@@ -25,11 +25,11 @@
  */
  
 
-ICE release 0.90.0 - July 3, 2015
-======================================== 
+ICE release 0.90.2 - September 22, 2015
+========================================== 
 ICE is open source software and in active development. Several releases are planned for early 2015. Please check in to http://www.cdsframework.org/ for the latest status, or e-mail questions to ice@hln.com. 
 
-An overview of the capabilities of ICE is available http://www.hln.com/ice/. This distribution comes bundled with OpenCDS 2.0.4, which was released on 1/14/2015. The latest version of OpenCDS can be downloaded from http://www.opencds.org/. The out of the box (default) immunization rules documentation, as well as technical documentation for ICE and CAT, can be found at http://www.cdsframework.org/.
+An overview of the capabilities of ICE is available http://www.hln.com/ice/. This distribution comes bundled with OpenCDS 2.0.5, which was released on August 2015. The ICE software will continually update to the latest versions of OpenCDS as they become available. The out of the box (default) immunization rules documentation, as well as technical documentation for ICE and CAT, can be found at http://www.cdsframework.org/.
 
 This version of ICE requires Java 7, and has been tested under the latest version of Tomcat 7. It is recommended that at least 1GB of memory be allocated to the Tomcat instance, though in our internal performance tests, we have noted a significant performance increase when allocating 2GB of memory.
 
@@ -52,6 +52,4 @@ Alternatively, to build the software via source:
     $ cd opencds/opencds-parent
     $ mvn clean
     $ mvn -P drools-5.5 -Dmaven.test.skip=true install
-
-
 
