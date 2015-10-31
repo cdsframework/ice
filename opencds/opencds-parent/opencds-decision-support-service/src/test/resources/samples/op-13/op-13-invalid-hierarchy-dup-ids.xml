@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns3:cdsInput xmlns:ns2="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns3="org.opencds.vmr.v1_0.schema.cdsinput"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../../../../../../opencds-vmr-1_0/opencds-vmr-1_0-schema/src/main/resources/schema/cdsInput.xsd">
+    <templateId root="2.16.840.1.113883.3.795.11.1.1" />
+    <cdsContext>
+        <cdsSystemUserPreferredLanguage code="en" codeSystem="2.16.840.1.113883.6.99" displayName="English" />
+    </cdsContext>
+    <vmrInput>
+        <templateId root="2.16.840.1.113883.3.795.11.1.1" />
+        <patient>
+            <templateId root="2.16.840.1.113883.3.795.11.2.1.1" />
+            <id root="2.16.840.1.113883.19.5.99999.2" extension="998991" />
+            <demographics>
+                <birthTime value="19750501" />
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" />
+            </demographics>
+            <clinicalStatements>
+                <observationResults>
+                    <observationResult>
+                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1" />
+                        <id root="7d5a02b0-67a4-11db-bd13-0800200c9a66" />
+                        <observationFocus code="43789009" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="CBC WO DIFFERENTIAL" />
+                        <observationValue>
+                            <concept code="completed" codeSystem="2.16.840.1.113883.6.1" />
+                        </observationValue>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002" />
+                            <observationResult>
+                                <templateId root="2.16.840.1.113883.3.795.11.6.3.1" />
+                                <id root="107c2dc0-67a5-11db-bd13-0800200c9a66" />
+                                <observationFocus code="30313-1" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="HGB" />
+                                <observationEventTime low="200003231430" high="200003231430" />
+                                <interpretation code="completed" codeSystem="2.16.840.1.113883.6.1" />
+                                <interpretation code="N" codeSystem="2.16.840.1.113883.5.83" />
+                                <relatedClinicalStatement>
+                                    <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002" />
+                                    <observationResult>
+                                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1" />
+                                        <id root="107c2dc0-67a5-11db-bd13-0800200c9a66" />
+                                        <observationFocus code="30313-1-1" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="HGB" />
+                                        <observationEventTime low="200003231430" high="200003231430" />
+                                        <observationValue>
+                                            <physicalQuantity value="13.2" unit="g/dl" />
+                                        </observationValue>
+                                    </observationResult>
+                                </relatedClinicalStatement>
+                            </observationResult>
+                        </relatedClinicalStatement>
+                    </observationResult>
+                </observationResults>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</ns3:cdsInput>

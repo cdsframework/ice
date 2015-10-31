@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sample CDS input using vMR DAM XSDs derived from vMR DAM Enterprise Architect model. -->
+<cdsInput xsi:noNamespaceSchemaLocation="cdsInput.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vmrInput>
+		<templateId root="templateIdOidVmr"/>
+		<!-- information on the patient -->
+		<patient xsi:type="EvaluatedPerson">
+			<id extension="person001" root="1.2.3"/>
+			<!-- information about relative #1 -->
+			<relatedEntity>
+				<!-- daughter -->
+				<targetRole codeSystem="DAU" code="2.16.840.113883.5.111"/>
+				<entity xsi:type="EvaluatedPerson">
+					<id extension="relatedPerson001" root="1.2.3"/>					
+					<!-- daughter's demographic data -->
+					<name>
+						<part type="FAM" value="Bartram"/>
+						<part type="GIV" value="Elizabeth"/>
+					</name>
+					<birthTime value="1971"/>
+					<isDeceased value="true"/>
+					<ageAtDeath value="40" unit="a"/>					
+					<!-- Could add clinical statements about daughter here using same structure used for the patient.  Also could add further nested relatives. -->
+				</entity>
+			</relatedEntity>
+			<!-- demographic information about patient-->
+			<name>
+				<part type="FAM" value="Bartram"/>
+				<part type="GIV" value="John"/>
+			</name>
+			<address use="H">
+				<part type="AL" value="1200 Chester Avenue"/>
+				<part type="AL" value="Phildelphia, PA 12345"/>
+			</address>
+			<telecom use="H" value="tel:+1-800-555-1212" capabilities="voice"/>
+			<birthTime value="19460901"/>
+			<gender codeSystem="2.16.840.1.113883.5.1" code="M"/>
+			<!-- clinical statements about patient -->
+			<!-- diabetes mellitus since 1950 -->
+			<clinicalStatement xsi:type="Problem">
+				<id root="someRandomGUID"/>
+				<problemCode codeSystem="icd9Oid" code="250.00"/>
+				<problemEffectiveTime>
+					<low value="1950"/>
+				</problemEffectiveTime>
+				<diagnosticEventTime>
+					<low value="20110701"/>
+					<high value="20110701"/>						
+				</diagnosticEventTime>
+				<problemStatus codeSystem="snomedOid" code="snomedCodeForActive"/>
+			</clinicalStatement>
+			<!-- Hep B vaccination: dose 3, July 1, 2011 -->
+			<clinicalStatement xsi:type="SubstanceAdministrationEvent">
+				<id root="someRandomGUID"/>
+				<substanceAdministrationGeneralPurpose codeSystem="opencdsOid" code="Immunization"/>
+				<substance xsi:type="AdministrableSubstance">
+					<id root="randomGUID"/>
+					<substanceCode code="102" codeSystem="cvxOid">
+						<displayName value="Hepatitis B vaccination"/>
+					</substanceCode>
+					<manufacturer code="SKB" codeSystem="mvxOid"/>
+					<lotNo value="lotNo132"/>
+				</substance>
+				<doseNumber value="3"/>
+				<administrationTimeInterval>
+					<low value="20110701"/>
+					<high value="20110701"/>
+				</administrationTimeInterval>
+				<documentationTime>
+					<low value="20110701"/>
+					<high value="20110701"/>
+				</documentationTime>
+			</clinicalStatement>			
+		</patient>
+	</vmrInput>
+</cdsInput>

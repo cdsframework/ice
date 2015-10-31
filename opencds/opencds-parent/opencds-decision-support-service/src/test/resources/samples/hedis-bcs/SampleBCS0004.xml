@@ -1,0 +1,69 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../../../../../../../../../Google%20Drive/Read/schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- ALL: female, born in 1961
+				procedures (CPT/HCPCS/UBREV): Unilateral Mastectomy with Right Modifier, Unilateral Mastectomy with Left Modifier, Mammography-->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="BCS0004" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19610202101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                        <encounterEvent>
+                            <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                            <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2.12.2"/> 
+                            <encounterType code="I" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/>  
+                            <encounterEventTime high="20120105" low="20120105"/>
+                            <relatedClinicalStatement> 
+                                <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                                <procedureEvent> <!--Unilateral Mastectomy with Right Modifier-->                
+                                    <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                    <id extension="procedure001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                    <procedureCode code="85.41" codeSystem="2.16.840.1.113883.6.104" codeSystemName="ICD9PCS" displayName="Unilateral Mastectomy"/>
+                                    <targetBodySite>
+                                        <bodySiteCode code="76645" codeSystem="2.16.840.1.113883.6.12" />
+                                        <laterality code="RT" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Right Modifier"/>
+                                    </targetBodySite>
+                                    <procedureTime high="20120105" low="20120105"/>
+                                    </procedureEvent>
+                            </relatedClinicalStatement>
+                            <relatedClinicalStatement> 
+                                <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                                <procedureEvent> <!--Unilateral Mastectomy with Left Modifier-->                
+                                    <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                    <id extension="procedure001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                    <procedureCode code="85.41" codeSystem="2.16.840.1.113883.6.104" codeSystemName="ICD9PCS" displayName="Unilateral Mastectomy"/>
+                                    <targetBodySite>
+                                        <bodySiteCode code="76645" codeSystem="2.16.840.1.113883.6.12" />
+                                        <laterality code="LT" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Left Modifier"/>
+                                    </targetBodySite>
+                                    <procedureTime high="20120105" low="20120105"/>
+                                </procedureEvent>
+                            </relatedClinicalStatement>
+                        </encounterEvent>
+                        <encounterEvent>
+                            <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                            <id extension="encounter002" root="2.16.840.1.113883.3.795.5.2.12.2"/> 
+                            <encounterType code="O" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/>  
+                            <encounterEventTime high="20120108" low="20120108"/>  
+                            <relatedClinicalStatement> 
+                                <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                                    <procedureEvent> <!--Mammography-->
+                                        <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                        <id extension="procedure002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                        <procedureCode code="77055" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Mammography"/>
+                                        <procedureTime high="20120108" low="20120108"/>
+                                    </procedureEvent>
+                            </relatedClinicalStatement>
+                        </encounterEvent>
+                    </encounterEvents>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

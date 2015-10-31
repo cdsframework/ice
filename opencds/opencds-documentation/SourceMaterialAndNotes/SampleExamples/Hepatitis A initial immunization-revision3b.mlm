@@ -1,0 +1,171 @@
+﻿maintenance:
+	title: Hepatitis A Immunization MLM;;
+	mlmname: Hep_A_Immunization;;
+	arden: Version 2.8;;
+	version: 1.00;;
+	institution: Intermountain Health Care;;
+	author: Peter Haug, M.D.;;
+	specialist: Peter Haug M.D.;;
+	date: 2011-09-10;;
+	validation: testing;; 
+library:
+	purpose: Suggest initial dose of Hepatitis A vaccine schedule.;;
+	explanation: ;;
+	keywords: Hepatitis A; vaccine; immunization;;
+	citations: to be added. ;;
+	links: to be added;;
+knowledge:
+type: data_driven;;
+data:
+	/* text within curly brackets would be replaced with an institution's own query */
+
+	Let PatientIDRecord BE OBJECT [AccountNum, Name, Birthdate, Sex];
+	LET Patient BE Read As PatientIDRecord Latest {select accountnum, name, dateofbirth, sex from EHR} ;
+
+	LET outpatient_visit BE EVENT {storage of ambulatory registrationn}
+
+	LET Medication BE OBJECT [Drug_Name, Form, Dosage, Route, Schedule]
+	LET VAQTA BE Read As Medication {select med, form, dose, route, schedule from EHR where med = 'VAQTA'} ;
+	LET HAVRIX BE Read As Medication {select med, form, dose, route, schedule from EHR where med = 'HAVRIX'} ;
+	LET TWINRIX BE Read As Medication {select med, form, dose, route, schedule from EHR where med = 'TWINRIX'} ;
+	
+	Let GenericMessage BE OBJECT [MessageID, MessageCode, Message_Text];
+	Let Vaccine_Message BE New GenericMessage;
+	;;
+	
+evoke: outpatient_visit;;
+	
+logic:
+	/* Check age */
+	if
+		Patient_Age Is Null
+	then
+		Patient_Age := Now - Patient.Birthdate;
+	endif;
+
+	if 
+		Patient_Age Less Than 12 months 
+	then 
+		Conclude False ;
+	endif;
+	
+	/* Young Patient */		
+	if 
+		Patient_Age Greater Than 12 months and
+		Patient_Age Less Than or Equal 18 years 
+	then
+		Apply_young_patient_rules := true;
+	endif;
+	
+	/* Older Patient */		
+	if 
+		Patient_Age Greater Than 18 years 
+	then
+		Apply_older_patient_rules := true;
+	endif;
+	
+	/* Rules-no previous vaccine. */
+	if 
+		Exist(VAQTA) or Exist(HAVRIX) or Exist(TWINRIX) 
+	then 
+		Hepatitis_vaccination:= true;
+	endif;
+	
+	if 
+		Apply_young_patient_rules and
+		Not Hepatitis_vaccination
+	then 
+		Vaccine_Message.Message_Text := "Give VAQTA vaccine, 25U, IM now and repeat in 6 to 18 months.";
+		Conclude true;
+	endif;
+	
+	if 
+		Apply_older_patient_rules and
+		Not Hepatitis_vaccination
+	then 
+		Vaccine_Message.Message_Text := "Give VAQTA vaccine, 50U, IM now and repeat in 6 to 18 months.";
+		Conclude true;
+	endif;
+	
+/* Rules-one previous vaccination. */
+	if 
+		Count(VAQTA) + Count(HAVRIX) + Count(TWINRIX) = 1
+	then
+		Needs_second_dose := true;
+	endif;
+
+	/* Second dose young people */
+	if 
+		Apply_young_patient_rules and 
+		Needs_second_dose and
+		Exist(VAQTA) and
+		Latest VAQTA Occurred Before 6 months Ago
+	then 
+		Vaccine_Message.Message_Text := "Give VAQTA vaccine, 25U, IM now. This completes Hepatitis A vaccinations.";
+		Conclude true;
+	endif;
+	
+	if 
+		Apply_young_patient_rules and 
+		Needs_second_dose and
+		Exist(HAVRIX) and
+		Latest HAVRIX Occurred Before 6 months Ago
+	then 
+		Vaccine_Message.Message_Text := "Give HAVRIX vaccine, 720EL.U, IM now. This completes Hepatitis A vaccinations.";
+		Conclude true;
+	endif;
+	
+	if 
+		Apply_young_patient_rules and 
+		Needs_second_dose and
+		Exist(TWINRIX) and
+		Latest TWINRIX Occurred Before 1 months Ago
+	then 
+		Vaccine_Message.Message_Text := "Give TWINRIX vaccine, 720 EL.U/20ug, IM now. This is the second Hepatitis A/B vaccination.";
+		Conclude true;
+	endif;
+
+	/* Second dose Older people */
+	if 
+		Apply_older_patient_rules and 
+		Needs_second_dose and
+		Exist(VAQTA) and
+		Latest VAQTA Occurred Before 6 months Ago		
+	then 
+		Vaccine_Message.Message_Text := "Give VAQTA vaccine, 50 U, IM now. This completes Hepatitis A vaccinations.";
+		Conclude true;
+	endif;
+		
+	if 
+		Apply_older_patient_rules and 
+		Needs_second_dose and
+		Exist(HAVRIX) and
+		Latest HAVRIX Occurred Before 6 months Ago	
+	then 
+		Vaccine_Message.Message_Text := "Give HAVRIX vaccine, 1440 U, IM now. This completes Hepatitis A vaccinations.";
+		Conclude true;
+	endif;
+		
+	if 
+		Apply_older_patient_rules and 
+		Needs_second_dose and
+		Exist(TWINRIX) and
+		Latest TWINRIX Occurred Before 1 months Ago		
+	then 
+		Vaccine_Message.Message_Text := "Give TWINRIX vaccine, 720EL.U/20ug, IM now. This is the second Hepatitis A/B vaccination.";
+		Conclude true;
+	endif;	
+	
+	/* Third dose of TWINRIX */
+	
+	if 
+		Exist(TWINRIX) and Count(TWINRIX) = 2 and
+		Latest(TWINRIX) Occurred Before 5 months Ago
+	then
+		Vaccine_Message.Message_Text := "Give TWINRIX vaccine, 720EL.U/20ug, IM now. This completes Hepatitis A/B vaccinations.";
+		Conclude true;
+	endif;
+	;;
+action:
+	write Vaccine_Message.Message_Text;;
+end:

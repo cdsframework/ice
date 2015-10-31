@@ -1,0 +1,66 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput vmr%20schema/cdsInput.xsd">   
+   
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+           <!-- Denom check: UBREV nonacute inpt and UBREV Outpatient encounters - one outside timeframe but discharged within the timeframe (denomNotMet)	-->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CDC-Denom0012" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+			<demographics>
+				<birthTime value="19900101101010"/>
+                <gender code="M" codeSystem="2.16.840.1.113883.1.11.1" displayName="Male"/>
+			</demographics>
+			<clinicalStatements>
+                <encounterEvents>
+                   <encounterEvent><!-- non acute inpatient visit by UBREV-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2.12.2"/> <!-- OID is OPENCDS_UTAH_ENCOUNTER -->
+                        <encounterType code="O" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/> <!-- Pulled from VISIT_DM.VISIT --> 
+                        <encounterEventTime high="20091202101010" low="20091202101010"/>
+                        <relatedClinicalStatement> <!-- UBREV codes are mapped as procedure events in the vMR -->
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id root="a5a9ba85-2a46-46e8-bf52-da356f2e756f"/>
+                                <procedureCode code="0118" codeSystem="2.16.840.1.113883.6.301.3" codeSystemName="UBREV" displayName="•	Nonacute Inpatient  Visit"/>
+                                <procedureTime high="20091202101010" low="20091202101010"/>                     
+                            </procedureEvent>
+                        </relatedClinicalStatement>      
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="250" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Diabetes"/>
+                            </problem>                      
+                        </relatedClinicalStatement>                
+                    </encounterEvent>                    
+                   <encounterEvent><!-- outpatient visit by UBREV-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter002" root="2.16.840.1.113883.3.795.5.2.12.2"/> <!-- OID is OPENCDS_UTAH_ENCOUNTER -->
+                        <encounterType code="O" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/> <!-- Pulled from VISIT_DM.VISIT --> 
+                        <encounterEventTime high="20101102101010" low="20101102101010"/>
+                        <relatedClinicalStatement> <!-- UBREV codes are mapped as procedure events in the vMR -->
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id  extension="proc002"    root="a5a9ba85-2a46-46e8-bf52-da356f2e756f"/>
+                                <procedureCode code="0510" codeSystem="2.16.840.1.113883.6.301.3" codeSystemName="UBREV" displayName="Outpatient Visit"/> 
+                                <procedureTime high="20101102101010" low="20101102101010"/>                            
+                            </procedureEvent>
+                        </relatedClinicalStatement>      
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="250" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Diabetes"/>
+                            </problem>                      
+                        </relatedClinicalStatement>                
+                    </encounterEvent>
+                </encounterEvents>
+            </clinicalStatements>
+		</patient>
+    </vmrInput>
+</in:cdsInput>

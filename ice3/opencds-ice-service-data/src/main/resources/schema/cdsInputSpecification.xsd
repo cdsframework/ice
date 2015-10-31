@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:cis="org.opencds.vmr.v1_0.schema.cdsinput.specification" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" targetNamespace="org.opencds.vmr.v1_0.schema.cdsinput.specification">
+	<xs:annotation>
+		<xs:documentation>Specifies the specific CDS input data required for a specific CDS use case.</xs:documentation>
+	</xs:annotation>
+	<xs:import namespace="org.opencds.vmr.v1_0.schema.datatypes" schemaLocation="datatypes.xsd"/>
+	<xs:complexType name="EvaluatedPersonInputSpecification" abstract="true">
+		<xs:annotation>
+			<xs:documentation>Specifies the data required for an evaluated person.  Can include (i) a specification of the person attributes (e.g., gender) required; (ii) a specification of the templates that must be applied; (iii) a specification of the data required for related entities; and (iv) a specification of the clinical statements required.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="requiredEvaluatedPersonAttribute" type="dt:CS" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Required attribute of the EvaluatedPerson.  Note that if an attribute is required by a specified template, it must be provided regardless of whether its need is specified here.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="requiredEvaluatedPersonTemplate" type="dt:II" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Identifier of a set of constraints that must be placed on the EvaluatedPerson.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="relatedEntityInputSpecification" type="cis:RelatedEntityInputSpecification" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="clinicalStatementInputSpecification" type="cis:ClinicalStatementInputSpecification" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CDSInputSpecification">
+		<xs:annotation>
+			<xs:documentation>The parent class containing the data required by a specific CDS use case.  For example, this class can be used to specify that the evaluation of a patient for the need for a mammogram requires the following data: (i) gender; (ii) age; (iii) past mastectomy history; and (iv) past mammogram history.
+
+Can include a detailed input specification for the focal patient as well as for related evaluated persons.  Note that it is assumed that the superset of data required for related evaluated persons are the same for each of the related evaluated persons (e.g., relatives).  If input specifications are not provided regarding patients or other evaluated persons, then this signifies that no further constraints are being placed on required data other than what is expressed through the input data model and its existing template(s).</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="requiredCdsResourceType" type="dt:CD" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>The type of CDS resource required.  Required input parameters (e.g., mammogram testing frequency) can be specified using this attribute (e.g., with a CD representing mammogram testing frequency).</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="requiredCdsContextAttribute" type="dt:CS" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>The CDS context attribute (e.g., CDS system user preferred language) required.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="requiredInputVmrTemplate" type="dt:II" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Identifier of a set of constraints that must be placed on the input vMR.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="patientInputSpecification" type="cis:PatientInputSpecification" minOccurs="0"/>
+			<xs:element name="relatedEvaluatedPersonInputSpecification" type="cis:RelatedEvaluatedPersonInputSpecification" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="PatientInputSpecification">
+		<xs:annotation>
+			<xs:documentation>The data required for the patient.  Is a specialization of the EvaluatedPersonInputSpecification class.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="cis:EvaluatedPersonInputSpecification"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="CodedAttributeRequirement">
+		<xs:annotation>
+			<xs:documentation>A requirement for a coded attribute of a clinical statement.  Specified in terms of the target coded attribute and the code(s) for that attribute that allow the requirement to be fulfilled.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="targetCodedAttribute" type="dt:CS">
+				<xs:annotation>
+					<xs:documentation>The clinical statement's coded attribute that is the subject of restriction.  E.g., problem code, problem status.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="targetCode" type="dt:CD" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A target code for the target coded attribute.  If a clinical statement has a target coded attribute (e.g., problem code) that matches one of the target codes (e.g., ICD9CM 250.00), then the coded attribute requirement is met.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="RelatedEvaluatedPersonInputSpecification">
+		<xs:annotation>
+			<xs:documentation>The data required for evaluated persons related to the patient.  Is a specialization of the EvaluatedPersonInputSpecification class.  Includes a specification of the scope of evaluated persons that are required.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="cis:EvaluatedPersonInputSpecification">
+				<xs:sequence>
+					<xs:element name="inclusionScope" type="dt:CD">
+						<xs:annotation>
+							<xs:documentation>The scope of evaluated persons to include.  E.g., relative, sexual contacts, persons living in affected geographic zone.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="inclusionScopeChainDepth" type="xs:int" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>The number of links to traverse to identify evaluated persons within the specific scope.  E.g., 3 in combination with scope of relative would indicate up to 3rd degree relatives.  If neither inclusionScopeChainDepth nor inclusionScopeDistance are specified, then all available evaluated persons with the indicated scope should be included.  E.g., if inclusion scope is sexual contact and no scope depth/distance is specified, then all sexual contacts of the focal person and of other persons related through sexual contact should be included.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="inclusionScopeDistance" type="dt:PQ" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>The distance to traverse to identify evaluated persons within the specific scope.  E.g., 5 miles in combination with scope of living in affected area would indicate people living within a 5 mile radius of a location of interest.  If neither inclusionScopeChainDepth nor inclusionScopeDistance are specified, then all available evaluated persons with the indicated scope should be included.  E.g., if inclusion scope is sexual contact and no scope depth/distance is specified, then all sexual contacts of the focal person and of other persons related through sexual contact should be included.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="RelatedEntityInputSpecification">
+		<xs:annotation>
+			<xs:documentation>Specifies the data required regarding entities related to the evaluated person of interest.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="requiredRelationshipType" type="dt:CD">
+				<xs:annotation>
+					<xs:documentation>Required type of relationship to Entities other than EvaluatedPersons, if available.  Note that requirements for other EvaluatedPersons are specified separately within the RelatedEvaluatedPersonInputSpecification class.  E.g., primary care provider, health insurance provider.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="requiredEntityTemplate" type="dt:II" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Identifier of a set of constraints that must be placed on the related Entity.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="requiredRelationshipSearchBackTimePeriod" type="dt:PQ" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>This requirement is met if the relationship time interval overlaps with the time interval that starts at (index evaluation time - requiredRelationshipSearchBackTimePeriod) and ends at (index evaluation time). The earlier point is considered to be exclusive and the ending point is considered to be inclusive.  E.g., if the index evaluation time is 7/1/2011 at 4pm and the requiredRelationshipSearchBackTimePeriod is 1 year, then this requirement is met if the relationshipTimeInterval overlaps with any time after 4pm on 7/1/2010 and up to and including 7/1/2011 at 4pm.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="requiredRelationshipSearchFowardTimePeriod" type="dt:PQ" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>This requirement is met if the relationship time interval overlaps with the time interval that starts at (index evaluation time) and ends at (index evaluation time + requiredRelationshipSearchForwardTimePeriod). The earlier point is considered to be exclusive and the ending point is considered to be inclusive.  E.g., if the index evaluation time is 7/1/2011 at 4pm and the requiredRelationshipSearchForwardTimePeriod is 1 year, then this requirement is met if the relationshipTimeInterval overlaps with any time after 4pm on 7/1/2011 and up to and including 7/1/2012 at 4pm.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ClinicalStatementInputSpecification">
+		<xs:annotation>
+			<xs:documentation>Specifies the clinical statements required regarding the evaluated person of interest.  Can include CodedAttributeRequirements and TimeAttributeRequirements.
+
+If no CodedAttributeRequirement specified, all relevant clinical statements are required regardless of their coded attributes.  If no TimeAttributeRequirement specified, all relevant clinical statements are required regardless of their time attributes.  All specified CodedAttributeRequirements and TimeAttributeRequirements should be fulfilled in provided ClinicalStatements.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="requiredGeneralClinicalStatementClass" type="dt:CS">
+				<xs:annotation>
+					<xs:documentation>The general class of clinical statement required.  E.g., Procedure, Observation.
+
+If only the general clinical statement type is specified (i.e., requiredSpecificClinicalStatementType is not specified), then it will be assumed that all members of the specified general clinical statement types are desired.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="requiredClinicalStatementTemplate" type="dt:II" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Identifier of a set of constraints that must be placed on the ClinicalStatement.  Allows, for example, the specification of required detailed clinical models that correspond to templates.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="requiredSpecificClinicalStatementClass" type="dt:CS" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The specific class of clinical statement required.  E.g., ProcedureOrder, ObservationResult.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="codedAttributeRequirement" type="cis:CodedAttributeRequirement" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="timeAttributeRequirement" type="cis:TimeAttributeRequirement" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="TimeAttributeRequirement">
+		<xs:annotation>
+			<xs:documentation>A requirement for a time attribute of a clinical statement.  Specified in terms of the target time attribute and the required time interval for that attribute in relatonship to the index evaluation time.  A searchBackTimePeriod and/or a searchForwardTimePeriod must be provided.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="targetTimeAttribute" type="dt:CS">
+				<xs:annotation>
+					<xs:documentation>The time attribute targeted for restriction.  E.g., procedure time, substance dispensation time.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="searchBackTimePeriod" type="dt:PQ" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The time attribute requirement is met if the target time attribute overlaps with the time interval that starts at (index evaluation time - searchBackTimePeriod) and ends at (index evaluation time).  The earlier point is considered to be exclusive and the ending point is considered to be inclusive.  E.g., if the index evaluation time is 7/1/2011 at 4pm and the searchBackTimePeriod is 1 year, then the time attribute requirement is met if the targetTimeAttribute has overlaps with anytime after 4pm on 7/1/2010 and up to and including 7/1/2011 at 4pm.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="searchForwardTimePeriod" type="dt:PQ" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>The time attribute requirement is met if the target time attribute overlaps with the time interval that starts at (index evaluation time) and ends at (index evaluation time + searchForwardTimePeriod).  The earlier point is considered to be exclusive and the ending point is considered to be inclusive. E.g., if the index evaluation time is 7/1/2011 at 4pm and the searchForwardTimePeriod is 1 year, then the time attribute requirement is met if the targetTimeAttribute has overlaps with anytime after 4pm on 7/1/2011 and up to and including 7/1/2012 at 4pm.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="cdsInputSpecification" type="cis:CDSInputSpecification"/>
+</xs:schema>

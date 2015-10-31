@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/util
+	http://www.springframework.org/schema/util/spring-util.xsd
+	http://cxf.apache.org/jaxws 
+	http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations" value="file:${user.home}/.opencds/opencds-apelon.properties" />
+        <property name="ignoreResourceNotFound" value="true" />
+    </bean>
+
+    <bean id="apelonDtsClient" class="org.opencds.terminology.apelon.OpenCDSApelonDtsClient">
+        <constructor-arg name="host" value="${apelon.host}" />
+        <constructor-arg name="port" value="${apelon.port}" />
+        <constructor-arg name="username" value="${apelon.username}" />
+        <constructor-arg name="password" value="${apelon.password}" />
+        <constructor-arg name="namespace" value="${apelon.namespace}" />
+    </bean>
+
+    <bean id="xmlHttpSender" class="org.opencds.common.xml.XmlHttpSender">
+        <constructor-arg name="trustStoreLocation" value="" />
+        <constructor-arg name="trustStorePassword" value="" />
+    </bean>
+
+    <bean id="opencdsCache" class="org.opencds.common.cache.OpencdsCache" />
+
+    <bean id="apelonDtsService" class="org.opencds.terminology.apelon.ApelonDtsService">
+        <property name="apelonDtsClient" ref="apelonDtsClient" />
+        <property name="xmlHttpSender" ref="xmlHttpSender" />
+        <property name="cache" ref="opencdsCache" />
+    </bean>
+
+    <!-- beans for cache refresh -->
+    <bean id="apelonDtsRefreshService" class="org.opencds.terminology.apelon.ApelonDtsRefreshService">
+        <property name="apelonDtsService" ref="apelonDtsService" />
+    </bean>
+
+    <bean id="refreshJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="apelonDtsService" />
+        <property name="targetMethod" value="refreshCache" />
+    </bean>
+
+    <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="refreshJobDetail" />
+        <!-- midnight each day -->
+        <property name="cronExpression" value="${concept.refresh.cron.value}" />
+    </bean>
+
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="cronTrigger" />
+            </list>
+        </property>
+        <property name="quartzProperties">
+            <value>org.quartz.scheduler.skipUpdateCheck=true</value>
+        </property>
+        <property name="waitForJobsToCompleteOnShutdown" value="true" />
+    </bean>
+
+</beans>

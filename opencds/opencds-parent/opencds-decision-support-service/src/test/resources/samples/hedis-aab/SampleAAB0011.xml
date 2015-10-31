@@ -1,0 +1,258 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- 44 year old, Giagentic vMR with Exclusion conditions corresponding to each Acute Bronchitis visit except for one -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="AAB0011" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19700202101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    
+                    <encounterEvent><!--February: Encounter Otpatient visit (CPT) with Acute Bronchitis (HIV 1 year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99201" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20110203115000" low="20110203115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="466.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Acute Bronchitis"/>
+                                <problemEffectiveTime high="20110203115000" low="20110203115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Otpatient visit (CPT) with Acute Bronchitis (HIV 1 year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter002" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99201" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20100205115000" low="20100205115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="042" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="HIV"/>
+                                <problemEffectiveTime high="20100205115000" low="20100205115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    
+                    <encounterEvent><!--March: Encounter Otpatient visit (HCPCS) with Acute Bronchitis (ICD9CM) (Malignant Neoplasms) 1 year before-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter003" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="G0402" codeSystem="2.16.840.1.113883.6.285" codeSystemName="HCPCS" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20110303115000" low="20110303115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem003" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="466.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Acute Bronchitis"/>
+                                <problemEffectiveTime high="20110303115000" low="20110303115000"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Otpatient visit (HCPCS) with Acute Bronchitis (ICD9CM) (Malignant Neoplasms 1 year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter004" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="G0402" codeSystem="2.16.840.1.113883.6.285" codeSystemName="HCPCS" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20100305115000" low="20100305115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem004" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="140" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Malignant Neoplasms"/>
+                                <problemEffectiveTime high="20100305115000" low="20100305115000"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>   
+                    
+                    <encounterEvent><!--April: Encounter Otpatient visit (UBREV) with Acute Bronchitis (Emphysema 1 year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter005" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="0510" codeSystem="2.16.840.1.113883.6.301.3" codeSystemName="UBREV" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20110403115000" low="20110403115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem005" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="466.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Acute Bronchitis"/>
+                                <problemEffectiveTime high="20110403115000" low="20110403115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--April: Encounter Otpatient visit (UBREV) with Acute Bronchitis (Emphysema 1 year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter006" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="G0402" codeSystem="2.16.840.1.113883.6.285" codeSystemName="HCPCS" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20100405115000" low="20100405115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem006" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="492.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Emphysema"/>
+                                <problemEffectiveTime high="20100405115000" low="20100405115000"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent> 
+                    
+                    <encounterEvent><!-- May: Encounter Observational visit (CPT) with Acute Bronchitis Diagnosis (ICD9CM) (COPD 1 year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter007" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99217" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Observation (CPT: 99217)"/>
+                        <encounterEventTime high="20110503115000" low="20110503115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem007" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="466.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Acute Bronchitis"/>
+                                <problemEffectiveTime high="20110503115000" low="20110503115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!-- May: Encounter Observational visit (CPT) with Acute Bronchitis Diagnosis (ICD9CM) (COPD 1 year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter0072" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99217" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Observation (CPT: 99217)"/>
+                        <encounterEventTime high="20100505115000" low="20100505115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem0072" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="493.2" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="COPD"/>
+                                <problemEffectiveTime high="20100505115000" low="20100505115000"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>  
+                    
+                    <encounterEvent><!--June: Encounter ED visit (CPT) with Acute Bronchitis Diagnosis (ICD9CM) (CysticFibrosis one year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter008" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99281" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="ED Encounter"/>
+                        <encounterEventTime high="20110603115000" low="20110603115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem008" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="466.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Acute Bronchitis"/>
+                                <problemEffectiveTime high="20110603115000" low="20110603115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--June: Encounter ED visit (CPT) with Acute Bronchitis Diagnosis (ICD9CM) (CysticFibrosis one year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter009" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="G0402" codeSystem="2.16.840.1.113883.6.285" codeSystemName="HCPCS" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20100605115000" low="20100605115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem009" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="277.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="CysticFibrosis"/>
+                                <problemEffectiveTime high="20100605115000" low="20100605115000"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>                    
+                    
+                    <encounterEvent><!-- July: Encounter ED (UBREV) with Acute Bronchitis Diagnosis (ICD9CM) (ComorbidConditions one year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter010" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="0450" codeSystem="2.16.840.1.113883.6.301.3" codeSystemName="UBREV" displayName="ED Encounter"/>
+                        <encounterEventTime high="20110703115000" low="20110703115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem010" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="466.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Acute Bronchitis"/>
+                                <problemEffectiveTime high="20110703115000" low="20110703115000"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--July: Encounter ED (UBREV) with Acute Bronchitis Diagnosis (ICD9CM) (ComorbidConditions one year before)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter011" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="G0402" codeSystem="2.16.840.1.113883.6.285" codeSystemName="HCPCS" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20100705115000" low="20100705115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem011" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="016.72" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="ComorbidConditions"/>
+                                <problemEffectiveTime high="20100705115000" low="20100705115000"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>     
+                    
+                    <encounterEvent><!--December: Encounter Otpatient visit (CPT) with Acute Bronchitis (The only real encounter with antibiotic medication 2 days later)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter021" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99201" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20111213115000" low="20111213115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem021" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="466.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Acute Bronchitis"/>
+                                <problemEffectiveTime high="20111213115000" low="20111213115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                </encounterEvents>
+                
+                <substanceDispensationEvents>
+
+
+                    <substanceDispensationEvent><!-- December: Med Order / HEDIS-PBH Table B Beta-Blocker Medications (NDC: 00007337013) -->
+                        <id root="1.2.3" extension="Rx002"/>
+                        <substance >
+                            <id root="1.2.3" extension="Med002"/>
+                            <substanceCode code="00004196302" codeSystem="2.16.840.1.113883.6.69" codeSystemName="NDC" displayName="HEDIS-AAB Table D Antibiotic Medications (NDC: 00004196302)" />
+                        </substance>
+                        <daysSupply value="20"/>
+                        <dispensationTime high="20111215115000" low="20111215115000"/>
+                    </substanceDispensationEvent>  
+
+
+                </substanceDispensationEvents>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

@@ -1,0 +1,65 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- Num check: Low back pain ICD9CM: 721.3 as primary diagnosis as part of an outpatient encounter: CPT=99201 (denomMet) and 
+            encounter with Imaging study CPT 20 days later. -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="LBP0003" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19700202101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent><!--Encounter Otpatient visit (CPT) with Low Back Pain Diagnosis (ICD9CM)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99201" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20110301115000" low="20110301115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="721.3" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Low Back Pain"/>
+                                <problemEffectiveTime high="20110301115000" low="20110301115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Otpatient visit (UBREV) with Imaging Study (UBREV: 320) and Low Back Pain-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter010" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="0320" codeSystem="2.16.840.1.113883.6.301.3" codeSystemName="UBREV" displayName="Imaging Study (UBREV: 0320)"/>
+                        <encounterEventTime high="20110302115000" low="20110302115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem010" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="721.3" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Low Back Pain"/>
+                                <problemEffectiveTime high="20110302115000" low="20110302115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure010" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="0320" codeSystem="2.16.840.1.113883.6.301.3" codeSystemName="UBREV" displayName="Imaging Study (UBREV: 0320)"/>
+                                <procedureTime high="20110302115000" low="20110302115000"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                </encounterEvents>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

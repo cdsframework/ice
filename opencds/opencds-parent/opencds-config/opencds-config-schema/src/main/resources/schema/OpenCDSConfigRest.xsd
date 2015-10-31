@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:config="org.opencds.dss.config.v1_0" xmlns:rest="org.opencds.dss.config_rest.v1_0" targetNamespace="org.opencds.dss.config_rest.v1_0">
+    <xs:import namespace="org.opencds.dss.config.v1_0" schemaLocation="OpenCDSConfiguration.xsd" />
+    <xs:annotation>
+        <xs:documentation>Elements to support OpenCDS Configuration REST Services</xs:documentation>
+    </xs:annotation>
+    <xs:element name="conceptDeterminationMethod" type="config:ConceptDeterminationMethod" />
+    <xs:element name="conceptDeterminationMethods">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="conceptDeterminationMethod" type="config:ConceptDeterminationMethod" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="executionEngine" type="config:ExecutionEngine" />
+    <xs:element name="executionEngines">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="executionEngine" type="config:ExecutionEngine" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="knowledgeModule" type="config:KnowledgeModule" />
+    <xs:element name="knowledgeModules">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="knowledgeModule" type="config:KnowledgeModule" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="pluginPackage" type="config:PluginPackage" />
+    <xs:element name="pluginPackages">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="pluginPackage" type="config:PluginPackage" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="semanticSignifier" type="config:SemanticSignifier" />
+    <xs:element name="semanticSignifiers">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="semanticSignifier" type="config:SemanticSignifier" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="supportingData" type="config:SupportingData" />
+    <xs:element name="supportingDataList">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="supportingData" type="config:SupportingData" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

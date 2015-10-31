@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in:cdsInput xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes"
+		xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ..\schema\cdsInput.xsd">
+	<templateId root="2.16.840.1.113883.3.795.11.1.1"/>
+	<!--<cdsResource/>-->
+	<!--cdsContext is optional-->
+	<cdsContext>
+		<!--<cdsSystemUserType code="" codeSystem="" displayName=""/>-->
+		<cdsSystemUserPreferredLanguage code="en" codeSystem="1.2.3" displayName="English"/>
+		<!--<cdsInformationRecipientType code="" codeSystem="" displayName=""/>-->
+		<!--<cdsInformationRecipientPreferredLanguage code="" codeSystem="" displayName=""/>-->
+		<!--<cdsSystemUserTaskContext code="" codeSystem="" displayName=""/>-->
+	</cdsContext>
+	<vmrInput>
+		<templateId root="2.16.840.1.113883.3.795.11.1.1"/>
+		<patient>
+			<id root="2.16.840.1.113883.19.5" extension="996-756-495"/>
+			<!--alternate form of id:  <id root="aGUID"/>  -->
+			<demographics>
+				<birthTime value="19830630"/>
+				<gender codeSystem="2.16.840.1.113883.5" code="F"/>
+			</demographics>
+			<clinicalStatements>
+				<!-- allergies -->
+				<adverseEvents>
+					<adverseEvent>
+						<id root="2.16.840.1.113883.3.795.10.1" extension="7478551"/>
+						<!-- Allergic reaction to substance (disorder) -->
+						<adverseEventCode codeSystem="2.16.840.1.113883.6.96" code="418634005"/>
+						<!-- Eggs (edible) (substance) -->
+						<adverseEventAgent codeSystem="2.16.840.1.113883.6.96" code="256442007"/>
+						<documentationTime low="200003231430" high="200003231430"/>
+						<adverseEventStatus codeSystem="2.16.840.1.113883.6.96" code="55561003"/>
+						<!--following two "related" elements are junk, not meant to be realistic-->
+						<relatedEntity>
+							<targetRole codeSystem="1.2.3" code="someEntityRole"/>
+							<administrableSubstance>
+								<id root="abcGUID"></id>
+								<substanceCode codeSystem="1.2.3" code="substanceCode"/>
+							</administrableSubstance>
+						</relatedEntity>
+						<relatedClinicalStatement>
+							<targetRelationshipToSource codeSystem="1.2.3" code="someCSRole"/>
+							<adverseEvent>
+								<id root="2.16.840.1.113883.3.795.10.1" extension="7478554"/>
+								<adverseEventCode codeSystem="2.16.840.1.113883.6.96" code="418634005"/>
+								<!-- Eggs (edible) (substance) -->
+								<adverseEventAgent codeSystem="2.16.840.1.113883.6.96" code="256442007"/>
+								<documentationTime low="19450917" high="200003231430"/>
+								<adverseEventStatus codeSystem="2.16.840.1.113883.6.96" code="55561003"/>
+							</adverseEvent>
+						</relatedClinicalStatement>
+					</adverseEvent>
+				</adverseEvents>
+				<!--lab results, using optional nested structure for panel-->
+				<observationResults>
+					<observationResult>
+						<templateId root="2.16.840.1.113883.10.20.1.32"/> <!-- Result organizer template -->
+						<id root="107c2dc0-67a5-11db-bd13-0800200c9a66"/>
+						<observationFocus code="43789009" codeSystem="2.16.840.1.113883.6.96" displayName="CBC WO DIFFERENTIAL"/>
+						<observationEventTime low="20110803" high="20110803"/>
+						<observationValue/>
+						<relatedClinicalStatement>
+							<targetRelationshipToSource codeSystem="2.16.840.1.113883.5.1002" code="COMP"/>
+							<observationResult>
+								<templateId root="2.16.840.1.113883.10.20.1.31"/> <!-- Result observation template -->
+								<id root="33d27880-eb74-11e0-9572-0800200c9a66"/>
+								<observationFocus code="30313-1" codeSystem="2.16.840.1.113883.6.1" displayName="HGB"/>
+								<observationEventTime low="20110803" high="20110803"/>
+								<observationValue><physicalQuantity value="13.2" unit="g/dl"/></observationValue>
+								<interpretation code="N" codeSystem="2.16.840.1.113883.5.83"/>
+							</observationResult>
+						</relatedClinicalStatement>
+						<relatedClinicalStatement>
+							<targetRelationshipToSource codeSystem="2.16.840.1.113883.5.1002" code="COMP"/>
+							<observationResult>
+								<templateId root="2.16.840.1.113883.10.20.1.31"/> <!-- Result observation template -->
+								<id root="33d27881-eb74-11e0-9572-0800200c9a66"/>
+								<observationFocus code="33765-9" codeSystem="2.16.840.1.113883.6.1" displayName="WBC"/>
+								<observationEventTime low="20110803" high="20110803"/>
+								<observationValue><physicalQuantity value="6.7" unit="10+3/ul"/></observationValue>
+								<interpretation code="N" codeSystem="2.16.840.1.113883.5.83"/>
+							</observationResult>
+						</relatedClinicalStatement>
+						<relatedClinicalStatement>
+							<targetRelationshipToSource codeSystem="2.16.840.1.113883.5.1002" code="COMP"/>
+							<observationResult>
+								<templateId root="2.16.840.1.113883.10.20.1.31"/> <!-- Result observation template -->
+								<id root="33d27882-eb74-11e0-9572-0800200c9a66"/>
+								<observationFocus code="26515-7" codeSystem="2.16.840.1.113883.6.1" displayName="PLT"/>
+								<observationEventTime low="20110803" high="20110803"/>
+								<observationValue><physicalQuantity value="123" unit="10+3/ul"/></observationValue>
+								<interpretation code="L" codeSystem="2.16.840.1.113883.5.83"/>
+								<relatedEntity>
+									<targetRole codeSystem="2.16.840.1.113883.5.111" code="_LicensedRoleType"  displayName="Lab Technician"/>
+									<person>
+										<id root="71ea2b7d-e6dd-4d72-a8e2-ff69862db52d"/>
+										<name use="C"><part type="GIV" value="Jane"/><part type="FAM" value="Doe"/></name>
+										<telecom value="tel:801-123-4567" use="WP"/>
+										<telecom value="mailto:jane@lab.com" use="WP"/>
+									</person>
+								</relatedEntity>
+							</observationResult>
+						</relatedClinicalStatement>
+					</observationResult>
+					<!--a different set of lab results, using alternate listed structure in lieu of nested structure above-->
+					<observationResult>
+						<templateId root="2.16.840.1.113883.10.20.1.32"/> <!-- Result organizer template -->
+						<id root="33d27883-eb74-11e0-9572-0800200c9a66"/>
+						<observationFocus code="20109005" codeSystem="2.16.840.1.113883.6.96" displayName="LYTES"/>
+						<observationEventTime low="20110803" high="20110803"/>
+						<observationValue/>
+					</observationResult>
+					<observationResult>
+						<templateId root="2.16.840.1.113883.10.20.1.31"/> <!-- Result observation template -->
+						<id root="e814debb-8a47-451b-8f01-f4b7f2beeba1"/>
+						<observationFocus code="2951-2" codeSystem="2.16.840.1.113883.6.1" displayName="NA"/>
+						<observationEventTime low="20110803" high="20110803"/>
+						<observationValue><physicalQuantity value="140" unit="meq/l"/></observationValue>
+						<interpretation code="N" codeSystem="2.16.840.1.113883.5.83"/>
+					</observationResult>
+					<observationResult>
+						<templateId root="2.16.840.1.113883.10.20.1.31"/> <!-- Result observation template -->
+						<id root="57968a4a-0167-4494-a110-ffe276c8e62b"/>
+						<observationFocus code="2823-3" codeSystem="2.16.840.1.113883.6.1" displayName="K"/>
+						<observationEventTime low="20110803" high="20110803"/>
+						<observationValue><physicalQuantity value="4.0" unit="meq/l"/></observationValue>
+						<interpretation code="N" codeSystem="2.16.840.1.113883.5.83"/>
+					</observationResult>
+					<observationResult>
+						<templateId root="2.16.840.1.113883.10.20.1.31"/> <!-- Result observation template -->
+						<id root="6215747f-c61b-4652-8b29-a9b9e2c6509c"/>
+						<observationFocus code="2075-0" codeSystem="2.16.840.1.113883.6.1" displayName="CL"/>
+						<observationEventTime low="20110803" high="20110803"/>
+						<observationValue><physicalQuantity value="102" unit="meq/l"/></observationValue>
+						<interpretation code="N" codeSystem="2.16.840.1.113883.5.83"/>
+					</observationResult>
+					<observationResult>
+						<templateId root="2.16.840.1.113883.10.20.1.31"/> <!-- Result observation template -->
+						<id root="287132be-39e2-40bf-bc6c-de09f09ce6f1"/>
+						<observationFocus code="1963-8" codeSystem="2.16.840.1.113883.6.1" displayName="HCO3"/>
+						<observationEventTime low="20110803" high="20110803"/>
+						<observationValue><physicalQuantity value="35" unit="meq/l"/></observationValue>
+						<interpretation code="H" codeSystem="2.16.840.1.113883.5.83"/>
+					</observationResult>
+				</observationResults>
+				<!-- current medications -->
+				<substanceAdministrationEvents>
+					<substanceAdministrationEvent>
+						<id root="2.16.840.1.113883.3.795.10.1" extension="4519239"/>
+						<substanceAdministrationGeneralPurpose codeSystem="2.16.840.1.113883.6.5" codeSystemName="SNOMED CT" code="18629005" displayName="Administration of drug or medicament"/>
+						<!--<substanceAdministrationGeneralPurpose codeSystem="2.16.840.1.113883.6.5" codeSystemName="SNOMED CT" code="384810002" displayName="Immunization/vaccination management (procedure)"/>-->
+						<substance>
+							<id root="f4a1d18b-2b92-4399-b4f9-efb1828d267d"/>
+							<!-- Hydrochlorothiazide 25 MG Oral Tablet -->
+							<substanceCode codeSystem="2.16.840.1.113883.6.88" code="310798" />
+						</substance>
+						<documentationTime low="20110803" high="20110803"/>
+					</substanceAdministrationEvent>
+				</substanceAdministrationEvents>
+			</clinicalStatements>
+			<clinicalStatementRelationships>
+				<clinicalStatementRelationship>
+					<sourceId root="33d27883-eb74-11e0-9572-0800200c9a66"/>
+					<targetId root="e814debb-8a47-451b-8f01-f4b7f2beeba1"/>
+					<targetRelationshipToSource codeSystem="2.16.840.1.113883.5.1002" code="COMP"/>
+				</clinicalStatementRelationship>
+				<clinicalStatementRelationship>
+					<sourceId root="33d27883-eb74-11e0-9572-0800200c9a66"/>
+					<targetId root="57968a4a-0167-4494-a110-ffe276c8e62b"/>
+					<targetRelationshipToSource codeSystem="2.16.840.1.113883.5.1002" code="COMP"/>
+				</clinicalStatementRelationship>
+				<clinicalStatementRelationship>
+					<sourceId root="33d27883-eb74-11e0-9572-0800200c9a66"/>
+					<targetId root="6215747f-c61b-4652-8b29-a9b9e2c6509c"/>
+					<targetRelationshipToSource codeSystem="2.16.840.1.113883.5.1002" code="COMP"/>
+				</clinicalStatementRelationship>
+				<clinicalStatementRelationship>
+					<sourceId root="33d27883-eb74-11e0-9572-0800200c9a66"/>
+					<targetId root="287132be-39e2-40bf-bc6c-de09f09ce6f1"/>
+					<targetRelationshipToSource codeSystem="2.16.840.1.113883.5.1002" code="COMP"/>
+				</clinicalStatementRelationship>
+			</clinicalStatementRelationships>
+			<clinicalStatementEntityInRoleRelationships>
+				<!--here is the lab technician relationship to one of the above labs-->
+				<clinicalStatementEntityInRoleRelationship>
+					<sourceId root="287132be-39e2-40bf-bc6c-de09f09ce6f1"/>
+					<targetEntityId root="71ea2b7d-e6dd-4d72-a8e2-ff69862db52d"/>
+					<targetRole codeSystem="2.16.840.1.113883.5.111" code="_LicensedRoleType" displayName="Lab Technician"/>
+				</clinicalStatementEntityInRoleRelationship>
+			</clinicalStatementEntityInRoleRelationships>
+			<entityRelationships>
+				<entityRelationship>
+					<sourceId root="71ea2b7d-e6dd-4d72-a8e2-ff69862db52d"/>
+					<targetEntityId root="1.2.3" extension="SLC"/>
+					<targetRole codeSystem="2.16.840.1.113883.5.111" code="laboratory"/>
+					<relationshipTimeInterval/>
+				</entityRelationship>
+				<entityRelationship>
+					<sourceId root="1.2.3" extension="SLC"/>
+					<targetEntityId root="71ea2b7d-e6dd-4d72-a8e2-ff69862db52g"/>
+					<targetRole codeSystem="2.16.840.1.113883.5.111" code="_EmployeeRoleType"/>
+					<relationshipTimeInterval/>
+				</entityRelationship>
+			</entityRelationships>
+			<entityLists>
+				<organizations>
+					<organization>
+						<id root="1.2.3" extension="SLC"/>
+ 						<name use="C"><part type="GIV" value="Some Lab Company"/></name>
+					</organization>
+				</organizations>
+				<persons>
+					<!--this is a lab technician-->
+					<person>
+						<id root="71ea2b7d-e6dd-4d72-a8e2-ff69862db52g"/>
+						<name use="C"><part type="GIV" value="Jane"/><part type="FAM" value="Doe"/></name>
+						<telecom value="tel:801-123-4567" use="WP"/>
+						<telecom value="mailto:jane@lab.com" use="WP"/>
+					</person>
+				</persons>
+			</entityLists>
+		</patient>
+		<otherEvaluatedPersons>
+			<evaluatedPerson>
+				<id root="71ea2b7d-e6dd-4d72-a8e2-ff69862db52e"/>
+				<demographics></demographics>
+				<clinicalStatements>
+					<adverseEvents>
+						<adverseEvent>
+							<id root="71ea2b7d-e6dd-4d72-a8e2-ff69862db52f"/>
+							<adverseEventCode codeSystem="someCodeSystem" code="someCode"/>
+						</adverseEvent>
+					</adverseEvents>
+				</clinicalStatements>
+			</evaluatedPerson>
+		</otherEvaluatedPersons>
+		<evaluatedPersonRelationships>
+			<evaluatedPersonRelationship>
+				<sourceId root="2.16.840.1.113883.19.5" extension="996-756-495"/>
+				<targetEntityId root="71ea2b7d-e6dd-4d72-a8e2-ff69862db52e"/>
+				<targetRole codeSystem="aCodeSystem" code="fatherOf"/>
+			</evaluatedPersonRelationship>
+		</evaluatedPersonRelationships>
+	</vmrInput>
+</in:cdsInput>

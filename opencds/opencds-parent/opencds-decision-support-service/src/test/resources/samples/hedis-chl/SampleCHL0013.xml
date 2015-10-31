@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../../../../../../../opencds-knowledge-repository-data/target/classes/resources_v1.1/schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- Denominator check:  18 years old, female, Obs(LOINC)  19080-1  ;Pregnancy tests, Denominator Inclusions by Claims Data -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CHL0013" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19940102101010"/> <!--18 yrs old on 20120201-->
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <observationResults>
+                    <observationResult><!--Observation Focus LOINC Pregnancy tests-->
+                        <id extension="obr003" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <observationFocus code="19080-1" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Pregnancy tests"/>
+                        <observationEventTime high="20110305" low="20110305"/>
+                        <observationValue><boolean value="true"/></observationValue>
+                    </observationResult>
+                </observationResults>
+           </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

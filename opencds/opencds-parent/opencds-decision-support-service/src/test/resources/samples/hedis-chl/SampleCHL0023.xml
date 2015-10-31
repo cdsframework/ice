@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../../../../../../../opencds-knowledge-repository-data/target/classes/resources_v1.1/schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- Numerator check:  18 years old, female, procedure (CPT):  81025      ;Pregnancy tests, 
+            Denominator Inclusions by Claims Data, procedure (CPT):  87110      ;chlamydia tests [13 months ago - should fail] -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CHL0023" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19940102101010"/> <!--18 yrs old on 20120201-->
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <procedureEvents>
+                    <procedureEvent> <!--Procedure CPT Pregnancy Tests-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                        <id extension="procedure001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <procedureCode code="81025" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Pregnancy tests"/>
+                        <procedureTime high="20110305" low="20110305"/>
+                    </procedureEvent>
+                    <procedureEvent> <!--Procedure CPT chlamydia tests-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                        <id extension="procedure002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <procedureCode code="87110" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="chlamydia tests"/>
+                        <procedureTime high="20100309" low="20100309"/>
+                    </procedureEvent>
+                </procedureEvents>
+           </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

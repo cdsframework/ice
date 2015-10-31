@@ -1,0 +1,26 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../../../../../../../../git/opencds/opencds-knowledge-repository-data/target/classes/resources_v1.1/schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="BCS0010" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19610202101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <procedureEvents>
+                    <procedureEvent> <!--Mammography ICD9PCS-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                        <id extension="procedure006" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <procedureCode code="87.36" codeSystem="2.16.840.1.113883.6.104" codeSystemName="ICD9PCS" displayName="Mammography"/>
+                        <procedureTime high="20120105" low="20120105"/>
+                    </procedureEvent>
+                </procedureEvents>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

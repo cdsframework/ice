@@ -1,0 +1,53 @@
+package Bounce_v1_5_5
+//same as Bounce_v1_0_0 except that it requries Drools 5.5
+
+import org.opencds.vmr.v1_0.internal.ClinicalStatement
+import org.opencds.vmr.v1_0.internal.ClinicalStatementRelationship
+import org.opencds.vmr.v1_0.internal.EntityBase
+
+
+global java.util.Date evalTime
+global String clientLanguage
+global String clientTimeZoneOffset
+global String focalPersonId
+global java.util.HashSet assertions
+global java.util.HashMap namedObjects
+
+
+
+//NOTE:  all demographics about the Patient are always returned in the result 
+//			when the result is an outputVMR.
+
+//NOTE2:  all Entities that have a relationship to a ClinicalStatement or to another Entity 
+//			are always returned nested within that ClinicalStatement or Entity ONLY if that
+//			ClinicalStatement or Entity (or one of its ancestors) is flagged toBeReturned.  
+
+//NOTE3:  all Entities that are related directly to the patient will be returned or not
+//			depending on the setting of the toBeReturned flag.
+
+rule "BounceAllEntities"
+	dialect "mvel"
+	when
+		$entityBase : EntityBase()
+	then
+		$entityBase.setToBeReturned( true );
+end
+
+
+rule "BounceAllClinicalStatements"
+	dialect "mvel"
+	when
+		$cs : ClinicalStatement()
+	then
+		$cs.setToBeReturned( true );
+end
+
+rule "SetNestedAllClinicalStatements"
+	dialect "mvel"
+	when
+		$cs : ClinicalStatement( ClinicalStatementToBeRoot == true )
+		$csr : ClinicalStatementRelationship( targetId == $cs.id )
+	then
+		$cs.setClinicalStatementToBeRoot( false );
+end
+

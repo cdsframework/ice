@@ -1,0 +1,73 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../../../../../../../../git/opencds/opencds-knowledge-repository-data/src/main/resources/resources_v1.1/schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="ABA0009" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19900202101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent>
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="62" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="99999999999999999999999999" codeSystem="2.16.840.1.113883.3.795.12.2.6.1"/>
+                        <encounterEventTime high="20111117000000" low="20111116000000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP"
+                                codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id root="d6323abd-0ef9-4d12-b39e-459c7f7ff92c"/>
+                                <procedureCode code="99201" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Outpatient"/>
+                                <procedureTime high="20111116120000" low="20111116120000"/>
+                                <relatedEntity>
+                                    <targetRole code="Performer"
+                                        codeSystem="2.16.840.1.113883.3.795.12.1.1"/>
+                                    <person>
+                                        <id root="8703a2b8-bd69-459e-8066-3100d1185661"/>
+                                        <entityType code="134"
+                                            codeSystem="2.16.840.1.113883.3.795.5.2.12.4"/>
+                                    </person>
+                                </relatedEntity>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                         <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id root="e7bfe162-bccb-40c5-b2b6-52ab9e646d23"/>
+                                <procedureCode code="11721" codeSystem="2.16.840.1.113883.6.12"
+                                    codeSystemName="CPT"
+                                    displayName="DEBRIDEMENT NAIL ANY METHOD 6/&gt;"/>
+                                <procedureTime high="20111116120000" low="20111116120000"/>
+                                <relatedEntity>
+                                    <targetRole code="Performer"
+                                        codeSystem="2.16.840.1.113883.3.795.12.1.1"/>
+                                    <person>
+                                        <id root="c304899e-cba4-475a-9f61-1f1c7af71a38"/>
+                                        <entityType code="134"
+                                            codeSystem="2.16.840.1.113883.3.795.5.2.12.4"/>
+                                    </person>
+                                </relatedEntity>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                </encounterEvents>
+                <problems>
+                    <problem> <!--BMI-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                        <id extension="prob001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <problemCode code="V85.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="BMI"/>
+                        <problemEffectiveTime high="20110304" low="20110304"/>
+                    </problem>
+                </problems>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

@@ -1,0 +1,39 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../schema/cdsInput.xsd"
+    xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- numerator met,  measles disease (ICD9CM: 055 ) and rubella disease (ICD9CM: 056 ) AND   mumps disease ( ICD9CM: 072) between birth and 2nd birthday: numerator not met (1 in the right dates, 1 in the wrong date) -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CIS_MMR0007" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="20090902101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <problems>
+                    <problem> <!--Encounter Diagnosis: Mumps (ICD9CM: 072)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                        <id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <problemCode code="072" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Mumps"/>
+                        <problemEffectiveTime high="20100304020700" low="20100304020700"/>
+                    </problem>
+                    <problem> <!--Encounter Diagnosis: rubella disease (ICD9CM: 056 )-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                        <id extension="problem002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <problemCode code="056" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Rubella"/>
+                        <problemEffectiveTime high="20100304020700" low="20100304020700"/>
+                    </problem>
+                    <problem> <!--Encounter Diagnosis: measles disease (ICD9CM: 055 )-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                        <id extension="problem003" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <problemCode code="055" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Measles"/>
+                        <problemEffectiveTime high="20111004020700" low="20111004020700"/>
+                    </problem>
+                </problems>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

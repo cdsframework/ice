@@ -1,0 +1,27 @@
+VMR notes from pre-submission total review 12/21/2011 by des
+
+1. Datatypes seem to match perfectly
+2. CDSInput seems to match perfectly
+3. VMR
+	a. EvaluatedPersons as a separate list from Entities seems to not be a notion in the vMR model, but is probably OK
+		1.) EvaluatedPerson extends Person in the model, but includes Person elements and extends Entity in the schema.
+	b. EvaluatedPersonRelationships as a separate list from Entities seems to not be a notion in the vMR model, but is probably OK
+		1.) both of the above elements are actually special cases that are handled differently in schema than in the model.
+	c. Entity as a separate class instead of a base class seems to not be in the vMR model
+		1.) Entity as a separate class has a description which is not in the vMR model.
+			a.) This is because we anticipate that it will be very useful to be able to describe an entity, eg. output "NQF Measure 31"
+				which is identified by its ID having an OID for the measure, but not being human readable.
+	d. Specimen has a description which is not in the vMR model.
+			a.) This is because we anticipate that it will be useful at some point to be able to process natural language text
+				about a specimen that is important clinical information.
+	e. ClinicalStatements:
+		1.) bodySiteCode > optional. 
+		2.) SubstanceAdministrationEvent (issues that are not fixed in schema)
+			a.) doseNumber in immunization applies to one vaccine component, rather than the entire possibly combined substance
+			b.) isValid in immunization applies to one vaccine component, rather than the entire possibly combined substance
+			c.) unresolved: options include using related observations and making dose # and isValid part of repeating objects
+				that include references back to the ID of the substance component.
+4. CDSOutput seems to match perfectly
+5. CDSInputSpecification seems to match perfectly.
+
+http://wiki.hl7.org/index.php?title=Virtual_Medical_Record_(vMR)

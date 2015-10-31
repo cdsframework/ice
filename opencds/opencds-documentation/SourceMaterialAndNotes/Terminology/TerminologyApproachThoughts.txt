@@ -1,0 +1,64 @@
+RUle Vocab DM 1.0.0
+DM_Value_Set 1.0.0	ICD9			diabetes_mellitus^1.0.0
+
+Rule Vocab DM 2.0.0
+DM_Value_Set 2.0.0	ICD9+SNOMED		diabetes_mellitus^2.0.0
+
+
+
+Rule
+If Problem concept diabetes_mellitus
+Then X
+
+
+Option A: DSS outside of Drools
+If DSS request is DM_HgbA1c 1.0.0
+	Then use 
+		Rule Vocab DM 1.0.0
+		Rule DM 1.0.0
+
+If DSS requset is DM_HgbA1c 2.0.0
+	Then use
+		Rule Vocab DM 2.0.0
+		Rule DM 1.0.0
+
+
+Option B: DSS outside of Drools
+If DSS request is DM_HgbA1c 1.0.0
+	Then use 
+		Terminology service concept sets - diabetes_mellitus^1.0.0, hgba1c^1.0.0
+		Rule DM A 1.0.0		If not diabetes
+		Rule DM B 1.0.0		If diabetes, due
+		Rule DM C 1.0.0		If diabetes, not due
+		Decision Table/Template	Covers all 3 cases above
+
+If DSS requset is DM_HgbA1c 2.0.0
+	Then use
+		Terminology service concept sets - diabetes_mellitus^2.0.0, hgba1c^1.0.0
+		Rule DM 1.0.0
+
+=[[IdAndVersion [id=Diabetes_Mellitus^static, version=1.0.0]]
+
+RequiredTerminologyValueSets [requiredTerminologyValueSetList=[IdAndVersion [id=Diabetes_Mellitus^static, version=1.0.0], IdAndVersion [id=Diabetes_Mellitus^static, version=1.0.0]]] 
+
+=[requiredTerminologyValueSetList=[IdAndVersion [id=Diabetes_Mellitus^static, version=1.0.0], IdAndVersion [id=Diabetes_Mellitus^static, version=1.0.0]]]
+
+$listOfConcepts: org.opencds.terminology.TerminologyManagementUtility.getMatchingConcepts($codeSystem, $code, $requiredTerminologyValueSets)
+
+for ( String $concept : $conceptList ) {
+    Person person = ( Person ) row.get( "person" );
+    System.out.println( person.getName() + "\n" );
+}
+
+java.util.List $conceptList = org.opencds.terminology.TerminologyManagementUtility.getMatchingConcepts($codeSystem, $code, 
+$requiredTerminologyValueSets);
+
+org.opencds.terminology.TerminologyManagementUtility.getMatchingConcepts("ICD9CM", "250", new List<String>());
+
+$hundredDaysBack = $evalTime.getXDaysBeforeEvalTime(100)
+
+
+	protected GregorianCalendar myCalendar = new GregorianCalendar();
+
+org.opencds.utilities.DateUtility.getDateAfterAddingTime($evalTime, 2, 100)
+	

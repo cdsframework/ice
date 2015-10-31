@@ -1,0 +1,47 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput vmr%20schema/cdsInput.xsd">
+	<templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+	<vmrInput>
+		<!-- Numerator check:  lab test one in the past year
+		-expect Numerator met-->
+	<templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+		<patient>
+			<templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+			<id extension="CDC_HbA1cScreen002" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+			<demographics>
+				<birthTime value="19700202101010"/>
+				<gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+			</demographics>
+			<clinicalStatements>
+				<encounterEvents>
+					<encounterEvent>
+						<!--Encounter acute inpatient visit (CPT) and discharged alive with Acute MI Diagnosis (ICD9CM)-->
+						<templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+						<id extension="encounter001" root="2.16.840.1.113883.3.795.5.2"/>
+						<dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+						<encounterType code="99223" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Acute Inpatient Encounter"/>
+						<encounterEventTime high="20100301115000" low="20100301115000"/>
+						<relatedClinicalStatement>
+							<targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							<problem>
+								<!--Encounter Diagnosis ICD9CM-->
+								<templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+								<id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+								<problemCode code="250" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Diabetes"/>
+								<problemEffectiveTime high="20100301115000" low="20100301115000"/>
+								<importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+							</problem>
+						</relatedClinicalStatement>
+					</encounterEvent>
+				</encounterEvents>
+				<procedureEvents>
+					<procedureEvent>
+						<templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+						<id extension="procedure001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+						<procedureCode code="83036" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT" displayName="HbA1c Tests"/>
+						<procedureTime high="20110116120000" low="20110116120000"/>
+					</procedureEvent>				
+				</procedureEvents>	
+			</clinicalStatements>  		
+		</patient>
+	</vmrInput>
+</in:cdsInput>

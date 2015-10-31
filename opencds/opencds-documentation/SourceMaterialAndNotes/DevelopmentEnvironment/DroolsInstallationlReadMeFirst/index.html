@@ -1,0 +1,2099 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+<title xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory">Drools 
+Introduction and General User Guide</title><link rel="stylesheet" 
+href="index_files/jbossorg.css" type="text/css"><meta 
+xmlns:rf="java:org.jboss.highlight.XhtmlRendererFactory" 
+name="generator" content="DocBook XSL-NS Stylesheets V1.74.0"></head><body><div
+ class="book" lang="en-US"><div class="titlepage"><div><p id="title"><a 
+href="http://www.jboss.org/" class="site_href"><strong>JBoss.org</strong></a><a
+ href="http://docs.jboss.org/" class="doc_href"><strong>Community 
+Documentation</strong></a></p></div><hr></div><div class="toc"><dl><dt><span
+ class="chapter"><a href="#d0e9">1. Welcome</a></span></dt><dt><span 
+class="chapter"><a href="#d0e26">2. Drools Release Notes</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e29">2.1. What is new in Drools 5.0</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e48">2.1.1. Drools API</a></span></dt><dt><span
+ class="section"><a href="#d0e166">2.1.2. Drools Guvnor</a></span></dt><dt><span
+ class="section"><a href="#d0e254">2.1.3. Drools Expert</a></span></dt><dt><span
+ class="section"><a href="#d0e625">2.1.4. Drools Flow</a></span></dt><dt><span
+ class="section"><a href="#d0e808">2.1.5. Drools Fusion</a></span></dt><dt><span
+ class="section"><a href="#d0e978">2.1.6. Eclipse IDE</a></span></dt></dl></dd><dt><span
+ class="section"><a href="#d0e1009">2.2. What is new in Drools 4.0</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e1014">2.2.1. Language Expressiveness 
+Enhancements</a></span></dt><dt><span class="section"><a href="#d0e1051">2.2.2.
+ Core Engine Enhancements</a></span></dt><dt><span class="section"><a 
+href="#d0e1091">2.2.3. IDE Enhancements</a></span></dt><dt><span 
+class="section"><a href="#d0e1107">2.2.4. Business Rules Management 
+System - BRMS</a></span></dt><dt><span class="section"><a 
+href="#d0e1138">2.2.5. Miscellaneous Enhancements</a></span></dt></dl></dd><dt><span
+ class="section"><a href="#d0e1145">2.3. Upgrade tips from Drools 3.0.x 
+to Drools 4.0.x</a></span></dt><dd><dl><dt><span class="section"><a 
+href="#d0e1152">2.3.1. API changes</a></span></dt><dt><span 
+class="section"><a href="#d0e1209">2.3.2. Rule Language Changes</a></span></dt><dt><span
+ class="section"><a href="#d0e1268">2.3.3. Drools Update Tool</a></span></dt><dt><span
+ class="section"><a href="#d0e1294">2.3.4. DSL Grammars in Drools 4.0</a></span></dt><dt><span
+ class="section"><a href="#d0e1311">2.3.5. Rule flow Update for 4.0.2</a></span></dt></dl></dd></dl></dd><dt><span
+ class="chapter"><a href="#d0e1322">3. Installation and Setup (Core and 
+IDE)</a></span></dt><dd><dl><dt><span class="section"><a href="#d0e1325">3.1.
+ Installing and using</a></span></dt><dd><dl><dt><span class="section"><a
+ href="#d0e1337">3.1.1. Dependencies and jars</a></span></dt><dt><span 
+class="section"><a href="#d0e1366">3.1.2. Runtime</a></span></dt><dt><span
+ class="section"><a href="#d0e1371">3.1.3. Installing IDE (Rule 
+Workbench)</a></span></dt></dl></dd><dt><span class="section"><a 
+href="#d0e1473">3.2. Setup from source</a></span></dt><dt><span 
+class="section"><a href="#d0e1532">3.3. Source Checkout</a></span></dt><dt><span
+ class="section"><a href="#d0e1583">3.4. Build</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e1586">3.4.1. Building the Source</a></span></dt><dt><span
+ class="section"><a href="#d0e1615">3.4.2. Building the Manual</a></span></dt></dl></dd><dt><span
+ class="section"><a href="#d0e1667">3.5. Eclipse</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e1670">3.5.1. Importing Eclipse Projects</a></span></dt></dl></dd></dl></dd><dt><span
+ class="index"><a href="#d0e1733">Index</a></span></dt></dl></div><div 
+class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 
+class="title"><a id="d0e9">Chapter&nbsp;1.&nbsp;Welcome</a></h2></div></div></div><div
+ class="screenshot"><div class="mediaobject"><a id="d0e9"><img 
+src="../../images/Chapter-Welcome/drools_logo.png"></a></div></div><p><a
+ id="d0e9">I've always stated that end business users struggle 
+understanding the
+  differences between rules and processes, and more recently rules and 
+event
+  processing. For them they have this problem in their mind and they 
+just want
+  to model it using some software. The traditional way of using two 
+vendor
+  offerings forces the business user to work with a process oriented or 
+rules
+  oriented approach which just gets in the way, often with great 
+confusion
+  over which tool they should be using to model which bit.</a></p><p><a 
+id="d0e9">PegaSystems and Microsoft have done a great job of showing 
+that the
+  two can be combined and a behavioural modelling approach can be used. 
+This
+  allows the business user to work more naturally where the full range 
+of
+  approaches is available to them, without the tools getting in the way.
+ From
+  being process oriented to rule oriented or shades of grey in the 
+middle -
+  whatever suites the problem being modelled at that time.</a></p><p><a 
+id="d0e9">Drools 5.0 takes this one step further by not only adding 
+workflow
+  with Drools Flow but also adding event processing with Drools Fusion,
+  creating a more holistic approach to software development. Where the 
+term
+  holistic is used for emphasizing the importance of the whole and the
+  interdependence of its parts. Drools 5.0 is the launch of what we call
+ the
+  Business Logic integration Platform (BLiP) .</a></p><p><a id="d0e9">Drools
+ 5.0 is now split into 4 modules, each with their own manual -
+  Guvnor, Expert, Fusion and Flow. Guvnor is our web based governance 
+system,
+  traditionally referred to in the rules world as a BRMS. We decided to 
+move
+  away from the BRMS term to a play on governance as it's not rules 
+specific.
+  Expert is the traditional rules engine. Fusion is the event processing
+ side,
+  it's a play on data/sensor fusion terminology. Finally there is Flow 
+which
+  is our workflow module.</a></p></div><div class="chapter" lang="en-US"><div
+ class="titlepage"><div><div><h2 class="title"><a id="d0e26">Chapter&nbsp;2.&nbsp;Drools
+ Release Notes</a></h2></div></div></div><div class="toc"><dl><dt><span 
+class="section"><a href="#d0e29">2.1. What is new in Drools 5.0</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e48">2.1.1. Drools API</a></span></dt><dt><span
+ class="section"><a href="#d0e166">2.1.2. Drools Guvnor</a></span></dt><dt><span
+ class="section"><a href="#d0e254">2.1.3. Drools Expert</a></span></dt><dt><span
+ class="section"><a href="#d0e625">2.1.4. Drools Flow</a></span></dt><dt><span
+ class="section"><a href="#d0e808">2.1.5. Drools Fusion</a></span></dt><dt><span
+ class="section"><a href="#d0e978">2.1.6. Eclipse IDE</a></span></dt></dl></dd><dt><span
+ class="section"><a href="#d0e1009">2.2. What is new in Drools 4.0</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e1014">2.2.1. Language Expressiveness 
+Enhancements</a></span></dt><dt><span class="section"><a href="#d0e1051">2.2.2.
+ Core Engine Enhancements</a></span></dt><dt><span class="section"><a 
+href="#d0e1091">2.2.3. IDE Enhancements</a></span></dt><dt><span 
+class="section"><a href="#d0e1107">2.2.4. Business Rules Management 
+System - BRMS</a></span></dt><dt><span class="section"><a 
+href="#d0e1138">2.2.5. Miscellaneous Enhancements</a></span></dt></dl></dd><dt><span
+ class="section"><a href="#d0e1145">2.3. Upgrade tips from Drools 3.0.x 
+to Drools 4.0.x</a></span></dt><dd><dl><dt><span class="section"><a 
+href="#d0e1152">2.3.1. API changes</a></span></dt><dt><span 
+class="section"><a href="#d0e1209">2.3.2. Rule Language Changes</a></span></dt><dt><span
+ class="section"><a href="#d0e1268">2.3.3. Drools Update Tool</a></span></dt><dt><span
+ class="section"><a href="#d0e1294">2.3.4. DSL Grammars in Drools 4.0</a></span></dt><dt><span
+ class="section"><a href="#d0e1311">2.3.5. Rule flow Update for 4.0.2</a></span></dt></dl></dd></dl></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h2 
+class="title"><a id="d0e29">2.1.&nbsp;What is new in Drools 5.0</a></h2></div></div></div><p><a
+ id="d0e29">Drools 5.0 will be the launch of what we call the Business 
+Logic integration Platform (BLiP) - the BRMs is dead :) The future is 
+for a unified and integrated solution for Rules, Processes and CEP - 
+this is what users want and this is what we are aiming for.
+
+Drools 5.0 will split up into 4 main sub projects, the documentation has
+ already been split to reflect this:
+
+    </a></p><div class="itemizedlist"><ul><li><p><a id="d0e29">Drools 
+Guvnor (BRMS/BPMS)</a></p></li><li><p><a id="d0e29">Drools Expert (rule 
+engine),</a></p></li><li><p><a id="d0e29">Drools Flow (process/workflow)</a></p></li><li><p><a
+ id="d0e29">Drools Fusion (cep/temporal reasoning)</a></p></li></ul></div><p>
+<a id="d0e29">  </a></p><div class="section" lang="en-US"><div 
+class="titlepage"><div><div><h3 class="title"><a id="d0e48">2.1.1.&nbsp;Drools
+ API</a></h3></div></div></div><p>
+<a id="d0e48">Drools now has complete api/implementation separation that
+ is no longer rules oriented. This is an important strategy as we move 
+to support other forms of logic, such as workflow and event processing. 
+The main change is that we are now knowledge oriented, instead of rule 
+oriented. The module drools-api provide the interfaces and factories and
+ we have made pains to provide much better javadocs, with lots of code 
+snippets, than we did before. Drools-api also helps clearly show what is
+ intended as a user api and what is just an engine api, drools-core and 
+drools-compiler did not make this clear enough.
+
+The most common interfaces you will use are:
+    </a></p><div class="itemizedlist"><ul><li><p><a id="d0e48">org.drools.builder.KnowledgeBuilder</a></p></li><li><p><a
+ id="d0e48">org.drools.KnowledgeBase</a></p></li><li><p><a id="d0e48">org.drools.agent.KnowledgeAgent</a></p></li><li><p><a
+ id="d0e48">org.drools.runtime.StatefulKnowledgeSession</a></p></li><li><p><a
+ id="d0e48">org.drools.runtime.StatelessKnowledgeSession </a></p></li></ul></div><p>
+
+<a id="d0e48">Factory classes, with static methods, provide instances of
+ the above interfaces. A pluggable provider approach is used to allow 
+provider implementations to be wired up to the factories at runtime. The
+ Factories you will most commonly used are:
+
+    </a></p><div class="itemizedlist"><ul><li><p><a id="d0e48">org.drools.builder.KnowledgeBuilderFactory</a></p></li><li><p><a
+ id="d0e48">org.drools.io.ResourceFactory</a></p></li><li><p><a 
+id="d0e48">org.drools.KnowledgeBaseFactory</a></p></li><li><p><a 
+id="d0e48">org.drools.agent.KnowledgeAgentFactory</a></p></li></ul></div><p>
+
+<a id="d0e48">	</a></p><div class="example"><a id="d0e84"></a><p 
+class="title"><a id="d0e84"><b>Example&nbsp;2.1.&nbsp;A Typical example 
+to load a rule resource</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e84">KnowledgeBuilder kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+kbuilder.add( ResourceFactory.newUrlResource( url ),
+            ResourceType.DRL );
+if ( kbuilder.hasErrors() ) {
+  System.err.println( builder.getErrors().toString() );
+}         
+
+KnowledgeBase kbase = KnowledgeBaseFactory.newKnowledgeBase();
+kbase.addKnowledgePackages( builder.getKnowledgePackages() );
+
+StatefulKnowledgeSession ksession = knowledgeBase.newStatefulKnowledgeSession();
+ksession.insert( new Fibonacci( 10 ) );
+ksession.fireAllRules();
+
+ksession.dispose();</a></pre></div></div><p><a id="d0e84"><br 
+class="example-break">
+
+A Typical example to load a process resource. Notice the <code 
+class="code">ResourceType</code> is changed, in accordance with the <code
+ class="code">Resource</code> type:
+	</a></p><div class="example"><a id="d0e96"></a><p class="title"><a 
+id="d0e96"><b>Example&nbsp;2.2.&nbsp;A Typical example to load a process
+ resource. Notice the <code class="code">ResourceType</code> is changed,
+ in accordance with the <code class="code">Resource</code> type</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e96">KnowledgeBuilder kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+kbuilder.add( ResourceFactory.newUrlResource( url ),
+            ResourceType.DRF );
+if ( kbuilder.hasErrors() ) {
+  System.err.println( builder.getErrors().toString() );
+}         
+
+KnowledgeBase kbase = KnowledgeBaseFactory.newKnowledgeBase();
+kbase.addKnowledgePackages( builder.getKnowledgePackages() );
+
+StatefulKnowledgeSession ksession = knowledgeBase.newStatefulKnowledgeSession();
+ksession.startProcess( "Buy Order Process" );
+
+ksession.dispose();
+</a></pre></div></div><p><a id="d0e96"><br class="example-break">
+
+'kbuilder', 'kbase', 'ksession' are the variable identifiers often used,
+ the k prefix is for 'knowledge'.
+
+	</a></p><div class="example"><a id="d0e108"></a><p class="title"><a 
+id="d0e108"><b>Example&nbsp;2.3.&nbsp;We have uniformed how decision 
+trees are loaded, and they are now consistent with no need to pre 
+generate the DRL with the spreadsheet compiler</b></a></p><div 
+class="example-contents"><pre class="programlisting"><a id="d0e108">DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
+dtconf.setInputType( DecisionTableInputType.XLS );
+dtconf.setWorksheetName( "Tables_2" );
+kbuilder.add( ResourceFactory.newUrlResource( "file://IntegrationExampleTest.xls" ),
+            ResourceType.DTABLE,
+            dtconf );
+</a></pre></div></div><p><a id="d0e108"><br class="example-break">
+
+It is also possible to configure a <code class="code">KnowledgeBase</code>
+ using configuration, via a xml change set, instead of programmatically.
+ 
+	</a></p><div class="example"><a id="d0e117"></a><p class="title"><a 
+id="d0e117"><b>Example&nbsp;2.4.&nbsp;Here is a simple change set</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e117">&lt;change-set xmlns='http://drools.org/drools-5.0/change-set'
+xmlns:xs='http://www.w3.org/2001/XMLSchema-instance'
+xs:schemaLocation='http://drools.org/drools-5.0/change-set change-set-5.0.xsd' &gt;
+  &lt;add&gt;
+      &lt;resource source='classpath:org/domain/someRules.drl' type='DRL' /&gt;
+      &lt;resource source='classpath:org/domain/aFlow.drf' type='DRF' /&gt;
+  &lt;/add&gt;
+&lt;/change-set&gt;
+</a></pre></div></div><p><a id="d0e117"><br class="example-break">
+
+	</a></p><div class="example"><a id="d0e123"></a><p class="title"><a 
+id="d0e123"><b>Example&nbsp;2.5.&nbsp;And it is added just like any 
+other ResourceType</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e123">KnowledgeBuilder kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+kbuilder.add( ResourceFactory.newUrlResource( url ),
+            ResourceType.ChangeSet );
+</a></pre></div></div><p><a id="d0e123"><br class="example-break">
+The other big change for the <code class="code">KnowledgeAgent</code>, 
+compared to the <code class="code">RuleAgent</code>, is that polling 
+scanner is now a service. further to this there is an abstraction 
+between the agent notification and the resource monitoring, to allow 
+other mechanisms to be used other than polling. 
+
+</a></p><div class="example"><a id="d0e135"></a><p class="title"><a 
+id="d0e135"><b>Example&nbsp;2.6.&nbsp;These services currently are not 
+started by default, to start them do the following</b></a></p><div 
+class="example-contents"><pre class="programlisting"><a id="d0e135">ResourceFactory.getResourceChangeNotifierService().start();
+ResourceFactory.getResourceChangeScannerService().start();
+</a></pre></div></div><p><a id="d0e135"><br class="example-break">
+
+There are two new interfaces added, <code class="code">ResourceChangeNotifier</code>
+ and <code class="code">ResourceChangeMonitor</code>. <code class="code">KnowlegeAgents</code>
+ subscribe for resource change notifications using the <code 
+class="code">ResourceChangeNotifier</code> implementation. The <code 
+class="code">ResourceChangeNotifier</code> is informed of resource 
+changes by the added <code class="code">ResourceChangeMonitors</code>. 
+We currently only provide one out of the box monitor, <code class="code">ResourceChangeScannerService</code>,
+ which polls resources for changes. However the api is there for users 
+to add their own monitors, and thus use a push based monitor such as 
+JMS.
+</a></p><p><code class="code">
+<a id="d0e135">ResourceFactory.getResourceChangeNotifierService().addResourceChangeMonitor(
+ myJmsMonitor);
+</a></code>
+</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3
+ class="title"><a id="d0e166">2.1.2.&nbsp;Drools Guvnor</a></h3></div></div></div><div
+ class="itemizedlist"><ul><li><p><a id="d0e166"> 
+      	New look web tooling
+  	</a></p><div class="figure"><a id="d0e173"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e173"><img src="index_files/guvnor1.png" align="middle"></a></div></div><p
+ class="title"><a id="d0e173"><b>Figure&nbsp;2.1.&nbsp;</b></a></p></div><p><a
+ id="d0e173"><br class="figure-break">
+	</a></p></li><li><p>
+<a id="d0e173">	Web based decision table editor
+	</a></p><div class="figure"><a id="d0e183"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e183"><img src="index_files/WebDT.png" alt="Web based decision 
+table editor" align="middle"></a></div></div><p class="title"><a 
+id="d0e183"><b>Figure&nbsp;2.2.&nbsp;Web based decision table editor</b></a></p></div><p><a
+ id="d0e183"><br class="figure-break">
+	</a></p></li><li><p>
+<a id="d0e183">	Integrated scenario testing
+	</a></p><div class="figure"><a id="d0e193"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e193"><img src="index_files/ScenarioSuite.png" alt="Running all 
+scenarios" align="middle"></a></div></div><p class="title"><a 
+id="d0e193"><b>Figure&nbsp;2.3.&nbsp;Running all scenarios</b></a></p></div><p><a
+ id="d0e193"><br class="figure-break">
+	</a></p><div class="figure"><a id="d0e200"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e200"><img src="index_files/Scenario.png" alt="Running single 
+scenario" align="middle"></a></div></div><p class="title"><a id="d0e200"><b>Figure&nbsp;2.4.&nbsp;Running
+ single scenario</b></a></p></div><p><a id="d0e200"><br 
+class="figure-break">
+	</a></p></li><li><p>
+<a id="d0e200">	WebDAV file based interface to repository
+	</a></p><div class="figure"><a id="d0e210"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e210"><img src="index_files/WebDav.png" alt="WebDAV" 
+align="middle"></a></div></div><p class="title"><a id="d0e210"><b>Figure&nbsp;2.5.&nbsp;WebDAV</b></a></p></div><p><a
+ id="d0e210"><br class="figure-break">
+	</a></p></li><li><p><a id="d0e210">Declarative modelling of types 
+(types that are not in pojos)
+ 
+	</a></p><div class="figure"><a id="d0e220"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e220"><img src="index_files/DeclaringModel.png" 
+alt="&gt;Declarative modelling" align="middle"></a></div></div><p 
+class="title"><a id="d0e220"><b>Figure&nbsp;2.6.&nbsp;&gt;Declarative 
+modelling</b></a></p></div><p><a id="d0e220"><br class="figure-break">
+
+	This works with the new "declare" statement - you can now declare types
+ in drl itself. You can then populate these without using a pojo (if you
+ like). These types are then available in the rulebase.</a></p></li><li><p><a
+ id="d0e220">Fine grained security (lock down access to the app per 
+package or per category). Users who only have category permissions have 
+limited UI capability (ideal for business users)</a></p></li><li><p><a 
+id="d0e220">Execution server - access rules via XML or JSON for 
+execution</a></p></li><li><p><a id="d0e220">Category rules allows you to
+ set 'parent rules' for a category. Any rules appearing in the given 
+category will 'extend' the rule specified - ie inherit the 
+conditions/LHS. The base rule for the category can be set on package 
+configuration tab. RHS is not inherited, only the LHS</a></p></li><li><p><a
+ id="d0e220">Scenario runner detects infinite loops</a></p></li><li><p><a
+ id="d0e220">Scenario runner can show event trace that was recorded by 
+audit logger</a></p></li><li><p><a id="d0e220">DSL sentences in guided 
+editor can now be set to show enums as a dropdown, dates as a date 
+picker, booleans as a checkbox and use regular expressions to validate 
+the inputs (DSL Widgets in Guvnor)</a></p></li><li><p><a id="d0e220">Functions
+ can be edited with text editor</a></p></li><li><p><a id="d0e220">It is 
+possible to add objects to global collections.</a></p></li><li><p><a 
+id="d0e220">Translations to English, Spanish, Chinese and Japanese</a></p></li></ul></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e254">2.1.3.&nbsp;Drools Expert</a></h3></div></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e257">2.1.3.1.&nbsp;Asymmetrical Rete algorithm 
+implementation</a></h4></div></div></div><p><a id="d0e257">Shadow 
+proxies are no longer needed. Shadow proxies protected the engine from 
+information change on facts, which if occurred outside of the engine's 
+control it could not be modified or retracted.</a></p></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e262">2.1.3.2.&nbsp;<code class="code">PackageBuilder</code>
+ can now build multiple namespaces</a></h4></div></div></div><p><a 
+id="d0e262">You no longer need to confine one <code class="code">PackageBuilder</code>
+ to one package namespace. Just keeping adding your DRLs for any 
+namespace and <code class="code">getPackages()</code> returns an array 
+of Packages for each of the used namespaces.
+	
+	</a></p><div class="example"><a id="d0e275"></a><p class="title"><a 
+id="d0e275"><b>Example&nbsp;2.7.&nbsp;Getting multiple packages</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e275">Package[] packages = pkgBuilder.getPackages();</a></pre></div></div><p><a
+ id="d0e275"><br class="example-break"></a></p></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e280">2.1.3.3.&nbsp;<code class="code">RuleBase</code>
+ attachment to <code class="code">PackageBuilder</code></a></h4></div></div></div><p><a
+ id="d0e280">It is now possible to attach a <code class="code">RuleBase</code>
+ to a <code class="code">PackageBuilder</code>, this means that rules 
+are built and added to the rulebase at the same time. <code class="code">PackageBuilder</code>
+ uses the <code class="code">Package</code> instances of the actual <code
+ class="code">RuleBase</code> as it's source, removing the need for 
+additional <code class="code">Package</code> creation and merging that 
+happens in the existing approach.
+
+	</a></p><div class="example"><a id="d0e307"></a><p class="title"><a 
+id="d0e307"><b>Example&nbsp;2.8.&nbsp;Attaching <code class="code">RuleBase</code>
+ to <code class="code">PackageBuilder</code></b></a></p><div 
+class="example-contents"><pre class="programlisting"><a id="d0e307">RuleBase ruleBase = RuleBaseFactory.newRuleBase();
+PackageBuilder pkgBuilder = new PackageBuilder( ruleBase, null );</a></pre></div></div><p><a
+ id="d0e307"><br class="example-break"></a></p></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e317">2.1.3.4.&nbsp;Binary marshalling of 
+stateful sessions</a></h4></div></div></div><p><a id="d0e317">Stateful 
+sessions can now saved and resumed at a later date.
+Pre-loaded data sessions can now be created.
+Pluggable strategies can be used for user object persistence, i.e. 
+hibernate or identity maps.</a></p></div><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a 
+id="d0e322">2.1.3.5.&nbsp;Type Declaration</a></h4></div></div></div><p><a
+ id="d0e322">Drools now supports a new base construct called Type 
+Declaration. This construct fulfils two purposes: the ability to declare
+ fact metadata, and the ability to dynamically generate new fact types 
+local to the rule engine. The Guvnor modelling tool uses this 
+underneath.
+One example of the construct is:
+	</a></p><div class="example"><a id="d0e327"></a><p class="title"><a 
+id="d0e327"><b>Example&nbsp;2.9.&nbsp;Declaring <code class="code">StockTick</code></b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e327">declare StockTick
+  @role( event )
+  @timestamp( timestampAttr )
+
+  companySymbol : String
+  stockPrice : double
+  timestampAttr : long
+end</a></pre></div></div><p><a id="d0e327"><br class="example-break"></a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e334">2.1.3.6.&nbsp;Declaring Fact Metadata</a></h4></div></div></div><p>
+<a id="d0e334">To declare and associate fact metadata, just use the @ 
+symbol for each metadata ID you want to declare. Example:
+</a></p><div class="example"><a id="d0e339"></a><p class="title"><a 
+id="d0e339"><b>Example&nbsp;2.10.&nbsp;Declaring metadata</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e339">declare StockTick
+  @role( event )
+end</a></pre></div></div><p><a id="d0e339"><br class="example-break"></a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e344">2.1.3.7.&nbsp;Triggering Bean Generation</a></h4></div></div></div><p>
+<a id="d0e344">To activate the dynamic bean generation, just add fields 
+and types to your type declaration:
+</a></p><div class="example"><a id="d0e349"></a><p class="title"><a 
+id="d0e349"><b>Example&nbsp;2.11.&nbsp;Declaring <code class="code">Person</code></b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e349">declare Person
+  name : String
+  age : int
+end</a></pre></div></div><p><a id="d0e349"><br class="example-break"></a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e356">2.1.3.8.&nbsp;DSL improvements</a></h4></div></div></div><p>
+<a id="d0e356">A series of DSL improvements were implemented, including a
+ completely new parser and the ability to declare matching masks for 
+matching variables. For instance, one can constrain a phone number field
+ to a 2-digit country code + 3-digit area code + 8-digit phone number, 
+all connected by a "-" (dash), by declaring the DSL map like:
+
+The phone number is {number:\d{2}-\d{3}-\d{8}}
+
+Any valid java regexp may be used in the variable mask.</a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e361">2.1.3.9.&nbsp;<code class="code">fireUntilHalt()</code></a></h4></div></div></div><p>
+<a id="d0e361">Drools now supports "fireUntilHalt()" feature, that 
+starts the engine in a reactive mode, where rules will be continually 
+fired, until a halt() call is made. This is specially useful for CEP 
+scenarios that require what is commonly known as "active queries".</a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e367">2.1.3.10.&nbsp;Rule Base partitioning and 
+multi-thread propagation</a></h4></div></div></div><p>
+<a id="d0e367">Drools ReteOO algorithm now supports an option to start 
+the rule base in a multi-thread mode, where Drools ReteOO network is 
+split into multiple partitions and rules are then evaluated concurrently
+ by multiple threads. This is also a requirement for CEP where there 
+usually are several independent rules running concurrently, with near 
+realtime performance/throughput requirements and the evaluation of one 
+can not interfere with the evaluation of others.</a></p></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e372">2.1.3.11.&nbsp;XSD Model Support</a></h4></div></div></div><p>
+<a id="d0e372">Drools now supports XSD models. Remember though the XSD 
+model is generated as pojos local to the Drools classloader. A helper 
+class is there to assist in the creation of the model in the 
+packagebuilder. Once the data model is generated you'll typically use 
+the JAXB dataloader to insert data.</a></p></div><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a 
+id="d0e377">2.1.3.12.&nbsp;Data Loaders</a></h4></div></div></div><p>
+<a id="d0e377">Drools now supports two data loaders, Smooks and JAXB. 
+Smooks is an open source data transformation tool for ETL and JAXB a 
+standard sun data mapping tool. Unit tests showing Smooks can be found 
+here and JAXB here. </a></p></div><div class="section" lang="en-US"><div
+ class="titlepage"><div><div><h4 class="title"><a id="d0e382">2.1.3.13.&nbsp;Type
+ safe configuration</a></h4></div></div></div><p>
+
+<a id="d0e382">In addition to the ability of configuring options in 
+drools through configuration files, system properties and by setting 
+properties through the API <code class="code">setProperty()</code> 
+method, Drools-API now supports type safe configuration.
+
+We didn't want to add specific methods for each possible configuration 
+methods for two reasons: it polutes the API and every time a new option 
+is added to Drools, the API would have to change. This way, we followed a
+ modular, class based configuration, where a new Option class is added 
+to the API for each possible configuration, keeping the API stable, but 
+flexible at the same time.
+
+So, in order to set configuration options now, you just need to use the 
+enumerations or factories provided for each option. For instance, if you
+ want to configure the knowledge base for assert behavior "equality" and
+ to automatically remove identities from pattern matchings, you would 
+just use the enums:
+</a></p><div class="example"><a id="d0e390"></a><p class="title"><a 
+id="d0e390"><b>Example&nbsp;2.12.&nbsp;Configuring</b></a></p><div 
+class="example-contents"><pre class="programlisting"><a id="d0e390">KnowledgeBaseConfiguration config = KnowledgeBaseFactory.newKnowledgeBaseConfiguration();
+config.setOption( AssertBehaviorOption.EQUALITY );
+config.setOption( RemoveIdentitiesOption.YES );</a></pre></div></div><p><a
+ id="d0e390"><br class="example-break">
+
+For options that don't have a predefined constant or can assume multiple
+ values, a factory method is provided. For instance, to configure the 
+alpha threshold to 5, just use the "get" factory method:
+</a></p><div class="example"><a id="d0e396"></a><p class="title"><a 
+id="d0e396"><b>Example&nbsp;2.13.&nbsp;Configuring alpha threshold</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e396">config.setOption( AlphaThresholdOption.get(5) );</a></pre></div></div><p><a
+ id="d0e396"><br class="example-break">
+
+As you can see, the same <code class="code">setOption()</code> method is
+ used for the different possible configurations, but they are still type
+ safe.</a></p></div><div class="section" lang="en-US"><div 
+class="titlepage"><div><div><h4 class="title"><a id="d0e405">2.1.3.14.&nbsp;New
+ accumulate functions: collectSet and collectList</a></h4></div></div></div><p>
+
+<a id="d0e405">There are times when it is necessary to collect sets or 
+lists of values that are derived from the facts attributes, but are not 
+facts themselves. In such cases, it was not possible to use the collect 
+CE. So, Drools now has two accumulate functions for such cases: 
+collectSet for collecting sets of values (i.e., with no duplicate 
+values) and collectList for collecting lists of values (i.e., allowing 
+duplicate values):
+</a></p><div class="example"><a id="d0e410"></a><p class="title"><a 
+id="d0e410"><b>Example&nbsp;2.14.&nbsp;New accumulate functions</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e410"># collect the set of unique names in the working memory
+$names : Set() from accumulate( Person( $n : name, $s : surname ),
+                        collectSet( $n + " " + $s ) )
+
+# collect the list of alarm codes from the alarms in the working memory
+$codes : List() from accumulate( Alarm( $c : code, $s : severity ),
+                         collectList( $c + $s ) )</a></pre></div></div><p><a
+ id="d0e410"><br class="example-break"></a></p></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e415">2.1.3.15.&nbsp;New metadata for type 
+declarations: @propertyChangeSupport</a></h4></div></div></div><p>
+
+<a id="d0e415">Facts that implement support for property changes as 
+defined in the Javabean(tm) spec, now can be annotated so that the 
+engine register itself to listen for changes on fact properties. The 
+boolean parameter that was used in the insert() method in the Drools 4 
+API is deprecated and does not exist in the drools-api module.
+
+</a></p><div class="example"><a id="d0e420"></a><p class="title"><a 
+id="d0e420"><b>Example&nbsp;2.15.&nbsp;@propertyChangeSupport</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e420">declare Person
+	@propertyChangeSupport
+end</a></pre></div></div><p><a id="d0e420"><br class="example-break"></a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e425">2.1.3.16.&nbsp;Batch Executor</a></h4></div></div></div><p>
+<a id="d0e425">Batch Executor allows for the scripting of of a Knowledge
+ session using Commands, which can also re, both the <code class="code">StatelessKnowledgeSession</code>
+ and <code class="code">StatefulKnowledgeSession</code> implement this 
+interface
+
+Commands are created using the <code class="code">CommandFactory</code> 
+and executed using the "execute" method, such as the following insert 
+Command:
+	</a></p><div class="example"><a id="d0e439"></a><p class="title"><a 
+id="d0e439"><b>Example&nbsp;2.16.&nbsp;Using <code class="code">CommandFactory</code></b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e439">ksession.execute( CommandFactory.newInsert( person ) ); </a></pre></div></div><p><a
+ id="d0e439"><br class="example-break">
+
+Typically though you will want to execute a batch of commands, this can 
+be achieved via the composite Command <code class="code">BatchExecution</code>.
+ <code class="code">BatchExecutionResults</code> is now used to handle 
+the results, some commands can specify "out" identifiers which it used 
+to add the result to the <code class="code">BatchExecutionResult</code>.
+ Handily querries can now be executed and results added to the <code 
+class="code">BatchExecutionResult</code>. Further to this results are 
+scoped to this execute call and return via the <code class="code">BatchExecutionResults</code>:
+
+	</a></p><div class="example"><a id="d0e462"></a><p class="title"><a 
+id="d0e462"><b>Example&nbsp;2.17.&nbsp;Using <code class="code">BatchExecutionResult</code></b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e462">List&lt;Command&gt; cmds = new ArrayList&lt;Command&gt;();
+cmds.add( CommandFactory.newSetGlobal( "list1", new ArrayList(), true ) );
+cmds.add( CommandFactory.newInsert( new Person( "jon", 102 ), "person" ) );
+cmds.add( CommandFactory.newQuery( "Get People" "getPeople" );
+
+BatchExecutionResults results = ksession.execute( CommandFactory.newBatchExecution( cmds ) );
+results.getValue( "list1" ); // returns the ArrayList
+results.getValue( "person" ); // returns the inserted fact Person
+results.getValue( "Get People" );// returns the query as a QueryResults instance.
+end</a></pre></div></div><p><a id="d0e462"><br class="example-break">
+
+The <code class="code">CommandFactory</code> details the supported 
+commands, all of which can marshalled using XStream and the <code 
+class="code">BatchExecutionHelper</code>. This can be combined with the 
+pipeline to automate the scripting of a session.
+
+</a></p><div class="example"><a id="d0e476"></a><p class="title"><a 
+id="d0e476"><b>Example&nbsp;2.18.&nbsp;Using <code class="code">PipelineFactory</code></b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e476">Action executeResultHandler = PipelineFactory.newExecuteResultHandler();
+Action assignResult = PipelineFactory.newAssignObjectAsResult();
+assignResult.setReceiver( executeResultHandler );
+Transformer outTransformer = PipelineFactory.newXStreamToXmlTransformer( BatchExecutionHelper.newXStreamMarshaller() );
+outTransformer.setReceiver( assignResult );
+KnowledgeRuntimeCommand batchExecution = PipelineFactory.newBatchExecutor();
+batchExecution.setReceiver( outTransformer );
+Transformer inTransformer = PipelineFactory.newXStreamFromXmlTransformer( BatchExecutionHelper.newXStreamMarshaller() );
+inTransformer.setReceiver( batchExecution );
+Pipeline pipeline = PipelineFactory.newStatelessKnowledgeSessionPipeline( ksession );
+pipeline.setReceiver( inTransformer ); </a></pre></div></div><p><a 
+id="d0e476"><br class="example-break">
+
+Using the above for a rulset that updates the price of a Cheese fact, 
+given the following xml to insert a Cheese instance using an 
+out-identifier:
+
+</a></p><div class="example"><a id="d0e484"></a><p class="title"><a 
+id="d0e484"><b>Example&nbsp;2.19.&nbsp;Updating Cheese fact</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e484">&lt;batch-execution&gt;
+&lt;insert out-identifier='outStilton'&gt;
+  &lt;org.drools.Cheese&gt;
+    &lt;type&gt;stilton&lt;/type&gt;
+    &lt;price&gt;25&lt;/price&gt;
+    &lt;oldPrice&gt;0&lt;/oldPrice&gt;
+  &lt;/org.drools.Cheese&gt;
+&lt;/insert&gt;
+&lt;/batch-execution&gt;
+</a></pre></div></div><p><a id="d0e484"><br class="example-break">
+
+We then get the following <code class="code">BatchExecutionResults</code>:
+
+</a></p><div class="example"><a id="d0e493"></a><p class="title"><a 
+id="d0e493"><b>Example&nbsp;2.20.&nbsp;Updating Cheese fact</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e493">&lt;batch-execution-results&gt;
+ &lt;result identifier='outStilton'&gt;
+   &lt;org.drools.Cheese&gt;
+     &lt;type&gt;stilton&lt;/type&gt;
+     &lt;oldPrice&gt;0&lt;/oldPrice&gt;       
+     &lt;price&gt;30&lt;/price&gt;
+   &lt;/org.drools.Cheese&gt;
+ &lt;/result&gt;
+&lt;/batch-execution-results&gt;
+</a></pre></div></div><p><a id="d0e493"><br class="example-break"></a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e498">2.1.3.17.&nbsp;Marshalling</a></h4></div></div></div><p>
+
+<a id="d0e498">The <code class="code">MarshallerFactory</code> is used 
+to marshal and unmarshal <code class="code">StatefulKnowledgeSessions</code>.
+ At the simplest it can be used as follows:
+
+</a></p><div class="example"><a id="d0e509"></a><p class="title"><a 
+id="d0e509"><b>Example&nbsp;2.21.&nbsp;Using <code class="code">MarshallerFactory</code></b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e509">// ksession is the StatefulKnowledgeSession
+// kbase is the KnowledgeBase
+ByteArrayOutputStream baos = new ByteArrayOutputStream();
+Marshaller marshaller = MarshallerFactory.newMarshaller( kbase );
+marshaller.marshall( baos, ksession );
+baos.close();
+</a></pre></div></div><p><a id="d0e509"><br class="example-break">
+
+However with marshalling you need more flexibility when dealing with 
+referenced user data. To achieve this we have the <code class="code">ObjectMarshallingStrategy</code>
+ interface. Two implementations are provided, but the user can implement
+ their own. The two supplied are <code class="code">IdentityMarshallingStrategy</code>
+ and <code class="code">SerializeMarshallingStrategy</code>. <code 
+class="code">SerializeMarshallingStrategy</code> is the default, as used
+ in the example above and it just calls the <code class="code">Serializable</code>
+ or <code class="code">Externalizable</code> methods on a user instance.
+ <code class="code">IdentityMarshallingStrategy</code> instead creates 
+an int id for each user object and stores them in a <code class="code">Map</code>
+ the id is written to the stream. When unmarshalling it simply looks to 
+the <code class="code">IdentityMarshallingStrategy</code> map to 
+retrieve the instance. This means that if you use the <code class="code">IdentityMarshallingStrategy</code>
+ it's stateful for the life of the Marshaller instance and will create 
+ids and keep references to all objects that it attempts to marshal. 
+
+</a></p><div class="example"><a id="d0e547"></a><p class="title"><a 
+id="d0e547"><b>Example&nbsp;2.22.&nbsp;Code to use a <code class="code">IdentityMarshallingStrategy</code></b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e547">ByteArrayOutputStream baos = new ByteArrayOutputStream();
+Marshaller marshaller = MarshallerFactory.newMarshaller( kbase, new ObjectMarshallingStrategy[] { MarshallerFactory.newIdentityMarshallingStrategy() } );
+marshaller.marshall( baos, ksession );
+baos.close(); 
+</a></pre></div></div><p><a id="d0e547"><br class="example-break">
+
+For added flexability we can't assume that a single strategy is suitable
+ for this we have added the <code class="code">ObjectMarshallingStrategyAcceptor</code>
+ interface that each <code class="code">ObjectMarshallingStrategy</code>
+ has. The Marshaller has a chain of strategies and when it attempts to 
+read or write a user object it iterates the strategies asking if they 
+accept responsability for marshalling the user object. One one 
+implementation is provided the <code class="code">ClassFilterAcceptor</code>.
+ This allows strings and wild cards to be used to match class names. The
+ default is "*.*", so in the above the <code class="code">IdentityMarshallingStrategy</code>
+ is used which has a default "*.*" acceptor.
+
+But lets say we want to serialise all classes except for one given 
+package, where we will use identity lookup, we could do the following:
+
+</a></p><div class="example"><a id="d0e567"></a><p class="title"><a 
+id="d0e567"><b>Example&nbsp;2.23.&nbsp;Using identity lookup</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e567">ByteArrayOutputStream baos = new ByteArrayOutputStream();
+ObjectMarshallingStrategyAcceptor identityAceceptor = MarshallerFactory.newClassFilterAcceptor( new String[] { "org.domain.pkg1.*" } );
+ObjectMarshallingStrategy identityStratetgy = MarshallerFactory.newIdentityMarshallingStrategy( identityAceceptor );
+Marshaller marshaller = MarshallerFactory.newMarshaller( kbase, new ObjectMarshallingStrategy[] { identityStratetgy, MarshallerFactory.newSerializeMarshallingStrategy() } );
+marshaller.marshall( baos, ksession );
+baos.close();
+</a></pre></div></div><p><a id="d0e567"><br class="example-break"></a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e572">2.1.3.18.&nbsp;Knowledge Agent</a></h4></div></div></div><p>
+
+<a id="d0e572">The <code class="code">KnowlegeAgent</code> is created by
+ the <code class="code">KnowlegeAgentFactory</code>. The <code 
+class="code">KnowlegeAgent</code> provides automatic loading, caching 
+and re-loading, of resources and is configured from a properties files. 
+The <code class="code">KnowledgeAgent</code> can update or rebuild this <code
+ class="code">KnowlegeBase</code> as the resources it uses are changed. 
+The strategy for this is determined by the configuration given to the 
+factory, but it is typically pull based using regular polling. We hope 
+to add push based updates and rebuilds in future versions.
+
+The Following example constructs an agent that will build a new <code 
+class="code">KnowledgeBase</code> from the files specified in the path 
+String. It will poll those files every 30 seconds to see if they are 
+updated. If new files are found it will construct a new KnowledgeBase, 
+instead of updating the existing one, due to the "newInstance" set to 
+"true" (however currently only the value of "true" is supported and is 
+hard coded into the engine):
+
+</a></p><div class="example"><a id="d0e595"></a><p class="title"><a 
+id="d0e595"><b>Example&nbsp;2.24.&nbsp;Constructing an agent</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e595">// Set the interval on the ResourceChangeScannerService if you are to use it and default of 60s is not desirable.
+ResourceChangeScannerConfiguration sconf = ResourceFactory.getResourceChangeScannerService().newResourceChangeScannerConfiguration();
+sconf.setProperty( "drools.resource.scanner.interval",
+                  "30" ); // set the disk scanning interval to 30s, default is 60s
+ResourceFactory.getResourceChangeScannerService().configure( sconf );
+KnowledgeBase kbase = KnowledgeBaseFactory.newKnowledgeBase();
+KnowledgeAgentConfiguration aconf = KnowledgeAgentFactory.newKnowledgeAgentConfiguration();
+aconf.setProperty( "drools.agent.scanDirectories",
+                  "true" ); // we want to scan directories, not just files, turning this on turns on file scanning
+aconf.setProperty( "drools.agent.newInstance",
+                  "true" ); // resource changes results in a new instance of the KnowledgeBase being built,
+                            // this cannot currently be set to false for incremental building
+    
+KnowledgeAgent kagent = KnowledgeAgentFactory.newKnowledgeAgent( "test agent", // the name of the agent
+                                                                kbase, // the KnowledgeBase to use, the Agent will also monitor any exist knowledge definitions
+                                                                aconf );
+kagent.applyChangeSet( ResourceFactory.newUrlResource( url ) ); // resource to the change-set xml for the resources to add
+</a></pre></div></div><p><a id="d0e595"><br class="example-break">
+
+<code class="code">KnowledgeAgents</code> can take a empty <code 
+class="code">KnowledgeBase</code> or a populated one. If a populated <code
+ class="code">KnowledgeBase</code> is provided, the <code class="code">KnowledgeAgent</code>
+ will iterate <code class="code">KnowledgeBase</code> and subscribe to 
+the <code class="code">Resource</code> that it finds. While it is 
+possible for the <code class="code">KnowledgeBuilder</code> to build all
+ resources found in a directory, that information is lost by the 
+KnowledgeBuilder so those directories will not be continuously scanned. 
+Only directories specified as part of the <code class="code">applyChangeSet(Resource)</code>
+ method are monitored.</a></p></div></div><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a 
+id="d0e625">2.1.4.&nbsp;Drools Flow</a></h3></div></div></div><p>
+<a id="d0e625">	Drools 4.0 had simple "RuleFlow" which was for 
+orchestrating rules. Drools 5.0 introduces a powerful (extensible) 
+workflow engine. It allows users to specify their business logic using 
+both rules and processes (where powerful interaction between processes 
+and rules is possible) and offers a unified enviroment.</a></p><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e630">2.1.4.1.&nbsp;Process Instance view at a 
+specific breakpoint</a></h4></div></div></div><p>
+</p><div class="figure"><a id="d0e635"></a><div class="figure-contents"><div
+ class="mediaobject" align="center"><a id="d0e635"><img 
+src="index_files/process-instances.png" alt="Rule Flow properties" 
+align="middle"></a></div></div><p class="title"><a id="d0e635"><b>Figure&nbsp;2.7.&nbsp;Rule
+ Flow properties</b></a></p></div><p><a id="d0e635"><br 
+class="figure-break">
+
+</a></p><div class="figure"><a id="d0e642"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e642"><img src="index_files/example-debug-1.png" alt="Current 
+active nodes in a workflow in a specific breakpoint" align="middle"></a></div></div><p
+ class="title"><a id="d0e642"><b>Figure&nbsp;2.8.&nbsp;Current active 
+nodes in a workflow in a specific breakpoint</b></a></p></div><p><a 
+id="d0e642"><br class="figure-break">
+
+	</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e649">2.1.4.2.&nbsp;New Nodes</a></h4></div></div></div><p>
+<a id="d0e649">Timers:</a></p><p>
+<a id="d0e649">A timer node can be added which causes the execution of 
+the node to wait for a specific period. Currently just uses JDK defaults
+ of initial delay and repeat delay, more complex timers will be 
+available in further milestones.
+</a></p><p>
+<a id="d0e649">Human Task:</a></p><p>
+<a id="d0e649">Processes can include tasks that need to be executed by 
+human actors. Human tasks include parameters like taskname, priority, 
+description, actorId, etc. The process engine can easily be integrated 
+with existing human task component (like for example a WS-HumanTask 
+implementation) using our pluggable work items (see below). Swimlanes 
+and assignment rules are also supported.
+
+</a></p><p>
+<a id="d0e649">The palette in the screenshot shows the two new 
+components, and the workflow itself shows the human task in use. It also
+ shows two "work items" which is explained in the next section:
+	</a></p><div class="figure"><a id="d0e662"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e662"><img src="index_files/humantask.png" alt="Human task" 
+align="middle"></a></div></div><p class="title"><a id="d0e662"><b>Figure&nbsp;2.9.&nbsp;Human
+ task</b></a></p></div><p><a id="d0e662"><br class="figure-break">
+
+
+	</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e669">2.1.4.3.&nbsp;Domain Specific Work Items</a></h4></div></div></div><p>
+<a id="d0e669">Domain Specific Work Items are pluggable nodes that users
+ create to facilitate custom task execution. They provide an api to 
+specify a new icon in the palette and gui editor for the tasks 
+properties, if no editor gui is supplied then it defaults to a text 
+based key value pair form. The api then allows execution behaviour for 
+these work items to be specified. By default the Email and Log work 
+items are provided. The Drools flow Manual has been updated on how to 
+implement these.
+
+</a></p><p>
+<a id="d0e669">The below image shows three different work items in use 
+in a workflow, "Blood Pressure", "BP Medication", "Notify GP":
+
+	</a></p><div class="figure"><a id="d0e676"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e676"><img src="index_files/CDSSExample.png" alt="Work items" 
+align="middle"></a></div></div><p class="title"><a id="d0e676"><b>Figure&nbsp;2.10.&nbsp;Work
+ items</b></a></p></div><p><a id="d0e676"><br class="figure-break">
+
+This one ows a new "Notification" work item:
+	</a></p><div class="figure"><a id="d0e683"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e683"><img src="index_files/NotificationPalette.png" 
+alt="Notification" align="middle"></a></div></div><p class="title"><a 
+id="d0e683"><b>Figure&nbsp;2.11.&nbsp;Notification</b></a></p></div><p><a
+ id="d0e683"><br class="figure-break">
+
+
+	</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e690">2.1.4.4.&nbsp;Extensible Process 
+Definition Language (ePDL)</a></h4></div></div></div><p>
+<a id="d0e690">Drools 4.0 used Xstream to store it's content, which was 
+not easily human writeable. Drools 5.0 introduced the ePDL which is a 
+XML specific to our process language, it also allows for domain specific
+ extensions which has been talked about in detail in this blog posting 
+"Drools Extensible Process Definition Language (ePDL) and the Semantic 
+Module Framework (SMF)". An example of the XML language, with a DSL 
+extension in red, is shown below.
+
+</a></p><div class="example"><a id="d0e695"></a><p class="title"><a 
+id="d0e695"><b>Example&nbsp;2.25.&nbsp;Example of the XML language</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e695">&lt;process  name="process name" id="process name" package-name="org.domain"
+xmlns="http://drools.org/drools-4.0/process"
+xmlns:mydsl="http://domain/org/mydsl"
+xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+xs:schemaLocation="http://drools.org/drools-4.0/process drools-processes-4.0.xsd" &gt;
+&lt;nodes&gt;
+  &lt;start id="0" /&gt;
+
+  &lt;action id="1" dialect="java"&gt;
+      list.add( "action node was here" ); 
+  &lt;/action&gt;
+
+    &lt;mydsl:logger id="2" type="warn"&gt;
+        This is my message         
+    &lt;mydsl:logger&gt;
+
+  &lt;end id="3" /&gt;
+&lt;/nodes&gt;
+
+&lt;connections&gt;
+  &lt;connection from="0 to="1" /&gt;
+  &lt;connection from="1" to="2" /&gt;
+  &lt;connection from="2" to="3" /&gt;
+&lt;/connections&gt;
+
+&lt;/process&gt;
+</a></pre></div></div><p><a id="d0e695"><br class="example-break">
+
+	</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e701">2.1.4.5.&nbsp;Pluggable Nodes</a></h4></div></div></div><p>
+<a id="d0e701">The underlying nodes for the framework are completely 
+pluggable making it simple to extend and to implement other execution 
+models. We already have a partial implementation for OSWorkflow and are 
+working with Deigo to complete this to provide a migration path for 
+OSWorkflow users.
+
+Other enhancements include exception scopes, the ability to include 
+on-entry and on-exit actions on various node types, integration with our
+ binary persistence mechanism to persist the state of long running 
+processes, etc. Check out the Drools Flow documentation to learn more.
+
+	</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e706">2.1.4.6.&nbsp;Human tasks</a></h4></div></div></div><p>
+<a id="d0e706">Human task management is very important in the context of
+ processes. While we allow users to plug in any task component they 
+prefer, we have developed a human task management component that 
+supports the entire life cycle of human tasks based on the WS-HumanTask 
+specification.
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e711">2.1.4.7.&nbsp;New functions to the Drools 
+Flow language</a></h4></div></div></div><p>
+
+<a id="d0e711">    </a></p><div class="itemizedlist"><ul><li><p><a 
+id="d0e711">Event nodes that allow a process to respond to external 
+events</a></p></li><li><p><a id="d0e711">Exception handlers and 
+exception handler scopes to handle exceptions that could be thrown</a></p></li><li><p><a
+ id="d0e711">A ForEach node allows instantiating a section of your flow 
+multiple times, for each element in a collection</a></p></li><li><p><a 
+id="d0e711">Data type support has been extended</a></p></li><li><p><a 
+id="d0e711">Timers are integrated with common node types</a></p></li></ul></div><p>
+
+<a id="d0e711">As a result, new node types and properties have been 
+added to the Drools Flow editor in Eclipse. You can also find examples 
+of these new features in the integration tests (e.g. 
+ProcessExceptionHandlerTest, ProcessTimerTest, etc.).
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e733">2.1.4.8.&nbsp;Work items</a></h4></div></div></div><p>
+<a id="d0e733">Our pluggable work item approach allows you to plug in 
+domain-specific work in your process in a declarative manner. We plan to
+ build a library of common work items and already provide an 
+implementation for sending emails, finding files, archiving, executing 
+system commands, logging and human tasks.
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e738">2.1.4.9.&nbsp;JPA</a></h4></div></div></div><p>
+<a id="d0e738">Improved support for persistence (JPA) and transactions 
+(JTA). 
+	</a></p><div class="example"><a id="d0e743"></a><p class="title"><a 
+id="d0e743"><b>Example&nbsp;2.26.&nbsp;An example on how to use 
+persistence and transactions in combination with processes</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e743">// create a new JPA-based session and specify the JPA entity manager factory
+Environment env = KnowledgeBaseFactory.newEnvironment();
+env.set( EnvironmentName.ENTITY_MANAGER_FACTORY, Persistence.createEntityManagerFactory( "emf-name" ) );
+env.set( EnvironmentName.TRANSACTION_MANAGER, TransactionManagerServices.getTransactionManager() );
+        
+StatefulKnowledgeSession ksession = JPAKnowledgeService.newStatefulKnowledgeSession( kbase, null, env ); // KnowledgeSessionConfiguration may be null, and a default will be used
+int sessionId = ksession.getId();
+
+// if no transaction boundary is specified, the method invocation is executed in a new transaction automatically
+ProcessInstance processInstance = ksession.startProcess( "org.drools.test.TestProcess" );
+
+// the users can also specify the transaction boundary themselves
+UserTransaction ut = (UserTransaction) new InitialContext().lookup( "java:comp/UserTransaction" );
+ut.begin();
+ksession.insert( new Person( "John Doe" ) );
+ksession.startProcess( "org.drools.test.TestProcess" );
+ksession.fireAllRules();
+ut.commit();</a></pre></div></div><p><a id="d0e743"><br 
+class="example-break">
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e749">2.1.4.10.&nbsp;Variable Injection</a></h4></div></div></div><p>
+<a id="d0e749">Support direct access to process variables in both MVEL 
+and Java in code constraints and actions, so if you have a variable 
+called "person" in your process, you can now describe constraints like:
+</a></p><div class="example"><a id="d0e754"></a><p class="title"><a 
+id="d0e754"><b>Example&nbsp;2.27.&nbsp;Variable injection example</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e754">    * [Java code constraint] return person.getAge() &gt; 20;
+    * [MVEL action] System.out.println(person.name);</a></pre></div></div><p><a
+ id="d0e754"><br class="example-break">
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e760">2.1.4.11.&nbsp;Miscellaneous Enhancements</a></h4></div></div></div><p>
+
+<a id="d0e760">    </a></p><div class="itemizedlist"><ul><li><p><a 
+id="d0e760">Process instances can now listen for external events by 
+marking the event node property "external" as true. External events are 
+signaled to the engine using <code class="code">session.signalEvent(type,
+ eventData)</code>
+      More information on how to use events inside your processes can be
+ found in the Drools Flow documentation here: 
+https://hudson.jboss.org/hudson/job/drools/lastSuccessfulBuild/artifact/trunk/target/docs/drools-flow/html/ch03.html#d0e917</a></p></li><li><p><a
+ id="d0e760">Process instances are now safe for multi-threading (as 
+multiple thread are blocked from working on the same process instance)</a></p></li><li><p><a
+ id="d0e760">Process persistence / transaction support has been further 
+improved. Check out the drools-process/drools-process-enterprise project
+ for more information.</a></p></li><li><p><a id="d0e760">The human task 
+component has been extended to support all kinds of data for input / 
+output / exceptions during task execution. 
+	</a></p><div class="example"><a id="d0e781"></a><p class="title"><a 
+id="d0e781"><b>Example&nbsp;2.28.&nbsp;As a result, the life cycle 
+methods of the task client have been extended to allow content data</b></a></p><div
+ class="example-contents"><pre class="programlisting"><a id="d0e781">          taskClient.addTask(task, contentData, responseHandler)
+          taskClient.complete(taskId, userId, outputData,responseHandler)
+          taskFail.complete(taskId, userId, outputData,responseHandler)
+
+          long contentId = task.getTaskData().getDocumentContentId();
+          taskClient.getContent(contentId, responseHandler);
+          ContentData content = responseHandler.getContent();</a></pre></div></div><p><a
+ id="d0e781"><br class="example-break">
+
+</a></p></li><li><p><a id="d0e781">It is now possible to migrate old 
+Drools4 RuleFlows (using the xstream format) to Drools5 processes (using
+ readable xml) during compilation. Migration will automatically be 
+performed when adding the RuleFlow to the KnowledgeBase when the 
+following system property is set:
+          <code class="code">drools.ruleflow.port = true</code></a></p></li><li><p><a
+ id="d0e781">The "Transform" work item allows you to easily transform 
+data from one format to another inside processes. The code and an 
+example can be found in the drools-process/drools-workitems directory.</a></p></li><li><p><a
+ id="d0e781">Function imports are now also supported inside processes.</a></p></li><li><p><a
+ id="d0e781">The history log - that keeps the history of all executed 
+process instances in a database - has been extended so it is now caable 
+of storing more detailed information for one specfic process instance. 
+It is now possible to find out exactly which nodes were triggered during
+ the execution of the process instance.</a></p></li><li><p><a 
+id="d0e781">A new type of join has been added, one that will wait until n
+ of its m incoming connections have been completed. This n could either 
+be hardcoded in the process or based on the value of a variable in the 
+process.</a></p></li><li><p><a id="d0e781">Improvements have been made 
+to make persistence easier to configure. The persistence approach is 
+based on a command service that makes sure that all the client 
+invocations are executed inside a transaction and that the state is 
+stored in the database after successful execution of the command. While 
+this was already possible in M4 using the commands directly, we have 
+extended this so that people can simply use the normal 
+StatefulKnowledgeSession interface but simply can configure the 
+persistence using configuration files. For more details, check out the 
+chapter on persistence in the Drools Flow documentation.</a></p></li></ul></div><p>
+</p></div></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h3
+ class="title"><a id="d0e808">2.1.5.&nbsp;Drools Fusion</a></h3></div></div></div><p><a
+ id="d0e808">Drools 5.0 brings to the rules world the full power of 
+events processing by supporting a number of CEP features as well as 
+supporting events as first class citizens in the rules engine.</a></p><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e813">2.1.5.1.&nbsp;Event Semantics</a></h4></div></div></div><p>
+<a id="d0e813">		Events are (from a rules engine perspective) a special 
+type of fact that has a few special characteristics:
+		    </a></p><div class="itemizedlist"><ul><li><p><a id="d0e813">they 
+are immutable</a></p></li><li><p><a id="d0e813">they have strong 
+time-related relationships</a></p></li><li><p><a id="d0e813">they may 
+have clear lifecycle windows</a></p></li><li><p><a id="d0e813">they may 
+be transparently garbage collected after it's lifecycle window expires</a></p></li><li><p><a
+ id="d0e813">they may be time-constrained</a></p></li><li><p><a 
+id="d0e813">they may be included in sliding windows for reasoning</a></p></li></ul></div><p>
+<a id="d0e813">		</a></p></div><div class="section" lang="en-US"><div 
+class="titlepage"><div><div><h4 class="title"><a id="d0e838">2.1.5.2.&nbsp;Event
+ Declaration</a></h4></div></div></div><p>
+
+<a id="d0e838">Any fact type can assume an event role, and its 
+corresponding event semantics, by simply declaring the metadata for it. 
+</a></p><div class="example"><a id="d0e843"></a><p class="title"><a 
+id="d0e843"><b>Example&nbsp;2.29.&nbsp;Both existing and generated beans
+ support event semantics:
+</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e843"># existing bean assuming an event role
+import org.drools.test.StockTick
+declare StockTick
+  @role( event )
+end
+
+# generated bean assuming an event role
+declare Alarm
+  @role( event )
+  type : String
+  timestamp : long
+end</a></pre></div></div><p><a id="d0e843"><br class="example-break">
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e849">2.1.5.3.&nbsp;Entry-Point Stream Listeners</a></h4></div></div></div><p>
+
+<a id="d0e849">A new key "from entry-point" has been added to allow a 
+pattern in a rule to listen on a stream, which avoids the overhead of 
+having to insert the object into the working memory where it is 
+potentially reasoned over by all rules.
+</a></p><p><code class="code">
+<a id="d0e849">$st : StockTick( company == "ACME", price &gt; 10 ) from 
+entry-point "stock stream"
+</a></code></p><p>
+</p><p>
+</p><div class="example"><a id="d0e861"></a><p class="title"><a 
+id="d0e861"><b>Example&nbsp;2.30.&nbsp;To insert facts into an entry 
+point</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e861">WorkingMemoryEntryPoint entry = wm.getWorkingMemoryEntryPoint( "stock stream" );
+entry.insert( ticker );
+</a></pre></div></div><p><a id="d0e861"><br class="example-break"></a></p><p>
+<a id="d0e861">StreamTest shows a unit for this.
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e868">2.1.5.4.&nbsp;Event Correlation and New 
+Operators</a></h4></div></div></div><p>
+
+<a id="d0e868">Event correlation and time based constraint support are 
+requirements of event processing, and are completely supported by Drools
+ 5.0. The new, out of the box, time constraint operators can be seen in 
+these test case rules:
+test_CEP_TimeRelationalOperators.drl
+</a></p><p>
+<a id="d0e868">As seen in the test above, Drools supports both: 
+primitive events, that are point in time occurrences with no duration, 
+and compound events, that are events with distinct start and end 
+timestamps.
+</a></p><p>
+<a id="d0e868">The complete list of operators are:
+</a></p><div class="itemizedlist"><ul><li><p><a id="d0e868">coincides</a></p></li><li><p><a
+ id="d0e868">before</a></p></li><li><p><a id="d0e868">after</a></p></li><li><p><a
+ id="d0e868">meets</a></p></li><li><p><a id="d0e868">metby</a></p></li><li><p><a
+ id="d0e868">overlaps</a></p></li><li><p><a id="d0e868">overlappedby</a></p></li><li><p><a
+ id="d0e868">during</a></p></li><li><p><a id="d0e868">includes</a></p></li><li><p><a
+ id="d0e868">starts</a></p></li><li><p><a id="d0e868">startedby</a></p></li><li><p><a
+ id="d0e868">finishes</a></p></li><li><p><a id="d0e868">finishedby</a></p></li></ul></div><p>
+</p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e918">2.1.5.5.&nbsp;Sliding Time Windows</a></h4></div></div></div><p>
+
+<a id="d0e918">Drools 5.0 adds support for reasoning over sliding 
+windows of events. For instance:
+</a></p><p><code class="code">
+<a id="d0e918">StockTick( symbol == "RHAT" ) over window:time( 60 )
+</a></code></p><p>
+<a id="d0e918">The above example will only pattern match the RHAT stock 
+ticks that happened in the last 60 clock ticks, discarding any event 
+older than that.
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e928">2.1.5.6.&nbsp;Session Clock</a></h4></div></div></div><p>
+
+<a id="d0e928">Enabling full event processing capabilities requires the 
+ability to configure and interact with a session clock. Drools adds 
+support for time reasoning and session clock configuration, allowing it 
+to not only run real time event processing but also simulations, what-if
+ scenarios and post-processing audit by replaying a scenario.
+</a></p><div class="example"><a id="d0e933"></a><p class="title"><a 
+id="d0e933"><b>Example&nbsp;2.31.&nbsp;The Clock is specified as part of
+ the SessionConfiguration, a new class that is optionally specified at 
+session creation time</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e933">SessionConfiguration conf = new SessionConfiguration();
+conf.setClockType( ClockType.PSEUDO_CLOCK );
+StatefulSession session = ruleBase.newStatefulSession( conf );
+</a></pre></div></div><p><a id="d0e933"><br class="example-break">
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e939">2.1.5.7.&nbsp;Event Garbage Collection</a></h4></div></div></div><p>
+<a id="d0e939">Since events usually have strong temporal relationships, 
+it is possible to infer a logical time window when events can possibly 
+match. The engine uses that capability to calculate when an event is no 
+longer capable of matching any rule anymore and automatically retracts 
+that event.
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e944">2.1.5.8.&nbsp;Time Units Support</a></h4></div></div></div><p>
+<a id="d0e944">Drools adopted a simplified syntax for time units, based 
+on the ISO 8601 syntax for durations. This allows users to easily add 
+temporal constraints to the rules writing time in well known units. 
+Example:
+</a></p><p>
+<code class="code"><a id="d0e944">SomeEvent( this after[1m,1h30m] 
+$anotherEvent )</a></code>
+</p><p>
+<a id="d0e944">The above pattern will match if SomeEvent happens between
+ 1 minute (1m) and 1 hour and 30 minutes after <code class="code">$anotherEvent</code>.
+</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h4
+ class="title"><a id="d0e959">2.1.5.9.&nbsp;Support to event expiration 
+policy</a></h4></div></div></div><p>
+<a id="d0e959">added the ability to define a per-type event expiration 
+policy. In the example bellow, the StockTick events will expire 10 
+minutes after they enter the system:
+</a></p><p><code class="code">
+<a id="d0e959">declare StockTick @role( event ) @expires( 10m ) end
+</a></code></p></div><div class="section" lang="en-US"><div 
+class="titlepage"><div><div><h4 class="title"><a id="d0e967">2.1.5.10.&nbsp;Support
+ to temporal operations over arbitrary dates.</a></h4></div></div></div><p>
+</p><div class="example"><a id="d0e972"></a><p class="title"><a 
+id="d0e972"><b>Example&nbsp;2.32.&nbsp;added the ability for 
+point-in-time operators (before, after and coincides) to be used with 
+any arbitrary date field</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e972">rule "Allow access"
+when
+WorkHours( $s : start, $e : end )
+LogIn( time after $s, time before $e )
+then
+// allow access
+end
+</a></pre></div></div><p><a id="d0e972"><br class="example-break">
+</a></p></div></div><div class="section" lang="en-US"><div 
+class="titlepage"><div><div><h3 class="title"><a id="d0e978">2.1.6.&nbsp;Eclipse
+ IDE</a></h3></div></div></div><div class="itemizedlist"><ul><li><p><a 
+id="d0e978">Support multiple runtimes: The IDE now supports multiple 
+runtimes. A Drools runtime is a collection of jars on your file system 
+that represent one specific release of the Drools project jars. To 
+create a runtime, you must either point the IDE to the release of your 
+choice, or you can simply create a new runtime on your file system from 
+the jars included in the Drools Eclipse plugin. Drools runtimes can be 
+configured by opening up the Eclipse preferences and selecting the 
+Drools -&gt; Installed Drools Runtimes category, as shown below.
+</a></p><div class="figure"><a id="d0e985"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e985"><img src="index_files/runtimes.png" alt="Run times" 
+align="middle"></a></div></div><p class="title"><a id="d0e985"><b>Figure&nbsp;2.12.&nbsp;Run
+ times</b></a></p></div><p><a id="d0e985"><br class="figure-break">
+
+
+</a></p></li><li><p><a id="d0e985">Debugging of rules using the MVEL 
+dialect has been fixed</a></p></li><li><p><a id="d0e985">Drools Flow 
+Editor
+     </a></p><div class="itemizedlist"><ul><li><p><a id="d0e985">Process
+ Skins allow you to define how the different RuleFlow nodes are 
+visualized. We now support two skins: the default one which existed 
+before and a BPMN skin that visualizes the nodes using a BPMN-like 
+representation: http://blog.athico.com/2008/10/drools-flow-and-bpmn.html</a></p></li><li><p><a
+ id="d0e985">An (X)OR split now shows the name of the constraint as the 
+connection label</a></p></li><li><p><a id="d0e985">Custom work item 
+editors now signal the process correctly that it has been changed</a></p></li></ul></div><p>
+</p></li></ul></div></div></div><div class="section" lang="en-US"><div 
+class="titlepage"><div><div><h2 class="title"><a id="d0e1009">2.2.&nbsp;What
+ is new in Drools 4.0</a></h2></div></div></div><p><a id="d0e1009">Drools
+ 4.0 is a major update over the previous Drools 3.0.x series. A
+  whole new set of features were developed which special focus on 
+language
+  expressiveness, engine performance and tools availability. The 
+following is
+  a list of the most interesting changes.</a></p><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a 
+id="d0e1014">2.2.1.&nbsp;Language Expressiveness Enhancements</a></h3></div></div></div><div
+ class="itemizedlist"><ul><li><p><a id="d0e1014">New Conditional 
+Elements: from, collect, accumulate and
+        forall</a></p></li><li><p><a id="d0e1014">New Field Constraint 
+operators: not matches, not contains, in,
+        not in, memberOf, not memberOf</a></p></li><li><p><a 
+id="d0e1014">New Implicit Self Reference field: this</a></p></li><li><p><a
+ id="d0e1014">Full support for Conditional Elements nesting, for First 
+Order
+        Logic completeness.</a></p></li><li><p><a id="d0e1014">Support 
+for multi-restrictions and constraint connectives
+        &amp;&amp; and ||</a></p></li><li><p><a id="d0e1014">Parser 
+improvements to remove previous language limitations,
+        like character escaping and keyword conflicts</a></p></li><li><p><a
+ id="d0e1014">Support for pluggable dialects and full support for MVEL
+        scripting language</a></p></li><li><p><a id="d0e1014">Complete 
+rewrite of DSL engine, allowing for full l10n</a></p></li><li><p><a 
+id="d0e1014">Fact attributes auto-vivification for return value 
+restrictions
+        and inline-eval constraints</a></p></li><li><p><a id="d0e1014">Support
+ for nested accessors, property navigation and simplified
+        collection, arrays and maps syntax</a></p></li><li><p><a 
+id="d0e1014">Improved support for XML rules</a></p></li></ul></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1051">2.2.2.&nbsp;Core Engine Enhancements</a></h3></div></div></div><div
+ class="itemizedlist"><ul><li><p><a id="d0e1051">Native support for 
+primitive types, avoiding constant
+        autoboxing</a></p></li><li><p><a id="d0e1051">Support for 
+transparent optional Shadow Facts</a></p></li><li><p><a id="d0e1051">Rete
+ Network performance improvements for complex rules</a></p></li><li><p><a
+ id="d0e1051">Support for Rule-Flows</a></p></li><li><p><a id="d0e1051">Support
+ for Stateful and Stateless working memories (rule engine
+        sessions)</a></p></li><li><p><a id="d0e1051">Support for 
+Asynchronous Working Memory actions</a></p></li><li><p><a id="d0e1051">Rules
+ Engine Agent for hot deployment and BRMS
+        integration</a></p></li><li><p><a id="d0e1051">Dynamic salience 
+for rules conflict resolution</a></p></li><li><p><a id="d0e1051">Support
+ for Parameterized Queries</a></p></li><li><p><a id="d0e1051">Support 
+for halt command</a></p></li><li><p><a id="d0e1051">Support for 
+sequential execution mode</a></p></li><li><p><a id="d0e1051">Support for
+ pluggable global variable resolver</a></p></li></ul></div></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1091">2.2.3.&nbsp;IDE Enhancements</a></h3></div></div></div><div
+ class="itemizedlist"><ul><li><p><a id="d0e1091">Support for rule 
+break-points on debugging</a></p></li><li><p><a id="d0e1091">WYSIWYG 
+support for rule-flows</a></p></li><li><p><a id="d0e1091">New guided 
+editor for rules authoring</a></p></li><li><p><a id="d0e1091">Upgrade to
+ support all new engine features</a></p></li></ul></div></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1107">2.2.4.&nbsp;Business Rules Management 
+System - BRMS</a></h3></div></div></div><div class="itemizedlist"><ul><li><p><a
+ id="d0e1107">New BRMS tool</a></p></li><li><p><a id="d0e1107">User 
+friendly web interface with nice WEB 2.0 ajax
+        features</a></p></li><li><p><a id="d0e1107">Package 
+configuration</a></p></li><li><p><a id="d0e1107">Rule Authoring easy to 
+edit rules both with guided editor (
+        drop-down menus ) and text editor</a></p></li><li><p><a 
+id="d0e1107">Package compilation and deployment</a></p></li><li><p><a 
+id="d0e1107">Easy deployment with Rule Agent</a></p></li><li><p><a 
+id="d0e1107">Easy to organize with categories and search assets</a></p></li><li><p><a
+ id="d0e1107">Versioning enabled, you can easily replace yours assets 
+with
+        previously saved</a></p></li><li><p><a id="d0e1107">JCR 
+compliant rule assets repository</a></p></li></ul></div></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1138">2.2.5.&nbsp;Miscellaneous Enhancements</a></h3></div></div></div><div
+ class="itemizedlist"><ul><li><p><a id="d0e1138">Slimmed down 
+dependencies and smaller memory footprint</a></p></li></ul></div></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h2 
+class="title"><a id="d0e1145">2.3.&nbsp;Upgrade tips from Drools 3.0.x 
+to Drools 4.0.x</a></h2></div></div></div><p><a id="d0e1145">As 
+mentioned before Drools 4.0 is a major update over the previous
+  Drools 3.0.x series. Unfortunately, in order to achieve the goals set 
+for
+  this release, some backward compatibility issues were introduced, as
+  discussed in the mail list and blogs.</a></p><p><a id="d0e1145">This 
+section of the manual is a work in progress and will document a
+  simple how-to on upgrading from Drools 3.0.x to Drools 4.0.x.</a></p><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1152">2.3.1.&nbsp;API changes</a></h3></div></div></div><p><a
+ id="d0e1152">There are a few API changes that are visible to regular 
+users and
+    need to be fixed.</a></p><div class="section" lang="en-US"><div 
+class="titlepage"><div><div><h4 class="title"><a id="d0e1157">2.3.1.1.&nbsp;Working
+ Memory creation</a></h4></div></div></div><p><a id="d0e1157">Drools 
+3.0.x had only one working memory type that worked like a
+      stateful working memory. Drools 4.0.x introduces separate APIs for
+      Stateful and Stateless working memories that are called now Rule
+      Sessions. In Drools 3.0.x, the code to create a working memory
+      was:</a></p><div class="example"><a id="d0e1163"></a><p 
+class="title"><a id="d0e1163"><b>Example&nbsp;2.33.&nbsp;Drools 3.0.x: 
+Working Memory Creation</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e1163">WorkingMemory wm = rulebase.newWorkingMemory();</a></pre></div></div><p><a
+ id="d0e1163"><br class="example-break">In Drools 4.0.x it must be 
+changed to:</a></p><div class="example"><a id="d0e1170"></a><p 
+class="title"><a id="d0e1170"><b>Example&nbsp;2.34.&nbsp;Drools 4.0.x: 
+Stateful Rule Session Creation</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e1170">StatefulSession wm = rulebase.newStatefulSession();</a></pre></div></div><p><a
+ id="d0e1170"><br class="example-break">The StatefulSession object has 
+the same behavior as the
+      Drools 3.0.x WorkingMemory (it even extends the WorkingMemory
+      interface), so there should be no other problems with this fix.</a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e1176">2.3.1.2.&nbsp;Working Memory Actions</a></h4></div></div></div><p><a
+ id="d0e1176">Drools 4.0.x now supports pluggable dialects and has 
+built-in
+      support for Java and MVEL scripting language. In order to avoid 
+keyword
+      conflicts, the working memory actions were renamed as showed
+      bellow:</a></p><p></p><div class="table"><a id="d0e1182"></a><p 
+class="title"><a id="d0e1182"><b>Table&nbsp;2.1.&nbsp;Working Memory 
+Actions equivalent API methods</b></a></p><div class="table-contents"><table
+ summary="Working Memory Actions equivalent API methods" border="1"><colgroup><col><col></colgroup><tbody><tr><td><span
+ class="bold"><strong>Drools 3.0.x</strong></span></td><td><span 
+class="bold"><strong>Drools 4.0.x</strong></span></td></tr><tr><td>WorkingMemory.assertObject()</td><td>WorkingMemory.insert()</td></tr><tr><td>WorkingMemory.assertLogicalObject()</td><td>WorkingMemory.insertLogical()</td></tr><tr><td>WorkingMemory.modifyObject()</td><td>WorkingMemory.update()</td></tr></tbody></table></div></div><a
+ id="d0e1182"><br class="table-break"></a></div></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1209">2.3.2.&nbsp;Rule Language Changes</a></h3></div></div></div><p><a
+ id="d0e1209">The DRL Rule Language also has some backward incompatible 
+changes as
+    detailed bellow.</a></p><div class="section" lang="en-US"><div 
+class="titlepage"><div><div><h4 class="title"><a id="d0e1214">2.3.2.1.&nbsp;Working
+ Memory Actions</a></h4></div></div></div><p><a id="d0e1214">The Working
+ Memory actions in rule consequences were also changed
+      in a similar way to the change made in the API. The following 
+table
+      summarizes the change:</a></p><div class="table"><a id="d0e1219"></a><p
+ class="title"><a id="d0e1219"><b>Table&nbsp;2.2.&nbsp;Working Memory 
+Actions equivalent DRL commands</b></a></p><div class="table-contents"><table
+ summary="Working Memory Actions equivalent DRL commands" border="1"><colgroup><col><col></colgroup><tbody><tr><td><span
+ class="bold"><strong>Drools 3.0.x</strong></span></td><td><span 
+class="bold"><strong>Drools 4.0.x</strong></span></td></tr><tr><td>assert()</td><td>insert()</td></tr><tr><td>assertLogical()</td><td>insertLogical()</td></tr><tr><td>modify()</td><td>update()</td></tr></tbody></table></div></div><a
+ id="d0e1219"><br class="table-break"></a></div><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a 
+id="d0e1246">2.3.2.2.&nbsp;Primitive support and unboxing</a></h4></div></div></div><p><a
+ id="d0e1246">Drools 3.0.x did not had native support for primitive 
+types and
+      consequently, it auto-boxed all primitives in it's respective 
+wrapper
+      classes. That way, any use of a boxed variable binding required a 
+manual
+      unbox.</a></p><p><a id="d0e1246">Drools 4.0.x has full support for
+ primitive types and does not
+      wrap values anymore. So, all previous unwrap method calls must be
+      removed from the DRL.</a></p><div class="example"><a id="d0e1253"></a><p
+ class="title"><a id="d0e1253"><b>Example&nbsp;2.35.&nbsp;Drools 3.0.x 
+manual unwrap</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e1253">rule "Primitive int manual unbox"
+when
+    $c : Cheese( $price : price )
+then
+    $c.setPrice( $price<span class="bold"><strong>.intValue()</strong></span> * 2 )
+end
+</a></pre></div></div><a id="d0e1253"><br class="example-break"></a><p><a
+ id="d0e1253">The above rule in 4.0.x would be:</a></p><div 
+class="example"><a id="d0e1263"></a><p class="title"><a id="d0e1263"><b>Example&nbsp;2.36.&nbsp;Drools
+ 4.0.x primitive support</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e1263">rule "Primitive support"
+when
+    $c : Cheese( $price : price )
+then
+    $c.setPrice( $price * 2 )
+end
+</a></pre></div></div><a id="d0e1263"><br class="example-break"></a></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1268">2.3.3.&nbsp;Drools Update Tool</a></h3></div></div></div><p><a
+ id="d0e1268">The Drools Update tools is a simple program to help with 
+the upgrade
+    of DRL files from Drools 3.0.x to Drools 4.0.x.</a></p><p><a 
+id="d0e1268">At this point, its main objective is to upgrade the memory 
+action
+    calls from 3.0.x to 4.0.x, but expect it to grow over the next few 
+weeks
+    covering additional scenarios. It is important to note that it does 
+not
+    make a dumb text search and replace in rules file, but it actually 
+parses
+    the rules file and try to make sure it is not doing anything 
+unexpected,
+    and as so, it is a safe tool to use for upgrade large sets of rule
+    files.</a></p><p><a id="d0e1268">The Drools update tool can be found
+ as a maven project in the
+    following source repository
+    
+http://anonsvn.labs.jboss.com/labs/jbossrules/trunk/experimental/drools-update/
+
+    you just need to check it out, and execute the maven clean install 
+action
+    with the project's pom.xml file. After resolve all the class path
+    dependencies you are able to run the toll with the following
+    command:</a></p><pre class="programlisting"><a id="d0e1268">java -cp $CLASSPATH org.drools.tools.update.UpdateTool -f &lt;filemask&gt; [-d &lt;basedir&gt;] [-s &lt;sufix&gt;]</a></pre><p><a
+ id="d0e1268">The program parameters are very easy to understand as 
+following.
+    </a></p><div class="itemizedlist"><ul><li><p><a id="d0e1268">-h,--help,
+ Shows a very simple list the usage help</a></p></li><li><p><a 
+id="d0e1268">-d your source base directory</a></p></li><li><p><a 
+id="d0e1268">-f pattern for the files to be updated. The format is the 
+same
+          as used by ANT: * = single file, directory ** = any level of
+          subdirectories EXAMPLE: src/main/resources/**/*.drl = matches 
+all
+          DRL files inside any subdirectory of /src/main/resources</a></p></li><li><p><a
+ id="d0e1268">-s,--sufix the sufix to be added to all updated files</a></p></li></ul></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1294">2.3.4.&nbsp;DSL Grammars in Drools 4.0</a></h3></div></div></div><p><a
+ id="d0e1294">It is important to note that the DSL template engine was 
+rewritten
+    from scratch to improve flexibility. One of the new features of DSL
+    grammars is the support to Regular Expressions. This way, now you 
+can
+    write your mappings using regexp to have additional flexibility, as
+    explained in the DSL chapter. Although, now you have to escape 
+characters
+    with regexp meaning. Example: if previously you had a matching
+    like:</a></p><div class="example"><a id="d0e1299"></a><p 
+class="title"><a id="d0e1299"><b>Example&nbsp;2.37.&nbsp;Drools 3.0.x 
+mapping</b></a></p><div class="example-contents"><pre class="programlisting"><a id="d0e1299">[when][]- the {attr} is in [ {values} ]={attr} in ( {values} )</a></pre></div></div><a
+ id="d0e1299"><br class="example-break"></a><p><a id="d0e1299">Now, you 
+need to escape '[' and ']' characters, as they have special
+    meaning in regexps. So, the same mapping in Drools 4.0 would be:</a></p><div
+ class="example"><a id="d0e1306"></a><p class="title"><a id="d0e1306"><b>Example&nbsp;2.38.&nbsp;Drools
+ 4.0.x mapping with escaped characters</b></a></p><div 
+class="example-contents"><pre class="programlisting"><a id="d0e1306">[when][]- the {attr} is in \[ {values} \]={attr} in ( {values} )</a></pre></div></div><a
+ id="d0e1306"><br class="example-break"></a></div><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h3 class="title"><a 
+id="d0e1311">2.3.5.&nbsp;Rule flow Update for 4.0.2</a></h3></div></div></div><p>
+<a id="d0e1311">    	The Rule flow feature was updated for 4.0.2, and 
+now all your ruleflows must declare a package name.
+    </a></p><div class="figure"><a id="d0e1316"></a><div 
+class="figure-contents"><div class="mediaobject" align="center"><a 
+id="d0e1316"><img src="index_files/ruleflowproperties.png" alt="Rule 
+Flow properties" align="middle"></a></div></div><p class="title"><a 
+id="d0e1316"><b>Figure&nbsp;2.13.&nbsp;Rule Flow properties</b></a></p></div><a
+ id="d0e1316"><br class="figure-break"></a></div></div></div><div 
+class="chapter" lang="en-US"><div class="titlepage"><div><div><h2 
+class="title"><a id="d0e1322">Chapter&nbsp;3.&nbsp;Installation and 
+Setup (Core and IDE)</a></h2></div></div></div><div class="toc"><dl><dt><span
+ class="section"><a href="#d0e1325">3.1. Installing and using</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e1337">3.1.1. Dependencies and jars</a></span></dt><dt><span
+ class="section"><a href="#d0e1366">3.1.2. Runtime</a></span></dt><dt><span
+ class="section"><a href="#d0e1371">3.1.3. Installing IDE (Rule 
+Workbench)</a></span></dt></dl></dd><dt><span class="section"><a 
+href="#d0e1473">3.2. Setup from source</a></span></dt><dt><span 
+class="section"><a href="#d0e1532">3.3. Source Checkout</a></span></dt><dt><span
+ class="section"><a href="#d0e1583">3.4. Build</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e1586">3.4.1. Building the Source</a></span></dt><dt><span
+ class="section"><a href="#d0e1615">3.4.2. Building the Manual</a></span></dt></dl></dd><dt><span
+ class="section"><a href="#d0e1667">3.5. Eclipse</a></span></dt><dd><dl><dt><span
+ class="section"><a href="#d0e1670">3.5.1. Importing Eclipse Projects</a></span></dt></dl></dd></dl></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h2 
+class="title"><a id="d0e1325">3.1.&nbsp;Installing and using</a></h2></div></div></div><p><a
+ id="d0e1325">Drools provides an Eclipse-based IDE (which is optional), 
+but at its
+  core only Java 1.5 (Java SE) is required.</a></p><p><a id="d0e1325">A 
+simple way to get started is to download and install the Eclipse
+  plug-in - this will also require the Eclipse GEF framework to be 
+installed
+  (see below, if you don't have it installed already). This will provide
+ you
+  with all the dependencies you need to get going: you can simply create
+ a new
+  rule project and everything will be done for you. Refer to the chapter
+ on
+  the Rule Workbench and IDE for detailed instructions on this. 
+Installing the
+  Eclipse plug-in is generally as simple as unzipping a file into your 
+Eclipse
+  plug-in directory.</a></p><p><a id="d0e1325">Use of the Eclipse 
+plug-in is not required. Rule files are just
+  textual input (or spreadsheets as the case may be) and the IDE (also 
+known
+  as the Rule Workbench) is just a convenience. People have integrated 
+the
+  rule engine in many ways, there is no "one size fits all".</a></p><p><a
+ id="d0e1325">Alternatively, you can download the binary distribution, 
+and include
+  the relevant jars in your projects classpath.</a></p><p></p><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1337">3.1.1.&nbsp;Dependencies and jars</a></h3></div></div></div><p><a
+ id="d0e1337">Drools is broken down into a few modules, some are 
+required during
+    rule development/compiling, and some are required at runtime. In 
+many
+    cases, people will simply want to include all the dependencies at 
+runtime,
+    and this is fine. It allows you to have the most flexibility. 
+However,
+    some may prefer to have their "runtime" stripped down to the bare 
+minimum,
+    as they will be deploying rules in binary form - this is also 
+possible.
+    The core runtime engine can be quite compact, and only require a few
+ 100
+    kilobytes across 2 jar files.</a></p><p><a id="d0e1337">The 
+following is a description of the important libraries that make
+    up JBoss Rules</a></p><div class="itemizedlist"><ul><li><p><a 
+id="d0e1337">drools-api.jar - this provides the interfaces 
+	and factories. Drools-api also helps clearly show what is intended 
+	as a user api and what is just an engine api.</a></p></li><li><p><a 
+id="d0e1337">drools-core.jar - this is the core engine, runtime 
+component.
+        Contains both the RETE engine and the LEAPS engine. This is the 
+only
+        runtime dependency if you are pre-compiling rules (and deploying
+ via
+        Package or RuleBase objects).</a></p></li><li><p><a id="d0e1337">drools-compiler.jar
+ - this contains the compiler/builder
+        components to take rule source, and build executable rule bases.
+ This
+        is often a runtime dependency of your application, but it need 
+not be
+        if you are pre-compiling your rules. This depends on
+        drools-core</a></p></li><li><p><a id="d0e1337">drools-jsr94.jar -
+ this is the JSR-94 compliant implementation,
+        this is essentially a layer over the drools-compiler component. 
+Note
+        that due to the nature of the JSR-94 specification, not all 
+features
+        are easily exposed via this interface. In some cases, it will be
+        easier to go direct to the Drools API, but in some environments 
+the
+        JSR-94 is mandated.</a></p></li><li><p><a id="d0e1337">drools-decisiontables.jar
+ - this is the decision tables
+        'compiler' component, which uses the drools-compiler component. 
+This
+        supports both excel and CSV input formats.</a></p></li></ul></div><p><a
+ id="d0e1337">There are quite a few other dependencies which the above 
+components
+    require, most of which are for the drools-compiler, drools-jsr94 or
+    drools-decisiontables module. Some key ones to
+    note are "POI" which provides the
+    spreadsheet parsing ability, and "antlr" which provides the parsing 
+for
+    the rule language itself.</a></p><p><a id="d0e1337">NOTE: if you are
+ using Drools in J2EE or servlet containers and you
+    come across classpath issues with "JDT", then you can switch to the 
+janino
+    compiler. Set the system property "drools.compiler": For example:
+    -Ddrools.compiler=JANINO.</a></p><p><a id="d0e1337">For up to date 
+info on dependencies in a release, consult the
+    README_DEPENDENCIES.txt file, which can be found in the lib 
+directory of
+    the download bundle, or in the root of the project directory.</a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1366">3.1.2.&nbsp;Runtime</a></h3></div></div></div><p><a
+ id="d0e1366">The "runtime" requirements mentioned here are if you are 
+deploying
+    rules as their binary form (either as KnowledgePackage objects, or 
+KnowledgeBase objects
+    etc). This is an optional feature that allows you to keep your 
+runtime
+    very light. You may use drools-compiler to produce rule packages 
+"out of
+    process", and then deploy them to a runtime system. This runtime 
+system
+    only requires drools-core.jar and drools-api for execution. This is 
+an optional
+    deployment pattern, and many people do not need to "trim" their
+    application this much, but it is an ideal option for certain
+    environments.</a></p></div><div class="section" lang="en-US"><div 
+class="titlepage"><div><div><h3 class="title"><a id="d0e1371">3.1.3.&nbsp;Installing
+ IDE (Rule Workbench)</a></h3></div></div></div><p><a id="d0e1371">The 
+rule workbench (for Eclipse) requires that you have Eclipse 3.4
+    or greater, as well as Eclipse GEF 3.4 or greater. You can install 
+it
+    either by downloading the plug-in or, or using the update site.</a></p><p><a
+ id="d0e1371">Another option is to use the JBoss IDE, which comes with 
+all the
+    plug-in requirements pre packaged, as well as a choice of other 
+tools
+    separate to rules. You can choose just to install rules from the 
+"bundle"
+    that JBoss IDE ships with.</a></p><div class="section" lang="en-US"><div
+ class="titlepage"><div><div><h4 class="title"><a id="d0e1378">3.1.3.1.&nbsp;Installing
+ GEF (a required dependency)</a></h4></div></div></div><p><a 
+id="d0e1378">GEF is the Eclipse Graphical Editing Framework, which is 
+used for
+      graph viewing components in the plug-in.</a></p><p><a id="d0e1378">If
+ you don't have GEF installed, you can install it using the
+      built in update mechanism (or downloading GEF from the Eclipse.org
+      website not recommended). JBoss IDE has GEF already, as do many 
+other "distributions" of
+      Eclipse, so this step may be redundant for some people.</a></p><p><a
+ id="d0e1378">Open the Help-&gt;Software updates...-&gt;Available 
+Software-&gt;Add Site...
+      from the help menu. Location is:</a></p><pre class="programlisting"><a id="d0e1378">http://download.eclipse.org/tools/gef/updates/releases/</a></pre><p><a
+ id="d0e1378">Next you choose the GEF plug-in:</a></p><div 
+class="screenshot"><div class="mediaobject"><a id="d0e1378"><img 
+src="index_files/install_gef.png"></a></div></div><p><a id="d0e1378">Press
+ next, and agree to install the plug-in (an Eclipse restart
+      may be required). Once this is completed, then you can continue on
+      installing the rules plug-in.</a></p></div><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a 
+id="d0e1397">3.1.3.2.&nbsp;Installing GEF from zip file</a></h4></div></div></div><p><a
+ id="d0e1397">To install from the zip file, download and unzip the file.
+ Inside
+      the zip you will see a plug-in directory, and the plug-in jar 
+itself. You
+      place the plug-in jar into your Eclipse applications plug-in 
+directory,
+      and restart Eclipse.</a></p></div><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h4 class="title"><a 
+id="d0e1402">3.1.3.3.&nbsp;Installing Drools plug-in from zip file</a></h4></div></div></div><p><a
+ id="d0e1402">Download the Drools Eclipse
+    IDE plugin from the link below. Unzip the downloaded file in your 
+main eclipse folder
+    (do not just copy the file there, extract it so that the feature and
+ plugin jars end
+    up in the features and plugin directory of eclipse) and (re)start 
+Eclipse.</a></p><p><a class="ulink" 
+href="http://www.jboss.org/drools/downloads.html">http://www.jboss.org/drools/downloads.html</a></p><p>To
+ check that the installation was successful, try opening the Drools 
+perspective:
+    Click the 'Open Perspective' button in the top right corner of your 
+Eclipse window,
+    select 'Other...' and pick the Drools perspective.  If you cannot 
+find the Drools perspective
+    as one of the possible perspectives, the installation probably was 
+unsuccessful. Check
+    whether you executed each of the required steps correctly: Do you 
+have the right version
+    of Eclipse (3.4.x)?  Do you have Eclipse GEF installed (check 
+whether the org.eclipse.gef_3.4.*.jar
+    exists in the plugins directory in your eclipse root folder)? Did 
+you extract the Drools Eclipse
+    plugin correctly (check whether the org.drools.eclipse_*.jar exists 
+in the plugins directory in
+    your eclipse root folder)?  If you cannot find the problem, try 
+contacting us (e.g. on irc or on
+    the user mailing list), more info can be found no our homepage here:</p><p><a
+ class="ulink" href="http://www.jboss.org/drools/">http://www.jboss.org/drools/</a></p></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h4 
+class="title"><a id="d0e1415">3.1.3.4.&nbsp;Drools Runtimes</a></h4></div></div></div><p><a
+ id="d0e1415">A Drools runtime is a collection of jars on your file 
+system that represent
+    one specific release of the Drools project jars. To create a 
+runtime, you must 
+    point the IDE to the release of your choice.  If you want to create a
+ new runtime
+    based on the latest Drools project jars included in the plugin 
+itself, you can also
+    easily do that.  You are required to specify a default Drools 
+runtime for your
+    Eclipse workspace, but each individual project can override the 
+default and select
+    the appropriate runtime for that project specifically.</a></p><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h5 
+class="title"><a id="d0e1420">3.1.3.4.1.&nbsp;Defining a Drools runtime</a></h5></div></div></div><p><a
+ id="d0e1420">You are required to define one or more Drools runtimes 
+using the Eclipse preferences
+      view.  To open up your preferences, in the menu Window select the 
+Preferences
+      menu item.  A new preferences dialog should show all your 
+preferences.  On the
+      left side of this dialog, under the Drools category, select 
+"Installed Drools
+      runtimes".  The panel on the right should then show the currently 
+defined Drools
+      runtimes.  If you have not yet defined any runtimes, it should 
+like something like
+      the figure below.</a></p><div class="mediaobject" align="center"><a
+ id="d0e1420"><img src="index_files/drools-runtimes.png" align="middle"></a></div><p><a
+ id="d0e1420">To define a new Drools runtime, click on the add button.  A
+ dialog as shown
+      below should pop up, requiring the name for your runtime and the 
+location on your
+      file system where it can be found.</a></p><div class="mediaobject"
+ align="center"><a id="d0e1420"><img 
+src="index_files/drools-runtimes-add.png" align="middle"></a></div><p><a
+ id="d0e1420">In general, you have two options:</a></p><div 
+class="orderedlist"><ol type="1"><li><p><a id="d0e1420">If you simply 
+want to use the default jars as included in the Drools
+        Eclipse plugin, you can create a new Drools runtime 
+automatically by clicking the
+        "Create a new Drools 5 runtime ..." button.  A file browser will
+ show up, asking
+        you to select the folder on your file system where you want this
+ runtime to be
+        created.  The plugin will then automatically copy all required 
+dependencies to
+        the specified folder.  After selecting this folder, the dialog 
+should look like
+        the figure shown below.</a></p></li><li><p><a id="d0e1420">If 
+you want to use one specific release of the Drools project, you should
+        create a folder on your file system that contains all the 
+necessary Drools libraries
+        and dependencies.  Instead of creating a new Drools runtime as 
+explained above, give
+        your runtime a name and select the location of this folder 
+containing all the required
+        jars.</a></p></li></ol></div><div class="mediaobject" 
+align="center"><a id="d0e1420"><img 
+src="index_files/drools-runtimes-add2.png" align="middle"></a></div><p><a
+ id="d0e1420">After clicking the OK button, the runtime should show up 
+in your table of installed
+      Drools runtimes, as shown below.  Click on checkbox in front of 
+the newly created runtime 
+      to make it the default Drools runtime.  The default Drools runtime
+ will be used as the
+      runtime of all your Drools project that have not selected a 
+project-specific runtime.
+      </a></p><div class="mediaobject" align="center"><a id="d0e1420"><img
+ src="index_files/drools-runtimes2.png" align="middle"></a></div><p><a 
+id="d0e1420">You can add as many Drools runtimes as you need.  For 
+example, the screenshot below
+      shows a configuration where three runtimes have been defined: a 
+Drools 4.0.7 runtime, a
+      Drools 5.0.0 runtime and a Drools 5.0.0.SNAPSHOT runtime.  The 
+Drools 5.0.0 runtime is
+      selected as the default one.</a></p><div class="mediaobject" 
+align="center"><a id="d0e1420"><img 
+src="index_files/drools-runtimes3.png" align="middle"></a></div><p><a 
+id="d0e1420">Note that you will need to restart Eclipse if you changed 
+the default runtime and
+      you want to make sure that all the projects that are using the 
+default runtime update
+      their classpath accordingly.</a></p></div><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h5 class="title"><a 
+id="d0e1457">3.1.3.4.2.&nbsp;Selecting a runtime for your Drools project</a></h5></div></div></div><p><a
+ id="d0e1457">Whenever you create a Drools project (using the New Drools
+ Project wizard or by
+      converting an existing Java project to a Drools project using the 
+"Convert to Drools
+      Project" action that is shown when you are in the Drools 
+perspective and you right-click
+      an existing Java project), the plugin will automatically add all 
+the required jars to
+      the classpath of your project.</a></p><p><a id="d0e1457">When 
+creating a new Drools project, the plugin will automatically use the 
+default
+      Drools runtime for that project, unless you specify a 
+project-specific one.  You can do
+      this in the final step of the New Drools Project wizard, as shown 
+below, by deselecting
+      the "Use default Drools runtime" checkbox and selecting the 
+appropriate runtime in the
+      drop-down box.  If you click the "Configure workspace settings 
+..." link, the workspace
+      preferences showing the currently installed Drools runtimes will 
+be opened, so you can
+      add new runtimes there.</a></p><div class="mediaobject" 
+align="center"><a id="d0e1457"><img 
+src="index_files/drools-runtimes-newproject.png" align="middle"></a></div><p><a
+ id="d0e1457">You can change the runtime of a Drools project at any time
+ by opening the project
+      properties (right-click the project and select Properties) and 
+selecting the Drools
+      category, as shown below.  Check the "Enable project specific 
+settings" checkbox and select
+      the appropriate runtime from the drop-down box.  If you click the 
+"Configure workspace
+      settings ..." link, the workspace preferences showing the 
+currently installed Drools
+      runtimes will be opened, so you can add new runtimes there.  If 
+you deselect the "Enable
+      project specific settings" checkbox, it will use the default 
+runtime as defined in your
+      global preferences.</a></p><div class="mediaobject" align="center"><a
+ id="d0e1457"><img src="index_files/drools-runtimes-project.png" 
+align="middle"></a></div></div></div></div></div><div class="section" 
+lang="en-US"><div class="titlepage"><div><div><h2 class="title"><a 
+id="d0e1473">3.2.&nbsp;Setup from source</a></h2></div></div></div><p><a
+ id="d0e1473">As Drools is an open source project, instructions for 
+building from
+  source are part of the manual ! Building from source means you can 
+stay on
+  top with the latest features. Whilst aspects of Drools are quite
+  complicated, many users have found ways to become contributors.</a></p><p><a
+ id="d0e1473">Drools works with JDK1.5 and above. you will need also 
+need to have
+  the following tools installed. Minimum requirement version numbers
+  provided.</a></p><div class="itemizedlist"><ul><li><p><a id="d0e1483" 
+class="indexterm">Eclipse 3.4 </a></p><p><a id="d0e1483" 
+class="indexterm">http://www.eclipse.org/</a></p></li><li><p><a 
+id="d0e1491" class="indexterm">Subversion Client 1.4</a></p><p><a 
+id="d0e1491" class="indexterm">http://subversion.tigris.org</a></p><p><a
+ id="d0e1498" class="indexterm">http://tortoisesvn.tigris.org - 
+recommended win32
+      client</a></p></li><li><p><a id="d0e1504" class="indexterm">Maven 
+2.0.9</a></p><p><a id="d0e1504" class="indexterm">http://maven.apache.org/</a></p></li><li><p><a
+ id="d0e1512" class="indexterm">Ant 1.7.0</a></p><p><a id="d0e1512" 
+class="indexterm">http://ant.apache.org</a></p></li></ul></div><p><a 
+id="d0e1512" class="indexterm">Ensure the executables for ant, maven and
+ java are in your </a><a id="d0e1520" class="indexterm">path. The 
+examples given illustrative and are for a win32
+  system:</a></p><div class="literallayout"><p><a id="d0e1520" 
+class="indexterm">Path=D:\java\j2sdk1.5.0_8\bin;D:\java\apache-ant-1.7\bin;D:\java\maven-2.0.9\bin</a></p></div><p><a
+ id="d0e1520" class="indexterm">Following environment variables will 
+also need to be set. The examples
+  given illustrative and are for a win32 system::</a></p><div 
+class="literallayout"><p><a id="d0e1520" class="indexterm">JAVA_HOME=D:\java\j2sdk1.5.0_8<br>
+ANT_HOME=D:\java\apache-ant-1.7<br>
+MAVEN_HOME=D:\java\maven-2.0.9<br>
+<br>
+</a></p></div><p>
+<a id="d0e1520" class="indexterm">		Past releases used to have an ant 
+based build mechanism, but now maven is mandatory, although Ant is used 
+internally in maven for document building proposes
+	</a></p></div><div class="section" lang="en-US"><div class="titlepage"><div><div><h2
+ class="title"><a id="d0e1532">3.3.&nbsp;Source Checkout</a></h2></div></div></div><p><a
+ id="d0e1532">Drools is available from two </a><a id="d0e1537" 
+class="indexterm">Subversion repositories.</a></p><div 
+class="itemizedlist"><ul><li><p><a id="d0e1537" class="indexterm">Anonymous
+ SVN</a></p><p><a id="d0e1537" class="indexterm">http://anonsvn.jboss.org/repos/labs/labs/jbossrules/trunk/</a></p></li><li><p><a
+ id="d0e1537" class="indexterm">Developers secured SVN</a></p><p><a 
+id="d0e1537" class="indexterm">https://svn.jboss.org/repos/labs/labs/jbossrules/trunk/</a></p></li></ul></div>
+
+<a id="d0e1537" class="indexterm">To checkout Drools source code just 
+execute the following command.
+
+</a><pre class="programlisting"><a id="d0e1537" class="indexterm">fmeyer:~/jboss $ svn checkout http://anonsvn.jboss.org/repos/labs/labs/jbossrules/trunk/ trunk</a></pre>
+
+<a id="d0e1537" class="indexterm">And wait to complete the files 
+download.
+
+</a><pre class="programlisting"><a id="d0e1537" class="indexterm">A    trunk/drools-repository
+A    trunk/drools-repository/.classpath
+A    trunk/drools-repository/.project
+A    trunk/drools-repository/doc
+A    trunk/drools-repository/doc/repository_layout.jpeg
+A    trunk/drools-repository/doc/high_level_design.jpeg
+A    trunk/drools-repository/doc/javadoc
+A    trunk/drools-repository/doc/javadoc/serialized-form.html
+A    trunk/drools-repository/doc/javadoc/index-all.html
+A    trunk/drools-repository/doc/javadoc/stylesheet.css
+A    trunk/drools-repository/doc/javadoc/allclasses-frame.html
+A    trunk/drools-repository/doc/javadoc/package-list
+A    trunk/drools-repository/doc/javadoc/overview-tree.html
+A    trunk/drools-repository/doc/javadoc/org
+A    trunk/drools-repository/doc/javadoc/org/drools
+A    trunk/drools-repository/doc/javadoc/org/drools/repository
+A    trunk/drools-repository/doc/javadoc/org/drools/repository/class-use
+A    trunk/drools-repository/doc/javadoc/org/drools/repository/class-use/RuleSet.html
+A    trunk/drools-repository/doc/javadoc/org/drools/repository/class-use/RulesRepositoryException.html
+A    trunk/drools-repository/doc/javadoc/org/drools/repository/class-use/RulesRepository.html
+A    trunk/drools-repository/doc/javadoc/org/drools/repository/RuleSet.html
+
+....
+
+snip 
+
+....
+
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/benchmark/waltz
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/benchmark/waltz/waltz.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/benchmark/manners
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/benchmark/manners/manners.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/benchmark/waltzdb
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/benchmark/waltzdb/waltzdb.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/TroubleTicketWithDSL.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/TroubleTicket.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/calculate.rfm
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/generation.rf
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/calculate.rf
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/registerNeighbor.rfm
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/killAll.rfm
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/registerNeighbor.rf
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/conway-agendagroup.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/killAll.rf
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/conway-ruleflow.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/conway/generation.rfm
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/ticketing.dsl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/StateExampleUsingSalience.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/golf.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/LogicalAssertionsNotPingPong.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/StateExampleDynamicRule.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/sudoku
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/sudoku/sudoku.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/HelloWorld.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/ExamplePolicyPricing.xls
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/HonestPolitician.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/Fibonacci.drl
+A    trunk/drools-examples/drools-examples-drl/src/main/rules/org/drools/examples/StateExampleUsingAgendGroup.drl
+A    trunk/drools-examples/drools-examples-drl/pom.xml
+A    trunk/drools-examples/drools-examples-drl/build.xml
+ U   trunk
+Checked out revision 13656.</a></pre><p><a id="d0e1537" 
+class="indexterm">Although, we highly recommend command line tools to 
+work with repository you can also use both Eclipse's integrated SVN 
+client or TortoiseSVN</a></p><p><a id="d0e1537" class="indexterm">Setup 
+TortoiseSVN to checkout from the subversion repository and click
+  <code class="literal">'OK'</code> Once the checkout has finished you 
+should see the
+  folders as shown below.</a></p><div class="screenshot"><div 
+class="mediaobject"><a id="d0e1537" class="indexterm"><img 
+src="index_files/svn_checkout1.png"></a></div></div><div 
+class="screenshot"><div class="mediaobject"><a id="d0e1537" 
+class="indexterm"><img src="index_files/svn_checkout2.png"></a></div></div><div
+ class="screenshot"><div class="mediaobject"><a id="d0e1537" 
+class="indexterm"><img src="index_files/svn_checkout3.png"></a></div></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h2 
+class="title"><a id="d0e1583">3.4.&nbsp;Build</a></h2></div></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1586">3.4.1.&nbsp;Building the Source</a></h3></div></div></div><p><a
+ id="d0e1586">Now that we have the source the next step is to build and 
+install
+    the source. Since version 3.1 Drools uses Maven 2 to build the 
+system. There are two profiles
+    available which enable the associated modules "documentation" and
+    "Eclipse"; this enables quicker building of the core modules for
+    developers. The Eclipse profile will download Eclipse into the
+    drools-Eclipse folder, which is over 100MB download (It depends on 
+your operating system), however this only
+    needs to be done once; if you wish you can move that Eclipse 
+download into
+    another location and specify it with
+    -DlocalEclipseDrop=/folder/jboss-drools/local-Eclipse-drop-mirror. 
+The
+    following builds all the jars, the documentation and the Eclipse zip
+ with
+    a local folder specified to avoid downloading Eclipse:</a></p><pre class="programlisting"><a id="d0e1586">mvn -Declipse -Ddocumentation clean install -DlocalEclipseDrop=/folder/jboss-drools/local-Eclipse-drop-mirror </a></pre><p><a
+ id="d0e1586">You can produce distribution builds, which puts everything
+ into
+    zips, as follows:
+</a></p><pre class="programlisting"><a id="d0e1586">mvn -Declipse -Ddocumentation clean install -DlocalEclipseDrop=/folder/jboss-drools/local-Eclipse-drop-mirror
+mvn -Ddocumentation -Declipse -Dmaven.test.skip package javadoc:javadoc assembly:assembly -DlocalEclipseDrop=/folder/jboss-drools/local-Eclipse-drop-mirror
+</a></pre><p><a id="d0e1586">Note that install must be done first as 
+javadoc:javadoc won't work
+    unless the jars are in the local maven repo, but the tests can be 
+skipped
+    on the second run. assembly:assembly fails unless you increase the
+    available memory to Maven, on windows the following command worked 
+well:
+    set MAVEN_OPTS=-Xmx512m</a></p><p><a id="d0e1586">Type mvn clean to 
+clear old artifacts, and then test and built the
+    source, and report on any errors.</a></p><p><a id="d0e1586">The 
+resulting jars are put in the /target directory from the top
+    level of the project.</a></p><p><a id="d0e1586">As maven builds each
+ module it will install the resulting jars in
+    the local Maven 2 repository automatically. Where it can be easily 
+used
+    from other project <code class="literal">pom.xml</code> or copied 
+else where.</a></p><div class="screenshot"><div class="mediaobject"><a 
+id="d0e1586"><img src="index_files/mvn_install4.png"></a></div></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1615">3.4.2.&nbsp;Building the Manual</a></h3></div></div></div><p>
+<a id="d0e1615">		The building of the manual is now integrated into the 
+maven build process, and is built by either using the profile 
+(-Ddocumentation) switch or 
+		cding into the main directory.
+	</a></p><p><a id="d0e1615">Drools uses </a><a id="d0e1622" 
+class="indexterm">Docbook for this manual. Maven is used to build 
+documents and this build produces three different formats, 
+      all sharing the same images directory.</a></p><div 
+class="itemizedlist"><ul><li><p><a id="d0e1622" class="indexterm">html_single</a></p><p><a
+ id="d0e1622" class="indexterm">The entire manual in a single html 
+document</a></p></li><li><p><a id="d0e1634" class="indexterm">html</a></p><p><a
+ id="d0e1634" class="indexterm">The manual is split into multiple 
+documents and placed in a
+        frameset. The left frame provides navigation</a></p></li><li><p><a
+ id="d0e1634" class="indexterm">Eclipse</a></p><p><a id="d0e1634" 
+class="indexterm">Documentation suitable for including in an Eclipse 
+plug-in</a></p></li></ul></div><p><a id="d0e1634" class="indexterm">The 
+manual can be generated from the project pom.xml by
+    calling <code class="literal">'mvn package'</code> in the 
+drools-docs directory or adding the -Ddocumentation switch when you 
+build the sources.
+    Documentation is generated into each drools-docs subdirectory's <code
+ class="literal">'target/'</code> directory. Running <code 
+class="literal">'mvn -Ddocumentation package assembly:assembly'</code>
+    in the Drools project root generates and copies the documentation 
+into a zip file. This zip file is located in the root folders <code 
+class="literal">'target/'</code>
+    directory.
+
+    </a></p><pre class="programlisting"><a id="d0e1634" class="indexterm">[trikkola@trikkola trunk]$ mvn -Ddocumentation clean package assembly:assembly
+[INFO] Scanning for projects...
+[INFO] Reactor build order:
+[INFO]   Drools
+[INFO]   Drools :: API
+[INFO]   Drools :: Core
+[INFO]   Drools :: Compiler
+[INFO]   Drools :: Templates
+[INFO]   Drools :: Decision Tables
+[INFO]   Drools :: JSR-94 API Module
+[INFO]   Drools :: Pipeline :: Transformer :: Smooks
+[INFO]   Drools :: Pipeline :: Transformer :: JAXB
+[INFO]   Drools :: Pipeline :: Transformer :: XStream
+[INFO]   Drools :: Pipeline :: Transformer :: JXLS
+[INFO]   Drools :: Pipeline :: Messenger :: JMS
+[INFO]   Drools :: Pipeline
+[INFO]   Drools :: Process :: WorkItems
+[INFO]   Drools :: Process :: Task
+[INFO]   Drools :: Process :: BAM
+[INFO]   Drools :: Process
+[INFO]   Drools :: Persistence :: JPA
+[INFO]   Drools :: Server
+[INFO]   Drools :: Verifier
+[INFO]   Drools :: Ant Task
+[INFO]   Drools :: Repository
+[INFO]   Drools :: Guvnor
+[INFO]   Drools :: Microcontainer
+[INFO]   Drools :: Clips
+[INFO]   Drools :: Solver parent
+[INFO]   Drools :: Solver core
+[INFO]   Drools :: Solver examples
+[INFO] Searching repository for plugin with prefix: 'assembly'.
+WAGON_VERSION: 1.0-beta-2
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Drools
+[INFO]    task-segment: [clean, package]
+[INFO] ------------------------------------------------------------------------
+[INFO] [clean:clean]
+[INFO] [site:attach-descriptor]
+[INFO] Preparing source:jar
+[WARNING] Removing: jar from forked lifecycle, to prevent recursive invocation.
+[INFO] No goals needed for project - skipping
+[INFO] [source:jar {execution: default}]
+[INFO] Preparing source:test-jar
+[WARNING] Removing: jar from forked lifecycle, to prevent recursive invocation.
+[WARNING] Removing: test-jar from forked lifecycle, to prevent recursive invocation.
+[INFO] No goals needed for project - skipping
+[INFO] [source:test-jar {execution: default}]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Drools :: API
+[INFO]    task-segment: [clean, package]
+[INFO] ------------------------------------------------------------------------
+[INFO] [clean:clean]
+[INFO] Deleting directory /home/trikkola/jboss-drools/trunk/drools-api/target
+
+...snip ...
+
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO] ------------------------------------------------------------------------
+[INFO] Drools ................................................ SUCCESS [59.889s]
+[INFO] Drools :: API ......................................... SUCCESS [4.832s]
+[INFO] Drools :: Core ........................................ SUCCESS [11.027s]
+[INFO] Drools :: Compiler .................................... SUCCESS [10.400s]
+[INFO] Drools :: Templates ................................... SUCCESS [1.018s]
+[INFO] Drools :: Decision Tables ............................. SUCCESS [1.179s]
+[INFO] Drools :: JSR-94 API Module ........................... SUCCESS [1.001s]
+[INFO] Drools :: Pipeline :: Transformer :: Smooks ........... SUCCESS [0.651s]
+[INFO] Drools :: Pipeline :: Transformer :: JAXB ............. SUCCESS [0.711s]
+[INFO] Drools :: Pipeline :: Transformer :: XStream .......... SUCCESS [0.465s]
+[INFO] Drools :: Pipeline :: Transformer :: JXLS ............. SUCCESS [0.481s]
+[INFO] Drools :: Pipeline :: Messenger :: JMS ................ SUCCESS [0.879s]
+[INFO] Drools :: Pipeline .................................... SUCCESS [0.006s]
+[INFO] Drools :: Process :: WorkItems ........................ SUCCESS [1.526s]
+[INFO] Drools :: Process :: Task ............................. SUCCESS [3.104s]
+[INFO] Drools :: Process :: BAM .............................. SUCCESS [0.580s]
+[INFO] Drools :: Process ..................................... SUCCESS [0.005s]
+[INFO] Drools :: Persistence :: JPA .......................... SUCCESS [0.958s]
+[INFO] Drools :: Server ...................................... SUCCESS [2.216s]
+[INFO] Drools :: Verifier .................................... SUCCESS [1.836s]
+[INFO] Drools :: Ant Task .................................... SUCCESS [0.722s]
+[INFO] Drools :: Repository .................................. SUCCESS [3.925s]
+[INFO] Drools :: Guvnor ...................................... SUCCESS [19.850s]
+[INFO] Drools :: Microcontainer .............................. SUCCESS [0.676s]
+[INFO] Drools :: Clips ....................................... SUCCESS [1.464s]
+[INFO] Drools :: Solver parent ............................... SUCCESS [0.527s]
+[INFO] Drools :: Solver core ................................. SUCCESS [2.209s]
+[INFO] Drools :: Solver examples ............................. SUCCESS [4.689s]
+[INFO] ------------------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 2 minutes 24 seconds
+[INFO] Finished at: Tue Apr 07 15:11:14 EEST 2009
+[INFO] Final Memory: 48M/178M
+[INFO] ------------------------------------------------------------------------&gt;</a></pre><p>
+<a id="d0e1634" class="indexterm">    </a></p><p><a id="d0e1634" 
+class="indexterm">The generated manual can be found in the
+    <code class="literal">target\drools-docs$VERSION.jar'</code> file, a
+ compressed archive with all formats.</a></p></div></div><div 
+class="section" lang="en-US"><div class="titlepage"><div><div><h2 
+class="title"><a id="d0e1667">3.5.&nbsp;Eclipse</a></h2></div></div></div><div
+ class="section" lang="en-US"><div class="titlepage"><div><div><h3 
+class="title"><a id="d0e1670">3.5.1.&nbsp;Importing Eclipse Projects</a></h3></div></div></div><p><a
+ id="d0e1670">With the </a><a id="d0e1675" class="indexterm">Eclipse 
+project files generated they can now be imported
+    into Eclipse. When starting Eclipse open the workspace in the root 
+of your
+    subversion checkout.</a></p><div class="screenshot"><div 
+class="mediaobject"><a id="d0e1675" class="indexterm"><img 
+src="index_files/eclipse_import1.jpg"></a></div></div><div 
+class="screenshot"><div class="mediaobject"><a id="d0e1675" 
+class="indexterm"><img src="index_files/eclipse_import2.jpg"></a></div></div><div
+ class="screenshot"><div class="mediaobject"><a id="d0e1675" 
+class="indexterm"><img src="index_files/eclipse_import3.jpg"></a></div></div><div
+ class="screenshot"><div class="mediaobject"><a id="d0e1675" 
+class="indexterm"><img src="index_files/eclipse_import4.jpg"></a></div></div><p><a
+ id="d0e1675" class="indexterm">When calling <code class="literal">'mvn 
+install'</code> all the project
+    dependencies were downloaded and added to the local Maven 
+repository.
+    Eclipse cannot find those dependencies unless you tell it where that
+    repository is. To do this setup an M2_REPO classpath variable.</a></p><div
+ class="screenshot"><div class="mediaobject"><a id="d0e1675" 
+class="indexterm"><img src="index_files/eclipse_import6.jpg"></a></div></div><div
+ class="screenshot"><div class="mediaobject"><a id="d0e1675" 
+class="indexterm"><img src="index_files/eclipse_import7.jpg"></a></div></div><div
+ class="screenshot"><div class="mediaobject"><a id="d0e1675" 
+class="indexterm"><img src="index_files/eclipse_import8.jpg"></a></div></div><div
+ class="screenshot"><div class="mediaobject"><a id="d0e1675" 
+class="indexterm"><img src="index_files/eclipse_import9.jpg"></a></div></div></div></div></div><div
+ class="index"><div class="titlepage"><div><div><h2 class="title"><a 
+id="d0e1733">Index</a></h2></div></div></div><div class="index"><div 
+class="indexdiv"><h3><a id="d0e1733">A</a></h3><dl><dt><a id="d0e1733">ant,
+ </a><a class="indexterm" href="#d0e1473">Setup from source</a></dt></dl></div><div
+ class="indexdiv"><h3>D</h3><dl><dt>docbook, <a class="indexterm" 
+href="#d0e1615">Building the Manual</a></dt></dl></div><div 
+class="indexdiv"><h3>E</h3><dl><dt>eclipse, <a class="indexterm" 
+href="#d0e1473">Setup from source</a></dt><dt>Eclipse, <a 
+class="indexterm" href="#d0e1670">Importing Eclipse Projects</a></dt></dl></div><div
+ class="indexdiv"><h3>H</h3><dl><dt>html, <a class="indexterm" 
+href="#d0e1615">Building the Manual</a></dt></dl></div><div 
+class="indexdiv"><h3>M</h3><dl><dt>maven, <a class="indexterm" 
+href="#d0e1473">Setup from source</a></dt></dl></div><div 
+class="indexdiv"><h3>P</h3><dl><dt>path, <a class="indexterm" 
+href="#d0e1473">Setup from source</a></dt></dl></div><div 
+class="indexdiv"><h3>S</h3><dl><dt>subversion, <a class="indexterm" 
+href="#d0e1473">Setup from source</a>, <a class="indexterm" 
+href="#d0e1532">Source Checkout</a></dt></dl></div><div class="indexdiv"><h3>T</h3><dl><dt>TortoiseSVN,
+ <a class="indexterm" href="#d0e1473">Setup from source</a></dt></dl></div></div></div></div></body></html>

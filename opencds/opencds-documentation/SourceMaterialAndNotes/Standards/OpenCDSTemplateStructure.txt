@@ -1,0 +1,81 @@
+Template thinking, last updated ~january, 2011, des
+
+I.  Structure of Templates for OpenCDS:
+
+Root Template (1..*)
+    Group Template (1..*)
+        Detail Template (1..*)
+
+When there is more than one template at a particular level in a particular instance, 
+each additional template further constrains the previous template.
+
+Root Templates include
+    HL7-CDA
+    IHE-
+    OpenCDS-vMR
+    (other?)
+
+Group Templates include
+    HL7-CDA-LabPanels.Observation
+    HL7-CDA-Organizers.Observation
+    IHE.Observation
+    OpenCDS-vMR-ClinicalStatements.ObservationEvents
+
+Detail Templates include
+    HL7-CDA-ProblemList
+    IHE-ProblemList
+    OpenCDS-vMR-ClinicalStatements.Problems
+    
+=========================================
+    
+II.  How about this:
+One OpenCDS template defines one set of external templates that constrain each other, 
+so that at implementation time, we don't have to deal with nested lists of templates.
+
+So, for example, we might have the following root templates:
+	OpenCDS-vMR (references just the HL7 vMR root template)
+	OpenCDS-CDA (references just the HL7 CDA root template)
+	OpenCDS-CDA-IHE (references the HL7 CDA root template constrained by IHE root template)
+	OpenCDS-CDA-IHE-vMR (references the HL7 CDA root template constrained by IHE and vMR root template)
+	...
+	
+We then might have the following group templates:
+	OpenCDS-vMR-LabPanel (references just the HL7 vMR LabPanel template)
+	OpenCDS-CDA-LabPanel (references just the HL7 CDA LabPanel template)
+	OpenCDS-CDA-IHE-LabPanel (references the HL7 CDA LabPanel template constrained by IHE LabPanel template)
+	...
+	
+And we might have the following detail templates:
+	OpenCDS-vMR-SubstanceAdministrationEvent (references just the HL7 vMR SubstanceAdministrationEvent template)
+	OpenCDS-CDA-SubstanceAdministrationEvent (references just the HL7 CDA SubstanceAdministrationEvent template)
+	OpenCDS-CDA-IHE-SubstanceAdministrationEvent (references the HL7 CDA SubstanceAdministrationEvent template 
+		constrained by IHE SubstanceAdministrationEvent template)
+	...
+	
+What this allows us to do is to use a single template in the opencds-vmr-internal.ClinicalStatement class to 
+		uniquely identify all the layers of the template onion
+
+nah...  I don't like it.  see the next idea
+		
+=========================================
+		
+III.  Another alternative is to just create a token for nested sets of templateId values, and store the token in 
+		the ClinicalStatement, and in a static master list of templateId sets.  This is somewhat analogous to 
+		the way in which we conflate II instances into root^extension.  However, in the case of templateId
+		values, it actually eliminates a separate dynamic fact list that grows with the quantity of input data
+		and substitutes a fixed and small static templateId list that can be implemented as a Drools global.
+		
+IV.  In fact, while we are at it, we might also just conflate CD data instances into codeSystem^code.  It would 
+		greatly simplify usage of the code values in rules, lower the number of classes that we would have to 
+		work with, and thereby simplify writing the rules.
+		
+=========================================
+
+V.  Using Templates in OpenCDS, by extending idea III. above:
+	We will have a master list of templateId ordered sets, uniquely identified by a templateId token (tIdT).
+	Corresponding to each tIdT is a Template Id Helper Class having the tIdT as its className.  Within this 
+	class are helper methods to map both ways from external data schemas into the internal vmr.  These classes 
+	contain enough knowledge about the external structure of the templated data, and the internal structure, to 
+	map accurately without throwing exceptions beyond that for invalid data.  These classes can be nested, so that 
+	the tIdT for a vital sign value could be referenced by the tIdT for a vital sign organizer, which in turn 
+	could be referenced by a tIdT for the vMR.

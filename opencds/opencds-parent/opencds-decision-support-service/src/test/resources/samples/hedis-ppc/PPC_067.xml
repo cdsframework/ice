@@ -1,0 +1,92 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput vmr%20schema/cdsInput.xsd">
+	<templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+	<vmrInput>
+		<!-- Assumptions: Measurement Year is 2011, encounter low date is proxy for delivery date -->
+        <!-- 1 - Denom check: HEDIS 1st delivery by ICD9Px, gestation age 43	-->
+		<!-- 1 - Num check: 1 standalone prenatal visit by HCPCS w/ provider at 279 days before delivery, 1 postpartum visit by ICD9Px at 6 wks after delivery  -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="PPC-067" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+			<demographics>
+				<birthTime value="19900101"/> 
+                <gender code="F" codeSystem="2.16.840.1.113883.1.11.1" displayName="Female"/>
+			</demographics>
+			<clinicalStatements>
+                <encounterEvents>
+					<encounterEvent>
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2.12.2"/> 
+                        <encounterType code="I" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/>  
+                        <encounterEventTime high="20101118" low="20101115"/>
+						<relatedClinicalStatement> 
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id extension="procedure002" root="2.16.840.1.113883.3.795.5.2"/>
+                                <procedureCode code="72.0" codeSystem="2.16.840.1.113883.6.104" codeSystemName="ICD9CM procedures" displayName="Delivery"/>
+                                <procedureTime high="20101115" low="20101115"/>                                
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+						<relatedClinicalStatement>
+                           <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                           <observationResult>
+                               <templateId root="2.16.840.1.113883.3.1829.11.6.3.13"/>
+                               <id extension="GestAge001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                               <observationFocus code="GestationalAge" codeSystem="2.16.840.1.113883.3.795.5.2.12.6" codeSystemName="UUHC Encounter Attributes" displayName="Gestational Age"/>
+                               <observationEventTime low="20101115" high="20101115"/>
+                               <observationValue>
+                                   <physicalQuantity value="43" unit="wk" xsi:type="dt:PQ"/>
+                               </observationValue>
+                           </observationResult>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent>
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounterPP001" root="2.16.840.1.113883.3.795.5.2.12.2"/> 
+                        <encounterType code="O" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/>  
+                        <encounterEventTime high="20110101" low="20110101"/>
+                        <relatedClinicalStatement> 
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+								<id extension="procedure003" root="2.16.840.1.113883.3.795.5.2"/>
+								<procedureCode code="89.26" codeSystem="2.16.840.1.113883.6.104" codeSystemName="ICD9CM Procedures" displayName="postpartum services"/>
+                                <procedureTime high="20110101" low="20110101"/>                      
+								<relatedEntity>
+									<targetRole code="Performer" codeSystem="2.16.840.1.113883.3.795.12.3.3.1"/>
+									<person>
+										<id extension="performer001" root="2.16.840.1.113883.3.795.5.2"/>
+										<entityType code="130" codeSystem="2.16.840.1.113883.3.795.5.2.12.4" />
+									</person>
+								</relatedEntity>   
+                           </procedureEvent>
+                        </relatedClinicalStatement> 
+                    </encounterEvent> 
+                    <encounterEvent>
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter018" root="2.16.840.1.113883.3.795.5.2.12.2"/> 
+                        <encounterType code="O" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/>  
+                        <encounterEventTime high="20100209" low="20100209"/>
+                        <relatedClinicalStatement> 
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+								<id extension="procedure020" root="2.16.840.1.113883.3.795.5.2"/>
+								<procedureCode code="H1000" codeSystem="2.16.840.1.113883.6.285" codeSystemName="HCPCS" displayName="standalone prenatal visit"/>
+                                <procedureTime high="20100209" low="20100209"/>                      
+								<relatedEntity>
+									<targetRole code="Performer" codeSystem="2.16.840.1.113883.3.795.12.3.3.1"/>
+									<person>
+										<id extension="performer017" root="2.16.840.1.113883.3.795.5.2"/>
+										<entityType code="130" codeSystem="2.16.840.1.113883.3.795.5.2.12.4" />
+									</person>
+								</relatedEntity>   
+                           </procedureEvent>
+                        </relatedClinicalStatement> 
+                    </encounterEvent> 
+                 </encounterEvents>
+			</clinicalStatements>
+		</patient>
+	</vmrInput>
+</in:cdsInput>

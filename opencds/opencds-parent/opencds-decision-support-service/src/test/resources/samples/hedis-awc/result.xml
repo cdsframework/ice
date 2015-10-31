@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns5:cdsOutput xmlns:ns2="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns3="org.opencds.vmr.v1_0.schema.cdsinput" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput.specification" xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">
+    <vmrOutput>
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1" extension="" />
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1" />
+            <id root="2.16.840.1.113883.3.795.5.2.1.1" extension="0001" />
+            <demographics>
+                <birthTime value="19921010101010.000-0600" />
+                <gender code="F" codeSystem="2.16.840.1.113883.1.11.1" displayName="Female" />
+            </demographics>
+            <clinicalStatements>
+                <observationResults>
+                    <observationResult>
+                        <id root="2.16.840.1.113883.3.795.5.1" extension="DEBUG_CONCEPTS" />
+                        <observationFocus code="concepts" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="Concepts found in working memory" />
+                        <observationEventTime high="20120201000000.000-0700" low="20120201000000.000-0700" />
+                        <observationValue>
+                            <text value="C2557=,C2680=Comprehensive Well-Care Visit,C2704=,C44=Ambulatory" />
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="2.16.840.1.113883.3.795.5.1" extension="ROOT" />
+                        <observationFocus code="C2626" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" />
+                        <observationEventTime high="20120201000000.000-0700" low="20120201000000.000-0700" />
+                        <observationValue>
+                            <identifier root="2.16.840.1.113883.3.795.5.2.1.1" extension="0001" />
+                        </observationValue>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="C405" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="Part of" />
+                            <observationResult>
+                                <id root="2.16.840.1.113883.3.795.5.1" extension="denominator" />
+                                <observationFocus code="C2626" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" />
+                                <observationEventTime high="20120201000000.000-0700" low="20120201000000.000-0700" />
+                                <observationValue>
+                                    <integer value="1" />
+                                </observationValue>
+                            </observationResult>
+                        </relatedClinicalStatement>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="C405" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="Part of" />
+                            <observationResult>
+                                <id root="2.16.840.1.113883.3.795.5.1" extension="numerator" />
+                                <observationFocus code="C2626" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" />
+                                <observationEventTime high="20120201000000.000-0700" low="20120201000000.000-0700" />
+                                <observationValue>
+                                    <integer value="1" />
+                                </observationValue>
+                            </observationResult>
+                        </relatedClinicalStatement>
+                    </observationResult>
+                    <observationResult>
+                        <id root="2.16.840.1.113883.3.795.5.1" extension="ASSERTROOT" />
+                        <observationFocus code="assertions" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="Assertions found in working memory" />
+                        <observationEventTime high="20120201000000.000-0700" low="20120201000000.000-0700" />
+                        <observationValue>
+                            <text value="C2679=Patient Age between 12 and 21 Years,C2680=Comprehensive Well-Care Visit,C2682=Any Healthcare Transaction,C539=Numerator Indicator met,C54=Denominator criteria met,C545=Has Denominator Inclusions,numMet,wrapper" />
+                        </observationValue>
+                    </observationResult>
+                </observationResults>
+            </clinicalStatements>
+        </patient>
+    </vmrOutput>
+</ns5:cdsOutput>

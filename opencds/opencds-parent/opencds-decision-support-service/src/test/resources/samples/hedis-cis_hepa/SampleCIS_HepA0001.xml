@@ -1,0 +1,36 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- HEDIS-HepA (CPT: 90633 ) - wright date -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CIS_HepA0001" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="20090902101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent><!--Encounter Ambulatory visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20091102101010" low="20091102101010"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="90633" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="HEDIS-HepA"/>
+                                <procedureTime high="20091102101010" low="20091102101010"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                 </encounterEvents>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

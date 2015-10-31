@@ -1,0 +1,278 @@
+/**
+ * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package org.cdsframework.ice.v1_0_0
+
+import java.util.Date
+import java.util.Iterator
+import java.util.List
+import java.util.Set
+import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.IceFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.Schedule
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept
+import org.cdsframework.ice.supportingdata.tmp.SupportedEvaluationConcept
+import org.cdsframework.ice.supportingdata.tmp.SupportedFactConcept
+import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineConcept
+import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.service.TimePeriod
+import org.cdsframework.ice.service.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+global java.util.Date evalTime
+
+
+// Duplicate Shot/Same Day Overview Rule #1: 
+// If all shots are the same CVX code, then evaluate the 1st CVX processed as Valid and evaluate the others as Invalid with a reason code of DUPLICATE_SAME_DAY. 
+// (This scenario shouldn't happen with most registries.)
+rule "Duplicate Shots/Same Day Overview Rule #1: If both shots are of the same CVX code, then evaluate the 1st CVX processed as Valid and evaluate the 2nd CVS processed as Invalid/Duplicate" 
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	when
+		// All valid duplicate, valid shots on same day have the same CVX code
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
+			$tdAssociatedTargetSeries : associatedTargetSeries)
+		not TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false, associatedTargetSeries == $tdAssociatedTargetSeries)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
+			associatedTargetSeries == $tdAssociatedTargetSeries, administeredVaccine.vaccineConcept.openCdsConceptCode == $td.administeredVaccine.vaccineConcept.openCdsConceptCode, 
+			administeredShotNumberInSeries > $tdAdministeredShotNumber)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(SupportedEvaluationConcept._DUPLICATE_SAME_DAY_REASON.getConceptCodeValue());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
+
+
+// Duplicate Shot/Same Day Overview Rule #2: 
+// If all but one of those shots is an NOS CVX, then evaluate the NOSs as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other (non-NOS) CVX as Valid.
+rule "Duplicate Shots/Same Day Overview Rule #2: If one of those shots is an NOS CVX, then evaluate the NOS as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other (non-NOS) CVX as Valid"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, 
+			vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false, associatedTargetSeries == $tdAssociatedTargetSeries)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
+			associatedTargetSeries == $tdAssociatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(SupportedEvaluationConcept._DUPLICATE_SAME_DAY_REASON.getConceptCodeValue());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
+
+
+// Duplicate Shots/Same Day Overview Rule #3: If no shot is an NOS CVX, if one is a combination vaccine and the others are not a combination vaccine, then evaluate the combination 
+// CVX as Valid and evaluate the non-combination CVXs as Invalid with a reason code of DUPLICATE_SAME_DAY
+rule "Duplicate Shots/Same Day Overview Rule #3: If neither shot is an NOS CVX, if one is a combination vaccine and the other is not a combination vaccine, then evaluate the combination CVX as Valid and evaluate the non-combination CVX as Invalid with a reason code of DUPLICATE_SAME_DAY"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, 
+			vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.isCombinationVaccine() == true)
+		not TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false, associatedTargetSeries == $tdAssociatedTargetSeries)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
+			associatedTargetSeries == $tdAssociatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.isCombinationVaccine() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(SupportedEvaluationConcept._DUPLICATE_SAME_DAY_REASON.getConceptCodeValue());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
+
+
+// Duplicate Shots/Same Day Overview Rule #4: If all shots are an NOS CVX, then evaluate the 1st CVX processed as Valid and evaluate the other CVXs processed as Invalid with a 
+// reason code of DUPLICATE_SAME_DAY
+rule "Duplicate Shots/Same Day Overview Rule #4: If both shots are an NOS CVX, then evaluate the 1st CVX processed as Valid and evaluate the 2nd CVX processed as Invalid with a reason code of DUPLICATE_SAME_DAY"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
+			$tdAssociatedTargetSeries : associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false, associatedTargetSeries == $tdAssociatedTargetSeries)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
+			associatedTargetSeries == $tdAssociatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == true, administeredShotNumberInSeries > $tdAdministeredShotNumber)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(SupportedEvaluationConcept._DUPLICATE_SAME_DAY_REASON.getConceptCodeValue());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
+
+
+// Duplicate Shots/Same Day Overview Rule #4(DTP exception): If all shots are an NOS CVX, then evaluate the 1st CVX processed as Valid and evaluate the other CVXs processed as Invalid with a 
+// reason code of DUPLICATE_SAME_DAY
+rule "Duplicate Shots/Same Day Overview Rule #4-DTP-Pertussis: If both shots are an NOS CVX but one of them contains Pertussis and the other does not, then evaluate shot with Pertussis as Valid and evaluate the other as Invalid with a reason code of DUPLICATE_SAME_DAY"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, vaccineComponent.isUnspecifiedFormulation() == true,
+			vaccineComponent.allDiseasesTargetedForImmunity contains SupportedDiseaseConcept.Pertussis, associatedTargetSeries.vaccineGroup == SupportedVaccineGroupConcept.DTP)
+		not TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false, associatedTargetSeries == $td.associatedTargetSeries)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
+			associatedTargetSeries == $td.associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == true, 
+			vaccineComponent.allDiseasesTargetedForImmunity not contains SupportedDiseaseConcept.Pertussis)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(SupportedEvaluationConcept._DUPLICATE_SAME_DAY_REASON.getConceptCodeValue());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
+//  If neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination then:
+rule "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, 
+			vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
+		not TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false, associatedTargetSeries == $tdAssociatedTargetSeries)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
+			associatedTargetSeries == $tdAssociatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == false, $tdOtherIsCombination : administeredVaccine.isCombinationVaccine())
+		eval($tdIsCombination == true && $tdOtherIsCombination == true || $tdIsCombination == false && $tdOtherIsCombination == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
+
+
+rule "Duplicate Shots/Same Day non-DTP Rule 5a: non-DTP shots; set the 2nd shot as Invalid w/ DUPLICATE_SHOT_SAME_DAY"
+		extends "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
+	ruleflow-group "HistoryEvaluation"
+	dialect "java"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when	
+		eval($td.getAssociatedTargetSeries().getVaccineGroup() != SupportedVaccineGroupConcept.DTP && 
+			$td.getAssociatedTargetSeries().getSeriesRules().isDoseNumberCalculationBasedOnDiseasesTargetedByEachVaccineAdministered() == true && 
+			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().size() == $td.getVaccineComponent().getAllDiseasesTargetedForImmunity().size() &&
+			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().containsAll($td.getVaccineComponent().getAllDiseasesTargetedForImmunity()))
+	then
+		String _RULENAME = drools.getRule().getName();
+		TargetDose tdToModify = null;
+		if ($td.getAdministeredShotNumberInSeries() > $tdother.getAdministeredShotNumberInSeries()) {
+			tdToModify = $td;
+		}
+		else {
+			tdToModify = $tdother;
+		}
+		modify(tdToModify) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(SupportedEvaluationConcept._DUPLICATE_SAME_DAY_REASON.getConceptCodeValue());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, tdToModify + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
+
+
+// Duplicate Shots/Same Day DTP Rule 5a: If one DTP shot is pertussis-containing vaccine andother is not pertussis-containing, evaluate the non-pertussis containing vaccine as 
+// Invalid w/ DUPLICATE_SHOT_SAME_DAY"
+rule "Duplicate Shots/Same Day DTP Rule 5a: If one DTP shot is pertussis-containing vaccine andother is not pertussis-containing, evaluate the non-pertussis containing vaccine as Invalid w/ DUPLICATE_SHOT_SAME_DAY"
+		extends "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when	
+		eval($td.getAssociatedTargetSeries().getVaccineGroup() == SupportedVaccineGroupConcept.DTP && 
+			$td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains(SupportedDiseaseConcept.Pertussis) && 
+			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains(SupportedDiseaseConcept.Pertussis))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(SupportedEvaluationConcept._DUPLICATE_SAME_DAY_REASON.getConceptCodeValue());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
+
+
+// Duplicate Shot/Same Day DTP Rule 5b: If neither shot contains pertussis or both shots contain pertussis, then evaluate the 1st shot processed as Valid and evaluate the 2nd  
+// shot processed as Invalid with a reason code of DUPLICATE_SAME_DAY
+rule "Duplicate Shot/Same Day DTP Rule 5b: If neither shot contains pertussis or both shots contain pertussis, then evaluate the 1st shot processed as Valid and evaluate the 2nd shot processed as Invalid with a reason code of DUPLICATE_SAME_DAY"
+		extends "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
+	ruleflow-group "HistoryEvaluation"
+	dialect "java"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		eval($td.getAssociatedTargetSeries().getVaccineGroup() == SupportedVaccineGroupConcept.DTP && 
+			($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains(SupportedDiseaseConcept.Pertussis) && 
+			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains(SupportedDiseaseConcept.Pertussis) || 
+			! $td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains(SupportedDiseaseConcept.Pertussis) &&
+			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains(SupportedDiseaseConcept.Pertussis)))
+	then
+		String _RULENAME = drools.getRule().getName();
+		TargetDose tdToModify = null;
+		if ($td.getAdministeredShotNumberInSeries() > $tdother.getAdministeredShotNumberInSeries()) {
+			tdToModify = $td;
+		}
+		else {
+			tdToModify = $tdother;
+		}
+		modify(tdToModify) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(SupportedEvaluationConcept._DUPLICATE_SAME_DAY_REASON.getConceptCodeValue());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, tdToModify + " in TargetSeries " + $tdAssociatedTargetSeries);
+end	

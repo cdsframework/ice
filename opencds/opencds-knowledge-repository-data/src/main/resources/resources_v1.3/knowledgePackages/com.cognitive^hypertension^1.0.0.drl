@@ -1,0 +1,311 @@
+package hypertension;
+
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
+import java.util.Date;
+import java.text.DecimalFormat;
+
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
+import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu2.resource.CommunicationRequest;
+import ca.uhn.fhir.model.dstu2.resource.Provenance;
+import ca.uhn.fhir.model.dstu2.resource.Provenance.Agent;
+import ca.uhn.fhir.model.dstu2.resource.CommunicationRequest.Payload;
+import ca.uhn.fhir.model.dstu2.resource.Observation;
+import ca.uhn.fhir.model.dstu2.resource.Procedure;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.StringDt;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Collections;
+import org.opencds.service.evaluate.ObservationComparator;
+
+global java.lang.String clientLanguage
+global java.lang.String clientTimeZoneOffset
+global java.lang.String focalPersonId
+global java.util.Date evalTime
+global java.util.HashSet assertions
+global java.util.HashMap namedObjects
+ 
+
+function CommunicationRequest createPayload(String message) {
+		CommunicationRequest comRequest = new CommunicationRequest();
+		Payload payload = comRequest.addPayload();
+		IDatatype stringType = new  StringDt(message);
+		payload.setContent(stringType);
+return comRequest;
+}
+
+function Provenance createProvenance(String message) {
+		Provenance prov = new Provenance();
+		Agent agent = prov.addAgent();
+		IDatatype stringType = new  StringDt(message);
+        agent.setDisplay(message);
+return prov;
+}
+
+function Boolean isCodingContains(CodeableConceptDt cc, String system, String code){
+		 Boolean result = false;
+		 List<CodingDt> l =  cc.getCoding();
+         for (CodingDt codingDt : l) {
+			if(codingDt.getSystem().equalsIgnoreCase(system) && 
+				codingDt.getCode().equalsIgnoreCase(code)){
+				result = true;
+			}
+		}
+ return result;
+}
+function QuantityDt getValueQuantity(IDatatype dt) {
+       if (dt instanceof QuantityDt){
+          return (QuantityDt) dt;
+       }
+       else
+       {
+          return null;
+       }
+    }
+
+
+declare HYPERTENSION_COHORT
+    @propertyReactive
+	diastolic 	: boolean @key
+	systolic : boolean @key
+	medHf :boolean @key
+	education : boolean @key
+	systolicList : ArrayList
+	diastolicList : ArrayList
+	systolicMR : Observation // Most recent Systolic Observation
+	diastolicMR : Observation // Most recent Diastolic Observation
+	heightList : ArrayList
+	weightList : ArrayList
+	heightMR : Observation // Most recent height Observation
+	weightMR : Observation // Most recent weight Observation
+end
+
+rule "Initialize"
+	salience 200, no-loop
+	when
+	then
+		insert(new HYPERTENSION_COHORT(false, false, false, false, new ArrayList(), new ArrayList(), null, null,new ArrayList(), new ArrayList(), null, null));	
+end
+ 
+rule "Collect Systolic Observations"
+	dialect "java"
+	salience 190
+   when
+     $cohort : HYPERTENSION_COHORT()
+     $obs : Observation( isCodingContains(code, "http://loinc.org", "8480-6"))
+     
+   then
+   modify($cohort) { getSystolicList().add($obs) };
+   
+end   
+
+rule "Collect Diastolic Observations"
+	dialect "java"
+	salience 200
+	when
+	    $cohort : HYPERTENSION_COHORT()
+        $obs : Observation( isCodingContains(code, "http://loinc.org", "8462-4"))
+       
+	then
+        modify($cohort) { getDiastolicList( ).add($obs) };   				
+end
+
+rule "The most recent Systolic Blood Pressure Observation"
+	dialect "java"
+	salience 20
+    when
+	     $cohort : HYPERTENSION_COHORT(!systolicList.isEmpty())
+	     
+	then
+ 
+    Collections.sort($cohort.getSystolicList(), ObservationComparator.ISSUED_DATE );
+    Observation o = (Observation)$cohort.getSystolicList().get(0);
+    modify($cohort) { setSystolicMR( o ) };
+    System.out.println("SystolicList most recent observation "  +  o.getIssued());
+   
+end  
+
+rule "The most recent Diastolic Blood Pressure Observation"
+	dialect "java"
+	salience 20
+    when
+	     $cohort : HYPERTENSION_COHORT(!diastolicList.isEmpty())
+	     
+	then
+ 
+    Collections.sort($cohort.getDiastolicList(), ObservationComparator.ISSUED_DATE );
+    Observation o = (Observation)$cohort.getDiastolicList().get(0);
+    modify($cohort) { setDiastolicMR( o ) };
+    System.out.println("Diastolic Obs most recent observation "  +  o.getIssued());
+   
+end    
+
+rule "High Systolic blood pressure"
+      dialect "java", no-loop
+      salience 10
+      when
+      $cohort : HYPERTENSION_COHORT(systolicMR != null, $systolicMR : systolicMR)
+     
+      eval(getValueQuantity($systolicMR.getValue()).getValue().intValue() < 160 )
+      eval(getValueQuantity($systolicMR.getValue()).getValue().intValue() > 139 )
+      
+      then
+      modify($cohort) { setSystolic( true ) };
+     
+      System.out.println("Systolic = " + getValueQuantity($systolicMR.getValue()).getValue());
+end 
+
+
+rule "High Diastolic blood pressure"
+      dialect "java"
+      salience 10
+      when
+   	 $cohort : HYPERTENSION_COHORT(systolicMR != null, $diastolicMR : diastolicMR)
+     
+      eval(getValueQuantity($diastolicMR.getValue()).getValue().intValue() > 89 )
+      eval(getValueQuantity($diastolicMR.getValue()).getValue().intValue() < 100 )
+      
+      then
+     
+      modify($cohort) { setDiastolic( true ) };
+     
+      System.out.println("Diastolic = " + getValueQuantity($diastolicMR.getValue()).getValue());
+end 
+
+rule "Collect Height Observations"
+	dialect "java"
+	salience 160
+	when
+	    $cohort : HYPERTENSION_COHORT()
+        $obs : Observation( isCodingContains(code, "http://loinc.org", "8302-2"))
+	then
+        modify($cohort) { getHeightList( ).add($obs) };   				
+end
+
+rule "Collect Weight Observations"
+	dialect "java"
+	salience 150
+	when
+	    $cohort : HYPERTENSION_COHORT()
+        $obs : Observation( isCodingContains(code, "http://loinc.org", "29463-7"))
+       
+	then
+        modify($cohort) { getWeightList( ).add($obs) };   				
+end
+
+rule "The most recent weight Observation"
+	dialect "java"
+	salience 20
+    when
+	     $cohort : HYPERTENSION_COHORT(!weightList.isEmpty())
+	     
+	then
+ 
+    Collections.sort($cohort.getWeightList(), ObservationComparator.ISSUED_DATE );
+    Observation o = (Observation)$cohort.getWeightList().get(0);
+    modify($cohort) { setWeightMR( o ) };
+    System.out.println("Weight most recent observation "  +  o.getIssued());
+    System.out.println("Weight = " + getValueQuantity(o.getValue()).getValue());
+end  
+
+rule "The most recent Height Observation"
+	dialect "java"
+	salience 20
+    when
+	     $cohort : HYPERTENSION_COHORT(!heightList.isEmpty())
+	     
+	then
+ 
+    Collections.sort($cohort.getHeightList(), ObservationComparator.ISSUED_DATE );
+    Observation o = (Observation)$cohort.getHeightList().get(0);
+    modify($cohort) { setHeightMR( o ) };
+    System.out.println("Height Obs most recent observation "  +  o.getIssued());
+    System.out.println("Height = " + getValueQuantity(o.getValue()).getValue());
+   
+end    
+
+rule "Had HTN EDUCATIONAL INTERVENTIONS"
+      dialect "java"
+      salience 60
+      when
+       $cohort : HYPERTENSION_COHORT()
+       $procedure : Procedure($type: type)
+   	   eval(isCodingContains($type, "http://ehmp.va.gov/terminology/1.0", "/concept/VA-HTN%20EXERCISE%20EDUCATION") || 
+   	  	    isCodingContains($type, "http://ehmp.va.gov/terminology/1.0", "/concept/VA-HTN%20NUTRITION%20EDUCATION") ||
+   	  	    isCodingContains($type, "http://ehmp.va.gov/terminology/1.0", "/concept/VA-HTN%20NUTRITION%20EDUCATION")
+   	   )
+     
+      then
+      modify($cohort) { setEducation( true ) };
+      System.out.println(" education rule fired " );
+end
+
+rule "Had HTN MED & OTHER INTERVENTIONS"
+      dialect "java"
+      salience 50
+      when
+       $cohort : HYPERTENSION_COHORT()
+       $obs : Observation($code: code, 
+       				isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20MEDICATIONS%20ADJUSTED") || 
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20REFUSAL%20OF%20MED%20INTERVENTION") ||
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20EVALUATION%20OF%20RESISTANT/SECONDARY") ||
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20NO%20MED%20CHANGE%20-%20BP%20CONTROLLED") ||
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20NO%20MED%20CHANGE%20-%20COMORBID%20ILLNESS") ||
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20NO%20MED%20CHANGE%20-%20SIDE%20EFFECTS%20FROM%20RX") ||
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20NO%20MED%20CHANGE%20-%20LIMITED%20LIFE%20EXP") ||
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20NO%20MED%20CHANGE%20-%20NONCOMPLIANCE") ||
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20NO%20MED%20CHANGE%20-%20OTHER") ||
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20LIFESTYLE%20MODIFICATIONS%20RECOMMENDED") ||
+		   	  	    isCodingContains($code, "http://ehmp.va.gov/terminology/1.0", "/concept/HTN%20NO%20EDUC%20INTERVENTION%20WARRANTED") 
+		   	   )
+   	  
+      then
+      modify($cohort) { setMedHf( true ) };
+      System.out.println("Had HTN MED & OTHER INTERVENTIONS " );
+end
+
+rule "Hypertension Screening"
+      dialect "java"
+      salience 0
+      when
+       $cohort : HYPERTENSION_COHORT( diastolic == true, systolic == true, medHf == false, education == false, $systolicMR : systolicMR, $diastolicMR : diastolicMR, 
+       			 heightMR != null, $heightMR:heightMR, weightMR != null, $weightMR:weightMR)
+      
+      then
+      // Formula: weight (lb) / [height (in)]2 x 703
+	  // Calculate BMI by dividing weight in pounds (lbs) by height in inches (in) squared and multiplying by a conversion factor of 703.
+      double bmi = (getValueQuantity($weightMR.getValue()).getValue().doubleValue() / 
+      			   (getValueQuantity($heightMR.getValue()).getValue().doubleValue() * 
+      			   getValueQuantity($heightMR.getValue()).getValue().doubleValue())) * 703;
+      DecimalFormat formatter = new DecimalFormat("#.00");
+      CommunicationRequest comRequest = createPayload("The most recent recorded BP was elevated. Satisfying this reminder requires addressing medication issues and/or education issues. The patient's last recorded BP is " + 
+      getValueQuantity($systolicMR.getValue()).getValue() + "/" + getValueQuantity($diastolicMR.getValue()).getValue() + " mmHg and their BMI is " +
+      formatter.format(bmi) + " kg/m^2." );
+      
+      
+      CodeableConceptDt category = new CodeableConceptDt("SNOMED", "419772000");
+      comRequest.setCategory(category);
+      category.getCodingFirstRep().setDisplay("Family Medicine");
+      category.setText("Family Medicine");
+      
+      CodeableConceptDt reason = new CodeableConceptDt("SNOMED", "419772000");
+      comRequest.getReason().add(reason);
+      reason.getCodingFirstRep().setDisplay("Hypertension Screening NCR.");
+      
+      CodeableConceptDt priority = new CodeableConceptDt("CDS-System", "50");
+      priority.getCodingFirstRep().setDisplay("Routine");
+      comRequest.setPriority(priority);
+      
+      Provenance prov = createProvenance("http://www.uspreventiveservicestaskforce.org/");
+      ContainedDt contained = new ContainedDt();
+	  contained.getContainedResources().add(prov);
+      comRequest.setContained(contained);
+    
+      namedObjects.put("communicationRequest", comRequest); 
+      namedObjects.put("provenance", prov);
+end 

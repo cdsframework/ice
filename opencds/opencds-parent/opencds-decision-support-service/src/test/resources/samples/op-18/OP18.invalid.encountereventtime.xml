@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<in:cdsInput xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ..\schema\cdsInput.xsd">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="05236369" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19410912000000"/>
+                <gender code="M" codeSystem="2.16.840.1.113883.1.11.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent>
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="1550599" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="I" codeSystem="2.16.840.1.113883.3.795.12.2.6.1" displayName="Inpatient encounter"/>
+                        <encounterEventTime />
+                    </encounterEvent>
+                </encounterEvents>
+            </clinicalStatements>
+            <clinicalStatementRelationships>
+                <clinicalStatementRelationship>
+                    <sourceId root="sourceId"/>
+                    <targetId root="targetId"/>
+                    <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.445"/>
+                    <!--I think this is HL7 CDA, as an attribute of an EntryRelationship-->
+                </clinicalStatementRelationship>
+            </clinicalStatementRelationships>
+            <clinicalStatementEntityInRoleRelationships>
+                <clinicalStatementEntityInRoleRelationship>
+                    <sourceId root="sourceId"/>
+                    <targetEntityId root="targetEntityId"/>
+                    <targetRole code="P" codeSystem="2.16.840.1.113883.12.369" codeSystemName="Specimen Role" displayName="Patient"/>
+                </clinicalStatementEntityInRoleRelationship>
+            </clinicalStatementEntityInRoleRelationships>
+            <entityRelationships>
+                <entityRelationship>
+                    <sourceId root="sourceId"/>
+                    <targetEntityId root="targetEntityId"/>
+                    <targetRole code="C" codeSystem="2.16.840.1.114222.4.11.1040" displayName="Component"/>
+                </entityRelationship>
+            </entityRelationships>
+        </patient>
+        <otherEvaluatedPersons>
+            <evaluatedPerson>
+                <id root="otherEvaluatedPersonId"/>
+                <demographics>
+                    <birthTime value="18010101"/>
+                    <gender code="F" codeSystem="2.16.840.1.113883.1.11.1" displayName="Female"/>
+                    <isDeceased value="true"/>
+                    <ageAtDeath unit="yrs" value="99"/>
+                </demographics>
+                <clinicalStatements/>
+            </evaluatedPerson>
+        </otherEvaluatedPersons>
+        <evaluatedPersonRelationships>
+            <evaluatedPersonRelationship>
+                <sourceId root="sourceId"/>
+                <targetEntityId root="targetEntityId"/>
+                <targetRole code="relationship" codeSystem="2.16.840.1.113883.12.63"/>
+            </evaluatedPersonRelationship>
+        </evaluatedPersonRelationships>
+    </vmrInput>
+</in:cdsInput>

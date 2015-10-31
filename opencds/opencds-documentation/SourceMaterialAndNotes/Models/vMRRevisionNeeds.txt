@@ -1,0 +1,19 @@
+Documentation
+- add trailing periods where needed
+
+TEL
+- change description of useablePeriod to note that it refers to useablePeriod.originalText.value, and update schema example.
+
+Schemas
+- goalTargetValue, observationResultValue should be type ANY, not xs:any
+- awkward that nested clinical statements occur before many attributes.  May want to make nested clinical statements occur last by adding individually to all clinical statements.
+
+Model
+- consider making some required attributes optional, e.g., problem diagnosticEventTime.  May not always be avaialble (e.g., when constructing vMR from CCD).
+- consider making IVL_TS have center, to not have to indicate low and high separately.
+
+CD
+- suggest adding originalText as optional attribute, to enable free-text parsing.  ? if we do this, should we make codeSystem and code optional, and require in a template?  Or should we do things like Observation, code = free text problem, value = String of free text problem.  This approach would not automatically give the attributes attached to Problem.
+
+Documentation
+- need to adjust documentation of "current X list", e.g., at 3.1.4.39, 3.1.4.7.

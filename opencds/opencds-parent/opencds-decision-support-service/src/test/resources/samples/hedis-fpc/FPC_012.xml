@@ -1,0 +1,112 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput vmr%20schema/cdsInput.xsd">
+	<templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+	<vmrInput>
+		<!-- Assumptions: Measurement Year is 2011, encounter low date is proxy for delivery date -->
+        <!-- 1 - Denom check: HEDIS Delivery by ICD9Px	-->
+		<!-- 0 - Num check: one standalone prenatal visit by CPT, w/o provider, 1 month before delivery  -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="FPC-012" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+			<demographics>
+				<birthTime value="19900101"/> 
+                <gender code="F" codeSystem="2.16.840.1.113883.1.11.1" displayName="Female"/>
+			</demographics>
+			<clinicalStatements>
+                <encounterEvents>
+					<encounterEvent>
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2.12.2"/> 
+                        <encounterType code="I" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/>  
+                        <encounterEventTime high="20101118" low="20101115"/>
+                        <!-- <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							<problem> 
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="72.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="xxx"/>
+                            </problem>                      
+                        </relatedClinicalStatement> -->
+                        <!-- <relatedClinicalStatement> 
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id extension="procedure001" root="2.16.840.1.113883.3.795.5.2"/>
+                                <procedureCode code="59409" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Delivery"/>
+                                <procedureTime high="20101115" low="20101115"/>                                
+                            </procedureEvent>
+                        </relatedClinicalStatement> -->
+						<relatedClinicalStatement> 
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id extension="procedure002" root="2.16.840.1.113883.3.795.5.2"/>
+                                <procedureCode code="72.0" codeSystem="2.16.840.1.113883.6.104" codeSystemName="ICD9CM procedures" displayName="Delivery"/>
+                                <procedureTime high="20101115" low="20101115"/>                                
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+						<relatedClinicalStatement>
+                           <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                           <observationResult>
+                               <templateId root="2.16.840.1.113883.3.1829.11.6.3.13"/>
+                               <id extension="GestAge001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                               <observationFocus code="GestationalAge" codeSystem="2.16.840.1.113883.3.795.5.2.12.6" codeSystemName="UUHC Encounter Attributes" displayName="Gestational Age"/>
+                               <observationEventTime low="20101115" high="20101115"/>
+                               <observationValue>
+                                   <physicalQuantity value="40" unit="wk" xsi:type="dt:PQ"/>
+                               </observationValue>
+                           </observationResult>
+                         </relatedClinicalStatement>
+						<!-- <relatedClinicalStatement>
+							<targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							<problem>							
+								<templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+								<id extension="problem002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+								<problemCode code="637.02" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Non-live birth"/>
+								<problemEffectiveTime  low="20101115" high="20101115"/>
+							</problem>
+						</relatedClinicalStatement> --> 
+                    </encounterEvent>
+                    <encounterEvent>
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter002" root="2.16.840.1.113883.3.795.5.2.12.2"/> 
+                        <encounterType code="O" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/>  
+                        <encounterEventTime high="20101006" low="20101006"/>
+                        <relatedClinicalStatement> 
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+								<id extension="procedure003" root="2.16.840.1.113883.3.795.5.2"/>
+								<procedureCode code="99500" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="standalone prenatal visit"/>
+                                <procedureTime high="20101006" low="20101006"/>                      
+								<!-- <relatedEntity>
+									<targetRole code="Performer" codeSystem="2.16.840.1.113883.3.795.12.3.3.1"/>
+									<person>
+										<id extension="performer001" root="2.16.840.1.113883.3.795.5.2"/>
+										<entityType code="130" codeSystem="2.16.840.1.113883.3.795.5.2.12.4" />
+									</person>
+								</relatedEntity> -->  
+                           </procedureEvent>
+                        </relatedClinicalStatement> 
+						<!-- <relatedClinicalStatement> 
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+								<id extension="procedure004" root="2.16.840.1.113883.3.795.5.2"/>
+								<procedureCode code="90966" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="ESRD"/>
+                                <procedureTime high="20101006" low="20101006"/>                      
+								<relatedEntity>
+									<targetRole code="Performer" codeSystem="2.16.840.1.113883.3.795.12.3.3.1"/>
+									<person>
+										<id extension="performer002" root="2.16.840.1.113883.3.795.5.2"/>
+										<entityType code="???" codeSystem="2.16.840.1.113883.3.795.5.2.12.4" />
+									</person>
+								</relatedEntity>  
+                            </procedureEvent>
+                        </relatedClinicalStatement> -->                        
+                    </encounterEvent> 
+                 </encounterEvents>
+			</clinicalStatements>
+		</patient>
+	</vmrInput>
+</in:cdsInput>

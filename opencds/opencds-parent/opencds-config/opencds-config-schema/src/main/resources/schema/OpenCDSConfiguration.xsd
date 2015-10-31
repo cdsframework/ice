@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:config="org.opencds.dss.config.v1_0" targetNamespace="org.opencds.dss.config.v1_0">
+    <xs:annotation>
+        <xs:documentation>
+            This schema is meant to specify the
+            operational aspects of DSS.
+        </xs:documentation>
+    </xs:annotation>
+    <xs:complexType name="Link">
+        <xs:annotation>
+            <xs:documentation>Used externally. This element is not
+                intended to be used for storage.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="rel" type="xs:string" />
+        <xs:attribute name="href" type="xs:anyURI" />
+    </xs:complexType>
+    <xs:complexType name="Concept">
+        <xs:attribute name="code" type="xs:string" use="required" />
+        <xs:attribute name="displayName" type="xs:string" />
+    </xs:complexType>
+    <xs:complexType name="NamespacedConcept">
+        <xs:complexContent>
+            <xs:extension base="config:Concept">
+                <xs:attribute name="codeSystem" type="xs:string" use="required" />
+                <xs:attribute name="codeSystemName" type="xs:string" />
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="ConceptDeterminationMethodBase">
+        <xs:sequence>
+            <xs:element name="link" type="config:Link" minOccurs="0" />
+        </xs:sequence>
+        <xs:attribute name="code" type="xs:string" use="required" />
+        <xs:attribute name="displayName" type="xs:string" />
+        <xs:attribute name="codeSystem" type="xs:string" />
+        <xs:attribute name="version" type="xs:string" />
+    </xs:complexType>
+    <xs:complexType name="ConceptDeterminationMethod">
+        <xs:annotation>
+            <xs:documentation>
+                Base class for CDMs, for use in both
+                referencing a CDM as well as for extension to specify
+                the details
+                of the CDM.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexContent>
+            <xs:extension base="config:ConceptDeterminationMethodBase">
+                <xs:sequence>
+                    <xs:element name="conceptMapping" type="config:ConceptMapping" maxOccurs="unbounded" />
+                    <xs:element name="description" type="xs:string" minOccurs="0" />
+                    <xs:element name="timestamp" type="xs:dateTime" />
+                    <xs:element name="userId" type="config:UserId" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="ConceptMapping">
+        <xs:annotation>
+            <xs:documentation>
+                Specifies concept mappings from any number
+                of concepts to a potentially internal concept supported
+                by
+                the DSS implementation.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="toConcept" type="config:NamespacedConcept" />
+            <xs:element name="fromConcepts" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="concept" type="config:Concept" maxOccurs="unbounded" />
+                    </xs:sequence>
+                    <xs:attribute name="codeSystem" type="xs:string" use="required" />
+                    <xs:attribute name="codeSystemName" type="xs:string" />
+                    <xs:attribute name="displayName" type="xs:string" />
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="EntityIdentifier">
+        <xs:annotation>
+            <xs:documentation>A unique identifier characterized by 3
+                attributes: the identifier of the scoping entity; the
+                business identifier within the scoping entity; and the
+                version. Two identifiers are the same when these 3
+                attributes are equal. An
+                EntityIdentifier must be globally unique.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="scopingEntityId" type="xs:string" use="required" />
+        <xs:attribute name="businessId" type="xs:string" use="required" />
+        <xs:attribute name="version" type="xs:string" use="required" />
+    </xs:complexType>
+    <xs:complexType name="ExecutionEngine" abstract="false">
+        <xs:annotation>
+            <xs:documentation>Metadata about individual inference
+                engines
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="link" type="config:Link" minOccurs="0" />
+            <xs:element name="identifier" type="config:ExecutionEngineIdentifier" />
+            <xs:element name="description" type="xs:string" />
+            <xs:element name="timestamp" type="xs:dateTime" />
+            <xs:element name="userId" type="config:UserId" />
+            <xs:element name="supportedOperation" type="config:OperationType" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="KMId">
+        <xs:complexContent>
+            <xs:extension base="config:EntityIdentifier" />
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="KnowledgeModule" abstract="false">
+        <xs:annotation>
+            <xs:documentation>Metadata about individual knowledge
+                modules (KMs).
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="link" type="config:Link" minOccurs="0" />
+            <xs:element name="identifier" type="config:KMId" />
+            <xs:element name="status" type="config:KMStatus" />
+            <xs:element name="executionEngine" type="config:ExecutionEngineIdentifier">
+                <xs:annotation>
+                    <xs:documentation>Fully qualified package name of
+                        the OpenCDS execution engine.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="semanticSignifierId" type="config:SemanticSignifierId">
+                <xs:annotation>
+                    <xs:documentation>SemanticSignifier Identifier, as
+                        specified in the OmgDssSemanticSignifier schema.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="conceptDeterminationMethods" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="primaryCDM" type="config:ConceptDeterminationMethodBase" minOccurs="1" />
+                        <xs:element name="secondaryCDM" minOccurs="0" maxOccurs="unbounded">
+                            <xs:complexType>
+                                <xs:complexContent>
+                                    <xs:extension base="config:ConceptDeterminationMethodBase">
+                                        <xs:attribute name="method" type="config:SupportMethod" use="required" />
+                                    </xs:extension>
+                                </xs:complexContent>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="package" type="config:Package">
+                <xs:annotation>
+                    <xs:documentation>Knowledge Module Type;
+                        implementation-specific. Package ID intended for
+                        internal use.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="primaryProcess" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>String identifying the name of the
+                        primary process for the knowledge module. This
+                        only applies to BPMN and PKG files for Drools.
+                        This element is required if the knowledge module
+                        has a file extension of ".pkg" or ".bpmn",
+                        however, it may be an empty string if a PKG file
+                        is built from a DRL file which does not contain any
+                        BPMN processes.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="traitId" type="config:EntityIdentifier" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="preProcessPlugins" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Plugins that will be executed prior to rules inferencing. Order is significant.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="preProcessPlugin" type="config:PluginId" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="postProcessPlugins" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Plugins that will be executed after rules inferencing. Order is significant.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="postProcessPlugin" type="config:PluginId" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="timestamp" type="xs:dateTime" />
+            <xs:element name="userId" type="config:UserId" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Package">
+        <xs:sequence>
+            <xs:element name="link" type="config:Link" minOccurs="0" />
+            <xs:element name="packageType" type="xs:string" />
+            <xs:element name="packageId" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Intended for internal use.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="preload" type="xs:boolean" minOccurs="0" default="false">
+                <xs:annotation>
+                    <xs:documentation>Specifies whether a given Package should be preloaded
+                        into memory on startup or configuration loading, if supported
+                        by the underlying implementation.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="SemanticSignifier" abstract="false">
+        <xs:annotation>
+            <xs:documentation>Attributes of individual semantic
+                signifiers (SSs).
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="link" type="config:Link" minOccurs="0" />
+            <xs:element name="identifier" type="config:SemanticSignifierId" />
+            <xs:element name="name" type="xs:string" />
+            <xs:element name="description" type="xs:string" />
+            <xs:element name="xsdComputableDefinition" type="config:XSDComputableDefinition" />
+            <xs:element name="entryPoint" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The entry point into the external
+                        model as represented by the system, intended for
+                        implementers of the DSS and related schemas.
+                        This is usually the name of the software component
+                        that participates in unmarshalling, as
+                        used within the DSS implementation.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="exitPoint" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        The exit point of the external
+                        model as represented by the system, intended for
+                        implementers of the DSS and related schemas.
+                        This is usually the name of the software component
+                        that participates in marshalling, as used
+                        within the DSS implementation.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="factListsBuilder" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>The fact lists builder used for
+                        processing vMR version-specific input into fact
+                        lists for rules engine processing.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="resultSetBuilder" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>The fact lists builder used for
+                        processing vMR version-specific input into fact
+                        lists for rules engine processing.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="timestamp" type="xs:dateTime" />
+            <xs:element name="userId" type="config:UserId" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="SemanticSignifierId">
+        <xs:complexContent>
+            <xs:extension base="config:EntityIdentifier" />
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="PluginPackage">
+        <xs:sequence>
+            <xs:element name="link" type="config:Link" minOccurs="0" />
+            <xs:element name="identifier" type="config:PluginPackageId" />
+            <xs:element name="loadContext" type="config:PluginLoadContext" />
+            <xs:element name="resourceName" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Name of the jar containing one or more plugins. Not applicable for loadContext == CLASSPATH</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="plugins">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="plugin" type="config:Plugin" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="timestamp" type="xs:dateTime" />
+            <xs:element name="userId" type="config:UserId" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PluginPackageId">
+        <xs:complexContent>
+            <xs:extension base="config:EntityIdentifier" />
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="Plugin">
+        <xs:annotation>
+            <xs:documentation></xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="identifier" type="config:PluginId">
+                <xs:annotation>
+                    <xs:documentation>Intended to guarantee uniqueness across plugins.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="className" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="PluginId">
+        <xs:complexContent>
+            <xs:extension base="config:EntityIdentifier" />
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:simpleType name="PluginLoadContext">
+        <xs:annotation>
+            <xs:documentation>Allowed values for indicating the context from which to
+                load the referencing plugin.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CLASSPATH">
+                <xs:annotation>
+                    <xs:documentation>Plugin jar has been placed on the same classpath as the OpenCDS service.</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="IMPORTED">
+                <xs:annotation>
+                    <xs:documentation>Plugin jar has been uploaded to/imported into OpenCDS via the REST service.</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="SupportingData">
+        <xs:annotation>
+            <xs:documentation></xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="link" type="config:Link" minOccurs="0" />
+            <xs:element name="identifier" type="xs:string" />
+            <xs:element name="kmId" type="config:KMId" />
+            <xs:element name="package" type="config:Package" />
+            <xs:element name="loadedBy" type="config:PluginId">
+                <xs:annotation>
+                    <xs:documentation>References the identifier of a Plugin that is supports
+                        processing the SupportingData into a programmatically usable structure.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="timestamp" type="xs:dateTime" />
+            <xs:element name="userId" type="config:UserId" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="XSDComputableDefinition">
+        <xs:sequence>
+            <xs:element name="xsdRootGlobalElementName" type="xs:string" />
+            <xs:element name="xsdURL" type="xs:string" />
+            <xs:element name="schematronURL" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="narrativeModelRestrictionGuideURL" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="ExecutionEngineIdentifier">
+        <xs:restriction base="xs:string" />
+    </xs:simpleType>
+    <xs:simpleType name="KMStatus">
+        <xs:annotation>
+            <xs:documentation>Allowed values for Knowledge Module
+                status. See technical specification for details.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="APPROVED">
+                <xs:annotation>
+                    <xs:documentation>The KM successfully passed the QA
+                        tests.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="DEFINED">
+                <xs:annotation>
+                    <xs:documentation>Can be executed. Precondition: the
+                        KM is syntactically valid. When a defined KM
+                        changes, a new version should be created.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="DRAFT">
+                <xs:annotation>
+                    <xs:documentation>Draft KM.</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="PROMOTED">
+                <xs:annotation>
+                    <xs:documentation>The KM can be used in the
+                        production environment.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="REJECTED">
+                <xs:annotation>
+                    <xs:documentation>The KM definition doesn't match
+                        the KM specification.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="RETIRED">
+                <xs:annotation>
+                    <xs:documentation>The KM was historically promoted,
+                        but should not be used any more.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="OperationType">
+        <xs:annotation>
+            <xs:documentation>Supported operations as defined in the OMG
+                HL7 DSS Standard
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="EVALUATION.EVALUATE" />
+            <xs:enumeration value="EVALUATION.EVALUATE_AT_SPECIFIED_TIME" />
+            <xs:enumeration value="EVALUATION.EVALUATE_ITERATIVELY" />
+            <xs:enumeration value="EVALUATION.EVALUATE_ITERATIVELY_AT_SPECIFIED_TIME" />
+            <xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_PROFILE" />
+            <xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_SCOPING_ENTITY" />
+            <xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_SCOPING_ENTITY_HIERARCHY" />
+            <xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_SEMANTIC_REQUIREMENT" />
+            <xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_SEMANTIC_SIGNIFIER" />
+            <xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_TRAIT" />
+            <xs:enumeration value="METADATA_DISCOVERY.LIST_PROFILES" />
+            <xs:enumeration value="QUERY.FIND_KMS" />
+            <xs:enumeration value="QUERY.GET_KM_DATA_REQUIREMENTS" />
+            <xs:enumeration value="QUERY.GET_KM_DATA_REQUIREMENTS_FOR_EVALUATION_AT_SPECIFIED_TIME" />
+            <xs:enumeration value="QUERY.GET_KM_DESCRIPTION" />
+            <xs:enumeration value="QUERY.GET_KM_EVALUATION_RESULT_SEMANTICS" />
+            <xs:enumeration value="QUERY.LIST_KMS" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="SupportMethod">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ADDITIVE">
+                <xs:annotation>
+                    <xs:documentation>Indicating a CDM is additive to
+                        the default or primary CDM.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="REPLACEMENT">
+                <xs:annotation>
+                    <xs:documentation>Indicating a CDM will replace
+                        duplicative contents supplied by the default or
+                        primary CDM
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="ConfigUser">
+        <xs:sequence>
+            <xs:element name="username" type="xs:string" />
+            <xs:element name="password" type="xs:string" />
+            <xs:element name="enabled" type="xs:boolean" />
+            <xs:element name="grantedAuthorities" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="authority" type="config:ConfigAuthority" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="ConfigAuthority">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ROLE_CONFIG_ADMIN" />
+            <xs:enumeration value="ROLE_CONFIG_USER" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:element name="ConfigurationSecurity" type="config:ConfigSecurity" />
+    <xs:complexType name="ConfigSecurity">
+        <xs:annotation>
+            <xs:documentation>Declaration to limit access to the configuration services.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="users">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="user" type="config:ConfigUser" maxOccurs="unbounded" />
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="UserId">
+        <xs:restriction base="xs:string" />
+    </xs:simpleType>
+</xs:schema>

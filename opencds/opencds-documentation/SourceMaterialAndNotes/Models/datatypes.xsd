@@ -1,0 +1,1417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:sch="http://www.ascc.net/xml/schematron" elementFormDefault="qualified">
+	<xsd:annotation>
+		<xsd:documentation>
+Introduction
+------------
+
+This XML document was originally developed in the course of development of 
+the ISO/HL7 21090 standard (Healthcare Datatypes). This XML document contains 
+either a part or all of the Healthcare Datatypes schema implementation for 
+Healthcare Datatypes examples conformant to the Healthcare Datatypes schemas.
+
+ISO/HL7 gives users of Healthcare Datatypes free license to this XML document 
+or modifications thereof for use in hardware or software products claiming 
+conformance to Healthcare Datatypes.
+
+Those intending to use this XML document in hardware or software products are 
+advised that its use may infringe existing patents. The original developers 
+of this XML document and his/her company, the subsequent editors and their 
+companies, and ISO/HL7 have no liability for use of this XML document or 
+modifications thereof in an implementation.
+
+Copyright is not released for non Healthcare Datatypes conforming products. 
+The organizations who contributed to this XML document retain the full 
+right to use the code for their own purpose, assign or donate their 
+contribution to a third party and inhibit third parties from using 
+their contribution for non Healthcare Datatypes conforming products.
+
+Copyright (c) 2005-2009 ISO/HL7.
+
+This XML document is provided for informative purposes only. If any parts 
+of this XML document contradict the normative part of the corresponding 
+standard document then the normative part should be used as the definitive 
+specification.
+
+This notice must be included in all copies or derivative works.
+ 
+Basic Profile for vMR
+---------------------
+
+vMR goals for "Basic" profile:
+	Remove elements whose use is primarily for human readability
+	Remove elements whose use is primarily for highly-specialized edge cases
+	Adequately support "Basic vMR" uses including 
+		enough demographics to enable the structuring of patient-focused output
+		support for basic medical concepts in a wide variety of vocabularies
+		support for the expression of all common laboratory results
+		support for all common coded observations about a patient
+		support for common
+Extended vMR Profiles are planned for templated extensions to the basic vMR, 
+as required.  Following those general constraints, we have come up with the 
+following list of elements as essential to "Basic" vMR use, expecting them to 
+have broad applicability, even in highly specialized uses of CDS:
+•	ANY abstract extends HXIT
+•	XP abstract extends ANY
+•	EntityNamePartQualifier
+•	set_EntityNamePartQualifier
+•	EntityNamePartType
+•	EntityNameUse
+•	set_EntityNameUse
+•	ENXP extends XP
+•	EN extends ANY 
+•	AddressPartType
+•	PostalAddressUse
+•	set_PostalAddressUse
+•	AD extends ANY 
+•	ADXP extends XP
+•	BL extends ANY
+•	CD extends ANY
+•	Code
+•	CS extends ANY
+•	Decimal
+•	HXIT abstract
+•	II extends ANY
+•	INT extends QTY
+•	IVL_INT extends ANY
+•	IVL_PQ extends ANY
+•	IVL_QTY extends ANY
+•	IVL_REAL extends ANY
+•	IVL_TS extends ANY
+•	PQ extends QTY
+•	QTY abstract extends ANY
+•	REAL extends QTY
+•	RTO extends QTY
+•	ST extends ANY
+•	TelecommunicationCapability 
+•	set_TelecommunicationCapability
+•	TelecommunicationAddressUse 
+•	set_TelecommunicationAddressUse
+•	TEL extends ANY
+•	TS extends QTY
+•	Uid extends String
+•	UncertaintyType
+•	Uri extends String 
+
+
+Profiling this schema
+---------------------
+
+As described in ISO 21090, conformance profiles are able to 
+describe subsets of ISO 21090. If a subset schema is derived
+from this schema (by, for instance, deleting types, elements or 
+attributes, or by tightening schema or schematron constraints),
+this heading documentation (copyright statement, this paragraph,
+and the version history) must be reproduced as is, along with a
+a section above this one explaining who prepared the revised 
+schema, what conformance profile it conforms to, and where the 
+conformance profile may be found.
+
+Version History
+---------------
+Version 0.03 20110113 Technical Correction (Lloyd McKenzie)
+  Changes from 0.02:
+    Corrected schematron to reflect new names of controlInformationRoot and controlInformationExtension
+
+Version 0.02  20090526 Final Ballot Candidate (Grahame Grieve)
+  Changes from 0.01:
+    Add documentation for each element
+    Remove flavors as schema types
+    HXIT: Renamed controlActRoot and controlActExtension to controlInformationRoot and controlInformationExtension
+    ANY: made flavorId a set instead of a singleton
+    ENXP/ADXP: Introduce XP type and move attributes there
+    EN: Reorganise EN.use, ENXP.partType and ENXP.qualifier enumerations
+    TEL: add capabilities attribute
+    SD.TEXT / SD.TITLE: new types defined
+    CD: change codingRationale contents
+    II: correct one enumeration value on reliability
+    REAL/MO: remove precision attribute
+    PQ: remove PQV and redefine PQ and PQR accordingly
+    QSC: change code from enumerated attribute to CD
+    
+Version 0.01  20080317 First Release (Grahame Grieve)
+    </xsd:documentation>
+	</xsd:annotation>
+	<xsd:complexType name="AD">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null or parts">
+					<sch:rule abstract="true" id="AD-0">
+						<sch:assert test="(@nullFlavor or part) and not(@nullFlavor and part)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on AD attributes">
+					<sch:rule abstract="true" id="AD-1">
+						<sch:assert test="count(*[self::useablePeriod][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="part" type="ADXP" maxOccurs="unbounded"/>
+				</xsd:sequence>
+				<xsd:attribute name="use" type="set_PostalAddressUse" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ADXP">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="value is required">
+					<sch:rule abstract="true" id="ADXP-0">
+						<sch:assert test="@nullFlavor or @type = &#34;DEL&#34; or (string-length(@value) &#62; 0)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="XP">
+				<xsd:attribute name="type" type="AddressPartType" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ANY">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="no ANY unless nullFlavored">
+					<sch:rule abstract="true" id="ANY-0">
+						<sch:assert test="not(@xsi:type) or (xsi:type != &#34;ANY&#34;) or (@nullFlavor)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+	</xsd:complexType>
+	<xsd:complexType name="BL">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="value if not nullFlavored">
+					<sch:rule abstract="true" id="BL-0">
+						<sch:assert test="@nullFlavor or (not(@nullFlavor) and @value)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="value" type="xsd:boolean" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="CD">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null or code and/or originalText">
+					<sch:rule abstract="true" id="CD-0">
+						<sch:assert test="@nullFlavor or @code or (originalText and not(originalText/@nullFlavor) or (originalTextReference and not(originalTextReference/@nullFlavor))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="other requires codeSystem or valueSet">
+					<sch:rule abstract="true" id="CD-1">
+						<sch:assert test="@nullFlavor != &#34;OTH&#34; or @codeSystem or @valueSet"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="code requires codeSystem">
+					<sch:rule abstract="true" id="CD-2">
+						<sch:assert test="@codeSystem or not(@code)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="codeSystemName only if codeSystem">
+					<sch:rule abstract="true" id="CD-3">
+						<sch:assert test="@codeSystem or not(@codeSystemName)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="codeSystemVersion only if codeSystem">
+					<sch:rule abstract="true" id="CD-4">
+						<sch:assert test="@codeSystem or not(@codeSystemVersion)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="displayName only if code">
+					<sch:rule abstract="true" id="CD-5">
+						<sch:assert test="@code or not(@displayName)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="valueSet requires valueSetVersion">
+					<sch:rule abstract="true" id="CD-6">
+						<sch:assert test="not(@valueSet) or (@valueSet and @valueSetVersion)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="No original text on translations">
+					<sch:rule abstract="true" id="CD-7">
+						<sch:assert test="not translation/originalText"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="Translations cannot have translations">
+					<sch:rule abstract="true" id="CD-8">
+						<sch:assert test="not translation/translation"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on CD elements">
+					<sch:rule abstract="true" id="CD-9">
+						<sch:assert test="count(*[self::displayName or self::originalText or self::originalTextReference or self::translation][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="displayName" type="ST" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="code" type="xsd:string" use="required"/>
+				<xsd:attribute name="codeSystem" type="Uid" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="CS">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="code is required">
+					<sch:rule abstract="true" id="CS-0">
+						<sch:assert test="@nullFlavor or (not(@nullFlavor) and @code)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="code" type="xsd:string" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="EN">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null or parts">
+					<sch:rule abstract="true" id="EN-0">
+						<sch:assert test="(@nullFlavor or part) and not(@nullFlavor and part)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="part" type="ENXP" maxOccurs="unbounded"/>
+				</xsd:sequence>
+				<xsd:attribute name="use" type="set_EntityNameUse" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ENXP">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="value is required">
+					<sch:rule abstract="true" id="ENXP-0">
+						<sch:assert test="@nullFlavor or (string-length(@value) &#62; 0)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="XP">
+				<xsd:attribute name="type" type="EntityNamePartType" use="required"/>
+				<xsd:attribute name="qualifier" type="set_EntityNamePartQualifier" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<!--<xsd:complexType name="HXIT" abstract="true">
+		<xsd:annotation>
+			<xsd:documentation>Information about the history of this value: period of validity and a reference to an identified event that established this value as valid.
+
+Because of the way that the types are defined, a number of attributes of the datatypes have values with a type derived from HXIT. In these cases the HXIT attributes are constrained to null. The only case where the HXIT attributes are allowed within a datatype is on items in a collection (DSET, LIST, BAG, HIST).
+The use of these attributes is generally subject to further constraints in the specifications that make use of these types.</xsd:documentation>
+			<xsd:appinfo>
+				<sch:pattern name="extension requires root">
+					<sch:rule abstract="true" id="HXIT-0">
+						<sch:assert test="not(@controlInformationExtension) or @controlInformationRoot"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:attribute name="validTimeLow" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>The time that the given information became or will become valid. 
+
+This is not the time that any system first observed the value, but the time that the actual value became correct (i.e. when a patient changes their name).</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="validTimeHigh" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>The time that the given information ceased or will cease to be correct.
+
+Both validTimeLow and validTimeHigh must be valid timestamps using the format described in  7.8.12.3.1 (TS.value). </xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>-->
+	<xsd:complexType name="II">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="root is required">
+					<sch:rule abstract="true" id="II-0">
+						<sch:assert test="@nullFlavor or (not(@nullFlavor) and @root)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="root" type="Uid" use="required"/>
+				<xsd:attribute name="extension" type="xsd:string" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="INT">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="no uncertainty">
+					<sch:rule abstract="true" id="INT-0">
+						<sch:assert test="not(uncertainty)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="value xor uncertainRange">
+					<sch:rule abstract="true" id="INT-1">
+						<sch:assert test="not(@value and uncertainRange)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="null or value">
+					<sch:rule abstract="true" id="INT-2">
+						<sch:assert test="@nullFlavor or @value or uncertainRange"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:attribute name="value" type="xsd:int" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_INT">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null rules">
+					<sch:rule abstract="true" id="IVL_INT-0">
+						<sch:assert test="(@nullFlavor and not(any|low|high|width)) or (not(@nullFlavor) and (any|low|high|width))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="co-occurence rules">
+					<sch:rule abstract="true" id="IVL_INT-1">
+						<sch:assert test="(((any and not(any/@nullFlavor)) and not((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor)) or (width and not(width/@nullFlavor)))) or (not(any) or any/@nullFlavor)) and ((any and not(any/@nullFlavor)) or (not(any) or any/@nullFlavor) and (((width and not(width/@nullFlavor)) and (not(low) or low/@nullFlavor) and (not(high) or high/@nullFlavor))) or ((not(width) or width/@nullFlavor) and ((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor))))))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="closed attributes only if limited">
+					<sch:rule abstract="true" id="IVL_INT-2">
+						<sch:assert test="not(low and @lowClosed) and not(high and @highClosed)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on IVL attributes">
+					<sch:rule abstract="true" id="IVL_INT-3">
+						<sch:assert test="count(*[self::low or self::high or self::width][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="low" type="INT" minOccurs="0"/>
+					<xsd:element name="high" type="INT" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional"/>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_PQ">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null rules">
+					<sch:rule abstract="true" id="IVL_PQ-0">
+						<sch:assert test="(@nullFlavor and not(any|low|high|width)) or (not(@nullFlavor) and (any|low|high|width))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="co-occurence rules">
+					<sch:rule abstract="true" id="IVL_PQ-1">
+						<sch:assert test="(((any and not(any/@nullFlavor)) and not((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor)) or (width and not(width/@nullFlavor)))) or (not(any) or any/@nullFlavor)) and ((any and not(any/@nullFlavor)) or (not(any) or any/@nullFlavor) and (((width and not(width/@nullFlavor)) and (not(low) or low/@nullFlavor) and (not(high) or high/@nullFlavor))) or ((not(width) or width/@nullFlavor) and ((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor))))))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="closed attributes only if limited">
+					<sch:rule abstract="true" id="IVL_PQ-2">
+						<sch:assert test="not(low and @lowClosed) and not(high and @highClosed)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on IVL attributes">
+					<sch:rule abstract="true" id="IVL_PQ-3">
+						<sch:assert test="count(*[self::low or self::high or self::width][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="low" type="PQ" minOccurs="0"/>
+					<xsd:element name="high" type="PQ" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional"/>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_QTY">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null rules">
+					<sch:rule abstract="true" id="IVL_QTY-0">
+						<sch:assert test="(@nullFlavor and not(any|low|high|width)) or (not(@nullFlavor) and (any|low|high|width))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="co-occurence rules">
+					<sch:rule abstract="true" id="IVL_QTY-1">
+						<sch:assert test="(((any and not(any/@nullFlavor)) and not((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor)) or (width and not(width/@nullFlavor)))) or (not(any) or any/@nullFlavor)) and ((any and not(any/@nullFlavor)) or (not(any) or any/@nullFlavor) and (((width and not(width/@nullFlavor)) and (not(low) or low/@nullFlavor) and (not(high) or high/@nullFlavor))) or ((not(width) or width/@nullFlavor) and ((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor))))))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="closed attributes only if limited">
+					<sch:rule abstract="true" id="IVL_QTY-2">
+						<sch:assert test="not(low and @lowClosed) and not(high and @highClosed)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on IVL attributes">
+					<sch:rule abstract="true" id="IVL_QTY-3">
+						<sch:assert test="count(*[self::low or self::high or self::width][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="low" type="QTY" minOccurs="0"/>
+					<xsd:element name="high" type="QTY" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional"/>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_RTO">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null rules">
+					<sch:rule abstract="true" id="IVL_QTY-0">
+						<sch:assert test="(@nullFlavor and not(any|low|high|width)) or (not(@nullFlavor) and (any|low|high|width))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="co-occurence rules">
+					<sch:rule abstract="true" id="IVL_QTY-1">
+						<sch:assert test="(((any and not(any/@nullFlavor)) and not((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor)) or (width and not(width/@nullFlavor)))) or (not(any) or any/@nullFlavor)) and ((any and not(any/@nullFlavor)) or (not(any) or any/@nullFlavor) and (((width and not(width/@nullFlavor)) and (not(low) or low/@nullFlavor) and (not(high) or high/@nullFlavor))) or ((not(width) or width/@nullFlavor) and ((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor))))))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="closed attributes only if limited">
+					<sch:rule abstract="true" id="IVL_QTY-2">
+						<sch:assert test="not(low and @lowClosed) and not(high and @highClosed)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on IVL attributes">
+					<sch:rule abstract="true" id="IVL_QTY-3">
+						<sch:assert test="count(*[self::low or self::high or self::width][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="low" type="RTO" minOccurs="0"/>
+					<xsd:element name="high" type="RTO" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional"/>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_REAL">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null rules">
+					<sch:rule abstract="true" id="IVL_REAL-0">
+						<sch:assert test="(@nullFlavor and not(any|low|high|width)) or (not(@nullFlavor) and (any|low|high|width))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="co-occurence rules">
+					<sch:rule abstract="true" id="IVL_REAL-1">
+						<sch:assert test="(((any and not(any/@nullFlavor)) and not((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor)) or (width and not(width/@nullFlavor)))) or (not(any) or any/@nullFlavor)) and ((any and not(any/@nullFlavor)) or (not(any) or any/@nullFlavor) and (((width and not(width/@nullFlavor)) and (not(low) or low/@nullFlavor) and (not(high) or high/@nullFlavor))) or ((not(width) or width/@nullFlavor) and ((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor))))))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="closed attributes only if limited">
+					<sch:rule abstract="true" id="IVL_REAL-2">
+						<sch:assert test="not(low and @lowClosed) and not(high and @highClosed)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on IVL attributes">
+					<sch:rule abstract="true" id="IVL_REAL-3">
+						<sch:assert test="count(*[self::low or self::high or self::width][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="low" type="REAL" minOccurs="0"/>
+					<xsd:element name="high" type="REAL" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional"/>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_TS">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null rules">
+					<sch:rule abstract="true" id="IVL_TS-0">
+						<sch:assert test="(@nullFlavor and not(any|low|high|width)) or (not(@nullFlavor) and (any|low|high|width))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="co-occurence rules">
+					<sch:rule abstract="true" id="IVL_TS-1">
+						<sch:assert test="(((any and not(any/@nullFlavor)) and not((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor)) or (width and not(width/@nullFlavor)))) or (not(any) or any/@nullFlavor)) and ((any and not(any/@nullFlavor)) or (not(any) or any/@nullFlavor) and (((width and not(width/@nullFlavor)) and (not(low) or low/@nullFlavor) and (not(high) or high/@nullFlavor))) or ((not(width) or width/@nullFlavor) and ((low and not(low/@nullFlavor)) or (high and not(high/@nullFlavor))))))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="closed attributes only if limited">
+					<sch:rule abstract="true" id="IVL_TS-2">
+						<sch:assert test="not(low and @lowClosed) and not(high and @highClosed)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on IVL attributes">
+					<sch:rule abstract="true" id="IVL_TS-3">
+						<sch:assert test="count(*[self::low or self::high or self::width][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="low" type="TS" minOccurs="0"/>
+					<xsd:element name="high" type="TS" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional"/>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="PQ">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="null or value">
+					<sch:rule abstract="true" id="PQ-0">
+						<sch:assert test="@nullFlavor or @value or uncertainRange"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="value xor uncertainRange">
+					<sch:rule abstract="true" id="PQ-1">
+						<sch:assert test="not(@value and uncertainRange)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:attribute name="value" type="Decimal" use="required"/>
+				<xsd:attribute name="unit" type="Code" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="QTY" abstract="true">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="uncertainty rules">
+					<sch:rule abstract="true" id="QTY-0">
+						<sch:assert test="not(uncertainty/@expression) and not(uncertainty/@uncertainty) and not(uncertainty/@uncertainRange) and not(uncertainty/@originalText)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="uncertainRange rules">
+					<sch:rule abstract="true" id="QTY-1">
+						<sch:assert test="not(uncertainRange/low/@expression) and not(uncertainRange/low/@uncertainty) and not(uncertainRange/low/@uncertainRange) and not(uncertainty/low/@originalText) and not(uncertainRange/high/@expression) and not(uncertainRange/high/@uncertainty) and not(uncertainRange/high/@uncertainRange) and not(uncertainty/high/@originalText)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="uncertainty kind">
+					<sch:rule abstract="true" id="QTY-2">
+						<sch:assert test="not(uncertainty) or not(uncertainRange)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="uncertainRange Type">
+					<sch:rule abstract="true" id="QTY-3">
+						<sch:assert test="not(uncertainRange) or (not(uncertainRange/width) and not(uncertainRange/any) and ((uncertainRange/low and not(uncertainRange/low/@nullFlavor)) or (uncertainRange/high  and not(uncertainRange/high/@nullFlavor)))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="No History or Update Mode">
+					<sch:rule abstract="true" id="QTY-4">
+						<sch:assert test="count(*[self::originalText or self::uncertainty or self::uncertainRange or self::expression][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY"/>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="REAL">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="value xor uncertainRange">
+					<sch:rule abstract="true" id="REAL-0">
+						<sch:assert test="not(@value and uncertainRange)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="null or value">
+					<sch:rule abstract="true" id="REAL-1">
+						<sch:assert test="@nullFlavor or @value or uncertainRange"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:attribute name="value" type="Decimal" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="RTO">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="numerator and denominator required">
+					<sch:rule abstract="true" id="RTO-0">
+						<sch:assert test="@nullFlavor or ((numerator and not(numerator/@nullFlavor)) and (numerator and not(numerator/@nullFlavor)))"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on RTO Attributes">
+					<sch:rule abstract="true" id="RTO-1">
+						<sch:assert test="count(*[self::numerator or self::denominator][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no uncertainty">
+					<sch:rule abstract="true" id="RTO-2">
+						<sch:assert test="not(uncertainty)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no TS">
+					<sch:rule abstract="true" id="RTO-3">
+						<sch:assert test="not(numerator/@xsi:type = &#34;TS&#34;) and not(denominator/@xsi:type = &#34;TS&#34;)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:sequence>
+					<xsd:element name="numerator" type="PQ"/>
+					<xsd:element name="denominator" type="PQ"/>
+				</xsd:sequence>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ST">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="no nested translations">
+					<sch:rule abstract="true" id="ST-0">
+						<sch:assert test="not(translation) or thumbnail[not(translation)]"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="content if not null">
+					<sch:rule abstract="true" id="ST-1">
+						<sch:assert test="(@nullFlavor or (@value and string-length(@value)&#38;gt;0)) and not(@nullFlavor and @value)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="translation: no translations">
+					<sch:rule abstract="true" id="ST-2">
+						<sch:assert test="not(translation) or (not(translation/translation))"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="value" type="xsd:string" use="required"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="TEL">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="value is required">
+					<sch:rule abstract="true" id="TEL-0">
+						<sch:assert test="@nullFlavor or (not(@nullFlavor) and @value)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="no updateMode or History on TEL attributes">
+					<sch:rule abstract="true" id="TEL-1">
+						<sch:assert test="count(*[self::useablePeriod][@validTimeLow or @validTimeHigh or @controlInformationRoot or @controlInformationExtension or @updateMode])=0"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="useablePeriod" type="ST" minOccurs="0"/>
+				</xsd:sequence>
+				<xsd:attribute name="value" type="xsd:anyURI" use="required"/>
+				<xsd:attribute name="use" type="set_TelecommunicationAddressUse" use="optional"/>
+				<xsd:attribute name="capabilities" type="set_TelecommunicationCapability" use="optional"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="TS">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="value xor uncertainRange">
+					<sch:rule abstract="true" id="TS-0">
+						<sch:assert test="not(@value and uncertainRange)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="null or value">
+					<sch:rule abstract="true" id="TS-1">
+						<sch:assert test="@nullFlavor or @value or uncertainRange"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:attribute name="value" use="required">
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:pattern value="[1-2][0-9]{3,3}(((0[1-9])|(1[0-2]))(((0[1-9])|([1-2][0-9])|(3[0-1]))((([0-1][0-9])|(2[0-3]))(([0-5][0-9])(([0-5][0-9])(\.[0-9]{1,4})?)?)?)?)?)?([+\-](0[0-9]|1[0-3])([0-5][0-9]))?"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="XP">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<sch:pattern name="code requires codeSystem">
+					<sch:rule abstract="true" id="XP-0">
+						<sch:assert test="@codeSystem or not(@code)"/>
+					</sch:rule>
+				</sch:pattern>
+				<sch:pattern name="codeSystemVersion only if codeSystem">
+					<sch:rule abstract="true" id="XP-1">
+						<sch:assert test="@codeSystem or not(@codeSystemVersion)"/>
+					</sch:rule>
+				</sch:pattern>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:attribute name="value" type="xsd:string" use="required"/>
+	</xsd:complexType>
+	<xsd:simpleType name="AddressPartType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="AL">
+				<xsd:annotation>
+					<xsd:documentation>Address Line : An address line is for either an additional locator, a delivery address or a street address. An address generally has only a delivery address line or a street address line, but not both</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ADL">
+				<xsd:annotation>
+					<xsd:documentation>Additional Locator : This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g., &#34;3rd floor, Appt. 342&#34;). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g., Dutch &#34;t.o.&#34; means &#34;opposite to&#34; for house boats located across the street facing houses)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="UNID">
+				<xsd:annotation>
+					<xsd:documentation>Unit Identifier : The number or name of a specific unit contained within a building or complex, as assigned by that building or complex</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="UNIT">
+				<xsd:annotation>
+					<xsd:documentation>Unit Designator : Indicates the type of specific unit contained within a building or complex. E.g. Apartment, Floor </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DAL">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Address Line : A delivery address line is frequently used instead of breaking out delivery mode, delivery installation, etc. An address generally has only a delivery address line or a street address line, but not both.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DINST">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Installation Type : Indicates the type of delivery installation (the facility to which the mail will be delivered prior to final shipping via the delivery mode.) Example: post office, letter carrier depot, community mail center, station, etc.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DINSTA">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Installation Area : The location of the delivery installation, usually a town or city, and is only required if the area is different from the municipality. Area to which mail delivery service is provided from any postal facility or service such as an individual letter carrier, rural route, or postal route</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DINSTQ">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Installation Qualifier : A number, letter or name identifying a delivery installation. E.g., for Station A, the delivery installation qualifier would be &#39;A&#39;.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DMOD">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Mode : Indicates the type of service offered, method of delivery. For example: post office box, rural route, general delivery, etc.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DMODID">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Mode Identifier: Represents the routing information such as a letter carrier route number. It is the identifying number of the designator (the box number or rural route number)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SAL">
+				<xsd:annotation>
+					<xsd:documentation>Street Address Line : A street address line is frequently used instead of breaking out build number, street name, street type, etc. An address generally has only a delivery address line or a street address line, but not both.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BNR">
+				<xsd:annotation>
+					<xsd:documentation>Building Number : The number of a building, house or lot alongside the street. Also known as &#34;primary street number&#34;. This does not number the street but rather the building</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BNN">
+				<xsd:annotation>
+					<xsd:documentation>Building Number Numeric : The numeric portion of a building number </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BNS">
+				<xsd:annotation>
+					<xsd:documentation>Building Number Suffix : Any alphabetic character, fraction or other text that may appear after the numeric portion of a building number </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="STR">
+				<xsd:annotation>
+					<xsd:documentation>Street Name : The name of the street, including the type</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="STB">
+				<xsd:annotation>
+					<xsd:documentation>Street Name Base : The base name of a roadway or artery recognized by a municipality (excluding street type and direction) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="STTYP">
+				<xsd:annotation>
+					<xsd:documentation>Street Type : The designation given to the street. (e.g. Street, Avenue, Crescent, etc.) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DIR">
+				<xsd:annotation>
+					<xsd:documentation>Direction : Direction (e.g., N, S, W, E) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="INT">
+				<xsd:annotation>
+					<xsd:documentation>Intersection : An intersection denotes that the actual address is located at or close to the intersection of two or more streets</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CAR">
+				<xsd:annotation>
+					<xsd:documentation>Care of : The name of the party who will take receipt at the specified address, and will take on responsibility for ensuring delivery to the target recipient.
+
+Note: This is included only to support the convention of writing c/- address lines. This item is not appropriate for use when information is entrusted to one party on behalf of another in some significant way.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CEN">
+				<xsd:annotation>
+					<xsd:documentation>Census Tract : A geographic sub-unit delineated for demographic purposes </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CNT">
+				<xsd:annotation>
+					<xsd:documentation>Country : Country</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CPA">
+				<xsd:annotation>
+					<xsd:documentation>County or Parish : A sub-unit of a state or province. (49 of the United States of America use the term &#34;county;&#34; Louisiana uses the term &#34;parish&#34;) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CTY">
+				<xsd:annotation>
+					<xsd:documentation>Municipality : The name of the city, town, village, or other community or delivery center </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DEL">
+				<xsd:annotation>
+					<xsd:documentation>Delimiter : Delimiters are printed without framing white space. If no value component is provided, the delimiter appears as a line break</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="POB">
+				<xsd:annotation>
+					<xsd:documentation>Post box : A numbered box located in a post station </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PRE">
+				<xsd:annotation>
+					<xsd:documentation>Precinct : A subsection of a municipality </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="STA">
+				<xsd:annotation>
+					<xsd:documentation>State or Province : A sub-unit of a country with limited sovereignty in a federally organized country</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ZIP">
+				<xsd:annotation>
+					<xsd:documentation>Postal Code : A postal code designating a region defined by the postal service</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DPID">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Point Identifier : A value that uniquely identifies the postal address</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="Code">
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="Decimal">
+		<xsd:restriction base="xsd:double"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="EntityNamePartQualifier">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="LS">
+				<xsd:annotation>
+					<xsd:documentation>Legal Status : For organizations a suffix indicating the legal status, e.g., &#34;Inc.&#34;, &#34;Co.&#34;, &#34;AG&#34;, &#34;GmbH&#34;, &#34;B.V.&#34; &#34;S.A.&#34;, &#34;Ltd.&#34; Etc.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="AC">
+				<xsd:annotation>
+					<xsd:documentation>Academic : Indicates that a prefix like &#34;Dr.&#34; or a suffix like &#34;M.D.&#34; or &#34;Ph.D.&#34; is an academic title </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="NB">
+				<xsd:annotation>
+					<xsd:documentation>Nobility : In Europe and Asia, there are still people with nobility titles (aristocrats). German &#34;von&#34; is generally a nobility title, not a mere voorvoegsel. Others are &#34;Earl of&#34; or &#34;His Majesty King of...&#34; etc. Rarely used nowadays, but some systems do keep track of this </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PR">
+				<xsd:annotation>
+					<xsd:documentation>Professional : Primarily in the British Imperial culture people tend to have an abbreviation of their professional organization as part of their credential suffices </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HON">
+				<xsd:annotation>
+					<xsd:documentation>Honorific : A honorific such as &#34;The Right Honourable&#34; or &#34;Weledelgeleerde Heer&#34;.  </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BR">
+				<xsd:annotation>
+					<xsd:documentation>Birth : A name that a person was given at birth or established as a consequence of adoption.  
+
+Note: this is not used for temporary names assigned at birth such as &#34;Baby of Smith&#34; - which is just a name with a use code of &#34;TEMP&#34;.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="AD">
+				<xsd:annotation>
+					<xsd:documentation>Acquired : A name part a person acquired.  
+
+The name part may be acquired by adoption, or the person may have chosen to use the name part for some other reason.
+
+Note: this differs from an Other/Psuedonym/Alias in that an acquired name part is acquired on a formal basis rather than an informal one (e.g. registered as part of the official name)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SP">
+				<xsd:annotation>
+					<xsd:documentation>Spouse : The name assumed from the partner in a marital relationship. Usually the spouse&#39;s family name. Note that no inference about gender can be made from the existence of spouse names</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="MID">
+				<xsd:annotation>
+					<xsd:documentation>Middle Name : Indicates that the name part is a middle name.
+Usage Notes:
+In general, the english &#39;middle name&#39; concept is all of the given names after the first. This qualifier may be used to explicitly indicate which given names are considered to be middle names. 
+The middle name qualifier may also be used with family names. This is a Scandinavian use case, matching the concept of &#34;mellomnavn&#34; / &#34;mellannamn&#34;. Note that there are specific rules that indicate what names may be taken as a mellannamn in different Scandinavian countries</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CL">
+				<xsd:annotation>
+					<xsd:documentation>Callme : Callme is used to indicate which of the various name parts is used when interacting with the person</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="IN">
+				<xsd:annotation>
+					<xsd:documentation>Initial : Indicates that a name part is just an initial. Initials do not imply a trailing period since this would not work with non-Latin scripts. Initials may consist of more than one letter, e.g., &#34;Ph.&#34; could stand for &#34;Philippe&#34; or &#34;Th.&#34; for &#34;Thomas&#34;</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PFX">
+				<xsd:annotation>
+					<xsd:documentation>Prefix : A prefix has a strong association to the immediately following name part. A prefix has no implicit trailing white space (it has implicit leading white space though).</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SFX">
+				<xsd:annotation>
+					<xsd:documentation>Suffix : A suffix has a strong association to the immediately preceding name part. A suffix has no implicit leading white space (it has implicit trailing white space though).</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="EntityNamePartType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="FAM">
+				<xsd:annotation>
+					<xsd:documentation>Family : Family name, this is the name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="GIV">
+				<xsd:annotation>
+					<xsd:documentation>Given: Given name.
+Note: don&#39;t call it &#34;first name&#34; since this given names do not always come first</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="TITLE">
+				<xsd:annotation>
+					<xsd:documentation>Title : Part of the name that is acquired as a title due to academic, legal, employment or nobility status etc.
+Note: Title name parts include name parts that come after the name such as qualifications</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DEL">
+				<xsd:annotation>
+					<xsd:documentation>Delimiter : A delimiter has no meaning other than being literally printed in this name representation. A delimiter has no implicit leading and trailing white space</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="EntityNameUse">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ABC">
+				<xsd:annotation>
+					<xsd:documentation>Alphabetic : Alphabetic transcription of name (Japanese: romaji) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SYL">
+				<xsd:annotation>
+					<xsd:documentation>Syllabic : Syllabic transcription of name (e.g., Japanese kana, Korean hangul) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="IDE">
+				<xsd:annotation>
+					<xsd:documentation>Ideographic : Ideographic representation of name (e.g., Japanese kanji, Chinese characters) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="C">
+				<xsd:annotation>
+					<xsd:documentation>Customary : Known as/conventional/the one you normally use</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="OR">
+				<xsd:annotation>
+					<xsd:documentation>Official Registry Name : the formal name as registered in an official (government) registry, but which name might not be commonly used. May correspond to the concept of legal name</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="T">
+				<xsd:annotation>
+					<xsd:documentation>Temporary : A temporary name.  Note that a name valid time can provide more detailed information.  This may also be used for temporary names assigned at birth or in emergency situations.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="I">
+				<xsd:annotation>
+					<xsd:documentation>Indigenous/Tribal : e.g. Chief Red Cloud </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="P">
+				<xsd:annotation>
+					<xsd:documentation>Other/Pseudonym/Alias: A non-official name by which the person is sometimes known.  (This may also be used to record informal names such as a nickname)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ANON">
+				<xsd:annotation>
+					<xsd:documentation>Anonymous : Anonymous assigned name (used to protect a person&#39;s identity for privacy reasons)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="A">
+				<xsd:annotation>
+					<xsd:documentation>Business Name : A name used in a Professional or Business context .
+  
+Examples: Continuing to use a maiden name in a professional context, or using a stage performing name (some of these names are also pseudonyms)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="R">
+				<xsd:annotation>
+					<xsd:documentation>Religious : A name assumed as part of a religious vocation. e.g. Sister Mary Francis, Brother John </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="OLD">
+				<xsd:annotation>
+					<xsd:documentation>No Longer in Use : This name is no longer in use (note: Names may also carry valid time ranges .  This code is used to cover the situations where it is known that the name is no longer valid, but no particular time range for its use is known)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DN">
+				<xsd:annotation>
+					<xsd:documentation>Do Not Use : This name should no longer be used when interacting with the person (i.e .  in addition to no longer being used, the name should not be even mentioned when interacting with the person)
+
+Note: applications are not required to compare names labeled &#34;Do Not Use&#34; and other names in order to eliminate name parts that are common between the other name and a name labeled &#34;Do Not Use&#34;.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="M">
+				<xsd:annotation>
+					<xsd:documentation>Maiden Name : A name used prior to marriage.
+
+Note that marriage naming customs vary greatly around the world.  This name use is for use by applications that collect and store &#34;maiden&#34; names.  Though the concept of maiden name is often gender specific, the use of this term is not gender specific.  The use of this term does not imply any particular history for a person&#39;s name, nor should the maiden name be determined algorithmically</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SRCH">
+				<xsd:annotation>
+					<xsd:documentation>Search Type Uses: A name intended for use in searching or matching</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PHON">
+				<xsd:annotation>
+					<xsd:documentation>Phonetic : The name as understood by the data enterer, i.e. a close approximation of a phonetic spelling of the name, not based on a phonetic algorithm.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="PostalAddressUse">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="H">
+				<xsd:annotation>
+					<xsd:documentation>Home address : A communication address at a home, attempted contacts for business purposes might intrude privacy and chances are one will contact family or other household members instead of the person one wishes to call. Typically used with urgent cases, or if no other contacts are available</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HP">
+				<xsd:annotation>
+					<xsd:documentation>Primary home : The primary home, to reach a person after business hours </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HV">
+				<xsd:annotation>
+					<xsd:documentation>Vacation home : A vacation home, to reach a person while on vacation </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="WP">
+				<xsd:annotation>
+					<xsd:documentation>Work place : An office address. First choice for business related contacts during business hours </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DIR">
+				<xsd:annotation>
+					<xsd:documentation>Direct : Indicates a work place address or telecommunication address that reaches the individual or organization directly without intermediaries. For phones, often referred to as a &#39;private line&#39; </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PUB">
+				<xsd:annotation>
+					<xsd:documentation>Public : Indicates a work place address or telecommunication address that is a &#39;standard&#39; address which may reach a reception service, mail-room, or other intermediary prior to the target entity </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BAD">
+				<xsd:annotation>
+					<xsd:documentation>Bad address : A flag indicating that the address is bad, in fact, useless </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PHYS">
+				<xsd:annotation>
+					<xsd:documentation>Physical Visit Address : Used primarily to visit an address</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PST">
+				<xsd:annotation>
+					<xsd:documentation>Postal Address : Used to send mail</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="TMP">
+				<xsd:annotation>
+					<xsd:documentation>Temporary Address : A temporary address, may be good for visit or mailing. Note that an address history can provide more detailed information.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ABC">
+				<xsd:annotation>
+					<xsd:documentation>Alphabetic : Alphabetic transcription of name (Japanese: romaji) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="IDE">
+				<xsd:annotation>
+					<xsd:documentation>Ideographic : Ideographic representation of name (e.g., Japanese kanji, Chinese characters) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SYL">
+				<xsd:annotation>
+					<xsd:documentation>Syllabic : Syllabic transcription of name (e.g., Japanese kana, Korean hangul) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SRCH">
+				<xsd:annotation>
+					<xsd:documentation>Search Type Uses : A name intended for use in searching or matching.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SNDX">
+				<xsd:annotation>
+					<xsd:documentation>Soundex : An address spelled according to the SoundEx algorithm</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PHON">
+				<xsd:annotation>
+					<xsd:documentation>Phonetic : The address as understood by the data enterer, i.e. a close approximation of a phonetic spelling of the address, not based on a phonetic algorithm</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_EntityNamePartQualifier">
+		<xsd:list itemType="EntityNamePartQualifier"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_EntityNameUse">
+		<xsd:list itemType="EntityNameUse"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_PostalAddressUse">
+		<xsd:list itemType="PostalAddressUse"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_TelecommunicationAddressUse">
+		<xsd:list itemType="TelecommunicationAddressUse"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_TelecommunicationCapability">
+		<xsd:list itemType="TelecommunicationCapability"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="TelecommunicationAddressUse">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="H">
+				<xsd:annotation>
+					<xsd:documentation>Home address : A communication address at a home, attempted contacts for business purposes might intrude privacy and chances are one will contact family or other household members instead of the person one wishes to call. Typically used with urgent cases, or if no other contacts are available</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HP">
+				<xsd:annotation>
+					<xsd:documentation>Primary Home : The primary home, to reach a person after business hours </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HV">
+				<xsd:annotation>
+					<xsd:documentation>Vacation Home : A vacation home, to reach a person while on vacation </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="WP">
+				<xsd:annotation>
+					<xsd:documentation>Work Place : An office address. First choice for business related contacts during business hours </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DIR">
+				<xsd:annotation>
+					<xsd:documentation>Direct : Indicates a work place address or telecommunication address that reaches the individual or organization directly without intermediaries. For phones, often referred to as a &#39;private line&#39; </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PUB">
+				<xsd:annotation>
+					<xsd:documentation>Public : Indicates a work place address or telecommunication address that is a &#39;standard&#39; address which may reach a reception service, mail-room, or other intermediary prior to the target entity </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BAD">
+				<xsd:annotation>
+					<xsd:documentation>Bad address : A flag indicating that the address is bad, in fact, useless </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="TMP">
+				<xsd:annotation>
+					<xsd:documentation>Temporary address : A temporary address, may be good for visit or mailing. Note that an address history can provide more detailed information </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="AS">
+				<xsd:annotation>
+					<xsd:documentation>Answering Service : An automated answering machine used for less urgent cases and if the main purpose of contact is to leave a message or access an automated announcement</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="EC">
+				<xsd:annotation>
+					<xsd:documentation>Emergency Contact : A contact specifically designated to be used for emergencies. This is the first choice in emergencies, independent of any other use codes </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="MC">
+				<xsd:annotation>
+					<xsd:documentation>Mobile Contact : A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PG">
+				<xsd:annotation>
+					<xsd:documentation>Pager: A paging device suitable to solicit a callback or to leave a very short message </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="TelecommunicationCapability">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="voice">
+				<xsd:annotation>
+					<xsd:documentation>Voice : This device can receive voice calls (i.e. talking to another person, or a recording device, or a voice activated computer)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="fax">
+				<xsd:annotation>
+					<xsd:documentation>Fax : This device can receive faxes.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="data">
+				<xsd:annotation>
+					<xsd:documentation>Data : This device can receive data calls (i.e. modem)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="tty">
+				<xsd:annotation>
+					<xsd:documentation>Text : This device is a text telephone.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="sms">
+				<xsd:annotation>
+					<xsd:documentation>SMS : This device can receive SMS messages</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="Uid">
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="UncertaintyType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="U">
+				<xsd:annotation>
+					<xsd:documentation>Uniform : The uniform distribution assigns a constant probability over the entire interval of possible outcomes, while all outcomes outside this interval are assumed to have zero probability. The width of this interval is 2 s v3. Thus, the uniform distribution assigns the probability densities f(x) = (2 s v3)-1 to values µ - s v3 = x = µ + s v3 and f(x) = 0 otherwise</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="N">
+				<xsd:annotation>
+					<xsd:documentation>Normal (Gaussian) : This is the well-known bell-shaped normal distribution. Because of the central limit theorem, the normal distribution is the distribution of choice for an unbounded random variable that is an outcome of a combination of many stochastic processes. Even for values bounded on a single side (i.e. greater than 0) the normal distribution may be accurate enough if the mean is &#34;far away&#34; from the bound of the scale measured in terms of standard deviations</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="LN">
+				<xsd:annotation>
+					<xsd:documentation>Log-Normal : The logarithmic normal distribution is used to transform skewed random variable X into a normally distributed random variable U = log X. The log-normal distribution can be specified with the properties mean µ and standard deviation s. Note however that mean µ and standard deviation s are the parameters of the raw value distribution, not the transformed parameters of the lognormal distribution that are conventionally referred to by the same letters. Those log-normal parameters µ log and slog relate to the mean µ and standard deviation s of the data value through slog2 = log (s2/µ2 + 1) and µlog = log µ - slog2/2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="G">
+				<xsd:annotation>
+					<xsd:documentation>? (gamma) : The gamma-distribution used for data that is skewed and bounded to the right, i.e. where the maximum of the distribution curve is located near the origin. The ?-distribution has two parameters a and ß. The relationship to mean µ and variance s2 is µ = a ß and s2 = a ß2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="E">
+				<xsd:annotation>
+					<xsd:documentation>Exponential : Used for data that describes extinction. The exponential distribution is a special form of ?-distribution where a = 1, hence, the relationship to mean µ and variance s2 are µ = ß and s2 = ß2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="X2">
+				<xsd:annotation>
+					<xsd:documentation>? : Used to describe the sum of squares of random variables that occurs when a variance is estimated (rather than presumed) from the sample. The only parameter of the ?2-distribution is ?, so called the number of degrees of freedom (which is the number of independent parts in the sum). The ?2-distribution is a special type of ?-distribution with parameter a = ? /2 and ß = 2. Hence, µ = ? and s2 = 2 ?</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="T">
+				<xsd:annotation>
+					<xsd:documentation>t (student) : Used to describe the quotient of a normal random variable and the square root of a ?2 random variable. The t-distribution has one parameter ?, the number of degrees of freedom. The relationship to mean µ and variance s2 are: µ = 0 and s2 = ? / (? - 2)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="F">
+				<xsd:annotation>
+					<xsd:documentation>F : Used to describe the quotient of two ?2 random variables. The F-distribution has two parameters ?1 and ?2, which are the numbers of degrees of freedom of the numerator and denominator variable respectively. The relationship to mean µ and variance s2 are: µ = ?2 / (?2 - 2) and s 2 = (2 ?22 (? 2 + ?1 - 2)) / (?1 (?2 - 2)2 (?2 - 4))</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="B">
+				<xsd:annotation>
+					<xsd:documentation>?(beta) : The beta-distribution is used for data that is bounded on both sides and may or may not be skewed (e.g., occurs when probabilities are estimated.) Two parameters a and ß are available to adjust the curve. The mean µ and variance s2 relate as follows: µ = a / (a + ß) and (s2 = a ß/((a + ß)2 (a + ß + 1))</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="Uri">
+		<xsd:restriction base="xsd:anyURI"/>
+	</xsd:simpleType>
+</xsd:schema>

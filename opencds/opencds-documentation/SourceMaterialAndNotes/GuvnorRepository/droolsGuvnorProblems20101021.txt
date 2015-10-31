@@ -1,0 +1,40 @@
+1.  We have problems with saves failing
+
+2.  we have problems with the Guvnor tester not able to create certain structures of test data.
+
+3.  we have problems with trying to set values in RHS of facts lists and referencing a variable assigned in the LHS:  workaround is to set RHS before setting LHS.
+
+4.  Archiving everything, and then deleting all archives leaves a bunch of links in the following lists
+
+Browse | Assets | Inbox | Incoming changes 
+			|| Recently Opened 
+			|| Recently Edited
+
+This does not happen to the following lists:
+Browse | Assets | By Status 
+		|| By Category 
+
+
+5.  Nested drop-downs do not work with DSL, but they work in guided rules.
+5b.  In guided rules, nested drop-downs work to 3 levels on LHS, but only to 2 levels on RHS.
+
+6. Need to verify that extending class does not lead to unexpected behaviors.
+
+7. Assigning enumeration to a list causes unexpected behavior when populating items in Test.
+
+8. Web decision tables do not support nested dropdowns.
+
+9. In Firefox (at least), text field for free form DRL in Guided rules editor is very small.
+
+10. Admin --> Export function results in needing to log back in (otherwise, error message generated when trying to work on new assets)
+
+11. Guvnor guided editor problem -> once add name to variable, cannot remove it.
+
+12. Guvnor test scenarios --> once defining attributes for Fact type, cannot add new facts of type and have attributes show up for data entry (can't add another instance of fact).
+
+13. Guvnor categories --> must delete contents individually before can get rid of them.  Can't delete entire package and then get rid of categories that reference them.  Probably pointers don't get reset.
+
+14. DSL --> depending on name/relative order, behavior changes.  See Procedure DSLs in extract 2011_03_30b.  Issue seems to be when narrative text in front of first variable is the same.
+
+15. Guvnor test scenarios --> for globals with String attributes, cannot add values for those attributes.
+Appears to be https://issues.jboss.org/browse/GUVNOR-1181.

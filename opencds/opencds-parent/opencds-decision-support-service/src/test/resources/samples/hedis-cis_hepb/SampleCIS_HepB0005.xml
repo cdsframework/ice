@@ -1,0 +1,27 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- HEDIS-HepB (ICD9CM: 070.23 )-->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CIS_HepB0005" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="20090902101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <problems>
+                    <problem> <!--Encounter Diagnosis: HepBtitis A (ICD9CM: 070.1)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                        <id extension="problem004" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <problemCode code="070.23" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="HepBtitis A (ICD9CM: 070.23)"/>
+                        <problemEffectiveTime high="20100304020700" low="20100304020700"/>
+                    </problem>
+                </problems>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

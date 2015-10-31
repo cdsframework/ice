@@ -1,0 +1,41 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../../../../../../../opencds-knowledge-repository-data/target/classes/resources_v1.1/schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CCS0003" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19770202101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent><!--Any Encounter in the last year-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="1550599" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" displayName="Any Encounter"/>
+                        <encounterEventTime high="20111023115000" low="20111023115000"/>
+                    </encounterEvent>
+                </encounterEvents>
+                <observationResults>
+                    <observationResult><!--HPV Tests-->
+                        <id extension="obr001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <observationFocus code="21440-3" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="HPV Tests"/>
+                        <observationEventTime high="20080305" low="20080305"/>
+                        <observationValue><boolean value="true"/></observationValue>
+                    </observationResult>
+                    <observationResult><!--Cervical Cytology-->
+                        <id extension="obr002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <observationFocus code="10524-7" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Cervical Cytology"/>
+                        <observationEventTime high="20080308" low="20080308"/>
+                        <observationValue><boolean value="true"/></observationValue>
+                    </observationResult>
+                </observationResults>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

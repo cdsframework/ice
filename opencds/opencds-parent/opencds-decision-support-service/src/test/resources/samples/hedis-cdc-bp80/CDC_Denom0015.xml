@@ -1,0 +1,86 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput vmr%20schema/cdsInput.xsd">
+	<templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+	<vmrInput>
+		<!-- Denomenator check:  pharmacy 
+		-expect Denomenator met-->
+		<templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+		<patient>
+			<templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+			<id extension="CDC_Denom0015" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+			<demographics>
+				<birthTime value="19700202101010"/>
+				<gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+			</demographics>
+			<clinicalStatements>
+				<encounterEvents>
+					<encounterEvent>
+						<!--Encounter acute inpatient visit (CPT) and discharged alive with Acute MI Diagnosis (ICD9CM)-->
+						<!-- use this encounter framgent with the "O" encounter type for checking denomiantor pharmacy.  The CPT code has been moved to a related Procedure -->
+						<templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+						<id extension="encounter001" root="2.16.840.1.113883.3.795.5.2"/>
+						<dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+						<!-- this maps to "Outpatient" -->
+						<encounterType code="O" codeSystem="2.16.840.1.113883.3.795.5.2.12.3" codeSystemName="UUHC Proprietary" displayName="Outpatient for UUHC"/>
+						<encounterEventTime high="20100301115000" low="20100301115000"/>
+						<relatedClinicalStatement>
+							<targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							<problem>
+								<!--Encounter Diagnosis ICD9CM-->
+								<templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+								<id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+								<problemCode code="070.1" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Hepatitis A (ICD9CM: 070.1)"/>
+								<problemEffectiveTime high="20100301115000" low="20100301115000"/>
+								<importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+							</problem>
+						</relatedClinicalStatement>
+						<!-- related procedure for encounter -->
+						<relatedClinicalStatement>
+							<targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							<procedureEvent>
+								<id extension="proc001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+								<procedureCode code="99202" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Outpatient Encounter"/>
+								<procedureTime high="20100301115000" low="20100301115000"/>
+							</procedureEvent>
+						</relatedClinicalStatement>
+						<relatedClinicalStatement>
+							<targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							<!-- medication.  MUST be part of an outpatient encounter.  To map to this, make sure encounter type of  -->
+							<substanceDispensationEvent>
+								<id extension="subDispense001" root="2.16.840.1.113883.3.795.5.2"/>
+								<substance>
+									<id extension="sub001_001" root="2.16.840.1.113883.3.795.5.2"/>
+									<substanceCode code="CDC-A^insulin" codeSystem="2.16.840.1.113883.3.795.5.2.12.8" codeSystemName="OPENCDS_UTAH_HEDIS_MEDICATION_CODESET" displayName="CDC-A CODE"/>
+								</substance>
+								<daysSupply value="120"/>
+								<dispensationTime high="20110305" low="20110305"/>
+							</substanceDispensationEvent>
+						</relatedClinicalStatement>
+					</encounterEvent>
+					<encounterEvent><!--Encounter Nonacute Inpatient t  visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter002" root="2.16.840.1.113883.3.795.5.2.12.2"/> <!-- OID is OPENCDS_UTAH_ENCOUNTER -->
+                        <encounterType code="I" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/> <!-- Pulled from VISIT_DM.VISIT --> 
+                        <encounterEventTime high="20111202101010" low="20111202101010"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="070.1" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Hepatitis A (ICD9CM: 070.1)"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                        <relatedClinicalStatement> <!-- CPT4 codes are mapped as procedure events in the vMR -->
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id extension="proc002"   root="a5a9ba85-2a46-46e8-bf52-da356f2e756f"/>
+                                <procedureCode code="99316" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Nonacute Inpatient Visit"/>
+                                <procedureTime high="20111202101010" low="20111202101010"/>                                
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+				</encounterEvents>
+			</clinicalStatements>
+		</patient>
+	</vmrInput>
+</in:cdsInput>

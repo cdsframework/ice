@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../../../../../../../opencds-knowledge-repository-data/target/classes/resources_v1.1/schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+			<!-- ALL: 22 years old, female, 
+				problem: pregnancy,sexual activity; 
+				procedures: sexual activity, chlamydia tests, pregnancy Tests; 
+				labs: chlamydia tests, pregnancy Tests, sexual activity;
+				meds: contraceptives (C2839), 
+				denom inclusion by claims, denom inclusions by pharmacy, denomin inclusions met - expect 21-25 and 16-25 years assertions to fire-->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CHL0002" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19900102101010"/> <!--22 yrs old on 20120201-->
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <procedureEvents>
+                    <procedureEvent> <!--Procedure CPT sexual activity-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                        <id extension="procedure001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                        <procedureCode code="11976" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="sexual activity"/>
+                        <procedureTime high="20110305" low="20110305"/>
+                    </procedureEvent>
+                </procedureEvents>
+           </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

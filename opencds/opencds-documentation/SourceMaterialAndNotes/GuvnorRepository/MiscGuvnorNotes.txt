@@ -1,0 +1,141 @@
+[<scope>] [<type>] <language expression>=<rule mapping>
+
+[condition] [droolsbook.bank.model.Customer] The Customer does not have address=Customer(address == null)
+
+
+=============
+
+[condition] [] There is an Account that=$account : Account()
+[condition] [] - has owner=owner != null
+
+[consequence] [] Display {message_type_enum} for 
+
+Gender is {X:ENUM:Patient.administrativeGender} = $patient: Patient(administrativeGender == "{X}")
+
+Gender is {X:ENUM:Picklist.administrativeGender} = $patient: Patient(administrativeGender == "{X}")
+
+Problem is type {ZZZ:ENUM:Picklist.problemCategory} problem {X:ENUM:Picklist.problemConcepts} = Concepts(conceptsAsList contains "{X}")
+
+Problem
+	Concepts problemConcepts
+
+
+EnumerationHelper
+	String problemConceptType
+	String problemConcept
+
+'Problem.problemCodeSystem' : ['ICD9CM', 'SNOMED CT']
+'Problem.problemCode[problemCodeSystem=ICD9CM]' : ['250', '250.01' ]
+'Problem.problemCode[problemCodeSystem=SNOMED CT]' : ['SMD1', 'SMD2' ]
+
+[when]CO Patient has disease type {X:ENUM:Concept.problemConceptType} and disease {Y:ENUM:Concept.conceptValue} = $concept : Concept( conceptValue == "{Y}" ) and ProblemWithConcepts( conceptObjectsAsList contains $concept )
+
+
+Problem
+	id $id
+
+ProblemConcept
+	referredId
+	Concept
+
+'Problem.problemCodeSystem' : ['ICD9CM', 'SNOMED CT']
+'Problem.problemCode[problemCodeSystem=ICD9CM]' : ['250', '250.01' ]
+'Problem.problemCode[problemCodeSystem=SNOMED CT]' : ['SMD1', 'SMD2' ]
+
+'EnumerationHelper.problemConceptType' : ['Endocrine', 'Pulmonary', 'All']
+'EnumerationHelper.problemConceptType[problemConceptType=Endocrine]' : ['Diabetes mellitus', 'Hyperthyroidism' ]
+'EnumerationHelper.problemConceptType[problemConceptType=Pulmonary]' : ['Asthma', 'COPD' ]
+'EnumerationHelper.problemConceptType[problemConceptType=All]' : ['Diabetes mellitus', 'Hyperthyroidism', 'Asthma', 'COPD' ]
+
+'Concepts.problemConceptType' : ['Endocrine', 'Pulmonary']
+'Concepts.conceptsAsList[problemConceptType=Endocrine]' : ['EndConcept1', 'EndConcept2' ]
+'Concepts.conceptsAsList[problemConceptType=Pulmonary]' : ['PulmConcept1', 'PulmConcept2' ]
+
+'Concept.problemConceptType' : ['Endocrine', 'Pulmonary', 'All']
+'Concept.conceptValue[problemConceptType=Endocrine]' : ['EndConcept1', 'EndConcept2' ]
+'Concept.conceptValue[problemConceptType=Pulmonary]' : ['PulmConcept1', 'PulmConcept2' ]
+'Concept.conceptValue[problemConceptType=All]' : ['EndConcept1', 'EndConcept2', 'PulmConcept1', 'PulmConcept2' ]
+
+[when]Patient has concept type {X:ENUM:Concept.problemConceptType} and disease {Y:ENUM:Concept.conceptValue} = Concept( problemConceptType == "{X}" , conceptValue == "{Y}" )
+
+'Concept.problemConceptType' : ['Endocrine2', 'Pulmonary2']
+'Concept.conceptValue[problemConceptType=Endocrine2]' : ['EndConcept1', 'EndConcept2']
+'Concept.conceptValue[problemConceptType=Pulmonary2]' : ['PulmConcept1', 'PulmConcept2']
+
+
+problemIdRoot
+problemIdExtension
+problemConceptType
+problemConcept
+
+procedureIdRoot
+procedureIdExtension
+approachSiteConcept
+
+clinicalStatementIdRoot
+clinicalStatementIdExtension
+clinicalStatementType
+concept
+
+
+ProbA
+Probext
+Diabetes_Mellitus
+
+
+ProbA
+Probext
+Diabetes_Mellitus_Type_II
+
+problemCodeSystem
+problemCode
+problemConcept
+
+ICD9CM
+250.01
+Diabetes_Mellitus
+
+ICD9CM
+250.01
+Diabetes_Mellitus_Type_II
+
+codeSystem
+code
+concept
+
+
+Problem
+	$idroot: idroot
+	$idextension: idextension
+
+ProblemConcept
+	idroot == $idroot
+	idextension == $idextension
+	concept == "diabetes_mellitus"
+
+Problem
+	$problemCodeSystem : problemCodeSystem
+	$problemCode : problemCode
+
+ProblemConcept
+	problemCodeSystem == $problemCodeSystem
+	problemCode == $problemCode
+	concept == "diabetes_mellitus"
+
+TerminologyValueSetsRequired
+	List<TerminologyValueSet> 
+
+TerminologyValueSet
+	String id
+	String version
+
+SetConcepts_DiabetesMellitus_1.0.0
+
+TerminologyBundlesToUse.add("Diabetes_Mellitus, 1.0")
+
+GetConceptsFromTerminologyService(terminologyBundlesToUse)
+
+
+
+
+	

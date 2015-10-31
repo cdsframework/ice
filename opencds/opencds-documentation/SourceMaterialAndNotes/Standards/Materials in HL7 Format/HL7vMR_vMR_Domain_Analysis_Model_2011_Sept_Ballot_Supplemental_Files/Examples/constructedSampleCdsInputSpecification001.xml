@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sample CDS input specification using vMR DAM XSDs derived from vMR DAM Enterprise Architect model. Specifies requirements for mammogram testing: age, gender, bresat cancer history, past mastectomies, and past mammograms. -->
+<cdsInputSpecification xsi:noNamespaceSchemaLocation="..\Schemas\cdsInputSpecification.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<patientInputSpecification>
+		<requiredEvaluatedPersonAttribute code="age"/>
+		<requiredEvaluatedPersonAttribute code="gender"/>
+		<!-- requirement for breast cancer problem observations -->
+		<clinicalStatementInputSpecification>		
+			<requiredGeneralClinicalStatementClass code="Problem"/>
+			<requiredSpecificClinicalStatementClass code="Problem"/>
+			<codedAttributeRequirement>
+				<targetCodedAttribute code="problemCode"></targetCodedAttribute>
+				<targetCode codeSystem="icd9Oid" code="174.0"/>
+				<targetCode codeSystem="icd9Oid" code="174.1"/>
+				<targetCode codeSystem="icd9Oid" code="174.2"/>
+				<targetCode codeSystem="icd9Oid" code="174.3"/>
+				<targetCode codeSystem="icd9Oid" code="174.4"/>
+				<targetCode codeSystem="icd9Oid" code="174.5"/>
+				<targetCode codeSystem="icd9Oid" code="174.6"/>
+				<targetCode codeSystem="icd9Oid" code="174.8"/>
+				<targetCode codeSystem="icd9Oid" code="174.9"/>
+			</codedAttributeRequirement>
+		</clinicalStatementInputSpecification>
+		<!-- requirement for mastectomy history -->
+		<clinicalStatementInputSpecification>		
+			<requiredGeneralClinicalStatementClass code="Procedure"/>
+			<requiredSpecificClinicalStatementClass code="ProcedureEvent"/>
+			<codedAttributeRequirement>
+				<targetCodedAttribute code="procedureCode"></targetCodedAttribute>
+				<targetCode codeSystem="cptOid" code="19180"/>
+				<targetCode codeSystem="cptOid" code="19200"/>
+				<targetCode codeSystem="cptOid" code="19240"/>
+				<targetCode codeSystem="cptOid" code="19303"/>
+				<targetCode codeSystem="cptOid" code="19304"/>
+				<targetCode codeSystem="cptOid" code="19305"/>
+				<targetCode codeSystem="cptOid" code="19306"/>
+				<targetCode codeSystem="cptOid" code="19307"/>
+			</codedAttributeRequirement>
+		</clinicalStatementInputSpecification>
+		<!-- requirement for mammogram history from past 4 years-->
+		<clinicalStatementInputSpecification>		
+			<requiredGeneralClinicalStatementClass code="Procedure"/>
+			<requiredSpecificClinicalStatementClass code="ProcedureEvent"/>
+			<codedAttributeRequirement>
+				<targetCodedAttribute code="procedureCode"></targetCodedAttribute>
+				<targetCode codeSystem="cptOid" code="76090"/>
+				<targetCode codeSystem="cptOid" code="76091"/>
+				<targetCode codeSystem="cptOid" code="76092"/>
+				<targetCode codeSystem="cptOid" code="77055"/>
+				<targetCode codeSystem="cptOid" code="77056"/>
+				<targetCode codeSystem="cptOid" code="77057"/>
+			</codedAttributeRequirement>
+			<timeAttributeRequirement>
+				<targetTimeAttribute code="procedureTime"/>
+				<searchBackTimePeriod value="4" unit="a"/>
+			</timeAttributeRequirement>
+		</clinicalStatementInputSpecification>
+	</patientInputSpecification>
+</cdsInputSpecification>

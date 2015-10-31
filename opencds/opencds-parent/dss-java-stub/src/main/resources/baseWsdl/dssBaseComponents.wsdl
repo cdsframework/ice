@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:dss="http://www.omg.org/spec/CDSS/201105/dss" xmlns:dssWsdl="http://www.omg.org/spec/CDSS/201105/dssWsdl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://schemas.xmlsoap.org/soap/encoding/" name="DSS_BASE_COMPONENTS_WSDL" targetNamespace="http://www.omg.org/spec/CDSS/201105/dssWsdl">
+	<wsdl:types>
+		<xs:schema targetNamespace="http://www.omg.org/spec/CDSS/201105/dss" elementFormDefault="qualified">
+			<xs:include schemaLocation="OmgDssSchema.xsd"/>
+		</xs:schema>
+	</wsdl:types>
+	<wsdl:message name="DSSRuntimeExceptionFault">
+		<wsdl:part name="dssRuntimeException" element="dss:DSSRuntimeException"/>
+	</wsdl:message>	
+	<wsdl:message name="UnrecognizedScopingEntityExceptionFault">
+		<wsdl:part name="unrecognizedScopingEntityException" element="dss:UnrecognizedScopingEntityException"/>
+	</wsdl:message>
+	<wsdl:message name="UnrecognizedScopedEntityExceptionFault">
+		<wsdl:part name="unrecognizedScopedEntityException" element="dss:UnrecognizedScopedEntityException"/>
+	</wsdl:message>
+	<wsdl:message name="UnrecognizedTraitCriterionExceptionFault">
+		<wsdl:part name="unrecognizedTraitCriterionException" element="dss:UnrecognizedTraitCriterionException"/>
+	</wsdl:message>
+	<wsdl:message name="InvalidTraitCriterionDataFormatExceptionFault">
+		<wsdl:part name="invalidTraitCriterionDataFormatException" element="dss:InvalidTraitCriterionDataFormatException"/>
+	</wsdl:message>
+	<wsdl:message name="UnrecognizedLanguageExceptionFault">
+		<wsdl:part name="unrecognizedLanguageException" element="dss:UnrecognizedLanguageException"/>
+	</wsdl:message>
+	<wsdl:message name="describeProfileRequest">
+		<wsdl:part name="parameters" element="dss:describeProfile"/>
+	</wsdl:message>
+	<wsdl:message name="describeProfileResponse">
+		<wsdl:part name="parameters" element="dss:describeProfileResponse"/>
+	</wsdl:message>
+	<wsdl:message name="describeScopingEntityRequest">
+		<wsdl:part name="parameters" element="dss:describeScopingEntity"/>
+	</wsdl:message>
+	<wsdl:message name="describeScopingEntityHierarchyRequest">
+		<wsdl:part name="parameters" element="dss:describeScopingEntityHierarchy"/>
+	</wsdl:message>
+	<wsdl:message name="describeScopingEntityResponse">
+		<wsdl:part name="parameters" element="dss:describeScopingEntityResponse"/>
+	</wsdl:message>
+	<wsdl:message name="describeScopingEntityHierarchyResponse">
+		<wsdl:part name="parameters" element="dss:describeScopingEntityHierarchyResponse"/>
+	</wsdl:message>
+	<wsdl:message name="describeSemanticRequirementRequest">
+		<wsdl:part name="parameters" element="dss:describeSemanticRequirement"/>
+	</wsdl:message>
+	<wsdl:message name="describeSemanticRequirementResponse">
+		<wsdl:part name="parameters" element="dss:describeSemanticRequirementResponse"/>
+	</wsdl:message>
+	<wsdl:message name="describeSemanticSignifierRequest">
+		<wsdl:part name="parameters" element="dss:describeSemanticSignifier"/>
+	</wsdl:message>
+	<wsdl:message name="describeSemanticSignifierResponse">
+		<wsdl:part name="parameters" element="dss:describeSemanticSignifierResponse"/>
+	</wsdl:message>
+	<wsdl:message name="UnsupportedLanguageExceptionFault">
+		<wsdl:part name="unsupportedLanguageException" element="dss:UnsupportedLanguageException"/>
+	</wsdl:message>
+	<wsdl:message name="findKMsRequest">
+		<wsdl:part name="parameters" element="dss:findKMs"/>
+	</wsdl:message>
+	<wsdl:message name="findKMsResponse">
+		<wsdl:part name="parameters" element="dss:findKMsResponse"/>
+	</wsdl:message>
+	<wsdl:message name="listKMsResponse">
+		<wsdl:part name="parameters" element="dss:listKMsResponse"/>
+	</wsdl:message>
+	<wsdl:message name="getKMDataRequirementsRequest">
+		<wsdl:part name="parameters" element="dss:getKMDataRequirements"/>
+	</wsdl:message>
+	<wsdl:message name="getKMDataRequirementsResponse">
+		<wsdl:part name="parameters" element="dss:getKMDataRequirementsResponse"/>
+	</wsdl:message>
+	<wsdl:message name="getKMDataRequirementsForEvaluationAtSpecifiedTimeRequest">
+		<wsdl:part name="parameters" element="dss:getKMDataRequirementsForEvaluationAtSpecifiedTime"/>
+	</wsdl:message>
+	<wsdl:message name="getKMEvaluationResultSemanticsRequest">
+		<wsdl:part name="parameters" element="dss:getKMEvaluationResultSemantics"/>
+	</wsdl:message>
+	<wsdl:message name="evaluateRequest">
+		<wsdl:part name="parameters" element="dss:evaluate"/>
+	</wsdl:message>
+	<wsdl:message name="evaluateResponse">
+		<wsdl:part name="parameters" element="dss:evaluateResponse"/>
+	</wsdl:message>
+	<wsdl:message name="evaluateAtSpecifiedTimeResponse">
+		<wsdl:part name="parameters" element="dss:evaluateAtSpecifiedTimeResponse"/>
+	</wsdl:message>
+	<wsdl:message name="evaluateIterativelyResponse">
+		<wsdl:part name="parameters" element="dss:evaluateIterativelyResponse"/>
+	</wsdl:message>
+	<wsdl:message name="evaluateIterativelyAtSpecifiedTimeResponse">
+		<wsdl:part name="parameters" element="dss:evaluateIterativelyAtSpecifiedTimeResponse"/>
+	</wsdl:message>
+	<wsdl:message name="evaluateIterativelyAtSpecifiedTimeRequest">
+		<wsdl:part name="parameters" element="dss:evaluateIterativelyAtSpecifiedTime"/>
+	</wsdl:message>
+	<wsdl:message name="getKMDescriptionRequest">
+		<wsdl:part name="parameters" element="dss:getKMDescription"/>
+	</wsdl:message>
+	<wsdl:message name="getKMDescriptionResponse">
+		<wsdl:part name="parameters" element="dss:getKMDescriptionResponse"/>
+	</wsdl:message>
+	<wsdl:message name="getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse">
+		<wsdl:part name="parameters" element="dss:getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse"/>
+	</wsdl:message>
+	<wsdl:message name="getKMEvaluationResultSemanticsResponse">
+		<wsdl:part name="parameters" element="dss:getKMEvaluationResultSemanticsResponse"/>
+	</wsdl:message>
+	<wsdl:message name="InvalidTimeZoneOffsetExceptionFault">
+		<wsdl:part name="invalidTimeZoneOffsetException" element="dss:InvalidTimeZoneOffsetException"/>
+	</wsdl:message>
+	<wsdl:message name="RequiredDataNotProvidedExceptionFault">
+		<wsdl:part name="requiredDataNotProvidedException" element="dss:RequiredDataNotProvidedException"/>
+	</wsdl:message>
+	<wsdl:message name="InvalidDriDataFormatExceptionFault">
+		<wsdl:part name="invalidDriDataFormatException" element="dss:InvalidDriDataFormatException"/>
+	</wsdl:message>
+	<wsdl:message name="EvaluationExceptionFault">
+		<wsdl:part name="evaluationException" element="dss:EvaluationException"/>
+	</wsdl:message>
+	<wsdl:message name="evaluateAtSpecifiedTimeRequest">
+		<wsdl:part name="parameters" element="dss:evaluateAtSpecifiedTime"/>
+	</wsdl:message>
+	<wsdl:message name="describeTraitRequest">
+		<wsdl:part name="parameters" element="dss:describeTrait"/>
+	</wsdl:message>
+	<wsdl:message name="evaluateIterativelyRequest">
+		<wsdl:part name="parameters" element="dss:evaluateIteratively"/>
+	</wsdl:message>
+	<wsdl:message name="describeTraitResponse">
+		<wsdl:part name="parameters" element="dss:describeTraitResponse"/>
+	</wsdl:message>
+	<wsdl:message name="listProfilesResponse">
+		<wsdl:part name="parameters" element="dss:listProfilesResponse"/>
+	</wsdl:message>
+	<wsdl:message name="listKMsRequest">
+		<wsdl:part name="parameters" element="dss:listKMs"/>
+	</wsdl:message>
+	<wsdl:message name="listProfilesRequest">
+		<wsdl:part name="parameters" element="dss:listProfiles"/>
+	</wsdl:message>
+</wsdl:definitions>

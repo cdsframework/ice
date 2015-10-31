@@ -1,0 +1,1618 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="org.opencds.vmr.v1_0.schema.datatypes" xmlns:altova="http://www.altova.com/xml-schema-extensions" targetNamespace="org.opencds.vmr.v1_0.schema.datatypes">
+	<xsd:annotation>
+		<xsd:documentation>
+Introduction
+------------
+
+This XML document was originally developed in the course of development of 
+the ISO/HL7 21090 standard (Healthcare Datatypes). This XML document contains 
+either a part or all of the Healthcare Datatypes schema implementation for 
+Healthcare Datatypes examples conformant to the Healthcare Datatypes schemas.
+
+ISO/HL7 gives users of Healthcare Datatypes free license to this XML document 
+or modifications thereof for use in hardware or software products claiming 
+conformance to Healthcare Datatypes.
+
+Those intending to use this XML document in hardware or software products are 
+advised that its use may infringe existing patents. The original developers 
+of this XML document and his/her company, the subsequent editors and their 
+companies, and ISO/HL7 have no liability for use of this XML document or 
+modifications thereof in an implementation.
+
+Copyright is not released for non Healthcare Datatypes conforming products. 
+The organizations who contributed to this XML document retain the full 
+right to use the code for their own purpose, assign or donate their 
+contribution to a third party and inhibit third parties from using 
+their contribution for non Healthcare Datatypes conforming products.
+
+Copyright (c) 2005-2009 ISO/HL7.
+
+This XML document is provided for informative purposes only. If any parts 
+of this XML document contradict the normative part of the corresponding 
+standard document then the normative part should be used as the definitive 
+specification.
+
+This notice must be included in all copies or derivative works.
+ 
+Basic Profile for vMR
+---------------------
+
+vMR goals for "Basic" profile:
+	Adequately support "Basic vMR" uses including 
+		enough demographics to enable the structuring of patient-focused output
+		support for basic medical concepts in a wide variety of vocabularies
+		support for the expression of all common laboratory results
+		support for all common coded observations about a patient
+		support for common substance administrations
+	Remove elements whose use is primarily for human readability
+		this includes simplifying ST datatypes to just the value
+	Remove elements whose use is primarily for highly-specialized edge cases
+		this includes simplifying CD datatype to omit translations, and changing
+		its displayName element to be an attribute of xsd:string
+
+	Extended vMR Profiles are planned for templated extensions to the basic vMR, 
+	as required.  Following those general constraints, we have come up with the 
+	following list of elements as essential to "Basic" vMR use, expecting them to 
+	have broad applicability, even in highly specialized uses of CDS:
+	•	ANY abstract extends HXIT
+	•	XP abstract extends ANY
+	•	EntityNamePartQualifier
+	•	set_EntityNamePartQualifier
+	•	EntityNamePartType
+	•	EntityNameUse
+	•	set_EntityNameUse
+	•	ENXP extends XP
+	•	EN extends ANY 
+	•	AddressPartType
+	•	PostalAddressUse
+	•	set_PostalAddressUse
+	•	AD extends ANY 
+	•	ADXP extends XP
+	•	BL extends ANY
+	•	CD extends ANY
+	•	Code
+	•	CS extends ANY
+	•	Decimal
+	•	HXIT abstract
+	•	II extends ANY
+	•	INT extends QTY
+	•	IVL_INT extends ANY
+	•	IVL_PQ extends ANY
+	•	IVL_QTY extends ANY
+	•	IVL_REAL extends ANY
+	•	IVL_TS extends ANY
+	•	PQ extends QTY
+	•	QTY abstract extends ANY
+	•	REAL extends QTY
+	•	RTO extends QTY
+	•	ST extends ANY
+	•	TelecommunicationCapability 
+	•	set_TelecommunicationCapability
+	•	TelecommunicationAddressUse 
+	•	set_TelecommunicationAddressUse
+	•	TEL extends ANY
+	•	TS extends QTY
+	•	Uid extends String
+	•	UncertaintyType
+	•	Uri extends String 
+
+
+Profiling this schema
+---------------------
+
+As described in ISO 21090, conformance profiles are able to 
+describe subsets of ISO 21090. If a subset schema is derived
+from this schema (by, for instance, deleting types, elements or 
+attributes, or by tightening schema or schematron constraints),
+this heading documentation (copyright statement, this paragraph,
+and the version history) must be reproduced as is, along with a
+a section above this one explaining who prepared the revised 
+schema, what conformance profile it conforms to, and where the 
+conformance profile may be found.
+
+Version History
+---------------
+Version 0.03 20110113 Technical Correction (Lloyd McKenzie)
+  Changes from 0.02:
+    Corrected schematron to reflect new names of controlInformationRoot and controlInformationExtension
+
+Version 0.02  20090526 Final Ballot Candidate (Grahame Grieve)
+  Changes from 0.01:
+    Add documentation for each element
+    Remove flavors as schema types
+    HXIT: Renamed controlActRoot and controlActExtension to controlInformationRoot and controlInformationExtension
+    ANY: made flavorId a set instead of a singleton
+    ENXP/ADXP: Introduce XP type and move attributes there
+    EN: Reorganise EN.use, ENXP.partType and ENXP.qualifier enumerations
+    TEL: add capabilities attribute
+    SD.TEXT / SD.TITLE: new types defined
+    CD: change codingRationale contents
+    II: correct one enumeration value on reliability
+    REAL/MO: remove precision attribute
+    PQ: remove PQV and redefine PQ and PQR accordingly
+    QSC: change code from enumerated attribute to CD
+    
+Version 0.01  20080317 First Release (Grahame Grieve)
+    </xsd:documentation>
+	</xsd:annotation>
+	<xsd:complexType name="AD">
+		<xsd:annotation>
+			<xsd:documentation>Mailing and home or office addresses. 
+
+AD is primarily used to communicate data that will allow printing mail labels, or that will allow a person to physically visit that address. The postal address datatype is not supposed to be a container for additional information that might be useful for finding geographic locations (e.g., GPS coordinates) or for performing epidemiological studies. Such additional information should be captured by other, more appropriate data structures.
+
+Addresses are essentially sequences of address parts, but add a "use" code and a valid time range for information about if and when the address can be used for a given purpose.
+</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="part" type="ADXP" maxOccurs="unbounded">
+						<xsd:annotation>
+							<xsd:documentation>A sequence of address parts, such as street or post office Box, city, postal code, country, etc.</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+				</xsd:sequence>
+				<xsd:attribute name="use" type="set_PostalAddressUse" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>A set of codes advising a system or user which address in a set of like addresses to select for a given purpose. 
+An address without specific use code might be a default address useful for any purpose, but an address with a specific use code would be preferred for that respective purpose.
+If populated, the values contained in this attribute SHALL be taken from the HL7 PostalAddressUse code system.
+</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ADXP">
+		<xsd:annotation>
+			<xsd:documentation>A part with a type-tag signifying its role in the address. Typical parts that exist in about every address are street, house number, or post box, postal code, city, country but other roles may be defined regionally, nationally, or on an enterprise level (e.g. in military addresses). </xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="XP">
+				<xsd:attribute name="type" type="AddressPartType" use="required">
+					<xsd:annotation>
+						<xsd:documentation>Whether an address part names the street, city, country, postal code, post box, address line 1, etc.
+The value of this attribute SHALL be taken from the HL7 AddressPartType code system.
+</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ANY">
+		<xsd:annotation>
+			<xsd:documentation>Defines the basic properties of every data value. This is conceptually an abstract type, meaning that no proper value can be just a data value without belonging to any concrete type. Every public concrete type is a specialization of this general abstract DataValue type.
+
+This class is maintained despite the lack of attributes to maintain compatibility with the ISO 21090 data structure.
+</xsd:documentation>
+		</xsd:annotation>
+	</xsd:complexType>
+	<xsd:complexType name="BL">
+		<xsd:annotation>
+			<xsd:documentation>BL stands for the values of two-valued logic. A BL value can be either true or false.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="value" type="xsd:boolean" use="required">
+					<xsd:annotation>
+						<xsd:documentation>The value of the BL.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="CD">
+		<xsd:annotation>
+			<xsd:documentation>A CD is a reference to a concept defined in an external code system, terminology, or ontology.  
+
+A CD may also contain an original text or phrase that served as the basis of the coding. </xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="code" type="Code" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>The plain code symbol defined by the code system, or an expression in a syntax defined by the code system which describes the concept. 
+Code SHALL be an exact match to a plain code symbol or expression defined by the code system. If the code system defines a code or expression that includes whitespace, the code SHALL include the whitespace. An expression can only be used where the codeSystem either defines an expression syntax, or there is a generally accepted syntax for the codeSystem. A code system may be defined that only defines an expression syntax with bindings to other code Systems for the elements of the expression. 
+It is at the discretion of the interpreting system whether to check for an expression instead of a simple code and evaluate the expression instead of treating the expression as a code. In some cases, it may be unclear or ambiguous whether the code represents a single symbol or an expression. This usually arises where the code system defines an expression language and then defines pre-coordinated concepts with symbols which match their expression, e.g. UCUM. In other cases, it is safe to treat the expression as a symbol. There is no guarantee that this is always safe: the definitions of the codeSystem should always be consulted to determine how to handle potential expressions.
+</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="codeSystem" type="Uid" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>The code system that defines the code, or if no code was found, the codeSystem in which no code was found. 
+Code systems SHALL be referred to by a UID, which allows unambiguous reference to standard code systems and other local codesystems. Where either ISO or HL7 have assigned UID to code Systems, then these UIDs SHALL be used. Otherwise implementations SHALL use an appropriate ISO Object Identifier (OID) or UUID to construct a globally unique local coding system identifier.
+</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="codeSystemName" type="xsd:string" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>The common name of the coding system. 
+
+The code system name has no computational value. codeSystemName can never modify the meaning of codeSystem and cannot exist without codeSystem.
+
+Information Processing Entities claiming direct or indirect conformance SHALL NOT functionally rely on codeSystemName. In addition, they MAY choose not to implement codeSystemName; but SHALL NOT reject instances because codeSystemName is present.
+
+Note:  The purpose of a code system name is to assist an unaided human interpreter of a code value to interpret codeSystem.
+</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="displayName" type="xsd:string" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>A name, title, or representation for the code or expression as it exists in the code system.
+If populated, the displayName SHALL be a valid human readable representation of the concept as defined by the code system at the time of data entry. The displayName SHALL conform to any rules defined by the codingSystem; if the codeSystem does not define a human representation for the code or expression, then none can be provided. displayName is included both as a courtesy to an unaided human interpreter of a code value and as a documentation of the name used to display the concept to the user. The display name has no functional meaning; it SHALL never exist without a code; and it SHALL never modify the meaning of the code. A display name may not be present if the code is an expression for which no display name has been assigned or can be derived. Information Processing Entities claiming direct or indirect conformance MAY choose not to implement displayName but SHALL NOT reject instances because displayName is present.
+Display names SHALL not alter the meaning of the code value. Therefore, display names SHOULD NOT be presented to the user on a receiving application system without ascertaining that the display name adequately represents the concept referred to by the code value. Communication SHALL NOT simply rely on the display name. The display name's main purpose is to support implementation debugging.
+</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="originalText" type="xsd:string" use="optional" default="">
+					<xsd:annotation>
+						<xsd:documentation>The text as seen and/or selected by the user who entered the data which represents the intended meaning of the user.  This attribute is equivalent to OriginalText.value in the ISO 21090 model.
+
+Note: Local implementations may influence what is required to represent that original text.
+
+Original text can be used in a structured user interface to capture what the user saw as a representation of the code on the data input screen, or in a situation where the user dictates or directly enters text, it is the text entered or uttered by the user. 
+
+It is valid to use the CD datatype to store only the text that the user entered or uttered. In this situation, original text will exist without a code. In a situation where the code is assigned sometime after the text was entered, originalText is the text or phrase used as the basis for assigning the code. 
+
+The original text SHALL be an excerpt of the relevant information in the original sources, rather than a pointer or exact reproduction. Thus the original text SHALL be represented in plain text form. In specific circumstances, when clearly descirbed the context of use, the originalText may be a reference to some other text artefact for which the resolution scope is clearly described.
+
+Values of type CD MAY have a original text despite not having a code. Any CD value with no code signifies a coding exception. In this case, originalText is a name or description of the concept that was not coded. </xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="CS">
+		<xsd:annotation>
+			<xsd:documentation>Coded data in its simplest form, where only the code is not predetermined. 
+
+The code system and code system version are implied and fixed by the context in which the CS value occurs.  
+
+Due to its highly restricted functionality, CS SHALL only be used for simple structural attributes with highly controlled and stable terminologies where:
+- all codes come from a single code system
+- codes are not reused if their concept is deprecated
+- the publication and extensibility properties of the code system are well described and understood
+</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="code" type="xsd:string" use="required">
+					<xsd:annotation>
+						<xsd:documentation>The plain code symbol defined by the code system.  If the code value is empty or null, then there is no code in the code system that represents the concept.
+Code SHALL only contain characters that are either a letter, a digit, or one of '.', '-', '_' or ':'. Code systems that are used with CS SHALL NOT define code symbols or expression syntaxes that contain whitespace or any other characters not in this list.
+</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="EN">
+		<xsd:annotation>
+			<xsd:documentation>A name for a person, organization, place or thing. 
+
+Examples:   Jim Bob Walton, Jr., Health Level Seven, Inc., Lake Tahoe, etc. An entity name may be as simple as a character string or may consist of several entity name parts, such as, Jim, Bob, Walton, and Jr., Health Level Seven, and Inc.
+
+Entity names are essentially sequences of entity name parts, but add a "use" code.
+</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="part" type="ENXP" maxOccurs="unbounded">
+						<xsd:annotation>
+							<xsd:documentation>A sequence of name parts, such as given name or family name, prefix, suffix, etc.</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+				</xsd:sequence>
+				<xsd:attribute name="use" type="set_EntityNameUse" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>A set of codes advising a system or user which name in a set of names to select for a given purpose. 
+A name without specific use code might be a default name useful for any purpose, but a name with a specific use code would be preferred for that respective purpose. Names SHOULD not be collected without at least one use code, but names MAY exist without  use code, particularly for legacy data.
+If populated, the values contained in this attribute SHALL be taken from the HL7 EntityNameUse2 code system.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ENXP">
+		<xsd:annotation>
+			<xsd:documentation>A part with a type code signifying the role of the part in the whole entity name, and qualifier codes for more detail about the name part type. (Typical name parts for person names are given names, and family names, titles, etc.).</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="XP">
+				<xsd:attribute name="type" type="EntityNamePartType" use="required">
+					<xsd:annotation>
+						<xsd:documentation>Indicates whether the name part is a given name, family name, prefix, suffix, etc. 
+The value of this attribute SHALL be taken from the HL7 EntityNamePartType2 code system.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="qualifier" type="set_EntityNamePartQualifier" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>The qualifier is a set of codes each of which specifies a certain subcategory of the name part in addition to the main name part type.
+For example, a given name may be flagged as a nickname (CL), a family name may be a name acquired by marriage (SP) or a name from birth (BR).
+If populated, the values contained in this attribute SHALL be taken from the HL7 EntityNamePartQualifier2 code system.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="II">
+		<xsd:annotation>
+			<xsd:documentation>An identifier that uniquely identifies a thing or object. 
+
+Examples are object identifier for HL7 RIM objects, medical record number, order id, service catalog item id, Vehicle Identification Number (VIN), etc. Instance identifiers are usually defined based on ISO object identifiers.
+
+An identifier allows someone to select one record, object or thing from a set of candidates. Usually an identifier alone without any context is not usable. Identifiers are distinguished from concept descriptors as concept descriptors never identify an individual thing, although there may sometimes be an individual record or object that represents the concept.
+
+Information Processing Entities claiming direct or indirect conformance SHALL never assume that receiving applications can infer the identity of issuing authority or the type of the identifier from the identifier or components thereof.
+</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="root" type="Uid" use="required">
+					<xsd:annotation>
+						<xsd:documentation>A unique identifier that guarantees the global uniqueness of the instance identifier. 
+If root is populated, and there is no extension, then the root is a globally unique identifier in its own right. In the presence of a non-null extension, the root is the unique identifier for the "namespace" of the identifier in the extension. Note that this does NOT necessarily correlate with the organization that manages the issuing of the identifiers. A given organization may manage multiple identifier namespaces, and control over a given namespace may transfer from organization to organization over time while the root remains the same. 
+This field can be either a DCE UUID, an Object Identifier (OID), or a special identifier taken from lists that may be published by ISO or HL7. 
+Comparison of root values is always case sensitive. UUID's SHALL be represented in upper case, so UUID case should always be preserved. 
+The root SHALL not be used to carry semantic meaning - all it does is ensure global computational uniqueness.
+</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="extension" type="xsd:string" use="optional" default="">
+					<xsd:annotation>
+						<xsd:documentation>A character string as a unique identifier within the scope of the identifier root. 
+The root and extension scheme means that the concatenation of root and extension SHALL be a globally unique identifier for the item that this II value identifies.
+Some identifier schemes define certain style options to their code values. For example, the U.S. Social Security Number (SSN) is normally written with dashes that group the digits into a pattern "123-12-1234". However, the dashes are not meaningful and a SSN can also be represented as "123121234" without the dashes. In the case where identifier schemes provide for multiple representations, HL7 or ISO may make a ruling about which is the preferred form and document that ruling where that respective external identifier scheme is recognized.
+If no extension attribute is provided in a non-null II, then the root is the complete unique identifier. 
+</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="INT">
+		<xsd:annotation>
+			<xsd:documentation>Integer numbers (-1,0,1,2, 100, 3398129, etc.) are precise numbers that are results of counting and enumerating. Integer numbers are discrete, the set of integers is infinite but countable. No arbitrary limit is imposed on the range of integer numbers.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:attribute name="value" type="xsd:int" use="required">
+					<xsd:annotation>
+						<xsd:documentation>The value of the INT. Note that this specification imposes no limitations on the size of integer, but most implementations will map this to a 32 or 64 bit integer.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_INT">
+		<xsd:annotation>
+			<xsd:documentation>A set of consecutive values of an ordered base datatype. 
+
+Any ordered type can be the basis of an IVL; it does not matter whether the base type is discrete or continuous. If the base datatype is only partially ordered, all elements of the IVL must be elements of a totally ordered subset of the partially ordered datatype. For example, PQ is considered ordered. However the ordering of PQs is only partial; a total order is only defined among comparable quantities (quantities of the same physical dimension). While IVLs between 2 and 4 meter exists, there is no IVL between 2 meters and 4 seconds.
+</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="low" type="xsd:int">
+					<xsd:annotation>
+						<xsd:documentation>This is the low limit. If the low limit is not known, it may be null.
+The low limit SHALL NOT be positive infinity.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="high" type="xsd:int">
+					<xsd:annotation>
+						<xsd:documentation>This is the high limit. If the high limit is not known, it may be null.
+The high limit SHALL NOT be negative infinity, and SHALL be higher than the low limit if one exists.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called lowIsClosed in the ISO 21090 specification.
+
+Whether low is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called highIsClosed in the ISO 21090 specification.
+
+Whether high is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_PQ">
+		<xsd:annotation>
+			<xsd:documentation>A set of consecutive values of an ordered base datatype. 
+
+Any ordered type can be the basis of an IVL; it does not matter whether the base type is discrete or continuous. If the base datatype is only partially ordered, all elements of the IVL must be elements of a totally ordered subset of the partially ordered datatype. For example, PQ is considered ordered. However the ordering of PQs is only partial; a total order is only defined among comparable quantities (quantities of the same physical dimension). While IVLs between 2 and 4 meter exists, there is no IVL between 2 meters and 4 seconds.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attributeGroup ref="ATTR_PQ_LOW">
+					<xsd:annotation>
+						<xsd:documentation>This is the low limit. If the low limit is not known, it may be null.
+The low limit SHALL NOT be positive infinity.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attributeGroup>
+				<xsd:attributeGroup ref="ATTR_PQ_HIGH">
+					<xsd:annotation>
+						<xsd:documentation>This is the high limit. If the high limit is not known, it may be null.
+The high limit SHALL NOT be negative infinity, and SHALL be higher than the low limit if one exists.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attributeGroup>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called lowIsClosed in the ISO 21090 specification.
+
+Whether low is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called highIsClosed in the ISO 21090 specification.
+
+Whether high is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_QTY" abstract="true">
+		<xsd:annotation>
+			<xsd:documentation>A set of consecutive values of an ordered base datatype. 
+
+Any ordered type can be the basis of an IVL; it does not matter whether the base type is discrete or continuous. If the base datatype is only partially ordered, all elements of the IVL must be elements of a totally ordered subset of the partially ordered datatype. For example, PQ is considered ordered. However the ordering of PQs is only partial; a total order is only defined among comparable quantities (quantities of the same physical dimension). While IVLs between 2 and 4 meter exists, there is no IVL between 2 meters and 4 seconds.
+</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:sequence>
+					<xsd:element name="low" type="QTY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>This is the low limit. If the low limit is not known, it may be null.
+The low limit SHALL NOT be positive infinity.</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="high" type="QTY" minOccurs="0">
+						<xsd:annotation>
+							<xsd:documentation>This is the high limit. If the high limit is not known, it may be null.
+The high limit SHALL NOT be negative infinity, and SHALL be higher than the low limit if one exists.</xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+				</xsd:sequence>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called lowIsClosed in the ISO 21090 specification.
+
+Whether low is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called highIsClosed in the ISO 21090 specification.
+
+Whether high is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_RTO">
+		<xsd:annotation>
+			<xsd:documentation>A set of consecutive values of an ordered base datatype. 
+
+Any ordered type can be the basis of an IVL; it does not matter whether the base type is discrete or continuous. If the base datatype is only partially ordered, all elements of the IVL must be elements of a totally ordered subset of the partially ordered datatype. For example, PQ is considered ordered. However the ordering of PQs is only partial; a total order is only defined among comparable quantities (quantities of the same physical dimension). While IVLs between 2 and 4 meter exists, there is no IVL between 2 meters and 4 seconds.
+</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attributeGroup ref="ATTR_RTO_LOW">
+					<xsd:annotation>
+						<xsd:documentation>This is the low limit. If the low limit is not known, it may be null.
+The low limit SHALL NOT be positive infinity.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attributeGroup>
+				<xsd:attributeGroup ref="ATTR_RTO_HIGH">
+					<xsd:annotation>
+						<xsd:documentation>This is the high limit. If the high limit is not known, it may be null.
+The high limit SHALL NOT be negative infinity, and SHALL be higher than the low limit if one exists.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attributeGroup>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called lowIsClosed in the ISO 21090 specification.
+
+Whether low is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called highIsClosed in the ISO 21090 specification.
+
+Whether high is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_REAL">
+		<xsd:annotation>
+			<xsd:documentation>A set of consecutive values of an ordered base datatype. 
+
+Any ordered type can be the basis of an IVL; it does not matter whether the base type is discrete or continuous. If the base datatype is only partially ordered, all elements of the IVL must be elements of a totally ordered subset of the partially ordered datatype. For example, PQ is considered ordered. However the ordering of PQs is only partial; a total order is only defined among comparable quantities (quantities of the same physical dimension). While IVLs between 2 and 4 meter exists, there is no IVL between 2 meters and 4 seconds.
+</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="low" type="Decimal" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This is the low limit. If the low limit is not known, it may be null.
+The low limit SHALL NOT be positive infinity.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="high" type="Decimal" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This is the high limit. If the high limit is not known, it may be null.
+The high limit SHALL NOT be negative infinity, and SHALL be higher than the low limit if one exists.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called lowIsClosed in the ISO 21090 specification.
+
+Whether low is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called highIsClosed in the ISO 21090 specification.
+
+Whether high is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="IVL_TS">
+		<xsd:annotation>
+			<xsd:documentation>A set of consecutive values of an ordered base datatype. 
+
+Any ordered type can be the basis of an IVL; it does not matter whether the base type is discrete or continuous. If the base datatype is only partially ordered, all elements of the IVL must be elements of a totally ordered subset of the partially ordered datatype. For example, PQ is considered ordered. However the ordering of PQs is only partial; a total order is only defined among comparable quantities (quantities of the same physical dimension). While IVLs between 2 and 4 meter exists, there is no IVL between 2 meters and 4 seconds.
+</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attributeGroup ref="ATTR_TS_LOW"/>
+				<xsd:attributeGroup ref="ATTR_TS_HIGH"/>
+				<xsd:attribute name="lowIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called lowIsClosed in the ISO 21090 specification.
+
+Whether low is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+						<xsd:appinfo>
+							<altova:exampleValues>
+								<altova:example value="true"/>
+							</altova:exampleValues>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="highIsInclusive" type="xsd:boolean" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is called highIsClosed in the ISO 21090 specification.
+
+Whether high is included in the IVL (is closed) or excluded from the IVL (is open).</xsd:documentation>
+						<xsd:appinfo>
+							<altova:exampleValues>
+								<altova:example value="false"/>
+							</altova:exampleValues>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="PQ">
+		<xsd:annotation>
+			<xsd:documentation>A dimensioned quantity expressing the result of measuring.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:attributeGroup ref="ATTR_PQ"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="QTY" abstract="true">
+		<xsd:annotation>
+			<xsd:documentation>The quantity datatype is an abstract generalization for all datatypes whose domain values has an order relation (less-or-equal) and where difference is defined in all of the datatype's totally ordered value subsets.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY"/>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="REAL">
+		<xsd:annotation>
+			<xsd:documentation>Fractional numbers. Typically used whenever quantities are measured, estimated, or computed from other real numbers. The typical representation is decimal, where the number of significant decimal digits is known as the precision.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:attribute name="value" type="Decimal" use="required">
+					<xsd:annotation>
+						<xsd:documentation>The value of the REAL. </xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="RTO">
+		<xsd:annotation>
+			<xsd:documentation>A quantity constructed as the quotient of a numerator quantity divided by a denominator quantity. 
+Common factors in the numerator and denominator are not automatically cancelled out. 
+The RTO datatype supports titers (e.g., 1:128) and other quantities produced by laboratories that truly represent ratios. Ratios are not simply structured numerics, particularly blood pressure measurements (e.g. 120/60) are not ratios.
+Notes: 
+1.    Ratios are different from rational numbers, i.e., in ratios common factors in the numerator and denominator never cancel out. A ratio of two real or integer numbers is not automatically reduced to a real number. This datatype is not defined to generally represent rational numbers. It is used only if common factors in numerator and denominator are not supposed to cancel out. This is only rarely the case. For observation values, ratios occur almost exclusively with titers. In most other cases, REAL should be used instead of the RTO.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:attributeGroup ref="ATTR_RTO"/>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="ST">
+		<xsd:annotation>
+			<xsd:documentation>The character string datatype stands for text data, primarily intended for machine processing (e.g., sorting, querying, indexing, etc.) or direct display. Used for names, symbols, presentation and formal expressions.
+
+A ST SHALL have at least one character or else be null.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="value" type="xsd:string" use="required">
+					<xsd:annotation>
+						<xsd:documentation>The actual content of the string. </xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="TEL">
+		<xsd:annotation>
+			<xsd:documentation>A locatable resource that is identified by a URI, such as a web page, a telephone number (voice, fax or some other resource mediated by telecommunication equipment), an e-mail address, or any other locatable resource that can be specified by a URL.
+
+The address is specified as a Universal Resource Locator (URL) qualified by time specification and use codes that help in deciding which address to use for a given time and purpose.
+
+The value attribute is constrained to be a uniform resource locator specified according to IETF RFCs 1738 and 2806 when used in this datatype. 
+
+Note:  The intent of this datatype is to be a locator, not an identifier; this datatype is used to refer to a locatable resource using a URL, and knowing the URL allows one to locate the object. However some use cases have arisen where a URI is used to refer to a locatable resource. Though this datatype allows for URIs to be used, the resource identified SHOULD always be locatable. A common use of locatable URIs is to refer to SOAP attachments.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="ANY">
+				<xsd:attribute name="value" type="xsd:anyURI" use="required">
+					<xsd:annotation>
+						<xsd:documentation>A uniform resource identifier specified according to IETF RFC 2396. 
+The URI specifies the protocol and the contact point defined by that protocol for the resource. 
+Examples:  Notable uses of the telecommunication address datatype are for telephone and telefax numbers, e-mail addresses, Hypertext references, FTP references, etc.</xsd:documentation>
+						<xsd:appinfo>
+							<altova:exampleValues>
+								<altova:example value="tel:8005551212"/>
+							</altova:exampleValues>
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="use" type="set_TelecommunicationAddressUse" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>One or more codes advising system or user which telecommunication address in a set of like addresses to select for a given telecommunication need. 
+The telecommunication use code is not a complete classification for equipment types or locations. Its main purpose is to suggest or discourage the use of a particular telecommunication address. There are no easily defined rules that govern the selection of a telecommunication address. Conformance statements may clarify what rules may apply or how additional rules are applied.
+If populated, the values contained in this attribute SHALL be taken from the HL7 TelecommunicationAddressUse code system.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="capabilities" type="set_TelecommunicationCapability" use="optional">
+					<xsd:annotation>
+						<xsd:documentation>One or more codes advising a system or user what telecommunication capabilities are known to be associated with the telecommunication address. 
+If populated, the values contained in this attribute SHALL be taken from the HL7 TelecommunicationCapability code system.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="useablePeriodOriginalText" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation>This attribute is equivalent to the originalText.value within the useablePeriod attribute of this class in the ISO 21090 specification.
+
+The periods of time during which the telecommunication address can be used. 
+
+For a telephone number, this can indicate the time of day in which the party can be reached on that telephone. For a web address, it may specify a time range in which the web content is promised to be available under the given address.</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="TS">
+		<xsd:annotation>
+			<xsd:documentation>A quantity specifying a point on the axis of natural time. A point in time is most often represented as a calendar expression.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexContent>
+			<xsd:extension base="QTY">
+				<xsd:attribute name="value" use="required">
+					<xsd:annotation>
+						<xsd:documentation>The value of the TS. value is a string with the format "YYYY[MM[DD[HH[MM[SS[.U[U[U[U]]]]]]]]][+|-ZZzz]" that conforms to the constrained ISO 8601 defined in ISO 8824 (ASN.1) under clause 32 (generalized time). The format should be used to the degree of precision that is appropriate.</xsd:documentation>
+						<xsd:appinfo>
+							<altova:exampleValues>
+								<altova:example value="20101127235417.123-0700"/>
+							</altova:exampleValues>
+						</xsd:appinfo>
+					</xsd:annotation>
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:string">
+							<xsd:pattern value="[1-2][0-9]{3,3}(((0[1-9])|(1[0-2]))(((0[1-9])|([1-2][0-9])|(3[0-1]))((([0-1][0-9])|(2[0-3]))(([0-5][0-9])(([0-5][0-9])(\.[0-9]{1,4})?)?)?)?)?)?([+\-](0[0-9]|1[0-3])([0-5][0-9]))?"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:complexType name="XP">
+		<xsd:annotation>
+			<xsd:documentation>A part of a name or address. Each part is a character string.</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="value" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The actual string value of the part.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+	<xsd:attributeGroup name="ATTR_PQ">
+		<xsd:annotation>
+			<xsd:documentation>Attribute group defining a PQ</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="value" type="Decimal" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The number which is multiplied by the unit to make the PQ.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="unit" type="Code" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The unit of measure specified in the Unified Code for Units of Measure (UCUM). 
+UCUM defines two forms of expression, case sensitive and case insensitive. PQ uses the case sensitive codes. The codeSystem OID for the case sensitive form is 2.16.840.1.113883.6.8. The default value for unit is the UCUM code "1" (unity).
+Equality of physical quantities does not require the values and units to be equal independently. Value and unit is only how we represent physical quantities. For example, 1 m equals 100 cm. Although the units are different and the values are different, the physical quantities are equal. Therefore one should never expect a particular unit for a physical quantity but instead allow for automated conversion between different comparable units. 
+The unit SHALL come from UCUM, which only specifies unambiguous measurement units. Sometimes it is not clear how some measurements in healthcare map to UCUM codes.
+Note: The general pattern for a measurement is  value unit of Thing. In this scheme, the PQ represents the  value and the unit, and the Thing is described by some coded concept that is linked to the PQ by the context of use. This maps obviously to some measurements, such as Patient Body Temperature of 37 Celsius, and 250 mg/day of Salicylate.
+However for some measurements that arise in healthcare, the scheme is not so obvious. Two classic examples are 5 Drinks of Beer, and 3 Acetaminophen tablets. At first glance it is tempting to classify these measurements like this: 5 drinks of Beer and 3 Acetaminophen tablets. The problem with this is that UCUM does not support units of "beer", "tablets" or "scoops".
+The reason for this is that neither tablets or scoops are proper units. What kind of tablets? How big is the glass? In these kinds of cases, the concept that appears to be a unit needs to further specified before interoperability is established. If a correct amount is required, then it is generally appropriate to specify an exact measurement with an appropriate UCUM unit. If this is not possible, then the concept is not part of the measurement. UCUM provides a unit called unity for use in these cases. The proper way to understand these measurements as 3 1 Acetaminophen tablets, where 1 is the UCUM unit for unity, and the Thing has a qualifier. The context of use will need to provide the extra qualifying information.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="ATTR_PQ_LOW">
+		<xsd:annotation>
+			<xsd:documentation>Attribute group defining a IVL_PQ low value</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="lowValue" type="Decimal" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The number which is multiplied by the unit to make the PQ.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="lowUnit" type="Code" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The unit of measure specified in the Unified Code for Units of Measure (UCUM). 
+UCUM defines two forms of expression, case sensitive and case insensitive. PQ uses the case sensitive codes. The codeSystem OID for the case sensitive form is 2.16.840.1.113883.6.8. The default value for unit is the UCUM code "1" (unity).
+Equality of physical quantities does not require the values and units to be equal independently. Value and unit is only how we represent physical quantities. For example, 1 m equals 100 cm. Although the units are different and the values are different, the physical quantities are equal. Therefore one should never expect a particular unit for a physical quantity but instead allow for automated conversion between different comparable units. 
+The unit SHALL come from UCUM, which only specifies unambiguous measurement units. Sometimes it is not clear how some measurements in healthcare map to UCUM codes.
+Note: The general pattern for a measurement is  value unit of Thing. In this scheme, the PQ represents the  value and the unit, and the Thing is described by some coded concept that is linked to the PQ by the context of use. This maps obviously to some measurements, such as Patient Body Temperature of 37 Celsius, and 250 mg/day of Salicylate.
+However for some measurements that arise in healthcare, the scheme is not so obvious. Two classic examples are 5 Drinks of Beer, and 3 Acetaminophen tablets. At first glance it is tempting to classify these measurements like this: 5 drinks of Beer and 3 Acetaminophen tablets. The problem with this is that UCUM does not support units of "beer", "tablets" or "scoops".
+The reason for this is that neither tablets or scoops are proper units. What kind of tablets? How big is the glass? In these kinds of cases, the concept that appears to be a unit needs to further specified before interoperability is established. If a correct amount is required, then it is generally appropriate to specify an exact measurement with an appropriate UCUM unit. If this is not possible, then the concept is not part of the measurement. UCUM provides a unit called unity for use in these cases. The proper way to understand these measurements as 3 1 Acetaminophen tablets, where 1 is the UCUM unit for unity, and the Thing has a qualifier. The context of use will need to provide the extra qualifying information.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="ATTR_PQ_HIGH">
+		<xsd:annotation>
+			<xsd:documentation>Attribute group defining a IVL_PQ high value</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="highValue" type="Decimal" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The number which is multiplied by the unit to make the PQ.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="highUnit" type="Code" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The unit of measure specified in the Unified Code for Units of Measure (UCUM). 
+UCUM defines two forms of expression, case sensitive and case insensitive. PQ uses the case sensitive codes. The codeSystem OID for the case sensitive form is 2.16.840.1.113883.6.8. The default value for unit is the UCUM code "1" (unity).
+Equality of physical quantities does not require the values and units to be equal independently. Value and unit is only how we represent physical quantities. For example, 1 m equals 100 cm. Although the units are different and the values are different, the physical quantities are equal. Therefore one should never expect a particular unit for a physical quantity but instead allow for automated conversion between different comparable units. 
+The unit SHALL come from UCUM, which only specifies unambiguous measurement units. Sometimes it is not clear how some measurements in healthcare map to UCUM codes.
+Note: The general pattern for a measurement is  value unit of Thing. In this scheme, the PQ represents the  value and the unit, and the Thing is described by some coded concept that is linked to the PQ by the context of use. This maps obviously to some measurements, such as Patient Body Temperature of 37 Celsius, and 250 mg/day of Salicylate.
+However for some measurements that arise in healthcare, the scheme is not so obvious. Two classic examples are 5 Drinks of Beer, and 3 Acetaminophen tablets. At first glance it is tempting to classify these measurements like this: 5 drinks of Beer and 3 Acetaminophen tablets. The problem with this is that UCUM does not support units of "beer", "tablets" or "scoops".
+The reason for this is that neither tablets or scoops are proper units. What kind of tablets? How big is the glass? In these kinds of cases, the concept that appears to be a unit needs to further specified before interoperability is established. If a correct amount is required, then it is generally appropriate to specify an exact measurement with an appropriate UCUM unit. If this is not possible, then the concept is not part of the measurement. UCUM provides a unit called unity for use in these cases. The proper way to understand these measurements as 3 1 Acetaminophen tablets, where 1 is the UCUM unit for unity, and the Thing has a qualifier. The context of use will need to provide the extra qualifying information.</xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="ATTR_RTO">
+		<xsd:annotation>
+			<xsd:documentation>Attribute group defining a RTO numerator and denominator values</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="numerator" type="Decimal" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The quantity that is being divided in the ratio.  This represents the numerator.expression.value from the ISO21090 datatypes.</xsd:documentation>
+				<xsd:appinfo>
+					<altova:exampleValues>
+						<altova:example value="1"/>
+					</altova:exampleValues>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="denominator" type="Decimal" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The quantity that divides the numerator in the ratio. 
+The denominator SHALL not be zero.  This represents the denominator.expression.value from the ISO 21090 datatypes.</xsd:documentation>
+				<xsd:appinfo>
+					<altova:exampleValues>
+						<altova:example value="32"/>
+					</altova:exampleValues>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="ATTR_RTO_LOW">
+		<xsd:annotation>
+			<xsd:documentation>Attribute group defining a RTO numerator and denominator values</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="lowNumerator" type="Decimal" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The quantity that is being divided in the ratio.  This represents the numerator.expression.value from the ISO21090 datatypes.</xsd:documentation>
+				<xsd:appinfo>
+					<altova:exampleValues>
+						<altova:example value="1"/>
+					</altova:exampleValues>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="lowDenominator" type="Decimal" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The quantity that divides the numerator in the ratio. 
+The denominator SHALL not be zero.  This represents the denominator.expression.value from the ISO 21090 datatypes.</xsd:documentation>
+				<xsd:appinfo>
+					<altova:exampleValues>
+						<altova:example value="32"/>
+					</altova:exampleValues>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="ATTR_RTO_HIGH">
+		<xsd:annotation>
+			<xsd:documentation>Attribute group defining a RTO numerator and denominator values</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="highNumerator" type="Decimal" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The quantity that is being divided in the ratio.  This represents the numerator.expression.value from the ISO21090 datatypes.</xsd:documentation>
+				<xsd:appinfo>
+					<altova:exampleValues>
+						<altova:example value="1"/>
+					</altova:exampleValues>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="highDenominator" type="Decimal" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The quantity that divides the numerator in the ratio. 
+The denominator SHALL not be zero.  This represents the denominator.expression.value from the ISO 21090 datatypes.</xsd:documentation>
+				<xsd:appinfo>
+					<altova:exampleValues>
+						<altova:example value="32"/>
+					</altova:exampleValues>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="ATTR_TS">
+		<xsd:annotation>
+			<xsd:documentation>Attribute group defining a TS</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="value" use="required">
+			<xsd:annotation>
+				<xsd:documentation>The value of the TS. value is a string with the format "YYYY[MM[DD[HH[MM[SS[.U[U[U[U]]]]]]]]][+|-ZZzz]" that conforms to the constrained ISO 8601 defined in ISO 8824 (ASN.1) under clause 32 (generalized time). The format should be used to the degree of precision that is appropriate.</xsd:documentation>
+				<xsd:appinfo>
+					<altova:exampleValues>
+						<altova:example value="20101127235417.1234+0930"/>
+					</altova:exampleValues>
+				</xsd:appinfo>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:pattern value="[1-2][0-9]{3,3}(((0[1-9])|(1[0-2]))(((0[1-9])|([1-2][0-9])|(3[0-1]))((([0-1][0-9])|(2[0-3]))(([0-5][0-9])(([0-5][0-9])(\.[0-9]{1,4})?)?)?)?)?)?([+\-](0[0-9]|1[0-3])([0-5][0-9]))?"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="ATTR_TS_LOW">
+		<xsd:annotation>
+			<xsd:documentation>Attribute group defining a IVL_TS low value</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="low" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>This is the low limit. If the low limit is not known, it may be null.
+The low limit SHALL NOT be positive infinity.
+			The value of the TS. value is a string with the format "YYYY[MM[DD[HH[MM[SS[.U[U[U[U]]]]]]]]][+|-ZZzz]" that conforms to the constrained ISO 8601 defined in ISO 8824 (ASN.1) under clause 32 (generalized time). The format should be used to the degree of precision that is appropriate.</xsd:documentation>
+				<xsd:appinfo>
+					<altova:exampleValues>
+						<altova:example value="20101127235417.123+0930"/>
+					</altova:exampleValues>
+				</xsd:appinfo>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:pattern value="[1-2][0-9]{3,3}(((0[1-9])|(1[0-2]))(((0[1-9])|([1-2][0-9])|(3[0-1]))((([0-1][0-9])|(2[0-3]))(([0-5][0-9])(([0-5][0-9])(\.[0-9]{1,4})?)?)?)?)?)?([+\-](0[0-9]|1[0-3])([0-5][0-9]))?"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:attributeGroup name="ATTR_TS_HIGH">
+		<xsd:annotation>
+			<xsd:documentation>Attribute group defining a IVL_TS high value</xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="high" use="optional">
+			<xsd:annotation>
+				<xsd:documentation>This is the high limit. If the high limit is not known, it may be null.
+The high limit SHALL NOT be negative infinity, and SHALL be higher than the low limit if one exists.
+			The value of the TS. value is a string with the format "YYYY[MM[DD[HH[MM[SS[.U[U[U[U]]]]]]]]][+|-ZZzz]" that conforms to the constrained ISO 8601 defined in ISO 8824 (ASN.1) under clause 32 (generalized time). The format should be used to the degree of precision that is appropriate.</xsd:documentation>
+				<xsd:appinfo>
+					<altova:exampleValues>
+						<altova:example value="20101127235418.123+0930"/>
+					</altova:exampleValues>
+				</xsd:appinfo>
+			</xsd:annotation>
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:pattern value="[1-2][0-9]{3,3}(((0[1-9])|(1[0-2]))(((0[1-9])|([1-2][0-9])|(3[0-1]))((([0-1][0-9])|(2[0-3]))(([0-5][0-9])(([0-5][0-9])(\.[0-9]{1,4})?)?)?)?)?)?([+\-](0[0-9]|1[0-3])([0-5][0-9]))?"/>
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+	<xsd:simpleType name="AddressPartType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="AL">
+				<xsd:annotation>
+					<xsd:documentation>Address Line : An address line is for either an additional locator, a delivery address or a street address. An address generally has only a delivery address line or a street address line, but not both</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ADL">
+				<xsd:annotation>
+					<xsd:documentation>Additional Locator : This can be a unit designator, such as apartment number, suite number, or floor. There may be several unit designators in an address (e.g., &#34;3rd floor, Appt. 342&#34;). This can also be a designator pointing away from the location, rather than specifying a smaller location within some larger one (e.g., Dutch &#34;t.o.&#34; means &#34;opposite to&#34; for house boats located across the street facing houses)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="UNID">
+				<xsd:annotation>
+					<xsd:documentation>Unit Identifier : The number or name of a specific unit contained within a building or complex, as assigned by that building or complex</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="UNIT">
+				<xsd:annotation>
+					<xsd:documentation>Unit Designator : Indicates the type of specific unit contained within a building or complex. E.g. Apartment, Floor </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DAL">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Address Line : A delivery address line is frequently used instead of breaking out delivery mode, delivery installation, etc. An address generally has only a delivery address line or a street address line, but not both.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DINST">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Installation Type : Indicates the type of delivery installation (the facility to which the mail will be delivered prior to final shipping via the delivery mode.) Example: post office, letter carrier depot, community mail center, station, etc.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DINSTA">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Installation Area : The location of the delivery installation, usually a town or city, and is only required if the area is different from the municipality. Area to which mail delivery service is provided from any postal facility or service such as an individual letter carrier, rural route, or postal route</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DINSTQ">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Installation Qualifier : A number, letter or name identifying a delivery installation. E.g., for Station A, the delivery installation qualifier would be &#39;A&#39;.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DMOD">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Mode : Indicates the type of service offered, method of delivery. For example: post office box, rural route, general delivery, etc.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DMODID">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Mode Identifier: Represents the routing information such as a letter carrier route number. It is the identifying number of the designator (the box number or rural route number)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SAL">
+				<xsd:annotation>
+					<xsd:documentation>Street Address Line : A street address line is frequently used instead of breaking out build number, street name, street type, etc. An address generally has only a delivery address line or a street address line, but not both.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BNR">
+				<xsd:annotation>
+					<xsd:documentation>Building Number : The number of a building, house or lot alongside the street. Also known as &#34;primary street number&#34;. This does not number the street but rather the building</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BNN">
+				<xsd:annotation>
+					<xsd:documentation>Building Number Numeric : The numeric portion of a building number </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BNS">
+				<xsd:annotation>
+					<xsd:documentation>Building Number Suffix : Any alphabetic character, fraction or other text that may appear after the numeric portion of a building number </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="STR">
+				<xsd:annotation>
+					<xsd:documentation>Street Name : The name of the street, including the type</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="STB">
+				<xsd:annotation>
+					<xsd:documentation>Street Name Base : The base name of a roadway or artery recognized by a municipality (excluding street type and direction) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="STTYP">
+				<xsd:annotation>
+					<xsd:documentation>Street Type : The designation given to the street. (e.g. Street, Avenue, Crescent, etc.) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DIR">
+				<xsd:annotation>
+					<xsd:documentation>Direction : Direction (e.g., N, S, W, E) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="INT">
+				<xsd:annotation>
+					<xsd:documentation>Intersection : An intersection denotes that the actual address is located at or close to the intersection of two or more streets</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CAR">
+				<xsd:annotation>
+					<xsd:documentation>Care of : The name of the party who will take receipt at the specified address, and will take on responsibility for ensuring delivery to the target recipient.
+
+Note: This is included only to support the convention of writing c/- address lines. This item is not appropriate for use when information is entrusted to one party on behalf of another in some significant way.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CEN">
+				<xsd:annotation>
+					<xsd:documentation>Census Tract : A geographic sub-unit delineated for demographic purposes </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CNT">
+				<xsd:annotation>
+					<xsd:documentation>Country : Country</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CPA">
+				<xsd:annotation>
+					<xsd:documentation>County or Parish : A sub-unit of a state or province. (49 of the United States of America use the term &#34;county;&#34; Louisiana uses the term &#34;parish&#34;) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CTY">
+				<xsd:annotation>
+					<xsd:documentation>Municipality : The name of the city, town, village, or other community or delivery center </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DEL">
+				<xsd:annotation>
+					<xsd:documentation>Delimiter : Delimiters are printed without framing white space. If no value component is provided, the delimiter appears as a line break</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="POB">
+				<xsd:annotation>
+					<xsd:documentation>Post box : A numbered box located in a post station </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PRE">
+				<xsd:annotation>
+					<xsd:documentation>Precinct : A subsection of a municipality </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="STA">
+				<xsd:annotation>
+					<xsd:documentation>State or Province : A sub-unit of a country with limited sovereignty in a federally organized country</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ZIP">
+				<xsd:annotation>
+					<xsd:documentation>Postal Code : A postal code designating a region defined by the postal service</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DPID">
+				<xsd:annotation>
+					<xsd:documentation>Delivery Point Identifier : A value that uniquely identifies the postal address</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="Code">
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="Decimal">
+		<xsd:restriction base="xsd:double"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="EntityNamePartQualifier">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="LS">
+				<xsd:annotation>
+					<xsd:documentation>Legal Status : For organizations a suffix indicating the legal status, e.g., &#34;Inc.&#34;, &#34;Co.&#34;, &#34;AG&#34;, &#34;GmbH&#34;, &#34;B.V.&#34; &#34;S.A.&#34;, &#34;Ltd.&#34; Etc.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="AC">
+				<xsd:annotation>
+					<xsd:documentation>Academic : Indicates that a prefix like &#34;Dr.&#34; or a suffix like &#34;M.D.&#34; or &#34;Ph.D.&#34; is an academic title </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="NB">
+				<xsd:annotation>
+					<xsd:documentation>Nobility : In Europe and Asia, there are still people with nobility titles (aristocrats). German &#34;von&#34; is generally a nobility title, not a mere voorvoegsel. Others are &#34;Earl of&#34; or &#34;His Majesty King of...&#34; etc. Rarely used nowadays, but some systems do keep track of this </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PR">
+				<xsd:annotation>
+					<xsd:documentation>Professional : Primarily in the British Imperial culture people tend to have an abbreviation of their professional organization as part of their credential suffices </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HON">
+				<xsd:annotation>
+					<xsd:documentation>Honorific : A honorific such as &#34;The Right Honourable&#34; or &#34;Weledelgeleerde Heer&#34;.  </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BR">
+				<xsd:annotation>
+					<xsd:documentation>Birth : A name that a person was given at birth or established as a consequence of adoption.  
+
+Note: this is not used for temporary names assigned at birth such as &#34;Baby of Smith&#34; - which is just a name with a use code of &#34;TEMP&#34;.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="AD">
+				<xsd:annotation>
+					<xsd:documentation>Acquired : A name part a person acquired.  
+
+The name part may be acquired by adoption, or the person may have chosen to use the name part for some other reason.
+
+Note: this differs from an Other/Psuedonym/Alias in that an acquired name part is acquired on a formal basis rather than an informal one (e.g. registered as part of the official name)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SP">
+				<xsd:annotation>
+					<xsd:documentation>Spouse : The name assumed from the partner in a marital relationship. Usually the spouse&#39;s family name. Note that no inference about gender can be made from the existence of spouse names</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="MID">
+				<xsd:annotation>
+					<xsd:documentation>Middle Name : Indicates that the name part is a middle name.
+Usage Notes:
+In general, the english &#39;middle name&#39; concept is all of the given names after the first. This qualifier may be used to explicitly indicate which given names are considered to be middle names. 
+The middle name qualifier may also be used with family names. This is a Scandinavian use case, matching the concept of &#34;mellomnavn&#34; / &#34;mellannamn&#34;. Note that there are specific rules that indicate what names may be taken as a mellannamn in different Scandinavian countries</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="CL">
+				<xsd:annotation>
+					<xsd:documentation>Callme : Callme is used to indicate which of the various name parts is used when interacting with the person</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="IN">
+				<xsd:annotation>
+					<xsd:documentation>Initial : Indicates that a name part is just an initial. Initials do not imply a trailing period since this would not work with non-Latin scripts. Initials may consist of more than one letter, e.g., &#34;Ph.&#34; could stand for &#34;Philippe&#34; or &#34;Th.&#34; for &#34;Thomas&#34;</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PFX">
+				<xsd:annotation>
+					<xsd:documentation>Prefix : A prefix has a strong association to the immediately following name part. A prefix has no implicit trailing white space (it has implicit leading white space though).</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SFX">
+				<xsd:annotation>
+					<xsd:documentation>Suffix : A suffix has a strong association to the immediately preceding name part. A suffix has no implicit leading white space (it has implicit trailing white space though).</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="EntityNamePartType">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<altova:exampleValues>
+					<altova:example value="FAM"/>
+					<altova:example value="GIV"/>
+				</altova:exampleValues>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="FAM">
+				<xsd:annotation>
+					<xsd:documentation>Family : Family name, this is the name that links to the genealogy. In some cultures (e.g. Eritrea) the family name of a son is the first name of his father</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="GIV">
+				<xsd:annotation>
+					<xsd:documentation>Given: Given name.
+Note: don&#39;t call it &#34;first name&#34; since this given names do not always come first</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="TITLE">
+				<xsd:annotation>
+					<xsd:documentation>Title : Part of the name that is acquired as a title due to academic, legal, employment or nobility status etc.
+Note: Title name parts include name parts that come after the name such as qualifications</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DEL">
+				<xsd:annotation>
+					<xsd:documentation>Delimiter : A delimiter has no meaning other than being literally printed in this name representation. A delimiter has no implicit leading and trailing white space</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="EntityNameUse">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ABC">
+				<xsd:annotation>
+					<xsd:documentation>Alphabetic : Alphabetic transcription of name (Japanese: romaji) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SYL">
+				<xsd:annotation>
+					<xsd:documentation>Syllabic : Syllabic transcription of name (e.g., Japanese kana, Korean hangul) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="IDE">
+				<xsd:annotation>
+					<xsd:documentation>Ideographic : Ideographic representation of name (e.g., Japanese kanji, Chinese characters) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="C">
+				<xsd:annotation>
+					<xsd:documentation>Customary : Known as/conventional/the one you normally use</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="OR">
+				<xsd:annotation>
+					<xsd:documentation>Official Registry Name : the formal name as registered in an official (government) registry, but which name might not be commonly used. May correspond to the concept of legal name</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="T">
+				<xsd:annotation>
+					<xsd:documentation>Temporary : A temporary name.  Note that a name valid time can provide more detailed information.  This may also be used for temporary names assigned at birth or in emergency situations.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="I">
+				<xsd:annotation>
+					<xsd:documentation>Indigenous/Tribal : e.g. Chief Red Cloud </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="P">
+				<xsd:annotation>
+					<xsd:documentation>Other/Pseudonym/Alias: A non-official name by which the person is sometimes known.  (This may also be used to record informal names such as a nickname)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ANON">
+				<xsd:annotation>
+					<xsd:documentation>Anonymous : Anonymous assigned name (used to protect a person&#39;s identity for privacy reasons)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="A">
+				<xsd:annotation>
+					<xsd:documentation>Business Name : A name used in a Professional or Business context .
+  
+Examples: Continuing to use a maiden name in a professional context, or using a stage performing name (some of these names are also pseudonyms)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="R">
+				<xsd:annotation>
+					<xsd:documentation>Religious : A name assumed as part of a religious vocation. e.g. Sister Mary Francis, Brother John </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="OLD">
+				<xsd:annotation>
+					<xsd:documentation>No Longer in Use : This name is no longer in use (note: Names may also carry valid time ranges .  This code is used to cover the situations where it is known that the name is no longer valid, but no particular time range for its use is known)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DN">
+				<xsd:annotation>
+					<xsd:documentation>Do Not Use : This name should no longer be used when interacting with the person (i.e .  in addition to no longer being used, the name should not be even mentioned when interacting with the person)
+
+Note: applications are not required to compare names labeled &#34;Do Not Use&#34; and other names in order to eliminate name parts that are common between the other name and a name labeled &#34;Do Not Use&#34;.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="M">
+				<xsd:annotation>
+					<xsd:documentation>Maiden Name : A name used prior to marriage.
+
+Note that marriage naming customs vary greatly around the world.  This name use is for use by applications that collect and store &#34;maiden&#34; names.  Though the concept of maiden name is often gender specific, the use of this term is not gender specific.  The use of this term does not imply any particular history for a person&#39;s name, nor should the maiden name be determined algorithmically</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SRCH">
+				<xsd:annotation>
+					<xsd:documentation>Search Type Uses: A name intended for use in searching or matching</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PHON">
+				<xsd:annotation>
+					<xsd:documentation>Phonetic : The name as understood by the data enterer, i.e. a close approximation of a phonetic spelling of the name, not based on a phonetic algorithm.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="PostalAddressUse">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<altova:exampleValues>
+					<altova:example value="WP"/>
+					<altova:example value="PHYS"/>
+				</altova:exampleValues>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="H">
+				<xsd:annotation>
+					<xsd:documentation>Home address : A communication address at a home, attempted contacts for business purposes might intrude privacy and chances are one will contact family or other household members instead of the person one wishes to call. Typically used with urgent cases, or if no other contacts are available</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HP">
+				<xsd:annotation>
+					<xsd:documentation>Primary home : The primary home, to reach a person after business hours </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HV">
+				<xsd:annotation>
+					<xsd:documentation>Vacation home : A vacation home, to reach a person while on vacation </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="WP">
+				<xsd:annotation>
+					<xsd:documentation>Work place : An office address. First choice for business related contacts during business hours </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DIR">
+				<xsd:annotation>
+					<xsd:documentation>Direct : Indicates a work place address or telecommunication address that reaches the individual or organization directly without intermediaries. For phones, often referred to as a &#39;private line&#39; </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PUB">
+				<xsd:annotation>
+					<xsd:documentation>Public : Indicates a work place address or telecommunication address that is a &#39;standard&#39; address which may reach a reception service, mail-room, or other intermediary prior to the target entity </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BAD">
+				<xsd:annotation>
+					<xsd:documentation>Bad address : A flag indicating that the address is bad, in fact, useless </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PHYS">
+				<xsd:annotation>
+					<xsd:documentation>Physical Visit Address : Used primarily to visit an address</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PST">
+				<xsd:annotation>
+					<xsd:documentation>Postal Address : Used to send mail</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="TMP">
+				<xsd:annotation>
+					<xsd:documentation>Temporary Address : A temporary address, may be good for visit or mailing. Note that an address history can provide more detailed information.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="ABC">
+				<xsd:annotation>
+					<xsd:documentation>Alphabetic : Alphabetic transcription of name (Japanese: romaji) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="IDE">
+				<xsd:annotation>
+					<xsd:documentation>Ideographic : Ideographic representation of name (e.g., Japanese kanji, Chinese characters) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SYL">
+				<xsd:annotation>
+					<xsd:documentation>Syllabic : Syllabic transcription of name (e.g., Japanese kana, Korean hangul) </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SRCH">
+				<xsd:annotation>
+					<xsd:documentation>Search Type Uses : A name intended for use in searching or matching.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="SNDX">
+				<xsd:annotation>
+					<xsd:documentation>Soundex : An address spelled according to the SoundEx algorithm</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PHON">
+				<xsd:annotation>
+					<xsd:documentation>Phonetic : The address as understood by the data enterer, i.e. a close approximation of a phonetic spelling of the address, not based on a phonetic algorithm</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_EntityNamePartQualifier">
+		<xsd:list itemType="EntityNamePartQualifier"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_EntityNameUse">
+		<xsd:list itemType="EntityNameUse"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_PostalAddressUse">
+		<xsd:list itemType="PostalAddressUse"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_TelecommunicationAddressUse">
+		<xsd:list itemType="TelecommunicationAddressUse"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="set_TelecommunicationCapability">
+		<xsd:list itemType="TelecommunicationCapability"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="TelecommunicationAddressUse">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<altova:exampleValues>
+					<altova:example value="WP"/>
+					<altova:example value="HP"/>
+				</altova:exampleValues>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="H">
+				<xsd:annotation>
+					<xsd:documentation>Home address : A communication address at a home, attempted contacts for business purposes might intrude privacy and chances are one will contact family or other household members instead of the person one wishes to call. Typically used with urgent cases, or if no other contacts are available</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HP">
+				<xsd:annotation>
+					<xsd:documentation>Primary Home : The primary home, to reach a person after business hours </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="HV">
+				<xsd:annotation>
+					<xsd:documentation>Vacation Home : A vacation home, to reach a person while on vacation </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="WP">
+				<xsd:annotation>
+					<xsd:documentation>Work Place : An office address. First choice for business related contacts during business hours </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="DIR">
+				<xsd:annotation>
+					<xsd:documentation>Direct : Indicates a work place address or telecommunication address that reaches the individual or organization directly without intermediaries. For phones, often referred to as a &#39;private line&#39; </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PUB">
+				<xsd:annotation>
+					<xsd:documentation>Public : Indicates a work place address or telecommunication address that is a &#39;standard&#39; address which may reach a reception service, mail-room, or other intermediary prior to the target entity </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="BAD">
+				<xsd:annotation>
+					<xsd:documentation>Bad address : A flag indicating that the address is bad, in fact, useless </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="TMP">
+				<xsd:annotation>
+					<xsd:documentation>Temporary address : A temporary address, may be good for visit or mailing. Note that an address history can provide more detailed information </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="AS">
+				<xsd:annotation>
+					<xsd:documentation>Answering Service : An automated answering machine used for less urgent cases and if the main purpose of contact is to leave a message or access an automated announcement</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="EC">
+				<xsd:annotation>
+					<xsd:documentation>Emergency Contact : A contact specifically designated to be used for emergencies. This is the first choice in emergencies, independent of any other use codes </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="MC">
+				<xsd:annotation>
+					<xsd:documentation>Mobile Contact : A telecommunication device that moves and stays with its owner. May have characteristics of all other use codes, suitable for urgent matters, not the first choice for routine business </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="PG">
+				<xsd:annotation>
+					<xsd:documentation>Pager: A paging device suitable to solicit a callback or to leave a very short message </xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="TelecommunicationCapability">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<altova:exampleValues>
+					<altova:example value="voice"/>
+					<altova:example value="fax"/>
+				</altova:exampleValues>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="voice">
+				<xsd:annotation>
+					<xsd:documentation>Voice : This device can receive voice calls (i.e. talking to another person, or a recording device, or a voice activated computer)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="fax">
+				<xsd:annotation>
+					<xsd:documentation>Fax : This device can receive faxes.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="data">
+				<xsd:annotation>
+					<xsd:documentation>Data : This device can receive data calls (i.e. modem)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="tty">
+				<xsd:annotation>
+					<xsd:documentation>Text : This device is a text telephone.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="sms">
+				<xsd:annotation>
+					<xsd:documentation>SMS : This device can receive SMS messages</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="Uid">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<altova:exampleValues>
+					<altova:example value="OidOrGuid"/>
+				</altova:exampleValues>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string"/>
+	</xsd:simpleType>
+	<xsd:simpleType name="UncertaintyType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="U">
+				<xsd:annotation>
+					<xsd:documentation>Uniform : The uniform distribution assigns a constant probability over the entire interval of possible outcomes, while all outcomes outside this interval are assumed to have zero probability. The width of this interval is 2 s v3. Thus, the uniform distribution assigns the probability densities f(x) = (2 s v3)-1 to values µ - s v3 = x = µ + s v3 and f(x) = 0 otherwise</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="N">
+				<xsd:annotation>
+					<xsd:documentation>Normal (Gaussian) : This is the well-known bell-shaped normal distribution. Because of the central limit theorem, the normal distribution is the distribution of choice for an unbounded random variable that is an outcome of a combination of many stochastic processes. Even for values bounded on a single side (i.e. greater than 0) the normal distribution may be accurate enough if the mean is &#34;far away&#34; from the bound of the scale measured in terms of standard deviations</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="LN">
+				<xsd:annotation>
+					<xsd:documentation>Log-Normal : The logarithmic normal distribution is used to transform skewed random variable X into a normally distributed random variable U = log X. The log-normal distribution can be specified with the properties mean µ and standard deviation s. Note however that mean µ and standard deviation s are the parameters of the raw value distribution, not the transformed parameters of the lognormal distribution that are conventionally referred to by the same letters. Those log-normal parameters µ log and slog relate to the mean µ and standard deviation s of the data value through slog2 = log (s2/µ2 + 1) and µlog = log µ - slog2/2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="G">
+				<xsd:annotation>
+					<xsd:documentation>? (gamma) : The gamma-distribution used for data that is skewed and bounded to the right, i.e. where the maximum of the distribution curve is located near the origin. The ?-distribution has two parameters a and ß. The relationship to mean µ and variance s2 is µ = a ß and s2 = a ß2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="E">
+				<xsd:annotation>
+					<xsd:documentation>Exponential : Used for data that describes extinction. The exponential distribution is a special form of ?-distribution where a = 1, hence, the relationship to mean µ and variance s2 are µ = ß and s2 = ß2</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="X2">
+				<xsd:annotation>
+					<xsd:documentation>? : Used to describe the sum of squares of random variables that occurs when a variance is estimated (rather than presumed) from the sample. The only parameter of the ?2-distribution is ?, so called the number of degrees of freedom (which is the number of independent parts in the sum). The ?2-distribution is a special type of ?-distribution with parameter a = ? /2 and ß = 2. Hence, µ = ? and s2 = 2 ?</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="T">
+				<xsd:annotation>
+					<xsd:documentation>t (student) : Used to describe the quotient of a normal random variable and the square root of a ?2 random variable. The t-distribution has one parameter ?, the number of degrees of freedom. The relationship to mean µ and variance s2 are: µ = 0 and s2 = ? / (? - 2)</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="F">
+				<xsd:annotation>
+					<xsd:documentation>F : Used to describe the quotient of two ?2 random variables. The F-distribution has two parameters ?1 and ?2, which are the numbers of degrees of freedom of the numerator and denominator variable respectively. The relationship to mean µ and variance s2 are: µ = ?2 / (?2 - 2) and s 2 = (2 ?22 (? 2 + ?1 - 2)) / (?1 (?2 - 2)2 (?2 - 4))</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="B">
+				<xsd:annotation>
+					<xsd:documentation>?(beta) : The beta-distribution is used for data that is bounded on both sides and may or may not be skewed (e.g., occurs when probabilities are estimated.) Two parameters a and ß are available to adjust the curve. The mean µ and variance s2 relate as follows: µ = a / (a + ß) and (s2 = a ß/((a + ß)2 (a + ß + 1))</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="Uri">
+		<xsd:annotation>
+			<xsd:appinfo>
+				<altova:exampleValues>
+					<altova:example value="tel:800-555-1212"/>
+				</altova:exampleValues>
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:anyURI"/>
+	</xsd:simpleType>
+</xsd:schema>

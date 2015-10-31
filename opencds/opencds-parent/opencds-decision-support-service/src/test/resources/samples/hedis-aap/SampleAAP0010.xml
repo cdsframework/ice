@@ -1,0 +1,136 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- Denominator Logic Check: 19 years old - too young-->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="AAP0010" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19920202101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent><!--Encounter Ambulatory visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="99241" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Ambulatory visit"/>
+                        <encounterEventTime high="20111023115000" low="20111023115000"/>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Ambulatory visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter002" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20111023115000" low="20111023115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="99241" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Ambulatory visit"/>
+                                <procedureTime high="20111116120000" low="20111116120000"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Ambulatory visit HCPCS-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter003" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20111023115000" low="20111023115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure003" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="G0402" codeSystem="2.16.840.1.113883.6.285" codeSystemName="HCPCS" displayName="Ambulatory visit"/>
+                                <procedureTime high="20111116120000" low="20111116120000"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Ambulatory visit ICD9CM-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter004" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20111023115000" low="20111023115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                                <problem> <!--Encounter Diagnosis ICD9CM-->
+                                    <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                    <id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                    <problemCode code="V20.2" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Hysterectomy"/>
+                                    <problemEffectiveTime high="20110304020700" low="20110304020700"/>
+                                </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Ambulatory visit UBREV-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter005" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20111023115000" low="20111023115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure005" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="0510" codeSystem="2.16.840.1.113883.6.301.3" codeSystemName="UBREV" displayName="Ambulatory visit"/>
+                                <procedureTime high="20111116120000" low="20111116120000"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Ambulatory Other  visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter006" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20111023115000" low="20111023115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure006" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="92002" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Ambulatory Other visit"/>
+                                <procedureTime high="20111116120000" low="20111116120000"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Ambulatory Other  visit HCPCS-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter007" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20111023115000" low="20111023115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure007" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="S0621" codeSystem="2.16.840.1.113883.6.285" codeSystemName="HCPCS" displayName="Ambulatory Other  visit"/>
+                                <procedureTime high="20111116120000" low="20111116120000"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Ambulatory Other  visit UBREV-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter008" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20111023115000" low="20111023115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure008" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="0524" codeSystem="2.16.840.1.113883.6.301.3" codeSystemName="UBREV" displayName="Ambulatory Other visit"/>
+                                <procedureTime high="20111116120000" low="20111116120000"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                </encounterEvents>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

@@ -1,0 +1,76 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput vmr%20schema/cdsInput.xsd">
+	<templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+	<vmrInput>
+        <!-- Denom check: acute inpatient encounter : CPT=99223 from 0-2 years ago EncDx diabetes ICD9CM: 250 and 22 years old, female (denomMet)	-->
+		<!-- Num check: HEDIS-ESRD CPT] [1] or more times with [low] time in the past [1][yr] -expect numerator met   -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CDC-Nephro-011" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+			<demographics>
+				<birthTime value="19900101"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.1.11.1" displayName="Female"/>
+			</demographics>
+			<clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent><!--Encounter Acute Inpatient visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="99223" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Acute Inpatient Visit"/>
+                        <encounterEventTime high="20101202" low="20101202"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="250" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Diabetes"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="909.70" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="ESRD RELATED SVC &lt;FULL MONTH 20/&gt;YR OLD"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+						<!-- related procedure for encounter -->
+						<relatedClinicalStatement>
+							<targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							<procedureEvent>
+								<id extension="proc001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+								<procedureCode code="90970" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="ESRD RELATED SVC &lt;FULL MONTH 20/&gt;YR OLD"/>
+								<procedureTime high="20110401115000" low="20110401115000"/>   
+							</procedureEvent>
+						</relatedClinicalStatement>
+					</encounterEvent>
+				</encounterEvents>
+				<!-- <observationResults>
+					<observationResult>
+						<id extension="obr001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+						<observationFocus code="20621-9" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Albumin/Creatinine [Presence] in Urine by Test strip"/>
+						<observationEventTime high="20100305" low="20100305"/>
+						<observationValue>
+							<concept code="C88" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS" displayName="Result Negative" />
+						</observationValue>
+					</observationResult>  
+				</observationResults> --> 
+				<!-- <procedureEvents>
+					<procedureEvent>
+						<templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+						<id extension="proc002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+						<procedureCode code="3066F" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="DOCUMENTATION OF TREATMENT FOR NEPHROPATHY"/>
+						<procedureTime high="20100401115000" low="20100401115000"/>    
+                        <relatedEntity>
+                            <targetRole code="Performer" codeSystem="2.16.840.1.113883.3.795.12.3.3.1"/>
+                            <person>
+                                <id root="4be34db4-7aa5-4141-9325-5dcd8758ef9a"/>
+                                <entityType code="199" codeSystem="2.16.840.1.113883.3.795.5.2.12.4" />
+                            </person>
+                        </relatedEntity>  
+					</procedureEvent>
+				</procedureEvents>   -->
+			</clinicalStatements>
+		</patient>
+	</vmrInput>
+</in:cdsInput>

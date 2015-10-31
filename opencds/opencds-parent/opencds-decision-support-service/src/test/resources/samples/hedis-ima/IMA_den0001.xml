@@ -1,0 +1,38 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput vmr%20schema/cdsInput.xsd">   
+   
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- Denom check: acute inpatient encounter : CPT=90733 13 years old during measurement year (dec 31, 2011 is 13th birthday birthTime value="19990101" should not pass too young	-->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="IMA_den0001" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+			<demographics>
+				<!--<birthTime value="19981231"/> --><!--should pass-->
+				<birthTime value="19990101"/>    <!--should not pass too young--><!--
+				<birthTime value="19980101"/> --><!--should pass--><!--	
+				<birthTime value="19971231"/> --><!--should old--><!--			-->
+                <gender code="M" codeSystem="2.16.840.1.113883.1.11.1" displayName="Male"/>
+			</demographics>
+			<clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent><!--Encounter Nonacute Inpatient  visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter001" root="2.16.840.1.113883.3.795.5.2.12.2"/> <!-- OID is OPENCDS_UTAH_ENCOUNTER -->
+                        <encounterType code="I" codeSystem="2.16.840.1.113883.3.795.5.2.12.3"/> <!-- Pulled from VISIT_DM.VISIT --> 
+                        <encounterEventTime high="20111231101010" low="20111231101010"/>
+                        <relatedClinicalStatement> <!-- CPT4 codes are mapped as procedure events in the vMR -->
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id root="a5a9ba85-2a46-46e8-bf52-da356f2e756f-Proc01"/>
+                                <procedureCode code="99223" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Acute Inpatient Visit"/>
+                                <procedureTime high="20111231101010" low="20111231101010"/>                                
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                </encounterEvents>
+            </clinicalStatements> 
+		</patient>
+    </vmrInput>
+</in:cdsInput>

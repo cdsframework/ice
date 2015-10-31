@@ -1,0 +1,66 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../schema/cdsInput.xsd"
+    xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- numerator met,  measles vaccine  (CPT: 90705 ) AND rubella vaccine (CPT: 90706) AND mumps vaccine (CPT: 90704) etweenb birth and 2nd birthday:  numerator not met (2 in the right dates, 1 in the wrong date)-->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="CIS_MMR0009" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="20090902101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent><!--Encounter Ambulatory visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter002" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20100602101010" low="20100602101010"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure002" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="90705" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="measles vaccine"/>
+                                <procedureTime high="20100602101010" low="20100602101010"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Ambulatory visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter003" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20100702101010" low="20100702101010"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure003" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="90706" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="rubella vaccine"/>
+                                <procedureTime high="20100702101010" low="20100702101010"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--Encounter Ambulatory visit CPT-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter004" root="2.16.840.1.113883.3.795.5.2"/>
+                        <encounterType code="00000" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Any Encounter"/>
+                        <encounterEventTime high="20120704101010" low="20120704101010"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.1"/>
+                                <id extension="procedure004" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="90704" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="mumps vaccine"/>
+                                <procedureTime high="20120702101010" low="20120702101010"/>
+                            </procedureEvent>
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                </encounterEvents>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

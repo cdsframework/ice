@@ -1,0 +1,22 @@
+Add Element for the root
+
+Fix import schema location
+
+Entity:
+	replace relatedEntity with EntityRelationship class
+
+EntityRelationship:
+	add entity of type Entity, 1...1
+
+Clinical Statement:
+	replace relatedClinicalStatement with ClinicalStatementRelationship class
+	replace relatedEntityInRole with ClinicalStatementEntityInRoleRelationship class
+
+ClinicalStatementRelationship:
+	add clinicalStatement of type ClinicalStatement, 1...1
+
+ClinicalStatementEntityInRoleRelationship:
+	add entity of type Entity, 1...1
+
+=== for Packaging in ballot format ===
+for sample XMLs, adjust schema paths with ..\Schemas\ prefix to note new relative location of schemas in ballot package format

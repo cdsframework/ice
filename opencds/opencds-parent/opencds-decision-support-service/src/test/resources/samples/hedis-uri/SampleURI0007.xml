@@ -1,0 +1,95 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- 10 year old, Exclusion check: competing diagnosis -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="URI0007" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="20000202101010"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    
+
+
+                    <encounterEvent><!--December: Encounter Otpatient visit (CPT) with URI (Competing Diagnosis 2 days after: Pharyngitis)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter014" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99201" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20101203115000" low="20101203115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem014" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="465.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="URI"/>
+                                <problemEffectiveTime high="20101203115000" low="20101203115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    <encounterEvent><!--December: Encounter Otpatient visit (CPT) with URI (Competing Diagnosis 2 days after: Pharyngitis)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter016" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99201" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20101205115000" low="20101205115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem016" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="462" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Pharyngitis"/>
+                                <problemEffectiveTime high="20101205115000" low="20101205115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    
+                    <encounterEvent><!--January: Encounter Otpatient visit (CPT) with URI (Competing Diagnosis 2 days after: OtherCompetingDx)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter017" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99201" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20110103115000" low="20110103115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem017" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="465.0" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="URI"/>
+                                <problemEffectiveTime high="20110103115000" low="20110103115000"/>
+                                <importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                    
+                    
+                    <encounterEvent><!--January: Encounter Otpatient visit (CPT) with URI (Competing Diagnosis 2 days after: OtherCompetingDx)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter018" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+                        <encounterType code="99201" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Oupatient Encounter"/>
+                        <encounterEventTime high="20110105115000" low="20110105115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem018" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <problemCode code="730.9" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="OtherCompetingDx"/>
+                                <problemEffectiveTime high="20110105115000" low="20110105115000"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+
+                </encounterEvents>
+            </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

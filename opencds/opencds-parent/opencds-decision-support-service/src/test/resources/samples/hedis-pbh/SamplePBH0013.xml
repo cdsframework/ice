@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ../schema/cdsInput.xsd"
+ xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput">
+    <templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+    <vmrInput>
+        <!-- Wrong Drug -->
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id extension="PBH0013" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+            <demographics>
+                <birthTime value="19500102101010"/> <!--62 yrs old on 20120201-->
+                <gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+            </demographics>
+            <clinicalStatements>
+                <encounterEvents>
+                    <encounterEvent><!--Inpatient Acute visit (CPT) with AMI Diagnosis (ICD9CM)-->
+                        <templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+                        <id extension="encounter005" root="2.16.840.1.113883.3.795.5.2"/>
+                        <dataSourceType code="FacilityBilling" codeSystem="2.16.840.1.113883.3.795.12.3.5.1"/>
+                        <encounterType code="99221" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Inpatient Acute Encounter"/>
+                        <encounterEventTime high="20110201115000" low="20110201115000"/>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <problem> <!--Encounter Diagnosis ICD9CM AMI-->
+                                <templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+                                <id extension="problem005" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <dataSourceType code="FacilityBilling" codeSystem="2.16.840.1.113883.3.795.12.3.5.1"/>
+                                <problemCode code="410.01" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="AMI"/>
+                                <problemEffectiveTime high="20110201115000" low="20110702115000"/>
+                            </problem>                      
+                        </relatedClinicalStatement>
+                    </encounterEvent>
+                </encounterEvents>
+                <substanceDispensationEvents>
+                    <substanceDispensationEvent><!-- Med Order / HEDIS-PBH Table B Beta-Blocker Medications (NDC: 00007337013) -->
+                        <id root="1.2.3" extension="Rx001"/>
+                        <substance >
+                            <id root="1.2.3" extension="Med001"/>
+                            <substanceCode code="00007337013" codeSystem="2.16.840.1.113883.6.69" codeSystemName="NDC" displayName="HEDIS-PBH Table B Beta-Blocker Medications (NDC: 00007337013)" />
+                         </substance>
+                        <daysSupply value="20"/>
+                        <dispensationTime high="20110205" low="20110205"/>
+                    </substanceDispensationEvent>  
+                    <substanceDispensationEvent><!-- Med Order / HEDIS-PBH Table B Beta-Blocker Medications (NDC: 00007337013) -->
+                        <id root="1.2.3" extension="Rx002"/>
+                        <substance >
+                            <id root="1.2.3" extension="Med002"/>
+                            <substanceCode code="00007337013" codeSystem="2.16.840.1.113883.6.69" codeSystemName="NDC" displayName="HEDIS-PBH Table B Beta-Blocker Medications (NDC: 00007337013)" />
+                        </substance>
+                        <daysSupply value="120"/>
+                        <dispensationTime high="20110305" low="20110305"/>
+                    </substanceDispensationEvent>  
+                    <substanceDispensationEvent><!-- Med Order / HEDIS-PBH Table D Medications to Identify Exclusions (History of Asthma) (NDC: 54569626600) -->
+                        <id root="1.2.3" extension="Rx003"/>
+                        <substance >
+                            <id root="1.2.3" extension="Med003"/>
+                            <substanceCode code="000000000000" codeSystem="2.16.840.1.113883.6.69" codeSystemName="NDC" displayName="HEDIS-PBH Table D Medications to Identify Exclusions (History of Asthma) (NDC: 54569626600)" />
+                        </substance>
+                        <daysSupply value="120"/>
+                        <dispensationTime high="20110105" low="20110105"/>
+                    </substanceDispensationEvent>  
+                </substanceDispensationEvents>       
+           </clinicalStatements>
+        </patient>
+    </vmrInput>
+</in:cdsInput>

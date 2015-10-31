@@ -1,0 +1,224 @@
+package Bounce_v1_6_1;
+
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.opencds.vmr.v1_0.internal.EvaluatedPersonAgeAtEvalTime;
+import org.opencds.vmr.v1_0.internal.Demographics;
+import org.opencds.vmr.v1_0.internal.FocalPersonId;
+import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
+import org.opencds.vmr.v1_0.internal.FocalPersonId;
+import org.opencds.vmr.v1_0.internal.ObservationResult;
+import org.opencds.vmr.v1_0.internal.ObservationValue;
+import org.joda.time.Period;
+import org.joda.time.PeriodType;
+import java.util.Date;
+import java.text.DecimalFormat;
+
+import ca.uhn.fhir.model.api.IDatatype;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.composite.ContainedDt;
+import ca.uhn.fhir.model.dstu2.resource.CommunicationRequest;
+import ca.uhn.fhir.model.dstu2.resource.CommunicationRequest.Payload;
+import ca.uhn.fhir.model.dstu2.resource.Provenance;
+import ca.uhn.fhir.model.dstu2.resource.Provenance.Agent;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.primitive.StringDt;
+import java.util.ArrayList;
+import java.util.ArrayList;
+import java.util.List;
+import java.lang.String;
+
+global java.lang.String clientLanguage;
+global java.lang.String clientTimeZoneOffset;
+global java.lang.String focalPersonId;
+global java.util.Date evalTime;
+global java.util.HashSet assertions;
+global java.util.HashMap namedObjects;
+ 
+
+function CommunicationRequest createPayload(String message) {
+		CommunicationRequest comRequest = new CommunicationRequest();
+		Payload payload = comRequest.addPayload();
+		IDatatype content = new  StringDt(message);
+		payload.setContent(content);
+return comRequest;
+}
+
+function Provenance createProvenance(String message) {
+		Provenance prov = new Provenance();
+		Agent agent = prov.addAgent();
+		IDatatype stringType = new  StringDt(message);
+        agent.setDisplay(message);
+return prov;
+}
+
+//function CodeableConceptDt createCodeableConcept(String text, String code) {
+		
+//return concept;
+ 
+ 
+rule "ageGengerForMale"
+			dialect "java"
+			when
+				$person : EvaluatedPerson( $demographics : demographics, $birthtime : demographics.birthTime, $gender : demographics.gender)
+				$age : Period() from new Period($birthtime.getTime(), new Date().getTime(), PeriodType.years())
+				
+				eval($age.getYears() >= 45 )
+				eval($gender.getCode().equals("M"))	
+				
+			then
+			
+			System.out.println($age.getYears());
+			System.out.println($gender.getCode());
+			
+			java.util.Date now = new java.util.Date();
+			IVLDate testDate = new IVLDate();
+			testDate.setLow(now);
+			testDate.setHigh(now);
+	
+			ObservationResult observationResult = new ObservationResult();
+			observationResult.setObservationEventTime(testDate);
+	 		String observationProposalId = "2.16.840.1.113883.3.1829.11.1.2.1";
+	 		observationResult.setId(observationProposalId);
+	 		observationResult.setEvaluatedPersonId($person.getId());
+	 		observationResult.setSubjectIsFocalPerson(true);
+			observationResult.setClinicalStatementToBeRoot(true);
+			observationResult.setToBeReturned(true);
+			
+			DecimalFormat twoPlaces = new DecimalFormat("#.##");
+			//Setup the ObservationFocus
+			CD focus = new CD();
+			focus.setCode("427272008");
+			focus.setCodeSystem("snomed");
+			focus.setCodeSystemName("snomed");
+			focus.setDisplayName("NIH Coronary Heart Disease Risk");
+			focus.setOriginalText("http://www.nhlbi.nih.gov/health/health-topics/topics/hd");
+			observationResult.setObservationFocus(focus);
+			//Setup the ObservationValue
+			ObservationValue value = new ObservationValue();
+			value.setText("The risk of heart disease increases for men after age 45."); 
+			observationResult.setObservationValue(value);
+			
+			insert(observationResult);
+			// TODO remove it on production
+			System.out.println("***************** Inserting ObservationResult\n");
+			
+			namedObjects.put("observationResult", observationResult);
+							
+end 
+
+
+rule "ageGenderForFemale"
+			dialect "java"
+			when
+				$person : EvaluatedPerson( $demographics : demographics, $birthtime : demographics.birthTime, $gender : demographics.gender)
+				$age : Period() from new Period($birthtime.getTime(), new Date().getTime(), PeriodType.years())
+				
+				eval($age.getYears() >= 55 )
+				eval($gender.getCode().equals("F"))	
+				
+			then
+			
+			java.util.Date now = new java.util.Date();
+			IVLDate testDate = new IVLDate();
+			testDate.setLow(now);
+			testDate.setHigh(now);
+	
+			ObservationResult observationResult = new ObservationResult();
+			observationResult.setObservationEventTime(testDate);
+	 		String observationProposalId = "2.16.840.1.113883.3.1829.11.1.2.1";
+	 		observationResult.setId(observationProposalId);
+	 		observationResult.setEvaluatedPersonId($person.getId());
+	 		observationResult.setSubjectIsFocalPerson(true);
+			observationResult.setClinicalStatementToBeRoot(true);
+			observationResult.setToBeReturned(true);
+			
+			DecimalFormat twoPlaces = new DecimalFormat("#.##");
+			//Setup the ObservationFocus
+			CD focus = new CD();
+			focus.setCode("427272008");
+			focus.setCodeSystem("snomed");
+			focus.setCodeSystemName("snomed");
+			focus.setDisplayName("NIH Coronary Heart Disease Risk");
+			focus.setOriginalText("http://www.nhlbi.nih.gov/health/health-topics/topics/hd");
+			observationResult.setObservationFocus(focus);
+			//Setup the ObservationValue
+			ObservationValue value = new ObservationValue();
+			value.setText("The risk of heart disease increases for female after age 55."); 
+			observationResult.setObservationValue(value);
+			
+			insert(observationResult);
+			// TODO remove it on production
+			System.out.println("***************** Inserting ObservationResult\n");
+			
+			namedObjects.put("observationResult", observationResult);					
+end 
+
+rule "ageGenderFhirMale"
+			dialect "java"
+			when
+				$patient : Patient($birthtime : birthDate, $gender : gender)
+				$age : Period() from new Period($birthtime.getTime(), new Date().getTime(), PeriodType.years())
+				
+				eval($age.getYears() >= 45 )
+				eval($gender.equals("male"))	
+				
+			then
+			  CommunicationRequest comRequest = createPayload("The risk of heart disease increases for men after age 45.");
+		  
+		      CodeableConceptDt category = new CodeableConceptDt("SNOMED", "419772000");
+		      comRequest.setCategory(category);
+		      category.getCodingFirstRep().setDisplay("Family Medicine");
+		      category.setText("Family Medicine");
+		      
+		      CodeableConceptDt reason = new CodeableConceptDt("SNOMED", "419772000");
+		      comRequest.getReason().add(reason);
+		      reason.getCodingFirstRep().setDisplay("NIH Coronary Heart Disease Risk Reminder");
+		      
+		      CodeableConceptDt priority = new CodeableConceptDt("CDS-System", "50");
+		      priority.getCodingFirstRep().setDisplay("Routine");
+		      comRequest.setPriority(priority);
+		      
+		      Provenance prov = createProvenance("http://www.nhlbi.nih.gov/health/health-topics/topics/hd");
+		      ContainedDt contained = new ContainedDt();
+			  contained.getContainedResources().add(prov);
+		      comRequest.setContained(contained);
+		      
+		      namedObjects.put("provenance", prov);	
+		      namedObjects.put("communicationRequest", comRequest);			
+end 
+
+rule "ageGenderFhirFemale"
+			dialect "java"
+			when
+				$patient : Patient($birthtime : birthDate, $gender : gender)
+				$age : Period() from new Period($birthtime.getTime(), new Date().getTime(), PeriodType.years())
+				
+				eval($age.getYears() >= 55 )
+				eval($gender.equals("female"))	
+				
+			then
+			  CommunicationRequest comRequest = createPayload("The risk of heart disease increases for female after age 55.");
+		  
+		      CodeableConceptDt category = new CodeableConceptDt("SNOMED", "419772000");
+		      comRequest.setCategory(category);
+		      category.getCodingFirstRep().setDisplay("Family Medicine");
+		      category.setText("Family Medicine");
+		      
+		      CodeableConceptDt reason = new CodeableConceptDt("SNOMED", "419772000");
+		      comRequest.getReason().add(reason);
+		      reason.getCodingFirstRep().setDisplay("NIH Coronary Heart Disease Risk Reminder");
+		      
+		      CodeableConceptDt priority = new CodeableConceptDt("CDS-System", "50");
+		      priority.getCodingFirstRep().setDisplay("Routine");
+		      comRequest.setPriority(priority);
+		      
+		      Provenance prov = createProvenance("http://www.nhlbi.nih.gov/health/health-topics/topics/hd");
+		      ContainedDt contained = new ContainedDt();
+			  contained.getContainedResources().add(prov);
+		      comRequest.setContained(contained);
+		      
+		      namedObjects.put("provenance", prov);	
+		      namedObjects.put("communicationRequest", comRequest);			
+end 

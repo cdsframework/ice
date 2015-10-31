@@ -1,0 +1,6 @@
+Latest version of schema is always checked in source code at C:\OpenCDS_active\opencds-parent\opencds-vmr-1_0\opencds-vmr-1_0-schema\src\main\resources\schema
+
+Changes to schema vs. Sept 2011 HL7 DAM, to be also incorporated into Future HL7 DAM:
+
+- FOR FUTURE: Make ClinicalStatementEntityInRoleRelationship and RelatedClinicalStatementToEntityInRole have a relationshipTimeInterval, similar to EntityRelationship.  This is logically desirable and also may simplify implementations by having entities have similar attributes whether they are related to a clinical statement or entity source.
+- ALREADY CHANGED: Made bodySiteCode within BodySite attributes optional rather than mandatory.  This change was made because a specific body site may be implied by the type of procedure, problem, etc., such that only the laterality is of interest (e.g., bilateral laterality for a mastectomy).

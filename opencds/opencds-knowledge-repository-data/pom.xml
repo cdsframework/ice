@@ -1,0 +1,44 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.opencds</groupId>
+    <artifactId>opencds-knowledge-repository-data</artifactId>
+    <version>2.0.5</version>
+    <name>OpenCDS Knowledge Repository</name>
+    <description>Knowledge repository for storing all resources (rules, concept mappings, data structures, schematrons, schemas, etc.)</description>
+    <distributionManagement>
+        <repository>
+            <id>opencds</id>
+            <name>OpenCDS Nexus Repository</name>
+            <url>${nexus.deploy.release.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>opencds</id>
+            <name>OpenCDS Nexus Snapshot Repository</name>
+            <url>${nexus.deploy.snapshots.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <issueManagement>
+        <system>jira</system>
+        <url>https://opencds.atlassian.net/browse/OP</url>
+    </issueManagement>
+    <mailingLists>
+        <mailingList>
+            <name>Project Email Distribution List</name>
+            <post> opencds-users@googlegroups.com</post>
+            <subscribe>https://groups.google.com/group/opencds-users</subscribe>
+            <unsubscribe>opencds-users+unsubscribe@googlegroups.com</unsubscribe>
+            <archive>https://groups.google.com/group/opencds-users</archive>
+        </mailingList>
+    </mailingLists>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <organization>
+        <name>OpenCDS</name>
+        <url>http://www.opencds.org</url>
+    </organization>
+</project>

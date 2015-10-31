@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns5:cdsOutput xmlns:ns2="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns3="org.opencds.vmr.v1_0.schema.cdsinput" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput.specification" xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">
+    <vmrOutput>
+        <templateId root="2.16.840.1.113883.3.1829.11.1.2.1" extension=""/>
+        <patient>
+            <templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+            <id root="2.16.840.1.113883.3.795.5.2.1.1" extension="Patient001"/>
+            <demographics>
+                <birthTime value="19610101000000.000-0700"/>
+                <gender code="F" codeSystem="2.16.840.1.113883.1.11.1"/>
+            </demographics>
+            <clinicalStatements>
+                <observationResults>
+                    <observationResult>
+                        <id root="2.16.840.1.113883.3.795.5.1" extension="DEBUG_CONCEPTS"/>
+                        <observationFocus code="concepts" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="Concepts found in working memory"/>
+                        <observationEventTime high="20140116062332.435-0700" low="20140116062332.435-0700"/>
+                        <observationValue>
+                            <text value="C238=Inpatient Encounter,C374=Abdominopelvic Procedure,C377=Operating Room Procedure,C405=Part of,C475=Inpatient Discharge Disposition,C482=NUBC Value Sets,C496=Major Surgery,C500=Gynecological Surgery,C562=Anesthesia,C575=VTE Prophylaxis 1 Low dose unfractionated heparin (LDUH),C577=VTE Prophylaxis 3 Intermittent pneumatic compression devices (IPC),C594=Subcutaneous,C60=Hysterectomy,C781=VTE Prophylaxis 7 Compression Boots,C877=Associated with"/>
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="2.16.840.1.113883.3.795.5.1" extension="ASSERTROOT"/>
+                        <observationFocus code="assertions" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="Assertions found in working memory"/>
+                        <observationEventTime high="20140116062332.435-0700" low="20140116062332.435-0700"/>
+                        <observationValue>
+                            <text value="C2504=,C529=REJECTED for missing or bad data,reject,wrapper"/>
+                        </observationValue>
+                    </observationResult>
+                    <observationResult>
+                        <id root="2.16.840.1.113883.3.795.5.1" extension="ROOT"/>
+                        <observationFocus code="C465" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="Encounter Number"/>
+                        <observationEventTime high="20140116062332.435-0700" low="20140116062332.435-0700"/>
+                        <observationValue>
+                            <identifier root="2.16.840.1.113883.3.795.5.2" extension="193250241^70113777"/>
+                        </observationValue>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="C405" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="Part of"/>
+                            <observationResult>
+<id root="2.16.840.1.113883.3.795.5.1" extension="denominator"/>
+<observationFocus code="C529" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="REJECTED for missing or bad data"/>
+<observationEventTime high="20140116062332.435-0700" low="20140116062332.435-0700"/>
+<observationValue>
+    <integer value="0"/>
+</observationValue>
+                            </observationResult>
+                        </relatedClinicalStatement>
+                        <relatedClinicalStatement>
+                            <targetRelationshipToSource code="C405" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="Part of"/>
+                            <observationResult>
+<id root="2.16.840.1.113883.3.795.5.1" extension="numerator"/>
+<observationFocus code="C529" codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" displayName="REJECTED for missing or bad data"/>
+<observationEventTime high="20140116062332.435-0700" low="20140116062332.435-0700"/>
+<observationValue>
+    <integer value="0"/>
+</observationValue>
+                            </observationResult>
+                        </relatedClinicalStatement>
+                    </observationResult>
+                </observationResults>
+            </clinicalStatements>
+        </patient>
+    </vmrOutput>
+</ns5:cdsOutput>
+

@@ -1,0 +1,101 @@
+<in:cdsInput xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes" xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput" xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput vmr%20schema/cdsInput.xsd">
+	<templateId root="2.16.840.1.113883.3.1829.11.1.1.1"/>
+	<vmrInput>
+		<!-- Numerator check:  lab test CPT in the past year of 7 - 9%
+		-expect Numerator met-->
+		<templateId root="2.16.840.1.113883.3.1829.11.1.2.1"/>
+		<patient>
+			<templateId root="2.16.840.1.113883.3.1829.11.2.1.1"/>
+			<id extension="CDC0041" root="2.16.840.1.113883.3.795.5.2.1.1"/>
+			<demographics>
+				<birthTime value="19700202101010"/>
+				<gender code="F" codeSystem="2.16.840.1.113883.5.1" displayName="Female"/>
+			</demographics>
+			<clinicalStatements>
+				<encounterEvents>
+					<encounterEvent>
+						<!--Encounter acute inpatient visit (CPT) and discharged alive with Acute MI Diagnosis (ICD9CM)-->
+						<!-- use this encounter framgent with the "O" encounter type for checking denomiantor pharmacy.  The CPT code has been moved to a related Procedure -->
+						<templateId root="2.16.840.1.113883.3.1829.11.4.3.1"/>
+						<id extension="encounter001" root="2.16.840.1.113883.3.795.5.2"/>
+						<dataSourceType code="Administrative" codeSystem="2.16.840.1.113883.3.795.12.2.5.1"/>
+						<!-- this maps to "Outpatient" -->
+						<encounterType code="I" codeSystem="2.16.840.1.113883.3.795.5.2.12.3" codeSystemName="UUHC Proprietary" displayName="Outpatient for UUHC"/>
+						<encounterEventTime high="20110301115000" low="20110301115000"/>
+						<relatedClinicalStatement>
+							<targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							<problem>
+								<!--Encounter Diagnosis ICD9CM-->
+								<templateId root="2.16.840.1.113883.3.1829.11.7.2.18"/>
+								<id extension="problem001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+								<problemCode code="250" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD9CM diagnoses" displayName="Diabetes"/>
+								<problemEffectiveTime high="20110301115000" low="20110301115000"/>
+								<importance code="1" codeSystem="2.16.840.1.113883.12.359"/>
+							</problem>
+						</relatedClinicalStatement>
+						<!-- related procedure for encounter -->
+						<relatedClinicalStatement>
+							<targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							<procedureEvent>
+								<id extension="proc001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+								<procedureCode code="99223" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="Acute Inpatient Encounter"/>
+								<procedureTime high="20110301115000" low="20110301115000"/>
+							</procedureEvent>
+						</relatedClinicalStatement>
+<!--						<relatedClinicalStatement>
+							<targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+							--><!-- medication.  MUST be part of an outpatient encounter.  To map to this, make sure encounter type of  --><!--
+							<substanceDispensationEvent>
+								<id extension="subDispense001" root="2.16.840.1.113883.3.795.5.2"/>
+								<substance>
+									<id extension="sub001_001" root="2.16.840.1.113883.3.795.5.2"/>
+									<substanceCode code="CDC-A" codeSystem="2.16.840.1.113883.3.795.5.2.12.8" codeSystemName="OPENCDS_UTAH_HEDIS_MEDICATION_CODESET" displayName="CDC-A CODE"/>
+								</substance>
+								<daysSupply value="120"/>
+								<dispensationTime high="20110305" low="20110305"/>
+							</substanceDispensationEvent>
+						</relatedClinicalStatement>-->
+<!--                         <relatedClinicalStatement> --><!-- CPT4 codes are mapped as procedure events in the vMR --><!--
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id extension="proc004" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="3046F" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="HbA1c Level Greater Than 9.0"/>
+                                <procedureTime high="20110301115000" low="20110301115000"/>                               
+                            </procedureEvent>
+                        </relatedClinicalStatement>    -->  
+                    <relatedClinicalStatement> <!-- CPT4 codes are mapped as procedure events in the vMR -->
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id extension="proc004" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="3045F" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="HbA1c Level 7.0-9.0"/>
+                                <procedureTime high="20110301115000" low="20110301115000"/>                               
+                            </procedureEvent>
+                        </relatedClinicalStatement>    
+<!--                   <relatedClinicalStatement> --><!-- CPT4 codes are mapped as procedure events in the vMR --><!--
+                            <targetRelationshipToSource code="COMP" codeSystem="2.16.840.1.113883.3.795.12.3.2.1"/>
+                            <procedureEvent>
+                                <templateId root="2.16.840.1.113883.3.1829.11.8.1.2"/>
+                                <id extension="proc004" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+                                <procedureCode code="3044F" codeSystem="2.16.840.1.113883.6.12" codeSystemName="CPT4" displayName="HbA1c Level Less Than 7.0"/>
+                                <procedureTime high="20100301115000" low="20100301115000"/>                               
+                            </procedureEvent>
+                        </relatedClinicalStatement>   -->  						
+					</encounterEvent>
+				</encounterEvents>
+<!--				<observationResults>
+					<observationResult>-->
+						<!--Observation Focus, LDL-C, LOINC in past year
+						<id extension="obr001" root="2.16.840.1.113883.3.795.5.2.3.6"/>
+						<observationFocus code="17856-6" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="HbA1c tests"/>
+						<observationEventTime high="20110305" low="20110305"/>
+						<observationValue>
+							<physicalQuantity value="9" unit="%" xsi:type="dt:PQ"/>
+						</observationValue>
+					</observationResult>
+				</observationResults>  -->  	
+			</clinicalStatements>
+		</patient>
+	</vmrInput>
+</in:cdsInput>
