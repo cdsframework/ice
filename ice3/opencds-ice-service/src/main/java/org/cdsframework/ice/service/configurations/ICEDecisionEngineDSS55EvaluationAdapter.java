@@ -559,10 +559,17 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			bpmnFile = new File(baseConfigurationLocation, "knowledgeModules/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".bpmn");
 
 			if (! dslFile.exists() ||  ! drlFile.exists() || ! drlFileDuplicateShotSameDay.exists() || ! bpmnFile.exists()) {
-				String lErrStr = "Some or all ICE base rules not found; knowledge repository location: " + baseConfigurationLocation + "; " +
-						"base rules scoping entity id: " + lBaseRulesScopingKmId;
-				logger.error(_METHODNAME + lErrStr);
-				throw new RuntimeException(lErrStr);
+				// Try in the knowledge module directory
+				dslFile = new File(baseConfigurationLocation, "knowledgeModules/" + lRequestedKmId + "/" + lRequestedKmId + ".dsl");
+				drlFile = new File(baseConfigurationLocation, "knowledgeModules/" + lRequestedKmId + "/" + lRequestedKmId + ".drl");
+				drlFileDuplicateShotSameDay = new File(baseConfigurationLocation, "knowledgeModules/" + lRequestedKmId + "/" + lRequestedKmId + "^DuplicateShotSameDay.drl");
+				bpmnFile = new File(baseConfigurationLocation, "knowledgeModules/" + lRequestedKmId + "/" + lRequestedKmId + ".bpmn");
+				if (! dslFile.exists() ||  ! drlFile.exists() || ! drlFileDuplicateShotSameDay.exists() || ! bpmnFile.exists()) {
+					String lErrStr = "Some or all ICE base rules not found; base repository location: " + baseConfigurationLocation + "; " +
+							"base rules scoping entity id: " + lBaseRulesScopingKmId + "; knowledge module location: " + lRequestedKmId;
+					logger.error(_METHODNAME + lErrStr);
+					throw new RuntimeException(lErrStr);
+				}
 			}
 
 			logger.info(_METHODNAME + "Loading knowledge base with base DRL, DSLR, BPMN and DSL files:");

@@ -1,0 +1,316 @@
+/**
+ * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package org.nyc.cir.ICE_v1_0_0
+
+//list any import classes here.
+import java.util.Date
+import java.util.List
+import java.util.Set
+import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.Schedule
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept
+import org.cdsframework.ice.supportingdata.tmp.SupportedEvaluationConcept
+import org.cdsframework.ice.supportingdata.tmp.SupportedRecommendationConcept
+import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineConcept
+import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.service.TimePeriod
+import org.cdsframework.ice.service.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+expander org.nyc.cir^ICE^0.9.0.dsl 
+
+global java.util.Date evalTime
+global org.drools.runtime.KnowledgeContext kcontext
+
+
+// If a PPSV shot has been given and patient is due for PCV, recommended interval= 56 days from PPSV
+rule "PCV: Recommended interval 56 days from PPSV if due for PCV" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
+	when
+		There is a Series $pcvSeries
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a recommendation date has been determined
+			- make note of the recommendation date as $pcvRecommendationDate
+		There is a Series $ppsvSeries
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PPSV
+			- the number of administered shots is > 0
+			- make note of the date that the most recent shot was administered as $dtPPSVShotDate
+	then
+		Add 56 DurationType.DAYS to $dtPPSVShotDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $pcvSeries
+		Record that this Series Rule was Processed for the TargetSeries $pcvSeries
+		Log that this Series Rule fired for the Series $pcvSeries
+end
+
+
+// Post Recommendation Check: When pneumococcal conjugate is recommended (in the future or now; not conditionally), always recommend at the vaccine level; vaccine recommended should be PCV 13 (CVX 133).
+rule "PCV: Recommend at the vaccine level in 4-Dose PCV Series; vaccine recommended should be PCV 13 (CVX 133)" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- post processing on the Series forecast has not already been run
+			- the name of the Series is "PCV 4-Dose Series"
+			- a Forecast for the Series has been made and a shot is recommended
+		The Immunization Schedule information $schedule must be known to complete writing this rule
+	then
+		Set the Recommended Vaccine for the Forecast in the Series $targetSeries of Schedule $schedule to SupportedVaccineConcept._PCV_13
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// If the child is >= 5yrs old and the series is not complete, mark that the series can never be completed
+rule "PCV: Mark that the Series cannot be ever be completed if Patient is >= 5yrs and series is not already complete" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 300
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the name of the Series is "PCV 4-Dose Series"
+			- the Series is Not Complete
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
+	then
+		Mark that the Series $targetSeries cannot be forecasted as Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// If a child is complete for the series, has had one or more doses but not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old and will be < 5 years old at the recommended due date, 
+// then a dose of PCV 13 (CVX 133) is recommended. Recommended interval = 8 weeks and minimum interval = 52 days from the previous shot.
+rule "PCV: Recommend dose if series complete if no prior VALID PCV13 doses, is <5 yrs old and will be less than 5yrs old upon recommendation date" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 210
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the name of the Series is "PCV 4-Dose Series"
+			- the Series is Complete
+			- the Number of Administered Shots is > 0
+			- make note of the date that the most recent shot was administered as $shotDate			
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine SupportedVaccineConcept._PCV_13 is == 0
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
+		Confirm elapsed time between $dtBirthDate and (calculate date from addition of $shotDate with TimePeriod "8w") < "5y"
+	then
+		Add 8 DurationType.WEEKS to $shotDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// If a child has had one or more doses but not had a dose of PCV 13, is < 5yrs but will be >= 5 years at the recommended due date, then recommendation = Conditional, 
+// reason = HIGH_RISK, Recommended interval = 8 weeks from the last dose... even if they have completed their PCV series (with PCV7 or PCV NOS)
+rule "PCV: Recommend a Conditional High_Risk if Patient is <5yrs, had no prior dose of PCV_13 but will be due after 5yrs of age" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 210
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the name of the Series is "PCV 4-Dose Series"
+			- the Number of Administered Shots is > 0
+			- make note of the date that the most recent shot was administered as $shotDate			 
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine SupportedVaccineConcept._PCV_13 is == 0
+		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
+		Confirm elapsed time between $dtBirthDate and (calculate date from addition of $shotDate with TimePeriod "8w") >= "5y"  
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON.getConcept()
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// If a child is => 5 years old but does not have a dose of PCV 13 then recommendation = Conditional, reason = HIGH_RISK even if they have completed 
+// their PCV series (with PCV7 or PCV NOS)
+rule "PCV: Recommend a Conditional High_Risk dose of PCV_13 if Patient is >= 5yrs and no prior dose of PCV_13" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 210
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the name of the Series is "PCV 4-Dose Series"				 
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine SupportedVaccineConcept._PCV_13 is == 0
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON.getConcept()
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+		
+
+// Rule for patients >=5 years old
+rule "PCV: Recommend Conditional High Risk in 4-Dose PCV Series if Patient Age >=5yrs and Series Not Complete by 5yrs of Age" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 200
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $assign_dtDateAtAge when the patient is "5y" of age
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the name of the Series is "PCV 4-Dose Series"
+			- the Series is Not Complete
+			- make note of the number of doses required to complete this series as $assign_nNumberOfDosesRequired
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON.getConcept()
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Exception 1
+rule "PCV: Include Recommendation with Date 7months in 4-Dose PCV Series and TargetDose 2 if Patient is between 7and12months and Received No Doses before 7months of Age" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 200
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the name of the Series is "PCV 4-Dose Series"
+			- the effective dose number in the Series is <= 2
+			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 0
+		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
+	then
+		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeSevenMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Exception 2A
+rule "PCV: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose PCV Series if Patient between age 12and24months and Received <2 Doses before 12months of Age" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 200
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age	
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the name of the Series is "PCV 4-Dose Series"
+			- the effective dose number in the Series is <= 3
+			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is < 2
+		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
+	then
+		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 3 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Exception 2B
+rule "PCV: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose PCV Series and Patient between age 12and24months and Received 2 Doses before 12months of Age" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 200
+	activation-group "recommendationAgeCheck"
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the name of the Series is "PCV 4-Dose Series"
+			- the effective dose number in the Series is <= 4
+			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is == 2
+		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
+	then
+		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Exception 3
+rule "PCV: Set Recommendation Date to 24months and TargetDose 4 in 4-Dose PCV Series if Patient between age 24months and 5years" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 200
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeTwentyFourMonths when the Patient is "24m" of age					
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the name of the Series is "PCV 4-Dose Series"
+			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
+			- the effective dose number in the Series is <= 4
+			- the Effective Number of Doses in the Series before $dtDateAtAgeTwentyFourMonths is < $assign_nNumberOfDosesRequired
+		Confirm elapsed time between $dtBirthDate and evalTime >= "24m" && elapsed time between $dtBirthDate and evalTime < "5y"
+	then
+		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeTwentyFourMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
