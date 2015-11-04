@@ -15,19 +15,17 @@ import org.cdsframework.ice.service.InconsistentConfigurationException;
  * SupportedCdsConcepts is used to track the concepts defined in the ICE supporting data files. All concepts, if defined in the ICE supporting data, must be associated with 
  * an ICEConceptType, or may not be tracked by this class. Furthermore, no ICEConcept defined in the supporting data can be associated with more than one CdsListItem per 
  * ICEConceptType. This latter requirement is so that, on output for a request, the ICE response may be output using the locally coded values required by the client.
- *   
- * @author daryl
  */
 public class SupportedCdsConcepts {
 
-	private Map<IceConceptType, Map<ICEConcept, LocallyCodedCdsListItem>> concepts;
+	private Map<ICEConceptType, Map<ICEConcept, LocallyCodedCdsListItem>> concepts;
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsConcepts.class);
 	
 	
 	protected SupportedCdsConcepts() {
 		
-		concepts = new EnumMap<IceConceptType, Map<ICEConcept, LocallyCodedCdsListItem>>(IceConceptType.class);
+		concepts = new EnumMap<ICEConceptType, Map<ICEConcept, LocallyCodedCdsListItem>>(ICEConceptType.class);
 	}
 	
 	
@@ -37,7 +35,7 @@ public class SupportedCdsConcepts {
 	 * @param PIC the concept to add
 	 * @throws InconsistentConfigurationException if the supporting data supplied is inconsistent with prior supporting data that has already been provided
 	 */
-	protected void addSupportedCdsConcept(IceConceptType pICT, ICEConcept pIC) {
+	protected void addSupportedCdsConcept(ICEConceptType pICT, ICEConcept pIC) {
 		
 		addSupportedCdsConceptWithCdsListItem(pICT, pIC, null);
 	}
@@ -53,7 +51,7 @@ public class SupportedCdsConcepts {
 	 * @throws InconsistentConfigurationException if the supporting data supplied is inconsistent with prior supporting data that has already been provided. This will happen
 	 * 		if ICEConcept is already associated with a LocallyCodedCdsListItem for the specified IceConceptType
 	 */
-	protected void addSupportedCdsConceptWithCdsListItem(IceConceptType pICT, ICEConcept pIC, LocallyCodedCdsListItem pLCCLI) 
+	protected void addSupportedCdsConceptWithCdsListItem(ICEConceptType pICT, ICEConcept pIC, LocallyCodedCdsListItem pLCCLI) 
 		throws InconsistentConfigurationException {
 		
 		String _METHODNAME = "addSupportedCdsConceptWithCdsListItem(): ";
@@ -87,5 +85,36 @@ public class SupportedCdsConcepts {
 			this.concepts.put(pICT, lIceConceptEntry);
 		}
 	}
+
 	
+	/**
+	 * Return map of supported concepts for the given IceConceptType. Returns null if not found.
+	 */
+	protected Map<ICEConcept, LocallyCodedCdsListItem> getMapOfSupportedCdsConceptsForICEConceptType(ICEConceptType pICT) {
+
+		if (pICT == null) {
+			return null;
+		}
+		
+		return this.concepts.get(pICT);
+	}
+
+	
+	/**
+	 * Return LocallyCodedCdsListItem for the given IceConceptType and ICEConcept. Returns null if not found.
+	 */
+	protected LocallyCodedCdsListItem getLocallyCodedCdsListItemForIceConceptTypeAndICEConcept(ICEConceptType pICT, ICEConcept pIC) {
+		
+		if (pICT == null || pIC == null) {
+			return null;
+		}
+		
+		Map<ICEConcept, LocallyCodedCdsListItem> lMap = this.concepts.get(pICT);
+		if (lMap != null) {
+			return lMap.get(pIC);
+		}
+		else {
+			return null;
+		}
+	}
 }

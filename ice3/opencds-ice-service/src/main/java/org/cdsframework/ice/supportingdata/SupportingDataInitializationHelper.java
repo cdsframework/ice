@@ -48,7 +48,7 @@ import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.schema.CD;
 
 
-public class ICESupportingDataHelper {
+public class SupportingDataInitializationHelper {
 
 	/**
 	 * e.g.
@@ -62,10 +62,10 @@ public class ICESupportingDataHelper {
 	private static final String _ICE_VACCINE_GROUP_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.vaccinegroup";
 	private static final String _ICE_VACCINE_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.vaccine";
 	
-	private static Log logger = LogFactory.getLog(ICESupportingDataHelper.class);
+	private static Log logger = LogFactory.getLog(SupportingDataInitializationHelper.class);
 	
 	
-	public ICESupportingDataHelper(List<String> pSupportedCdsVersions, List<File> pSupportingDataDirectories) 
+	public SupportingDataInitializationHelper(List<String> pSupportedCdsVersions, List<File> pSupportingDataDirectories) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "ICESupportingDataHelper(): ";
@@ -145,7 +145,6 @@ public class ICESupportingDataHelper {
 		for (File lSupportingDatadirectory : this.supportingDataDirectories) {
 			File lCodedConceptsDirectory = new File(lSupportingDatadirectory, pSupportingDataChildDirectory);
 			try {
-				// TODO: Make configurable
 				JAXBContext jc = JAXBContext.newInstance(_ICE_CDS_LIST_SPECIFICATION_FILE_XML_NAMESPACE);
 				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
 				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
@@ -192,7 +191,6 @@ public class ICESupportingDataHelper {
 		for (File lSupportingDataDirectory : this.supportingDataDirectories) {
 			File lVaccineGroupsDirectory = new File(lSupportingDataDirectory, pChildDirectory);
 			try {
-				// TODO: 
 				JAXBContext jc = JAXBContext.newInstance(_ICE_VACCINE_GROUP_SPECIFICATION_FILE_XML_NAMESPACE);
 				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
 				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
@@ -238,7 +236,6 @@ public class ICESupportingDataHelper {
 		for (File lSupportingDataDirectory : this.supportingDataDirectories) {
 			File lVaccineDirectory = new File(lSupportingDataDirectory, pChildDirectory);
 			try {
-				// TODO: 
 				JAXBContext jc = JAXBContext.newInstance(_ICE_VACCINE_SPECIFICATION_FILE_XML_NAMESPACE);
 				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
 				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
@@ -581,8 +578,8 @@ public class ICESupportingDataHelper {
 	public static void main(String[] args) {
 		
 		String[] lSupportingDataLocations = { 
-				"/usr/local/projects/ice/opencds-v2-ice/opencds-ice-service-data/src/main/resources/knowledgeModules/org.cdsframework^ICE^1.0.0/ice-supporting-data/",
-				"/usr/local/projects/ice/opencds-v2-ice/opencds-ice-service-data/src/main/resources/knowledgeModules/org.nyc.cir^ICE^1.1.0/ice-supporting-data/"
+				"/usr/local/projects/ice/ice3/opencds-ice-service-data/src/main/resources/knowledgeModules/org.cdsframework^ICE^1.0.0/ice-supporting-data/",
+				"/usr/local/projects/ice/ice3/opencds-ice-service-data/src/main/resources/knowledgeModules/org.nyc.cir^ICE^1.0.0/ice-supporting-data/"
 		};
 		/*
 		if (args.length == 1 && args[0] != null) {
@@ -599,7 +596,7 @@ public class ICESupportingDataHelper {
 			lSupportingDirectoryFileLoc.add(new File(lSupportingDataLocations[i]));
 		}
 		try {
-			ICESupportingDataHelper icdh = new ICESupportingDataHelper(lCdsVersions, lSupportingDirectoryFileLoc);
+			SupportingDataInitializationHelper icdh = new SupportingDataInitializationHelper(lCdsVersions, lSupportingDirectoryFileLoc);
 			icdh.initializeCodeConcepts("OtherLists");
 		}
 		catch (Exception e) {

@@ -46,7 +46,7 @@ import org.cdsframework.ice.service.TimePeriod;
 import org.cdsframework.ice.service.TimePeriod.DurationType;
 import org.cdsframework.ice.service.Vaccine;
 import org.cdsframework.ice.service.VaccineComponent;
-import org.cdsframework.ice.supportingdata.ICESupportingDataHelper;
+import org.cdsframework.ice.supportingdata.SupportingDataInitializationHelper;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.cdsframework.ice.supportingdata.SupportedCdsLists;
 import org.cdsframework.ice.supportingdata.SupportedCdsVaccineGroups;
@@ -104,10 +104,15 @@ public class ScheduleImpl implements Schedule {
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
-		File lSupportingDataDirectory = null;
+		
+		StringBuffer lSbSDlocation = new StringBuffer(512);
+		StringBuffer lSbCdsVersion = new StringBuffer(128);
+		lSbSDlocation.append("Supporting Data Directories: ");
+		lSbCdsVersion.append("CDS versions: ");
+		int i=1;
 		for (String lCdsVersion : this.cdsVersions) {
 			File lKnowledgeModuleDirectory = new File(pBaseKnowledgeRepositoryLocation, lCdsVersion); 
-			lSupportingDataDirectory = new File(lKnowledgeModuleDirectory, supportingDataDirectory);
+			File lSupportingDataDirectory = new File(lKnowledgeModuleDirectory, supportingDataDirectory);
 			if (lSupportingDataDirectory.isDirectory() == false) {
 				String lErrStr = "Supporting data directory location does not exist";
 				logger.error(_METHODNAME + lErrStr);
@@ -115,15 +120,35 @@ public class ScheduleImpl implements Schedule {
 			}
 			else {
 				this.supportingDataLocations.add(lSupportingDataDirectory);
+				if (i > 1) {
+					lSbSDlocation.append("; ");
+					lSbCdsVersion.append("; ");
+				}
+				lSbCdsVersion.append(lCdsVersion); 
+				lSbSDlocation.append(lSupportingDataDirectory.getAbsolutePath());
+				i++;
 			}
-			logger.info(_METHODNAME + "Added supporting data directory: " + lSupportingDataDirectory.getAbsolutePath());
+			if (logger.isDebugEnabled()) {
+				logger.info(_METHODNAME + "Added supporting data directory: " + lSupportingDataDirectory.getAbsolutePath());
+			}
 		}
 
-		ICESupportingDataHelper isdh = new ICESupportingDataHelper(cdsVersions, this.supportingDataLocations);
+		// Log initialization of Schedule
+		StringBuilder lSbScheduleInfo = new StringBuilder(512);
+		lSbScheduleInfo.append(_METHODNAME); lSbScheduleInfo.append("Initializing Schedule "); lSbScheduleInfo.append(this.scheduleId);
+		lSbScheduleInfo.append(lSbCdsVersion);
+		lSbScheduleInfo.append("; ");
+		lSbScheduleInfo.append(lSbSDlocation);
+		logger.info(lSbScheduleInfo.toString());;
+		
+		// Read supporting data
+		SupportingDataInitializationHelper isdh = new SupportingDataInitializationHelper(cdsVersions, this.supportingDataLocations);
 		initializeOtherLists(isdh);
 		initializeVaccineGroupDiseases(isdh);
 		initializeVaccines(isdh);					// Send a flag to Vaccines object to indicate if vaccine is used by more than 1 vaccine group
 		//initializeVaccineGroupSeries();
+		
+		// Schedule initialization complete
 		logger.info(_METHODNAME + "Initialization of Schedule complete.");
 	}
 
@@ -274,10 +299,10 @@ public class ScheduleImpl implements Schedule {
 	
 	/**
 	 * Initialize value set and code system lists
-	 * @param ICESupportingDataHelper instance of ICESupportingDataHelper to drive reading in of the supporting data from XML
+	 * @param SupportingDataInitializationHelper instance of ICESupportingDataHelper to drive reading in of the supporting data from XML
 	 * @throws ImproperUsageException
 	 */
-	private void initializeOtherLists(ICESupportingDataHelper lISDH) 
+	private void initializeOtherLists(SupportingDataInitializationHelper lISDH) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "initializeOtherLists(): ";
@@ -296,10 +321,10 @@ public class ScheduleImpl implements Schedule {
 	
 	/**
 	 * Initialize vaccine group supporting data
-	 * @param ICESupportingDataHelper instance of ICESupportingDataHelper to drive reading in of the supporting data from XML
+	 * @param SupportingDataInitializationHelper instance of ICESupportingDataHelper to drive reading in of the supporting data from XML
 	 * @throws ImproperUsageException
 	 */
-	private void initializeVaccineGroupDiseases(ICESupportingDataHelper lISDH) 
+	private void initializeVaccineGroupDiseases(SupportingDataInitializationHelper lISDH) 
 		throws ImproperUsageException {
 		
 		/*
@@ -338,10 +363,10 @@ public class ScheduleImpl implements Schedule {
 	
 	/**
 	 * Initialize vaccines
-	 * @param ICESupportingDataHelper instance of ICESupportingDataHelper to drive reading in of the supporting data from XML
+	 * @param SupportingDataInitializationHelper instance of ICESupportingDataHelper to drive reading in of the supporting data from XML
 	 * @throws ImproperUsageException
 	 */
-	private void initializeVaccines(ICESupportingDataHelper lISDH) 
+	private void initializeVaccines(SupportingDataInitializationHelper lISDH) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "initializeVaccines(): ";

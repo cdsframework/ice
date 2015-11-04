@@ -1,12 +1,13 @@
 package org.cdsframework.ice.supportingdata;
 
-public enum IceConceptType {
+public enum ICEConceptType {
 
 	DISEASE("SUPPORTED_DISEASE_CONCEPT"),
 	EVALUATION_STATUS("EVALUATION_STATUS_CONCEPT"),
 	EVALUATION_REASON("EVALUATION_REASON_CONCEPT"),
 	FACT("SUPPORTED_FACT_CONCEPT"),
 	IMMUNITY("SUPPORTED_IMMUNITY_CONCEPT"),
+	OPENCDS("OPENCDS_CDM"),
 	PERSON("SUPPORTED_PERSON_CONCEPT"),
 	RECOMMENDATION_STATUS("RECOMMENDATION_STATUS_CONCEPT"),
 	RECOMMENDATION_REASON("RECOMMENDATION_REASON_CONCEPT"),
@@ -15,7 +16,7 @@ public enum IceConceptType {
 	
 	private String iceConceptTypeValue;
 	
-	private IceConceptType(String pIceConceptType) {
+	private ICEConceptType(String pIceConceptType) {
 		
 		this.iceConceptTypeValue = pIceConceptType;
 	}
@@ -23,12 +24,12 @@ public enum IceConceptType {
 	/**
 	 * Return SupportedEvaluationConcept for the specified concept code; null if no associated SupportedEvaluationConcept exists
 	 */
-	public static IceConceptType getSupportedIceConceptType(String pIceConceptType) {
+	public static ICEConceptType getSupportedIceConceptType(String pIceConceptType) {
 
 		if (pIceConceptType == null) {
 			return null;
 		}
-		for (IceConceptType vc : IceConceptType.values()) {
+		for (ICEConceptType vc : ICEConceptType.values()) {
 			if (pIceConceptType.equals(vc.getIceConceptTypeValue())) {
 				return vc;
 			}

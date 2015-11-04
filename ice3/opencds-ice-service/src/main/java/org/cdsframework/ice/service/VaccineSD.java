@@ -162,15 +162,15 @@ public class VaccineSD extends AbstractVaccine {
 	 * Get list of diseases targeted for immunity by this vaccine
 	 * @return List<SupportedDiseaseConcept> of diseases targeted by this vaccine; empty list if none
 	 */
-	public Collection<SupportedDiseaseConcept> getAllDiseasesTargetedForImmunity() {
+	public Collection<String> getAllDiseasesTargetedForImmunity() {
 		
-		Set<SupportedDiseaseConcept> targetedDiseases = new HashSet<SupportedDiseaseConcept>();
+		Set<String> targetedDiseases = new HashSet<String>();
 		if (this.vaccineComponents == null) {
 			return targetedDiseases;
 		}
 		
 		for (VaccineComponentSD vc : this.vaccineComponents) {
-			Collection<SupportedDiseaseConcept> lImmunityList = vc.getDiseaseImmunityList();
+			Collection<String> lImmunityList = vc.getDiseaseImmunityList();
 			targetedDiseases.addAll(lImmunityList);
 		}
 		
@@ -191,8 +191,8 @@ public class VaccineSD extends AbstractVaccine {
 		}
 		
 		for (VaccineComponentSD vc : this.vaccineComponents) {
-			Collection<SupportedDiseaseConcept> sdcs = vc.getAllDiseasesTargetedForImmunity();
-			for (SupportedDiseaseConcept sdc : sdcs) {
+			Collection<String> sdcs = vc.getAllDiseasesTargetedForImmunity();
+			for (String sdc : sdcs) {
 				if (pTargetedDiseases.contains(sdc)) {
 					lVCsContainingSpecifiedDiseases.add(vc);
 				}

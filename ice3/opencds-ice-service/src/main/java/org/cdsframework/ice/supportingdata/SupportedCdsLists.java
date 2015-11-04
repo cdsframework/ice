@@ -21,12 +21,13 @@ import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class SupportedCdsLists {
 	
-	/*
-	 * _RECOMMENDED_RECOMMENDATION_STATUS("ICE219", "Recommended", "2.16.840.1.113883.3.795.12.100.5", "ICE3 Immunization Recommendation", 
-	 *		"RECOMMENDED", "Due Now"),
-	 *
-	 * private CD supportedRecommendationConcept;
-	 * private CD localRecommendationCodeConcept;
+	/**
+	 * Representative of a concept and one associated local code, that can be represented by an enumeration as follows (for example):
+	 *        _RECOMMENDED_RECOMMENDATION_STATUS("ICE219", "Recommended", "2.16.840.1.113883.3.795.12.100.5", "ICE3 Immunization Recommendation", "RECOMMENDED", "Due Now"),
+	 *        private CD supportedRecommendationConcept;
+	 *        private CD localRecommendationCodeConcept;
+	 * 
+	 * Note that references to "cdsListName" below are equivalent to LocallyCodedCdsListItem.getCdsListCode()
 	 */
 	private List<String> cdsVersions;												// Supported CDS List Versions
 	private Map<String, LocallyCodedCdsListItem> cdsListItemNameToCdsListItem;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> CodedCdsListItem
@@ -35,15 +36,14 @@ public class SupportedCdsLists {
 	private Map<String, Integer> countOfCdsListItemsPerCdsList;						// LOCAL CODE-RELATED: cdsList.code -> number of cdsListItemCodes for the cdsList
 	private Map<String, Set<LocallyCodedCdsListItem>> cdsListNameToCdsListItems; 	// LOCAL CODE-RELATED: cdsListCode -> Set of CodedCdsListItems
 
-	// Supported ICE concepts consisting of both OpenCDS defined concepts (of type IceConceptType.OPENCDS and/or other IceConceptType types).
 	// This class provides public methods for other classes to populate the IceConceptType.OPENCDS supported concepts, but other IceConceptType concepts
-	// are populated by this class when reading the XML.
+	// are populated by this class when reading the XML. Concepts are stored in the following structure.
 	private SupportedCdsConcepts supportedCdsConcepts;
-	
+		
 	private static Log logger = LogFactory.getLog(SupportedCdsLists.class);
+		
 	
-	
-	public SupportedCdsLists(List<String> pCdsVersions) {
+	protected SupportedCdsLists(List<String> pCdsVersions) {
 		
 		if (pCdsVersions == null) {
 			this.cdsVersions = new ArrayList<String>();
@@ -152,12 +152,21 @@ public class SupportedCdsLists {
 		this.cdsListNameToCdsListItems.put(lSLCCdsListCode, lcclis);
 		
 		///////
-		// Add the Concepts (if any) to SupportedConcepts
+		// Add the OpenCDS Concepts (if any) to SupportedConcepts, only if the CdsList is of an IceConceptType
 		///////
-		IceConceptType lIceConceptType = IceConceptType.getSupportedIceConceptType(lSLCCdsListCode);
 		Collection<ICEConcept> lConcepts = slci.getCdsListItemOpencdsConceptMappings();
 		for (ICEConcept lC : lConcepts) {
-			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(lIceConceptType, lC, slci);
+			lC.setIsOpenCdsSupportedConcept(true);
+			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(ICEConceptType.OPENCDS, lC, slci);
+		}
+		
+		///////
+		// Add this CdsListItem as an ICEConcept of the correct type (Disease, Evaluation, Recommendation, etc. (that is, only if the CdsList is of an IceConceptType)
+		///////
+		ICEConceptType lIceConceptType = ICEConceptType.getSupportedIceConceptType(lSLCCdsListCode);
+		if (lIceConceptType != null) {
+			ICEConcept lIC = new ICEConcept(lSupportedListConceptItemName, false);		// Not an OpenCDS concept
+			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(lIceConceptType, lIC, slci);
 		}
 	}
 
@@ -196,6 +205,17 @@ public class SupportedCdsLists {
 				}
 			}
 		}
+	}
+	
+	
+	/**
+	 * Get a Map of all supported Cds Concepts for the provided ICEConceptType. Returns null if none are found.
+	 * @param pICT
+	 * @return
+	 */
+	public Map<ICEConcept, LocallyCodedCdsListItem> getAllSupportedCdsConceptsAssociatedWithICEConceptType(ICEConceptType pICT) {
+		
+		return this.supportedCdsConcepts.getMapOfSupportedCdsConceptsForICEConceptType(pICT);
 	}
 	
 	

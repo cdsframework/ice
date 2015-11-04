@@ -26,6 +26,7 @@
  
 package org.cdsframework.ice.supportingdata;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.ice.service.ICEConcept;
+import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.util.support.data.ice.vaccinegroup.IceVaccineGroupSpecificationFile;
@@ -48,7 +50,7 @@ public class SupportedCdsVaccineGroups {
 	private static Log logger = LogFactory.getLog(SupportedCdsVaccineGroups.class);	
 
 	
-	public SupportedCdsVaccineGroups(List<String> pCdsVersions) {
+	protected SupportedCdsVaccineGroups(List<String> pCdsVersions) {
 	
 		if (pCdsVersions == null) {
 			this.cdsVersions = new ArrayList<String>();
@@ -66,7 +68,8 @@ public class SupportedCdsVaccineGroups {
 	 * value that is not known a known CdsListItem, an ImproperUsageException is thrown.
 	 * @param the IceVaccineGroupSpecification file
 	 * @param the 
-	 * @throws ImproperUsageException if the information provided in the IceVaccineGroupSpecificationFile is not consistent
+	 * @throws InconsistentConfigurationException if the information provided in the IceVaccineGroupSpecificationFile is not consistent
+	 * @throws ImproperUsageException if this operation is used incorrectly
 	 */
 	public void addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecificationFile, SupportedCdsLists pSupportedCdsLists) 
 		throws ImproperUsageException {
@@ -86,7 +89,7 @@ public class SupportedCdsVaccineGroups {
 		if (pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept() == null || pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode() == null) {
 			String lErrStr = "Attempt to add a SupportedCdsVaccineGroup with no corresponding primary OpenCDS concept";
 			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
 		}
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineGroupSpecificationFile.getCdsVersions(), this.cdsVersions);
@@ -99,7 +102,7 @@ public class SupportedCdsVaccineGroups {
 		if (llccli == null) {
 			String lErrStr = "Attempt to add vaccine group that is not in the list of SupportedCdsLists";
 			logger.warn(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);			
+			throw new InconsistentConfigurationException(lErrStr);			
 		}
 		String lVaccineGroupCdsListItemName = llccli.getSupportedListConceptItemName();
 		
@@ -115,13 +118,19 @@ public class SupportedCdsVaccineGroups {
 				if (lRelatedDiseaseCdsListItem == null) {
 					String lErrStr = "Attempt to add a related vaccine to a vaccine group that is not in the list of SupportedCdsLists";
 					logger.warn(_METHODNAME + lErrStr);
-					throw new ImproperUsageException(lErrStr);
+					throw new InconsistentConfigurationException(lErrStr);
 				}
 				lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getSupportedListConceptItemName());
 			}
 		}
 		
-		LocallyCodedVaccineGroupItem lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lCdsVersions, lRelatedDiseasesCdsListItems, lPrimaryOpenCdsConcept, pIceVaccineGroupSpecificationFile.getPriority().intValue());
+		// Vaccine group priority
+		int lVaccineGroupPriority = 0;
+		BigInteger lVaccineGroupPriorityInt = pIceVaccineGroupSpecificationFile.getPriority();
+		if (lVaccineGroupPriorityInt != null) {
+			lVaccineGroupPriority = lVaccineGroupPriorityInt.intValue();
+		}
+		LocallyCodedVaccineGroupItem lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lCdsVersions, lRelatedDiseasesCdsListItems, lPrimaryOpenCdsConcept, lVaccineGroupPriority);
 
 		// Add the mapping from the String to reference the vaccine group to LocallyCodedVaccineGroupItem
 		this.vaccineGroupConcepts.put(lVaccineGroupCdsListItemName, lcvgi);
