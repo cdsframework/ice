@@ -130,6 +130,25 @@ public class VaccineSD extends AbstractVaccine {
 	}
 	
 	
+	/**
+	 * Add the specified VaccineComponent as a VaccineComponent of this Vaccine.
+	 * @param pVaccineComponent
+	 */
+	public void addMemberVaccineComponent(VaccineComponentSD pVaccineComponent) {
+		
+		if (pVaccineComponent == null) {
+			return;
+		}
+		
+		// Set the unspecified formulation boolean
+		if (pVaccineComponent.isUnspecifiedFormulation() == false) {
+			this.setUnspecifiedFormulation(false);
+		}
+		
+		this.vaccineComponents.add(pVaccineComponent);
+	}
+	
+	
 	public static VaccineSD constructDeepCopyOfVaccineObject(VaccineSD pV) {
 		
 		if (pV == null) {
@@ -160,7 +179,7 @@ public class VaccineSD extends AbstractVaccine {
 	
 	/**
 	 * Get list of diseases targeted for immunity by this vaccine
-	 * @return List<SupportedDiseaseConcept> of diseases targeted by this vaccine; empty list if none
+	 * @return List<String> of diseases targeted by this vaccine; empty list if none
 	 */
 	public Collection<String> getAllDiseasesTargetedForImmunity() {
 		
@@ -178,11 +197,11 @@ public class VaccineSD extends AbstractVaccine {
 	}
 	
 	/**
-	 * Get all VaccineComponent member objects of this vaccine that are a member of the SupportedDiseaseConcept
-	 * @param pTargetedDiseases SupportedDiseaseConcept
+	 * Get all VaccineComponent member objects of this vaccine that targets the specified list of diseases
+	 * @param pTargetedDiseases Collection of diseases from which to ascertain targeting VaccineComponents
 	 * @return
 	 */
-	public Collection<VaccineComponentSD> getVaccineComponentsTargetingSpecifiedDiseases(Collection<SupportedDiseaseConcept> pTargetedDiseases) {
+	public Collection<VaccineComponentSD> getVaccineComponentsTargetingSpecifiedDiseases(Collection<String> pTargetedDiseases) {
 		
 		Set<VaccineComponentSD> lVCsContainingSpecifiedDiseases = new HashSet<VaccineComponentSD>(); // Ensure no duplicate VCs in returned Collection
 		

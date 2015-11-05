@@ -131,6 +131,25 @@ public class Vaccine extends AbstractVaccine {
 	}
 	
 	
+	/**
+	 * Add the specified VaccineComponent as a VaccineComponent of this Vaccine.
+	 * @param pVaccineComponent
+	 */
+	public void addMemberVaccineComponent(VaccineComponent pVaccineComponent) {
+		
+		if (pVaccineComponent == null) {
+			return;
+		}
+		
+		// Set the unspecified formulation boolean
+		if (pVaccineComponent.isUnspecifiedFormulation() == false) {
+			this.setUnspecifiedFormulation(false);
+		}
+		
+		this.vaccineComponents.add(pVaccineComponent);
+	}
+	
+	
 	public static Vaccine constructDeepCopyOfVaccineObject(Vaccine pV) {
 		
 		if (pV == null) {

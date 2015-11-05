@@ -277,9 +277,6 @@ public class SeriesRules {
 						}
 					}
 				}
-				//if (dr.getAllPermittedComponentVaccines().contains(v)) {
-				//	return true;
-				//}
 			}
 			else {
 				break;

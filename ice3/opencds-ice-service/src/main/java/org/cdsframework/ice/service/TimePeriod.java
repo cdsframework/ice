@@ -79,6 +79,7 @@ public class TimePeriod {
 	 * Months and days can be subtracted, as follows: 1y-4m-4d. TimePeriods can be negative: "-4d", "-1y+4d", etc. No spaces between units.
 	 * TimePeriods are immutable; once set, it is not possible to change it. 
 	 * @param pTimePeriodStr
+	 * @throws IllegalArgumentException if the TimePeriod argument is not in the correct format.
 	 */
 	public TimePeriod(String pTimePeriodStr) {
 				

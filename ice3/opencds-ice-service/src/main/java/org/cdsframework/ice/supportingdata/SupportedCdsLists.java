@@ -30,10 +30,10 @@ public class SupportedCdsLists {
 	 * Note that references to "cdsListName" below are equivalent to LocallyCodedCdsListItem.getCdsListCode()
 	 */
 	private List<String> cdsVersions;												// Supported CDS List Versions
-	private Map<String, LocallyCodedCdsListItem> cdsListItemNameToCdsListItem;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> CodedCdsListItem
+	private Map<String, LocallyCodedCdsListItem> cdsListItemNameToCdsListItem;		// LOCAL CODE-RELATED: cdsListCode.cdsListItemKey -> CodedCdsListItem
 	private Map<String, String> cdsListNameToCodeSystem;							// LOCAL CODE-RELATED: cdsListCode -> cdsListCodeSystem (to ensure there are no conflicts)	
 	private Map<String, String> codeSystemToCdsListName;							// LOCAL CODE-RELATED: cdsListCodeSystem -> cdsListCode (to ensure there are no conflicts)	
-	private Map<String, Integer> countOfCdsListItemsPerCdsList;						// LOCAL CODE-RELATED: cdsList.code -> number of cdsListItemCodes for the cdsList
+	private Map<String, Integer> countOfCdsListItemsPerCdsList;						// LOCAL CODE-RELATED: cdsListCode -> number of cdsListItemCodes for the cdsList
 	private Map<String, Set<LocallyCodedCdsListItem>> cdsListNameToCdsListItems; 	// LOCAL CODE-RELATED: cdsListCode -> Set of CodedCdsListItems
 
 	// This class provides public methods for other classes to populate the IceConceptType.OPENCDS supported concepts, but other IceConceptType concepts
@@ -84,7 +84,7 @@ public class SupportedCdsLists {
 		}
 		
 		LocallyCodedCdsListItem slci = new LocallyCodedCdsListItem(pCdsListSpecificationFile, pCdsListItem);
-		String lSupportedListConceptItemName = slci.getSupportedListConceptItemName();
+		String lSupportedListConceptItemName = slci.getSupportedCdsListItemName();
 		if (this.cdsListItemNameToCdsListItem.containsKey(lSupportedListConceptItemName)) {
 			String lErrStr = "Attempt to add duplicate SupportedListConceptItem found: cannot add a supported list concept that already been added; must first remove the prior SupportedListConcept of the same name " + 
 				lSupportedListConceptItemName;

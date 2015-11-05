@@ -68,7 +68,7 @@ public class LocallyCodedCdsListItem {
 	 *
 	 */
 
-	private String supportedListConceptItemName;
+	private String supportedCdsListItemName;
 	private String cdsListId;
 	private String cdsListCode;
 	private String cdsListName;
@@ -91,7 +91,10 @@ public class LocallyCodedCdsListItem {
 	
 	/**
 	 * Create a SupportedListConceptItem object based on the CdsListSpecificationFile and a CdsListItem. The CdsListItem object must be one that is in the CdsListSpecificationFile,
-	 * based on its cdsListItemKey value. It must conform to _attributeNamingConvention. The CdsList must contain populated cdsListCode and a cdsListCodeSystem values. 
+	 * based on its cdsListItemKey value. It must conform to _attributeNamingConvention. 
+	 * 
+	 * The CdsList must contain populated cdsListCode and a cdsListCodeSystem values (required values).
+	 *  
 	 * If any of these things occur, an ImproperUsageException is thrown.
 	 * @param pCdsLsf CdsListSpecificationFile containing common data elements - such as a code representing an associated value set - for all CdsListItems contained by it
 	 * @param pCdsLi The CdsListItem
@@ -198,7 +201,7 @@ public class LocallyCodedCdsListItem {
 		}
 
 		this.cdsListVersions = pCdsLsf.getCdsVersions();
-		this.supportedListConceptItemName = this.cdsListCode + "." + this.cdsListItemKey; 
+		this.supportedCdsListItemName = this.cdsListCode + "." + this.cdsListItemKey; 
 		
 		// Create CD
 		this.cdsListItemCD = new CD();
@@ -227,9 +230,11 @@ public class LocallyCodedCdsListItem {
 		}
 	}
 
-
-	public String getSupportedListConceptItemName() {
-		return this.supportedListConceptItemName;
+	/**
+	 * Returns the CdsListItemName that has been assigned to this CdsListItem. The CdsListItemName is always populated.
+	 */
+	public String getSupportedCdsListItemName() {
+		return this.supportedCdsListItemName;
 	}
 	
 	public String getCdsListId() {
@@ -307,7 +312,7 @@ public class LocallyCodedCdsListItem {
 	@Override
 	public String toString() {
 
-		String lStr = "[SupportedCdsListItem=" + supportedListConceptItemName + "\ncdsListId=" + cdsListId	+ 
+		String lStr = "[SupportedCdsListItem=" + supportedCdsListItemName + "\ncdsListId=" + cdsListId	+ 
 				"\ncdsListCode=" + cdsListCode + "\ncdsListName=" + cdsListName + "\ncdsListType=" + cdsListType + "\ncdsListDescription=" + cdsListDescription +
 				"\ncdsListCodeSystem=" + cdsListCodeSystem + "\ncdsListCodeSystemName=" + cdsListCodeSystemName + "\ncdsListValueSet=" + cdsListValueSet + 
 				"\ncdsListOpenCdsConceptType=" + cdsListOpenCdsConceptType + "\ncdsListItemKey=" + cdsListItemKey +	"\ncdsListItemValue=" + cdsListItemValue;
@@ -333,8 +338,8 @@ public class LocallyCodedCdsListItem {
 		int result = 1;
 		result = prime
 				* result
-				+ ((supportedListConceptItemName == null) ? 0
-						: supportedListConceptItemName.hashCode());
+				+ ((supportedCdsListItemName == null) ? 0
+						: supportedCdsListItemName.hashCode());
 		return result;
 	}
 
@@ -348,11 +353,11 @@ public class LocallyCodedCdsListItem {
 		if (getClass() != obj.getClass())
 			return false;
 		LocallyCodedCdsListItem other = (LocallyCodedCdsListItem) obj;
-		if (supportedListConceptItemName == null) {
-			if (other.supportedListConceptItemName != null)
+		if (supportedCdsListItemName == null) {
+			if (other.supportedCdsListItemName != null)
 				return false;
 		} 
-		else if (!supportedListConceptItemName.equals(other.supportedListConceptItemName))
+		else if (!supportedCdsListItemName.equals(other.supportedCdsListItemName))
 			return false;
 		return true;
 	}

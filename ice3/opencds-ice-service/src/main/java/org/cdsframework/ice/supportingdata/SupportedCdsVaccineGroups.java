@@ -104,7 +104,7 @@ public class SupportedCdsVaccineGroups {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
-		String lVaccineGroupCdsListItemName = llccli.getSupportedListConceptItemName();
+		String lVaccineGroupCdsListItemName = llccli.getSupportedCdsListItemName();
 		
 		// Primary OpenCds Concept
 		ICEConcept lPrimaryOpenCdsConcept = new ICEConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), true, pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());
@@ -120,7 +120,7 @@ public class SupportedCdsVaccineGroups {
 					logger.warn(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);
 				}
-				lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getSupportedListConceptItemName());
+				lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getSupportedCdsListItemName());
 			}
 		}
 		
