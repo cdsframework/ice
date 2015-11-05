@@ -55,8 +55,8 @@ public class VaccineSD extends AbstractVaccine {
 	}
 	
 	/**
-	 * Instantiate a vaccine object. If there is only one vaccine component, the vaccine component code must be the same as that specified by the ICEConcept.
-	 * Unspecified Formulation on constructed vaccine object is set to the same value as the monovalent vaccine, which is true by default if not otherwise specified; 
+	 * Instantiate a vaccine object. If there is only one vaccine component, the vaccine component code must be the same as that specified by the ICEConcept if using this constructor.
+	 * The Unspecified Formulation on constructed vaccine object is set to the same value as the monovalent vaccine, which is true by default if not otherwise specified; 
 	 * it is set to false if any component vaccine is not an unspecified formulation; otherwise set to true. Be sure to set unspecified formulation flag 
 	 * for each vaccine component appropriately to ensure proper behavior of rules, or update all components and this object appropriately if changed.
 	 * @param pVaccineConcept ICEConcept representing the vaccine

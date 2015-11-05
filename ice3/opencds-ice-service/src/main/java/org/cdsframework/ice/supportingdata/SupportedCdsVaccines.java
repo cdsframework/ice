@@ -140,7 +140,7 @@ public class SupportedCdsVaccines {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
-		// All related diseases
+		// Get all the related diseases that the vaccine targets (as specified in the configuration data)
 		// Specify Vaccine Component with Related Diseases
 		List<org.opencds.vmr.v1_0.schema.CD> lRelatedDiseases = pIceVaccineSpecificationFile.getDiseaseImmunities();
 		List<String> lRelatedDiseasesCdsListItems = new ArrayList<String>();
@@ -152,7 +152,7 @@ public class SupportedCdsVaccines {
 		for (org.opencds.vmr.v1_0.schema.CD lRelatedDisease : lRelatedDiseases) {
 			LocallyCodedCdsListItem lRelatedDiseaseCdsListItem = pSupportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(lRelatedDisease));
 			if (lRelatedDiseaseCdsListItem == null) {
-				String lErrStr = "Attempt to add a related vaccine to a vaccine that is not in the list of SupportedCdsLists";
+				String lErrStr = "Attempt to add a related disease to a vaccine that is not a supported disease concept specified in the list of Supported CdsLists";
 				logger.warn(_METHODNAME + lErrStr);
 				throw new InconsistentConfigurationException(lErrStr);
 			}
@@ -175,6 +175,9 @@ public class SupportedCdsVaccines {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
+		/////// 
+		// START to Determine which vaccine components can be incorporated now in the initialization of this vaccine
+		///////
 		// If the vaccine code of the component is the same as that of the vaccine (or there is only one vaccine component?), then add the vaccine component with the specified diseases
 		if (lVaccineComponentsCD.size() == 1) {
 			lCombinationVaccine = false;
@@ -184,14 +187,20 @@ public class SupportedCdsVaccines {
 				logger.error(_METHODNAME + lErrStr);
 				throw new InconsistentConfigurationException(lErrStr);
 			}
+			if (! lVaccineComponentCD.getCodeSystem().equals(lVaccineCD.getCodeSystem())) {
+				String lErrStr = "Vaccine and Vaccine Component are specified using two different code systems. This is not allowed in ICE";
+				logger.error(_METHODNAME + lErrStr);
+				throw new InconsistentConfigurationException(lErrStr);
+			}
 
-			VaccineComponentSD lVaccineComponent = new VaccineComponentSD(ic, new ArrayList<String>());
-			//////////
-			// Make note that this vaccine component is a part of the vaccine
+			// It doesn't matter if the vaccine component was previously specified for a monovalent vaccine; this is the definition. Create the vaccine component and store it.
+			// It targets all of the diseases targeted by this vaccine
+			VaccineComponentSD lVaccineComponent = new VaccineComponentSD(ic, lRelatedDiseasesCdsListItems);			
 			lVaccineComponentsToAddToVaccine.add(lVaccineComponent);
-			// This is a monovalent vaccine - thus, this entry is "defining" it and we therefore we make note that it has been processed by taking note of the mapping
+			// Make note that it has been processed by taking note of the mapping
 			this.cDToVaccineComponentsMap.put(lVaccineComponentCD, lVaccineComponent);
 			if (! ConceptUtils.cDElementsAreEqual(lVaccineCD, lVaccineComponentCD)) {
+				// FYI - the vaccine component and vaccine local codes are not equal
 				lVaccineAndOnlyVaccineComponentNotEqual = true;
 			}
 		}
@@ -206,6 +215,11 @@ public class SupportedCdsVaccines {
 					logger.error(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);					
 				}
+				if (! lVaccineComponentCD.getCodeSystem().equals(lVaccineCD.getCodeSystem())) {
+					String lErrStr = "Vaccine and Vaccine Component are specified using two different code systems. This is not allowed in ICE";
+					logger.error(_METHODNAME + lErrStr);
+					throw new InconsistentConfigurationException(lErrStr);
+				}
 				if (this.cDToVaccineComponentsMap.containsKey(lVaccineComponentCD)) {
 					// Make note that this vaccine component is a part of the vaccine
 					lVaccineComponentsToAddToVaccine.add(this.cDToVaccineComponentsMap.get(lVaccineComponentCD));
@@ -217,12 +231,34 @@ public class SupportedCdsVaccines {
 				}
 			}
 		}
+		/////// 
+		// END of Determine which vaccine components can be incorporated now in the initialization of this vaccine
+		///////
+
+		///////
+		// START Creating the Vaccine
+		///////
+		VaccineSD lVaccine = null;
+		if (lVaccineComponentsToAddToVaccine.size() == 1) {
+			if (lVaccineAndOnlyVaccineComponentNotEqual) {
+				lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine, true);
+			}
+			else {
+				lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine);
+			}
+		}
+		else {	
+			// The sized of the VaccineComponents defined is > 1 or == 0. Only those VaccineComponents previously encountered in the supporting data configuration so far are included 
+			lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine);
+		}
 		
-
-		//TODO:  Fix
-		// VaccineSD lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine);
-		VaccineSD lVaccine = new VaccineSD(ic, new ArrayList<VaccineComponentSD>());
-
+		// TODO: 
+		
+		///////
+		// END Creating the Vaccine
+		///////
+		
+		
 		//
 		// If a vaccine component was not specified, add the vaccine we're dealing with now to the list of vaccines that contain this (unspecified) vaccine component
 		//

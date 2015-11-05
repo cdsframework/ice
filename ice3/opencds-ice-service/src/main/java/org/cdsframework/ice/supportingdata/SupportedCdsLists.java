@@ -151,6 +151,7 @@ public class SupportedCdsLists {
 		lcclis.add(slci);
 		this.cdsListNameToCdsListItems.put(lSLCCdsListCode, lcclis);
 		
+		////////////// Supported Concepts initialization START //////////////
 		///////
 		// Add the OpenCDS Concepts (if any) to SupportedConcepts, only if the CdsList is of an IceConceptType
 		///////
@@ -168,6 +169,9 @@ public class SupportedCdsLists {
 			ICEConcept lIC = new ICEConcept(lSupportedListConceptItemName, false);		// Not an OpenCDS concept
 			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(lIceConceptType, lIC, slci);
 		}
+		
+		////////////// Supported Concepts initialization END //////////////
+		
 	}
 
 	
