@@ -39,12 +39,8 @@ import org.apache.commons.logging.LogFactory;
 import org.cdsframework.ice.service.ICEConcept;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.TimePeriod;
-import org.cdsframework.ice.service.Vaccine;
-import org.cdsframework.ice.service.VaccineComponent;
 import org.cdsframework.ice.service.VaccineComponentSD;
 import org.cdsframework.ice.service.VaccineSD;
-import org.cdsframework.ice.service.TimePeriod.DurationType;
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineConcept;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.util.support.data.ice.vaccine.IceVaccineSpecificationFile;
@@ -93,16 +89,17 @@ public class SupportedCdsVaccines {
 	 * value that is not known a known CdsListItem, an ImproperUsageException is thrown.
 	 * @param the IceVaccineSpecification file
 	 * @param the SupportedCdsLists for this instance of supporting data
+	 * @return true if the vaccine data loaded to this point is consistent, false if it is not
 	 * @throws IncosistentConfigurationException if the information provided in the IceVaccineGroupSpecificationFile is not consistent
 	 * @throws ImproperUsageException if this method is used improperly
 	 */
-	protected void addSupportedVaccineItemFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecificationFile, SupportedCdsLists pSupportedCdsLists) 
+	protected boolean addSupportedVaccineItemFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecificationFile, SupportedCdsLists pSupportedCdsLists) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportedVaccineItem(): ";
 		
 		if (pIceVaccineSpecificationFile == null) {
-			return;
+			return isVaccineSupportingDataConsistent();
 		}
 		if (pSupportedCdsLists == null) {
 			String lErrStr = "SupportedCdsLists parameter not specified";
@@ -120,7 +117,7 @@ public class SupportedCdsVaccines {
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineSpecificationFile.getCdsVersions(), this.cdsVersions);
 		if (lCdsVersions == null) {
-			return;
+			return isVaccineSupportingDataConsistent();
 		}
 		
 		// OpenCDS concept
@@ -317,6 +314,7 @@ public class SupportedCdsVaccines {
 		}
 		///////
 	
+		return isVaccineSupportingDataConsistent();
 				
 		/**
 		 * Examples
@@ -383,8 +381,9 @@ public class SupportedCdsVaccines {
 			supportedVaccinesMap.put(SupportedVaccineConcept._DTAP_HEPB_IPV, lVaccine);
 		 **/
 		
+		
 	}
-	
+
 	
 	private void addPropertiesFromSDToVaccineComponent(VaccineComponentSD pVaccineComponent, IceVaccineSpecificationFile pIVSF) {
 		
@@ -400,4 +399,16 @@ public class SupportedCdsVaccines {
 			pVaccineComponent.setValidMaximumAgeForUse(new TimePeriod(lAge));
 		}
 	}
+	
+	
+	public boolean isVaccineSupportingDataConsistent() {
+		
+		if (this.cDToVaccineComponentsMap.size() > 0) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+	
 }

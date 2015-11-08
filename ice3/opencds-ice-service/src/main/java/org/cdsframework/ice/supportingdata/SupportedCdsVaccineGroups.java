@@ -85,22 +85,25 @@ public class SupportedCdsVaccineGroups {
 			throw new ImproperUsageException(lErrStr);
 		}
 
-		// Verify that there is a primary opencds concept code
-		if (pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept() == null || pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode() == null) {
-			String lErrStr = "Attempt to add a SupportedCdsVaccineGroup with no corresponding primary OpenCDS concept";
-			logger.error(_METHODNAME + lErrStr);
-			throw new InconsistentConfigurationException(lErrStr);
-		}
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineGroupSpecificationFile.getCdsVersions(), this.cdsVersions);
 		if (lCdsVersions == null) {
 			return;
 		}
-		
+
+		// Verify that there is a primary opencds concept code
+		if (pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept() == null || pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode() == null) {
+			String lErrStr = "Attempt to add the following vaccine group which has no specified corresponding primary OpenCDS concept: " +
+					(pIceVaccineGroupSpecificationFile.getVaccineGroup() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
+			logger.error(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
+
 		LocallyCodedCdsListItem llccli = pSupportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
 		// Now verify that there is a CdsListItem for this vaccine group (i.e. - we are tracking the codes and code systems in SupportedCdsLists - it must be there too).
 		if (llccli == null) {
-			String lErrStr = "Attempt to add vaccine group that is not in the list of SupportedCdsLists";
+			String lErrStr = "Attempt to add the following vaccine group which is not in the list of SupportedCdsLists: " + 
+					(pIceVaccineGroupSpecificationFile.getVaccineGroup() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
