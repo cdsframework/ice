@@ -2,9 +2,7 @@ package org.cdsframework.ice.supportingdata;
 
 import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +59,7 @@ public class SupportedCdsConcepts {
 		}
 
 		Map<ICEConcept, LocallyCodedCdsListItem> lIceConceptEntry = this.concepts.get(pICT);
-		boolean lIceConceptEntryForConceptTypeFound = true;
+		boolean lIceConceptEntryForConceptTypeAdded = false;
 		if (lIceConceptEntry == null) {
 			lIceConceptEntry = new HashMap<ICEConcept, LocallyCodedCdsListItem>();
 		}
@@ -69,6 +67,7 @@ public class SupportedCdsConcepts {
 		if (pLCCLI != null) {
 			LocallyCodedCdsListItem priorAssociatedLCCLI = lIceConceptEntry.get(pIC);
 			if (priorAssociatedLCCLI == null) {
+				lIceConceptEntryForConceptTypeAdded = true;
 				lIceConceptEntry.put(pIC, pLCCLI);
 			}
 			else {
@@ -81,8 +80,18 @@ public class SupportedCdsConcepts {
 			}
 		}
 		
-		if (lIceConceptEntryForConceptTypeFound == false) {
+		if (lIceConceptEntryForConceptTypeAdded == true) {
 			this.concepts.put(pICT, lIceConceptEntry);
+			if (logger.isDebugEnabled()) {
+				String lDebugStr = "SupportedCdsConcept ADDED. ICEConceptType: " + pICT + "; ICEConcept: " + pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
+				logger.debug(_METHODNAME + lDebugStr);
+			}
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				String lDebugStr = "SupportedCdsConcept _NOT_ ADDED. ICEConceptType: " + pICT + "; ICEConcept: " + pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
+				logger.debug(_METHODNAME + lDebugStr);
+			}
 		}
 	}
 

@@ -34,7 +34,7 @@ import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseStatus
-import org.cdsframework.ice.service.IceFactTypeFinding
+import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
 import org.cdsframework.ice.service.Recommendation.RecommendationStatus
@@ -352,7 +352,7 @@ rule "DTP: Enforce Minimum Interval between Tdap/DTaP and Td/DT if the shot meet
 		There is not an IceFact
 			- that has associated administered shot $currentShot
 			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue
-		There is an IceFact $IceFactTypeFinding
+		There is an IceFact $ICEFactTypeFinding
 			- that has associated administered shot $currentShot
 			- that has finding SupportedFactConcept._BELOW_MINIMUM_INTERVAL.conceptCodeValue
 	then

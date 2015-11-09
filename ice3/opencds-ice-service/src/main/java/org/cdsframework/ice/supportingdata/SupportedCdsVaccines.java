@@ -78,8 +78,19 @@ public class SupportedCdsVaccines {
 		this.cdsListItemNameToVaccine = new HashMap<String, VaccineSD>();
 		this.cDToVaccineComponentsMap = new HashMap<CD, VaccineComponentSD>();
 		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<VaccineSD>>();
-		// this.vaccineConceptsNotFullySpecified = new HashSet<String>();
+		/////// this.vaccineConceptsNotFullySpecified = new HashSet<String>();
 		this.vaccineConcepts = new HashMap<String, LocallyCodedVaccineItem>();
+	}
+	
+	
+	protected boolean isEmpty() {
+		
+		if (this.cdsListItemNameToVaccine.isEmpty()) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	
 	
@@ -109,7 +120,8 @@ public class SupportedCdsVaccines {
 		
 		LocallyCodedCdsListItem llccli = pSupportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(pIceVaccineSpecificationFile.getVaccine()));
 		if (llccli == null) {
-			String lErrStr = "Attempt to add vaccine that is not in the list of SupportedCdsLists";
+			String lErrStr = "Attempt to add vaccine that is not in the list of SupportedCdsLists: " + 
+					(pIceVaccineSpecificationFile.getVaccine() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineSpecificationFile.getVaccine()));
 			logger.warn(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);			
 		}
@@ -123,7 +135,7 @@ public class SupportedCdsVaccines {
 		// OpenCDS concept
 		org.opencds.vmr.v1_0.schema.CD lPrimaryOpenCdsConcept = pIceVaccineSpecificationFile.getPrimaryOpenCdsConcept();
 		if (lPrimaryOpenCdsConcept == null) {
-			String lErrStr = "OpenCDS Concept not specified for vaccine";
+			String lErrStr = "OpenCDS Concept not specified for vaccine: " + llccli;
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}

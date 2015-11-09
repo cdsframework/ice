@@ -196,20 +196,20 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Vv]alid for this [Ss]eries=
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Insufficient Antigen"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._INSUFFICIENT_ANTIGEN_EVALUATION_REASON.getConceptCodeValue()); insert(new IceFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), {refer_oTargetDose}));
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Below Minimum Age for Final Dose"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_AGE_FOR_FINAL_DOSE_REASON.getConceptCodeValue()); insert(new IceFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Below Minimum Age"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_AGE_EVALUATION_REASON.getConceptCodeValue()); insert(new IceFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Below Minimum Interval"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_INTERVAL_EVALUATION_REASON.getConceptCodeValue()); insert(new IceFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Insufficient Antigen"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._INSUFFICIENT_ANTIGEN_EVALUATION_REASON.getConceptCodeValue()); insert(new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Below Minimum Age for Final Dose"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_AGE_FOR_FINAL_DOSE_REASON.getConceptCodeValue()); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Below Minimum Age"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_AGE_EVALUATION_REASON.getConceptCodeValue()); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Below Minimum Interval"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_INTERVAL_EVALUATION_REASON.getConceptCodeValue()); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Duplicate Same Day"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._DUPLICATE_SAME_DAY_REASON.getConceptCodeValue());
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Too Early Live Virus"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._TOO_EARLY_LIVE_VIRUS_EVALUATION_REASON.getConceptCodeValue());
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Prior to DOB"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._PRIOR_TO_DOB_EVALUATION_REASON.getConceptCodeValue());
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to the following reason code {sInvalidReasonCode}={refer_oTargetDose}.addInvalidReason({sInvalidReasonCode});
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Vaccine not Permitted for this Dose \(Booster Only\)"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._VACCINE_NOT_PERMITTED_BOOSTER_ONLY_REASON.getConceptCodeValue());
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Below Minimum Interval \(PCV PPSV\)"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_INTERVAL_PCV_PPSV_REASON.getConceptCodeValue()); insert(new IceFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Below Minimum Interval \(PCV PPSV\)"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_INTERVAL_PCV_PPSV_REASON.getConceptCodeValue()); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Outside Flu Season"={refer_oTargetDose}.addInvalidReason(SupportedEvaluationConcept._OUTSIDE_FLU_SEASON_REASON.getConceptCodeValue());
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Proof of Immunity"={refer_oTargetDose}.addAcceptedReason(SupportedEvaluationConcept._PROOF_OF_IMMUNITY_EVALUATION_REASON.getConceptCodeValue());
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Above Recommended Age"={refer_oTargetDose}.addAcceptedReason(SupportedEvaluationConcept._ABOVE_RECOMMENDED_AGE_EVALUATION_REASON.getConceptCodeValue());
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Below Recommended Age"={refer_oTargetDose}.addAcceptedReason(SupportedEvaluationConcept._BELOW_RECOMMENDED_AGE_EVALUATION_REASON.getConceptCodeValue()); insert(new IceFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Below Recommended Age"={refer_oTargetDose}.addAcceptedReason(SupportedEvaluationConcept._BELOW_RECOMMENDED_AGE_EVALUATION_REASON.getConceptCodeValue()); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)]+}={refer_oTargetDose}.addInvalidReason({oReason});
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Vv]alid for this [Ss]eries=
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {strReason:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({strReason});
@@ -337,9 +337,9 @@
 
 ///////// ***
 // Primary IceResult Fact Object conditions and sub-conditions
-[condition][]There exists {entity:an |another |}IceFact=exists IceFactTypeFinding()
-[condition][]There is not {entity:an |another |}IceFact=not IceFactTypeFinding() 
-[condition][]There is {entity:an |another |}IceFact {oIceFactTypeFinding}={oIceFactTypeFinding} : IceFactTypeFinding()
+[condition][]There exists {entity:an |another |}IceFact=exists ICEFactTypeFinding()
+[condition][]There is not {entity:an |another |}IceFact=not ICEFactTypeFinding() 
+[condition][]There is {entity:an |another |}IceFact {oICEFactTypeFinding}={oICEFactTypeFinding} : ICEFactTypeFinding()
 [condition][]- [Tt]hat has [Ff]inding {sIceResultFinding}=iceResultFinding == {sIceResultFinding}
 [condition][]- [Tt]hat has [Aa]ssociated [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
 [condition][]- [Tt]hat has [Aa]ssociated [Aa]dministered [Ss]hot {oTargetDose} {attr}=targetDose == {oTargetDose} {attr}
@@ -353,19 +353,19 @@
 
 ///////// ***
 // IceResult Fact Object Consequences START
-[consequence][][Ll]ogically [Ii]nsert an IceFact {sIceResultFinding} with TargetDose {oTargetDose} into [Ww]orking [Mm]emory=insertLogical(new IceFactTypeFinding({sIceResultFinding}, {oTargetDose}));
-[consequence][][Ll]ogically [Ii]nsert an IceFact {sIceResultFinding} with TargetSeries {oTargetSeries} into [Ww]orking [Mm]emory=insertLogical(new IceFactTypeFinding({sIceResultFinding}, {oTargetSeries}));
-[consequence][][Ll]ogically [Ii]nsert an IceFact {sIceResultFinding} into [Ww]orking [Mm]emory=insertLogical(new IceFactTypeFinding({sIceResultFinding}));
-[consequence][][Ii]nsert an IceFact {sIceResultFinding} with TargetDose {oTargetDose} into [Ww]orking [Mm]emory=insert(new IceFactTypeFinding({sIceResultFinding}, {oTargetDose}));
-[consequence][][Ii]nsert an IceFact {sIceResultFinding} with TargetSeries {oTargetSeries} into [Ww]orking [Mm]emory=insert(new IceFactTypeFinding({sIceResultFinding}, {oTargetSeries}));
-[consequence][][Ii]nsert an IceFact {sIceResultFinding} into [Ww]orking [Mm]emory=insert(new IceFactTypeFinding({sIceResultFinding}));
-[consequence][][Rr]etract IceFact {oIceFactTypeFinding} from [Ww]orking [Mm]emory=retract({oIceFactTypeFinding});
+[consequence][][Ll]ogically [Ii]nsert an IceFact {sIceResultFinding} with TargetDose {oTargetDose} into [Ww]orking [Mm]emory=insertLogical(new ICEFactTypeFinding({sIceResultFinding}, {oTargetDose}));
+[consequence][][Ll]ogically [Ii]nsert an IceFact {sIceResultFinding} with TargetSeries {oTargetSeries} into [Ww]orking [Mm]emory=insertLogical(new ICEFactTypeFinding({sIceResultFinding}, {oTargetSeries}));
+[consequence][][Ll]ogically [Ii]nsert an IceFact {sIceResultFinding} into [Ww]orking [Mm]emory=insertLogical(new ICEFactTypeFinding({sIceResultFinding}));
+[consequence][][Ii]nsert an IceFact {sIceResultFinding} with TargetDose {oTargetDose} into [Ww]orking [Mm]emory=insert(new ICEFactTypeFinding({sIceResultFinding}, {oTargetDose}));
+[consequence][][Ii]nsert an IceFact {sIceResultFinding} with TargetSeries {oTargetSeries} into [Ww]orking [Mm]emory=insert(new ICEFactTypeFinding({sIceResultFinding}, {oTargetSeries}));
+[consequence][][Ii]nsert an IceFact {sIceResultFinding} into [Ww]orking [Mm]emory=insert(new ICEFactTypeFinding({sIceResultFinding}));
+[consequence][][Rr]etract IceFact {oICEFactTypeFinding} from [Ww]orking [Mm]emory=retract({oICEFactTypeFinding});
 ///////// ***
 
 
 ///////// ***
 // IceResult Fact Object Accumulates START
-[condition][]Verify that the [Cc]ount of IceFacts \({IceResultConditions}\) is {aOp}  {nNumberOfConditions}=accumulate($irf : IceFactTypeFinding({IceResultConditions}); $countNum: count($irf); $countNum {aOp}  {nNumberOfConditions})
+[condition][]Verify that the [Cc]ount of IceFacts \({IceResultConditions}\) is {aOp}  {nNumberOfConditions}=accumulate($irf : ICEFactTypeFinding({IceResultConditions}); $countNum: count($irf); $countNum {aOp}  {nNumberOfConditions})
 
 // e.g. //Verify that the Count of IceResult Findings (where IceResult Finding is "yeah" and there is a TargetDose and the TargetDose administration date > "blah" and the TargetDose targets the disease "blah2") is > 5
 // or e.g. //Verify that the Count of IceResult Findings (where IceResult Finding is "yeah" and there is a TargetDose with administration date > "blah" and diseases targeted contains "blah2") is > 5

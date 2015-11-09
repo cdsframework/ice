@@ -56,7 +56,7 @@ import org.opencds.vmr.v1_0.internal.datatypes.IVLDate
 import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
-import org.cdsframework.ice.service.IceFactTypeFinding
+import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.LiveVirusFact
 import org.cdsframework.ice.service.InconsistentConfigurationException
 import org.cdsframework.ice.service.ICELogicHelper
@@ -1039,7 +1039,7 @@ rule "HistoryEvaluation.checkIsAllowableVaccine" ruleflow-group "HistoryEvaluati
 		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries, seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == false) 
 	then
 		String _RULENAME = kcontext.rule.name;
-		IceFactTypeFinding hef = new IceFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
+		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
 		insert(hef);		
 		$td.addInvalidReason(SupportedEvaluationConcept._VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.getConceptCodeValue());
 		$td.addDoseRuleProcessed(_RULENAME);	
@@ -1061,7 +1061,7 @@ rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "History
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
 	then
 		String _RULENAME = kcontext.rule.name;
-		IceFactTypeFinding hef = new IceFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
+		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
 		insert(hef);
 		$td.addInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_AGE_VACCINE_REASON.getConceptCodeValue());
 		$td.addDoseRuleProcessed(_RULENAME);	
@@ -1083,7 +1083,7 @@ rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "History
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) > 0)
 	then
 		String _RULENAME = kcontext.rule.name;
-		IceFactTypeFinding hef = new IceFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
+		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
 		insert(hef)		
 		$td.addInvalidReason(SupportedEvaluationConcept._INVALID_AGE_EVALUATION_REASON.getConceptCodeValue());
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
@@ -1106,7 +1106,7 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumAge" ruleflow-group "HistoryE
 		$ts.evaluateVaccineGroupMinimumAgeandRecordReason($person.demographics.birthTime, $td);
 		if ($td.containsInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_AGE_EVALUATION_REASON.getConceptCodeValue()) || 
 			$td.containsInvalidReason(SupportedEvaluationConcept._INVALID_AGE_EVALUATION_REASON.getConceptCodeValue())) {
-			IceFactTypeFinding hef = new IceFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), $td);
+			ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), $td);
 			insert(hef)				
 		}
 		$td.addDoseRuleProcessed(_RULENAME);
@@ -1127,12 +1127,12 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval" ruleflow-group "His
 		$tdprev : TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administeredShotNumberInSeries < $admindose, administrationDate < $tddate, $tdprevdate : administrationDate)
 		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate)
 		$ts : TargetSeries(containsTargetDose($td) && containsTargetDose($tdprev), seriesRules.numberOfDosesInSeries >= $doseNumber)
-		not IceFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1)
+		not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1)
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, $tdprev);
 		if ($td.containsInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_INTERVAL_EVALUATION_REASON.getConceptCodeValue())) {
-			IceFactTypeFinding hef = new IceFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), $td);
+			ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), $td);
 			insert(hef)				
 		}
 		$td.addDoseRuleProcessed(_RULENAME);
@@ -1161,7 +1161,7 @@ rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasona
 		TargetDose lastFromPrev = $tsprev.getTargetDoses().last();
 		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, lastFromPrev);
 		if ($td.containsInvalidReason(SupportedEvaluationConcept._BELOW_MINIMUM_INTERVAL_EVALUATION_REASON.getConceptCodeValue())) {
-			IceFactTypeFinding hef = new IceFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), $td);
+			ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), $td);
 			insert(hef)				
 		}
 		$td.addDoseRuleProcessed(_RULENAME);
@@ -2808,7 +2808,7 @@ rule "RecommendationForecast.Do Not Apply Earliest Interval for Dose 1 if Prior 
 		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, isSeriesComplete() == false, determineDoseNumberInSeries() == 1,
 			$lastShotAdministered : lastShotAdministeredInSeries, $lastShotAdministered != null, $lastShotAdministered.doseNumberInSeries == 1,	
 			$lastShotAdministered.getAdministeredVaccine().isLiveVirusVaccine() == false) 
-		exists IceFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $lastShotAdministered)
+		exists ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $lastShotAdministered)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
@@ -2823,7 +2823,7 @@ rule "RecommendationForecast.Do Not Apply Recommended Interval for Dose 1 if Pri
 		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, isSeriesComplete() == false, determineDoseNumberInSeries() == 1,
 			$lastShotAdministered : lastShotAdministeredInSeries, $lastShotAdministered != null, $lastShotAdministered.doseNumberInSeries == 1,
 			$lastShotAdministered.getAdministeredVaccine().isLiveVirusVaccine() == false) 
-		exists IceFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $lastShotAdministered)
+		exists ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $lastShotAdministered)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);

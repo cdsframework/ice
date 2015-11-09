@@ -61,6 +61,15 @@ public class SupportedCdsVaccineGroups {
 		this.vaccineGroupConcepts = new HashMap<String, LocallyCodedVaccineGroupItem>();
 	}
 	
+	protected boolean isEmpty() {
+		
+		if (this.vaccineGroupConcepts.isEmpty()) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 	
 	/**
 	 * Add the vaccine group information specified in the ice vaccine group specification file to the list of supported vaccine groups. If the IceVaccineGroupSpecificationFile is 
@@ -71,7 +80,7 @@ public class SupportedCdsVaccineGroups {
 	 * @throws InconsistentConfigurationException if the information provided in the IceVaccineGroupSpecificationFile is not consistent
 	 * @throws ImproperUsageException if this operation is used incorrectly
 	 */
-	public void addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecificationFile, SupportedCdsLists pSupportedCdsLists) 
+	protected void addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecificationFile, SupportedCdsLists pSupportedCdsLists) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportedVaccineGroupItem(): ";

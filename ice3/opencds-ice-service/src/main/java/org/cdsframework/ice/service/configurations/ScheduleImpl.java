@@ -210,7 +210,7 @@ public class ScheduleImpl implements Schedule {
 			return null;
 		}
 		
-		LocallyCodedVaccineGroupItem lCodedVaccineGroupItem = this.iceSupportingDataConfiguration.getSupportedVaccineGroupConcepts().getVaccineGroupItem(pVaccineGroupItemName);
+		LocallyCodedVaccineGroupItem lCodedVaccineGroupItem = this.iceSupportingDataConfiguration.getSupportedCdsVaccineGroups().getVaccineGroupItem(pVaccineGroupItemName);
 		if (lCodedVaccineGroupItem == null) {
 			return null;
 		}
@@ -253,7 +253,7 @@ public class ScheduleImpl implements Schedule {
 		}
 		List<SupportedDiseaseConcept> sdcs = new ArrayList<SupportedDiseaseConcept>();		
 		int i=0;
-		Collection<LocallyCodedVaccineGroupItem> lAllVaccineGroups = this.iceSupportingDataConfiguration.getSupportedVaccineGroupConcepts().getAllLocallyCodedVaccineGroupItems();
+		Collection<LocallyCodedVaccineGroupItem> lAllVaccineGroups = this.iceSupportingDataConfiguration.getSupportedCdsVaccineGroups().getAllLocallyCodedVaccineGroupItems();
 		for (LocallyCodedVaccineGroupItem lVaccineGroup : lAllVaccineGroups) {
 			Collection<String> lAllRelatedDiseases = lVaccineGroup.getRelatedDiseasesCdsListItemNames();
 			if (lAllRelatedDiseases != null) {			// should never be null

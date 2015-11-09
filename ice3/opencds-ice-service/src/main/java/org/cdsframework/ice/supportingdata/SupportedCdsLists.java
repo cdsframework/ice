@@ -60,6 +60,16 @@ public class SupportedCdsLists {
 	}
 	
 	
+	protected boolean isEmpty() {
+		
+		if (this.cdsListItemNameToCdsListItem.isEmpty()) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	/**
 	 * Adds an individual CdsListItem to the map of supported list concepts tracked by this class. This is currently a private method as all CdsListItems in the  
 	 * CdsListSpecificationFile should ideally be added all at once.
