@@ -129,7 +129,7 @@ public class ICESupportingDataConfiguration {
 			logger.debug(_METHODNAME + lDebugStr);
 		}
 
-		this.supportedCdsVaccineGroups = new SupportedCdsVaccineGroups(this.supportedCdsVersions);
+		this.supportedCdsVaccineGroups = new SupportedCdsVaccineGroups(this.supportedCdsVersions, this.supportedCdsLists);
 		initializeVaccineGroupSupportingData(supportingDataVaccineGroupsSubdirectory);
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = _METHODNAME + "The following Vaccine Groups have been initialized into the " + this.getClass().getName() + ": \n";
@@ -137,7 +137,7 @@ public class ICESupportingDataConfiguration {
 			logger.debug(_METHODNAME + lDebugStr);
 		}
 
-		this.supportedCdsVaccines = new SupportedCdsVaccines(this.supportedCdsVersions);
+		this.supportedCdsVaccines = new SupportedCdsVaccines(this.supportedCdsVersions, this.supportedCdsLists);
 		/*
 		initializeVaccineSupportingData(supportingDataVaccinesSubdirectory);
 		if (logger.isDebugEnabled()) {
@@ -511,7 +511,7 @@ public class ICESupportingDataConfiguration {
 			lDebugStrb += "\ngetPrimaryOpenCdsConcept(): " + ConceptUtils.toStringCD(lPrimaryOpenCdsMembership);
 		}
 		
-		this.supportedCdsVaccines.addSupportedVaccineItemFromIceVaccineSpecificationFile(pIceVaccineSpecification, this.supportedCdsLists);
+		this.supportedCdsVaccines.addSupportedVaccineItemFromIceVaccineSpecificationFile(pIceVaccineSpecification);
 	}
 	
 	
@@ -628,7 +628,7 @@ public class ICESupportingDataConfiguration {
 			logger.debug(lDebugStrb);
 		}
 		
-		this.supportedCdsVaccineGroups.addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(pIceVaccineGroupSpecification, this.supportedCdsLists);
+		this.supportedCdsVaccineGroups.addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(pIceVaccineGroupSpecification);
 	}
 
 	

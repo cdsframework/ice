@@ -2,7 +2,9 @@ package org.cdsframework.ice.supportingdata;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,14 +18,16 @@ import org.cdsframework.ice.service.InconsistentConfigurationException;
  */
 public class SupportedCdsConcepts {
 
-	private Map<ICEConceptType, Map<ICEConcept, LocallyCodedCdsListItem>> concepts;
+	private Map<ICEConceptType, Map<ICEConcept, LocallyCodedCdsListItem>> conceptTypeToConceptCdsListItemMap;
+	private Map<LocallyCodedCdsListItem, Set<ICEConcept>> cdsListItemToConceptList;
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsConcepts.class);
 	
 	
 	protected SupportedCdsConcepts() {
 		
-		concepts = new EnumMap<ICEConceptType, Map<ICEConcept, LocallyCodedCdsListItem>>(ICEConceptType.class);
+		conceptTypeToConceptCdsListItemMap = new EnumMap<ICEConceptType, Map<ICEConcept, LocallyCodedCdsListItem>>(ICEConceptType.class);
+		cdsListItemToConceptList = new HashMap<LocallyCodedCdsListItem, Set<ICEConcept>>();
 	}
 	
 	
@@ -58,39 +62,56 @@ public class SupportedCdsConcepts {
 			return;
 		}
 
-		Map<ICEConcept, LocallyCodedCdsListItem> lIceConceptEntry = this.concepts.get(pICT);
-		boolean lIceConceptEntryForConceptTypeAdded = false;
+		Map<ICEConcept, LocallyCodedCdsListItem> lIceConceptEntry = this.conceptTypeToConceptCdsListItemMap.get(pICT);
 		if (lIceConceptEntry == null) {
 			lIceConceptEntry = new HashMap<ICEConcept, LocallyCodedCdsListItem>();
 		}
-
 		if (pLCCLI != null) {
+			Set<ICEConcept> lICEConceptListAssocWCdsListItem = this.cdsListItemToConceptList.get(pLCCLI);
 			LocallyCodedCdsListItem priorAssociatedLCCLI = lIceConceptEntry.get(pIC);
 			if (priorAssociatedLCCLI == null) {
-				lIceConceptEntryForConceptTypeAdded = true;
 				lIceConceptEntry.put(pIC, pLCCLI);
+				// Record the Map<ICEConceptType, Map<ICEConcept, LocallyCodedCdsListItem> entry
+				this.conceptTypeToConceptCdsListItemMap.put(pICT, lIceConceptEntry);
+				// Record the Map<LocallyCodedCdsListItem, List<ICEConcept>> entry
+				if (lICEConceptListAssocWCdsListItem == null || ! lICEConceptListAssocWCdsListItem.contains(pIC)) {
+					if (lICEConceptListAssocWCdsListItem == null) {
+						lICEConceptListAssocWCdsListItem = new HashSet<ICEConcept>();
+					}
+					lICEConceptListAssocWCdsListItem.add(pIC);
+					this.cdsListItemToConceptList.put(pLCCLI, lICEConceptListAssocWCdsListItem);
+				}
+				if (logger.isDebugEnabled()) {
+					String lDebugStr = "SupportedCdsConcept with LocallyCodedCdsListItem ADDED. ICEConceptType: " + pICT + "; ICEConcept: " + pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
+					logger.debug(_METHODNAME + lDebugStr);
+				}
 			}
 			else {
 				if (! priorAssociatedLCCLI.equals(pLCCLI)) {
-					String lErrStr = "Attempt to map different LocallyCodedCdsListItem with ICEConcept previously mapped: IceConceptType: " + pICT + "; ICEConcept: " + 
+					String lErrStr = "Attempt to map different LocallyCodedCdsListItem with ICEConcept previously mapped: ICEConceptType: " + pICT + "; ICEConcept: " + 
 						pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
 					logger.warn(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);
 				}
-			}
-		}
-		
-		if (lIceConceptEntryForConceptTypeAdded == true) {
-			this.concepts.put(pICT, lIceConceptEntry);
-			if (logger.isDebugEnabled()) {
-				String lDebugStr = "SupportedCdsConcept ADDED. ICEConceptType: " + pICT + "; ICEConcept: " + pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
-				logger.debug(_METHODNAME + lDebugStr);
+				else {
+					if (logger.isDebugEnabled()) {
+						String lDebugStr = "SupportedCdsConcept with duplicate LocallyCodedCdsListItem _NOT_ ADDED. ICEConceptType: " + pICT + "; ICEConcept: " + pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
+						logger.debug(_METHODNAME + lDebugStr);
+					}
+				}
 			}
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				String lDebugStr = "SupportedCdsConcept _NOT_ ADDED. ICEConceptType: " + pICT + "; ICEConcept: " + pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
-				logger.debug(_METHODNAME + lDebugStr);
+			if (lIceConceptEntry.containsKey(pIC)) {
+				if (lIceConceptEntry.get(pICT) != null) {
+					String lErrStr = "Attempt to map different LocallyCodedCdsListItem with ICEConcept previously mapped: IceConceptType: " + pICT + "; ICEConcept: " + 
+							pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
+					logger.warn(_METHODNAME + lErrStr);
+					throw new InconsistentConfigurationException(lErrStr);					
+				}
+			}
+			else {
+				this.conceptTypeToConceptCdsListItemMap.put(pICT, null);
 			}
 		}
 	}
@@ -105,7 +126,7 @@ public class SupportedCdsConcepts {
 			return null;
 		}
 		
-		return this.concepts.get(pICT);
+		return this.conceptTypeToConceptCdsListItemMap.get(pICT);
 	}
 
 	
@@ -118,7 +139,7 @@ public class SupportedCdsConcepts {
 			return null;
 		}
 		
-		Map<ICEConcept, LocallyCodedCdsListItem> lMap = this.concepts.get(pICT);
+		Map<ICEConcept, LocallyCodedCdsListItem> lMap = this.conceptTypeToConceptCdsListItemMap.get(pICT);
 		if (lMap != null) {
 			return lMap.get(pIC);
 		}

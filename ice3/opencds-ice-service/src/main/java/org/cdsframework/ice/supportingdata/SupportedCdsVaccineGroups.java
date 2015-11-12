@@ -44,13 +44,17 @@ import org.opencds.common.exceptions.ImproperUsageException;
 
 public class SupportedCdsVaccineGroups {
 	
+	// Supported Cds Versions
 	private List<String> cdsVersions;
+	// Supporting Data CdsLists from which this vaccine group supporting data is built
+	private SupportedCdsLists supportedCdsLists;
+	
 	private Map<String, LocallyCodedVaccineGroupItem> vaccineGroupConcepts;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineGroupItem
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsVaccineGroups.class);	
 
 	
-	protected SupportedCdsVaccineGroups(List<String> pCdsVersions) {
+	protected SupportedCdsVaccineGroups(List<String> pCdsVersions, SupportedCdsLists pSupportedCdsLists) {
 	
 		if (pCdsVersions == null) {
 			this.cdsVersions = new ArrayList<String>();
@@ -58,6 +62,13 @@ public class SupportedCdsVaccineGroups {
 		else {
 			this.cdsVersions = pCdsVersions;
 		}
+		if (pSupportedCdsLists == null) {
+			this.supportedCdsLists = new SupportedCdsLists(this.cdsVersions);
+		}
+		else {
+			this.supportedCdsLists = pSupportedCdsLists;
+		}
+		
 		this.vaccineGroupConcepts = new HashMap<String, LocallyCodedVaccineGroupItem>();
 	}
 	
@@ -80,18 +91,13 @@ public class SupportedCdsVaccineGroups {
 	 * @throws InconsistentConfigurationException if the information provided in the IceVaccineGroupSpecificationFile is not consistent
 	 * @throws ImproperUsageException if this operation is used incorrectly
 	 */
-	protected void addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecificationFile, SupportedCdsLists pSupportedCdsLists) 
+	protected void addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecificationFile) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportedVaccineGroupItem(): ";
 		
 		if (pIceVaccineGroupSpecificationFile == null) {
 			return;
-		}
-		if (pSupportedCdsLists == null) {
-			String lErrStr = "SupportedCdsLists parameter not specified";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
 		}
 
 		// If adding a code that is not one of the supported cdsVersions, then return
@@ -108,7 +114,7 @@ public class SupportedCdsVaccineGroups {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 
-		LocallyCodedCdsListItem llccli = pSupportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
+		LocallyCodedCdsListItem llccli = this.supportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
 		// Now verify that there is a CdsListItem for this vaccine group (i.e. - we are tracking the codes and code systems in SupportedCdsLists - it must be there too).
 		if (llccli == null) {
 			String lErrStr = "Attempt to add the following vaccine group which is not in the list of SupportedCdsLists: " + 
@@ -126,7 +132,7 @@ public class SupportedCdsVaccineGroups {
 		List<String> lRelatedDiseasesCdsListItems = new ArrayList<String>();
 		if (lRelatedDiseases != null && ! lRelatedDiseases.isEmpty()) {
 			for (org.opencds.vmr.v1_0.schema.CD lRelatedDisease : lRelatedDiseases) {
-				LocallyCodedCdsListItem lRelatedDiseaseCdsListItem = pSupportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(lRelatedDisease));
+				LocallyCodedCdsListItem lRelatedDiseaseCdsListItem = this.supportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(lRelatedDisease));
 				if (lRelatedDiseaseCdsListItem == null) {
 					String lErrStr = "Attempt to add a related vaccine to a vaccine group that is not in the list of SupportedCdsLists";
 					logger.warn(_METHODNAME + lErrStr);
