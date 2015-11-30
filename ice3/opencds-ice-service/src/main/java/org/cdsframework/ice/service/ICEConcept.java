@@ -34,6 +34,7 @@ public class ICEConcept extends VmrOpenCdsConcept {
 
 	private String displayName;
 	private boolean isOpenCdsSupportedConcept;
+	private boolean includeIsOpenCdsSupportedConceptForEquality;
 	
 	private static Log logger = LogFactory.getLog(ICEConcept.class);
 	
@@ -47,7 +48,7 @@ public class ICEConcept extends VmrOpenCdsConcept {
 	 * @param openCdsConceptCode Concept Code; mandatory
 	 * @throws IllegalArgumentException if concept code is null
 	 */
-	public ICEConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept) {
+ 	public ICEConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept) {
 		super();
 		
 		if (pOpenCdsConceptCode == null) {
@@ -59,7 +60,7 @@ public class ICEConcept extends VmrOpenCdsConcept {
 		setOpenCdsConceptCode(pOpenCdsConceptCode);
 		this.isOpenCdsSupportedConcept = pIsOpenCdsSupportedConcept;
 	}
-
+ 	
 	/**
 	 * Instantiate an OpenCdsConceptCode object
 	 * @param pOpenCdsConceptCode Concept Code; mandatory
@@ -130,13 +131,40 @@ public class ICEConcept extends VmrOpenCdsConcept {
 		if (getOpenCdsConceptCode() == null) {
 			if (other.getOpenCdsConceptCode() != null)
 				return false;
-		// } else if (!getOpenCdsConceptCode().equals(other.getOpenCdsConceptCode()))
-		} else if (!getOpenCdsConceptCode().equals(other.getOpenCdsConceptCode()) && isOpenCdsSupportedConcept() != other.isOpenCdsSupportedConcept())
+		} else if (!getOpenCdsConceptCode().equals(other.getOpenCdsConceptCode()) && isOpenCdsSupportedConcept() == other.isOpenCdsSupportedConcept())
 			return false;
 		
 		return true;
 	}
 
+	
+	/*
+	public boolean equalsOpenCdsSupportedConceptExclusive(Object obj) {
+
+		if (this == obj)
+			return true;
+		//if (!super.equals(obj))
+		//	return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ICEConcept other = (ICEConcept) obj;
+		if (getOpenCdsConceptCode() == null) {
+			if (other.getOpenCdsConceptCode() != null)
+				return false;
+		} else if (!getOpenCdsConceptCode().equals(other.getOpenCdsConceptCode()) && isOpenCdsSupportedConcept() != other.isOpenCdsSupportedConcept())
+			return false;
+		
+		return true;
+	}
+	
+	
+	public boolean equalsOpenCdsSupportedConceptInclusive(Object obj) {
+	
+		return equals(obj);
+
+	}
+	*/
+	
 	@Override
 	public String toString() {
 		return "ICEConcept [displayName=" + displayName	+ ", isOpenCdsSupportedConcept=" + isOpenCdsSupportedConcept + ", toString()=" + super.toString() + "]";

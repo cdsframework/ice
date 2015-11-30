@@ -247,42 +247,57 @@ public class SeriesRules {
 	
 	private boolean isAllowableVaccineForDoseRule(Vaccine v, boolean allowableForAnyDose, int doseNumber) {
 
+		String _METHODNAME = "isAllowableVaccineForDoseRule(): ";
 		if (seriesDoseRules == null || v == null) {
+			logger.debug(_METHODNAME + "here-2");
 			return false;
 		}
 
 		ICEConcept vIceConcept = v.getVaccineConcept();
+		logger.debug(_METHODNAME + "vaccine concept: " + vIceConcept + "; doseNumber: " + doseNumber + "; allowable any " + allowableForAnyDose);
 		if (vIceConcept == null) {
+			logger.debug(_METHODNAME + "here-1");
 			return false;
 		}
 		String vOpenCdsConceptCode = vIceConcept.getOpenCdsConceptCode();
+		logger.debug(_METHODNAME + "opencds concept: " + vOpenCdsConceptCode);
 		if (vOpenCdsConceptCode == null) {
+			logger.debug(_METHODNAME + "here0");
 			return false;
 		}
 		for (DoseRule dr : seriesDoseRules) {
 			int drDoseNumber = dr.getDoseNumber();
+			logger.debug(_METHODNAME + "dose number: " + drDoseNumber);
 			if (! allowableForAnyDose && drDoseNumber < doseNumber) {
+				logger.debug(_METHODNAME + "here1; drDoseNumber " + drDoseNumber);
 				continue;
 			}
 			else if (allowableForAnyDose || dr.getDoseNumber() == doseNumber) {
+				logger.debug(_METHODNAME + "here2");
 				List<Vaccine> allPermittedComponentVaccines = dr.getAllPermittedVaccines();
 				for (Vaccine permittedVaccine : allPermittedComponentVaccines) {
 					if (permittedVaccine != null) {
+						logger.debug(_METHODNAME + "here3");
 						ICEConcept iceConcept = permittedVaccine.getVaccineConcept();
+						logger.debug(_METHODNAME + "ice concept: " + (iceConcept == null ? "null" : iceConcept.getOpenCdsConceptCode()));
 						if (iceConcept == null) {
+							logger.debug(_METHODNAME + "here4");
 							continue;
 						}
 						if (vOpenCdsConceptCode.equals(iceConcept.getOpenCdsConceptCode())) {
+							logger.debug(_METHODNAME + "here4.5");
 							return true;
 						}
 					}
 				}
 			}
 			else {
+				logger.debug(_METHODNAME + "here5");
 				break;
 			}
 		}
 		
+		logger.debug(_METHODNAME + "here6");
 		return false;
 	}
 
