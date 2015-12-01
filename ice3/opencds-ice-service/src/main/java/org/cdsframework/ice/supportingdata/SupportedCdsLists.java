@@ -232,6 +232,14 @@ public class SupportedCdsLists {
 		return this.supportedCdsConcepts.getMapOfSupportedCdsConceptsForICEConceptType(pICT);
 	}
 	
+
+	/**
+	 * Return the associated Supported Cds Concepts; will never be null
+	 */
+	public SupportedCdsConcepts getAssociatedSupportedCdsConcepts() {
+		
+		return this.supportedCdsConcepts;
+	}
 	
 	/**
 	 * Obtain the Cds List Code associated with a specified code system. 

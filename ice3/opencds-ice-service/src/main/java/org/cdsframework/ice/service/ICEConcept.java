@@ -34,7 +34,6 @@ public class ICEConcept extends VmrOpenCdsConcept {
 
 	private String displayName;
 	private boolean isOpenCdsSupportedConcept;
-	private boolean includeIsOpenCdsSupportedConceptForEquality;
 	
 	private static Log logger = LogFactory.getLog(ICEConcept.class);
 	
@@ -137,33 +136,6 @@ public class ICEConcept extends VmrOpenCdsConcept {
 		return true;
 	}
 
-	
-	/*
-	public boolean equalsOpenCdsSupportedConceptExclusive(Object obj) {
-
-		if (this == obj)
-			return true;
-		//if (!super.equals(obj))
-		//	return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ICEConcept other = (ICEConcept) obj;
-		if (getOpenCdsConceptCode() == null) {
-			if (other.getOpenCdsConceptCode() != null)
-				return false;
-		} else if (!getOpenCdsConceptCode().equals(other.getOpenCdsConceptCode()) && isOpenCdsSupportedConcept() != other.isOpenCdsSupportedConcept())
-			return false;
-		
-		return true;
-	}
-	
-	
-	public boolean equalsOpenCdsSupportedConceptInclusive(Object obj) {
-	
-		return equals(obj);
-
-	}
-	*/
 	
 	@Override
 	public String toString() {

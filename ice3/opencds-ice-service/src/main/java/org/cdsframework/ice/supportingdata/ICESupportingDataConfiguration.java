@@ -138,14 +138,12 @@ public class ICESupportingDataConfiguration {
 		}
 
 		this.supportedCdsVaccines = new SupportedCdsVaccines(this.supportedCdsVersions, this.supportedCdsLists);
-		/*
 		initializeVaccineSupportingData(supportingDataVaccinesSubdirectory);
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = _METHODNAME + "The following Vaccines have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedCdsVaccines.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}
-		*/
 		
 		// Log configuration data parameters of data initialized
 		lSbCdsVersion.append("; ");

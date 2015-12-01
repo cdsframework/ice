@@ -37,6 +37,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.ice.service.ICEConcept;
+import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.TimePeriod;
 import org.cdsframework.ice.service.VaccineComponentSD;
@@ -71,7 +72,7 @@ public class SupportedCdsVaccines {
 	
 	protected SupportedCdsVaccines(List<String> pCdsVersions, SupportedCdsLists pSupportedCdsLists) {
 		
-		String _METHODNAME = "SupportedCdsVaccines(): ";
+		// String _METHODNAME = "SupportedCdsVaccines(): ";
 		
 		if (pCdsVersions == null) {
 			this.cdsVersions = new ArrayList<String>();
@@ -139,17 +140,35 @@ public class SupportedCdsVaccines {
 			return isVaccineSupportingDataConsistent();
 		}
 		
-		// OpenCDS concept - check to make sure that this vaccine has an associated OpenCDS concept
-		// TODO:
-		
+		////////////// Determine Primary OpenCDS Concept START //////////////		
+		///////
+		// The Vaccine Concept will be stored as a Concept; doublecheck that a SupportedCdsConcept with the specified primary OpenCDS Concept for this Vaccine exists
+		// That is, check to make sure that the ICEConcept associated with this Vaccine (CdsListItem) is also a OpenCDS concept
+		///////
 		org.opencds.vmr.v1_0.schema.CD lPrimaryOpenCdsConcept = pIceVaccineSpecificationFile.getPrimaryOpenCdsConcept();
 		if (lPrimaryOpenCdsConcept == null) {
 			String lErrStr = "OpenCDS Concept not specified for vaccine: " + llccli;
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
+		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with a CdsListItem?
 		ICEConcept ic = new ICEConcept(lPrimaryOpenCdsConcept.getCode(), true, lPrimaryOpenCdsConcept.getDisplayName());
+		Collection<ICEConcept> lOpenCDSConcepts = this.supportedCdsLists.getAssociatedSupportedCdsConcepts().getListOfOpenCDSICEConceptsForSpecifiedCdsListItem(llccli);
+		boolean lPrimaryOpenCDSConceptForVaccineIdentified = false;
+		for (ICEConcept lIC : lOpenCDSConcepts) {
+			if (ic.equals(lIC)) {
+				lPrimaryOpenCDSConceptForVaccineIdentified = true;
+				break;
+			}
+		}
+		if (! lPrimaryOpenCDSConceptForVaccineIdentified) {
+			String lErrStr = "Attempt to specify Primary OpenCDS Concept for vaccine but OpenCDS concept not associated CdsListItem; vaccine: " + llccli;
+			logger.error(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 
+		////////////// Determine Primary OpenCDS Concept END //////////////
+				
 		// Vaccine properties to track
 		boolean lThisVaccineNotFullySpecified = false;
 		boolean lVaccineAndOnlyVaccineComponentNotEqual = false;
@@ -380,12 +399,6 @@ public class SupportedCdsVaccines {
 			diseaseImmunityList.add(SupportedDiseaseConcept.Pertussis);
 			diseaseImmunityList.add(SupportedDiseaseConcept.Polio);
 			numberOfVGsEncompassingDiseases = getNumberOfVaccineGroupsEncompassingDiseases(diseaseImmunityList);
-			if (numberOfVGsEncompassingDiseases > 1) {
-				numberOfVGsGreaterThanOne = true;
-			}
-			else {
-				numberOfVGsGreaterThanOne = false;
-			}
 			ic = new ICEConcept(SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptDisplayNameValue());
 			// Add HepB, DTaP, and IPV Vaccine Components START
 			lVaccineComponentList = new ArrayList<VaccineComponent>();

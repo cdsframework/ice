@@ -1,8 +1,11 @@
 package org.cdsframework.ice.supportingdata;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -118,7 +121,7 @@ public class SupportedCdsConcepts {
 
 	
 	/**
-	 * Return map of supported concepts for the given IceConceptType. Returns null if not found.
+	 * Return map of supported concepts for the given ICEConceptType. Returns null if not found.
 	 */
 	protected Map<ICEConcept, LocallyCodedCdsListItem> getMapOfSupportedCdsConceptsForICEConceptType(ICEConceptType pICT) {
 
@@ -131,9 +134,51 @@ public class SupportedCdsConcepts {
 
 	
 	/**
+	 * Return list of ICEConcepts that is also an OpenCDS concept for the given LocallyCodedCdsListItem. Returns empty list if none found 
+	 */
+	protected Collection<ICEConcept> getListOfOpenCDSICEConceptsForSpecifiedCdsListItem(LocallyCodedCdsListItem pLCCLI) {
+		
+		if (pLCCLI == null) {
+			return new ArrayList<ICEConcept>();
+		}
+		
+		Set<ICEConcept> lSetOfICEConceptsForLC = this.cdsListItemToConceptList.get(pLCCLI);
+		if (lSetOfICEConceptsForLC == null) {
+			return new ArrayList<ICEConcept>();
+		}
+		List<ICEConcept> lApplicableOpenCDSConcepts = new ArrayList<ICEConcept>();
+		for (ICEConcept lIC : lSetOfICEConceptsForLC) {
+			if (lIC != null && lIC.isOpenCdsSupportedConcept()) {
+				lApplicableOpenCDSConcepts.add(lIC);
+			}
+		}
+		return lApplicableOpenCDSConcepts;
+		
+	}
+	
+	/**
+	 * Return list of ICEConcepts for the given LocallyCodedCdsListItem. Returns empty list if none found 
+	 */
+	protected Collection<ICEConcept> getListOfAllICEConceptsForSpecifiedCdsListItem(LocallyCodedCdsListItem pLCCLI) {
+		
+		if (pLCCLI == null) {
+			return new ArrayList<ICEConcept>();
+		}
+		
+		Set<ICEConcept> lSetOfICEConceptsForLC = this.cdsListItemToConceptList.get(pLCCLI);
+		if (lSetOfICEConceptsForLC == null) {
+			return new ArrayList<ICEConcept>();
+		}
+		else {
+			return lSetOfICEConceptsForLC;
+		}
+	}
+	
+	
+	/**
 	 * Return LocallyCodedCdsListItem for the given IceConceptType and ICEConcept. Returns null if not found.
 	 */
-	protected LocallyCodedCdsListItem getLocallyCodedCdsListItemForIceConceptTypeAndICEConcept(ICEConceptType pICT, ICEConcept pIC) {
+	protected LocallyCodedCdsListItem getLocallyCodedCdsListItemForSpecifiedICEConceptTypeAndICEConcept(ICEConceptType pICT, ICEConcept pIC) {
 		
 		if (pICT == null || pIC == null) {
 			return null;
