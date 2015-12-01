@@ -880,8 +880,10 @@ rule "Duplicate Shots/Same Day: If this is a duplicate shot/same day, mark the d
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		$td: TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries)
-		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries < $tdAdministeredShotNumber, $tdprevDoseNumber: doseNumberInSeries)
+		$td: TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
+			$doseNumber : doseNumberInSeries)
+		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries < $tdAdministeredShotNumber, $tdprevDoseNumber: doseNumberInSeries, 
+			$tdprevDoseNumber < $doseNumber)
 		$targetSeries : TargetSeries(containsTargetDose($td), containsTargetDose($tdprev))
 	then
 		String _RULENAME = kcontext.rule.name;
