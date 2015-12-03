@@ -1,22 +1,22 @@
 package org.cdsframework.ice.service;
 
-public class IceFactTypeFinding {
+public class ICEFactTypeFinding {
 
 	private String iceResultFinding;
 	private TargetDose associatedTargetDose;
 	private TargetSeries associatedTargetSeries;
 	
-	public IceFactTypeFinding(String pIceResultFinding) {
+	public ICEFactTypeFinding(String pIceResultFinding) {
 		this.iceResultFinding = pIceResultFinding;
 	}
 	
-	public IceFactTypeFinding(String pIceResultFinding, TargetDose pTargetDose) {
+	public ICEFactTypeFinding(String pIceResultFinding, TargetDose pTargetDose) {
 		this.iceResultFinding = pIceResultFinding;
 		this.associatedTargetDose = pTargetDose;
 		this.associatedTargetSeries = pTargetDose != null ? pTargetDose.getAssociatedTargetSeries() : null;
 	}
 
-	public IceFactTypeFinding(String pIceResultFinding, TargetSeries pTargetSeries) {
+	public ICEFactTypeFinding(String pIceResultFinding, TargetSeries pTargetSeries) {
 		this.iceResultFinding = pIceResultFinding;
 		this.associatedTargetSeries = pTargetSeries;
 	}
@@ -61,9 +61,9 @@ public class IceFactTypeFinding {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof IceFactTypeFinding))
+		if (!(obj instanceof ICEFactTypeFinding))
 			return false;
-		IceFactTypeFinding other = (IceFactTypeFinding) obj;
+		ICEFactTypeFinding other = (ICEFactTypeFinding) obj;
 		if (iceResultFinding == null) {
 			if (other.iceResultFinding != null)
 				return false;

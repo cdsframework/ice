@@ -5,7 +5,7 @@ import groovy.xml.MarkupBuilder
 
 @Log4j
 class OpencdsClient {
-    private static final String WS_URL = "http://localhost:38080/opencds-decision-support-service/evaluate"
+    private static final String WS_URL = "http://localhost:28080/opencds-decision-support-service/evaluate"
     private static final String DSS_NS = "http://www.omg.org/spec/CDSS/201105/dss"
     private static final String EVALUATE = 'evaluate'
     private static final String EVALUATE_AT_SPEC_TIME = 'evaluateAtSpecifiedTime'

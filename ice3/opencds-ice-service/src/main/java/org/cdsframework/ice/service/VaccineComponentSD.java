@@ -36,7 +36,7 @@ import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept;
 
 public class VaccineComponentSD extends AbstractVaccine {
 
-	private Collection<SupportedDiseaseConcept> diseaseImmunityList;
+	private Collection<String> diseaseImmunityList;
 	
 	private static Log logger = LogFactory.getLog(VaccineComponentSD.class);
 	
@@ -53,7 +53,7 @@ public class VaccineComponentSD extends AbstractVaccine {
 	 * @param pDisease Disease that this vaccine component induces immunity to
 	 * @throws IllegalArgumentException If either parameter is not supplied
 	 */
-	public VaccineComponentSD(ICEConcept pVaccineConcept, List<SupportedDiseaseConcept> pDiseaseImmunityList) {
+	public VaccineComponentSD(ICEConcept pVaccineConcept, List<String> pDiseaseImmunityList) {
 		
 		super(pVaccineConcept);
 		
@@ -75,7 +75,7 @@ public class VaccineComponentSD extends AbstractVaccine {
 	 * @param pVaccine Populated vaccine instance that represents this vaccine component
 	 * @throws IllegalArgumentException If vaccine object or its ICEConcept is not supplied
 	 */
-	public VaccineComponentSD(Vaccine pVaccine) {
+	public VaccineComponentSD(VaccineSD pVaccine) {
 	
 		super(pVaccine);
 		
@@ -101,8 +101,8 @@ public class VaccineComponentSD extends AbstractVaccine {
 		}
 		
 		VaccineComponentSD lVC = new VaccineComponentSD(pV);
-		List<SupportedDiseaseConcept> lSDCList = new ArrayList<SupportedDiseaseConcept>();
-		for (SupportedDiseaseConcept pSD : pV.diseaseImmunityList) {
+		List<String> lSDCList = new ArrayList<String>();
+		for (String pSD : pV.diseaseImmunityList) {
 			lSDCList.add(pSD);
 		}
 		lVC.diseaseImmunityList = lSDCList;
@@ -111,7 +111,7 @@ public class VaccineComponentSD extends AbstractVaccine {
 	}
 	
 	
-	public Collection<SupportedDiseaseConcept> getDiseaseImmunityList() {
+	public Collection<String> getDiseaseImmunityList() {
 		return diseaseImmunityList;
 	}
 	
@@ -120,14 +120,14 @@ public class VaccineComponentSD extends AbstractVaccine {
 	 * Get list of diseases targeted for immunity by this vaccine
 	 * @return List<SupportedDiseaseConcept> of diseases targeted by this vaccine; empty list if none
 	 */
-	public Collection<SupportedDiseaseConcept> getAllDiseasesTargetedForImmunity() {
+	public Collection<String> getAllDiseasesTargetedForImmunity() {
 		
-		Collection<SupportedDiseaseConcept> lImmunityList = getDiseaseImmunityList();
+		Collection<String> lImmunityList = getDiseaseImmunityList();
 		if (lImmunityList != null) {
 			return lImmunityList;
 		}
 		else {
-			return new ArrayList<SupportedDiseaseConcept>();
+			return new ArrayList<String>();
 		}
 	}
 

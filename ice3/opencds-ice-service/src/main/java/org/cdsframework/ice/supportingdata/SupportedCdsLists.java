@@ -21,29 +21,29 @@ import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class SupportedCdsLists {
 	
-	/*
-	 * _RECOMMENDED_RECOMMENDATION_STATUS("ICE219", "Recommended", "2.16.840.1.113883.3.795.12.100.5", "ICE3 Immunization Recommendation", 
-	 *		"RECOMMENDED", "Due Now"),
-	 *
-	 * private CD supportedRecommendationConcept;
-	 * private CD localRecommendationCodeConcept;
+	/**
+	 * Representative of a concept and one associated local code, that can be represented by an enumeration as follows (for example):
+	 *        _RECOMMENDED_RECOMMENDATION_STATUS("ICE219", "Recommended", "2.16.840.1.113883.3.795.12.100.5", "ICE3 Immunization Recommendation", "RECOMMENDED", "Due Now"),
+	 *        private CD supportedRecommendationConcept;
+	 *        private CD localRecommendationCodeConcept;
+	 * 
+	 * Note that references to "cdsListName" below are equivalent to LocallyCodedCdsListItem.getCdsListCode()
 	 */
 	private List<String> cdsVersions;												// Supported CDS List Versions
-	private Map<String, LocallyCodedCdsListItem> cdsListItemNameToCdsListItem;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> CodedCdsListItem
+	private Map<String, LocallyCodedCdsListItem> cdsListItemNameToCdsListItem;		// LOCAL CODE-RELATED: cdsListCode.cdsListItemKey -> CodedCdsListItem
 	private Map<String, String> cdsListNameToCodeSystem;							// LOCAL CODE-RELATED: cdsListCode -> cdsListCodeSystem (to ensure there are no conflicts)	
 	private Map<String, String> codeSystemToCdsListName;							// LOCAL CODE-RELATED: cdsListCodeSystem -> cdsListCode (to ensure there are no conflicts)	
-	private Map<String, Integer> countOfCdsListItemsPerCdsList;						// LOCAL CODE-RELATED: cdsList.code -> number of cdsListItemCodes for the cdsList
+	private Map<String, Integer> countOfCdsListItemsPerCdsList;						// LOCAL CODE-RELATED: cdsListCode -> number of cdsListItemCodes for the cdsList
 	private Map<String, Set<LocallyCodedCdsListItem>> cdsListNameToCdsListItems; 	// LOCAL CODE-RELATED: cdsListCode -> Set of CodedCdsListItems
 
-	// Supported ICE concepts consisting of both OpenCDS defined concepts (of type IceConceptType.OPENCDS and/or other IceConceptType types).
 	// This class provides public methods for other classes to populate the IceConceptType.OPENCDS supported concepts, but other IceConceptType concepts
-	// are populated by this class when reading the XML.
+	// are populated by this class when reading the XML. Concepts are stored in the following structure.
 	private SupportedCdsConcepts supportedCdsConcepts;
-	
+		
 	private static Log logger = LogFactory.getLog(SupportedCdsLists.class);
+		
 	
-	
-	public SupportedCdsLists(List<String> pCdsVersions) {
+	protected SupportedCdsLists(List<String> pCdsVersions) {
 		
 		if (pCdsVersions == null) {
 			this.cdsVersions = new ArrayList<String>();
@@ -55,9 +55,20 @@ public class SupportedCdsLists {
 		this.cdsListNameToCodeSystem = new HashMap<String, String>();
 		this.codeSystemToCdsListName = new HashMap<String, String>();
 		this.countOfCdsListItemsPerCdsList = new HashMap<String, Integer>();
-		this.cdsListNameToCdsListItems = new HashMap<String, Set<LocallyCodedCdsListItem>>(); 
+		this.cdsListNameToCdsListItems = new HashMap<String, Set<LocallyCodedCdsListItem>>();
+		this.supportedCdsConcepts = new SupportedCdsConcepts();
 	}
 	
+	
+	protected boolean isEmpty() {
+		
+		if (this.cdsListItemNameToCdsListItem.isEmpty()) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 	
 	/**
 	 * Adds an individual CdsListItem to the map of supported list concepts tracked by this class. This is currently a private method as all CdsListItems in the  
@@ -68,7 +79,7 @@ public class SupportedCdsLists {
 	 * 	is not an item in the CdsListSpecificationFile, or if not all required elements have been populated 
 	 */
 	private void addSupportedCdsListItem(CdsListSpecificationFile pCdsListSpecificationFile, CdsListItem pCdsListItem) 
-		throws ImproperUsageException {
+		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "addSupportedListConcept(): ";
 		
@@ -83,50 +94,55 @@ public class SupportedCdsLists {
 		}
 		
 		LocallyCodedCdsListItem slci = new LocallyCodedCdsListItem(pCdsListSpecificationFile, pCdsListItem);
-		String lSupportedListConceptItemName = slci.getSupportedListConceptItemName();
+		String lSupportedListConceptItemName = slci.getSupportedCdsListItemName();
 		if (this.cdsListItemNameToCdsListItem.containsKey(lSupportedListConceptItemName)) {
 			String lErrStr = "Attempt to add duplicate SupportedListConceptItem found: cannot add a supported list concept that already been added; must first remove the prior SupportedListConcept of the same name " + 
 				lSupportedListConceptItemName;
 			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
 		}
 
 		String lSLCCdsListCode = slci.getCdsListCode();
 		String lSLCCdsListCodeSystem = slci.getCdsListCodeSystem();
 		if (lSLCCdsListCode == null || lSLCCdsListCodeSystem == null) {
-			String lErrStr = "Attempt to add an unpopulated cdsListCode or cdsListCodeSystem";
+			String lErrStr = "Attempt to add an unpopulated CdsList code or CdsList Code System";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
 		
-		// Add map from Cds List Code -> Code System; if mapping already present, enforce consistency of the previous mapping
+		// Consistency Check: For Cds List Code -> Code System; if mapping already present, enforce consistency of the previous mapping
 		String lPreviousMappedCdsListCodeSystem = cdsListNameToCodeSystem.get(lSLCCdsListCode);
 		if (lPreviousMappedCdsListCodeSystem != null && ! lSLCCdsListCodeSystem.equals(lPreviousMappedCdsListCodeSystem)) {
 			String lErrStr = "Attempt to add a supported list concept whose code system does not match the code system of a previously previously added concept by the same cdsListCode";
 			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);				
+			throw new InconsistentConfigurationException(lErrStr);				
 		}		
 		
-		// Add map from Cds List Code System -> Cds List Code; if mapping already present, enforce consistency of the previous mapping
-		String lPreviousMappedCdsListCode = this.codeSystemToCdsListName.get(lSLCCdsListCodeSystem);
-		if (lPreviousMappedCdsListCode != null && ! lPreviousMappedCdsListCode.equals(lPreviousMappedCdsListCode)) {
+		// Consistency check: For Cds List Code System -> Cds List Code; if mapping already present, enforce consistency of the previous mapping
+		String lPreviousMappedCdsListName = this.codeSystemToCdsListName.get(lSLCCdsListCodeSystem);
+		if (lPreviousMappedCdsListName != null && ! lPreviousMappedCdsListName.equals(lPreviousMappedCdsListName)) {
 			String lErrStr = "Attempt to add a supported list concept whose cdsList code does not match the cdsList code of a previously previously added concept by the same code system";
 			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
 		}
-		
-		// Consistency checks are ok; add the Cds List Code -> Code System and Code System -> cds List Code mappings
+
+		//
+		// Add the CdsList Name-> Code System and Code System -> CdsList Name mappings
 		if (lPreviousMappedCdsListCodeSystem == null) {
 			this.cdsListNameToCodeSystem.put(slci.getCdsListCode(), slci.getCdsListCodeSystem());
 		}
-		if (lPreviousMappedCdsListCode == null) {
+		if (lPreviousMappedCdsListName == null) {
 			this.codeSystemToCdsListName.put(slci.getCdsListCodeSystem(), slci.getCdsListCode());
 		}
 
-		// Add the mapping from the CdsListItemName to CodedCdsListItem
+		///////
+		// Add the mapping from the CdsListItem Name to CdsListItem
+		///////
 		this.cdsListItemNameToCdsListItem.put(lSupportedListConceptItemName, slci);
 		
+		///////
 		// Keep track of the number of mappings of Cds List Items per locally coded cds lists
+		///////
 		Integer lCountOfCdsListItems = this.countOfCdsListItemsPerCdsList.get(lSLCCdsListCode);
 		if (lCountOfCdsListItems == null) {
 			this.countOfCdsListItemsPerCdsList.put(lSLCCdsListCode, new Integer(1));
@@ -135,13 +151,37 @@ public class SupportedCdsLists {
 			this.countOfCdsListItemsPerCdsList.put(lSLCCdsListCode, new Integer(lCountOfCdsListItems.intValue()+1));
 		}
 		
-		// Keep track of all of the coded cds items associated with the cds list
+		///////
+		// Keep track of all of the CdsListItems associated with the CdsList
+		///////
 		Set<LocallyCodedCdsListItem> lcclis = this.cdsListNameToCdsListItems.get(lSLCCdsListCode);
 		if (lcclis == null) {
 			lcclis = new HashSet<LocallyCodedCdsListItem>();
 		}
 		lcclis.add(slci);
 		this.cdsListNameToCdsListItems.put(lSLCCdsListCode, lcclis);
+		
+		////////////// Supported Concepts initialization START //////////////
+		///////
+		// Add the OpenCDS Concepts (if any) to SupportedConcepts, only if the CdsList is of an IceConceptType
+		///////
+		Collection<ICEConcept> lConcepts = slci.getCdsListItemOpencdsConceptMappings();
+		for (ICEConcept lC : lConcepts) {
+			lC.setIsOpenCdsSupportedConcept(true);
+			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(ICEConceptType.OPENCDS, lC, slci);
+		}
+		
+		///////
+		// Add this CdsListItem as an ICEConcept of the correct type (Disease, Evaluation, Recommendation, etc. (that is, only if the CdsList is of an IceConceptType)
+		///////
+		ICEConceptType lIceConceptType = ICEConceptType.getSupportedIceConceptType(lSLCCdsListCode);
+		if (lIceConceptType != null) {
+			ICEConcept lIC = new ICEConcept(lSupportedListConceptItemName, false);		// Not an OpenCDS concept
+			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(lIceConceptType, lIC, slci);
+		}
+		
+		////////////// Supported Concepts initialization END //////////////
+		
 	}
 
 	
@@ -181,6 +221,25 @@ public class SupportedCdsLists {
 		}
 	}
 	
+	
+	/**
+	 * Get a Map of all supported Cds Concepts for the provided ICEConceptType. Returns null if none are found.
+	 * @param pICT
+	 * @return
+	 */
+	public Map<ICEConcept, LocallyCodedCdsListItem> getAllSupportedCdsConceptsAssociatedWithICEConceptType(ICEConceptType pICT) {
+		
+		return this.supportedCdsConcepts.getMapOfSupportedCdsConceptsForICEConceptType(pICT);
+	}
+	
+
+	/**
+	 * Return the associated Supported Cds Concepts; will never be null
+	 */
+	public SupportedCdsConcepts getAssociatedSupportedCdsConcepts() {
+		
+		return this.supportedCdsConcepts;
+	}
 	
 	/**
 	 * Obtain the Cds List Code associated with a specified code system. 
@@ -332,7 +391,6 @@ public class SupportedCdsLists {
 	 *
 	 * @author daryl
 	 *
-	 */
 	private class SupportedCdsConceptItem {
 		
 		private SupportedCdsConceptItem() {
@@ -341,6 +399,7 @@ public class SupportedCdsLists {
 		
 	}
 	
+	 */
 	
 
 	

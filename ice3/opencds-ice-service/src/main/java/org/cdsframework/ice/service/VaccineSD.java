@@ -55,8 +55,8 @@ public class VaccineSD extends AbstractVaccine {
 	}
 	
 	/**
-	 * Instantiate a vaccine object. If there is only one vaccine component, the vaccine component code must be the same as that specified by the ICEConcept.
-	 * Unspecified Formulation on constructed vaccine object is set to the same value as the monovalent vaccine, which is true by default if not otherwise specified; 
+	 * Instantiate a vaccine object. If there is only one vaccine component, the vaccine component code must be the same as that specified by the ICEConcept if using this constructor.
+	 * The Unspecified Formulation on constructed vaccine object is set to the same value as the monovalent vaccine, which is true by default if not otherwise specified; 
 	 * it is set to false if any component vaccine is not an unspecified formulation; otherwise set to true. Be sure to set unspecified formulation flag 
 	 * for each vaccine component appropriately to ensure proper behavior of rules, or update all components and this object appropriately if changed.
 	 * @param pVaccineConcept ICEConcept representing the vaccine
@@ -130,6 +130,25 @@ public class VaccineSD extends AbstractVaccine {
 	}
 	
 	
+	/**
+	 * Add the specified VaccineComponent as a VaccineComponent of this Vaccine.
+	 * @param pVaccineComponent
+	 */
+	public void addMemberVaccineComponent(VaccineComponentSD pVaccineComponent) {
+		
+		if (pVaccineComponent == null) {
+			return;
+		}
+		
+		// Set the unspecified formulation boolean
+		if (pVaccineComponent.isUnspecifiedFormulation() == false) {
+			this.setUnspecifiedFormulation(false);
+		}
+		
+		this.vaccineComponents.add(pVaccineComponent);
+	}
+	
+	
 	public static VaccineSD constructDeepCopyOfVaccineObject(VaccineSD pV) {
 		
 		if (pV == null) {
@@ -160,17 +179,17 @@ public class VaccineSD extends AbstractVaccine {
 	
 	/**
 	 * Get list of diseases targeted for immunity by this vaccine
-	 * @return List<SupportedDiseaseConcept> of diseases targeted by this vaccine; empty list if none
+	 * @return List<String> of diseases targeted by this vaccine; empty list if none
 	 */
-	public Collection<SupportedDiseaseConcept> getAllDiseasesTargetedForImmunity() {
+	public Collection<String> getAllDiseasesTargetedForImmunity() {
 		
-		Set<SupportedDiseaseConcept> targetedDiseases = new HashSet<SupportedDiseaseConcept>();
+		Set<String> targetedDiseases = new HashSet<String>();
 		if (this.vaccineComponents == null) {
 			return targetedDiseases;
 		}
 		
 		for (VaccineComponentSD vc : this.vaccineComponents) {
-			Collection<SupportedDiseaseConcept> lImmunityList = vc.getDiseaseImmunityList();
+			Collection<String> lImmunityList = vc.getDiseaseImmunityList();
 			targetedDiseases.addAll(lImmunityList);
 		}
 		
@@ -178,11 +197,11 @@ public class VaccineSD extends AbstractVaccine {
 	}
 	
 	/**
-	 * Get all VaccineComponent member objects of this vaccine that are a member of the SupportedDiseaseConcept
-	 * @param pTargetedDiseases SupportedDiseaseConcept
+	 * Get all VaccineComponent member objects of this vaccine that targets the specified list of diseases
+	 * @param pTargetedDiseases Collection of diseases from which to ascertain targeting VaccineComponents
 	 * @return
 	 */
-	public Collection<VaccineComponentSD> getVaccineComponentsTargetingSpecifiedDiseases(Collection<SupportedDiseaseConcept> pTargetedDiseases) {
+	public Collection<VaccineComponentSD> getVaccineComponentsTargetingSpecifiedDiseases(Collection<String> pTargetedDiseases) {
 		
 		Set<VaccineComponentSD> lVCsContainingSpecifiedDiseases = new HashSet<VaccineComponentSD>(); // Ensure no duplicate VCs in returned Collection
 		
@@ -191,8 +210,8 @@ public class VaccineSD extends AbstractVaccine {
 		}
 		
 		for (VaccineComponentSD vc : this.vaccineComponents) {
-			Collection<SupportedDiseaseConcept> sdcs = vc.getAllDiseasesTargetedForImmunity();
-			for (SupportedDiseaseConcept sdc : sdcs) {
+			Collection<String> sdcs = vc.getAllDiseasesTargetedForImmunity();
+			for (String sdc : sdcs) {
 				if (pTargetedDiseases.contains(sdc)) {
 					lVCsContainingSpecifiedDiseases.add(vc);
 				}

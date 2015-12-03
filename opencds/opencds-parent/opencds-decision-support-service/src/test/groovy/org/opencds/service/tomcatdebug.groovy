@@ -7,14 +7,14 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 public class tomcatdebug extends Specification {
-	private static final String SAMPLE = "C:/Users/u0734599/problemVMR.xml"
+	private static final String SAMPLE = "/usr/local/projects/ice3dev-resources/testing/ongoing-testing.xml"
 	@Unroll
 	def "test tomcat debug"() {
 		when:
 		def input = new File(SAMPLE).text
 		def params = [
-			kmEvaluationRequest:[scopingEntityId: 'edu.utah', businessId: 'HEDIS_AAP', version: '2014.0.0'],
-			specifiedTime: '2014-01-01'
+			kmEvaluationRequest:[scopingEntityId: 'org.nyc.cir', businessId: 'ICE', version: '0.9.0'],
+			specifiedTime: '2015-10-01'
 		]
 		def responsePayload = OpencdsClient.sendEvaluateAtSpecifiedTimeMessage(params, input)
         print responsePayload

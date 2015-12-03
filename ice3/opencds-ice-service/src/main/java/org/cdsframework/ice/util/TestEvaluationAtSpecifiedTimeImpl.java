@@ -72,11 +72,12 @@ public class TestEvaluationAtSpecifiedTimeImpl {
 		 */
 
 		String filePath = "/usr/local/projects/ice3dev-resources/testing/ongoing-testing.xml";
-		// File lF = new File(filePath);
-		// String lRequestPayload = getFileContentsAsString(lF);
+		File lF = new File(filePath);
+		String lRequestPayload = getFileContentsAsString(lF);
 		
-		// String responsePayload = IceClient.sendEvaluateAtSpecifiedTimeMessage(lRequestPayload);
-		// System.out.print(responsePayload);
+		String responsePayload="";
+		responsePayload = IceClient.sendEvaluateAtSpecifiedTimeMessage(lRequestPayload);
+		System.out.print(responsePayload);
 	}
 
 }
