@@ -54,6 +54,10 @@ public class VaccineSD extends AbstractVaccine {
 		super(pVaccine);
 	}
 	
+	public VaccineSD(ICEConcept pVaccineConcept) {
+		super(pVaccineConcept);
+	}
+	
 	/**
 	 * Instantiate a vaccine object. If there is only one vaccine component, the vaccine component code must be the same as that specified by the ICEConcept if using this constructor.
 	 * The Unspecified Formulation on constructed vaccine object is set to the same value as the monovalent vaccine, which is true by default if not otherwise specified; 

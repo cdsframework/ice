@@ -151,7 +151,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		String _METHODNAME = "getOneResponse(): ";
 		
 		long t0 = 0L;
-		if (logger.isDebugEnabled()) {
+		if (logger.isInfoEnabled()) {
 			t0 = System.nanoTime();
 		}
 		

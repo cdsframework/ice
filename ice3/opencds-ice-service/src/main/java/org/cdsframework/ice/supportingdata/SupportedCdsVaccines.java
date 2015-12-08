@@ -151,7 +151,7 @@ public class SupportedCdsVaccines {
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
-		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with a CdsListItem?
+		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with this CdsListItem?
 		ICEConcept ic = new ICEConcept(lPrimaryOpenCdsConcept.getCode(), true, lPrimaryOpenCdsConcept.getDisplayName());
 		Collection<ICEConcept> lOpenCDSConcepts = this.supportedCdsLists.getAssociatedSupportedCdsConcepts().getListOfOpenCDSICEConceptsForSpecifiedCdsListItem(llccli);
 		boolean lPrimaryOpenCDSConceptForVaccineIdentified = false;
@@ -169,7 +169,7 @@ public class SupportedCdsVaccines {
 
 		////////////// Determine Primary OpenCDS Concept END //////////////
 				
-		// Vaccine properties to track
+		////////////// Vaccine properties to track START //////////////
 		boolean lThisVaccineNotFullySpecified = false;
 		boolean lVaccineAndOnlyVaccineComponentNotEqual = false;
 		List<CD> lVaccineComponentsNotSpecified = new ArrayList<CD>();
@@ -182,7 +182,16 @@ public class SupportedCdsVaccines {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
-		// Get all the related diseases that the vaccine targets (as specified in the configuration data).
+		// Live virus vaccine?
+		boolean lLiveVirusVaccine = pIceVaccineSpecificationFile.isLiveVirusVaccine();
+
+		// Combination vaccine?
+		boolean lCombinationVaccine = false;
+
+		////////
+		// START RELATED DISEASES: Get all the related diseases that the vaccine targets (as specified in the configuration data).
+		// Related diseases is only used for monovalent vaccines; for combination vaccines, the related diseases are determined by the vaccine components
+		///////
 		List<org.opencds.vmr.v1_0.schema.CD> lRelatedDiseases = pIceVaccineSpecificationFile.getDiseaseImmunities();
 		List<String> lRelatedDiseasesCdsListItems = new ArrayList<String>();
 		if (lRelatedDiseases == null || lRelatedDiseases.isEmpty()) {
@@ -199,12 +208,9 @@ public class SupportedCdsVaccines {
 			}
 			lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getSupportedCdsListItemName());
 		}
-
-		// Live virus vaccine?
-		boolean lLiveVirusVaccine = pIceVaccineSpecificationFile.isLiveVirusVaccine();
-
-		// Combination vaccine?
-		boolean lCombinationVaccine = false;
+		////////
+		// END RELATED DISEASES: Get all the related diseases that the vaccine targets (as specified in the configuration data).
+		///////
 		
 		// Vaccine Components
 		List<VaccineComponentSD> lVaccineComponentsToAddToVaccine = new ArrayList<VaccineComponentSD>();
@@ -215,6 +221,8 @@ public class SupportedCdsVaccines {
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
+		
+		////////////// Vaccine properties to track END //////////////
 		
 		/////// 
 		// START to Determine which vaccine components can be incorporated now in the initialization of this vaccine
@@ -293,12 +301,16 @@ public class SupportedCdsVaccines {
 							}
 						}
 						else {
-							// This should not happen (null set of vaccines), but remove it anyway
-							this.vaccineComponentCDToVaccinesNotFullySpecified.remove(lVaccineComponentCD);
+							String lErrStr = "Error: Unaccounted for inconsistency encountered during processing of vaccine supporting data. " + 
+								"(Unaccounted for vaccine component when no vaccines have been defined)";
+							logger.error(_METHODNAME + lErrStr);
+							throw new ICECoreError(lErrStr);
+							////////////// OLD:::: This should not happen (null set of vaccines), but remove it anyway
+							////////////// this.vaccineComponentCDToVaccinesNotFullySpecified.remove(lVaccineComponentCD);
 						}
 					}
 					else {
-						
+						// TODO: 
 					}
 
 				}
@@ -317,7 +329,10 @@ public class SupportedCdsVaccines {
 		// START Create the Vaccine and store it this object
 		///////
 		VaccineSD lVaccine = null;
-		if (lVaccineComponentsToAddToVaccine.size() == 1) {
+		if (lVaccineComponentsToAddToVaccine.size() == 0) {
+			lVaccine = new VaccineSD(ic);
+		}
+		else if (lVaccineComponentsToAddToVaccine.size() == 1) {
 			if (lVaccineAndOnlyVaccineComponentNotEqual) {
 				// Monovalent vaccine where the VaccineComponent code is not the same as the Vaccine; this is rare but allowed if explicitly stated as such in the Vaccine constructor
 				lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine, true);
@@ -328,11 +343,20 @@ public class SupportedCdsVaccines {
 			}
 		}
 		else {	
-			// The sized of the VaccineComponents defined is > 1 or == 0. Only those VaccineComponents previously encountered in the supporting data configuration so far are included 
+			// The sized of the VaccineComponents defined is > 1. Only those VaccineComponents previously encountered in the supporting data configuration so far are included 
 			lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine);
 		}
-		
+		// Set combination vaccine and unformulated formulations, if applicable
 		lVaccine.setCombinationVaccine(lCombinationVaccine);
+		if (lCombinationVaccine == false) {
+			// Determine if the formulation of this vaccine is unformulated or not
+			boolean lUnspecifiedFormulation = false;
+			Boolean pIceVaccineSpecificationFormulation = pIceVaccineSpecificationFile.isUnspecifiedFormulation();
+			if (pIceVaccineSpecificationFormulation != null && pIceVaccineSpecificationFormulation.booleanValue() == true) {
+				lUnspecifiedFormulation = true;
+			}
+			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
+		}
 		lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
 		this.cdsListItemNameToVaccine.put(llccli.getSupportedCdsListItemName(), lVaccine);
 		

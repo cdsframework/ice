@@ -24,7 +24,7 @@
  * correspondence to ice@hln.com.
  */ 
  
-package org.cdsframework.ice.v1_0_0
+package org.cdsframework.ice.v1_1_0
 
 import java.util.ArrayList
 import java.util.Collection
@@ -115,7 +115,7 @@ rule "ImmunizationReferenceData.Initialize Static Immunization Schedule" ruleflo
 		eval(baseKnowledgeRepositoryLocation == null || requestedKmId == null || requestedKmId.length() == 0)
 	then
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
-		Schedule s = new ScheduleStaticTmpImpl("Schedule_v1.0.0");
+		Schedule s = new ScheduleStaticTmpImpl("Schedule_v1.1.0");
 		insert(s);
 		ICELogicHelper.logDRLDebugMessage("Initialize Immunization Schedule", "Entered Initialize Immunization Schedule; patientAgeTimeOfInterest " + patientAgeTimeOfInterest);		
 end
@@ -132,7 +132,7 @@ rule "ImmunizationReferenceData.Initialize Immunization Schedule and Supporting 
 	then
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
 		ArrayList cdsVersions = new ArrayList();
-		cdsVersions.add("org.cdsframework^ICE^1.0.0");
+		cdsVersions.add("org.cdsframework^ICE^1.1.0");
 		cdsVersions.add(requestedKmId);
 		Schedule s = new ScheduleImpl("requestedKmId", cdsVersions, baseKnowledgeRepositoryLocation);
 		insert(s);
