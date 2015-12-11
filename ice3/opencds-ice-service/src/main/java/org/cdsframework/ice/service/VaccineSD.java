@@ -52,10 +52,13 @@ public class VaccineSD extends AbstractVaccine {
 	
 	private VaccineSD(VaccineSD pVaccine) {
 		super(pVaccine);
+		this.vaccineComponents = new ArrayList<VaccineComponentSD>();
+ 
 	}
 	
 	public VaccineSD(ICEConcept pVaccineConcept) {
 		super(pVaccineConcept);
+		this.vaccineComponents = new ArrayList<VaccineComponentSD>();
 	}
 	
 	/**
@@ -80,7 +83,8 @@ public class VaccineSD extends AbstractVaccine {
 	 * @param pVaccineConcept ICEConcept representing the vaccine
 	 * @param pVaccineComponents At least one vaccine component is required; composite vaccines will contain more than one VaccineComponent;
 	 *     monovalent vaccines must contain the antigen for itself (and therefore the name concept code). This is necessary to specify the valid
-	 *     ages for the antigens
+	 *     ages for the antigens. If more than one vaccine component is specified, than this is set to a combinationVaccine: otherwise, it is not. It is recommended that the
+	 *     caller set the combinationVaccine property manually if this behavior is not desired.
 	 * @param permitUnequalVaccineComponentCodeValueInMonovalentVaccine If true and monovalent vaccine, permit the vaccine component code to be a different value from the
 	 * 		encompassing vaccine's code values. This is a rare circumstance and by default is set to false by other constructors.
 	 * @throws IllegalArgumentException If parameters are not correctly populated (or either are null) with valid values; monovalent vaccines must have a vaccine component
@@ -101,6 +105,7 @@ public class VaccineSD extends AbstractVaccine {
 			throw new IllegalArgumentException(errStr);
 		}
 
+		// Usually the monovalent vaccine must have a component vaccine with the same code as the encompassing vaccine object. Check this condition
 		int lVaccineComponentsSize = pVaccineComponents.size();
 		if (! permitUnequalVaccineComponentCodeValueInMonovalentVaccine && lVaccineComponentsSize == 1) {
 			VaccineComponentSD vc = pVaccineComponents.iterator().next();
@@ -110,11 +115,12 @@ public class VaccineSD extends AbstractVaccine {
 				throw new IllegalArgumentException(errStr);
 			}
 		}
-		this.combinationVaccine = false;
-		this.vaccineComponents = pVaccineComponents;
 
+		this.vaccineComponents = pVaccineComponents;
+		this.combinationVaccine = false;
 		boolean lUnspecifiedFormulation = true;
 		if (lVaccineComponentsSize > 1) {
+			this.combinationVaccine = true;
 			for (VaccineComponentSD lVC : pVaccineComponents) {
 				if (lVC.isUnspecifiedFormulation() == false) {
 					lUnspecifiedFormulation = false;
@@ -139,17 +145,31 @@ public class VaccineSD extends AbstractVaccine {
 	 * @param pVaccineComponent
 	 */
 	public void addMemberVaccineComponent(VaccineComponentSD pVaccineComponent) {
+
+		String _METHODNAME = "addMemberVaccineComponent(): ";
 		
 		if (pVaccineComponent == null) {
 			return;
 		}
 		
 		// Set the unspecified formulation boolean
-		if (pVaccineComponent.isUnspecifiedFormulation() == false) {
+		int lVaccineComponentsSize = getVaccineComponents().size();
+		if (lVaccineComponentsSize > 1 && pVaccineComponent.isUnspecifiedFormulation() == false) {
 			this.setUnspecifiedFormulation(false);
 		}
-		
-		this.vaccineComponents.add(pVaccineComponent);
+		else if (lVaccineComponentsSize == 1) {
+			this.setUnspecifiedFormulation(pVaccineComponent.isUnspecifiedFormulation());
+		}
+		else {
+			this.setUnspecifiedFormulation(true);
+		}
+
+		if (!this.vaccineComponents.contains(pVaccineComponent)) {
+			this.vaccineComponents.add(pVaccineComponent);
+		}
+		else {
+			logger.warn(_METHODNAME + "Attempt to add duplicate vaccine component ignored. Vaccine Component : " + pVaccineComponent.toString() + "; Vaccine: " + this.toString());
+		}
 	}
 	
 	
@@ -161,11 +181,9 @@ public class VaccineSD extends AbstractVaccine {
 		
 		VaccineSD lVaccine = new VaccineSD(pV);
 		lVaccine.combinationVaccine = pV.combinationVaccine;
-		List<VaccineComponentSD> lVCList = new ArrayList<VaccineComponentSD>();
 		for (VaccineComponentSD pVC : pV.vaccineComponents) {
-			lVCList.add(VaccineComponentSD.constructDeepCopyOfVaccineComponentObject(pVC));
+			lVaccine.getVaccineComponents().add(VaccineComponentSD.constructDeepCopyOfVaccineComponentObject(pVC));
 		}
-		lVaccine.vaccineComponents = lVCList;
 		
 		return lVaccine;
 	}

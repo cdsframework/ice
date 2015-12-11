@@ -59,13 +59,11 @@ public class SupportedCdsVaccines {
 	
 	// Keep track of which vaccine items are fully specified; in order for a vaccine to be fully specified, all of its component vaccines must be fully specified as well. We
 	// keep track of which Vaccines each VaccineComponent is associated so that they can be associated with the combination vaccine when/if that information comes available.
-	// vaccineItemFullySpecified set. 
 	private Map<String, VaccineSD> cdsListItemNameToVaccine;						// cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine 
 	private Map<CD, VaccineComponentSD> cDToVaccineComponentsMap;					// VaccineComponents previously defined, keyed by CD
 	private Map<CD, Set<VaccineSD>> vaccineComponentCDToVaccinesNotFullySpecified;	// VaccineComponents which have been encountered in a Vaccine object but not yet defined
-	// private Set<String> vaccineConceptsNotFullySpecified;							// Set of vaccines by VaccineItemName not fully specified	
 
-	private Map<String, LocallyCodedVaccineItem> vaccineConcepts;					// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineItem
+	// private Map<String, LocallyCodedVaccineItem> vaccineConcepts;					// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineItem
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsVaccines.class);	
 
@@ -91,8 +89,7 @@ public class SupportedCdsVaccines {
 		this.cdsListItemNameToVaccine = new HashMap<String, VaccineSD>();
 		this.cDToVaccineComponentsMap = new HashMap<CD, VaccineComponentSD>();
 		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<VaccineSD>>();
-		/////// this.vaccineConceptsNotFullySpecified = new HashSet<String>();
-		this.vaccineConcepts = new HashMap<String, LocallyCodedVaccineItem>();
+		// this.vaccineConcepts = new HashMap<String, LocallyCodedVaccineItem>();
 	}
 	
 	
@@ -170,7 +167,6 @@ public class SupportedCdsVaccines {
 		////////////// Determine Primary OpenCDS Concept END //////////////
 				
 		////////////// Vaccine properties to track START //////////////
-		boolean lThisVaccineNotFullySpecified = false;
 		boolean lVaccineAndOnlyVaccineComponentNotEqual = false;
 		List<CD> lVaccineComponentsNotSpecified = new ArrayList<CD>();
 		
@@ -217,7 +213,8 @@ public class SupportedCdsVaccines {
 		List<org.opencds.vmr.v1_0.schema.CD> lVaccineComponentsCD = pIceVaccineSpecificationFile.getVaccineComponents();
 		// Either the 
 		if (lVaccineComponentsCD == null || lVaccineComponentsCD.isEmpty()) {
-			String lErrStr = "vaccine components not specified";
+			String lErrStr = "vaccine components not specified; at least one vaccine component must be specified for a vaccine. Monovalent vaccines contain a vaccine " + 
+				"component code that is equal to the encompassing vaccine's code";
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
@@ -259,8 +256,12 @@ public class SupportedCdsVaccines {
 				VaccineComponentSD lVaccineComponent = new VaccineComponentSD(ic, lRelatedDiseasesCdsListItems);
 				addPropertiesFromSDToVaccineComponent(lVaccineComponent, pIceVaccineSpecificationFile); 
 				lVaccineComponentsToAddToVaccine.add(lVaccineComponent);
-				// Make note that it has been processed by taking note of the mapping
+				
+				// Make note that this monovalent vaccine and/or vaccine component has been processed by taking note of the mapping
 				this.cDToVaccineComponentsMap.put(lVaccineComponentCD, lVaccineComponent);
+				
+				// If this VaccineComponent was previously encountered by a Vaccine, add this VaccineComponent to those Vaccines as well.
+				populatePreviouslyDefinedVaccinesAssociatedWithVaccineComponentWithSpecifiedVaccineComponentInfo(lVaccineComponentCD, lVaccineComponent);
 			}
 		}
 		// More than one vaccine component was specified; include the vaccine components that have already been specified previously. If not all of them have been specified
@@ -283,41 +284,11 @@ public class SupportedCdsVaccines {
 					//
 					// This VaccineComponent has been defined previously. Make note that this previously encountered VaccineComponent is a part of this vaccine
 					//
-					VaccineComponentSD lVaccineComponent = this.cDToVaccineComponentsMap.get(lVaccineComponentCD);
-					lVaccineComponentsToAddToVaccine.add(lVaccineComponent);
-
-					// If this VaccineComponent was previously encountered by a Vaccine, add this VaccineComponent to those Vaccines as well.
-					if (this.vaccineComponentCDToVaccinesNotFullySpecified.containsKey(lVaccineComponentCD)) {
-						Set<VaccineSD> lPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(lVaccineComponentCD);
-						if (lPreviouslyEncounteredVaccinesWVaccineComponent != null) {
-							for (VaccineSD lPreviousVaccineEncountered : lPreviouslyEncounteredVaccinesWVaccineComponent) {
-								lPreviousVaccineEncountered.addMemberVaccineComponent(lVaccineComponent);
-								lPreviouslyEncounteredVaccinesWVaccineComponent.remove(lPreviousVaccineEncountered);
-							}
-							if (lPreviouslyEncounteredVaccinesWVaccineComponent.size() == 0) {
-								// If all vaccines have been handled, remove the fact that there were previously encountered vaccines that need this (now) fully specified 
-								// vaccine component to be added to it
-								this.vaccineComponentCDToVaccinesNotFullySpecified.remove(lVaccineComponentCD);
-							}
-						}
-						else {
-							String lErrStr = "Error: Unaccounted for inconsistency encountered during processing of vaccine supporting data. " + 
-								"(Unaccounted for vaccine component when no vaccines have been defined)";
-							logger.error(_METHODNAME + lErrStr);
-							throw new ICECoreError(lErrStr);
-							////////////// OLD:::: This should not happen (null set of vaccines), but remove it anyway
-							////////////// this.vaccineComponentCDToVaccinesNotFullySpecified.remove(lVaccineComponentCD);
-						}
-					}
-					else {
-						// TODO: 
-					}
-
+					lVaccineComponentsToAddToVaccine.add(this.cDToVaccineComponentsMap.get(lVaccineComponentCD));
 				}
 				else {
 					// Make note that this vaccine component has not been defined previously; therefore this vaccine has vaccine components not specified
 					lVaccineComponentsNotSpecified.add(lVaccineComponentCD);
-					lThisVaccineNotFullySpecified = true;
 				}
 			}
 		}
@@ -332,20 +303,10 @@ public class SupportedCdsVaccines {
 		if (lVaccineComponentsToAddToVaccine.size() == 0) {
 			lVaccine = new VaccineSD(ic);
 		}
-		else if (lVaccineComponentsToAddToVaccine.size() == 1) {
-			if (lVaccineAndOnlyVaccineComponentNotEqual) {
-				// Monovalent vaccine where the VaccineComponent code is not the same as the Vaccine; this is rare but allowed if explicitly stated as such in the Vaccine constructor
-				lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine, true);
-			}
-			else {
-				// Create the vaccine with the VaccineComponent code the same as the Vaccine code
-				lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine);
-			}
+		else {
+			lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine, true);
 		}
-		else {	
-			// The sized of the VaccineComponents defined is > 1. Only those VaccineComponents previously encountered in the supporting data configuration so far are included 
-			lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine);
-		}
+		
 		// Set combination vaccine and unformulated formulations, if applicable
 		lVaccine.setCombinationVaccine(lCombinationVaccine);
 		if (lCombinationVaccine == false) {
@@ -443,18 +404,62 @@ public class SupportedCdsVaccines {
 	}
 
 	
+	private void populatePreviouslyDefinedVaccinesAssociatedWithVaccineComponentWithSpecifiedVaccineComponentInfo(CD pVaccineComponentCD, VaccineComponentSD pVaccineComponent) {
+		
+		if (pVaccineComponent == null || pVaccineComponentCD == null) {
+			return;
+		}
+		
+		String _METHODNAME = "populatePreviouslyDefinedVaccinesAssociatedWithVaccineComponentWithSpecifiedVaccineComponentInfo(): ";
+		
+		// If this VaccineComponent was previously encountered by a Vaccine, add this VaccineComponent to those Vaccines as well.
+		if (this.vaccineComponentCDToVaccinesNotFullySpecified.containsKey(pVaccineComponentCD)) {
+			Set<VaccineSD> lPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(pVaccineComponentCD);
+			if (lPreviouslyEncounteredVaccinesWVaccineComponent != null) {
+				for (VaccineSD lPreviousVaccineEncountered : lPreviouslyEncounteredVaccinesWVaccineComponent) {
+					lPreviousVaccineEncountered.addMemberVaccineComponent(pVaccineComponent);
+					lPreviouslyEncounteredVaccinesWVaccineComponent.remove(lPreviousVaccineEncountered);
+				}
+				if (lPreviouslyEncounteredVaccinesWVaccineComponent.size() == 0) {
+					// If all vaccines with this pending vaccine component have been handled, remove the fact that there were previously encountered  
+					// vaccines that need this (now) fully specified vaccine component to be added to it
+					this.vaccineComponentCDToVaccinesNotFullySpecified.remove(pVaccineComponentCD);
+				}
+			}
+			else {
+				String lErrStr = "Error: Unaccounted for inconsistency encountered during processing of vaccine supporting data. " + 
+					"(Unaccounted for vaccine component when no vaccines have been defined)";
+				logger.error(_METHODNAME + lErrStr);
+				throw new ICECoreError(lErrStr);
+			}
+		}
+	}
+
+	/**
+	 * Adds the minimum age, maximum age, unspecified formulation flag, and live virus vaccine flag from the ICE vaccine supporting data file to the vaccine component
+	 * @param pVaccineComponent
+	 * @param pIVSF
+	 */
 	private void addPropertiesFromSDToVaccineComponent(VaccineComponentSD pVaccineComponent, IceVaccineSpecificationFile pIVSF) {
 		
 		if (pVaccineComponent == null || pIVSF == null) {
 			return;
 		}
+		
+		// Valid Minimum Age
 		String lAge = pIVSF.getValidMinimumAgeForUse();
 		if (lAge != null) {
 			pVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(lAge));
 		}
+		// Valid Maximum Age
 		lAge = pIVSF.getValidMaximumAgeForUse();
 		if (lAge != null) {
 			pVaccineComponent.setValidMaximumAgeForUse(new TimePeriod(lAge));
+		}
+		// Live virus
+		Boolean lBL = pIVSF.isLiveVirusVaccine();
+		if (lBL != null) {
+			pVaccineComponent.setLiveVirusVaccine(lBL.booleanValue());
 		}
 	}
 	
