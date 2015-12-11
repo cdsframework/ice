@@ -157,7 +157,7 @@ public class VaccineSD extends AbstractVaccine {
 		if (lVaccineComponentsSize > 1 && pVaccineComponent.isUnspecifiedFormulation() == false) {
 			this.setUnspecifiedFormulation(false);
 		}
-		else if (lVaccineComponentsSize == 1) {
+		else if (lVaccineComponentsSize == 1 || lVaccineComponentsSize == 0) {
 			this.setUnspecifiedFormulation(pVaccineComponent.isUnspecifiedFormulation());
 		}
 		else {

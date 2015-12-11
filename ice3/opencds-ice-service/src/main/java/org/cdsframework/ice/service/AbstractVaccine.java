@@ -90,7 +90,7 @@ public abstract class AbstractVaccine {
 		this.tradeName = null;
 		this.manufacturerCode = null;
 		this.liveVirusVaccine = false;
-		this.unspecifiedFormulation = true;
+		this.unspecifiedFormulation = false;
 		this.validMinimumAgeOfUse = null;
 		this.validMaximumAgeOfUse = null;
 		this.licensedForUseMinimumAge = null;
@@ -156,6 +156,10 @@ public abstract class AbstractVaccine {
 	}
 
 
+	/**
+	 * Sets the unspecified formulation flag to whatever is specified by the parameter, overriding any previous (including calculated) unspecified formulation 
+	 * @param unspecifiedFormulation
+	 */
 	public void setUnspecifiedFormulation(boolean unspecifiedFormulation) {
 		this.unspecifiedFormulation = unspecifiedFormulation;
 	}

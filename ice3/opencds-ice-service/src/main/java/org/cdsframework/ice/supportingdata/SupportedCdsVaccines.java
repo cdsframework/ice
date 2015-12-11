@@ -128,7 +128,7 @@ public class SupportedCdsVaccines {
 			String lErrStr = "Attempt to add vaccine that is not in the list of SupportedCdsLists: " + 
 					(pIceVaccineSpecificationFile.getVaccine() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineSpecificationFile.getVaccine()));
 			logger.warn(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);			
+			throw new InconsistentConfigurationException(lErrStr);			
 		}
 		
 		// If adding a code that is not one of the supported cdsVersions, then return
@@ -155,6 +155,9 @@ public class SupportedCdsVaccines {
 		for (ICEConcept lIC : lOpenCDSConcepts) {
 			if (ic.equals(lIC)) {
 				lPrimaryOpenCDSConceptForVaccineIdentified = true;
+				if (lPrimaryOpenCdsConcept.getDisplayName() == null && lIC.getDisplayName() != null) {
+					lPrimaryOpenCdsConcept.setDisplayName(lIC.getDisplayName());
+				}
 				break;
 			}
 		}
