@@ -89,7 +89,6 @@ public class SupportedCdsVaccines {
 		this.cdsListItemNameToVaccine = new HashMap<String, VaccineSD>();
 		this.cDToVaccineComponentsMap = new HashMap<CD, VaccineComponentSD>();
 		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<VaccineSD>>();
-		// this.vaccineConcepts = new HashMap<String, LocallyCodedVaccineItem>();
 	}
 	
 	
@@ -341,7 +340,7 @@ public class SupportedCdsVaccines {
 			this.vaccineComponentCDToVaccinesNotFullySpecified.put(lVaccineComponentCD, lVaccinesNotFullySpecifiedSet);
 		}
 		///////
-	
+
 		return isVaccineSupportingDataConsistent();
 				
 		/**
@@ -417,13 +416,17 @@ public class SupportedCdsVaccines {
 		
 		// If this VaccineComponent was previously encountered by a Vaccine, add this VaccineComponent to those Vaccines as well.
 		if (this.vaccineComponentCDToVaccinesNotFullySpecified.containsKey(pVaccineComponentCD)) {
-			Set<VaccineSD> lPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(pVaccineComponentCD);
-			if (lPreviouslyEncounteredVaccinesWVaccineComponent != null) {
-				for (VaccineSD lPreviousVaccineEncountered : lPreviouslyEncounteredVaccinesWVaccineComponent) {
+			Set<VaccineSD> lAllPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(pVaccineComponentCD);
+			if (lAllPreviouslyEncounteredVaccinesWVaccineComponent != null) {
+				List<VaccineSD> lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent = new ArrayList<VaccineSD>();
+				for (VaccineSD lPreviousVaccineEncountered : lAllPreviouslyEncounteredVaccinesWVaccineComponent) {
 					lPreviousVaccineEncountered.addMemberVaccineComponent(pVaccineComponent);
-					lPreviouslyEncounteredVaccinesWVaccineComponent.remove(lPreviousVaccineEncountered);
+					lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent.add(lPreviousVaccineEncountered);
 				}
-				if (lPreviouslyEncounteredVaccinesWVaccineComponent.size() == 0) {
+				for (VaccineSD lPreviouslyVaccineEncountered : lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent) {
+					lAllPreviouslyEncounteredVaccinesWVaccineComponent.remove(lPreviouslyVaccineEncountered);
+				}
+				if (lAllPreviouslyEncounteredVaccinesWVaccineComponent.size() == 0) {
 					// If all vaccines with this pending vaccine component have been handled, remove the fact that there were previously encountered  
 					// vaccines that need this (now) fully specified vaccine component to be added to it
 					this.vaccineComponentCDToVaccinesNotFullySpecified.remove(pVaccineComponentCD);
@@ -469,12 +472,27 @@ public class SupportedCdsVaccines {
 	
 	public boolean isVaccineSupportingDataConsistent() {
 		
-		if (this.cDToVaccineComponentsMap.size() > 0) {
+		if (this.vaccineComponentCDToVaccinesNotFullySpecified.size() > 0) {
 			return false;
 		}
 		else {
 			return true;
 		}
+	}
+	
+	
+	@Override
+	public String toString() {
+		
+		Set<String> cdsListItemNames = this.cdsListItemNameToVaccine.keySet();
+		int i = 1 ;
+		String ltoStringStr = null;
+		for (String s : cdsListItemNames) {
+			ltoStringStr += "{" + i + "} " + s + " = [ " + this.cdsListItemNameToVaccine.get(s).toString() + " ]\n";
+			i++;
+		}
+		
+		return ltoStringStr;
 	}
 	
 }

@@ -46,9 +46,7 @@ public class SupportedCdsVaccineGroups {
 	
 	// Supported Cds Versions
 	private List<String> cdsVersions;
-	// Supporting Data CdsLists from which this vaccine group supporting data is built
-	private SupportedCdsLists supportedCdsLists;
-	
+	private SupportedCdsLists supportedCdsLists;	// Supporting Data CdsLists from which this vaccine group supporting data is built
 	private Map<String, LocallyCodedVaccineGroupItem> vaccineGroupConcepts;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineGroupItem
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsVaccineGroups.class);	

@@ -259,7 +259,7 @@ public class ICESupportingDataConfiguration {
 				throw new RuntimeException(lErrStr);				
 			}
 			catch (JAXBException jaxbe) {
-				String lErrStr = "encountered an exception processing supporting data file";
+				String lErrStr = "encountered an exception processing supporting data file; likely an invalid formatted file";
 				logger.error(_METHODNAME + lErrStr, jaxbe);
 				throw new RuntimeException(lErrStr);
 			}
@@ -320,7 +320,7 @@ public class ICESupportingDataConfiguration {
 				throw new RuntimeException(lErrStr);				
 			}			
 			catch (JAXBException jaxbe) {
-				String lErrStr = "encountered an exception processing supporting data file";
+				String lErrStr = "encountered an exception processing supporting data file; likely an invalid formmated file";
 				logger.error(_METHODNAME + lErrStr, jaxbe);
 				throw new RuntimeException(lErrStr);
 			}
@@ -381,7 +381,7 @@ public class ICESupportingDataConfiguration {
 				throw new RuntimeException(lErrStr);				
 			}			
 			catch (JAXBException jaxbe) {
-				String lErrStr = "encountered an exception processing supporting data file";
+				String lErrStr = "encountered an exception processing supporting data file; likely an invalid formatted file";
 				logger.error(_METHODNAME + lErrStr, jaxbe);
 				throw new RuntimeException(lErrStr);
 			}

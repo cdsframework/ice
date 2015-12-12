@@ -4,18 +4,18 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.service.VaccineSD;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 public class LocallyCodedVaccineItem {
 	
 	private String vaccineCdsListItemName;
 	private Collection<String> cdsVersions;
-	private Vaccine vaccine;
+	private VaccineSD vaccine;
 	
 	private static Log logger = LogFactory.getLog(LocallyCodedVaccineItem.class);
 	
-	protected LocallyCodedVaccineItem(String pVaccineCdsListItemName, Collection<String> pCdsVersions, Vaccine pVaccine) 
+	protected LocallyCodedVaccineItem(String pVaccineCdsListItemName, Collection<String> pCdsVersions, VaccineSD pVaccine) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "LocallyCodedVaccineItem(): ";
@@ -48,7 +48,7 @@ public class LocallyCodedVaccineItem {
 		return cdsVersions;
 	}
 
-	public Vaccine getVaccine() {
+	public VaccineSD getVaccine() {
 		return vaccine;
 	}
 
