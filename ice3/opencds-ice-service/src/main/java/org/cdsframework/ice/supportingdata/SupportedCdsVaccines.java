@@ -61,7 +61,7 @@ public class SupportedCdsVaccines {
 	// keep track of which Vaccines each VaccineComponent is associated so that they can be associated with the combination vaccine when/if that information comes available.
 	private Map<String, VaccineSD> cdsListItemNameToVaccine;						// cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine 
 	private Map<CD, VaccineComponentSD> cDToVaccineComponentsMap;					// VaccineComponents previously defined, keyed by CD
-	private Map<CD, Set<VaccineSD>> vaccineComponentCDToVaccinesNotFullySpecified;	// VaccineComponents which have been encountered in a Vaccine object but not yet defined
+	private Map<CD, Set<LocallyCodedVaccineItem>> vaccineComponentCDToVaccinesNotFullySpecified;	// VaccineComponents which have been encountered in a Vaccine object but not yet defined
 
 	// private Map<String, LocallyCodedVaccineItem> vaccineConcepts;					// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineItem
 	
@@ -88,7 +88,7 @@ public class SupportedCdsVaccines {
 
 		this.cdsListItemNameToVaccine = new HashMap<String, VaccineSD>();
 		this.cDToVaccineComponentsMap = new HashMap<CD, VaccineComponentSD>();
-		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<VaccineSD>>();
+		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<LocallyCodedVaccineItem>>();
 	}
 	
 	
@@ -131,8 +131,8 @@ public class SupportedCdsVaccines {
 		}
 		
 		// If adding a code that is not one of the supported cdsVersions, then return
-		Collection<String> lCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineSpecificationFile.getCdsVersions(), this.cdsVersions);
-		if (lCdsVersions == null) {
+		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineSpecificationFile.getCdsVersions(), this.cdsVersions);
+		if (lIntersectionOfSupportedCdsVersions == null) {
 			return isVaccineSupportingDataConsistent();
 		}
 		
@@ -309,7 +309,7 @@ public class SupportedCdsVaccines {
 			lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine, true);
 		}
 		
-		// Set combination vaccine and unformulated formulations, if applicable
+		// Set combination vaccine, live virus, and unformulated formulations, if applicable
 		lVaccine.setCombinationVaccine(lCombinationVaccine);
 		if (lCombinationVaccine == false) {
 			// Determine if the formulation of this vaccine is unformulated or not
@@ -332,11 +332,13 @@ public class SupportedCdsVaccines {
 		// vaccine component
 		//
 		for (CD lVaccineComponentCD : lVaccineComponentsNotSpecified) {
-			Set<VaccineSD> lVaccinesNotFullySpecifiedSet = this.vaccineComponentCDToVaccinesNotFullySpecified.get(lVaccineComponentCD);
+			Set<LocallyCodedVaccineItem> lVaccinesNotFullySpecifiedSet = this.vaccineComponentCDToVaccinesNotFullySpecified.get(lVaccineComponentCD);
 			if (lVaccinesNotFullySpecifiedSet == null) {
-				lVaccinesNotFullySpecifiedSet = new HashSet<VaccineSD>();
+				lVaccinesNotFullySpecifiedSet = new HashSet<LocallyCodedVaccineItem>();
+				// LocallyCodedVaccineItem(String pVaccineCdsListItemName, Collection<String> pCdsVersions, VaccineSD pVaccine) 
 			}
-			lVaccinesNotFullySpecifiedSet.add(lVaccine);
+			LocallyCodedVaccineItem lcvi = new LocallyCodedVaccineItem(llccli.getSupportedCdsListItemName(), lIntersectionOfSupportedCdsVersions, lVaccine);
+			lVaccinesNotFullySpecifiedSet.add(lcvi);
 			this.vaccineComponentCDToVaccinesNotFullySpecified.put(lVaccineComponentCD, lVaccinesNotFullySpecifiedSet);
 		}
 		///////
@@ -416,15 +418,16 @@ public class SupportedCdsVaccines {
 		
 		// If this VaccineComponent was previously encountered by a Vaccine, add this VaccineComponent to those Vaccines as well.
 		if (this.vaccineComponentCDToVaccinesNotFullySpecified.containsKey(pVaccineComponentCD)) {
-			Set<VaccineSD> lAllPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(pVaccineComponentCD);
+			Set<LocallyCodedVaccineItem> lAllPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(pVaccineComponentCD);
 			if (lAllPreviouslyEncounteredVaccinesWVaccineComponent != null) {
-				List<VaccineSD> lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent = new ArrayList<VaccineSD>();
-				for (VaccineSD lPreviousVaccineEncountered : lAllPreviouslyEncounteredVaccinesWVaccineComponent) {
-					lPreviousVaccineEncountered.addMemberVaccineComponent(pVaccineComponent);
-					lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent.add(lPreviousVaccineEncountered);
+				List<LocallyCodedVaccineItem> lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent = new ArrayList<LocallyCodedVaccineItem>();
+				for (LocallyCodedVaccineItem lPreviousLocallyCodedVaccineItemEncountered : lAllPreviouslyEncounteredVaccinesWVaccineComponent) {
+					VaccineSD lVaccine = lPreviousLocallyCodedVaccineItemEncountered.getVaccine();
+					lVaccine.addMemberVaccineComponent(pVaccineComponent);
+					lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent.add(lPreviousLocallyCodedVaccineItemEncountered);
 				}
-				for (VaccineSD lPreviouslyVaccineEncountered : lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent) {
-					lAllPreviouslyEncounteredVaccinesWVaccineComponent.remove(lPreviouslyVaccineEncountered);
+				for (LocallyCodedVaccineItem lPreviousVaccineEncountered : lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent) {
+					lAllPreviouslyEncounteredVaccinesWVaccineComponent.remove(lPreviousVaccineEncountered);
 				}
 				if (lAllPreviouslyEncounteredVaccinesWVaccineComponent.size() == 0) {
 					// If all vaccines with this pending vaccine component have been handled, remove the fact that there were previously encountered  
@@ -440,6 +443,7 @@ public class SupportedCdsVaccines {
 			}
 		}
 	}
+	
 
 	/**
 	 * Adds the minimum age, maximum age, unspecified formulation flag, and live virus vaccine flag from the ICE vaccine supporting data file to the vaccine component

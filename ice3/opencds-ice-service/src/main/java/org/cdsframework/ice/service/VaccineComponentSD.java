@@ -80,13 +80,6 @@ public class VaccineComponentSD extends AbstractVaccine {
 		super(pVaccine);
 		
 		// String _METHODNAME = "VaccineComponent(): ";
-		/*
-		if (pVaccine.isMemberOfMultipleVaccineGroups() == true) {
-			String errStr = "specified vaccine is a member of multiple vaccine groups; cannot be added as a Vaccine Component";
-			logger.warn(_METHODNAME + errStr);
-			throw new IllegalArgumentException(errStr);
-		}
-		*/
 		this.diseaseImmunityList = pVaccine.getAllDiseasesTargetedForImmunity();
 	}
 	

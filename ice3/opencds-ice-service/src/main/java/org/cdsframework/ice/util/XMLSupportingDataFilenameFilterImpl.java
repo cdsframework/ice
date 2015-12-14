@@ -53,7 +53,7 @@ public class XMLSupportingDataFilenameFilterImpl implements FilenameFilter {
 		
 		if (pDir == null || pDir.isDirectory() == false) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(_METHODNAME + "Specified directory File is null or not a directory");
+				logger.debug(_METHODNAME + "Specified directory is either null or not a directory: " + (pDir == null ? "null" : pDir.getAbsolutePath()));
 			}
 			return false;
 		}
@@ -71,10 +71,10 @@ public class XMLSupportingDataFilenameFilterImpl implements FilenameFilter {
 		boolean b = m.matches();
 		if (logger.isDebugEnabled()) {
 			if (b == true) {
-				logger.debug(_METHODNAME + "Filename matches pattern");
+				logger.debug(_METHODNAME + "Filename matches pattern; filename is: " + pFilename);
 			}
 			else {
-				logger.debug(_METHODNAME + "Filename does not match pattern");
+				logger.debug(_METHODNAME + "Filename does not match pattern; filename is: " + pFilename);
 			}
 		}
 		

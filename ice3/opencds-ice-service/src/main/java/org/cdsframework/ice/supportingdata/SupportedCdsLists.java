@@ -94,10 +94,10 @@ public class SupportedCdsLists {
 		}
 		
 		LocallyCodedCdsListItem slci = new LocallyCodedCdsListItem(pCdsListSpecificationFile, pCdsListItem);
-		String lSupportedListConceptItemName = slci.getSupportedCdsListItemName();
-		if (this.cdsListItemNameToCdsListItem.containsKey(lSupportedListConceptItemName)) {
-			String lErrStr = "Attempt to add duplicate SupportedListConceptItem found: cannot add a supported list concept that already been added; must first remove the prior SupportedListConcept of the same name " + 
-				lSupportedListConceptItemName;
+		String lSupportedListItemName = slci.getSupportedCdsListItemName();
+		if (this.cdsListItemNameToCdsListItem.containsKey(lSupportedListItemName)) {
+			String lErrStr = "Attempt to add duplicate SupportedListItem: cannot add a supported list concept that already been added; must first remove the prior SupportedCdsListItem of the same name " + 
+				lSupportedListItemName;
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
@@ -138,7 +138,7 @@ public class SupportedCdsLists {
 		///////
 		// Add the mapping from the CdsListItem Name to CdsListItem
 		///////
-		this.cdsListItemNameToCdsListItem.put(lSupportedListConceptItemName, slci);
+		this.cdsListItemNameToCdsListItem.put(lSupportedListItemName, slci);
 		
 		///////
 		// Keep track of the number of mappings of Cds List Items per locally coded cds lists
@@ -176,7 +176,7 @@ public class SupportedCdsLists {
 		///////
 		ICEConceptType lIceConceptType = ICEConceptType.getSupportedIceConceptType(lSLCCdsListCode);
 		if (lIceConceptType != null) {
-			ICEConcept lIC = new ICEConcept(lSupportedListConceptItemName, false);		// Not an OpenCDS concept
+			ICEConcept lIC = new ICEConcept(lSupportedListItemName, false);		// Not an OpenCDS concept
 			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(lIceConceptType, lIC, slci);
 		}
 		

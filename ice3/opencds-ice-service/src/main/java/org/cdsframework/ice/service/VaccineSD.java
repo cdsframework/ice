@@ -255,18 +255,27 @@ public class VaccineSD extends AbstractVaccine {
 	
 	@Override
 	public String toString() {
-		return "Vaccine [getVaccineConcept()=" + getVaccineConcept()
-				// + ", isMemberOfMultipleVaccineGroups()=" + isMemberOfMultipleVaccineGroups() 
-				+ ", isLiveVirusVaccine()="	+ isLiveVirusVaccine() + ", getValidMinimumAgeForUse()="
-				+ getValidMinimumAgeForUse() + ", getValidMaximumAgeForUse()="
-				+ getValidMaximumAgeForUse() + ", getTradeName()="
-				+ getTradeName() + ", getManufacturerCode()="
-				+ getManufacturerCode() + ", getLicensedMinimumAgeForUse()="
-				+ getLicensedMinimumAgeForUse()
-				+ ", getLicensedMaximumAgeForUse()=" + getLicensedMaximumAgeForUse()
-				+ ", isUnspecifiedFormulation()=" + isUnspecifiedFormulation() 
-				+ ", isCombinationVaccine()=" + isCombinationVaccine()
-				+ "]";
+		
+		String toStr = "Vaccine [getVaccineConcept()=" + getVaccineConcept()
+			+ ", isLiveVirusVaccine()="	+ isLiveVirusVaccine() + ", getValidMinimumAgeForUse()="
+			+ getValidMinimumAgeForUse() + ", getValidMaximumAgeForUse()="
+			+ getValidMaximumAgeForUse() + ", getTradeName()="
+			+ getTradeName() + ", getManufacturerCode()="
+			+ getManufacturerCode() + ", getLicensedMinimumAgeForUse()="
+			+ getLicensedMinimumAgeForUse()
+			+ ", getLicensedMaximumAgeForUse()=" + getLicensedMaximumAgeForUse()
+			+ ", isUnspecifiedFormulation()=" + isUnspecifiedFormulation() 
+			+ ", isCombinationVaccine()=" + isCombinationVaccine()
+			+ ", VaccineComponent [[ ";
+		
+		int i=1;
+		for (VaccineComponentSD lVaccineComponent: this.getVaccineComponents()) {
+			toStr += "\n(" + i + ") " + lVaccineComponent;
+			i++;
+		}
+		toStr += "\n]]\n]";
+		
+		return toStr;
 	}
 	
 
