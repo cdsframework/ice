@@ -121,6 +121,12 @@ public class SupportedCdsVaccineGroups {
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
 		String lVaccineGroupCdsListItemName = llccli.getSupportedCdsListItemName();
+		if (this.vaccineGroupConcepts.containsKey(lVaccineGroupCdsListItemName)) {
+			String lErrStr = "Attempt to add vaccine group that was already specified previously: " + 
+					(pIceVaccineGroupSpecificationFile.getVaccineGroup() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 		
 		// Primary OpenCds Concept
 		ICEConcept lPrimaryOpenCdsConcept = new ICEConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), true, pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());

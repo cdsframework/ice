@@ -65,7 +65,6 @@ public class LocallyCodedVaccineGroupItem {
 	private static Log logger = LogFactory.getLog(LocallyCodedVaccineGroupItem.class);	
 
 
-	// public LocallyCodedVaccineGroupItem(CD pVaccineGroupCD, CD pPrimaryOpenCdsMembership, List<String> pCdsVersions) 
 	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, ICEConcept pPrimaryOpenCdsMembership) 
 		throws ImproperUsageException {
 
@@ -107,7 +106,7 @@ public class LocallyCodedVaccineGroupItem {
 	}
 
 	
-	public String getVaccineGroupItem() {
+	public String getVaccineGroupCdsListItemName() {
 		
 		return this.vaccineGroupCdsListItemName;
 	}

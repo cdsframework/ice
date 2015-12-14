@@ -47,18 +47,18 @@ public interface Schedule {
 	
 	public SeriesRules getScheduleSeriesByName(SupportedVaccineGroupConcept svg, String seriesName);
 		
-	public Vaccine getVaccineBySupportedVaccineConceptTypeValue(SupportedVaccineConcept vaccineValue);
+	/////// public Vaccine getVaccineBySupportedVaccineConceptTypeValue(SupportedVaccineConcept vaccineValue);
 
-	public Vaccine getVaccineByOpenCDSConceptTypeValue(String openCdsConceptValue);
+	/////// public Vaccine getVaccineByOpenCDSConceptTypeValue(String openCdsConceptValue);
 
 	// public VaccineComponent getVaccineByOpenCDSConceptTypeValueAndDisease(String openCdsConceptValue, SupportedDiseaseConcept sdc);
 
 	public Collection<SupportedDiseaseConcept> getDiseasesTargetedByVaccineGroup(SupportedVaccineGroupConcept pSVGC);
 	
-	public boolean vaccineTargetsOneOrMoreOfSpecifiedDiseases(Vaccine vaccine, Collection<SupportedDiseaseConcept> diseases);
+	/////// public boolean vaccineTargetsOneOrMoreOfSpecifiedDiseases(Vaccine vaccine, Collection<SupportedDiseaseConcept> diseases);
 
 	public List<SeriesRules> getAllSeries();
 
-	public Set<SupportedVaccineGroupConcept> getSupportedVaccineGroups();
+	// ? public Set<SupportedVaccineGroupConcept> getSupportedVaccineGroups();
 		
 }

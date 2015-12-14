@@ -154,56 +154,40 @@ public class ICESupportingDataConfiguration {
 
 
 	/**
-	 * Given a parent directory in File and sub-directory represented as a string, returns true, if the directory is present (and accessible), and false is not.
-	 * @param pParentDirectory
-	 * @param pChildDirectory
-	 * @return
+	 * Get the ICE SupportedCdsLists data for this supporting data configuration 
 	 */
-	public static boolean isSupportingDirectoryAndSubDirectoryPresent(File pParentDirectory, String pChildDirectory) {
+	public SupportedCdsLists getSupportedCdsLists() {
 		
-		if (pParentDirectory == null) {
-			return false;
-		}
-		File lSD = null;
-		if (pChildDirectory == null || pChildDirectory.length() == 0) {
-			lSD = pParentDirectory;
-		}
-		else {
-			lSD = new File(pParentDirectory, pChildDirectory);
-		}
-		if (lSD.isDirectory() == false) {
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-	
-
-	/**
-	 * Given a directory represented as a File, returns true if the directory is present (and accessible), false if not
-	 * @param pDirectory
-	 * @return
-	 */
-	public static boolean isSupportingDirectoryPresent(File pDirectory) {
-		
-		return isSupportingDirectoryAndSubDirectoryPresent(pDirectory, null);
+		return this.supportedCdsLists;
 	}
 	
 	
 	/**
-	 * Get the ICE supporting data directory locations for this supporting data configuration
-	 */
-	
-	
-	/**
-	 * Get the ICE Vaccine Group supporting data for this supporting data configuration
+	 * Get the ICE SupportedVaccineGroups data for this supporting data configuration
 	 */
 	public SupportedCdsVaccineGroups getSupportedCdsVaccineGroups() {
 		
 		return this.supportedCdsVaccineGroups;
 	}
 
+	
+	/**
+	 * Get the ICE SupportedVaccineGroups data for this supporting data configuration
+	 */
+	public SupportedCdsVaccines getSupportedCdsVaccines() {
+		
+		return this.supportedCdsVaccines;
+	}
+	
+	
+	/**
+	 * Get the ICE SupportedVaccineGroups data for this supporting data configuration
+	 */
+	public SupportedCdsConcepts getSupportedCdsConcepts() {
+		
+		return getSupportedCdsLists().getAssociatedSupportedCdsConcepts();
+	}
+	
 	
 	/**
 	 * Initialize the Coded Concepts from CdsListSpecificationFile XML supporting data files. IF the data has already been initialized, an ImproperUsageException is thrown (in 

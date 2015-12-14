@@ -54,7 +54,8 @@ public class SupportedCdsConcepts {
 	 * @param pIC The concept to add
 	 * @param pLCCLI The LocallyCodedCdsListItem (a.k.a. locally coded CdsListItem) with which to associate the ICEConcept with.
 	 * @throws InconsistentConfigurationException if the supporting data supplied is inconsistent with prior supporting data that has already been provided. This will happen
-	 * 		if ICEConcept is already associated with a LocallyCodedCdsListItem for the specified IceConceptType
+	 * 		if ICEConcept is already associated with a LocallyCodedCdsListItem for the specified IceConceptType. (So, although at the OpenCDS level, concepts may map to multiple 
+	 * 		codes and code sets, at the supporting data level, only one code may be mapped to an ICEConcept [which may or may not also be an OpenCDS concept]).
 	 */
 	protected void addSupportedCdsConceptWithCdsListItem(ICEConceptType pICT, ICEConcept pIC, LocallyCodedCdsListItem pLCCLI) 
 		throws InconsistentConfigurationException {
@@ -98,7 +99,7 @@ public class SupportedCdsConcepts {
 				}
 				else {
 					if (logger.isDebugEnabled()) {
-						String lDebugStr = "SupportedCdsConcept with duplicate LocallyCodedCdsListItem _NOT_ ADDED. ICEConceptType: " + pICT + "; ICEConcept: " + pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
+						String lDebugStr = "Encountered SupportedCdsConcept with _duplicate_ LocallyCodedCdsListItem (ignored): ICEConceptType: " + pICT + "; ICEConcept: " + pIC + "; LocallyCodedCdsListItem: " + pLCCLI;
 						logger.debug(_METHODNAME + lDebugStr);
 					}
 				}
@@ -123,7 +124,7 @@ public class SupportedCdsConcepts {
 	/**
 	 * Return map of supported concepts for the given ICEConceptType. Returns null if not found.
 	 */
-	protected Map<ICEConcept, LocallyCodedCdsListItem> getMapOfSupportedCdsConceptsForICEConceptType(ICEConceptType pICT) {
+	public Map<ICEConcept, LocallyCodedCdsListItem> getCdsConceptsAssociatedWithICEConceptType(ICEConceptType pICT) {
 
 		if (pICT == null) {
 			return null;
@@ -136,7 +137,7 @@ public class SupportedCdsConcepts {
 	/**
 	 * Return list of ICEConcepts that is also an OpenCDS concept for the given LocallyCodedCdsListItem. Returns empty list if none found 
 	 */
-	protected Collection<ICEConcept> getListOfOpenCDSICEConceptsForSpecifiedCdsListItem(LocallyCodedCdsListItem pLCCLI) {
+	public Collection<ICEConcept> getOpenCDSICEConceptsAssociatedWithCdsListItem(LocallyCodedCdsListItem pLCCLI) {
 		
 		if (pLCCLI == null) {
 			return new ArrayList<ICEConcept>();
@@ -159,7 +160,7 @@ public class SupportedCdsConcepts {
 	/**
 	 * Return list of ICEConcepts for the given LocallyCodedCdsListItem. Returns empty list if none found 
 	 */
-	protected Collection<ICEConcept> getListOfAllICEConceptsForSpecifiedCdsListItem(LocallyCodedCdsListItem pLCCLI) {
+	public Collection<ICEConcept> getICEConceptsAssociatedWithCdsListItem(LocallyCodedCdsListItem pLCCLI) {
 		
 		if (pLCCLI == null) {
 			return new ArrayList<ICEConcept>();
@@ -178,7 +179,7 @@ public class SupportedCdsConcepts {
 	/**
 	 * Return LocallyCodedCdsListItem for the given IceConceptType and ICEConcept. Returns null if not found.
 	 */
-	protected LocallyCodedCdsListItem getLocallyCodedCdsListItemForSpecifiedICEConceptTypeAndICEConcept(ICEConceptType pICT, ICEConcept pIC) {
+	public LocallyCodedCdsListItem getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType pICT, ICEConcept pIC) {
 		
 		if (pICT == null || pIC == null) {
 			return null;

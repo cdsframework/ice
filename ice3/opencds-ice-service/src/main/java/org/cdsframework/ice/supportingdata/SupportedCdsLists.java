@@ -221,17 +221,6 @@ public class SupportedCdsLists {
 		}
 	}
 	
-	
-	/**
-	 * Get a Map of all supported Cds Concepts for the provided ICEConceptType. Returns null if none are found.
-	 * @param pICT
-	 * @return
-	 */
-	public Map<ICEConcept, LocallyCodedCdsListItem> getAllSupportedCdsConceptsAssociatedWithICEConceptType(ICEConceptType pICT) {
-		
-		return this.supportedCdsConcepts.getMapOfSupportedCdsConceptsForICEConceptType(pICT);
-	}
-	
 
 	/**
 	 * Return the associated Supported Cds Concepts; will never be null
@@ -274,7 +263,7 @@ public class SupportedCdsLists {
 	 * @param pCdsListCode
 	 * @return Set of LocallyCodedCdsItem objects associated with the Cds List, or null if there are no associated cds list items
 	 */
-	public Set<LocallyCodedCdsListItem> getAllLocallyCodedCdsListItemsAssociatedWithCdsListCode(String pCdsListCode) {
+	public Set<LocallyCodedCdsListItem> getCdsListItemsAssociatedWithCdsListCode(String pCdsListCode) {
 		
 		if (pCdsListCode == null) {
 			return null;

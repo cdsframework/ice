@@ -59,9 +59,10 @@ public class SupportedCdsVaccines {
 	
 	// Keep track of which vaccine items are fully specified; in order for a vaccine to be fully specified, all of its component vaccines must be fully specified as well. We
 	// keep track of which Vaccines each VaccineComponent is associated so that they can be associated with the combination vaccine when/if that information comes available.
-	private Map<String, VaccineSD> cdsListItemNameToVaccine;						// cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine 
+	// private Map<String, VaccineSD> cdsListItemNameToVaccine;						// cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine 
+	private Map<String, LocallyCodedVaccineItem> cdsListItemNameToVaccineItem;		// cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine 
 	private Map<CD, VaccineComponentSD> cDToVaccineComponentsMap;					// VaccineComponents previously defined, keyed by CD
-	private Map<CD, Set<LocallyCodedVaccineItem>> vaccineComponentCDToVaccinesNotFullySpecified;	// VaccineComponents which have been encountered in a Vaccine object but not yet defined
+	private Map<CD, Set<VaccineSD>> vaccineComponentCDToVaccinesNotFullySpecified;	// VaccineComponents which have been encountered in a Vaccine object but not yet defined
 
 	// private Map<String, LocallyCodedVaccineItem> vaccineConcepts;					// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineItem
 	
@@ -86,19 +87,44 @@ public class SupportedCdsVaccines {
 			this.supportedCdsLists = pSupportedCdsLists;
 		}
 
-		this.cdsListItemNameToVaccine = new HashMap<String, VaccineSD>();
+		this.cdsListItemNameToVaccineItem = new HashMap<String, LocallyCodedVaccineItem>();
 		this.cDToVaccineComponentsMap = new HashMap<CD, VaccineComponentSD>();
-		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<LocallyCodedVaccineItem>>();
+		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<VaccineSD>>();
 	}
 	
 	
+	/**
+	 * Obtain the CdsVaccineItem by name (<CdsListCode>.<CdsListItemName>).
+	 * @param pCdsVaccineItemName
+	 * @return LocallyCodedVaccineItem CdsVaccineItem, or null if not found
+	 */
+	public LocallyCodedVaccineItem getCdsVaccineItem(String pCdsVaccineItemName) {
+		
+		if (pCdsVaccineItemName == null) {
+			return null;
+		}
+		
+		return this.cdsListItemNameToVaccineItem.get(pCdsVaccineItemName);
+	}
+	
 	protected boolean isEmpty() {
 		
-		if (this.cdsListItemNameToVaccine.isEmpty()) {
+		if (this.cdsListItemNameToVaccineItem.isEmpty()) {
 			return true;
 		}
 		else {
 			return false;
+		}
+	}
+	
+	
+	public boolean isVaccineSupportingDataConsistent() {
+		
+		if (this.vaccineComponentCDToVaccinesNotFullySpecified.size() > 0) {
+			return false;
+		}
+		else {
+			return true;
 		}
 	}
 	
@@ -122,12 +148,21 @@ public class SupportedCdsVaccines {
 			return isVaccineSupportingDataConsistent();
 		}
 		
+		// If the vaccine specified is not in the list of SupportedCdsLists, throw an InconsistentConfigurationException
 		LocallyCodedCdsListItem llccli = this.supportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(pIceVaccineSpecificationFile.getVaccine()));
 		if (llccli == null) {
 			String lErrStr = "Attempt to add vaccine that is not in the list of SupportedCdsLists: " + 
 					(pIceVaccineSpecificationFile.getVaccine() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineSpecificationFile.getVaccine()));
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
+		}
+		
+		// If one of the supporting data files already defined this vaccine, thrown an InconsistentConfigurationException
+		if (this.cdsListItemNameToVaccineItem.containsKey(llccli.getSupportedCdsListItemName())) {
+			String lErrStr = "Attempt to add vaccine that was already specified previously: " + 
+					(pIceVaccineSpecificationFile.getVaccine() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineSpecificationFile.getVaccine()));
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
 		// If adding a code that is not one of the supported cdsVersions, then return
@@ -149,7 +184,7 @@ public class SupportedCdsVaccines {
 		}
 		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with this CdsListItem?
 		ICEConcept ic = new ICEConcept(lPrimaryOpenCdsConcept.getCode(), true, lPrimaryOpenCdsConcept.getDisplayName());
-		Collection<ICEConcept> lOpenCDSConcepts = this.supportedCdsLists.getAssociatedSupportedCdsConcepts().getListOfOpenCDSICEConceptsForSpecifiedCdsListItem(llccli);
+		Collection<ICEConcept> lOpenCDSConcepts = this.supportedCdsLists.getAssociatedSupportedCdsConcepts().getOpenCDSICEConceptsAssociatedWithCdsListItem(llccli);
 		boolean lPrimaryOpenCDSConceptForVaccineIdentified = false;
 		for (ICEConcept lIC : lOpenCDSConcepts) {
 			if (ic.equals(lIC)) {
@@ -321,7 +356,8 @@ public class SupportedCdsVaccines {
 			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
 		}
 		lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
-		this.cdsListItemNameToVaccine.put(llccli.getSupportedCdsListItemName(), lVaccine);
+		this.cdsListItemNameToVaccineItem.put(llccli.getSupportedCdsListItemName(), 
+				new LocallyCodedVaccineItem(llccli.getSupportedCdsListItemName(), lIntersectionOfSupportedCdsVersions, lVaccine));
 		
 		///////
 		// END Creating and persisting the Vaccine
@@ -332,13 +368,11 @@ public class SupportedCdsVaccines {
 		// vaccine component
 		//
 		for (CD lVaccineComponentCD : lVaccineComponentsNotSpecified) {
-			Set<LocallyCodedVaccineItem> lVaccinesNotFullySpecifiedSet = this.vaccineComponentCDToVaccinesNotFullySpecified.get(lVaccineComponentCD);
+			Set<VaccineSD> lVaccinesNotFullySpecifiedSet = this.vaccineComponentCDToVaccinesNotFullySpecified.get(lVaccineComponentCD);
 			if (lVaccinesNotFullySpecifiedSet == null) {
-				lVaccinesNotFullySpecifiedSet = new HashSet<LocallyCodedVaccineItem>();
-				// LocallyCodedVaccineItem(String pVaccineCdsListItemName, Collection<String> pCdsVersions, VaccineSD pVaccine) 
+				lVaccinesNotFullySpecifiedSet = new HashSet<VaccineSD>();
 			}
-			LocallyCodedVaccineItem lcvi = new LocallyCodedVaccineItem(llccli.getSupportedCdsListItemName(), lIntersectionOfSupportedCdsVersions, lVaccine);
-			lVaccinesNotFullySpecifiedSet.add(lcvi);
+			lVaccinesNotFullySpecifiedSet.add(lVaccine);
 			this.vaccineComponentCDToVaccinesNotFullySpecified.put(lVaccineComponentCD, lVaccinesNotFullySpecifiedSet);
 		}
 		///////
@@ -418,15 +452,14 @@ public class SupportedCdsVaccines {
 		
 		// If this VaccineComponent was previously encountered by a Vaccine, add this VaccineComponent to those Vaccines as well.
 		if (this.vaccineComponentCDToVaccinesNotFullySpecified.containsKey(pVaccineComponentCD)) {
-			Set<LocallyCodedVaccineItem> lAllPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(pVaccineComponentCD);
+			Set<VaccineSD> lAllPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(pVaccineComponentCD);
 			if (lAllPreviouslyEncounteredVaccinesWVaccineComponent != null) {
-				List<LocallyCodedVaccineItem> lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent = new ArrayList<LocallyCodedVaccineItem>();
-				for (LocallyCodedVaccineItem lPreviousLocallyCodedVaccineItemEncountered : lAllPreviouslyEncounteredVaccinesWVaccineComponent) {
-					VaccineSD lVaccine = lPreviousLocallyCodedVaccineItemEncountered.getVaccine();
+				List<VaccineSD> lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent = new ArrayList<VaccineSD>();
+				for (VaccineSD lVaccine : lAllPreviouslyEncounteredVaccinesWVaccineComponent) {
 					lVaccine.addMemberVaccineComponent(pVaccineComponent);
-					lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent.add(lPreviousLocallyCodedVaccineItemEncountered);
+					lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent.add(lVaccine);
 				}
-				for (LocallyCodedVaccineItem lPreviousVaccineEncountered : lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent) {
+				for (VaccineSD lPreviousVaccineEncountered : lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent) {
 					lAllPreviouslyEncounteredVaccinesWVaccineComponent.remove(lPreviousVaccineEncountered);
 				}
 				if (lAllPreviouslyEncounteredVaccinesWVaccineComponent.size() == 0) {
@@ -474,25 +507,14 @@ public class SupportedCdsVaccines {
 	}
 	
 	
-	public boolean isVaccineSupportingDataConsistent() {
-		
-		if (this.vaccineComponentCDToVaccinesNotFullySpecified.size() > 0) {
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-	
-	
 	@Override
 	public String toString() {
 		
-		Set<String> cdsListItemNames = this.cdsListItemNameToVaccine.keySet();
+		Set<String> cdsListItemNames = this.cdsListItemNameToVaccineItem.keySet();
 		int i = 1 ;
 		String ltoStringStr = null;
 		for (String s : cdsListItemNames) {
-			ltoStringStr += "{" + i + "} " + s + " = [ " + this.cdsListItemNameToVaccine.get(s).toString() + " ]\n";
+			ltoStringStr += "{" + i + "} " + s + " = [ " + this.cdsListItemNameToVaccineItem.get(s).toString() + " ]\n";
 			i++;
 		}
 		

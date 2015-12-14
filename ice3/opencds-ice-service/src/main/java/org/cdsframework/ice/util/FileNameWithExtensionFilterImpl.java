@@ -103,12 +103,16 @@ public class FileNameWithExtensionFilterImpl implements FilenameFilter {
 		}
 		
 		int lInd = pFilename.lastIndexOf('.');
-		logger.debug(_METHODNAME + "Indice of filename extension is " + lInd);
+		if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "Indice of filename extension is " + lInd);
+		}
 		if (lInd < 0) {
 			return false;
 		}
 		String lExtension = pFilename.substring(lInd+1);
-		logger.debug(_METHODNAME + "Filename extension is " + lExtension);
+		if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "Filename extension is " + lExtension);
+		}
 		if (pFilename.startsWith(baseFilename) && validFileExtensions.contains(lExtension)) {
 			return true;
 		}
