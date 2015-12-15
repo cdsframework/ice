@@ -38,8 +38,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.ice.service.DoseRule;
-import org.cdsframework.ice.service.ICEConcept;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.service.Season;
@@ -50,7 +51,6 @@ import org.cdsframework.ice.service.Vaccine;
 import org.cdsframework.ice.service.VaccineSD;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.supportingdata.ICESupportingDataConfiguration;
-import org.cdsframework.ice.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept;
 import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineConcept;
@@ -183,7 +183,7 @@ public class ScheduleImpl implements Schedule {
 			return null;
 		}
 
-		ICEConcept lIceVaccineConcept = new ICEConcept(openCdsConceptValue, true);		// All vaccine concepts are OpenCDS concepts
+		CdsConcept lIceVaccineConcept = new CdsConcept(openCdsConceptValue, true);		// All vaccine concepts are OpenCDS concepts
 		LocallyCodedCdsListItem lVaccineCdsItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, lIceVaccineConcept); 
 		if (lVaccineCdsItem == null) {
 			return null;

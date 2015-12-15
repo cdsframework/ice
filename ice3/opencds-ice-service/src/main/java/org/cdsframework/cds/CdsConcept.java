@@ -24,21 +24,24 @@
  * correspondence to ice@hln.com.
  */
 
-package org.cdsframework.ice.service;
+package org.cdsframework.cds;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opencds.vmr.v1_0.internal.concepts.VmrOpenCdsConcept;
 
-public class ICEConcept extends VmrOpenCdsConcept {
+/**
+ * A CDS concept that originates from CAT. It may or may not also be an instantiated OpenCDS concept during invocation of OpenCDS.
+ */
+public class CdsConcept extends VmrOpenCdsConcept {
 
 	private String displayName;
 	private boolean isOpenCdsSupportedConcept;
 	
-	private static Log logger = LogFactory.getLog(ICEConcept.class);
+	private static Log logger = LogFactory.getLog(CdsConcept.class);
 	
 	
-	private ICEConcept() {
+	private CdsConcept() {
 		super();
 	}
 	
@@ -47,7 +50,7 @@ public class ICEConcept extends VmrOpenCdsConcept {
 	 * @param openCdsConceptCode Concept Code; mandatory
 	 * @throws IllegalArgumentException if concept code is null
 	 */
- 	public ICEConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept) {
+ 	public CdsConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept) {
 		super();
 		
 		if (pOpenCdsConceptCode == null) {
@@ -66,19 +69,19 @@ public class ICEConcept extends VmrOpenCdsConcept {
 	 * @param pDisplayName Display Name
 	 * @throws IllegalArgumentException if concept code is null
 	 */
-	public ICEConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept, String pDisplayName) {
+	public CdsConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept, String pDisplayName) {
 		this(pOpenCdsConceptCode, pIsOpenCdsSupportedConcept);
 		setDisplayName(pDisplayName);
 	}
 	
 
-	public static ICEConcept constructDeepCopyOfICEConceptObject(ICEConcept pIC) {
+	public static CdsConcept constructDeepCopyOfCdsConceptObject(CdsConcept pIC) {
 		
 		if (pIC == null) {
 			return pIC;
 		}
 		
-		ICEConcept lIC = new ICEConcept();
+		CdsConcept lIC = new CdsConcept();
 		lIC.conceptTargetId = pIC.conceptTargetId;
 		lIC.determinationMethodCode = pIC.determinationMethodCode;
 		lIC.openCdsConceptCode = pIC.openCdsConceptCode;
@@ -126,7 +129,7 @@ public class ICEConcept extends VmrOpenCdsConcept {
 		//	return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ICEConcept other = (ICEConcept) obj;
+		CdsConcept other = (CdsConcept) obj;
 		if (getOpenCdsConceptCode() == null) {
 			if (other.getOpenCdsConceptCode() != null)
 				return false;
@@ -139,7 +142,7 @@ public class ICEConcept extends VmrOpenCdsConcept {
 	
 	@Override
 	public String toString() {
-		return "ICEConcept [displayName=" + displayName	+ ", isOpenCdsSupportedConcept=" + isOpenCdsSupportedConcept + ", toString()=" + super.toString() + "]";
+		return "CdsConcept [displayName=" + displayName + ", isOpenCdsSupportedConcept=" + isOpenCdsSupportedConcept + ", toString()=" + super.toString() + "]";
 	}
 	
 	

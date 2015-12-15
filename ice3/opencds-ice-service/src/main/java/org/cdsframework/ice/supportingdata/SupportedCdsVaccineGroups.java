@@ -35,14 +35,17 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.ICEConcept;
+import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
+import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.util.support.data.ice.vaccinegroup.IceVaccineGroupSpecificationFile;
 import org.opencds.common.exceptions.ImproperUsageException;
 
-public class SupportedCdsVaccineGroups {
+public class SupportedCdsVaccineGroups implements SupportingData {
 	
 	// Supported Cds Versions
 	private List<String> cdsVersions;
@@ -70,7 +73,8 @@ public class SupportedCdsVaccineGroups {
 		this.vaccineGroupConcepts = new HashMap<String, LocallyCodedVaccineGroupItem>();
 	}
 	
-	protected boolean isEmpty() {
+	
+	public boolean isEmpty() {
 		
 		if (this.vaccineGroupConcepts.isEmpty()) {
 			return true;
@@ -120,7 +124,7 @@ public class SupportedCdsVaccineGroups {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
-		String lVaccineGroupCdsListItemName = llccli.getSupportedCdsListItemName();
+		String lVaccineGroupCdsListItemName = llccli.getCdsListItemName();
 		if (this.vaccineGroupConcepts.containsKey(lVaccineGroupCdsListItemName)) {
 			String lErrStr = "Attempt to add vaccine group that was already specified previously: " + 
 					(pIceVaccineGroupSpecificationFile.getVaccineGroup() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
@@ -129,7 +133,7 @@ public class SupportedCdsVaccineGroups {
 		}
 		
 		// Primary OpenCds Concept
-		ICEConcept lPrimaryOpenCdsConcept = new ICEConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), true, pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());
+		CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), true, pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());
 		
 		// Related Diseases
 		List<org.opencds.vmr.v1_0.schema.CD> lRelatedDiseases = pIceVaccineGroupSpecificationFile.getDiseaseImmunities();
@@ -142,7 +146,7 @@ public class SupportedCdsVaccineGroups {
 					logger.warn(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);
 				}
-				lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getSupportedCdsListItemName());
+				lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getCdsListItemName());
 			}
 		}
 		

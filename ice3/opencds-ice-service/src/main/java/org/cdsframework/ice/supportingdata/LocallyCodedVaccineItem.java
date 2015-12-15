@@ -9,7 +9,7 @@ import org.opencds.common.exceptions.ImproperUsageException;
 
 public class LocallyCodedVaccineItem {
 	
-	private String cdsListItemName;
+	private String cdsVaccineItemName;
 	private Collection<String> cdsVersions;
 	private VaccineSD vaccine;
 	
@@ -38,13 +38,13 @@ public class LocallyCodedVaccineItem {
 			throw new ImproperUsageException(lErrStr);
 		}
 		
-		this.cdsListItemName = pVaccineCdsListItemName;
+		this.cdsVaccineItemName = pVaccineCdsListItemName;
 		this.cdsVersions = pCdsVersions;
 		this.vaccine = pVaccine;
 	}
 
-	public String getCdsListItemName() {
-		return cdsListItemName;
+	public String getCdsVaccineItemName() {
+		return cdsVaccineItemName;
 	}
 
 	public Collection<String> getCdsVersions() {
@@ -59,7 +59,7 @@ public class LocallyCodedVaccineItem {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((cdsListItemName == null) ? 0 : cdsListItemName.hashCode());
+		result = prime * result + ((cdsVaccineItemName == null) ? 0 : cdsVaccineItemName.hashCode());
 		return result;
 	}
 
@@ -72,10 +72,10 @@ public class LocallyCodedVaccineItem {
 		if (getClass() != obj.getClass())
 			return false;
 		LocallyCodedVaccineItem other = (LocallyCodedVaccineItem) obj;
-		if (cdsListItemName == null) {
-			if (other.cdsListItemName != null)
+		if (cdsVaccineItemName == null) {
+			if (other.cdsVaccineItemName != null)
 				return false;
-		} else if (!cdsListItemName.equals(other.cdsListItemName))
+		} else if (!cdsVaccineItemName.equals(other.cdsVaccineItemName))
 			return false;
 		return true;
 	}

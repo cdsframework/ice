@@ -36,7 +36,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.ICEConcept;
+import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
+import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.TimePeriod;
@@ -49,7 +52,7 @@ import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 
-public class SupportedCdsVaccines {
+public class SupportedCdsVaccines implements SupportingData {
 
 	// CDS versions covered by this supporting datavaccine manager
 	private List<String> cdsVersions;
@@ -107,7 +110,8 @@ public class SupportedCdsVaccines {
 		return this.cdsListItemNameToVaccineItem.get(pCdsVaccineItemName);
 	}
 	
-	protected boolean isEmpty() {
+	
+	public boolean isEmpty() {
 		
 		if (this.cdsListItemNameToVaccineItem.isEmpty()) {
 			return true;
@@ -118,7 +122,7 @@ public class SupportedCdsVaccines {
 	}
 	
 	
-	public boolean isVaccineSupportingDataConsistent() {
+	protected boolean isVaccineSupportingDataConsistent() {
 		
 		if (this.vaccineComponentCDToVaccinesNotFullySpecified.size() > 0) {
 			return false;
@@ -158,7 +162,7 @@ public class SupportedCdsVaccines {
 		}
 		
 		// If one of the supporting data files already defined this vaccine, thrown an InconsistentConfigurationException
-		if (this.cdsListItemNameToVaccineItem.containsKey(llccli.getSupportedCdsListItemName())) {
+		if (this.cdsListItemNameToVaccineItem.containsKey(llccli.getCdsListItemName())) {
 			String lErrStr = "Attempt to add vaccine that was already specified previously: " + 
 					(pIceVaccineSpecificationFile.getVaccine() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineSpecificationFile.getVaccine()));
 			logger.warn(_METHODNAME + lErrStr);
@@ -183,10 +187,10 @@ public class SupportedCdsVaccines {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with this CdsListItem?
-		ICEConcept ic = new ICEConcept(lPrimaryOpenCdsConcept.getCode(), true, lPrimaryOpenCdsConcept.getDisplayName());
-		Collection<ICEConcept> lOpenCDSConcepts = this.supportedCdsLists.getAssociatedSupportedCdsConcepts().getOpenCDSICEConceptsAssociatedWithCdsListItem(llccli);
+		CdsConcept ic = new CdsConcept(lPrimaryOpenCdsConcept.getCode(), true, lPrimaryOpenCdsConcept.getDisplayName());
+		Collection<CdsConcept> lOpenCDSConcepts = this.supportedCdsLists.getAssociatedSupportedCdsConcepts().getOpenCDSICEConceptsAssociatedWithCdsListItem(llccli);
 		boolean lPrimaryOpenCDSConceptForVaccineIdentified = false;
-		for (ICEConcept lIC : lOpenCDSConcepts) {
+		for (CdsConcept lIC : lOpenCDSConcepts) {
 			if (ic.equals(lIC)) {
 				lPrimaryOpenCDSConceptForVaccineIdentified = true;
 				if (lPrimaryOpenCdsConcept.getDisplayName() == null && lIC.getDisplayName() != null) {
@@ -239,7 +243,7 @@ public class SupportedCdsVaccines {
 				logger.warn(_METHODNAME + lErrStr);
 				throw new InconsistentConfigurationException(lErrStr);
 			}
-			lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getSupportedCdsListItemName());
+			lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getCdsListItemName());
 		}
 		////////
 		// END RELATED DISEASES: Get all the related diseases that the vaccine targets (as specified in the configuration data).
@@ -356,8 +360,8 @@ public class SupportedCdsVaccines {
 			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
 		}
 		lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
-		this.cdsListItemNameToVaccineItem.put(llccli.getSupportedCdsListItemName(), 
-				new LocallyCodedVaccineItem(llccli.getSupportedCdsListItemName(), lIntersectionOfSupportedCdsVersions, lVaccine));
+		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), 
+				new LocallyCodedVaccineItem(llccli.getCdsListItemName(), lIntersectionOfSupportedCdsVersions, lVaccine));
 		
 		///////
 		// END Creating and persisting the Vaccine

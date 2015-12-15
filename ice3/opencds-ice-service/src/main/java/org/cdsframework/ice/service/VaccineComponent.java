@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept;
 
 public class VaccineComponent extends AbstractVaccine {
@@ -53,7 +54,7 @@ public class VaccineComponent extends AbstractVaccine {
 	 * @param pDisease Disease that this vaccine component induces immunity to
 	 * @throws IllegalArgumentException If either parameter is not supplied
 	 */
-	public VaccineComponent(ICEConcept pVaccineConcept, List<SupportedDiseaseConcept> pDiseaseImmunityList) {
+	public VaccineComponent(CdsConcept pVaccineConcept, List<SupportedDiseaseConcept> pDiseaseImmunityList) {
 		
 		super(pVaccineConcept);
 		

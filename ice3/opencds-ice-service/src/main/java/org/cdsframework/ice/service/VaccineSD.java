@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept;
 
 
@@ -56,7 +57,7 @@ public class VaccineSD extends AbstractVaccine {
  
 	}
 	
-	public VaccineSD(ICEConcept pVaccineConcept) {
+	public VaccineSD(CdsConcept pVaccineConcept) {
 		super(pVaccineConcept);
 		this.vaccineComponents = new ArrayList<VaccineComponentSD>();
 	}
@@ -73,7 +74,7 @@ public class VaccineSD extends AbstractVaccine {
 	 * @throws IllegalArgumentException If parameters are not correctly populated (or either are null) with valid values; monovalent vaccines must have a vaccine component
 	 * with the same ICEConcept ID
 	 */
-	public VaccineSD(ICEConcept pVaccineConcept, List<VaccineComponentSD> pVaccineComponents) {
+	public VaccineSD(CdsConcept pVaccineConcept, List<VaccineComponentSD> pVaccineComponents) {
 	
 		this(pVaccineConcept, pVaccineComponents, false);
 	}
@@ -90,7 +91,7 @@ public class VaccineSD extends AbstractVaccine {
 	 * @throws IllegalArgumentException If parameters are not correctly populated (or either are null) with valid values; monovalent vaccines must have a vaccine component
 	 * with the same ICEConcept ID if permitUnequalVacconeComponentValueInMonovalentVaccine is false (which by default it is).
 	 */
-	public VaccineSD(ICEConcept pVaccineConcept, List<VaccineComponentSD> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
+	public VaccineSD(CdsConcept pVaccineConcept, List<VaccineComponentSD> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
 		super(pVaccineConcept);
 		
 		String _METHODNAME = "Vaccine(): ";

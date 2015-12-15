@@ -31,7 +31,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.ICEConcept;
+import org.cdsframework.cds.CdsConcept;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 public class LocallyCodedVaccineGroupItem {
@@ -56,16 +56,16 @@ public class LocallyCodedVaccineGroupItem {
 		    <primaryOpenCdsConcept code="ICE202" displayName="Immunization Evaluation (Hep B Vaccine Group)"/>
 		</ns2:iceVaccineGroupSpecificationFile>
 	 */
-	private String vaccineGroupCdsListItemName;
+	private String cdsVaccineGroupItemName;
 	private Collection<String> relatedDiseasesCdsListItemNames;
 	private int priority;
-	private ICEConcept primaryOpenCdsConcept;
+	private CdsConcept primaryOpenCdsConcept;
 	private Collection<String> cdsVersions;
 	
 	private static Log logger = LogFactory.getLog(LocallyCodedVaccineGroupItem.class);	
 
 
-	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, ICEConcept pPrimaryOpenCdsMembership) 
+	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, CdsConcept pPrimaryOpenCdsMembership) 
 		throws ImproperUsageException {
 
 		String _METHODNAME = "VaccineGroupItem(): ";
@@ -89,7 +89,7 @@ public class LocallyCodedVaccineGroupItem {
 			throw new ImproperUsageException(lErrStr);
 		}
 		
-		this.vaccineGroupCdsListItemName = pVaccineGroupCdsListItemName;
+		this.cdsVaccineGroupItemName = pVaccineGroupCdsListItemName;
 		this.cdsVersions = pCdsVersions;
 		this.primaryOpenCdsConcept = pPrimaryOpenCdsMembership;
 		this.relatedDiseasesCdsListItemNames = pRelatedDiseasesCdsListItemNames;
@@ -98,7 +98,7 @@ public class LocallyCodedVaccineGroupItem {
 	
 	
 	// protected LocallyCodedVaccineGroupItem(CD pVaccineGroupCD, CD pPrimaryOpenCdsMembership, List<String> pCdsVersions, int pPriority) 
-	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, ICEConcept pPrimaryOpenCdsMembership, int pPriority) 
+	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, CdsConcept pPrimaryOpenCdsMembership, int pPriority) 
 		throws ImproperUsageException {
 		
 		this(pVaccineGroupCdsListItemName, pCdsVersions, pRelatedDiseasesCdsListItemNames, pPrimaryOpenCdsMembership);
@@ -106,9 +106,9 @@ public class LocallyCodedVaccineGroupItem {
 	}
 
 	
-	public String getVaccineGroupCdsListItemName() {
+	public String getCdsVaccineGroupItemName() {
 		
-		return this.vaccineGroupCdsListItemName;
+		return this.cdsVaccineGroupItemName;
 	}
 
 
@@ -127,13 +127,13 @@ public class LocallyCodedVaccineGroupItem {
 	}
 
 
-	public ICEConcept getPrimaryOpenCdsConcept() {
+	public CdsConcept getPrimaryOpenCdsConcept() {
 		return primaryOpenCdsConcept;
 	}
 
 	@Override
 	public String toString() {
-		String lStr = "LocallyCodedVaccineGroupItem [vaccineGroupCdsListItemName=" + vaccineGroupCdsListItemName + ", priority=" + priority + ", primaryOpenCdsConcept="	+ primaryOpenCdsConcept; 
+		String lStr = "LocallyCodedVaccineGroupItem [vaccineGroupCdsListItemName=" + cdsVaccineGroupItemName + ", priority=" + priority + ", primaryOpenCdsConcept="	+ primaryOpenCdsConcept; 
 		lStr += "\ncdsListVersions= [";
 
 		for (String lDisease : getRelatedDiseasesCdsListItemNames()) {

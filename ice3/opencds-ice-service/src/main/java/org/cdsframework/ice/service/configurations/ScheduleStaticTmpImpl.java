@@ -37,8 +37,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.service.DoseRule;
-import org.cdsframework.ice.service.ICEConcept;
 import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.service.Season;
 import org.cdsframework.ice.service.SeriesRules;
@@ -307,7 +307,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		// }		
 		
 		// _HEPB_LESSTHAN_20
-		ICEConcept hepBLessthan20 = new ICEConcept(SupportedVaccineConcept._HEPB_LESSTHAN_20.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_LESSTHAN_20.getConceptDisplayNameValue());
+		CdsConcept hepBLessthan20 = new CdsConcept(SupportedVaccineConcept._HEPB_LESSTHAN_20.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_LESSTHAN_20.getConceptDisplayNameValue());
 		VaccineComponent lVaccineComponent = new VaccineComponent(hepBLessthan20, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(new TimePeriod("20y"));
@@ -322,7 +322,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HEPB_LESSTHAN_20, lVaccine);
 
 		// _HEPB_HIGHRISK_INFANT
-		ICEConcept hepBHighRiskInfant = new ICEConcept(SupportedVaccineConcept._HEPB_HIGHRISK_INFANT.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_HIGHRISK_INFANT.getConceptDisplayNameValue());
+		CdsConcept hepBHighRiskInfant = new CdsConcept(SupportedVaccineConcept._HEPB_HIGHRISK_INFANT.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_HIGHRISK_INFANT.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(hepBHighRiskInfant, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(new TimePeriod("20y"));
@@ -337,7 +337,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HEPB_HIGHRISK_INFANT, lVaccine);
 
 		// _HEPB_DIALYSIS
-		ICEConcept hepBDialysis = new ICEConcept(SupportedVaccineConcept._HEPB_DIALYSIS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_DIALYSIS.getConceptDisplayNameValue());
+		CdsConcept hepBDialysis = new CdsConcept(SupportedVaccineConcept._HEPB_DIALYSIS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_DIALYSIS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(hepBDialysis, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -352,7 +352,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HEPB_DIALYSIS, lVaccine);
 
 		// _HEPB_NOS
-		ICEConcept hepBNOS = new ICEConcept(SupportedVaccineConcept._HEPB_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_NOS.getConceptDisplayNameValue());
+		CdsConcept hepBNOS = new CdsConcept(SupportedVaccineConcept._HEPB_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_NOS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(hepBNOS, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -367,7 +367,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HEPB_NOS, lVaccine);
 
 		// _HEPB_GREATEREQUAL_20
-		ICEConcept hepGreaterEqual20 = new ICEConcept(SupportedVaccineConcept._HEPB_GREATEREQUAL_20.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_GREATEREQUAL_20.getConceptDisplayNameValue());
+		CdsConcept hepGreaterEqual20 = new CdsConcept(SupportedVaccineConcept._HEPB_GREATEREQUAL_20.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_GREATEREQUAL_20.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(hepGreaterEqual20, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -386,7 +386,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.HepA);
 		
 		// _HEPA_PEDADOL_2_DOSE
-		ICEConcept hepAPedAdol2Dose = new ICEConcept(SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE.getConceptDisplayNameValue());
+		CdsConcept hepAPedAdol2Dose = new CdsConcept(SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(hepAPedAdol2Dose, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -401,7 +401,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE, lVaccine);
 
 		// _HEPA_PEDADOL_3_DOSE
-		ICEConcept hepAPedAdol3Dose = new ICEConcept(SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.getConceptDisplayNameValue());
+		CdsConcept hepAPedAdol3Dose = new CdsConcept(SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(hepAPedAdol3Dose, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -416,7 +416,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE, lVaccine);
 
 		// _HEPA_PED_NOS
-		ICEConcept hepAPedNOS = new ICEConcept(SupportedVaccineConcept._HEPA_PED_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PED_NOS.getConceptDisplayNameValue());
+		CdsConcept hepAPedNOS = new CdsConcept(SupportedVaccineConcept._HEPA_PED_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PED_NOS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(hepAPedNOS, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -431,7 +431,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HEPA_PED_NOS, lVaccine);
 
 		// _HEPA_ADULT
-		ICEConcept hepAAdult = new ICEConcept(SupportedVaccineConcept._HEPA_ADULT.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_ADULT.getConceptDisplayNameValue());
+		CdsConcept hepAAdult = new CdsConcept(SupportedVaccineConcept._HEPA_ADULT.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_ADULT.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(hepAAdult, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -446,7 +446,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HEPA_ADULT, lVaccine);
 
 		// _HEPA_NOS
-		ICEConcept hepANOS = new ICEConcept(SupportedVaccineConcept._HEPA_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_NOS.getConceptDisplayNameValue());
+		CdsConcept hepANOS = new CdsConcept(SupportedVaccineConcept._HEPA_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_NOS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(hepANOS, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -468,7 +468,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Mumps);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Rubella);
 		
-		ICEConcept mmr = new ICEConcept(SupportedVaccineConcept._MMR.getConceptCodeValue(), true, SupportedVaccineConcept._MMR.getConceptDisplayNameValue());
+		CdsConcept mmr = new CdsConcept(SupportedVaccineConcept._MMR.getConceptCodeValue(), true, SupportedVaccineConcept._MMR.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(mmr, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -486,7 +486,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		// _MEASLES
 		diseaseImmunityList = new ArrayList<SupportedDiseaseConcept>();
 		diseaseImmunityList.add(SupportedDiseaseConcept.Measles);
-		ICEConcept ic = new ICEConcept(SupportedVaccineConcept._MEASLES.getConceptCodeValue(), true, SupportedVaccineConcept._MEASLES.getConceptDisplayNameValue());
+		CdsConcept ic = new CdsConcept(SupportedVaccineConcept._MEASLES.getConceptCodeValue(), true, SupportedVaccineConcept._MEASLES.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -503,7 +503,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		// _MUMPS
 		diseaseImmunityList = new ArrayList<SupportedDiseaseConcept>();
 		diseaseImmunityList.add(SupportedDiseaseConcept.Mumps);
-		ic = new ICEConcept(SupportedVaccineConcept._MUMPS.getConceptCodeValue(), true, SupportedVaccineConcept._MUMPS.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MUMPS.getConceptCodeValue(), true, SupportedVaccineConcept._MUMPS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -520,7 +520,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		// _RUBELLA
 		diseaseImmunityList = new ArrayList<SupportedDiseaseConcept>();
 		diseaseImmunityList.add(SupportedDiseaseConcept.Rubella);
-		ic = new ICEConcept(SupportedVaccineConcept._RUBELLA.getConceptCodeValue(), true, SupportedVaccineConcept._RUBELLA.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._RUBELLA.getConceptCodeValue(), true, SupportedVaccineConcept._RUBELLA.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -539,7 +539,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Measles);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Rubella);
 
-		ic = new ICEConcept(SupportedVaccineConcept._MEASLES_RUBELLA.getConceptCodeValue(), true, SupportedVaccineConcept._MEASLES_RUBELLA.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MEASLES_RUBELLA.getConceptCodeValue(), true, SupportedVaccineConcept._MEASLES_RUBELLA.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -559,7 +559,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Mumps);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Rubella);
 
-		ic = new ICEConcept(SupportedVaccineConcept._MUMPS_RUBELLA.getConceptCodeValue(), true, SupportedVaccineConcept._MUMPS_RUBELLA.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MUMPS_RUBELLA.getConceptCodeValue(), true, SupportedVaccineConcept._MUMPS_RUBELLA.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -578,7 +578,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		// _VARICELLA
 		diseaseImmunityList = new ArrayList<SupportedDiseaseConcept>();
 		diseaseImmunityList.add(SupportedDiseaseConcept.Varicella);
-		ic = new ICEConcept(SupportedVaccineConcept._VARICELLA.getConceptCodeValue(), true, SupportedVaccineConcept._VARICELLA.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._VARICELLA.getConceptCodeValue(), true, SupportedVaccineConcept._VARICELLA.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -598,7 +598,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Rotavirus);
 
 		// Rotavirus RV5 vaccine
-		ic = new ICEConcept(SupportedVaccineConcept._ROTAVIRUS_RV5.getConceptCodeValue(), true, SupportedVaccineConcept._ROTAVIRUS_RV5.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._ROTAVIRUS_RV5.getConceptCodeValue(), true, SupportedVaccineConcept._ROTAVIRUS_RV5.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -613,7 +613,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._ROTAVIRUS_RV5, lVaccine);
 
 		// Rotavirus RV1 vaccine
-		ic = new ICEConcept(SupportedVaccineConcept._ROTAVIRUS_RV1.getConceptCodeValue(), true, SupportedVaccineConcept._ROTAVIRUS_RV1.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._ROTAVIRUS_RV1.getConceptCodeValue(), true, SupportedVaccineConcept._ROTAVIRUS_RV1.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -628,7 +628,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._ROTAVIRUS_RV1, lVaccine);
 
 		// Rotavirus NOS vaccine
-		ic = new ICEConcept(SupportedVaccineConcept._ROTAVIRUS_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._ROTAVIRUS_NOS.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._ROTAVIRUS_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._ROTAVIRUS_NOS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -643,7 +643,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._ROTAVIRUS_NOS, lVaccine);
 
 		// Rotavirus vaccine
-		ic = new ICEConcept(SupportedVaccineConcept._ROTAVIRUS.getConceptCodeValue(), true, SupportedVaccineConcept._ROTAVIRUS.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._ROTAVIRUS.getConceptCodeValue(), true, SupportedVaccineConcept._ROTAVIRUS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -662,7 +662,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Hib);
 		
 		// Hib NOS
-		ic = new ICEConcept(SupportedVaccineConcept._HIB_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_NOS.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HIB_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_NOS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -677,7 +677,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HIB_NOS, lVaccine);
 
 		// Hib-PRP-D
-		ic = new ICEConcept(SupportedVaccineConcept._HIB_PRP_D.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_PRP_D.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HIB_PRP_D.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_PRP_D.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -692,7 +692,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HIB_PRP_D, lVaccine);
 
 		// Hib-HbOC
-		ic = new ICEConcept(SupportedVaccineConcept._HIB_HBOC.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_HBOC.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HIB_HBOC.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_HBOC.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -707,7 +707,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HIB_HBOC, lVaccine);
 
 		// Hib-PRP-T
-		ic = new ICEConcept(SupportedVaccineConcept._HIB_PRP_T.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_PRP_T.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HIB_PRP_T.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_PRP_T.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -722,7 +722,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HIB_PRP_T, lVaccine);
 		
 		// Hib-PRP-OMP
-		ic = new ICEConcept(SupportedVaccineConcept._HIB_PRP_OMP.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_PRP_OMP.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HIB_PRP_OMP.getConceptCodeValue(), true, SupportedVaccineConcept._HIB_PRP_OMP.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -748,7 +748,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityListDTP.add(SupportedDiseaseConcept.Pertussis);
 		
 		// DTaP
-		ic = new ICEConcept(SupportedVaccineConcept._DTAP.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTAP.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityListDTP);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -763,7 +763,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._DTAP, lVaccine);
 		
 		// DTP
-		ic = new ICEConcept(SupportedVaccineConcept._DTP.getConceptCodeValue(), true, SupportedVaccineConcept._DTP.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTP.getConceptCodeValue(), true, SupportedVaccineConcept._DTP.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityListDTP);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -778,7 +778,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._DTP, lVaccine);
 
 		// DT
-		ic = new ICEConcept(SupportedVaccineConcept._DT.getConceptCodeValue(), true, SupportedVaccineConcept._DT.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DT.getConceptCodeValue(), true, SupportedVaccineConcept._DT.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -793,7 +793,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._DT, lVaccine);
 		
 		// DTaP, 5 pertussis antigens
-		ic = new ICEConcept(SupportedVaccineConcept._DTAP_5PERTUSSIS_ANTIGENS.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_5PERTUSSIS_ANTIGENS.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTAP_5PERTUSSIS_ANTIGENS.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_5PERTUSSIS_ANTIGENS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityListDTP);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -808,7 +808,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._DTAP_5PERTUSSIS_ANTIGENS, lVaccine);
 
 		// DTaP, unspecified formulation
-		ic = new ICEConcept(SupportedVaccineConcept._DTAP_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_UNSPECIFIED.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTAP_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_UNSPECIFIED.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityListDTP);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -823,7 +823,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._DTAP_UNSPECIFIED, lVaccine);
 
 		// Td (adult)
-		ic = new ICEConcept(SupportedVaccineConcept._TD_ABSORBED.getConceptCodeValue(), true, SupportedVaccineConcept._TD_ABSORBED.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._TD_ABSORBED.getConceptCodeValue(), true, SupportedVaccineConcept._TD_ABSORBED.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("7y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -838,7 +838,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._TD_ABSORBED, lVaccine);
 
 		// Td (adult) preservative free
-		ic = new ICEConcept(SupportedVaccineConcept._TD_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._TD_PRESERVATIVEFREE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._TD_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._TD_PRESERVATIVEFREE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("7y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -853,7 +853,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._TD_PRESERVATIVEFREE, lVaccine);
 
 		// Tdap
-		ic = new ICEConcept(SupportedVaccineConcept._TDAP.getConceptCodeValue(), true, SupportedVaccineConcept._TDAP.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._TDAP.getConceptCodeValue(), true, SupportedVaccineConcept._TDAP.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityListDTP);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("7y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -868,7 +868,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._TDAP, lVaccine);
 
 		// Td (adult) not absorbed
-		ic = new ICEConcept(SupportedVaccineConcept._TD_NOTABSORBED.getConceptCodeValue(), true, SupportedVaccineConcept._TD_NOTABSORBED.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._TD_NOTABSORBED.getConceptCodeValue(), true, SupportedVaccineConcept._TD_NOTABSORBED.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("7y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -883,7 +883,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._TD_NOTABSORBED, lVaccine);
 
 		// Td (adult) NOS
-		ic = new ICEConcept(SupportedVaccineConcept._TD_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._TD_NOS.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._TD_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._TD_NOS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("7y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -905,7 +905,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.HPV);
 
 		// HPV NOS
-		ic = new ICEConcept(SupportedVaccineConcept._HPV_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HPV_NOS.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HPV_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HPV_NOS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -920,7 +920,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HPV_NOS, lVaccine);
 		
 		// HPV9
-		ic = new ICEConcept(SupportedVaccineConcept._HPV_9.getConceptCodeValue(), true, SupportedVaccineConcept._HPV_9.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HPV_9.getConceptCodeValue(), true, SupportedVaccineConcept._HPV_9.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -935,7 +935,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HPV_9, lVaccine);
 
 		// HPV Qaudrivalent
-		ic = new ICEConcept(SupportedVaccineConcept._HPV_QUADRIVALENT.getConceptCodeValue(), true, SupportedVaccineConcept._HPV_QUADRIVALENT.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HPV_QUADRIVALENT.getConceptCodeValue(), true, SupportedVaccineConcept._HPV_QUADRIVALENT.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -950,7 +950,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._HPV_QUADRIVALENT, lVaccine);
 		
 		// HPV Bivalent
-		ic = new ICEConcept(SupportedVaccineConcept._HPV_BIVALENT.getConceptCodeValue(), true, SupportedVaccineConcept._HPV_BIVALENT.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HPV_BIVALENT.getConceptCodeValue(), true, SupportedVaccineConcept._HPV_BIVALENT.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -975,7 +975,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Pneumococcal);
 				
 		// _PCV_7
-		ic = new ICEConcept(SupportedVaccineConcept._PCV_7.getConceptCodeValue(), true, SupportedVaccineConcept._PCV_7.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._PCV_7.getConceptCodeValue(), true, SupportedVaccineConcept._PCV_7.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -990,7 +990,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._PCV_7, lVaccine);
 		
 		// _PCV_13
-		ic = new ICEConcept(SupportedVaccineConcept._PCV_13.getConceptCodeValue(), true, SupportedVaccineConcept._PCV_13.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._PCV_13.getConceptCodeValue(), true, SupportedVaccineConcept._PCV_13.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1005,7 +1005,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._PCV_13, lVaccine);
 		
 		// _PCV_NOS
-		ic = new ICEConcept(SupportedVaccineConcept._PCV_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._PCV_NOS.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._PCV_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._PCV_NOS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1020,7 +1020,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._PCV_NOS, lVaccine);
 		
 		// _PCV_NOS109 -- used by PCV and PPSV
-		ic = new ICEConcept(SupportedVaccineConcept._PCV_NOS109.getConceptCodeValue(), true, SupportedVaccineConcept._PCV_NOS109.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._PCV_NOS109.getConceptCodeValue(), true, SupportedVaccineConcept._PCV_NOS109.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1034,7 +1034,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		lVaccine.setLiveVirusVaccine(false);
 		supportedVaccinesMap.put(SupportedVaccineConcept._PCV_NOS109, lVaccine);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._PPSV_23VALENT.getConceptCodeValue(), true, SupportedVaccineConcept._PPSV_23VALENT.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._PPSV_23VALENT.getConceptCodeValue(), true, SupportedVaccineConcept._PPSV_23VALENT.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("2y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1058,7 +1058,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList = new ArrayList<SupportedDiseaseConcept>();
 		diseaseImmunityList.add(SupportedDiseaseConcept.Meningococcal);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._MENING_CY.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_CY.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MENING_CY.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_CY.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1072,7 +1072,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		lVaccine.setLiveVirusVaccine(false);
 		supportedVaccinesMap.put(SupportedVaccineConcept._MENING_CY, lVaccine);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._MENING_MCV4P.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_MCV4P.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MENING_MCV4P.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_MCV4P.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("9m-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1086,7 +1086,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		lVaccine.setLiveVirusVaccine(false);
 		supportedVaccinesMap.put(SupportedVaccineConcept._MENING_MCV4P, lVaccine);
 				
-		ic = new ICEConcept(SupportedVaccineConcept._MENING_MCV4O.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_MCV4O.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MENING_MCV4O.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_MCV4O.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("2m-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1100,7 +1100,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		lVaccine.setLiveVirusVaccine(false);
 		supportedVaccinesMap.put(SupportedVaccineConcept._MENING_MCV4O, lVaccine);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._MENING_MPSV4.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_MPSV4.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MENING_MPSV4.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_MPSV4.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("2y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1114,7 +1114,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		lVaccine.setLiveVirusVaccine(false);
 		supportedVaccinesMap.put(SupportedVaccineConcept._MENING_MPSV4, lVaccine);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._MENING_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_UNSPECIFIED.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MENING_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_UNSPECIFIED.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("9m-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1128,7 +1128,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		lVaccine.setLiveVirusVaccine(false);
 		supportedVaccinesMap.put(SupportedVaccineConcept._MENING_UNSPECIFIED, lVaccine);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._MENING_MCV4_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_MCV4_UNSPECIFIED.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MENING_MCV4_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_MCV4_UNSPECIFIED.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("9m-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1152,7 +1152,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList = new ArrayList<SupportedDiseaseConcept>();
 		diseaseImmunityList.add(SupportedDiseaseConcept.Polio);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._OPV.getConceptCodeValue(), true, SupportedVaccineConcept._OPV.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._OPV.getConceptCodeValue(), true, SupportedVaccineConcept._OPV.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1166,7 +1166,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		lVaccine.setLiveVirusVaccine(false);
 		supportedVaccinesMap.put(SupportedVaccineConcept._OPV, lVaccine);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._IPV.getConceptCodeValue(), true, SupportedVaccineConcept._IPV.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._IPV.getConceptCodeValue(), true, SupportedVaccineConcept._IPV.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1180,7 +1180,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		lVaccine.setLiveVirusVaccine(false);
 		supportedVaccinesMap.put(SupportedVaccineConcept._IPV, lVaccine);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._POLIO_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._POLIO_UNSPECIFIED.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._POLIO_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._POLIO_UNSPECIFIED.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1206,7 +1206,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Influenza);
 		
 		// Influenza, split
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_SPLIT.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_SPLIT.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_SPLIT.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_SPLIT.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1221,7 +1221,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_SPLIT, lVaccine);
 		
 		// Influenza, whole
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_WHOLE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_WHOLE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_WHOLE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_WHOLE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1236,7 +1236,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_WHOLE, lVaccine);
 		
 		// Influenza, unspecified formulation
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_UNSPECIFIED.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_UNSPECIFIED.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1251,7 +1251,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_UNSPECIFIED, lVaccine);
 		
 		// Influenza, live, intranasal
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("2y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1266,7 +1266,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL, lVaccine);		
 		
 		// Influenza, high dose, seasonal
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_HIGHDOSE_SEASONAL.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_HIGHDOSE_SEASONAL.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_HIGHDOSE_SEASONAL.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_HIGHDOSE_SEASONAL.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1281,7 +1281,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_HIGHDOSE_SEASONAL, lVaccine);			
 		
 		// Influenza, seasonal, injectable, preservative free
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE_PRESERVATIVEFREE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE_PRESERVATIVEFREE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1296,7 +1296,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE_PRESERVATIVEFREE, lVaccine);			
 		
 		// Influenza, seasonal, injectable
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1311,7 +1311,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_SEASONAL_INJECTABLE, lVaccine);
 
 		// Influenza, seasonal, intradermal, preservative free
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_SEASONAL_INTRADERMAL_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_SEASONAL_INTRADERMAL_PRESERVATIVEFREE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_SEASONAL_INTRADERMAL_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_SEASONAL_INTRADERMAL_PRESERVATIVEFREE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1326,7 +1326,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_SEASONAL_INTRADERMAL_PRESERVATIVEFREE, lVaccine);
 		
 		// Influenza, live, intranasal, quadrivalent
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL_QUADRIVALENT.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL_QUADRIVALENT.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL_QUADRIVALENT.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL_QUADRIVALENT.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("2y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1341,7 +1341,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_LIVE_INTRANASAL_QUADRIVALENT, lVaccine);		
 
 		// influenza, injectable, quadrivalent, preservative free
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1356,7 +1356,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE, lVaccine);		
 
 		// influenza, injectable, quadrivalent, preservative free, pediatric
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE_PEDIATRIC.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE_PEDIATRIC.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE_PEDIATRIC.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE_PEDIATRIC.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1371,7 +1371,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT_PRESERVATIVEFREE_PEDIATRIC, lVaccine);		
 
 		// influenza, injectable, quadrivalent, preservative free, pediatric
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_INTRADERMAL_QUADRIVALENT_PRESERVATIVEFREE_INJECTABLE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INTRADERMAL_QUADRIVALENT_PRESERVATIVEFREE_INJECTABLE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_INTRADERMAL_QUADRIVALENT_PRESERVATIVEFREE_INJECTABLE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INTRADERMAL_QUADRIVALENT_PRESERVATIVEFREE_INJECTABLE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1386,7 +1386,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_INTRADERMAL_QUADRIVALENT_PRESERVATIVEFREE_INJECTABLE, lVaccine);
 		
 		// influenza nasal, unspecified formulation
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_NASAL_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_NASAL_UNSPECIFIED.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_NASAL_UNSPECIFIED.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_NASAL_UNSPECIFIED.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod("2y-4d"));
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1401,7 +1401,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_NASAL_UNSPECIFIED, lVaccine);
 		
 		// influenza, injectable, MDCK, preservative free
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_INJECTABLE_MDCK_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INJECTABLE_MDCK_PRESERVATIVEFREE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_INJECTABLE_MDCK_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INJECTABLE_MDCK_PRESERVATIVEFREE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1416,7 +1416,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_INJECTABLE_MDCK_PRESERVATIVEFREE, lVaccine);
 		
 		// influenza, recombinant, injectable, preservative free
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_RECOMBINANT_INJECTABLE_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_RECOMBINANT_INJECTABLE_PRESERVATIVEFREE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_RECOMBINANT_INJECTABLE_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_RECOMBINANT_INJECTABLE_PRESERVATIVEFREE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1431,7 +1431,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._INFLUENZA_RECOMBINANT_INJECTABLE_PRESERVATIVEFREE, lVaccine);		
 
 		// influenza, injectable, quadrivalent >= 3yrs
-		ic = new ICEConcept(SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT.getConceptCodeValue(), true, SupportedVaccineConcept._INFLUENZA_INJECTABLE_QUADRIVALENT.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1456,7 +1456,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.H1N1);
 		
 		// Novel Influenza-H1N1-09, nasal
-		ic = new ICEConcept(SupportedVaccineConcept._H1N1_09_NASAL.getConceptCodeValue(), true, SupportedVaccineConcept._H1N1_09_NASAL.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._H1N1_09_NASAL.getConceptCodeValue(), true, SupportedVaccineConcept._H1N1_09_NASAL.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1471,7 +1471,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._H1N1_09_NASAL, lVaccine);
 
 		// Novel influenza-H1N1-09, preservative-free
-		ic = new ICEConcept(SupportedVaccineConcept._H1N1_09_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._H1N1_09_PRESERVATIVEFREE.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._H1N1_09_PRESERVATIVEFREE.getConceptCodeValue(), true, SupportedVaccineConcept._H1N1_09_PRESERVATIVEFREE.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1486,7 +1486,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._H1N1_09_PRESERVATIVEFREE, lVaccine);
 		
 		// Novel influenza-H1N1-09
-		ic = new ICEConcept(SupportedVaccineConcept._H1N1_09.getConceptCodeValue(), true, SupportedVaccineConcept._H1N1_09.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._H1N1_09.getConceptCodeValue(), true, SupportedVaccineConcept._H1N1_09.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1501,7 +1501,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		supportedVaccinesMap.put(SupportedVaccineConcept._H1N1_09, lVaccine);		
 		
 		// Novel influenza H1N1-09, all formulations
-		ic = new ICEConcept(SupportedVaccineConcept._H1N1_09_ALLFORMULATIONS.getConceptCodeValue(), true, SupportedVaccineConcept._H1N1_09_ALLFORMULATIONS.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._H1N1_09_ALLFORMULATIONS.getConceptCodeValue(), true, SupportedVaccineConcept._H1N1_09_ALLFORMULATIONS.getConceptDisplayNameValue());
 		lVaccineComponent = new VaccineComponent(ic, diseaseImmunityList);
 		lVaccineComponent.setValidMinimumAgeForUse(null);
 		lVaccineComponent.setValidMaximumAgeForUse(null);
@@ -1532,7 +1532,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Pertussis);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Hib);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._DTP_HIB.getConceptCodeValue(), true, SupportedVaccineConcept._DTP_HIB.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTP_HIB.getConceptCodeValue(), true, SupportedVaccineConcept._DTP_HIB.getConceptDisplayNameValue());
 		// Add Hib and HepB Vaccine Components 
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._HIB_NOS);
@@ -1555,7 +1555,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Pertussis);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Polio);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._DTAP_HIB_IPV.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_HIB_IPV.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTAP_HIB_IPV.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_HIB_IPV.getConceptDisplayNameValue());
 		// Add Hib, DTaP, and IPV Vaccine Components START
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._DTAP);
@@ -1577,7 +1577,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		// diseaseImmunityList.add(SupportedDiseaseConcept.Meningococcal);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Hib);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._MENING_HIB.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_HIB.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MENING_HIB.getConceptCodeValue(), true, SupportedVaccineConcept._MENING_HIB.getConceptDisplayNameValue());
 		// Add Hib and Mening Vaccine Components 
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._HIB_PRP_T);
@@ -1600,7 +1600,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Pertussis);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Hib);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._DTAP_HIB.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_HIB.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTAP_HIB.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_HIB.getConceptDisplayNameValue());
 		// Add Hib and HepB Vaccine Components 
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._HIB_PRP_T);
@@ -1622,7 +1622,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Pertussis);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Polio);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._DTAP_IPV.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_IPV.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTAP_IPV.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_IPV.getConceptDisplayNameValue());
 		// Add Hib and HepB Vaccine Components 
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._IPV);
@@ -1642,7 +1642,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.HepB);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Hib);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._HEPB_HIB.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_HIB.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._HEPB_HIB.getConceptCodeValue(), true, SupportedVaccineConcept._HEPB_HIB.getConceptDisplayNameValue());
 		// Add Hib and HepB Vaccine Components 
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._HIB_PRP_OMP);
@@ -1665,7 +1665,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Pertussis);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Polio);
 
-		ic = new ICEConcept(SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptDisplayNameValue());
 		// Add HepB, DTaP, and IPV Vaccine Components START
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._DTAP);
@@ -1690,7 +1690,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Pertussis);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Hib);
 
-		ic = new ICEConcept(SupportedVaccineConcept._DTP_HIB_HEPB.getConceptCodeValue(), true, SupportedVaccineConcept._DTP_HIB_HEPB.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTP_HIB_HEPB.getConceptCodeValue(), true, SupportedVaccineConcept._DTP_HIB_HEPB.getConceptDisplayNameValue());
 		// Add HepB, DTP, and Hib Vaccine Components START
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._DTP);
@@ -1715,7 +1715,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Hib);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Polio);
 
-		ic = new ICEConcept(SupportedVaccineConcept._DTAP_IPV_HIB_HEPB_HISTORICAL.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_IPV_HIB_HEPB_HISTORICAL.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTAP_IPV_HIB_HEPB_HISTORICAL.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_IPV_HIB_HEPB_HISTORICAL.getConceptDisplayNameValue());
 		// Add HepB, DTP, and Hib Vaccine Components START
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._DTAP);
@@ -1731,7 +1731,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		lVaccine.setCombinationVaccine(true);
 		supportedVaccinesMap.put(SupportedVaccineConcept._DTAP_IPV_HIB_HEPB_HISTORICAL, lVaccine);
 		
-		ic = new ICEConcept(SupportedVaccineConcept._DTAP_IPV_HIB_HEPB.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_IPV_HIB_HEPB.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._DTAP_IPV_HIB_HEPB.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_IPV_HIB_HEPB.getConceptDisplayNameValue());
 		// Add HepB, DTP, and Hib Vaccine Components START
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._DTAP);
@@ -1754,7 +1754,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.HepA);
 		diseaseImmunityList.add(SupportedDiseaseConcept.HepB);
 
-		ic = new ICEConcept(SupportedVaccineConcept._TWINRIX.getConceptCodeValue(), true, SupportedVaccineConcept._TWINRIX.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._TWINRIX.getConceptCodeValue(), true, SupportedVaccineConcept._TWINRIX.getConceptDisplayNameValue());
 		// Add HepA and HepB Vaccine Components START
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE);
@@ -1775,7 +1775,7 @@ public class ScheduleStaticTmpImpl implements Schedule {
 		diseaseImmunityList.add(SupportedDiseaseConcept.Rubella);
 		diseaseImmunityList.add(SupportedDiseaseConcept.Varicella);
 
-		ic = new ICEConcept(SupportedVaccineConcept._MMR_VARICELLA.getConceptCodeValue(), true, SupportedVaccineConcept._MMR_VARICELLA.getConceptDisplayNameValue());
+		ic = new CdsConcept(SupportedVaccineConcept._MMR_VARICELLA.getConceptCodeValue(), true, SupportedVaccineConcept._MMR_VARICELLA.getConceptDisplayNameValue());
 		// Add MMR and Varicella Vaccine Components Start
 		lVaccineComponentList = new ArrayList<VaccineComponent>();
 		componentVaccine = this.supportedVaccinesMap.get(SupportedVaccineConcept._MMR);

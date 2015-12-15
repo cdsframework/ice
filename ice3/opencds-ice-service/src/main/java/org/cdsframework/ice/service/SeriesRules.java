@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept;
 
 public class SeriesRules {
@@ -253,7 +254,7 @@ public class SeriesRules {
 			return false;
 		}
 
-		ICEConcept vIceConcept = v.getVaccineConcept();
+		CdsConcept vIceConcept = v.getVaccineConcept();
 		logger.debug(_METHODNAME + "vaccine concept: " + vIceConcept + "; doseNumber: " + doseNumber + "; allowable any " + allowableForAnyDose);
 		if (vIceConcept == null) {
 			logger.debug(_METHODNAME + "here-1");
@@ -278,7 +279,7 @@ public class SeriesRules {
 				for (Vaccine permittedVaccine : allPermittedComponentVaccines) {
 					if (permittedVaccine != null) {
 						logger.debug(_METHODNAME + "here3");
-						ICEConcept iceConcept = permittedVaccine.getVaccineConcept();
+						CdsConcept iceConcept = permittedVaccine.getVaccineConcept();
 						logger.debug(_METHODNAME + "ice concept: " + (iceConcept == null ? "null" : iceConcept.getOpenCdsConceptCode()));
 						if (iceConcept == null) {
 							logger.debug(_METHODNAME + "here4");

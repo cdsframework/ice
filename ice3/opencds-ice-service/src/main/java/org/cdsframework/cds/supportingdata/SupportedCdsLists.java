@@ -1,4 +1,4 @@
-package org.cdsframework.ice.supportingdata;
+package org.cdsframework.cds.supportingdata;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,8 +10,9 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.ICEConcept;
+import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.util.support.data.cds.list.CdsListItem;
 import org.cdsframework.util.support.data.cds.list.CdsListSpecificationFile;
@@ -19,7 +20,7 @@ import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 
-public class SupportedCdsLists {
+public class SupportedCdsLists implements SupportingData {
 	
 	/**
 	 * Representative of a concept and one associated local code, that can be represented by an enumeration as follows (for example):
@@ -43,7 +44,7 @@ public class SupportedCdsLists {
 	private static Log logger = LogFactory.getLog(SupportedCdsLists.class);
 		
 	
-	protected SupportedCdsLists(List<String> pCdsVersions) {
+	public SupportedCdsLists(List<String> pCdsVersions) {
 		
 		if (pCdsVersions == null) {
 			this.cdsVersions = new ArrayList<String>();
@@ -60,7 +61,7 @@ public class SupportedCdsLists {
 	}
 	
 	
-	protected boolean isEmpty() {
+	public boolean isEmpty() {
 		
 		if (this.cdsListItemNameToCdsListItem.isEmpty()) {
 			return true;
@@ -94,7 +95,7 @@ public class SupportedCdsLists {
 		}
 		
 		LocallyCodedCdsListItem slci = new LocallyCodedCdsListItem(pCdsListSpecificationFile, pCdsListItem);
-		String lSupportedListItemName = slci.getSupportedCdsListItemName();
+		String lSupportedListItemName = slci.getCdsListItemName();
 		if (this.cdsListItemNameToCdsListItem.containsKey(lSupportedListItemName)) {
 			String lErrStr = "Attempt to add duplicate SupportedListItem: cannot add a supported list concept that already been added; must first remove the prior SupportedCdsListItem of the same name " + 
 				lSupportedListItemName;
@@ -165,8 +166,8 @@ public class SupportedCdsLists {
 		///////
 		// Add the OpenCDS Concepts (if any) to SupportedConcepts, only if the CdsList is of an IceConceptType
 		///////
-		Collection<ICEConcept> lConcepts = slci.getCdsListItemOpencdsConceptMappings();
-		for (ICEConcept lC : lConcepts) {
+		Collection<CdsConcept> lConcepts = slci.getCdsListItemOpencdsConceptMappings();
+		for (CdsConcept lC : lConcepts) {
 			lC.setIsOpenCdsSupportedConcept(true);
 			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(ICEConceptType.OPENCDS, lC, slci);
 		}
@@ -176,7 +177,7 @@ public class SupportedCdsLists {
 		///////
 		ICEConceptType lIceConceptType = ICEConceptType.getSupportedIceConceptType(lSLCCdsListCode);
 		if (lIceConceptType != null) {
-			ICEConcept lIC = new ICEConcept(lSupportedListItemName, false);		// Not an OpenCDS concept
+			CdsConcept lIC = new CdsConcept(lSupportedListItemName, false);		// Not an OpenCDS concept
 			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(lIceConceptType, lIC, slci);
 		}
 		

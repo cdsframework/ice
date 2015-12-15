@@ -37,6 +37,8 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
+import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.util.ConceptUtils;
@@ -44,6 +46,7 @@ import org.cdsframework.ice.util.XMLSupportingDataFilenameFilterImpl;
 import org.cdsframework.util.support.data.cds.list.CdsListItem;
 import org.cdsframework.util.support.data.cds.list.CdsListItemConceptMapping;
 import org.cdsframework.util.support.data.cds.list.CdsListSpecificationFile;
+import org.cdsframework.util.support.data.ice.season.IceSeasonSpecificationFile;
 import org.cdsframework.util.support.data.ice.vaccine.IceVaccineSpecificationFile;
 import org.cdsframework.util.support.data.ice.vaccinegroup.IceVaccineGroupSpecificationFile;
 import org.opencds.common.exceptions.ImproperUsageException;
@@ -63,16 +66,21 @@ public class ICESupportingDataConfiguration {
 	private SupportedCdsLists supportedCdsLists;
 	private SupportedCdsVaccineGroups supportedCdsVaccineGroups;
 	private SupportedCdsVaccines supportedCdsVaccines;
+	private SupportedCdsSeasons supportedCdsSeasons;
 	
 	//
 	private static String supportingDataDirectory = "ice-supporting-data";
 	private static String supportingDataConceptsAndCodesSubdirectory = "OtherLists";	
 	private static String supportingDataVaccineGroupsSubdirectory = "VaccineGroups";
 	private static String supportingDataVaccinesSubdirectory = "Vaccines";
+	private static String supportingDataSeasonsSubdirectory = "Seasons";
+	private static String supportingDataSeriesSubdirectory = "Series";
 	//
 	private static final String _ICE_CDS_LIST_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.cds.list";
 	private static final String _ICE_VACCINE_GROUP_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.vaccinegroup";
 	private static final String _ICE_VACCINE_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.vaccine";
+	private static final String _ICE_SEASON_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.season";
+	private static final String _ICE_SERIES_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.series";
 	
 	private static Log logger = LogFactory.getLog(ICESupportingDataConfiguration.class);
 	
@@ -120,7 +128,9 @@ public class ICESupportingDataConfiguration {
 			}
 		}
 		
-		// Initialize the data
+		///////
+		// Initialize Code Systems/Value Sets supporting data
+		///////
 		this.supportedCdsLists = new SupportedCdsLists(supportedCdsVersions);
 		initializeCodeConcepts(supportingDataConceptsAndCodesSubdirectory);
 		if (logger.isDebugEnabled()) {
@@ -129,6 +139,9 @@ public class ICESupportingDataConfiguration {
 			logger.debug(_METHODNAME + lDebugStr);
 		}
 
+		///////
+		// Initialize the Vaccine Group supporting data
+		///////
 		this.supportedCdsVaccineGroups = new SupportedCdsVaccineGroups(this.supportedCdsVersions, this.supportedCdsLists);
 		initializeVaccineGroupSupportingData(supportingDataVaccineGroupsSubdirectory);
 		if (logger.isDebugEnabled()) {
@@ -137,6 +150,9 @@ public class ICESupportingDataConfiguration {
 			logger.debug(_METHODNAME + lDebugStr);
 		}
 
+		///////
+		// Initialize the Vaccine supporting data
+		///////
 		this.supportedCdsVaccines = new SupportedCdsVaccines(this.supportedCdsVersions, this.supportedCdsLists);
 		initializeVaccineSupportingData(supportingDataVaccinesSubdirectory);
 		if (logger.isDebugEnabled()) {
@@ -144,6 +160,16 @@ public class ICESupportingDataConfiguration {
 			lDebugStr += this.supportedCdsVaccines.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}
+		if (! this.supportedCdsVaccines.isVaccineSupportingDataConsistent()) {
+			String lErrStr = "The vaccine data supplied is inconsistent. Please ensure that all vaccine components for all vaccines have been defined in the supporting data";
+			logger.error(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}		
+		
+		///////
+		// Initialize Seasons supporting data
+		///////
+		this.supportedCdsSeasons = new SupportedCdsSeasons(this.supportedCdsVersions, this.supportedCdsLists);
 		
 		// Log configuration data parameters of data initialized
 		lSbCdsVersion.append("; ");
@@ -370,12 +396,79 @@ public class ICESupportingDataConfiguration {
 				throw new RuntimeException(lErrStr);
 			}
 		}
+
+	}
+	
+	
+	/**
+	 * Initialize the Vaccine Group Concepts from supporting iceVaccineGroupSpecificationFile XML data files  
+	 * @param pSupportingDataDirectory
+	 * @param pChildDirectory
+	 * @throws ImproperUsageException
+	 * @throws InconsistentConfigurationException
+	 */
+	private void initializeSeasonsSupportingData(String pSDSubDirectory) 
+		throws ImproperUsageException {	
+	
+		String _METHODNAME = "initializeSeasonsSupportingData(): ";
+
+		if (this.supportedCdsSeasons.isEmpty() == false) {
+			String lErrStr = "supported seasons concepts has already been initialized";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ICECoreError(lErrStr);
+		}
+		for (File lSupportingDataDirectory : this.supportingDataDirectoryLocations) {
+			File lVaccineDirectory = new File(lSupportingDataDirectory, pSDSubDirectory);
+			if (! lVaccineDirectory.exists()) {
+				// No coded concepts defined for this CDS version - go to next supported CDS version
+				if (logger.isDebugEnabled()) {
+					String lInfo = "No vaccine supporting data defined at: " + lVaccineDirectory.getAbsolutePath();
+					logger.debug(_METHODNAME + lInfo);
+				}
+				continue;
+			}
+			try {
+				JAXBContext jc = JAXBContext.newInstance(_ICE_SEASON_SPECIFICATION_FILE_XML_NAMESPACE);
+				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
+				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
+				String[] lSDFiles = lVaccineDirectory.list(lFF);
+				if (lSDFiles == null) {
+					String lErrStr = "An error occurred obtaining list of supporting data files";
+					logger.error(_METHODNAME + lErrStr);
+					throw new RuntimeException(lErrStr);
+				}
+
+				for (String lSDFile : lSDFiles) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Parsing supporting data file: \"" + lSDFile + "\"");
+					}
+					File lIceVFile = new File(lVaccineDirectory, lSDFile);
+					IceSeasonSpecificationFile icevf = (IceSeasonSpecificationFile) lUnmarshaller.unmarshal(lIceVFile);
+					addSupportingSeasonConceptFromIceSeasonSpecificationFile(icevf, lIceVFile);
+				}
+			}
+			catch (SecurityException se) {
+				String lErrStr = "encountered an exception processing supporting data file";
+				logger.error(_METHODNAME + lErrStr, se);
+				throw new RuntimeException(lErrStr);				
+			}			
+			catch (JAXBException jaxbe) {
+				String lErrStr = "encountered an exception processing supporting data file; likely an invalid formatted file";
+				logger.error(_METHODNAME + lErrStr, jaxbe);
+				throw new RuntimeException(lErrStr);
+			}
+		}
 		
 		if (! this.supportedCdsVaccines.isVaccineSupportingDataConsistent()) {
 			String lErrStr = "The vaccine data supplied is inconsistent";
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}		
+	}
+	
+	
+	private void addSupportingSeasonConceptFromIceSeasonSpecificationFile(IceSeasonSpecificationFile pIceSeasonSpecificationFile, File pSeasonFile) {
+		
 	}
 	
 	

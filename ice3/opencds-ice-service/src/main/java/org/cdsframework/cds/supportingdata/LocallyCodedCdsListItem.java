@@ -24,7 +24,7 @@
  * correspondence to ice@hln.com.
  */
  
-package org.cdsframework.ice.supportingdata;
+package org.cdsframework.cds.supportingdata;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,7 +32,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.ICEConcept;
+import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.util.support.data.cds.list.CdsListItem;
 import org.cdsframework.util.support.data.cds.list.CdsListItemConceptMapping;
 import org.cdsframework.util.support.data.cds.list.CdsListSpecificationFile;
@@ -68,7 +68,7 @@ public class LocallyCodedCdsListItem {
 	 *
 	 */
 
-	private String supportedCdsListItemName;
+	private String cdsListItemName;
 	private String cdsListId;
 	private String cdsListCode;
 	private String cdsListName;
@@ -81,7 +81,7 @@ public class LocallyCodedCdsListItem {
 	private String cdsListOpenCdsConceptType;
 	private String cdsListItemKey;
 	private String cdsListItemValue;
-	private Collection<ICEConcept> opencdsConceptMappings;
+	private Collection<CdsConcept> opencdsConceptMappings;
 	private Collection<String> cdsListVersions;
 	private CD cdsListItemCD;
 	
@@ -191,17 +191,17 @@ public class LocallyCodedCdsListItem {
 		this.cdsListOpenCdsConceptType = pCdsLsf.getOpenCdsConceptType();			
 		this.cdsListItemKey = lCdsListItemKey.replaceAll("[ \t\n\f\r]", "_");
 		this.cdsListItemValue = pCdsLi.getCdsListItemValue();
-		this.opencdsConceptMappings = new ArrayList<ICEConcept>();
+		this.opencdsConceptMappings = new ArrayList<CdsConcept>();
 		List<CdsListItemConceptMapping> clicm = pCdsLi.getCdsListItemConceptMappings();
 		for (CdsListItemConceptMapping clic : clicm) {
-			ICEConcept ic = new ICEConcept(clic.getCode(), true, clic.getDisplayName());
+			CdsConcept ic = new CdsConcept(clic.getCode(), true, clic.getDisplayName());
 			ic.setDeterminationMethodCode(clic.getConceptDeterminationMethod());
 			// CdsListItemConceptMapping has codeSystem and codeSystemName attributes, but this is N/A for an OpenCDS concept code so not included here
 			this.opencdsConceptMappings.add(ic);
 		}
 
 		this.cdsListVersions = pCdsLsf.getCdsVersions();
-		this.supportedCdsListItemName = this.cdsListCode + "." + this.cdsListItemKey; 
+		this.cdsListItemName = this.cdsListCode + "." + this.cdsListItemKey; 
 		
 		// Create CD
 		this.cdsListItemCD = new CD();
@@ -233,8 +233,8 @@ public class LocallyCodedCdsListItem {
 	/**
 	 * Returns the CdsListItemName that has been assigned to this CdsListItem. The CdsListItemName is always populated.
 	 */
-	public String getSupportedCdsListItemName() {
-		return this.supportedCdsListItemName;
+	public String getCdsListItemName() {
+		return this.cdsListItemName;
 	}
 	
 	public String getCdsListId() {
@@ -305,20 +305,20 @@ public class LocallyCodedCdsListItem {
 		return this.cdsListOpenCdsConceptType;
 	}
 
-	public Collection<ICEConcept> getCdsListItemOpencdsConceptMappings() {
+	public Collection<CdsConcept> getCdsListItemOpencdsConceptMappings() {
 		return this.opencdsConceptMappings;
 	}
 
 	@Override
 	public String toString() {
 
-		String lStr = "[SupportedCdsListItem=" + supportedCdsListItemName + "\ncdsListId=" + cdsListId	+ 
+		String lStr = "[SupportedCdsListItem=" + cdsListItemName + "\ncdsListId=" + cdsListId	+ 
 				"\ncdsListCode=" + cdsListCode + "\ncdsListName=" + cdsListName + "\ncdsListType=" + cdsListType + "\ncdsListDescription=" + cdsListDescription +
 				"\ncdsListCodeSystem=" + cdsListCodeSystem + "\ncdsListCodeSystemName=" + cdsListCodeSystemName + "\ncdsListValueSet=" + cdsListValueSet + 
 				"\ncdsListOpenCdsConceptType=" + cdsListOpenCdsConceptType + "\ncdsListItemKey=" + cdsListItemKey +	"\ncdsListItemValue=" + cdsListItemValue;
 		lStr += "\nopencdsConceptMappings= [";
 
-		for (ICEConcept icc : getCdsListItemOpencdsConceptMappings()) {
+		for (CdsConcept icc : getCdsListItemOpencdsConceptMappings()) {
 			lStr += "\tICEConcept=" + icc.toString() + "\n";
 		}
 		lStr += "\t]\n";		
@@ -338,8 +338,8 @@ public class LocallyCodedCdsListItem {
 		int result = 1;
 		result = prime
 				* result
-				+ ((supportedCdsListItemName == null) ? 0
-						: supportedCdsListItemName.hashCode());
+				+ ((cdsListItemName == null) ? 0
+						: cdsListItemName.hashCode());
 		return result;
 	}
 
@@ -353,11 +353,11 @@ public class LocallyCodedCdsListItem {
 		if (getClass() != obj.getClass())
 			return false;
 		LocallyCodedCdsListItem other = (LocallyCodedCdsListItem) obj;
-		if (supportedCdsListItemName == null) {
-			if (other.supportedCdsListItemName != null)
+		if (cdsListItemName == null) {
+			if (other.cdsListItemName != null)
 				return false;
 		} 
-		else if (!supportedCdsListItemName.equals(other.supportedCdsListItemName))
+		else if (!cdsListItemName.equals(other.cdsListItemName))
 			return false;
 		return true;
 	}
