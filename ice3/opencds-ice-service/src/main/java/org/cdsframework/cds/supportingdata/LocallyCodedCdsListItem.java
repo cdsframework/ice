@@ -103,7 +103,7 @@ public class LocallyCodedCdsListItem {
 	protected LocallyCodedCdsListItem(CdsListSpecificationFile pCdsLsf, CdsListItem pCdsLi) 
 		throws ImproperUsageException {
 
-		String _METHODNAME = "SupportedListConceptItem(): ";
+		String _METHODNAME = "LocallyCodedCdsListItem(): ";
 
 		if (pCdsLsf == null || pCdsLi == null) {
 			return;

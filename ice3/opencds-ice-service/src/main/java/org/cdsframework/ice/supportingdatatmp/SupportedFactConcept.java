@@ -1,4 +1,4 @@
-package org.cdsframework.ice.supportingdata.tmp;
+package org.cdsframework.ice.supportingdatatmp;
 
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 

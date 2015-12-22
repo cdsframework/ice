@@ -1,5 +1,7 @@
 package org.cdsframework.ice.service;
 
+import org.cdsframework.ice.service.TargetSeries;
+
 public class ICEFactTypeFinding {
 
 	private String iceResultFinding;

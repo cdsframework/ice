@@ -43,13 +43,22 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICECoreError;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.service.Recommendation;
 import org.cdsframework.ice.service.Recommendation.RecommendationStatus;
 import org.cdsframework.ice.service.Recommendation.RecommendationType;
-import org.cdsframework.ice.service.TimePeriod.DurationType;
-import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept;
-import org.cdsframework.ice.supportingdata.tmp.SupportedEvaluationConcept;
-import org.cdsframework.ice.supportingdata.tmp.SupportedRecommendationConcept;
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.util.TimePeriodException;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 public class TargetSeries {
@@ -143,7 +152,7 @@ public class TargetSeries {
 
 		interimEvaluationValidityCountByDisease = new EnumMap<SupportedDiseaseConcept, Integer>(SupportedDiseaseConcept.class);
 		interimDosesToSkipByDisease = new EnumMap<SupportedDiseaseConcept, Map<Integer, Integer>>(SupportedDiseaseConcept.class);
-		Collection<SupportedDiseaseConcept> targetedDiseases = pScheduleBackingSeries.getDiseasesTargetedByVaccineGroup(pSeriesRules.getVaccineGroup());
+		Collection<SupportedDiseaseConcept> targetedDiseases = null; // TODO: (SD) pScheduleBackingSeries.getDiseasesTargetedByVaccineGroup(pSeriesRules.getVaccineGroup());
 		if (targetedDiseases != null) {
 			for (SupportedDiseaseConcept disease : targetedDiseases) {
 				interimEvaluationValidityCountByDisease.put(disease, new Integer(0));
@@ -253,7 +262,7 @@ public class TargetSeries {
 		}
 
 		// Get the specified SeriesRules
-		SeriesRules srOfSwitchSeries = schedule.getScheduleSeriesByName(this.seriesRules.getVaccineGroup(), seriesToConvertTo);
+		SeriesRules srOfSwitchSeries = null; // TODO:  (SD) schedule.getScheduleSeriesByName(this.seriesRules.getVaccineGroup(), seriesToConvertTo);
 		if (srOfSwitchSeries == null) {
 			String str = _METHODNAME + "specified series not found";
 			logger.error(str);
@@ -594,11 +603,14 @@ public class TargetSeries {
 		int highestNonSkipDoseNumberToEntry = 0;
 
 		// Tally up objects for each disease, that is-- how many valid doses for each disease
-		Map<SupportedDiseaseConcept, Integer> tallyOfDoseNumberByDisease = new HashMap<SupportedDiseaseConcept, Integer>();
-		Map<SupportedDiseaseConcept, Integer> tallyOfRelevantDiseaseImmunity = new HashMap<SupportedDiseaseConcept, Integer>();
-
+		/////// Map<SupportedDiseaseConcept, Integer> tallyOfDoseNumberByDisease = new HashMap<SupportedDiseaseConcept, Integer>();
+		/////// Map<SupportedDiseaseConcept, Integer> tallyOfRelevantDiseaseImmunity = new HashMap<SupportedDiseaseConcept, Integer>();
+		Map<String, Integer> tallyOfDoseNumberByDisease = new HashMap<String, Integer>();
+		Map<String, Integer> tallyOfRelevantDiseaseImmunity = new HashMap<String, Integer>();
+		
 		// Initialize tally for supported diseases
-		Collection<SupportedDiseaseConcept> allSupportedDiseases = antigensToIncludeInDetermination;
+		/////// Collection<SupportedDiseaseConcept> allSupportedDiseases = antigensToIncludeInDetermination;
+		Collection<String> allSupportedDiseases = antigensToIncludeInDetermination;
 		for (SupportedDiseaseConcept disease : allSupportedDiseases) {
 			tallyOfDoseNumberByDisease.put(disease, new Integer(0));
 		}
@@ -625,14 +637,16 @@ public class TargetSeries {
 		String pTDUniqueIdentifier = pTD.getUniqueId();
 		TargetDose lPreviouslyProcessedTD = null;
 		Date lDuplicateShotSameDayValidDoseFoundDate = null;
-		HashSet<SupportedDiseaseConcept> lDuplicateShotDiseases = new HashSet<SupportedDiseaseConcept>();
+		/////// HashSet<SupportedDiseaseConcept> lDuplicateShotDiseases = new HashSet<SupportedDiseaseConcept>();
+		HashSet<String> lDuplicateShotDiseases = new HashSet<String>();
 		for (TargetDose td : targetDoses) {
 			if (updateInternalSeriesDoseNumberCount == false && lPreviouslyProcessedTD != null && lPreviouslyProcessedTD.getUniqueId().equals(pTDUniqueIdentifier)) {
 				break;
 			}
 			if (lDuplicateShotSameDayValidDoseFoundDate != null && ! td.getAdministrationDate().equals(lDuplicateShotSameDayValidDoseFoundDate)) {
 				lDuplicateShotSameDayValidDoseFoundDate = null;
-				lDuplicateShotDiseases = new HashSet<SupportedDiseaseConcept>();
+				/////// lDuplicateShotDiseases = new HashSet<SupportedDiseaseConcept>();
+				lDuplicateShotDiseases = new HashSet<String>();
 			}
 			if (lDuplicateShotSameDayValidDoseFoundDate != null && lPreviouslyProcessedTD != null && 
 				this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByEachVaccineAdministered() == false && 
@@ -642,13 +656,15 @@ public class TargetSeries {
 				continue;
 			}
 			DoseStatus statusThisTD = td.getStatus();
-			Collection<SupportedDiseaseConcept> diseasesTargetedByThisDose = td.getVaccineComponent().getAllDiseasesTargetedForImmunity();
+			/////// Collection<SupportedDiseaseConcept> diseasesTargetedByThisDose = td.getVaccineComponent().getAllDiseasesTargetedForImmunity();
+			Collection<String> diseasesTargetedByThisDose = td.getVaccineComponent().getAllDiseasesTargetedForImmunity();
 			if (Collections.disjoint(diseasesTargetedByThisDose, antigensToIncludeInDetermination)) {
 				// There is no overlap in diseases between this dose and the antigens we're checking.
 				lPreviouslyProcessedTD = td;
 				continue;
 			}
-			for (SupportedDiseaseConcept diseaseTargeted : diseasesTargetedByThisDose) {
+			/////// for (SupportedDiseaseConcept diseaseTargeted : diseasesTargetedByThisDose) {
+			for (String diseaseTargeted : diseasesTargetedByThisDose) {
 				Integer numberOfValidDosesForDiseaseInt = tallyOfDoseNumberByDisease.get(diseaseTargeted);
 				if (numberOfValidDosesForDiseaseInt != null) { 
 					// Vaccine from this dose supports this disease in this series
@@ -3492,6 +3508,5 @@ public class TargetSeries {
 			return false;
 		return true;
 	}
-
 	
 }

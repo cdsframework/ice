@@ -42,11 +42,11 @@ import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
-import org.cdsframework.ice.service.TimePeriod;
-import org.cdsframework.ice.service.VaccineComponentSD;
-import org.cdsframework.ice.service.VaccineSD;
+import org.cdsframework.ice.service.VaccineComponent;
+import org.cdsframework.ice.service.Vaccine;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
+import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.util.support.data.ice.vaccine.IceVaccineSpecificationFile;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
@@ -64,8 +64,8 @@ public class SupportedCdsVaccines implements SupportingData {
 	// keep track of which Vaccines each VaccineComponent is associated so that they can be associated with the combination vaccine when/if that information comes available.
 	// private Map<String, VaccineSD> cdsListItemNameToVaccine;						// cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine 
 	private Map<String, LocallyCodedVaccineItem> cdsListItemNameToVaccineItem;		// cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine 
-	private Map<CD, VaccineComponentSD> cDToVaccineComponentsMap;					// VaccineComponents previously defined, keyed by CD
-	private Map<CD, Set<VaccineSD>> vaccineComponentCDToVaccinesNotFullySpecified;	// VaccineComponents which have been encountered in a Vaccine object but not yet defined
+	private Map<CD, VaccineComponent> cDToVaccineComponentsMap;					// VaccineComponents previously defined, keyed by CD
+	private Map<CD, Set<Vaccine>> vaccineComponentCDToVaccinesNotFullySpecified;	// VaccineComponents which have been encountered in a Vaccine object but not yet defined
 
 	// private Map<String, LocallyCodedVaccineItem> vaccineConcepts;					// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineItem
 	
@@ -91,8 +91,8 @@ public class SupportedCdsVaccines implements SupportingData {
 		}
 
 		this.cdsListItemNameToVaccineItem = new HashMap<String, LocallyCodedVaccineItem>();
-		this.cDToVaccineComponentsMap = new HashMap<CD, VaccineComponentSD>();
-		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<VaccineSD>>();
+		this.cDToVaccineComponentsMap = new HashMap<CD, VaccineComponent>();
+		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<Vaccine>>();
 	}
 	
 	
@@ -144,9 +144,9 @@ public class SupportedCdsVaccines implements SupportingData {
 	 * @throws ImproperUsageException if this method is used improperly
 	 */
 	protected boolean addSupportedVaccineItemFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecificationFile) 
-		throws ImproperUsageException {
+		throws ImproperUsageException, InconsistentConfigurationException {
 		
-		String _METHODNAME = "addSupportedVaccineItem(): ";
+		String _METHODNAME = "addSupportedVaccineItemFromIceVaccineSpecificationFile(): ";
 		
 		if (pIceVaccineSpecificationFile == null) {
 			return isVaccineSupportingDataConsistent();
@@ -250,7 +250,7 @@ public class SupportedCdsVaccines implements SupportingData {
 		///////
 		
 		// Vaccine Components
-		List<VaccineComponentSD> lVaccineComponentsToAddToVaccine = new ArrayList<VaccineComponentSD>();
+		List<VaccineComponent> lVaccineComponentsToAddToVaccine = new ArrayList<VaccineComponent>();
 		List<org.opencds.vmr.v1_0.schema.CD> lVaccineComponentsCD = pIceVaccineSpecificationFile.getVaccineComponents();
 		// Either the 
 		if (lVaccineComponentsCD == null || lVaccineComponentsCD.isEmpty()) {
@@ -294,7 +294,7 @@ public class SupportedCdsVaccines implements SupportingData {
 			else {
 				///////
 				// Create the new VaccineComponent, and make note of this a vaccine component; record and will be a part of this Vaccine
-				VaccineComponentSD lVaccineComponent = new VaccineComponentSD(ic, lRelatedDiseasesCdsListItems);
+				VaccineComponent lVaccineComponent = new VaccineComponent(ic, lRelatedDiseasesCdsListItems);
 				addPropertiesFromSDToVaccineComponent(lVaccineComponent, pIceVaccineSpecificationFile); 
 				lVaccineComponentsToAddToVaccine.add(lVaccineComponent);
 				
@@ -340,12 +340,12 @@ public class SupportedCdsVaccines implements SupportingData {
 		///////
 		// START Create the Vaccine and store it this object
 		///////
-		VaccineSD lVaccine = null;
+		Vaccine lVaccine = null;
 		if (lVaccineComponentsToAddToVaccine.size() == 0) {
-			lVaccine = new VaccineSD(ic);
+			lVaccine = new Vaccine(ic);
 		}
 		else {
-			lVaccine = new VaccineSD(ic, lVaccineComponentsToAddToVaccine, true);
+			lVaccine = new Vaccine(ic, lVaccineComponentsToAddToVaccine, true);
 		}
 		
 		// Set combination vaccine, live virus, and unformulated formulations, if applicable
@@ -372,9 +372,9 @@ public class SupportedCdsVaccines implements SupportingData {
 		// vaccine component
 		//
 		for (CD lVaccineComponentCD : lVaccineComponentsNotSpecified) {
-			Set<VaccineSD> lVaccinesNotFullySpecifiedSet = this.vaccineComponentCDToVaccinesNotFullySpecified.get(lVaccineComponentCD);
+			Set<Vaccine> lVaccinesNotFullySpecifiedSet = this.vaccineComponentCDToVaccinesNotFullySpecified.get(lVaccineComponentCD);
 			if (lVaccinesNotFullySpecifiedSet == null) {
-				lVaccinesNotFullySpecifiedSet = new HashSet<VaccineSD>();
+				lVaccinesNotFullySpecifiedSet = new HashSet<Vaccine>();
 			}
 			lVaccinesNotFullySpecifiedSet.add(lVaccine);
 			this.vaccineComponentCDToVaccinesNotFullySpecified.put(lVaccineComponentCD, lVaccinesNotFullySpecifiedSet);
@@ -446,7 +446,7 @@ public class SupportedCdsVaccines implements SupportingData {
 	}
 
 	
-	private void populatePreviouslyDefinedVaccinesAssociatedWithVaccineComponentWithSpecifiedVaccineComponentInfo(CD pVaccineComponentCD, VaccineComponentSD pVaccineComponent) {
+	private void populatePreviouslyDefinedVaccinesAssociatedWithVaccineComponentWithSpecifiedVaccineComponentInfo(CD pVaccineComponentCD, VaccineComponent pVaccineComponent) {
 		
 		if (pVaccineComponent == null || pVaccineComponentCD == null) {
 			return;
@@ -456,14 +456,14 @@ public class SupportedCdsVaccines implements SupportingData {
 		
 		// If this VaccineComponent was previously encountered by a Vaccine, add this VaccineComponent to those Vaccines as well.
 		if (this.vaccineComponentCDToVaccinesNotFullySpecified.containsKey(pVaccineComponentCD)) {
-			Set<VaccineSD> lAllPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(pVaccineComponentCD);
+			Set<Vaccine> lAllPreviouslyEncounteredVaccinesWVaccineComponent = this.vaccineComponentCDToVaccinesNotFullySpecified.get(pVaccineComponentCD);
 			if (lAllPreviouslyEncounteredVaccinesWVaccineComponent != null) {
-				List<VaccineSD> lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent = new ArrayList<VaccineSD>();
-				for (VaccineSD lVaccine : lAllPreviouslyEncounteredVaccinesWVaccineComponent) {
+				List<Vaccine> lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent = new ArrayList<Vaccine>();
+				for (Vaccine lVaccine : lAllPreviouslyEncounteredVaccinesWVaccineComponent) {
 					lVaccine.addMemberVaccineComponent(pVaccineComponent);
 					lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent.add(lVaccine);
 				}
-				for (VaccineSD lPreviousVaccineEncountered : lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent) {
+				for (Vaccine lPreviousVaccineEncountered : lVaccinesToRemoveFromSetOfPreviouslyEncounteredVaccinesWVaccineComponent) {
 					lAllPreviouslyEncounteredVaccinesWVaccineComponent.remove(lPreviousVaccineEncountered);
 				}
 				if (lAllPreviouslyEncounteredVaccinesWVaccineComponent.size() == 0) {
@@ -487,7 +487,7 @@ public class SupportedCdsVaccines implements SupportingData {
 	 * @param pVaccineComponent
 	 * @param pIVSF
 	 */
-	private void addPropertiesFromSDToVaccineComponent(VaccineComponentSD pVaccineComponent, IceVaccineSpecificationFile pIVSF) {
+	private void addPropertiesFromSDToVaccineComponent(VaccineComponent pVaccineComponent, IceVaccineSpecificationFile pIVSF) {
 		
 		if (pVaccineComponent == null || pIVSF == null) {
 			return;

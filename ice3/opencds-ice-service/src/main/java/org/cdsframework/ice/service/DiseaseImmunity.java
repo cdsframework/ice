@@ -30,7 +30,7 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept;
 
 
 public class DiseaseImmunity {

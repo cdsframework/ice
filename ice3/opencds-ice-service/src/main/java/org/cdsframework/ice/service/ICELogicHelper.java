@@ -37,7 +37,6 @@ import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opencds.common.exceptions.InvalidDataException;
-import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
 
 public class ICELogicHelper {

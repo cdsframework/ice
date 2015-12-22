@@ -64,24 +64,23 @@ import org.cdsframework.ice.service.PayloadHelper
 import org.cdsframework.ice.service.Recommendation
 import org.cdsframework.ice.service.Recommendation.RecommendationStatus
 import org.cdsframework.ice.service.Schedule
-import org.cdsframework.ice.service.configurations.ScheduleImpl
-import org.cdsframework.ice.service.configurations.ScheduleStaticTmpImpl
 import org.cdsframework.ice.service.Season
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdata.tmp.SupportedEvaluationConcept
-import org.cdsframework.ice.supportingdata.tmp.SupportedFactConcept
-import org.cdsframework.ice.supportingdata.tmp.SupportedImmunityConcept
-import org.cdsframework.ice.supportingdata.tmp.SupportedRecommendationConcept
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept
+import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
+import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.supportingdatatmp.SupportedImmunityConcept
+import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept
+import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
+import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetDoseInitializationTracker
 import org.cdsframework.ice.service.TargetSeasons
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.service.TargetSeriesSelection
 import org.cdsframework.ice.service.TargetSeriesSelection.SeriesSelectionStatus
-import org.cdsframework.ice.service.TimePeriod
-import org.cdsframework.ice.service.TimePeriod.DurationType
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Vaccine
 import org.cdsframework.ice.service.VaccineComponent
 
@@ -108,22 +107,6 @@ global java.lang.String requestedKmId
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "ImmunizationReferenceData.Initialize Static Immunization Schedule" ruleflow-group "ImmunizationReferenceData"
-	dialect "mvel"
-   	when
-		not Schedule()
-		eval(baseKnowledgeRepositoryLocation == null || requestedKmId == null || requestedKmId.length() == 0)
-	then
-		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
-		Schedule s = new ScheduleStaticTmpImpl("Schedule_v1.1.0");
-		insert(s);
-		ICELogicHelper.logDRLDebugMessage("Initialize Immunization Schedule", "Entered Initialize Immunization Schedule; patientAgeTimeOfInterest " + patientAgeTimeOfInterest);		
-end
-
-
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
 rule "ImmunizationReferenceData.Initialize Immunization Schedule and Supporting Data" ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
    	when
@@ -134,7 +117,7 @@ rule "ImmunizationReferenceData.Initialize Immunization Schedule and Supporting 
 		ArrayList cdsVersions = new ArrayList();
 		cdsVersions.add("org.cdsframework^ICE^1.1.0");
 		cdsVersions.add(requestedKmId);
-		Schedule s = new ScheduleImpl("requestedKmId", cdsVersions, baseKnowledgeRepositoryLocation);
+		Schedule s = new Schedule("requestedKmId", cdsVersions, baseKnowledgeRepositoryLocation);
 		insert(s);
 		ICELogicHelper.logDRLDebugMessage("Initialize Immunization Schedule", "Entered Initialize Immunization Schedule");		
 end
@@ -903,8 +886,10 @@ rule "Duplicate Shots/Same Day: If this is a duplicate shot/same day, mark the d
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		$td: TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries)
-		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries < $tdAdministeredShotNumber, $tdprevDoseNumber: doseNumberInSeries)
+		$td: TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
+			$doseNumber : doseNumberInSeries)
+		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries < $tdAdministeredShotNumber, $tdprevDoseNumber: doseNumberInSeries, 
+			$tdprevDoseNumber < $doseNumber)
 		$targetSeries : TargetSeries(containsTargetDose($td), containsTargetDose($tdprev))
 	then
 		String _RULENAME = kcontext.rule.name;

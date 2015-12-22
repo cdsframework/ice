@@ -24,7 +24,7 @@
  * correspondence to ice@hln.com.
  */
 
-package org.cdsframework.ice.service;
+package org.cdsframework.ice.util;
 
 public class TimePeriodException extends Exception {
 

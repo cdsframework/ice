@@ -32,7 +32,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 

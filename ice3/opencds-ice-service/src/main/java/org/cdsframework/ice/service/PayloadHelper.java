@@ -7,10 +7,10 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.ice.service.Recommendation.RecommendationStatus;
-import org.cdsframework.ice.supportingdata.tmp.SupportedEvaluationConcept;
-import org.cdsframework.ice.supportingdata.tmp.SupportedRecommendationConcept;
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineConcept;
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 import org.drools.spi.KnowledgeHelper;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
@@ -509,6 +509,5 @@ public class PayloadHelper {
 			return retCD;
 		}
 	}
-
 
 }

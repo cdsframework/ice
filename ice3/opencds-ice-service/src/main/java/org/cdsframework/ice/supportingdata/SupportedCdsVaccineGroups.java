@@ -50,7 +50,7 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 	// Supported Cds Versions
 	private List<String> cdsVersions;
 	private SupportedCdsLists supportedCdsLists;	// Supporting Data CdsLists from which this vaccine group supporting data is built
-	private Map<String, LocallyCodedVaccineGroupItem> vaccineGroupConcepts;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineGroupItem
+	private Map<String, LocallyCodedVaccineGroupItem> cdsListItemNameToVaccineGroupItem;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineGroupItem
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsVaccineGroups.class);	
 
@@ -70,13 +70,13 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 			this.supportedCdsLists = pSupportedCdsLists;
 		}
 		
-		this.vaccineGroupConcepts = new HashMap<String, LocallyCodedVaccineGroupItem>();
+		this.cdsListItemNameToVaccineGroupItem = new HashMap<String, LocallyCodedVaccineGroupItem>();
 	}
 	
 	
 	public boolean isEmpty() {
 		
-		if (this.vaccineGroupConcepts.isEmpty()) {
+		if (this.cdsListItemNameToVaccineGroupItem.isEmpty()) {
 			return true;
 		}
 		else {
@@ -94,7 +94,7 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 	 * @throws ImproperUsageException if this operation is used incorrectly
 	 */
 	protected void addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecificationFile) 
-		throws ImproperUsageException {
+		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "addSupportedVaccineGroupItem(): ";
 		
@@ -125,7 +125,7 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
 		String lVaccineGroupCdsListItemName = llccli.getCdsListItemName();
-		if (this.vaccineGroupConcepts.containsKey(lVaccineGroupCdsListItemName)) {
+		if (this.cdsListItemNameToVaccineGroupItem.containsKey(lVaccineGroupCdsListItemName)) {
 			String lErrStr = "Attempt to add vaccine group that was already specified previously: " + 
 					(pIceVaccineGroupSpecificationFile.getVaccineGroup() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
 			logger.warn(_METHODNAME + lErrStr);
@@ -159,21 +159,21 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 		LocallyCodedVaccineGroupItem lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lCdsVersions, lRelatedDiseasesCdsListItems, lPrimaryOpenCdsConcept, lVaccineGroupPriority);
 
 		// Add the mapping from the String to reference the vaccine group to LocallyCodedVaccineGroupItem
-		this.vaccineGroupConcepts.put(lVaccineGroupCdsListItemName, lcvgi);
+		this.cdsListItemNameToVaccineGroupItem.put(lVaccineGroupCdsListItemName, lcvgi);
 	}
 	
 	
 	public void removeSupportedVaccineGroupItem(String pVaccineGroupItemName) {
 		
 		if (pVaccineGroupItemName != null) { 
-			this.vaccineGroupConcepts.remove(pVaccineGroupItemName);
+			this.cdsListItemNameToVaccineGroupItem.remove(pVaccineGroupItemName);
 		}		
 	}
 	
 	
 	public Collection<LocallyCodedVaccineGroupItem> getAllLocallyCodedVaccineGroupItems() {
 		
-		return this.vaccineGroupConcepts.values();
+		return this.cdsListItemNameToVaccineGroupItem.values();
 	}
 
 	
@@ -182,7 +182,7 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 		if (pVaccineGroupItemName == null) {
 			return null;
 		}
-		LocallyCodedVaccineGroupItem lLCVGI = this.vaccineGroupConcepts.get(pVaccineGroupItemName);
+		LocallyCodedVaccineGroupItem lLCVGI = this.cdsListItemNameToVaccineGroupItem.get(pVaccineGroupItemName);
 		if (lLCVGI == null) {
 			return null;
 		}
@@ -195,7 +195,7 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 	@Override
 	public String toString() {
 		
-		Collection<LocallyCodedVaccineGroupItem> slcvgis = this.vaccineGroupConcepts.values();
+		Collection<LocallyCodedVaccineGroupItem> slcvgis = this.cdsListItemNameToVaccineGroupItem.values();
 		int i = 1;
 		String ltoStringStr = "[ ";
 		for (LocallyCodedVaccineGroupItem slcvgi : slcvgis) {

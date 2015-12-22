@@ -2,7 +2,6 @@ package org.cdsframework.ice.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.configurations.ScheduleImpl;
 import org.drools.KnowledgeBase;
 import org.opencds.common.exceptions.ImproperUsageException;
 
@@ -11,7 +10,7 @@ public class ICEKnowledgeBase {
 	private KnowledgeBase rulesEngineKnowledgeBase;
 	private Schedule schedule;
 
-	private static Log logger = LogFactory.getLog(ScheduleImpl.class);
+	private static Log logger = LogFactory.getLog(Schedule.class);
 	
 
 	public ICEKnowledgeBase(KnowledgeBase pRulesEngineKnowledgeBase, Schedule pSchedule) 

@@ -26,7 +26,7 @@
 
 package org.cdsframework.ice.service;
 
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 
 
 public class TargetSeriesSelection {

@@ -29,6 +29,9 @@ package org.cdsframework.ice.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.util.TimePeriod;
+
 public class DoseRule {
 
 	private int doseNumber;

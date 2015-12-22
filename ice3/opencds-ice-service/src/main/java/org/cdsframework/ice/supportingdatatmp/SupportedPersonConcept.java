@@ -24,7 +24,7 @@
  * correspondence to ice@hln.com.
  */
 
-package org.cdsframework.ice.supportingdata.tmp;
+package org.cdsframework.ice.supportingdatatmp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

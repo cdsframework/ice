@@ -35,14 +35,12 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
-import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept;
 
 
 public class Vaccine extends AbstractVaccine {
 	
 	private boolean combinationVaccine;
 	private List<VaccineComponent> vaccineComponents;
-	// private List<Vaccine> conflictingVaccines;
 		
 	/**
 	 * private String strength;				
@@ -54,11 +52,18 @@ public class Vaccine extends AbstractVaccine {
 	
 	private Vaccine(Vaccine pVaccine) {
 		super(pVaccine);
+		this.vaccineComponents = new ArrayList<VaccineComponent>();
+ 
+	}
+	
+	public Vaccine(CdsConcept pVaccineConcept) {
+		super(pVaccineConcept);
+		this.vaccineComponents = new ArrayList<VaccineComponent>();
 	}
 	
 	/**
-	 * Instantiate a vaccine object. If there is only one vaccine component, the vaccine component code must be the same as that specified by the ICEConcept.
-	 * Unspecified Formulation on constructed vaccine object is set to the same value as the monovalent vaccine, which is true by default if not otherwise specified; 
+	 * Instantiate a vaccine object. If there is only one vaccine component, the vaccine component code must be the same as that specified by the ICEConcept if using this constructor.
+	 * The Unspecified Formulation on constructed vaccine object is set to the same value as the monovalent vaccine, which is true by default if not otherwise specified; 
 	 * it is set to false if any component vaccine is not an unspecified formulation; otherwise set to true. Be sure to set unspecified formulation flag 
 	 * for each vaccine component appropriately to ensure proper behavior of rules, or update all components and this object appropriately if changed.
 	 * @param pVaccineConcept ICEConcept representing the vaccine
@@ -78,7 +83,8 @@ public class Vaccine extends AbstractVaccine {
 	 * @param pVaccineConcept ICEConcept representing the vaccine
 	 * @param pVaccineComponents At least one vaccine component is required; composite vaccines will contain more than one VaccineComponent;
 	 *     monovalent vaccines must contain the antigen for itself (and therefore the name concept code). This is necessary to specify the valid
-	 *     ages for the antigens
+	 *     ages for the antigens. If more than one vaccine component is specified, than this is set to a combinationVaccine: otherwise, it is not. It is recommended that the
+	 *     caller set the combinationVaccine property manually if this behavior is not desired.
 	 * @param permitUnequalVaccineComponentCodeValueInMonovalentVaccine If true and monovalent vaccine, permit the vaccine component code to be a different value from the
 	 * 		encompassing vaccine's code values. This is a rare circumstance and by default is set to false by other constructors.
 	 * @throws IllegalArgumentException If parameters are not correctly populated (or either are null) with valid values; monovalent vaccines must have a vaccine component
@@ -99,6 +105,7 @@ public class Vaccine extends AbstractVaccine {
 			throw new IllegalArgumentException(errStr);
 		}
 
+		// Usually the monovalent vaccine must have a component vaccine with the same code as the encompassing vaccine object. Check this condition
 		int lVaccineComponentsSize = pVaccineComponents.size();
 		if (! permitUnequalVaccineComponentCodeValueInMonovalentVaccine && lVaccineComponentsSize == 1) {
 			VaccineComponent vc = pVaccineComponents.iterator().next();
@@ -108,11 +115,12 @@ public class Vaccine extends AbstractVaccine {
 				throw new IllegalArgumentException(errStr);
 			}
 		}
-		this.combinationVaccine = false;
-		this.vaccineComponents = pVaccineComponents;
 
+		this.vaccineComponents = pVaccineComponents;
+		this.combinationVaccine = false;
 		boolean lUnspecifiedFormulation = true;
 		if (lVaccineComponentsSize > 1) {
+			this.combinationVaccine = true;
 			for (VaccineComponent lVC : pVaccineComponents) {
 				if (lVC.isUnspecifiedFormulation() == false) {
 					lUnspecifiedFormulation = false;
@@ -137,17 +145,31 @@ public class Vaccine extends AbstractVaccine {
 	 * @param pVaccineComponent
 	 */
 	public void addMemberVaccineComponent(VaccineComponent pVaccineComponent) {
+
+		String _METHODNAME = "addMemberVaccineComponent(): ";
 		
 		if (pVaccineComponent == null) {
 			return;
 		}
 		
 		// Set the unspecified formulation boolean
-		if (pVaccineComponent.isUnspecifiedFormulation() == false) {
+		int lVaccineComponentsSize = getVaccineComponents().size();
+		if (lVaccineComponentsSize > 1 && pVaccineComponent.isUnspecifiedFormulation() == false) {
 			this.setUnspecifiedFormulation(false);
 		}
-		
-		this.vaccineComponents.add(pVaccineComponent);
+		else if (lVaccineComponentsSize == 1 || lVaccineComponentsSize == 0) {
+			this.setUnspecifiedFormulation(pVaccineComponent.isUnspecifiedFormulation());
+		}
+		else {
+			this.setUnspecifiedFormulation(true);
+		}
+
+		if (!this.vaccineComponents.contains(pVaccineComponent)) {
+			this.vaccineComponents.add(pVaccineComponent);
+		}
+		else {
+			logger.warn(_METHODNAME + "Attempt to add duplicate vaccine component ignored. Vaccine Component : " + pVaccineComponent.toString() + "; Vaccine: " + this.toString());
+		}
 	}
 	
 	
@@ -159,11 +181,9 @@ public class Vaccine extends AbstractVaccine {
 		
 		Vaccine lVaccine = new Vaccine(pV);
 		lVaccine.combinationVaccine = pV.combinationVaccine;
-		List<VaccineComponent> lVCList = new ArrayList<VaccineComponent>();
 		for (VaccineComponent pVC : pV.vaccineComponents) {
-			lVCList.add(VaccineComponent.constructDeepCopyOfVaccineComponentObject(pVC));
+			lVaccine.getVaccineComponents().add(VaccineComponent.constructDeepCopyOfVaccineComponentObject(pVC));
 		}
-		lVaccine.vaccineComponents = lVCList;
 		
 		return lVaccine;
 	}
@@ -181,17 +201,17 @@ public class Vaccine extends AbstractVaccine {
 	
 	/**
 	 * Get list of diseases targeted for immunity by this vaccine
-	 * @return List<SupportedDiseaseConcept> of diseases targeted by this vaccine; empty list if none
+	 * @return List<String> of diseases targeted by this vaccine; empty list if none
 	 */
-	public Collection<SupportedDiseaseConcept> getAllDiseasesTargetedForImmunity() {
+	public Collection<String> getAllDiseasesTargetedForImmunity() {
 		
-		Set<SupportedDiseaseConcept> targetedDiseases = new HashSet<SupportedDiseaseConcept>();
+		Set<String> targetedDiseases = new HashSet<String>();
 		if (this.vaccineComponents == null) {
 			return targetedDiseases;
 		}
 		
 		for (VaccineComponent vc : this.vaccineComponents) {
-			Collection<SupportedDiseaseConcept> lImmunityList = vc.getDiseaseImmunityList();
+			Collection<String> lImmunityList = vc.getDiseaseImmunityList();
 			targetedDiseases.addAll(lImmunityList);
 		}
 		
@@ -199,11 +219,11 @@ public class Vaccine extends AbstractVaccine {
 	}
 	
 	/**
-	 * Get all VaccineComponent member objects of this vaccine that are a member of the SupportedDiseaseConcept
-	 * @param pTargetedDiseases SupportedDiseaseConcept
+	 * Get all VaccineComponent member objects of this vaccine that targets the specified list of diseases
+	 * @param pTargetedDiseases Collection of diseases from which to ascertain targeting VaccineComponents
 	 * @return
 	 */
-	public Collection<VaccineComponent> getVaccineComponentsTargetingSpecifiedDiseases(Collection<SupportedDiseaseConcept> pTargetedDiseases) {
+	public Collection<VaccineComponent> getVaccineComponentsTargetingSpecifiedDiseases(Collection<String> pTargetedDiseases) {
 		
 		Set<VaccineComponent> lVCsContainingSpecifiedDiseases = new HashSet<VaccineComponent>(); // Ensure no duplicate VCs in returned Collection
 		
@@ -212,8 +232,8 @@ public class Vaccine extends AbstractVaccine {
 		}
 		
 		for (VaccineComponent vc : this.vaccineComponents) {
-			Collection<SupportedDiseaseConcept> sdcs = vc.getAllDiseasesTargetedForImmunity();
-			for (SupportedDiseaseConcept sdc : sdcs) {
+			Collection<String> sdcs = vc.getAllDiseasesTargetedForImmunity();
+			for (String sdc : sdcs) {
 				if (pTargetedDiseases.contains(sdc)) {
 					lVCsContainingSpecifiedDiseases.add(vc);
 				}
@@ -235,18 +255,27 @@ public class Vaccine extends AbstractVaccine {
 	
 	@Override
 	public String toString() {
-		return "Vaccine [getVaccineConcept()=" + getVaccineConcept()
-				// + ", isMemberOfMultipleVaccineGroups()=" + isMemberOfMultipleVaccineGroups() 
-				+ ", isLiveVirusVaccine()="	+ isLiveVirusVaccine() + ", getValidMinimumAgeForUse()="
-				+ getValidMinimumAgeForUse() + ", getValidMaximumAgeForUse()="
-				+ getValidMaximumAgeForUse() + ", getTradeName()="
-				+ getTradeName() + ", getManufacturerCode()="
-				+ getManufacturerCode() + ", getLicensedMinimumAgeForUse()="
-				+ getLicensedMinimumAgeForUse()
-				+ ", getLicensedMaximumAgeForUse()=" + getLicensedMaximumAgeForUse()
-				+ ", isUnspecifiedFormulation()=" + isUnspecifiedFormulation() 
-				+ ", isCombinationVaccine()=" + isCombinationVaccine()
-				+ "]";
+		
+		String toStr = "Vaccine [getVaccineConcept()=" + getVaccineConcept()
+			+ ", isLiveVirusVaccine()="	+ isLiveVirusVaccine() + ", getValidMinimumAgeForUse()="
+			+ getValidMinimumAgeForUse() + ", getValidMaximumAgeForUse()="
+			+ getValidMaximumAgeForUse() + ", getTradeName()="
+			+ getTradeName() + ", getManufacturerCode()="
+			+ getManufacturerCode() + ", getLicensedMinimumAgeForUse()="
+			+ getLicensedMinimumAgeForUse()
+			+ ", getLicensedMaximumAgeForUse()=" + getLicensedMaximumAgeForUse()
+			+ ", isUnspecifiedFormulation()=" + isUnspecifiedFormulation() 
+			+ ", isCombinationVaccine()=" + isCombinationVaccine()
+			+ ", VaccineComponent [[ ";
+		
+		int i=1;
+		for (VaccineComponent lVaccineComponent: this.getVaccineComponents()) {
+			toStr += "\n(" + i + ") " + lVaccineComponent;
+			i++;
+		}
+		toStr += "\n]]\n]";
+		
+		return toStr;
 	}
 	
 

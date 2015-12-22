@@ -33,7 +33,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 
 public class SeriesRules {
 
@@ -106,7 +108,7 @@ public class SeriesRules {
 		lSR.vaccineGroup = pSR.getVaccineGroup();
 		lSR.recurringDosesAfterSeriesComplete = pSR.recurringDosesAfterSeriesComplete;
 		lSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = pSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
-		lSR.applicableSeasons = pSR.applicableSeasons;
+		// lSR.applicableSeasons = pSR.applicableSeasons;
 		lSR.applicableSeasons = new ArrayList<Season>();
 		
 		// Copy Doses
@@ -255,22 +257,21 @@ public class SeriesRules {
 		}
 
 		CdsConcept vIceConcept = v.getVaccineConcept();
-		logger.debug(_METHODNAME + "vaccine concept: " + vIceConcept + "; doseNumber: " + doseNumber + "; allowable any " + allowableForAnyDose);
+		if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "vaccine concept: " + vIceConcept + "; doseNumber: " + doseNumber + "; allowable any " + allowableForAnyDose);
+		}
 		if (vIceConcept == null) {
-			logger.debug(_METHODNAME + "here-1");
 			return false;
 		}
 		String vOpenCdsConceptCode = vIceConcept.getOpenCdsConceptCode();
 		logger.debug(_METHODNAME + "opencds concept: " + vOpenCdsConceptCode);
 		if (vOpenCdsConceptCode == null) {
-			logger.debug(_METHODNAME + "here0");
 			return false;
 		}
 		for (DoseRule dr : seriesDoseRules) {
 			int drDoseNumber = dr.getDoseNumber();
 			logger.debug(_METHODNAME + "dose number: " + drDoseNumber);
 			if (! allowableForAnyDose && drDoseNumber < doseNumber) {
-				logger.debug(_METHODNAME + "here1; drDoseNumber " + drDoseNumber);
 				continue;
 			}
 			else if (allowableForAnyDose || dr.getDoseNumber() == doseNumber) {
@@ -278,27 +279,21 @@ public class SeriesRules {
 				List<Vaccine> allPermittedComponentVaccines = dr.getAllPermittedVaccines();
 				for (Vaccine permittedVaccine : allPermittedComponentVaccines) {
 					if (permittedVaccine != null) {
-						logger.debug(_METHODNAME + "here3");
 						CdsConcept iceConcept = permittedVaccine.getVaccineConcept();
-						logger.debug(_METHODNAME + "ice concept: " + (iceConcept == null ? "null" : iceConcept.getOpenCdsConceptCode()));
 						if (iceConcept == null) {
-							logger.debug(_METHODNAME + "here4");
 							continue;
 						}
 						if (vOpenCdsConceptCode.equals(iceConcept.getOpenCdsConceptCode())) {
-							logger.debug(_METHODNAME + "here4.5");
 							return true;
 						}
 					}
 				}
 			}
 			else {
-				logger.debug(_METHODNAME + "here5");
 				break;
 			}
 		}
 		
-		logger.debug(_METHODNAME + "here6");
 		return false;
 	}
 

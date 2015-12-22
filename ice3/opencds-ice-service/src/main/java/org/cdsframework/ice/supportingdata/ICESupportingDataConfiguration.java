@@ -260,7 +260,7 @@ public class ICESupportingDataConfiguration {
 					}
 					File lCdsListFile = new File(lCodedConceptsDirectory, lSDFile);
 					CdsListSpecificationFile cdslsf = (CdsListSpecificationFile) lUnmarshaller.unmarshal(lCdsListFile);
-					addSupportingListConceptsFromCdsListSpecificationFile(cdslsf, lCdsListFile);
+					addSupportedListConceptsFromCdsListSpecificationFile(cdslsf, lCdsListFile);
 				}
 			}
 			catch (SecurityException se) {
@@ -321,7 +321,7 @@ public class ICESupportingDataConfiguration {
 					}
 					File lIceVGFile = new File(lVaccineGroupsDirectory, lSDFile);
 					IceVaccineGroupSpecificationFile icevgf = (IceVaccineGroupSpecificationFile) lUnmarshaller.unmarshal(lIceVGFile);
-					addSupportingVaccineGroupConceptsFromIceVaccineGroupSpecificationFile(icevgf, lIceVGFile);
+					addSupportedVaccineGroupConceptFromIceVaccineGroupSpecificationFile(icevgf, lIceVGFile);
 				}
 			}
 			catch (SecurityException se) {
@@ -382,7 +382,7 @@ public class ICESupportingDataConfiguration {
 					}
 					File lIceVFile = new File(lVaccineDirectory, lSDFile);
 					IceVaccineSpecificationFile icevf = (IceVaccineSpecificationFile) lUnmarshaller.unmarshal(lIceVFile);
-					addSupportingVaccineConceptFromIceVaccineSpecificationFile(icevf, lIceVFile);
+					addSupportedVaccineConceptFromIceVaccineSpecificationFile(icevf, lIceVFile);
 				}
 			}
 			catch (SecurityException se) {
@@ -444,7 +444,7 @@ public class ICESupportingDataConfiguration {
 					}
 					File lIceVFile = new File(lVaccineDirectory, lSDFile);
 					IceSeasonSpecificationFile icevf = (IceSeasonSpecificationFile) lUnmarshaller.unmarshal(lIceVFile);
-					addSupportingSeasonConceptFromIceSeasonSpecificationFile(icevf, lIceVFile);
+					addSupportedSeasonConceptFromIceSeasonSpecificationFile(icevf, lIceVFile);
 				}
 			}
 			catch (SecurityException se) {
@@ -467,12 +467,81 @@ public class ICESupportingDataConfiguration {
 	}
 	
 	
-	private void addSupportingSeasonConceptFromIceSeasonSpecificationFile(IceSeasonSpecificationFile pIceSeasonSpecificationFile, File pSeasonFile) {
+	private void addSupportedSeasonConceptFromIceSeasonSpecificationFile(IceSeasonSpecificationFile pIceSeasonSpecificationFile, File pSeasonFile) 
+		throws ImproperUsageException {
+		
+		String _METHODNAME = "addSupportingSeasonFromIceSeasonSpecificationFile(): ";
+		if (pSeasonFile == null) {
+			String lErrStr = "Season supporting data file not specified; cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}		
+		if (pIceSeasonSpecificationFile == null) {
+			logger.warn(_METHODNAME + "IceSeasonSpecificationFile object not specified; read of supporting data file skipped");
+			return;
+		}
+		
+		String lSeasonCode = pIceSeasonSpecificationFile.getCode();
+		if (lSeasonCode == null) {
+			String lErrStr = "Required supporting data item code element not provided in cdsListSpecificationFile: " + pSeasonFile.getAbsolutePath();
+			logger.error(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}		
+		CD lVaccineGroupCD = pIceSeasonSpecificationFile.getVaccineGroup();
+		if (! ConceptUtils.requiredAttributesForCDSpecified(lVaccineGroupCD)) {
+			String lErrStr = "Required supporting data item vaccineGroup element not provided in IceVaccineGroupSpecificationFile: " + pSeasonFile.getAbsolutePath();
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
+		
+		String lDebugStrb = "";
+		if (logger.isDebugEnabled()) {
+			lDebugStrb += _METHODNAME + pIceSeasonSpecificationFile.getClass().getName();
+			// ID
+			lDebugStrb += "\ngetSeasonId(): " + pIceSeasonSpecificationFile.getSeasonId(); 
+			// Vaccine Group
+			lDebugStrb += "\ngetVaccineGroup():";
+			if (lVaccineGroupCD != null) {
+				lDebugStrb += "\n" + ConceptUtils.toStringCD(lVaccineGroupCD);
+			}
+			else {
+				lDebugStrb += "\nNo vaccine group CD information supplied";
+			}
+			// Code
+			lDebugStrb += "\ngetCode(): " + pIceSeasonSpecificationFile.getCode();
+			// Name
+			lDebugStrb += "\ngetName(): " + pIceSeasonSpecificationFile.getName();
+			// Start Date
+			lDebugStrb += "\ngetStartDate(): " + pIceSeasonSpecificationFile.getStartDate();
+			// End Date
+			lDebugStrb += "\ngetEndDate(): " + pIceSeasonSpecificationFile.getEndDate();
+			// Is Default Season?
+			lDebugStrb += "\nisDefaultSeason(): " + pIceSeasonSpecificationFile.isDefaultSeason();
+			// Default Start Month and Day
+			lDebugStrb += "\ngetDefaultStartMonthAndDay(): " + pIceSeasonSpecificationFile.getDefaultStartMonthAndDay();
+			// Default Stop Month and Day
+			lDebugStrb += "\ngetDefaultStopMonthAndDay(): " + pIceSeasonSpecificationFile.getDefaultStopMonthAndDay();
+			// CDS versions
+			
+			// CdsVersions
+			List<String> lCdsVersions = pIceSeasonSpecificationFile.getCdsVersions();
+			lDebugStrb += "\ngetCdsVersions(): ";
+			int i=1;
+			if (lCdsVersions != null) {
+				for (String lCdsVersion : lCdsVersions) {
+					lDebugStrb += "\n\t(" + i + "): " + lCdsVersion;
+					i++;
+				}
+			}
+			else {
+				lDebugStrb += "\n\tNo CdsVersion information supplied";
+			}
+		}
 		
 	}
 	
 	
-	private void addSupportingVaccineConceptFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecification, File pVaccineFile) 
+	private void addSupportedVaccineConceptFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecification, File pVaccineFile) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportingVaccineConceptsFromIceVaccineSpecificationFile(): ";
@@ -584,6 +653,9 @@ public class ICESupportingDataConfiguration {
 			// Primary OpenCDS membership
 			CD lPrimaryOpenCdsMembership = pIceVaccineSpecification.getPrimaryOpenCdsConcept();
 			lDebugStrb += "\ngetPrimaryOpenCdsConcept(): " + ConceptUtils.toStringCD(lPrimaryOpenCdsMembership);
+			
+			// Log it
+			logger.debug(lDebugStrb);
 		}
 		
 		this.supportedCdsVaccines.addSupportedVaccineItemFromIceVaccineSpecificationFile(pIceVaccineSpecification);
@@ -598,7 +670,7 @@ public class ICESupportingDataConfiguration {
 	 * @param pSupportedCdsLists
 	 * @throws ImproperUsageException
 	 */	
-	private void addSupportingVaccineGroupConceptsFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecification, File pVaccineGroupFile)
+	private void addSupportedVaccineGroupConceptFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecification, File pVaccineGroupFile)
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportingVaccineGroupConceptsFromIceVaccineGroupSpecificationFile(): ";
@@ -707,7 +779,7 @@ public class ICESupportingDataConfiguration {
 	}
 
 	
-	private void addSupportingListConceptsFromCdsListSpecificationFile(CdsListSpecificationFile pCdsListSpecification, File pCdsListFile) 
+	private void addSupportedListConceptsFromCdsListSpecificationFile(CdsListSpecificationFile pCdsListSpecification, File pCdsListFile) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportingListConceptsForCdsListSpecificationFile(): ";
@@ -741,7 +813,7 @@ public class ICESupportingDataConfiguration {
 		if (lCdsListCode == null) {
 			String lErrStr = "Required supporting data item code element not provided in cdsListSpecificationFile: " + pCdsListFile.getAbsolutePath();
 			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
 		}
 		List<CdsListItem> lcli = pCdsListSpecification.getCdsListItems();
 		if (lcli != null) {
@@ -767,7 +839,7 @@ public class ICESupportingDataConfiguration {
 				if (lCdsListItemCode == null) {
 					String lErrStr = "Required supporting data item cdsListItem.code element not provided in cdsListSpecificationFile: " + pCdsListFile.getAbsolutePath();
 					logger.error(_METHODNAME + lErrStr);
-					throw new ImproperUsageException(lErrStr);
+					throw new InconsistentConfigurationException(lErrStr);
 				}
 			}
 		

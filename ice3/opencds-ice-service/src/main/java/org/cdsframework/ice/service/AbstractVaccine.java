@@ -29,6 +29,7 @@ package org.cdsframework.ice.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.ice.util.TimePeriod;
 
 
 public abstract class AbstractVaccine {
