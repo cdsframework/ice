@@ -1,13 +1,10 @@
 package org.cdsframework.ice.supportingdata;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
-import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.util.ConceptUtils;
@@ -17,36 +14,19 @@ import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class SupportedCdsSeasons implements SupportingData {
 	
-	// CDS versions covered by this supporting datavaccine manager
-	private List<String> cdsVersions;
-	
 	private Map<String, LocallyCodedSeasonItem> seasonItemNameToSeasonItem;	// cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine 	
-	// Supporting Data Cds List from which this vaccine supporting data is built
-	private SupportedCdsLists supportedCdsLists;
-
+	private SupportedCdsVaccineGroups supportedVaccineGroups;				// Supporting vaccine groups from which this season data is built
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsSeasons.class);	
 
 	
-	protected SupportedCdsSeasons(List<String> pCdsVersions, SupportedCdsLists pSupportedCdsLists) {
+	protected SupportedCdsSeasons(SupportedCdsVaccineGroups pSupportedVaccineGroups) {
 
-		if (pCdsVersions == null) {
-			this.cdsVersions = new ArrayList<String>();
-		}
-		else {
-			this.cdsVersions = pCdsVersions;
-		}
-		
-		if (pSupportedCdsLists == null) {
-			this.supportedCdsLists = new SupportedCdsLists(this.cdsVersions);
-		}
-		else {
-			this.supportedCdsLists = pSupportedCdsLists;
-		}
+		this.supportedVaccineGroups = pSupportedVaccineGroups;
 	}
+
 	
-	public boolean isEmpty() {
-		
+	public boolean isEmpty() {		
 		// TODO:
 		return true;
 	}
@@ -57,7 +37,7 @@ public class SupportedCdsSeasons implements SupportingData {
 		
 		String _METHODNAME = "addSupportedSeasonItemFromIceSeasonSpecificationFile(): ";
 		
-		if (pIceSeasonSpecificationFile == null) {
+		if (pIceSeasonSpecificationFile == null || this.supportedVaccineGroups == null) {
 			return;
 		}
 		
@@ -68,15 +48,17 @@ public class SupportedCdsSeasons implements SupportingData {
 			throw new ImproperUsageException(lErrStr);
 		}
 		
-		// Check to make sure that this season code has not already been defined 
+		///////
+		// Check to make sure that this season code has not already been defined
+		///////
 		if (this.seasonItemNameToSeasonItem.containsKey(lSeasonCode)) {
 			String lErrStr = "Attempt to add a Season that was already specified previously: " + lSeasonCode;
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
-		/////// TODO:
-		
+		///////
+		// Check to make sure that the vaccine group specified is a valid vaccine group; one that has been previously specified
 		CD lVaccineGroupCD = ConceptUtils.toInternalCD(pIceSeasonSpecificationFile.getVaccineGroup());
 		if (! ConceptUtils.requiredAttributesForCDSpecified(lVaccineGroupCD)) {
 			String lErrStr = "Required supporting data item vaccineGroup element not provided in IceVaccineGroupSpecificationFile:";
@@ -85,60 +67,21 @@ public class SupportedCdsSeasons implements SupportingData {
 		}
 		
 		// Check to make sure that the specified vaccine group is a supported vaccine group
-		LocallyCodedCdsListItem lccli = this.supportedCdsLists.getCdsListItem(lVaccineGroupCD);
+		LocallyCodedCdsListItem lccli = this.supportedVaccineGroups.getAssociatedSupportedCdsLists().getCdsListItem(lVaccineGroupCD);
 		if (lccli == null) {
 			String lErrStr = "Attempt to add a season which specifies a vaccine group that is not in the list of SupportedCdsLists: " + 
 					(pIceSeasonSpecificationFile.getVaccineGroup() == null ? "null" : ConceptUtils.toInternalCD(pIceSeasonSpecificationFile.getVaccineGroup()));
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
 		}		
-		
-		/*
-		String lDebugStrb = "";
-		if (logger.isDebugEnabled()) {
-			lDebugStrb += _METHODNAME + pIceSeasonSpecificationFile.getClass().getName();
-			// ID
-			lDebugStrb += "\ngetSeasonId(): " + pIceSeasonSpecificationFile.getSeasonId(); 
-			// Vaccine Group
-			lDebugStrb += "\ngetVaccineGroup():";
-			if (lVaccineGroupCD != null) {
-				lDebugStrb += "\n" + ConceptUtils.toStringCD(lVaccineGroupCD);
-			}
-			else {
-				lDebugStrb += "\nNo vaccine group CD information supplied";
-			}
-			// Code
-			lDebugStrb += "\ngetCode(): " + pIceSeasonSpecificationFile.getCode();
-			// Name
-			lDebugStrb += "\ngetName(): " + pIceSeasonSpecificationFile.getName();
-			// Start Date
-			lDebugStrb += "\ngetStartDate(): " + pIceSeasonSpecificationFile.getStartDate();
-			// End Date
-			lDebugStrb += "\ngetEndDate(): " + pIceSeasonSpecificationFile.getEndDate();
-			// Is Default Season?
-			lDebugStrb += "\nisDefaultSeason(): " + pIceSeasonSpecificationFile.isDefaultSeason();
-			// Default Start Month and Day
-			lDebugStrb += "\ngetDefaultStartMonthAndDay(): " + pIceSeasonSpecificationFile.getDefaultStartMonthAndDay();
-			// Default Stop Month and Day
-			lDebugStrb += "\ngetDefaultStopMonthAndDay(): " + pIceSeasonSpecificationFile.getDefaultStopMonthAndDay();
-			// CDS versions
-			
-			// CdsVersions
-			List<String> lCdsVersions = pIceSeasonSpecificationFile.getCdsVersions();
-			lDebugStrb += "\ngetCdsVersions(): ";
-			int i=1;
-			if (lCdsVersions != null) {
-				for (String lCdsVersion : lCdsVersions) {
-					lDebugStrb += "\n\t(" + i + "): " + lCdsVersion;
-					i++;
-				}
-			}
-			else {
-				lDebugStrb += "\n\tNo CdsVersion information supplied";
-			}
+		LocallyCodedVaccineGroupItem lcvgi = this.supportedVaccineGroups.getVaccineGroupItem(lccli.getCdsListItemName());
+		if (lcvgi == null) {
+			String lErrStr = "Attempt to add a season which specifies a vaccine group that is not in the list of SupportedCdsVaccineGroups: " + 
+					(pIceSeasonSpecificationFile.getVaccineGroup() == null ? "null" : ConceptUtils.toInternalCD(pIceSeasonSpecificationFile.getVaccineGroup()));
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);			
 		}
-		*/
-		
+			
 		/**
 		 * Examples
 		 * 

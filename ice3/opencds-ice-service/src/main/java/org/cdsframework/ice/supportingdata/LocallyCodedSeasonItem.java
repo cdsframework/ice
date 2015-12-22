@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsItem;
-import org.cdsframework.ice.servicetmp.Season;
+import org.cdsframework.ice.service.Season;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 

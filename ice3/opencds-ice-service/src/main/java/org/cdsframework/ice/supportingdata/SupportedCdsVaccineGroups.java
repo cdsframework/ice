@@ -47,29 +47,15 @@ import org.opencds.common.exceptions.ImproperUsageException;
 
 public class SupportedCdsVaccineGroups implements SupportingData {
 	
-	// Supported Cds Versions
-	private List<String> cdsVersions;
 	private SupportedCdsLists supportedCdsLists;	// Supporting Data CdsLists from which this vaccine group supporting data is built
 	private Map<String, LocallyCodedVaccineGroupItem> cdsListItemNameToVaccineGroupItem;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineGroupItem
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsVaccineGroups.class);	
 
 	
-	protected SupportedCdsVaccineGroups(List<String> pCdsVersions, SupportedCdsLists pSupportedCdsLists) {
+	protected SupportedCdsVaccineGroups(SupportedCdsLists pSupportedCdsLists) {
 	
-		if (pCdsVersions == null) {
-			this.cdsVersions = new ArrayList<String>();
-		}
-		else {
-			this.cdsVersions = pCdsVersions;
-		}
-		if (pSupportedCdsLists == null) {
-			this.supportedCdsLists = new SupportedCdsLists(this.cdsVersions);
-		}
-		else {
-			this.supportedCdsLists = pSupportedCdsLists;
-		}
-		
+		this.supportedCdsLists = pSupportedCdsLists;
 		this.cdsListItemNameToVaccineGroupItem = new HashMap<String, LocallyCodedVaccineGroupItem>();
 	}
 	
@@ -83,6 +69,13 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 			return false;
 		}
 	}
+	
+	
+	protected SupportedCdsLists getAssociatedSupportedCdsLists() {
+		
+		return this.supportedCdsLists;
+	}
+	
 	
 	/**
 	 * Add the vaccine group information specified in the ice vaccine group specification file to the list of supported vaccine groups. If the IceVaccineGroupSpecificationFile is 
@@ -98,12 +91,12 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 		
 		String _METHODNAME = "addSupportedVaccineGroupItem(): ";
 		
-		if (pIceVaccineGroupSpecificationFile == null) {
+		if (pIceVaccineGroupSpecificationFile == null || this.supportedCdsLists == null) {
 			return;
 		}
 
 		// If adding a code that is not one of the supported cdsVersions, then return
-		Collection<String> lCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineGroupSpecificationFile.getCdsVersions(), this.cdsVersions);
+		Collection<String> lCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineGroupSpecificationFile.getCdsVersions(), this.supportedCdsLists.getCdsVersions());
 		if (lCdsVersions == null) {
 			return;
 		}

@@ -142,7 +142,7 @@ public class ICESupportingDataConfiguration {
 		///////
 		// Initialize the Vaccine Group supporting data
 		///////
-		this.supportedCdsVaccineGroups = new SupportedCdsVaccineGroups(this.supportedCdsVersions, this.supportedCdsLists);
+		this.supportedCdsVaccineGroups = new SupportedCdsVaccineGroups(this.supportedCdsLists);
 		initializeVaccineGroupSupportingData(supportingDataVaccineGroupsSubdirectory);
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = _METHODNAME + "The following Vaccine Groups have been initialized into the " + this.getClass().getName() + ": \n";
@@ -153,7 +153,7 @@ public class ICESupportingDataConfiguration {
 		///////
 		// Initialize the Vaccine supporting data
 		///////
-		this.supportedCdsVaccines = new SupportedCdsVaccines(this.supportedCdsVersions, this.supportedCdsLists);
+		this.supportedCdsVaccines = new SupportedCdsVaccines(this.supportedCdsLists);
 		initializeVaccineSupportingData(supportingDataVaccinesSubdirectory);
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = _METHODNAME + "The following Vaccines have been initialized into the " + this.getClass().getName() + ": \n";
@@ -169,7 +169,7 @@ public class ICESupportingDataConfiguration {
 		///////
 		// Initialize Seasons supporting data
 		///////
-		this.supportedCdsSeasons = new SupportedCdsSeasons(this.supportedCdsVersions, this.supportedCdsLists);
+		this.supportedCdsSeasons = new SupportedCdsSeasons(this.supportedCdsVaccineGroups);
 		
 		// Log configuration data parameters of data initialized
 		lSbCdsVersion.append("; ");

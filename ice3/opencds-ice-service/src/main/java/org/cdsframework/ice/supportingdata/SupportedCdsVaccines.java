@@ -54,9 +54,6 @@ import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class SupportedCdsVaccines implements SupportingData {
 
-	// CDS versions covered by this supporting datavaccine manager
-	private List<String> cdsVersions;
-	
 	// Supporting Data Cds List from which this vaccine supporting data is built
 	private SupportedCdsLists supportedCdsLists;
 	
@@ -72,24 +69,11 @@ public class SupportedCdsVaccines implements SupportingData {
 	private static Log logger = LogFactory.getLog(SupportedCdsVaccines.class);	
 
 	
-	protected SupportedCdsVaccines(List<String> pCdsVersions, SupportedCdsLists pSupportedCdsLists) {
+	protected SupportedCdsVaccines(SupportedCdsLists pSupportedCdsLists) {
 		
 		// String _METHODNAME = "SupportedCdsVaccines(): ";
 		
-		if (pCdsVersions == null) {
-			this.cdsVersions = new ArrayList<String>();
-		}
-		else {
-			this.cdsVersions = pCdsVersions;
-		}
-		
-		if (pSupportedCdsLists == null) {
-			this.supportedCdsLists = new SupportedCdsLists(this.cdsVersions);
-		}
-		else {
-			this.supportedCdsLists = pSupportedCdsLists;
-		}
-
+		this.supportedCdsLists = pSupportedCdsLists;
 		this.cdsListItemNameToVaccineItem = new HashMap<String, LocallyCodedVaccineItem>();
 		this.cDToVaccineComponentsMap = new HashMap<CD, VaccineComponent>();
 		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<Vaccine>>();
@@ -122,6 +106,12 @@ public class SupportedCdsVaccines implements SupportingData {
 	}
 	
 	
+	protected SupportedCdsLists getAssociatedSupportedCdsLists() {
+		
+		return this.supportedCdsLists;
+	}
+	
+	
 	protected boolean isVaccineSupportingDataConsistent() {
 		
 		if (this.vaccineComponentCDToVaccinesNotFullySpecified.size() > 0) {
@@ -148,7 +138,7 @@ public class SupportedCdsVaccines implements SupportingData {
 		
 		String _METHODNAME = "addSupportedVaccineItemFromIceVaccineSpecificationFile(): ";
 		
-		if (pIceVaccineSpecificationFile == null) {
+		if (pIceVaccineSpecificationFile == null || this.supportedCdsLists == null) {
 			return isVaccineSupportingDataConsistent();
 		}
 		
@@ -170,7 +160,8 @@ public class SupportedCdsVaccines implements SupportingData {
 		}
 		
 		// If adding a code that is not one of the supported cdsVersions, then return
-		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineSpecificationFile.getCdsVersions(), this.cdsVersions);
+		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineSpecificationFile.getCdsVersions(), 
+				this.supportedCdsLists.getCdsVersions());
 		if (lIntersectionOfSupportedCdsVersions == null) {
 			return isVaccineSupportingDataConsistent();
 		}
