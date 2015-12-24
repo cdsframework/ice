@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 
@@ -47,7 +46,7 @@ public class Season {
 	private boolean definedBySeriesTableRules;
 	private MonthDay defaultStartMonthAndDay;
 	private MonthDay defaultEndMonthAndDay;
-	private SupportedVaccineGroupConcept associatedVaccineGroup;
+	private String associatedVaccineGroup;
 
 	private enum SeasonDateType { START, END, OFFSEASON_START, OFFSEASON_END }; 
 	private static Log logger = LogFactory.getLog(Season.class);
@@ -61,7 +60,7 @@ public class Season {
 	 * Creates a fully-specified Season with a start and end dates (month/day/year). Off-season end dates permitted by default.
 	 * @throws IllegalArgumentException if month/day values are invalid
 	 */
-	public Season(String seasonName, SupportedVaccineGroupConcept svgc, boolean definedBySeriesTableRules, int startMonth, int startDay, int startYear, int endMonth, int endDay, int endYear) {
+	public Season(String seasonName, String svgc, boolean definedBySeriesTableRules, int startMonth, int startDay, int startYear, int endMonth, int endDay, int endYear) {
 		
 		String _METHODNAME = "Season(): ";
 		
@@ -86,7 +85,7 @@ public class Season {
 	 * Creates a default Season with a start and end dates (month/day but no year). Off-season end dates permitted by default.
 	 * @throws IllegalArgumentException if month/day values are invalid
 	 */
-	public Season(String seasonName, SupportedVaccineGroupConcept svgc, boolean definedBySeriesTableRules, int defaultStartMonth, int defaultStartDay, int defaultEndMonth, int defaultEndDay) {
+	public Season(String seasonName, String svgc, boolean definedBySeriesTableRules, int defaultStartMonth, int defaultStartDay, int defaultEndMonth, int defaultEndDay) {
 		
 		String _METHODNAME = "Season(): ";
 		
@@ -139,7 +138,7 @@ public class Season {
 	}
 	
 	
-	public SupportedVaccineGroupConcept getVaccineGroup() {
+	public String getVaccineGroup() {
 		return associatedVaccineGroup;
 	}
 

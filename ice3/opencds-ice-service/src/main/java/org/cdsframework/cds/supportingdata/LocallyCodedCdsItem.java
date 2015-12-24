@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.ice.util.CollectionUtils;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 public abstract class LocallyCodedCdsItem {
@@ -44,6 +45,55 @@ public abstract class LocallyCodedCdsItem {
 		return cdsVersions;
 	}
 
+	/*
+	 * Inclusion of cdsVersions in equality?
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cdsItemName == null) ? 0 : cdsItemName.hashCode());
+		for (String s : cdsVersions) {
+			// Order does not matter
+			result = prime * result + ((s == null) ? 0 : s.hashCode());
+		}
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LocallyCodedCdsItem other = (LocallyCodedCdsItem) obj;
+		if (cdsItemName == null) {
+			if (other.cdsItemName != null)
+				return false;
+		} else if (!cdsItemName.equals(other.cdsItemName))
+			return false;
+		if (cdsVersions == null) {
+			if (other.cdsVersions != null)
+				return false;
+		} 
+		else { 
+			Collection<String> lInter = CollectionUtils.intersectionOfStringCollections(cdsVersions, other.cdsVersions);
+			if (lInter == null) {
+				return false;
+			}
+			else if (cdsVersions.size() == lInter.size()) {
+				// Each collection contains the same set of versions, though they could be in a different order
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		return true;
+	}
+	*/
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -68,4 +118,5 @@ public abstract class LocallyCodedCdsItem {
 			return false;
 		return true;
 	}
+
 }

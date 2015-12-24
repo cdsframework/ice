@@ -1,21 +1,33 @@
 package org.cdsframework.ice.supportingdata;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.util.support.data.ice.season.IceSeasonSpecificationFile;
+import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class SupportedCdsSeasons implements SupportingData {
 	
-	private Map<String, LocallyCodedSeasonItem> seasonItemNameToSeasonItem;	// cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine 	
-	private SupportedCdsVaccineGroups supportedVaccineGroups;				// Supporting vaccine groups from which this season data is built
+	private Map<String, LocallyCodedSeasonItem> cdsListItemNameToSeasonItem;					// cdsListItemName (cdsListCode.cdsListItemKey) to LocallyCodedSeasonItem
+	private Map<LocallyCodedVaccineGroupItem, List<Season>> vaccineGroupItemToSeasons;			// Internal tracking structure: List of Seasons supported for each vaccine group	
+	private SupportedCdsVaccineGroups supportedVaccineGroups;									// Supporting vaccine groups from which this season data is built
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsSeasons.class);	
 
@@ -23,6 +35,8 @@ public class SupportedCdsSeasons implements SupportingData {
 	protected SupportedCdsSeasons(SupportedCdsVaccineGroups pSupportedVaccineGroups) {
 
 		this.supportedVaccineGroups = pSupportedVaccineGroups;
+		this.cdsListItemNameToSeasonItem = new HashMap<String, LocallyCodedSeasonItem>();
+		this.vaccineGroupItemToSeasons = new HashMap<LocallyCodedVaccineGroupItem, List<Season>>();
 	}
 
 	
@@ -41,6 +55,13 @@ public class SupportedCdsSeasons implements SupportingData {
 			return;
 		}
 		
+		// If adding a code that is not one of the supported cdsVersions, then return
+		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceSeasonSpecificationFile.getCdsVersions(), 
+			this.supportedVaccineGroups.getAssociatedSupportedCdsLists().getCdsVersions());
+		if (lIntersectionOfSupportedCdsVersions == null) {
+			return;
+		}
+				
 		String lSeasonCode = pIceSeasonSpecificationFile.getCode();
 		if (lSeasonCode == null) {
 			String lErrStr = "Required supporting data seasonCode element not provided in IceSeasonSpecificationFile";
@@ -51,7 +72,7 @@ public class SupportedCdsSeasons implements SupportingData {
 		///////
 		// Check to make sure that this season code has not already been defined
 		///////
-		if (this.seasonItemNameToSeasonItem.containsKey(lSeasonCode)) {
+		if (this.cdsListItemNameToSeasonItem.containsKey(lSeasonCode)) {
 			String lErrStr = "Attempt to add a Season that was already specified previously: " + lSeasonCode;
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
@@ -81,7 +102,64 @@ public class SupportedCdsSeasons implements SupportingData {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
-			
+		
+		////////////// Create new season and add it to the list of seasons being tracked for each vaccine group START //////////////
+		List<Season> lSeasonsListForVG = this.vaccineGroupItemToSeasons.get(lcvgi);
+		if (lSeasonsListForVG == null) {
+			lSeasonsListForVG = new ArrayList<Season>();
+		}
+		if (pIceSeasonSpecificationFile.isDefaultSeason() == false) {
+			///////
+			// Add fully-specified season
+			///////
+			if (pIceSeasonSpecificationFile.getStartDate() == null || pIceSeasonSpecificationFile.getEndDate() == null) {
+				String lErrStr = "Fully-specified season start and/or fully-specified season end date not specified for non-default season; start date: " + 
+						pIceSeasonSpecificationFile.getStartDate() + "; end date: " + pIceSeasonSpecificationFile.getEndDate();
+				logger.warn(_METHODNAME + lErrStr);
+				throw new InconsistentConfigurationException(lErrStr);
+			}
+
+			LocalDate lJodaFullySpecifiedSeasonStartDate = LocalDate.fromDateFields(pIceSeasonSpecificationFile.getStartDate());
+			LocalDate lJodaFullySpecifiedSeasonEndDate = LocalDate.fromDateFields(pIceSeasonSpecificationFile.getEndDate());
+			Season lS = new Season(lSeasonCode, lcvgi.getCdsItemName(), true, 
+					lJodaFullySpecifiedSeasonStartDate.getMonthOfYear(), lJodaFullySpecifiedSeasonStartDate.getDayOfMonth(), lJodaFullySpecifiedSeasonStartDate.getYear(), 
+					lJodaFullySpecifiedSeasonEndDate.getMonthOfYear(), lJodaFullySpecifiedSeasonStartDate.getDayOfMonth(), lJodaFullySpecifiedSeasonEndDate.getYear());
+			lSeasonsListForVG.add(lS);
+			this.vaccineGroupItemToSeasons.put(lcvgi, lSeasonsListForVG);
+			this.cdsListItemNameToSeasonItem.put(lSeasonCode, new LocallyCodedSeasonItem(lSeasonCode, pIceSeasonSpecificationFile.getCdsVersions(), lS));
+		}
+		else {
+			///////
+			// Add default season
+			///////
+			String lDefaultSeasonStartDate = pIceSeasonSpecificationFile.getDefaultStartMonthAndDay();
+			String lDefaultSeasonEndDate = pIceSeasonSpecificationFile.getDefaultStopMonthAndDay();
+			if (lDefaultSeasonStartDate == null || lDefaultSeasonEndDate == null) {
+				String lErrStr = "Default season start and/or default season end date not specified for default season; start date: " + 
+						lDefaultSeasonStartDate + "; end date: " + lDefaultSeasonEndDate;
+				logger.warn(_METHODNAME + lErrStr);
+				throw new InconsistentConfigurationException(lErrStr);
+			}
+
+			// Check validity of specified default start and stop dates
+			MonthDay lStartMonthDay = null;
+			MonthDay lEndMonthDay = null;
+			try {
+				lStartMonthDay = getMonthDayObjectForSDMonthDayStr(lDefaultSeasonStartDate);
+				lEndMonthDay = getMonthDayObjectForSDMonthDayStr(lDefaultSeasonEndDate);
+			}
+			catch (IllegalArgumentException e) {
+				String lErrStr = "Default season start and/or default season end date invalid format; start date: " + lDefaultSeasonStartDate + "; end date: " + lDefaultSeasonEndDate;
+				logger.warn(_METHODNAME + lErrStr);
+				throw new InconsistentConfigurationException(lErrStr);
+			}
+			Season lS = new Season(lSeasonCode, lcvgi.getCdsItemName(), true, lStartMonthDay.getMonthOfYear(), lStartMonthDay.getDayOfMonth(), 
+				lEndMonthDay.getMonthOfYear(), lEndMonthDay.getDayOfMonth());
+			lSeasonsListForVG.add(lS);
+			this.vaccineGroupItemToSeasons.put(lcvgi, lSeasonsListForVG);
+			this.cdsListItemNameToSeasonItem.put(lSeasonCode, new LocallyCodedSeasonItem(lSeasonCode, pIceSeasonSpecificationFile.getCdsVersions(), lS));
+		}
+		
 		/**
 		 * Examples
 		 * 
@@ -101,6 +179,45 @@ public class SupportedCdsSeasons implements SupportingData {
 			SeriesRules influenza2DoseDefaultSeriesRules = new SeriesRules("Influenza 2-Dose Default Series", SupportedVaccineGroupConcept.Influenza, influenzaDefaultSeasons);			
 		  *
 		  **/
+	}
+	
+	
+	private MonthDay getMonthDayObjectForSDMonthDayStr(String pMonthAndDay) 
+		throws IllegalArgumentException {
+
+		String _METHODNAME = "getMonthDayObjectForSDMonthDayStr(): ";
+
+		if (pMonthAndDay == null || pMonthAndDay.isEmpty()) {
+			String lErrStr = _METHODNAME + "MonthDay argument not specified";
+			throw new IllegalArgumentException(lErrStr);
+		}
+		
+		final String regex="(\\d+)(-)(\\d+)";
+		Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+		Matcher m = p.matcher(pMonthAndDay);
+		if (m.find()) {
+			try {
+				String monthStr=m.group(1);
+				String dayStr=m.group(3);
+				MonthDay md = new MonthDay(Integer.parseInt(monthStr), Integer.parseInt(dayStr));
+				return md;
+			}
+			catch (IllegalStateException ise) {
+				 String lErrStr = "An IllegalStateException was encountered for month and day: " + pMonthAndDay;
+				 logger.error(_METHODNAME + lErrStr);
+				 throw new ICECoreError(lErrStr);
+			}
+			catch (IndexOutOfBoundsException iobe) {
+				 String lErrStr = "An IllegalStateException was encountered for month and day: " + pMonthAndDay;
+				 logger.error(_METHODNAME + lErrStr);
+				 throw new ICECoreError(_METHODNAME + lErrStr);
+			}
+		}
+		else {
+			final String regexParm="(\\d)?(\\d)(-)(\\d)?(\\d)";
+			String lErrStr = _METHODNAME + "MonthDay argument is in invalid format. Format is: " + regexParm;
+			throw new IllegalArgumentException(lErrStr);
+		}
 	}
 	
 }

@@ -538,6 +538,7 @@ public class ICESupportingDataConfiguration {
 			}
 		}
 		
+		this.supportedCdsSeasons.addSupportedSeasonItemFromIceSeasonSpecificationFile(pIceSeasonSpecificationFile);
 	}
 	
 	

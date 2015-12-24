@@ -182,6 +182,15 @@ public class TimePeriod {
 		return duration + durationTypeStr;
 	}
 	
+	public static boolean isValidMonth(int month) {
+		if (month > 0 && month < 13) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	public static int numberOfDaysInMonth(int year, int month) {
 		DateTime dateTime = new DateTime(year, month, 14, 12, 0, 0, 000);
 		return dateTime.dayOfMonth().getMaximumValue();
