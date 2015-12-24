@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +35,13 @@ public class SupportedCdsSeasons implements SupportingData {
 	
 	protected SupportedCdsSeasons(SupportedCdsVaccineGroups pSupportedVaccineGroups) {
 
+		String _METHODNAME = "SupportedCdsSeasons(): ";
+		if (pSupportedVaccineGroups == null) {
+			String lErrStr = "SupportedCdsVaccineGroups argument is null; a valid argument must be provided.";
+			logger.error(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
+		
 		this.supportedVaccineGroups = pSupportedVaccineGroups;
 		this.cdsListItemNameToSeasonItem = new HashMap<String, LocallyCodedSeasonItem>();
 		this.vaccineGroupItemToSeasons = new HashMap<LocallyCodedVaccineGroupItem, List<Season>>();
@@ -41,10 +49,20 @@ public class SupportedCdsSeasons implements SupportingData {
 
 	
 	public boolean isEmpty() {		
-		// TODO:
-		return true;
+		
+		if (this.cdsListItemNameToSeasonItem.size() == 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	
+	
+	protected SupportedCdsVaccineGroups getAssociatedSupportedCdsVaccineGroups() {
+		
+		return this.supportedVaccineGroups;
+	}
 	
 	protected void addSupportedSeasonItemFromIceSeasonSpecificationFile(IceSeasonSpecificationFile pIceSeasonSpecificationFile) 
 		throws ImproperUsageException, InconsistentConfigurationException {
@@ -54,14 +72,7 @@ public class SupportedCdsSeasons implements SupportingData {
 		if (pIceSeasonSpecificationFile == null || this.supportedVaccineGroups == null) {
 			return;
 		}
-		
-		// If adding a code that is not one of the supported cdsVersions, then return
-		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceSeasonSpecificationFile.getCdsVersions(), 
-			this.supportedVaccineGroups.getAssociatedSupportedCdsLists().getCdsVersions());
-		if (lIntersectionOfSupportedCdsVersions == null) {
-			return;
-		}
-				
+
 		String lSeasonCode = pIceSeasonSpecificationFile.getCode();
 		if (lSeasonCode == null) {
 			String lErrStr = "Required supporting data seasonCode element not provided in IceSeasonSpecificationFile";
@@ -69,6 +80,14 @@ public class SupportedCdsSeasons implements SupportingData {
 			throw new ImproperUsageException(lErrStr);
 		}
 		
+		// If adding a code that is not one of the supported cdsVersions, then return
+		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceSeasonSpecificationFile.getCdsVersions(), 
+			this.supportedVaccineGroups.getAssociatedSupportedCdsLists().getCdsVersions());
+		if (lIntersectionOfSupportedCdsVersions.size() == 0) {
+			logger.warn(_METHODNAME + "Skipping attempt to add a Season \"" + lSeasonCode + "\" which does not have a cdsVersion that is supported by SupportedCdsLists");
+			return;
+		}
+				
 		///////
 		// Check to make sure that this season code has not already been defined
 		///////
@@ -125,8 +144,8 @@ public class SupportedCdsSeasons implements SupportingData {
 					lJodaFullySpecifiedSeasonStartDate.getMonthOfYear(), lJodaFullySpecifiedSeasonStartDate.getDayOfMonth(), lJodaFullySpecifiedSeasonStartDate.getYear(), 
 					lJodaFullySpecifiedSeasonEndDate.getMonthOfYear(), lJodaFullySpecifiedSeasonStartDate.getDayOfMonth(), lJodaFullySpecifiedSeasonEndDate.getYear());
 			lSeasonsListForVG.add(lS);
-			this.vaccineGroupItemToSeasons.put(lcvgi, lSeasonsListForVG);
 			this.cdsListItemNameToSeasonItem.put(lSeasonCode, new LocallyCodedSeasonItem(lSeasonCode, pIceSeasonSpecificationFile.getCdsVersions(), lS));
+			this.vaccineGroupItemToSeasons.put(lcvgi, lSeasonsListForVG);
 		}
 		else {
 			///////
@@ -156,13 +175,14 @@ public class SupportedCdsSeasons implements SupportingData {
 			Season lS = new Season(lSeasonCode, lcvgi.getCdsItemName(), true, lStartMonthDay.getMonthOfYear(), lStartMonthDay.getDayOfMonth(), 
 				lEndMonthDay.getMonthOfYear(), lEndMonthDay.getDayOfMonth());
 			lSeasonsListForVG.add(lS);
-			this.vaccineGroupItemToSeasons.put(lcvgi, lSeasonsListForVG);
 			this.cdsListItemNameToSeasonItem.put(lSeasonCode, new LocallyCodedSeasonItem(lSeasonCode, pIceSeasonSpecificationFile.getCdsVersions(), lS));
+			this.vaccineGroupItemToSeasons.put(lcvgi, lSeasonsListForVG);
 		}
 		
 		/**
 		 * Examples
 		 * 
+		 	// Fully-Specified Seasons
 			List<Season> influenzaSeasons = new ArrayList<Season>();
 			influenzaSeasons.add(new Season("2015-2016 Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 2015, 6, 30, 2016));
 			influenzaSeasons.add(new Season("2014-2015 Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 2014, 6, 30, 2015));
@@ -182,6 +202,12 @@ public class SupportedCdsSeasons implements SupportingData {
 	}
 	
 	
+	/**
+	 * Get MonthDay object for month and day string represented by MM-DD 
+	 * @param pMonthAndDay
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
 	private MonthDay getMonthDayObjectForSDMonthDayStr(String pMonthAndDay) 
 		throws IllegalArgumentException {
 
@@ -218,6 +244,34 @@ public class SupportedCdsSeasons implements SupportingData {
 			String lErrStr = _METHODNAME + "MonthDay argument is in invalid format. Format is: " + regexParm;
 			throw new IllegalArgumentException(lErrStr);
 		}
+	}
+	
+	
+	@Override
+	public String toString() {
+		
+		// First, print out all of the season name->season value map entries
+		Set<String> cdsListItemNames = this.cdsListItemNameToSeasonItem.keySet();
+		int i = 1 ;
+		String ltoStringStr = null;
+		for (String s : cdsListItemNames) {
+			ltoStringStr += "{" + i + "} " + s + " = [ " + this.cdsListItemNameToSeasonItem.get(s).toString() + " ]\n";
+			i++;
+		}
+		
+		// Second, print out which seasons are associated with which vaccine groups
+		Set<LocallyCodedVaccineGroupItem> lcvc = this.vaccineGroupItemToSeasons.keySet();
+		i=1;
+		ltoStringStr += "Vaccine Group -> Seasons list:";
+		for (LocallyCodedVaccineGroupItem lcvg : lcvc) {
+			ltoStringStr += "\n\t(" + i + ") Vaccine Group " + lcvg.getCdsItemName() + " ==> ";
+			List<Season> vgSeasons = this.vaccineGroupItemToSeasons.get(lcvg);
+			for (Season s: vgSeasons) {
+				ltoStringStr += s.getSeasonName() + "; ";
+			}
+		}
+		
+		return ltoStringStr;
 	}
 	
 }

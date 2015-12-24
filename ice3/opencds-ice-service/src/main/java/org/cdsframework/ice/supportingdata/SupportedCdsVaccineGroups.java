@@ -53,8 +53,18 @@ public class SupportedCdsVaccineGroups implements SupportingData {
 	private static Log logger = LogFactory.getLog(SupportedCdsVaccineGroups.class);	
 
 	
+	/**
+	 * Create a SupportedCdsVaccineGroups object. If the SupportedCdsLists argument is null, an IllegalArgumentException is thrown.
+	 * @param pSupportedCdsLists
+	 */
 	protected SupportedCdsVaccineGroups(SupportedCdsLists pSupportedCdsLists) {
 	
+		String _METHODNAME = "SupportedCdsVaccineGroups(): ";
+		if (pSupportedCdsLists == null) {
+			String lErrStr = "SupportedCdsLists argument is null; a valid argument must be provided.";
+			logger.error(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
 		this.supportedCdsLists = pSupportedCdsLists;
 		this.cdsListItemNameToVaccineGroupItem = new HashMap<String, LocallyCodedVaccineGroupItem>();
 	}

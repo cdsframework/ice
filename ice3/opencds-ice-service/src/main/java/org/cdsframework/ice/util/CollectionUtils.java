@@ -44,14 +44,15 @@ public class CollectionUtils {
 	}
 	*/
 
+	/**
+	 * Return a Collection that contains String arguments in all of the collections, or an empty set if there is no intersection of common elements.
+	 * @param pCollection
+	 * @return
+	 */
 	@SafeVarargs
 	public static Collection<String> intersectionOfStringCollections(Collection<String> ... pCollection) {
 
-		if (pCollection == null) {
-			return null;
-		}
-
-		if (pCollection.length == 1) {
+		if (pCollection == null || pCollection.length == 0 || pCollection.length == 1) {
 			return pCollection[0];
 		}
 

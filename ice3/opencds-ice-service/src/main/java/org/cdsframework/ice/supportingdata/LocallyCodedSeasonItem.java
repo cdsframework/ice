@@ -47,8 +47,16 @@ public class LocallyCodedSeasonItem extends LocallyCodedCdsItem {
 		this.season = pSeason;
 	}
 
-
 	public Season getSeason() {
 		return season;
 	}
+
+	@Override
+	public String toString() {
+		
+		String toStr = "LocallyCodedSeasonItem [getCdsItemName()=" + getCdsItemName() + "; getSeason()=" + this.season + "; getCdsVersions()=" + getCdsVersions() + "]";
+		return toStr;
+	}
+	
+	
 }

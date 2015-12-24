@@ -217,7 +217,31 @@ public class LocallyCodedCdsListItem {
 	}
 
 	
-	private boolean attributeNameConformsToRequiredNamingConvention(String pAttributeName) {
+	
+	/**
+	 * Return a modified String of the argument supplied as the attribute name which conforms to the required naming convention ([a-zA-Z0-9_\\.\\- ]) by stripping out all
+	 * spaces, tabs, line feeds, newline and carriage return characters. If an argument is such that it cannot be modified, then throw an IllegalArgumentException.
+	 * @param pAttributeName
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public static String modifyAttributeNameToConformToRequiredNamingConvention(String pAttributeName) 
+		throws IllegalArgumentException {
+		
+		String _METHODNAME = "modifyAttributeNameToConformToRequiredNamingConvention(): ";
+		if (! attributeNameConformsToRequiredNamingConvention(pAttributeName)) {
+			String lErrStr = "argument \"" + pAttributeName + "\"  contains invalid characters; must conform to " + _attributeNamingConvention;
+			logger.info(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
+		
+		String lAttributeName = pAttributeName;
+		lAttributeName.replaceAll("[ \t\n\f\r]", "_");
+		return lAttributeName;
+	}
+	
+	
+	public static boolean attributeNameConformsToRequiredNamingConvention(String pAttributeName) {
 
 		if (pAttributeName == null) {
 			return false;

@@ -134,7 +134,7 @@ public class ICESupportingDataConfiguration {
 		this.supportedCdsLists = new SupportedCdsLists(supportedCdsVersions);
 		initializeCodeConcepts(supportingDataConceptsAndCodesSubdirectory);
 		if (logger.isDebugEnabled()) {
-			String lDebugStr = _METHODNAME + "The following Cds Lists have been initialized into the " + this.getClass().getName() + ": \n";
+			String lDebugStr = "The following Cds Lists have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedCdsLists.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}
@@ -145,7 +145,7 @@ public class ICESupportingDataConfiguration {
 		this.supportedCdsVaccineGroups = new SupportedCdsVaccineGroups(this.supportedCdsLists);
 		initializeVaccineGroupSupportingData(supportingDataVaccineGroupsSubdirectory);
 		if (logger.isDebugEnabled()) {
-			String lDebugStr = _METHODNAME + "The following Vaccine Groups have been initialized into the " + this.getClass().getName() + ": \n";
+			String lDebugStr = "The following Vaccine Groups have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedCdsVaccineGroups.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}
@@ -156,7 +156,7 @@ public class ICESupportingDataConfiguration {
 		this.supportedCdsVaccines = new SupportedCdsVaccines(this.supportedCdsLists);
 		initializeVaccineSupportingData(supportingDataVaccinesSubdirectory);
 		if (logger.isDebugEnabled()) {
-			String lDebugStr = _METHODNAME + "The following Vaccines have been initialized into the " + this.getClass().getName() + ": \n";
+			String lDebugStr = "The following Vaccines have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedCdsVaccines.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}
@@ -170,6 +170,12 @@ public class ICESupportingDataConfiguration {
 		// Initialize Seasons supporting data
 		///////
 		this.supportedCdsSeasons = new SupportedCdsSeasons(this.supportedCdsVaccineGroups);
+		initializeSeasonsSupportingData(supportingDataSeasonsSubdirectory);
+		if (logger.isDebugEnabled()) {
+			String lDebugStr = _METHODNAME + "The following Seasons have been initialized into the " + this.getClass().getName() + ":\n";
+			lDebugStr += this.supportedCdsSeasons.toString();
+			logger.debug(_METHODNAME + lDebugStr);
+		}
 		
 		// Log configuration data parameters of data initialized
 		lSbCdsVersion.append("; ");
@@ -536,6 +542,8 @@ public class ICESupportingDataConfiguration {
 			else {
 				lDebugStrb += "\n\tNo CdsVersion information supplied";
 			}
+			
+			logger.debug(_METHODNAME + lDebugStrb);
 		}
 		
 		this.supportedCdsSeasons.addSupportedSeasonItemFromIceSeasonSpecificationFile(pIceSeasonSpecificationFile);
@@ -866,12 +874,6 @@ public class ICESupportingDataConfiguration {
 		}
 
 		System.out.println("\n\nmain(): END.\n\n");
-		
-		/*
-		String testReplace = "IMM_GENDER\tFEMALE";
-		System.out.println(testReplace);
-		System.out.println(testReplace.replaceAll("[ \t\n\f\r]", "_"));
-		*/
 	}
 	
 }

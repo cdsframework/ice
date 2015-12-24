@@ -4,7 +4,6 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.util.CollectionUtils;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 public abstract class LocallyCodedCdsItem {
@@ -15,21 +14,28 @@ public abstract class LocallyCodedCdsItem {
 	private static Log logger = LogFactory.getLog(LocallyCodedCdsItem.class);
 	
 	/**
-	 * Creates a LocallyCodedCdsItem. Both the CdsItemName and CdsVersions must be specified, or an IllegalArgumentException is thrown.
+	 * Creates a LocallyCodedCdsItem. Both the CdsItemName and CdsVersions must be specified, or an ImproerUsageException is thrown is thrown. If the CdsItemName does not 
+	 * follow the naming conventions set forth by LocallyCodedCdsListItem's attributeNameConformsToRequiredNamingConvention(), and furthermore that an call to 
+	 * LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention would modify the supplied parameter (as it should not), an IllegalArgumentException is thrown.
 	 */
 	public LocallyCodedCdsItem(String pCdsItemName, Collection<String> pCdsVersions) 
-		throws ImproperUsageException {
+		throws ImproperUsageException, IllegalArgumentException {
 		
 		String _METHODNAME = "LocallyCodedCdsItem(): ";
 		
 		if (pCdsItemName == null || pCdsItemName.isEmpty()) {
 			String lErrStr = "CdsItem name not specified";
-			logger.error(_METHODNAME + lErrStr);
-			throw new IllegalArgumentException(lErrStr);
+			logger.warn(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
+		if (! pCdsItemName.equals(LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention(pCdsItemName))) {
+			String lErrStr = "CdsItemName supplied \"" + pCdsItemName + "\" does not follow contains invalid characters; must conform to attribute naming conventions set forth by LocallyCodedCdsListItems";
+			logger.warn(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(_METHODNAME);
 		}
 		if (pCdsVersions == null || pCdsVersions.isEmpty()) {
 			String lErrStr = "CdsVersion(s) not specified";
-			logger.error(_METHODNAME + lErrStr);
+			logger.warn(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
 		

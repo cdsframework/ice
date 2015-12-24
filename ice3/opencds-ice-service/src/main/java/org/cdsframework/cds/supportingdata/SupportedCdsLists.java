@@ -96,7 +96,7 @@ public class SupportedCdsLists implements SupportingData {
 		
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lCdsVersions = CollectionUtils.intersectionOfStringCollections(pCdsListSpecificationFile.getCdsVersions(), this.cdsVersions);
-		if (lCdsVersions == null) {
+		if (lCdsVersions.size() == 0) {
 			return;
 		}
 		
