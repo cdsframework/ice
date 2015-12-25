@@ -20,6 +20,9 @@ import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 
+/**
+ * Creates and manages CdsLists, CdsListItems, and SupportedCdsConcepts.
+ */
 public class SupportedCdsLists implements SupportingData {
 	
 	/**
@@ -85,7 +88,7 @@ public class SupportedCdsLists implements SupportingData {
 	 * @throws ImproperUsageException If the caller tries to add a SupportedListConcept that has already been added to the supported list concepts; or if the specified CdsListItem
 	 * 	is not an item in the CdsListSpecificationFile, or if not all required elements have been populated 
 	 */
-	private void addSupportedCdsListItem(CdsListSpecificationFile pCdsListSpecificationFile, CdsListItem pCdsListItem) 
+	private void addSupportedCdsListItemAndConcept(CdsListSpecificationFile pCdsListSpecificationFile, CdsListItem pCdsListItem) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "addSupportedListConcept(): ";
@@ -192,7 +195,7 @@ public class SupportedCdsLists implements SupportingData {
 	}
 
 	
-	public void addAllSupportedListItemsFromCdsListSpecificationFile(CdsListSpecificationFile pCdsListSpecificationFile) 
+	public void addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(CdsListSpecificationFile pCdsListSpecificationFile) 
 		throws InconsistentConfigurationException {
 		
 		if (pCdsListSpecificationFile == null) {
@@ -202,7 +205,7 @@ public class SupportedCdsLists implements SupportingData {
 			List<CdsListItem> lcli = pCdsListSpecificationFile.getCdsListItems();
 			try {
 				for (CdsListItem cli : lcli) {
-					addSupportedCdsListItem(pCdsListSpecificationFile, cli);
+					addSupportedCdsListItemAndConcept(pCdsListSpecificationFile, cli);
 				}
 			}
 			catch (ImproperUsageException iue) {
@@ -232,7 +235,7 @@ public class SupportedCdsLists implements SupportingData {
 	/**
 	 * Return the associated Supported Cds Concepts; will never be null
 	 */
-	public SupportedCdsConcepts getAssociatedSupportedCdsConcepts() {
+	public SupportedCdsConcepts getSupportedCdsConcepts() {
 		
 		return this.supportedCdsConcepts;
 	}

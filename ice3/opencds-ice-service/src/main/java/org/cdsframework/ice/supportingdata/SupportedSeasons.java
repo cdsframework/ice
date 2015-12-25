@@ -43,7 +43,7 @@ public class SupportedSeasons implements SupportingData {
 			throw new IllegalArgumentException(lErrStr);
 		}
 		
-		this.supportedVaccineGroups = isdc.getSupportedCdsVaccineGroups();
+		this.supportedVaccineGroups = isdc.getSupportedVaccineGroups();
 		if (this.supportedVaccineGroups == null) {
 			String lErrStr = "Supporting vaccine group data not set in ICESupportingDataConfiguration; cannot continue";
 			logger.error(_METHODNAME + lErrStr);

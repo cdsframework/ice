@@ -24,19 +24,19 @@ public class SupportedSeries implements SupportingData {
 			throw new IllegalArgumentException(lErrStr);
 		}
 		
-		this.supportedVaccineGroups = isdc.getSupportedCdsVaccineGroups();
+		this.supportedVaccineGroups = isdc.getSupportedVaccineGroups();
 		if (this.supportedVaccineGroups == null) {
 			String lErrStr = "Supporting vaccine group data not set in ICESupportingDataConfiguration; cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
-		this.supportedVaccines = isdc.getSupportedCdsVaccines();
+		this.supportedVaccines = isdc.getSupportedVaccines();
 		if (this.supportedVaccines == null) {
 			String lErrStr = "Supporting vaccine data not set in ICESupportingDataConfiguration; cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
-		this.supportedSeasons = isdc.getSupportedCdsSeasons();
+		this.supportedSeasons = isdc.getSupportedSeasons();
 		if (this.supportedSeasons == null) {
 			String lErrStr = "Supporting season data not set in ICESupportingDataConfiguration; cannot continue";
 			logger.error(_METHODNAME + lErrStr);

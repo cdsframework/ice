@@ -181,7 +181,7 @@ public class Schedule {
 		}
 		
 		// Supporting data restrictions ensure all of the values are non-null
-		return this.iceSupportingDataConfiguration.getSupportedCdsVaccines().getCdsVaccineItem(lVaccineCdsItem.getCdsListName()).getVaccine();
+		return this.iceSupportingDataConfiguration.getSupportedVaccines().getCdsVaccineItem(lVaccineCdsItem.getCdsListName()).getVaccine();
 	}
 
 	
@@ -232,7 +232,7 @@ public class Schedule {
 			return null;
 		}
 		
-		LocallyCodedVaccineGroupItem lCodedVaccineGroupItem = this.iceSupportingDataConfiguration.getSupportedCdsVaccineGroups().getVaccineGroupItem(pVaccineGroupItemName);
+		LocallyCodedVaccineGroupItem lCodedVaccineGroupItem = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getVaccineGroupItem(pVaccineGroupItemName);
 		if (lCodedVaccineGroupItem == null) {
 			return null;
 		}
@@ -293,7 +293,7 @@ public class Schedule {
 		}
 		
 		int i=0;
-		Collection<LocallyCodedVaccineGroupItem> lAllVaccineGroups = this.iceSupportingDataConfiguration.getSupportedCdsVaccineGroups().getAllLocallyCodedVaccineGroupItems();
+		Collection<LocallyCodedVaccineGroupItem> lAllVaccineGroups = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getAllLocallyCodedVaccineGroupItems();
 		for (LocallyCodedVaccineGroupItem lVaccineGroup : lAllVaccineGroups) {
 			Collection<String> lAllRelatedDiseases = lVaccineGroup.getRelatedDiseasesCdsListItemNames();
 			if (lAllRelatedDiseases != null) {			// should never be null

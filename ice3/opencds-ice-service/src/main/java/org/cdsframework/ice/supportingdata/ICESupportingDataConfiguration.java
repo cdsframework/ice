@@ -82,12 +82,6 @@ public class ICESupportingDataConfiguration {
 	private static String supportingDataVaccinesSubdirectory = "Vaccines";
 	private static String supportingDataSeasonsSubdirectory = "Seasons";
 	private static String supportingDataSeriesSubdirectory = "Series";
-	//
-	private static final String _ICE_CDS_LIST_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.cds.list";
-	private static final String _ICE_VACCINE_GROUP_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.vaccinegroup";
-	private static final String _ICE_VACCINE_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.vaccine";
-	private static final String _ICE_SEASON_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.season";
-	// private static final String _ICE_SERIES_SPECIFICATION_FILE_XML_NAMESPACE = "org.cdsframework.util.support.data.ice.series";
 	
 	private static Log logger = LogFactory.getLog(ICESupportingDataConfiguration.class);
 	
@@ -146,7 +140,15 @@ public class ICESupportingDataConfiguration {
 		// Initialize Code Systems/Value Sets supporting data
 		///////
 		this.supportedCdsLists = new SupportedCdsLists(supportedCdsVersions);
-		initializeCodeConcepts(supportingDataConceptsAndCodesSubdirectory);
+		try {
+			Method sdMethodToInvoke = this.getClass().getMethod("addSupportedCdsListsAndConceptsFromCdsListSpecificationFile", new Class[] { CdsListSpecificationFile.class } );
+			initializeSupportingData(supportingDataConceptsAndCodesSubdirectory, this.supportedCdsLists, CdsListSpecificationFile.class, sdMethodToInvoke);
+		} 
+		catch (NoSuchMethodException | SecurityException e) {
+			String lErrStr = "Failed to obtain method to invoke for initializing supporting *CdsLists* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);
+		}		
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = "The following Cds Lists have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedCdsLists.toString();
@@ -157,7 +159,15 @@ public class ICESupportingDataConfiguration {
 		// Initialize the Vaccine Group supporting data
 		///////
 		this.supportedVaccineGroups = new SupportedVaccineGroups(this);
-		initializeVaccineGroupSupportingData(supportingDataVaccineGroupsSubdirectory);
+		try {
+			Method sdMethodToInvoke = this.getClass().getMethod("addSupportedVaccineGroupFromIceVaccineGroupSpecificationFile", new Class[] { IceVaccineGroupSpecificationFile.class } );
+			initializeSupportingData(supportingDataVaccineGroupsSubdirectory, this.supportedVaccineGroups, IceVaccineGroupSpecificationFile.class, sdMethodToInvoke);
+		} 
+		catch (NoSuchMethodException | SecurityException e) {
+			String lErrStr = "Failed to obtain method to invoke for initializing supporting *Vaccine Groups* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);
+		}
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = "The following Vaccine Groups have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedVaccineGroups.toString();
@@ -168,7 +178,16 @@ public class ICESupportingDataConfiguration {
 		// Initialize the Vaccine supporting data
 		///////
 		this.supportedVaccines = new SupportedVaccines(this);
-		initializeVaccineSupportingData(supportingDataVaccinesSubdirectory);
+		// initializeVaccineSupportingData(supportingDataVaccinesSubdirectory);
+		try {
+			Method sdMethodToInvoke = this.getClass().getMethod("addSupportedVaccineFromIceVaccineSpecificationFile", new Class[] { IceVaccineSpecificationFile.class } );
+			initializeSupportingData(supportingDataVaccinesSubdirectory, this.supportedVaccines, IceVaccineSpecificationFile.class, sdMethodToInvoke);
+		} 
+		catch (NoSuchMethodException | SecurityException e) {
+			String lErrStr = "Failed to obtain method to invoke for initializing supporting *Vaccines* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);
+		}		
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = "The following Vaccines have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedVaccines.toString();
@@ -184,7 +203,15 @@ public class ICESupportingDataConfiguration {
 		// Initialize Seasons supporting data
 		///////
 		this.supportedSeasons = new SupportedSeasons(this);
-		initializeSeasonsSupportingData(supportingDataSeasonsSubdirectory);
+		try {
+			Method sdMethodToInvoke = this.getClass().getMethod("addSupportedSeasonFromIceSeasonSpecificationFile", new Class[] { IceSeasonSpecificationFile.class } );
+			initializeSupportingData(supportingDataSeasonsSubdirectory, this.supportedSeasons, IceSeasonSpecificationFile.class, sdMethodToInvoke);
+		} 
+		catch (NoSuchMethodException | SecurityException e) {
+			String lErrStr = "Failed to obtain method to invoke for initializing supporting *Seasons* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);
+		}
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = _METHODNAME + "The following Seasons have been initialized into the " + this.getClass().getName() + ":\n";
 			lDebugStr += this.supportedSeasons.toString();
@@ -196,15 +223,15 @@ public class ICESupportingDataConfiguration {
 		///////
 		this.supportedSeries = new SupportedSeries(this);
 		try {
-			Method sdMethodToInvoke = this.getClass().getMethod("addSupportedSeriesFromIceSeriesSpecificationFile", new Class[] { IceSeriesSpecificationFile.class, File.class } );
-			initializeSupportingData(supportingDataSeriesSubdirectory, supportedSeries, IceSeriesSpecificationFile.class, sdMethodToInvoke);
+			Method sdMethodToInvoke = this.getClass().getMethod("addSupportedSeriesFromIceSeriesSpecificationFile", new Class[] { IceSeriesSpecificationFile.class } );
+			initializeSupportingData(supportingDataSeriesSubdirectory, this.supportedSeries, IceSeriesSpecificationFile.class, sdMethodToInvoke);
 		} 
 		catch (NoSuchMethodException | SecurityException e) {
-			String lErrStr = "Failed to obtain method to invoke for initializing supporting series data";
+			String lErrStr = "Failed to obtain method to invoke for initializing supporting *Series* data";
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
 		}
-
+		
 		// Log configuration data parameters of data initialized
 		lSbCdsVersion.append("; ");
 		lSbSDlocation.insert(0, lSbCdsVersion);
@@ -225,7 +252,7 @@ public class ICESupportingDataConfiguration {
 	/**
 	 * Get the ICE SupportedVaccineGroups data for this supporting data configuration
 	 */
-	public SupportedVaccineGroups getSupportedCdsVaccineGroups() {
+	public SupportedVaccineGroups getSupportedVaccineGroups() {
 		
 		return this.supportedVaccineGroups;
 	}
@@ -234,7 +261,7 @@ public class ICESupportingDataConfiguration {
 	/**
 	 * Get the ICE SupportedVaccineGroups data for this supporting data configuration
 	 */
-	public SupportedVaccines getSupportedCdsVaccines() {
+	public SupportedVaccines getSupportedVaccines() {
 		
 		return this.supportedVaccines;
 	}
@@ -243,7 +270,7 @@ public class ICESupportingDataConfiguration {
 	/**
 	 * Get the ICE SupportedSeasons data for this supporting data configuration
 	 */
-	public SupportedSeasons getSupportedCdsSeasons() {
+	public SupportedSeasons getSupportedSeasons() {
 		
 		return this.supportedSeasons;
 	}
@@ -253,10 +280,18 @@ public class ICESupportingDataConfiguration {
 	 */
 	public SupportedCdsConcepts getSupportedCdsConcepts() {
 		
-		return getSupportedCdsLists().getAssociatedSupportedCdsConcepts();
+		return getSupportedCdsLists().getSupportedCdsConcepts();
 	}
 	
 	
+	/**
+	 * Initialize the Vaccine Group Concepts from supporting iceVaccineGroupSpecificationFile XML data files
+	 * @param pSDSubDirectory Subdirectory where all of the XML files for this supporting data type are held
+	 * @param pSDObjectToInitialize The supporting data object to initialize
+	 * @param pSupportingDataXMLClass The class of the supporting data XML to be read in
+	 * @param pSupportingDataMethodToInvoke The initialization method to invoke for the supporting data type
+	 * @throws ICECoreError if any of the data is invalid or not provided
+	 */
 	private <T> void initializeSupportingData(String pSDSubDirectory, SupportingData pSDObjectToInitialize, Class<T> pSupportingDataXMLClass, Method pSupportingDataMethodToInvoke) {
 			
 		String _METHODNAME = "initializeSeasonsSupportingData(): ";
@@ -315,7 +350,8 @@ public class ICESupportingDataConfiguration {
 					JAXBElement<T> lJAXBDocument = (JAXBElement<T>) lUnmarshaller.unmarshal(new StreamSource(lIceVFile), pSupportingDataXMLClass);
 					T lIceDataSpecification = lJAXBDocument.getValue();
 					// Invoke the specified supporting data initialization routine
-					pSupportingDataMethodToInvoke.invoke(lIceDataSpecification, new Object[] { lIceVFile } );
+					// pSupportingDataMethodToInvoke.invoke(this, lIceDataSpecification, new Object[] { lIceVFile } );
+					pSupportingDataMethodToInvoke.invoke(this, lIceDataSpecification);
 				}
 			}
 			catch (SecurityException se) {
@@ -341,322 +377,19 @@ public class ICESupportingDataConfiguration {
 		}		
 	}
 	
-	/**
-	 * Initialize the Coded Concepts from CdsListSpecificationFile XML supporting data files. IF the data has already been initialized, an ImproperUsageException is thrown (in 
-	 * which case, reloadSupportingDataConfiguration() must be invoked if the caller wishes to reload all of the supporting data.  
-	 * @param pSupportingDataDirectory
-	 * @param pSupportingDataChildDirectory
-	 * @return
-	 * @throws ImproperUsageException
-	 */
-	private void initializeCodeConcepts(String pSDSubDirectory) 
-		throws ImproperUsageException {
+	
+	public void addSupportedSeriesFromIceSeriesSpecificationFile(IceSeriesSpecificationFile pIceSeriesSpecificationFile) {
 		
-		String _METHODNAME = "initializeCodeConcepts(): ";
-
-		if (! this.supportedCdsLists.isEmpty()) {
-			String lErrStr = "supported code concepts has already been initialized";
-			logger.error(_METHODNAME + lErrStr); 
-			throw new ICECoreError(lErrStr);
-		}
-		for (File lSupportingDatadirectory : this.supportingDataDirectoryLocations) {
-			File lCodedConceptsDirectory = new File(lSupportingDatadirectory, pSDSubDirectory);
-			if (! lCodedConceptsDirectory.exists()) {
-				// No coded concepts defined for this CDS version - go to next supported CDS version
-				if (logger.isDebugEnabled()) {
-					String lInfo = "No coded concept supporting data defined at: " + lCodedConceptsDirectory.getAbsolutePath();
-					logger.debug(_METHODNAME + lInfo);
-				}
-				continue;
-			}
-			try {
-				JAXBContext jc = JAXBContext.newInstance(_ICE_CDS_LIST_SPECIFICATION_FILE_XML_NAMESPACE);
-				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
-				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
-				String[] lSDFiles = lCodedConceptsDirectory.list(lFF);
-				if (lSDFiles == null) {
-					String lErrStr = "An error occurred obtaining list of supporting data files";
-					logger.error(_METHODNAME + lErrStr);
-					throw new RuntimeException(lErrStr);
-				}
-
-				for (String lSDFile : lSDFiles) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Parsing supporting data file: \"" + lSDFile + "\"");
-					}
-					File lCdsListFile = new File(lCodedConceptsDirectory, lSDFile);
-					CdsListSpecificationFile cdslsf = (CdsListSpecificationFile) lUnmarshaller.unmarshal(lCdsListFile);
-					addSupportedListConceptsFromCdsListSpecificationFile(cdslsf, lCdsListFile);
-				}
-			}
-			catch (SecurityException se) {
-				String lErrStr = "encountered an exception processing supporting data file";
-				logger.error(_METHODNAME + lErrStr, se);
-				throw new RuntimeException(lErrStr);				
-			}
-			catch (JAXBException jaxbe) {
-				String lErrStr = "encountered an exception processing supporting data file; likely an invalid formatted file";
-				logger.error(_METHODNAME + lErrStr, jaxbe);
-				throw new RuntimeException(lErrStr);
-			}
-		}		
+		String _METHODNAME = "addSupportedSeriesFromIceSeriesSpecificationFile(): ";
+		logger.debug(_METHODNAME + "invoked.");
 	}
 	
 	
-	/**
-	 * Initialize the Vaccine Group Concepts from supporting iceVaccineGroupSpecificationFile XML data files  
-	 * @param pSupportingDataDirectory
-	 * @param pChildDirectory
-	 * @return
-	 * @throws ImproperUsageException
-	 */
-	private void initializeVaccineGroupSupportingData(String pSDSubDirectory) 
-		throws ImproperUsageException {
-		
-		String _METHODNAME = "initializeVaccineGroupSupportingData(): ";
-
-		if (this.supportedVaccineGroups.isEmpty() == false) {
-			String lErrStr = "supported vaccine group concepts has already been initialized";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ICECoreError(lErrStr);
-		}
-		for (File lSupportingDataDirectory : this.supportingDataDirectoryLocations) {
-			File lVaccineGroupsDirectory = new File(lSupportingDataDirectory, pSDSubDirectory);
-			if (! lVaccineGroupsDirectory.exists()) {
-				// vaccine group supporting data does not exist for this CDS version; to the next
-				if (logger.isDebugEnabled()) {
-					String lInfo = "No vaccine group supporting data defined at: " + lVaccineGroupsDirectory.getAbsolutePath();
-					logger.debug(_METHODNAME + lInfo);
-				}
-				continue;
-			}
-			try {
-				JAXBContext jc = JAXBContext.newInstance(_ICE_VACCINE_GROUP_SPECIFICATION_FILE_XML_NAMESPACE);
-				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
-				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
-				String[] lSDFiles = lVaccineGroupsDirectory.list(lFF);
-				if (lSDFiles == null) {
-					String lErrStr = "An error occurred obtaining list of supporting data files";
-					logger.error(_METHODNAME + lErrStr);
-					throw new RuntimeException(lErrStr);
-				}
-
-				for (String lSDFile : lSDFiles) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Parsing supporting data file: \"" + lSDFile + "\"");
-					}
-					File lIceVGFile = new File(lVaccineGroupsDirectory, lSDFile);
-					IceVaccineGroupSpecificationFile icevgf = (IceVaccineGroupSpecificationFile) lUnmarshaller.unmarshal(lIceVGFile);
-					addSupportedVaccineGroupConceptFromIceVaccineGroupSpecificationFile(icevgf, lIceVGFile);
-				}
-			}
-			catch (SecurityException se) {
-				String lErrStr = "encountered an exception processing supporting data file";
-				logger.error(_METHODNAME + lErrStr, se);
-				throw new RuntimeException(lErrStr);				
-			}			
-			catch (JAXBException jaxbe) {
-				String lErrStr = "encountered an exception processing supporting data file; likely an invalid formmated file";
-				logger.error(_METHODNAME + lErrStr, jaxbe);
-				throw new RuntimeException(lErrStr);
-			}
-		}
-	}
-
-
-	/**
-	 * Initialize the Vaccine Group Concepts from supporting iceVaccineGroupSpecificationFile XML data files  
-	 * @param pSupportingDataDirectory
-	 * @param pChildDirectory
-	 * @throws ImproperUsageException
-	 * @throws InconsistentConfigurationException
-	 */
-	private void initializeVaccineSupportingData(String pSDSubDirectory) 
-		throws ImproperUsageException {	
-	
-		String _METHODNAME = "initializeVaccineSupportingData(): ";
-
-		if (this.supportedVaccines.isEmpty() == false) {
-			String lErrStr = "supported vaccine concepts has already been initialized";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ICECoreError(lErrStr);
-		}
-		for (File lSupportingDataDirectory : this.supportingDataDirectoryLocations) {
-			File lVaccineDirectory = new File(lSupportingDataDirectory, pSDSubDirectory);
-			if (! lVaccineDirectory.exists()) {
-				// No coded concepts defined for this CDS version - go to next supported CDS version
-				if (logger.isDebugEnabled()) {
-					String lInfo = "No vaccine supporting data defined at: " + lVaccineDirectory.getAbsolutePath();
-					logger.debug(_METHODNAME + lInfo);
-				}
-				continue;
-			}
-			try {
-				JAXBContext jc = JAXBContext.newInstance(_ICE_VACCINE_SPECIFICATION_FILE_XML_NAMESPACE);
-				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
-				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
-				String[] lSDFiles = lVaccineDirectory.list(lFF);
-				if (lSDFiles == null) {
-					String lErrStr = "An error occurred obtaining list of supporting data files";
-					logger.error(_METHODNAME + lErrStr);
-					throw new RuntimeException(lErrStr);
-				}
-
-				for (String lSDFile : lSDFiles) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Parsing supporting data file: \"" + lSDFile + "\"");
-					}
-					File lIceVFile = new File(lVaccineDirectory, lSDFile);
-					IceVaccineSpecificationFile icevf = (IceVaccineSpecificationFile) lUnmarshaller.unmarshal(lIceVFile);
-					addSupportedVaccineConceptFromIceVaccineSpecificationFile(icevf, lIceVFile);
-				}
-			}
-			catch (SecurityException se) {
-				String lErrStr = "encountered an exception processing supporting data file";
-				logger.error(_METHODNAME + lErrStr, se);
-				throw new RuntimeException(lErrStr);				
-			}			
-			catch (JAXBException jaxbe) {
-				String lErrStr = "encountered an exception processing supporting data file; likely an invalid formatted file";
-				logger.error(_METHODNAME + lErrStr, jaxbe);
-				throw new RuntimeException(lErrStr);
-			}
-		}
-	}
-	
-	
-	/**
-	 * Initialize the Vaccine Group Concepts from supporting iceVaccineGroupSpecificationFile XML data files  
-	 * @param pSupportingDataDirectory
-	 * @param pChildDirectory
-	 * @throws ImproperUsageException
-	 * @throws InconsistentConfigurationException
-	 */
-	private void initializeSeasonsSupportingData(String pSDSubDirectory) 
-		throws ImproperUsageException {	
-	
-		String _METHODNAME = "initializeSeasonsSupportingData(): ";
-
-		if (this.supportedSeasons.isEmpty() == false) {
-			String lErrStr = "supported seasons concepts has already been initialized";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ICECoreError(lErrStr);
-		}
-		for (File lSupportingDataDirectory : this.supportingDataDirectoryLocations) {
-			File lSeasonsDirectory = new File(lSupportingDataDirectory, pSDSubDirectory);
-			if (! lSeasonsDirectory.exists()) {
-				// No coded concepts defined for this CDS version - go to next supported CDS version
-				if (logger.isDebugEnabled()) {
-					String lInfo = "No vaccine supporting data defined at: " + lSeasonsDirectory.getAbsolutePath();
-					logger.debug(_METHODNAME + lInfo);
-				}
-				continue;
-			}
-			try {
-				JAXBContext jc = JAXBContext.newInstance(_ICE_SEASON_SPECIFICATION_FILE_XML_NAMESPACE);
-				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
-				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
-				String[] lSDFiles = lSeasonsDirectory.list(lFF);
-				if (lSDFiles == null) {
-					String lErrStr = "An error occurred obtaining list of supporting data files";
-					logger.error(_METHODNAME + lErrStr);
-					throw new RuntimeException(lErrStr);
-				}
-
-				for (String lSDFile : lSDFiles) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Parsing supporting data file: \"" + lSDFile + "\"");
-					}
-					File lIceVFile = new File(lSeasonsDirectory, lSDFile);
-					IceSeasonSpecificationFile icevf = (IceSeasonSpecificationFile) lUnmarshaller.unmarshal(lIceVFile);
-					addSupportedSeasonConceptFromIceSeasonSpecificationFile(icevf, lIceVFile);
-				}
-			}
-			catch (SecurityException se) {
-				String lErrStr = "encountered an exception processing supporting data file";
-				logger.error(_METHODNAME + lErrStr, se);
-				throw new RuntimeException(lErrStr);				
-			}			
-			catch (JAXBException jaxbe) {
-				String lErrStr = "encountered an exception processing supporting data file; likely an invalid formatted file";
-				logger.error(_METHODNAME + lErrStr, jaxbe);
-				throw new RuntimeException(lErrStr);
-			}
-		}		
-	}
-	
-	
-	/**
-	 * Initialize the Vaccine Group Concepts from supporting iceVaccineGroupSpecificationFile XML data files  
-	 * @param pSupportingDataDirectory
-	 * @param pChildDirectory
-	 * @throws ImproperUsageException
-	 * @throws InconsistentConfigurationException
-	 */
-	/*
-	private void initializeSeriesSupportingData(String pSDSubDirectory) 
-		throws ImproperUsageException {	
-	
-		String _METHODNAME = "initializeSeasonsSupportingData(): ";
-
-		if (this.supportedSeasons.isEmpty() == false) {
-			String lErrStr = "supported series concepts has already been initialized";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ICECoreError(lErrStr);
-		}
-		for (File lSupportingDataDirectory : this.supportingDataDirectoryLocations) {
-			File lSeriesDirectory = new File(lSupportingDataDirectory, pSDSubDirectory);
-			if (! lSeriesDirectory.exists()) {
-				// No coded concepts defined for this CDS version - go to next supported CDS version
-				if (logger.isDebugEnabled()) {
-					String lInfo = "No vaccine supporting data defined at: " + lSeriesDirectory.getAbsolutePath();
-					logger.debug(_METHODNAME + lInfo);
-				}
-				continue;
-			}
-			try {
-				JAXBContext jc = JAXBContext.newInstance(_ICE_SERIES_SPECIFICATION_FILE_XML_NAMESPACE);
-				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
-				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
-				String[] lSDFiles = lSeriesDirectory.list(lFF);
-				if (lSDFiles == null) {
-					String lErrStr = "An error occurred obtaining list of supporting data files";
-					logger.error(_METHODNAME + lErrStr);
-					throw new RuntimeException(lErrStr);
-				}
-
-				for (String lSDFile : lSDFiles) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Parsing supporting data file: \"" + lSDFile + "\"");
-					}
-					File lIceVFile = new File(lSeriesDirectory, lSDFile);
-					IceSeriesSpecificationFile icevf = (IceSeriesSpecificationFile) lUnmarshaller.unmarshal(lIceVFile);
-					// addSupportedSeriesConceptFromIceSeriesSpecificationFile(icevf, lIceVFile);
-				}
-			}
-			catch (SecurityException se) {
-				String lErrStr = "encountered an exception processing supporting data file";
-				logger.error(_METHODNAME + lErrStr, se);
-				throw new RuntimeException(lErrStr);				
-			}			
-			catch (JAXBException jaxbe) {
-				String lErrStr = "encountered an exception processing supporting data file; likely an invalid formatted file";
-				logger.error(_METHODNAME + lErrStr, jaxbe);
-				throw new RuntimeException(lErrStr);
-			}
-		}		
-	}
-	*/
-	
-	private void addSupportedSeasonConceptFromIceSeasonSpecificationFile(IceSeasonSpecificationFile pIceSeasonSpecificationFile, File pSeasonFile) 
+	public void addSupportedSeasonFromIceSeasonSpecificationFile(IceSeasonSpecificationFile pIceSeasonSpecificationFile) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportingSeasonFromIceSeasonSpecificationFile(): ";
-		if (pSeasonFile == null) {
-			String lErrStr = "Season supporting data file not specified; cannot continue";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
-		}		
+
 		if (pIceSeasonSpecificationFile == null) {
 			logger.warn(_METHODNAME + "IceSeasonSpecificationFile object not specified; read of supporting data file skipped");
 			return;
@@ -664,13 +397,13 @@ public class ICESupportingDataConfiguration {
 		
 		String lSeasonCode = pIceSeasonSpecificationFile.getCode();
 		if (lSeasonCode == null) {
-			String lErrStr = "Required supporting data item code element not provided in cdsListSpecificationFile: " + pSeasonFile.getAbsolutePath();
+			String lErrStr = "Required supporting data item code element not provided in cdsListSpecificationFile";
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}		
 		CD lVaccineGroupCD = pIceSeasonSpecificationFile.getVaccineGroup();
 		if (! ConceptUtils.requiredAttributesForCDSpecified(lVaccineGroupCD)) {
-			String lErrStr = "Required supporting data item vaccineGroup element not provided in IceVaccineGroupSpecificationFile: " + pSeasonFile.getAbsolutePath();
+			String lErrStr = "Required supporting data item vaccineGroup element not provided in IceVaccineGroupSpecificationFile";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
@@ -725,15 +458,10 @@ public class ICESupportingDataConfiguration {
 	}
 	
 	
-	private void addSupportedVaccineConceptFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecification, File pVaccineFile) 
+	public void addSupportedVaccineFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecification) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportingVaccineConceptsFromIceVaccineSpecificationFile(): ";
-		if (pVaccineFile == null) {
-			String lErrStr = "Vaccine supporting data file not specified; cannot continue";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
-		}
 		
 		if (pIceVaccineSpecification == null) {
 			logger.warn(_METHODNAME + "IceVaccineSpecificationFile object not specified; read of supporting data file skipped");
@@ -742,7 +470,7 @@ public class ICESupportingDataConfiguration {
 		
 		CD lVaccineCD = pIceVaccineSpecification.getVaccine();
 		if (! ConceptUtils.requiredAttributesForCDSpecified(lVaccineCD)) {
-			String lErrStr = "Required supporting data item vaccine element not provided in IceVaccineSpecificationFile: " + pVaccineFile.getAbsolutePath();
+			String lErrStr = "Required supporting data item vaccine element not provided in IceVaccineSpecificationFile";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
@@ -854,22 +582,18 @@ public class ICESupportingDataConfiguration {
 	 * @param pSupportedCdsLists
 	 * @throws ImproperUsageException
 	 */	
-	private void addSupportedVaccineGroupConceptFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecification, File pVaccineGroupFile)
+	public void addSupportedVaccineGroupFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecification)
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportingVaccineGroupConceptsFromIceVaccineGroupSpecificationFile(): ";
-		if (pVaccineGroupFile == null) {
-			String lErrStr = "Vaccine group supporting data file not specified; cannot continue";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);			
-		}
+		
 		if (pIceVaccineGroupSpecification == null) {
 			logger.warn(_METHODNAME + "IceVaccineGroupSpecificationFile; read of supporting data file skipped");
 			return;
 		}
 		CD lVaccineGroupCD = pIceVaccineGroupSpecification.getVaccineGroup();
 		if (! ConceptUtils.requiredAttributesForCDSpecified(lVaccineGroupCD)) {
-			String lErrStr = "Required supporting data item vaccineGroup element not provided in IceVaccineGroupSpecificationFile: " + pVaccineGroupFile.getAbsolutePath();
+			String lErrStr = "Required supporting data item vaccineGroup element not provided in IceVaccineGroupSpecificationFile";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
@@ -963,16 +687,11 @@ public class ICESupportingDataConfiguration {
 	}
 
 	
-	private void addSupportedListConceptsFromCdsListSpecificationFile(CdsListSpecificationFile pCdsListSpecification, File pCdsListFile) 
+	public void addSupportedCdsListsAndConceptsFromCdsListSpecificationFile(CdsListSpecificationFile pCdsListSpecification) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "addSupportingListConceptsForCdsListSpecificationFile(): ";
 		
-		if (pCdsListFile == null) {
-			String lErrStr = "File not specified";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
-		}
 		if (pCdsListSpecification == null) {
 			logger.warn(_METHODNAME + "CdsListSpecification object not specified");
 			return;
@@ -995,7 +714,7 @@ public class ICESupportingDataConfiguration {
 
 		String lCdsListCode = pCdsListSpecification.getCode();
 		if (lCdsListCode == null) {
-			String lErrStr = "Required supporting data item code element not provided in cdsListSpecificationFile: " + pCdsListFile.getAbsolutePath();
+			String lErrStr = "Required supporting data item code element not provided in cdsListSpecificationFile";
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
@@ -1021,7 +740,7 @@ public class ICESupportingDataConfiguration {
 				i++;
 				String lCdsListItemCode = cli.getCdsListItemKey();
 				if (lCdsListItemCode == null) {
-					String lErrStr = "Required supporting data item cdsListItem.code element not provided in cdsListSpecificationFile: " + pCdsListFile.getAbsolutePath();
+					String lErrStr = "Required supporting data item cdsListItem.code element not provided in cdsListSpecificationFile";
 					logger.error(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);
 				}
@@ -1031,7 +750,7 @@ public class ICESupportingDataConfiguration {
 				logger.debug(lDebugStrb);
 			}
 			
-			this.supportedCdsLists.addAllSupportedListItemsFromCdsListSpecificationFile(pCdsListSpecification);
+			this.supportedCdsLists.addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(pCdsListSpecification);
 		}
 	}
 

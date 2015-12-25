@@ -191,7 +191,7 @@ public class SupportedVaccines implements SupportingData {
 		}
 		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with this CdsListItem?
 		CdsConcept ic = new CdsConcept(lPrimaryOpenCdsConcept.getCode(), true, lPrimaryOpenCdsConcept.getDisplayName());
-		Collection<CdsConcept> lOpenCDSConcepts = this.supportedCdsLists.getAssociatedSupportedCdsConcepts().getOpenCDSICEConceptsAssociatedWithCdsListItem(llccli);
+		Collection<CdsConcept> lOpenCDSConcepts = this.supportedCdsLists.getSupportedCdsConcepts().getOpenCDSICEConceptsAssociatedWithCdsListItem(llccli);
 		boolean lPrimaryOpenCDSConceptForVaccineIdentified = false;
 		for (CdsConcept lIC : lOpenCDSConcepts) {
 			if (ic.equals(lIC)) {
