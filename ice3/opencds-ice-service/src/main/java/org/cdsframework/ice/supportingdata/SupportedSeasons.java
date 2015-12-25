@@ -24,25 +24,31 @@ import org.joda.time.MonthDay;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
-public class SupportedCdsSeasons implements SupportingData {
+public class SupportedSeasons implements SupportingData {
 	
 	private Map<String, LocallyCodedSeasonItem> cdsListItemNameToSeasonItem;					// cdsListItemName (cdsListCode.cdsListItemKey) to LocallyCodedSeasonItem
 	private Map<LocallyCodedVaccineGroupItem, List<Season>> vaccineGroupItemToSeasons;			// Internal tracking structure: List of Seasons supported for each vaccine group	
-	private SupportedCdsVaccineGroups supportedVaccineGroups;									// Supporting vaccine groups from which this season data is built
+	private SupportedVaccineGroups supportedVaccineGroups;									// Supporting vaccine groups from which this season data is built
 	
-	private static Log logger = LogFactory.getLog(SupportedCdsSeasons.class);	
+	private static Log logger = LogFactory.getLog(SupportedSeasons.class);	
 
 	
-	protected SupportedCdsSeasons(SupportedCdsVaccineGroups pSupportedVaccineGroups) {
+	protected SupportedSeasons(ICESupportingDataConfiguration isdc) 
+		throws ImproperUsageException, IllegalArgumentException {
 
 		String _METHODNAME = "SupportedCdsSeasons(): ";
-		if (pSupportedVaccineGroups == null) {
-			String lErrStr = "SupportedCdsVaccineGroups argument is null; a valid argument must be provided.";
+		if (isdc == null) {
+			String lErrStr = "ICESupportingDataConfiguration argument is null; a valid argument must be provided.";
 			logger.error(_METHODNAME + lErrStr);
 			throw new IllegalArgumentException(lErrStr);
 		}
 		
-		this.supportedVaccineGroups = pSupportedVaccineGroups;
+		this.supportedVaccineGroups = isdc.getSupportedCdsVaccineGroups();
+		if (this.supportedVaccineGroups == null) {
+			String lErrStr = "Supporting vaccine group data not set in ICESupportingDataConfiguration; cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
 		this.cdsListItemNameToSeasonItem = new HashMap<String, LocallyCodedSeasonItem>();
 		this.vaccineGroupItemToSeasons = new HashMap<LocallyCodedVaccineGroupItem, List<Season>>();
 	}
@@ -59,7 +65,7 @@ public class SupportedCdsSeasons implements SupportingData {
 	}
 	
 	
-	protected SupportedCdsVaccineGroups getAssociatedSupportedCdsVaccineGroups() {
+	protected SupportedVaccineGroups getAssociatedSupportedCdsVaccineGroups() {
 		
 		return this.supportedVaccineGroups;
 	}
@@ -253,7 +259,7 @@ public class SupportedCdsSeasons implements SupportingData {
 		// First, print out all of the season name->season value map entries
 		Set<String> cdsListItemNames = this.cdsListItemNameToSeasonItem.keySet();
 		int i = 1 ;
-		String ltoStringStr = null;
+		String ltoStringStr = "";
 		for (String s : cdsListItemNames) {
 			ltoStringStr += "{" + i + "} " + s + " = [ " + this.cdsListItemNameToSeasonItem.get(s).toString() + " ]\n";
 			i++;

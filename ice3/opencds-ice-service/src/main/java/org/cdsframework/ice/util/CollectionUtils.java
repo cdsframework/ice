@@ -18,31 +18,6 @@ public class CollectionUtils {
 		}
 	}
 	
-	
-	/*
-	public static <K> Collection<K> intersectionOfTwoCollections(Collection<K> pCollection1, Collection<K> pCollection2) {
-
-		if (pCollection1 == null || pCollection2 == null) {
-			return null;
-		}
-
-		Collection<K> lIntersectionList = new ArrayList<K>();
-		for (K lEntry : pCollection1) {
-			if (pCollection2.contains(lEntry)) {
-				lIntersectionList.add(lEntry);
-			}
-		}
-
-		return lIntersectionList;
-	}
-
-
-	public static <T> void addToList (List<T> listArg, T... elements) {
-		for (T x : elements) {
-			listArg.add(x);
-		}
-	}
-	*/
 
 	/**
 	 * Return a Collection that contains String arguments in all of the collections, or an empty set if there is no intersection of common elements.
@@ -93,26 +68,5 @@ public class CollectionUtils {
 
 		return lUnion;
 	}
-
-
-	/**
-	 * Create a unique Collection of elements from the specified attribute of the Collection in the parameter that is unique, or empty collection if none.
-	 *
-	public <X, Y> Collection<Y> getUnionOfAllUniqueElementsAcrossLists(Collection<X> pList, <attribute>) {
-
-		List<Y> elementList = new ArrayList<Y>();
-		if (pList == null) {
-			return elementList;
-		}
-
-		for (X ts : pList) {
-			if (ts != null && ! elementList.contains(ts)) {
-				elementList.add(ts);
-			}
-		}
-
-		return elementList;
-	}
-	 */
 
 }

@@ -38,12 +38,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
-import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
+import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
-import org.cdsframework.ice.service.VaccineComponent;
 import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.service.VaccineComponent;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.ice.util.TimePeriod;
@@ -52,7 +52,7 @@ import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 
-public class SupportedCdsVaccines implements SupportingData {
+public class SupportedVaccines implements SupportingData {
 
 	// Supporting Data Cds List from which this vaccine supporting data is built
 	private SupportedCdsLists supportedCdsLists;
@@ -63,24 +63,29 @@ public class SupportedCdsVaccines implements SupportingData {
 	private Map<CD, VaccineComponent> cDToVaccineComponentsMap;						// VaccineComponents previously defined, keyed by CD
 	private Map<CD, Set<Vaccine>> vaccineComponentCDToVaccinesNotFullySpecified;	// VaccineComponents which have been encountered in a Vaccine object but not yet defined
 
-	// private Map<String, LocallyCodedVaccineItem> vaccineConcepts;					// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineItem
-	
-	private static Log logger = LogFactory.getLog(SupportedCdsVaccines.class);	
+	private static Log logger = LogFactory.getLog(SupportedVaccines.class);	
 
 	
 	/**
 	 * Create a SupportedCdsVaccine object. If the SupportedCdsLists argument is null, an IllegalArgumentException is thrown.
 	 * @param pSupportedCdsLists
 	 */
-	protected SupportedCdsVaccines(SupportedCdsLists pSupportedCdsLists) {
+	protected SupportedVaccines(ICESupportingDataConfiguration isdc) 
+		throws ImproperUsageException, IllegalArgumentException {
 		
 		String _METHODNAME = "SupportedCdsVaccines(): ";
-		if (pSupportedCdsLists == null) {
-			String lErrStr = "SupportedCdsLists argument is null; a valid argument must be provided.";
+
+		if (isdc == null) {
+			String lErrStr = "ICESupportingDataConfiguration argument is null; a valid argument must be provided.";
 			logger.error(_METHODNAME + lErrStr);
 			throw new IllegalArgumentException(lErrStr);
 		}
-		this.supportedCdsLists = pSupportedCdsLists;
+		this.supportedCdsLists = isdc.getSupportedCdsLists();
+		if (this.supportedCdsLists == null) {
+			String lErrStr = "Supporting cds list data not set in ICESupportingDataConfiguration; cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}		
 		this.cdsListItemNameToVaccineItem = new HashMap<String, LocallyCodedVaccineItem>();
 		this.cDToVaccineComponentsMap = new HashMap<CD, VaccineComponent>();
 		this.vaccineComponentCDToVaccinesNotFullySpecified = new HashMap<CD, Set<Vaccine>>();

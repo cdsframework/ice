@@ -45,27 +45,35 @@ import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.util.support.data.ice.vaccinegroup.IceVaccineGroupSpecificationFile;
 import org.opencds.common.exceptions.ImproperUsageException;
 
-public class SupportedCdsVaccineGroups implements SupportingData {
+public class SupportedVaccineGroups implements SupportingData {
 	
 	private SupportedCdsLists supportedCdsLists;	// Supporting Data CdsLists from which this vaccine group supporting data is built
 	private Map<String, LocallyCodedVaccineGroupItem> cdsListItemNameToVaccineGroupItem;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineGroupItem
 	
-	private static Log logger = LogFactory.getLog(SupportedCdsVaccineGroups.class);	
+	private static Log logger = LogFactory.getLog(SupportedVaccineGroups.class);	
 
 	
 	/**
 	 * Create a SupportedCdsVaccineGroups object. If the SupportedCdsLists argument is null, an IllegalArgumentException is thrown.
 	 * @param pSupportedCdsLists
 	 */
-	protected SupportedCdsVaccineGroups(SupportedCdsLists pSupportedCdsLists) {
+	protected SupportedVaccineGroups(ICESupportingDataConfiguration isdc) 
+		throws ImproperUsageException, IllegalArgumentException {
 	
 		String _METHODNAME = "SupportedCdsVaccineGroups(): ";
-		if (pSupportedCdsLists == null) {
-			String lErrStr = "SupportedCdsLists argument is null; a valid argument must be provided.";
+		
+		if (isdc == null) {
+			String lErrStr = "ICESupportingDataConfiguration argument is null; a valid argument must be provided.";
 			logger.error(_METHODNAME + lErrStr);
 			throw new IllegalArgumentException(lErrStr);
 		}
-		this.supportedCdsLists = pSupportedCdsLists;
+
+		this.supportedCdsLists = isdc.getSupportedCdsLists();
+		if (this.supportedCdsLists == null) {
+			String lErrStr = "Supporting cds list data not set in ICESupportingDataConfiguration; cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
 		this.cdsListItemNameToVaccineGroupItem = new HashMap<String, LocallyCodedVaccineGroupItem>();
 	}
 	
