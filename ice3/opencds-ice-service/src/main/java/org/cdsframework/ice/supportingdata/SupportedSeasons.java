@@ -89,7 +89,7 @@ public class SupportedSeasons implements SupportingData {
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceSeasonSpecificationFile.getCdsVersions(), 
 			this.supportedVaccineGroups.getAssociatedSupportedCdsLists().getCdsVersions());
-		if (lIntersectionOfSupportedCdsVersions.size() == 0) {
+		if (lIntersectionOfSupportedCdsVersions == null || lIntersectionOfSupportedCdsVersions.size() == 0) {
 			logger.warn(_METHODNAME + "Skipping attempt to add a Season \"" + lSeasonCode + "\" which does not have a cdsVersion that is supported by SupportedCdsLists");
 			return;
 		}

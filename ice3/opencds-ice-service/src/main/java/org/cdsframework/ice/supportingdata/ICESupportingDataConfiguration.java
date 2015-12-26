@@ -52,6 +52,8 @@ import org.cdsframework.util.support.data.cds.list.CdsListItem;
 import org.cdsframework.util.support.data.cds.list.CdsListItemConceptMapping;
 import org.cdsframework.util.support.data.cds.list.CdsListSpecificationFile;
 import org.cdsframework.util.support.data.ice.season.IceSeasonSpecificationFile;
+import org.cdsframework.util.support.data.ice.series.IceDoseIntervalSpecification;
+import org.cdsframework.util.support.data.ice.series.IceSeriesDoseSpecification;
 import org.cdsframework.util.support.data.ice.series.IceSeriesSpecificationFile;
 import org.cdsframework.util.support.data.ice.vaccine.IceVaccineSpecificationFile;
 import org.cdsframework.util.support.data.ice.vaccinegroup.IceVaccineGroupSpecificationFile;
@@ -292,7 +294,8 @@ public class ICESupportingDataConfiguration {
 	 * @param pSupportingDataMethodToInvoke The initialization method to invoke for the supporting data type
 	 * @throws ICECoreError if any of the data is invalid or not provided
 	 */
-	private <T> void initializeSupportingData(String pSDSubDirectory, SupportingData pSDObjectToInitialize, Class<T> pSupportingDataXMLClass, Method pSupportingDataMethodToInvoke) {
+	private <T> void initializeSupportingData(String pSDSubDirectory, SupportingData pSDObjectToInitialize, Class<T> pSupportingDataXMLClass, Method pSupportingDataMethodToInvoke) 
+		throws ImproperUsageException, InconsistentConfigurationException {
 			
 		String _METHODNAME = "initializeSeasonsSupportingData(): ";
 
@@ -378,15 +381,107 @@ public class ICESupportingDataConfiguration {
 	}
 	
 	
-	public void addSupportedSeriesFromIceSeriesSpecificationFile(IceSeriesSpecificationFile pIceSeriesSpecificationFile) {
+	public void addSupportedSeriesFromIceSeriesSpecificationFile(IceSeriesSpecificationFile pIceSeriesSpecificationFile) 
+		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "addSupportedSeriesFromIceSeriesSpecificationFile(): ";
-		logger.debug(_METHODNAME + "invoked.");
+
+		if (pIceSeriesSpecificationFile == null) {
+			logger.warn(_METHODNAME + "IceSeriesSpecificationFile object not specified; read of supporting data file skipped");
+		}
+		
+		String lDebugStrb = "";
+		if (logger.isDebugEnabled()) {
+			lDebugStrb += _METHODNAME + pIceSeriesSpecificationFile.getClass().getName();
+			// ID
+			lDebugStrb += "\ngetSeriesId(): " + pIceSeriesSpecificationFile.getSeriesId();
+			// Code
+			lDebugStrb += "\ngetCode(): " + pIceSeriesSpecificationFile.getCode();
+			// Name
+			lDebugStrb += "\ngetName(): " + pIceSeriesSpecificationFile.getName();
+			// Number of Doses in Series
+			lDebugStrb += "\ngetNumberOfDosesInSeries(): " + pIceSeriesSpecificationFile.getNumberOfDosesInSeries();
+			// Vaccine groups
+			List<CD> lVaccineGroups = pIceSeriesSpecificationFile.getVaccineGroups();
+			lDebugStrb += "\ngetVaccineGroups(): ";
+			int i=1;
+			if (lVaccineGroups != null) {
+				i=1;
+				for (CD lVaccineGroup : lVaccineGroups) {
+					lDebugStrb += "\n\t(" + i + "): " + ConceptUtils.toStringCD(lVaccineGroup);
+					i++;
+				}
+			}
+			else {
+				lDebugStrb += "\n\tNo Vaccine Group information supplied";
+			}
+			// Seasons
+			List<String> lSeasonCodes = pIceSeriesSpecificationFile.getSeasonCodes();
+			lDebugStrb += "\ngetSeasonCodes(): ";
+			i=1;
+			if (lSeasonCodes != null) {
+				for (String lSeasonCode : lSeasonCodes) {
+					lDebugStrb += "\n\t(" + i + "): " + lSeasonCode;
+					i++;
+				}
+			}
+			else {
+				lDebugStrb += "\n\tNo Seasons information supplied";
+			}			
+			// CdsVersions
+			List<String> lCdsVersions = pIceSeriesSpecificationFile.getCdsVersions();
+			lDebugStrb += "\ngetCdsVersions(): ";
+			i=1;
+			if (lCdsVersions != null) {
+				for (String lCdsVersion : lCdsVersions) {
+					lDebugStrb += "\n\t(" + i + "): " + lCdsVersion;
+					i++;
+				}
+			}
+			else {
+				lDebugStrb += "\n\tNo CdsVersion information supplied";
+			}
+			///////
+			// Series Dose Specifications
+			///////
+			List<IceSeriesDoseSpecification> lIceSeriesDoses = pIceSeriesSpecificationFile.getIceSeriesDoses();
+			lDebugStrb += "\ngetIceSeriesDoses(): ";
+			if (lIceSeriesDoses != null) {
+				i=1;
+				for (IceSeriesDoseSpecification isds : lIceSeriesDoses) {
+					lDebugStrb += "\n\t(" + i + "): absolute minimum age: " + isds.getAbsoluteMinimumAge() + "; earliest recommended age: " + isds.getEarliestRecommendedAge() + 
+						"latest recommended age: " + isds.getLatestRecommendedAge() + "; minimum age: " + isds.getMinimumAge() + "; maximum age: " + isds.getMaximumAge();
+				}
+			}
+			else {
+				lDebugStrb += "\t\nNo IceSeriesDoses specified";
+			}
+			///////
+			// Series Dose Intervals
+			///////
+			List<IceDoseIntervalSpecification> lIceDoseIntervals = pIceSeriesSpecificationFile.getDoseIntervals();
+			lDebugStrb += "\ngetDoseIntervals(): ";
+			if (lIceDoseIntervals != null) {
+				i=1;
+				for (IceDoseIntervalSpecification idis : lIceDoseIntervals) {
+					lDebugStrb += "\n\t("+i+"): from dose number: " + idis.getFromDoseNumber() + "; to dose number: " + idis.getToDoseNumber() + 
+						"absolute minimum interval: " + idis.getAbsoluteMinimumInterval() + "; minimum interval: " + idis.getMinimumInterval() + 
+						"earliest recommended interval: " + idis.getEarliestRecommendedInterval() + "; latest recommended interval: " + idis.getLatestRecommendedInterval();
+				}
+			}
+			else {
+				lDebugStrb += "\t\nNo Dose Interval information provided";
+			}
+			
+			logger.debug(_METHODNAME + lDebugStrb);
+		}
+		
+		this.supportedSeries.addSupportedSeriesItemFromIceSeriesSpecificationFile(pIceSeriesSpecificationFile);
 	}
 	
 	
 	public void addSupportedSeasonFromIceSeasonSpecificationFile(IceSeasonSpecificationFile pIceSeasonSpecificationFile) 
-		throws ImproperUsageException {
+		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "addSupportingSeasonFromIceSeasonSpecificationFile(): ";
 
@@ -397,13 +492,13 @@ public class ICESupportingDataConfiguration {
 		
 		String lSeasonCode = pIceSeasonSpecificationFile.getCode();
 		if (lSeasonCode == null) {
-			String lErrStr = "Required supporting data item code element not provided in cdsListSpecificationFile";
+			String lErrStr = "Required supporting data item code element not provided in IceSeasonSpecificationFile";
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}		
 		CD lVaccineGroupCD = pIceSeasonSpecificationFile.getVaccineGroup();
 		if (! ConceptUtils.requiredAttributesForCDSpecified(lVaccineGroupCD)) {
-			String lErrStr = "Required supporting data item vaccineGroup element not provided in IceVaccineGroupSpecificationFile";
+			String lErrStr = "Required supporting data item vaccineGroup element not provided in IceSeasonSpecificationFile";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
@@ -434,9 +529,7 @@ public class ICESupportingDataConfiguration {
 			// Default Start Month and Day
 			lDebugStrb += "\ngetDefaultStartMonthAndDay(): " + pIceSeasonSpecificationFile.getDefaultStartMonthAndDay();
 			// Default Stop Month and Day
-			lDebugStrb += "\ngetDefaultStopMonthAndDay(): " + pIceSeasonSpecificationFile.getDefaultStopMonthAndDay();
-			// CDS versions
-			
+			lDebugStrb += "\ngetDefaultStopMonthAndDay(): " + pIceSeasonSpecificationFile.getDefaultStopMonthAndDay();		
 			// CdsVersions
 			List<String> lCdsVersions = pIceSeasonSpecificationFile.getCdsVersions();
 			lDebugStrb += "\ngetCdsVersions(): ";

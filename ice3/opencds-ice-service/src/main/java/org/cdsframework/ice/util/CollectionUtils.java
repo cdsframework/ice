@@ -20,14 +20,16 @@ public class CollectionUtils {
 	
 
 	/**
-	 * Return a Collection that contains String arguments in all of the collections, or an empty set if there is no intersection of common elements.
-	 * @param pCollection
-	 * @return
+	 * Return a Collection that contains String arguments in all of the collections, or an empty set if there is no intersection of common elements (or argument provided is null).
 	 */
 	@SafeVarargs
 	public static Collection<String> intersectionOfStringCollections(Collection<String> ... pCollection) {
+		
+		if (pCollection == null) {
+			return new HashSet<String>();
+		}
 
-		if (pCollection == null || pCollection.length == 0 || pCollection.length == 1) {
+		if (pCollection.length == 0 || pCollection.length == 1) {
 			return pCollection[0];
 		}
 

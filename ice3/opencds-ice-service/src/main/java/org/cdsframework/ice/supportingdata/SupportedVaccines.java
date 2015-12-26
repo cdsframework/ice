@@ -67,8 +67,7 @@ public class SupportedVaccines implements SupportingData {
 
 	
 	/**
-	 * Create a SupportedCdsVaccine object. If the SupportedCdsLists argument is null, an IllegalArgumentException is thrown.
-	 * @param pSupportedCdsLists
+	 * Create a SupportedVaccines object. If the ICESupportingDataConfiguration or its associated SupportedCdsLists argument is null, an IllegalArgumentException is thrown.
 	 */
 	protected SupportedVaccines(ICESupportingDataConfiguration isdc) 
 		throws ImproperUsageException, IllegalArgumentException {
@@ -174,7 +173,7 @@ public class SupportedVaccines implements SupportingData {
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineSpecificationFile.getCdsVersions(), 
 				this.supportedCdsLists.getCdsVersions());
-		if (lIntersectionOfSupportedCdsVersions == null) {
+		if (lIntersectionOfSupportedCdsVersions == null || lIntersectionOfSupportedCdsVersions.isEmpty()) {
 			return isVaccineSupportingDataConsistent();
 		}
 		

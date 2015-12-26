@@ -115,7 +115,7 @@ public class SupportedVaccineGroups implements SupportingData {
 
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineGroupSpecificationFile.getCdsVersions(), this.supportedCdsLists.getCdsVersions());
-		if (lCdsVersions == null) {
+		if (lCdsVersions == null || lCdsVersions.size() == 0) {
 			return;
 		}
 
