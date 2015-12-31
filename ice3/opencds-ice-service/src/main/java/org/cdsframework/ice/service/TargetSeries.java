@@ -649,7 +649,7 @@ public class TargetSeries {
 				lDuplicateShotDiseases = new HashSet<String>();
 			}
 			if (lDuplicateShotSameDayValidDoseFoundDate != null && lPreviouslyProcessedTD != null && 
-				this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByEachVaccineAdministered() == false && 
+				this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() == false && 
 				lPreviouslyProcessedTD.getAdministeredShotNumberInSeries() < td.getAdministeredShotNumberInSeries() &&
 				td.getAdministrationDate().equals(lPreviouslyProcessedTD.getAdministrationDate())) {
 				// Don't count prior duplicate shots if the disease immunity of the vaccines are not looked at from shot to shot
@@ -674,7 +674,7 @@ public class TargetSeries {
 					// and/or (3) it is a duplicate shot, taking into account targeted diseases if this series bases its dose count on the count of targeted diseases
 					boolean lIncrementDoseNumber = false;
 					if (statusThisTD == DoseStatus.VALID && td.countsTowardsCompletionOfSeries()) {
-						boolean lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByEachVaccineAdministered();
+						boolean lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered();
 						if (lDuplicateShotSameDayValidDoseFoundDate != null) {
 							// If duplicate shot same day valid dose found date is not null, then it is equal to this shot date or it would have been null'd above
 							// If the diseases should be taken into account for this series in determining dose number, and this disease has already been accounted for 
@@ -832,7 +832,7 @@ public class TargetSeries {
 					"; leastDoseNumberAcrossDiseases: " + leastDoseNumberAcrossDiseases + "; greatestDoseNumberAcrossDiseases: " + greatestDoseNumberAcrossDiseases); 
 		}
 
-		int doseNumberToReturn = (this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByEachVaccineAdministered() == true) ? leastDoseNumberAcrossDiseases : greatestDoseNumberAcrossDiseases; 
+		int doseNumberToReturn = (this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() == true) ? leastDoseNumberAcrossDiseases : greatestDoseNumberAcrossDiseases; 
 		if (returnTargetDoseNumber) {
 			doseNumberToReturn = doseNumberToReturn+1;
 			if (logger.isDebugEnabled()) {

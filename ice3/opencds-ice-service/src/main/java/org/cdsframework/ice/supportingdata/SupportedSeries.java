@@ -9,11 +9,13 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.ice.service.DoseRule;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.service.Season;
 import org.cdsframework.ice.service.SeriesRules;
 import org.cdsframework.ice.service.Vaccine;
 import org.cdsframework.ice.util.CollectionUtils;
@@ -30,11 +32,13 @@ import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class SupportedSeries implements SupportingData {
 
-	private Map<String, LocallyCodedSeriesItem> cdsListItemNameToSeriesItem;	// cdsListItemName (cdsListCode.cdsListItemKey) to LocallyCodedSeasonItem
 	private SupportedCdsLists supportedCdsLists;
 	private SupportedVaccineGroups supportedVaccineGroups;						// Supporting vaccine groups from which this series data is built
 	private SupportedVaccines supportedVaccines;
 	private SupportedSeasons supportedSeasons;
+
+	private Map<String, LocallyCodedSeriesItem> cdsListItemNameToSeriesItem;	// cdsListItemName (cdsListCode.cdsListItemKey) to LocallyCodedSeasonItem
+	private Map<LocallyCodedVaccineGroupItem, List<SeriesRules>> vaccineGroupItemToSeriesRules;
 	
 	private static Log logger = LogFactory.getLog(SupportedSeasons.class);	
 
@@ -79,6 +83,7 @@ public class SupportedSeries implements SupportingData {
 		}
 		
 		this.cdsListItemNameToSeriesItem = new HashMap<String,LocallyCodedSeriesItem>();
+		this.vaccineGroupItemToSeriesRules = new HashMap<LocallyCodedVaccineGroupItem, List<SeriesRules>>();
 	}
 
 	
@@ -124,6 +129,9 @@ public class SupportedSeries implements SupportingData {
 			String lErrStr = "Series code not specified in supporting data file. Cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
+		}
+		else {
+			lSeriesCode = LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention(lSeriesCode);
 		}
 		if (this.cdsListItemNameToSeriesItem.containsKey(lSeriesCode)) {
 			String lErrStr = "Attempt to add a Series that was already specified previously; series code:  " + lSeriesCode;
@@ -174,20 +182,6 @@ public class SupportedSeries implements SupportingData {
 			String lErrStr = "Number of doses specified for the Series does not match the number of IceSeriesDoseSpecification elements; cannot continue. Series " + lSeriesCode;
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
-		}
-		
-		///////
-		// If any Seasons are specified, verify that they are seasons that have been previously specified
-		///////
-		Collection<String> ss = pIceSeriesSpecificationFile.getSeasonCodes();
-		if (ss != null) {
-			for (String s : ss) {
-				if (! this.supportedSeasons.seasonItemExists(s)) {
-					String lErrStr = "Season " + s + " specified for the Series " + lSeriesCode + " does not exist";
-					logger.error(_METHODNAME + lErrStr);
-					throw new InconsistentConfigurationException(lErrStr);
-				}
-			}
 		}
 		
 		////////////// Gather the DoseRules START //////////////
@@ -258,6 +252,12 @@ public class SupportedSeries implements SupportingData {
 			String absoluteMinimumAge = isds.getAbsoluteMinimumAge();
 			String minimumAge = isds.getMinimumAge();
 			String earliestRecommendedAge = isds.getEarliestRecommendedAge();
+			// absolute minimum age, minimum age and earliest recommended age are mandatory 
+			if (absoluteMinimumAge == null || minimumAge == null || earliestRecommendedAge == null) {
+				String lErrStr = "Absolute minimum age, minimum age and/or earliest recommended age not specified in Series " + lSeriesCode;
+				logger.error(_METHODNAME + lErrStr);
+				throw new InconsistentConfigurationException(lErrStr);
+			}
 			String maximumAge = isds.getMaximumAge();			
 			String latestRecommendedAge = isds.getLatestRecommendedAge();
 			String absoluteMinimumInterval = null;
@@ -306,38 +306,43 @@ public class SupportedSeries implements SupportingData {
 					}
 				}
 			}
-			// absolute minimum age, minimum age and earliest recommended age are mandatory 
-			if (absoluteMinimumAge == null || minimumAge == null || earliestRecommendedAge == null) {
-				String lErrStr = "Absolute minimum age, minimum age and/or earliest recommended age not specified in Series " + lSeriesCode;
-				logger.error(_METHODNAME + lErrStr);
-				throw new InconsistentConfigurationException(lErrStr);
-			}
+
 			///////
 			// Create the DoseRule and add it to the list of Doses for this Series
 			///////
 			DoseRule dr = new DoseRule();
+			// Mandatory
 			dr.setDoseNumber(icseSeriesDoseSpecificationNumber);
+			// Mandatory
 			dr.setAbsoluteMinimumAge(new TimePeriod(absoluteMinimumAge));
+			// Mandatory
 			dr.setMinimumAge(new TimePeriod(minimumAge));
+			// Mandatory
 			dr.setEarliestRecommendedAge(new TimePeriod(earliestRecommendedAge));
 			dr.setPreferableVaccines(lPreferredDoseVaccines);
 			dr.setAllowableVaccines(lAllowableDoseVaccines);
 			if (maximumAge != null) {
+				// Only if specified
 				dr.setMaximumAge(new TimePeriod(maximumAge));
 			}
 			if (latestRecommendedAge != null) {
+				// Only if specified
 				dr.setMaximumAge(new TimePeriod(latestRecommendedAge));
 			}
 			if (absoluteMinimumInterval != null) {
+				// Only if specified
 				dr.setAbsoluteMinimumInterval(new TimePeriod(absoluteMinimumInterval));
 			}
 			if (minimumInterval != null) {
+				// Only if specified
 				dr.setMinimumInterval(new TimePeriod(minimumInterval));
 			}
 			if (earliestRecommendedInterval != null) {
+				// Only if specified
 				dr.setEarliestRecommendedInterval(new TimePeriod(earliestRecommendedInterval));
 			}
 			if (latestRecommendedInterval != null) {
+				// Only if specified
 				dr.setLatestRecommendedInterval(new TimePeriod(latestRecommendedAge));
 			}
 			
@@ -353,13 +358,32 @@ public class SupportedSeries implements SupportingData {
 		///////
 		SeriesRules series1Rules = new SeriesRules(lSeriesCode, lVGI.getCdsItemName());
 		series1Rules.setSeriesDoseRules(seriesDoseRules);
-		// dtpSeries1Rules.setRecurringDosesAfterSeriesComplete(true);
-		// dtpSeries1Rules.setDoseNumberCalculatationBasedOnDiseasesTargetedByEachVaccineAdministered(false);
+		series1Rules.setRecurringDosesAfterSeriesComplete(pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete());
+		series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered());
 		
 		///////
 		// Store the Series in this supporting data 
 		///////
+		// If any Seasons are specified, verify that they are seasons that have been previously specified
+		Collection<String> lSeasonCodesFromIceSeriesSpecificationFile = pIceSeriesSpecificationFile.getSeasonCodes();
+		List<Season> lSeasons = new ArrayList<Season>();
+		if (lSeasonCodesFromIceSeriesSpecificationFile != null) {
+			for (String s : lSeasonCodesFromIceSeriesSpecificationFile) {
+				LocallyCodedSeasonItem lcsi = this.supportedSeasons.getSeasonItem(s);
+				if (lcsi == null || lcsi.getSeason() == null) {
+					String lErrStr = "Season \"" + s + "\" specified for the Series " + lSeriesCode + " does not exist";
+					logger.error(_METHODNAME + lErrStr);
+					throw new InconsistentConfigurationException(lErrStr);
+				}
+				else {
+					lSeasons.add(lcsi.getSeason());
+				}
+			}
+		}
 		
+		///////
+		// Create the SeriesItem and store it
+		///////
 		LocallyCodedSeriesItem lcsi = null;
 		try {
 			new LocallyCodedSeriesItem(lSeriesCode, lCdsVersions, series1Rules);
@@ -373,11 +397,19 @@ public class SupportedSeries implements SupportingData {
 		// Add the mapping from the String to reference the Series to LocallyCodedSeriesItem
 		this.cdsListItemNameToSeriesItem.put(lSeriesCode, lcsi);
 		
+		/////// 
+		// Add the Series to the list of Series being tracked for each vaccine group START 
+		///////
+		List<SeriesRules> lSeriesRulesListForVG = this.vaccineGroupItemToSeriesRules.get(lcsi);
+		if (lSeriesRulesListForVG == null) {
+			lSeriesRulesListForVG = new ArrayList<SeriesRules>();
+		}
+		this.vaccineGroupItemToSeriesRules.put(lVGI, lSeriesRulesListForVG);
 		
 		/**
 		 * Example Seasons declarations:
 		 * 
-		 * Fully-Specified Seasons:
+		   Fully-Specified Seasons:
 		
 			List<Season> influenzaSeasons = new ArrayList<Season>();
 			influenzaSeasons.add(new Season("2015-2016 Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 2015, 6, 30, 2016));
@@ -385,15 +417,13 @@ public class SupportedSeries implements SupportingData {
 			influenzaSeasons.add(new Season("2013-2014 Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 2013, 6, 30, 2014));
 			influenzaSeasons.add(new Season("2012-2013 Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 2012, 6, 30, 2013));
 
-		 * Default Season: 
+		   Default Season: 
 
 			Season influenzaSeasonDefault = new Season("Default Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 6, 30);
 			List<Season> influenzaDefaultSeasons = new ArrayList<Season>();
 			influenzaDefaultSeasons.add(influenzaSeasonDefault);	
-		 */
-		
-		
-		/**
+
+		 *
 		 * Example population of SeriesRules and DoseRule classes
 		 * 		
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

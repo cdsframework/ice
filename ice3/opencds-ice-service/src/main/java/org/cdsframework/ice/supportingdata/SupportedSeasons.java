@@ -18,7 +18,9 @@ import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Season;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
+import org.cdsframework.ice.util.StringUtils;
 import org.cdsframework.util.support.data.ice.season.IceSeasonSpecificationFile;
+import org.codehaus.groovy.util.StringUtil;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.opencds.common.exceptions.ImproperUsageException;
@@ -110,12 +112,14 @@ public class SupportedSeasons implements SupportingData {
 		}
 
 		String lSeasonCode = pIceSeasonSpecificationFile.getCode();
-		if (lSeasonCode == null) {
+		if (StringUtils.isNullOrEmpty(lSeasonCode)) {
 			String lErrStr = "Required supporting data seasonCode element not provided in IceSeasonSpecificationFile";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
-		
+		else {
+			lSeasonCode = LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention(lSeasonCode);
+		}
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceSeasonSpecificationFile.getCdsVersions(), 
 			this.supportedVaccineGroups.getAssociatedSupportedCdsLists().getCdsVersions());

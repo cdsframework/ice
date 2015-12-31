@@ -165,11 +165,11 @@ public class SeriesRules {
 		this.numberOfDosesInSeries = numberOfDosesInSeries;
 	}
 	
-	public boolean isDoseNumberCalculationBasedOnDiseasesTargetedByEachVaccineAdministered() {
+	public boolean isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() {
 		return doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
 	}
 	
-	public void setDoseNumberCalculatationBasedOnDiseasesTargetedByEachVaccineAdministered(boolean yesno) {
+	public void setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(boolean yesno) {
 		doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = yesno;
 	}
 	
