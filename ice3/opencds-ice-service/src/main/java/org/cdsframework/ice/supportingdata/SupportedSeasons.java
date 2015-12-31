@@ -65,10 +65,40 @@ public class SupportedSeasons implements SupportingData {
 	}
 	
 	
+	public boolean seasonItemExists(String pSeasonItemName) {
+		
+		if (pSeasonItemName == null) {
+			return false;
+		}
+		if (this.cdsListItemNameToSeasonItem.get(pSeasonItemName) != null) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	
+	public LocallyCodedSeasonItem getSeasonItem(String pSeasonItemName) {
+		
+		if (pSeasonItemName == null) {
+			return null;
+		}
+		LocallyCodedSeasonItem lLCSI = this.cdsListItemNameToSeasonItem.get(pSeasonItemName);
+		if (lLCSI == null) {
+			return null;
+		}
+		else {
+			return lLCSI;
+		}
+	}
+
+	
 	protected SupportedVaccineGroups getAssociatedSupportedCdsVaccineGroups() {
 		
 		return this.supportedVaccineGroups;
 	}
+	
 	
 	protected void addSupportedSeasonItemFromIceSeasonSpecificationFile(IceSeasonSpecificationFile pIceSeasonSpecificationFile) 
 		throws ImproperUsageException, InconsistentConfigurationException {

@@ -776,7 +776,7 @@ public class ICESupportingDataConfiguration {
 			logger.debug(lDebugStrb);
 		}
 		
-		this.supportedVaccineGroups.addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(pIceVaccineGroupSpecification);
+		this.supportedVaccineGroups.addVaccineGroupItemFromIceVaccineGroupSpecificationFile(pIceVaccineGroupSpecification);
 	}
 
 	

@@ -8,7 +8,10 @@ import java.util.List;
 public class CollectionUtils {
 
 
-	public static <K> boolean isNotSpecified(Collection<K> pCollection) {
+	/**
+	 * Returns true if the collection is null or empty; false otherwise.
+	 */
+	public static <K> boolean isNullOrEmpty(Collection<K> pCollection) {
 		
 		if (pCollection == null || pCollection.isEmpty()) {
 			return true;
@@ -41,8 +44,32 @@ public class CollectionUtils {
 
 		return lIntersectionSet;
 	}
+	
 
+	/**
+	 * Return a Collection that contains Comparable arguments in all of the collections, or an empty set if there is no intersection of common elements (or argument provided is null).
+	 */
+	@SafeVarargs 
+	public static <T extends Comparable<T>> Collection<T> intersectionOfCollections(Collection<T> ... pCollection) {
+		
+		if (pCollection == null) {
+			return new HashSet<T>();
+		}
 
+		if (pCollection.length == 0 || pCollection.length == 1) {
+			return pCollection[0];
+		}
+
+		HashSet<T> lIntersectionSet = new HashSet<T>();
+		lIntersectionSet.addAll(pCollection[0]);
+		for (Collection<T> lCollection : pCollection) {
+			lIntersectionSet.retainAll(lCollection);
+		}
+
+		return lIntersectionSet;
+	}
+	
+	
 	/**
 	 * Create a List that combines elements from both Lists and returns a new List in no particular order containing entries from both Lists. Duplicates
 	 * across the lists will be included in the combined list but null entries are not. If the specified Lists are both empty and/or null, an empty list 

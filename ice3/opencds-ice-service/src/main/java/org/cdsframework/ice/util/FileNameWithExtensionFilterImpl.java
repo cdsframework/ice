@@ -28,7 +28,6 @@ package org.cdsframework.ice.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 

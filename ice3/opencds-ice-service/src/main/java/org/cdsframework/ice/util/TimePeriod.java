@@ -116,13 +116,15 @@ public class TimePeriod {
 
 	/**
 	 * Returns true if this TimePeriod has a time period value, and the DurationType is not UNSPECIFIED
-	 * @return
 	 */
 	public boolean isTimePeriodSet() {
 		return timePeriodSet;
 	}
 
-	private static boolean isTimePeriodStringInCorrectFormat(String pTimePeriodStr) {
+	/**
+	 * Returns true if the String argument is in the correct TimePeriod string format, false if it is not.
+	 */
+	public static boolean isTimePeriodStringInCorrectFormat(String pTimePeriodStr) {
 		
 		if (pTimePeriodStr == null) {
 			return false;
@@ -132,6 +134,31 @@ public class TimePeriod {
 		}
 		else {
 			return true;
+		}
+	}
+
+	/**
+	 * Returns true if the time period is a negative duration (i.e.- prefixed with a minus sign); false if not. Throws an IllegalArgumentException if the TimePeriod 
+	 * argument passed in is not in the correct TimePeriod string format. 
+	 * @param pTimePeriod
+	 * @return
+	 */
+	public static boolean isTimePeriodANegativeDuration(String pTimePeriodStr) {
+		
+		String _METHODNAME = "isTimePeriodANegativeDuration(): ";
+		if (isTimePeriodStringInCorrectFormat(pTimePeriodStr) == false) {
+			String lWarnStr = "TimePeriod argument is in the incorrect format: " + pTimePeriodStr;
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + lWarnStr);
+			}
+			throw new IllegalArgumentException(lWarnStr);
+		}
+		
+		if (pTimePeriodStr.startsWith("-")) {
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 	

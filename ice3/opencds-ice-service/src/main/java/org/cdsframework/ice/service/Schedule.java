@@ -181,7 +181,7 @@ public class Schedule {
 		}
 		
 		// Supporting data restrictions ensure all of the values are non-null
-		return this.iceSupportingDataConfiguration.getSupportedVaccines().getCdsVaccineItem(lVaccineCdsItem.getCdsListName()).getVaccine();
+		return this.iceSupportingDataConfiguration.getSupportedVaccines().getVaccineItem(lVaccineCdsItem.getCdsListName()).getVaccine();
 	}
 
 	
@@ -293,7 +293,7 @@ public class Schedule {
 		}
 		
 		int i=0;
-		Collection<LocallyCodedVaccineGroupItem> lAllVaccineGroups = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getAllLocallyCodedVaccineGroupItems();
+		Collection<LocallyCodedVaccineGroupItem> lAllVaccineGroups = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getAllVaccineGroupItems();
 		for (LocallyCodedVaccineGroupItem lVaccineGroup : lAllVaccineGroups) {
 			Collection<String> lAllRelatedDiseases = lVaccineGroup.getRelatedDiseasesCdsListItemNames();
 			if (lAllRelatedDiseases != null) {			// should never be null

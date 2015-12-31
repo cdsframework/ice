@@ -37,13 +37,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
-import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
+import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.util.support.data.ice.vaccinegroup.IceVaccineGroupSpecificationFile;
 import org.opencds.common.exceptions.ImproperUsageException;
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class SupportedVaccineGroups implements SupportingData {
 	
@@ -103,9 +105,10 @@ public class SupportedVaccineGroups implements SupportingData {
 	 * @param the 
 	 * @throws InconsistentConfigurationException if the information provided in the IceVaccineGroupSpecificationFile is not consistent
 	 * @throws ImproperUsageException if this operation is used incorrectly
+	 * @throws IllegalArgumentException if data supplied in the supporting data file is not permitted
 	 */
-	protected void addSupportedVaccineGroupItemFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecificationFile) 
-		throws ImproperUsageException, InconsistentConfigurationException {
+	protected void addVaccineGroupItemFromIceVaccineGroupSpecificationFile(IceVaccineGroupSpecificationFile pIceVaccineGroupSpecificationFile) 
+		throws InconsistentConfigurationException, IllegalArgumentException {
 		
 		String _METHODNAME = "addSupportedVaccineGroupItem(): ";
 		
@@ -127,6 +130,9 @@ public class SupportedVaccineGroups implements SupportingData {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 
+		///////
+		// Determine the vaccine group name. No duplicates allowed; no vaccine groups that weren't previously defined LocallyCodedCdsListItem allowed.
+		///////
 		LocallyCodedCdsListItem llccli = this.supportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
 		// Now verify that there is a CdsListItem for this vaccine group (i.e. - we are tracking the codes and code systems in SupportedCdsLists - it must be there too).
 		if (llccli == null) {
@@ -143,10 +149,14 @@ public class SupportedVaccineGroups implements SupportingData {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
-		// Primary OpenCds Concept
+		///////
+		// Primary OpenCds Concept - Vaccines are an OpenCDS concept as well.
+		///////
 		CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), true, pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());
 		
+		///////
 		// Related Diseases
+		///////
 		List<org.opencds.vmr.v1_0.schema.CD> lRelatedDiseases = pIceVaccineGroupSpecificationFile.getDiseaseImmunities();
 		List<String> lRelatedDiseasesCdsListItems = new ArrayList<String>();
 		if (lRelatedDiseases != null && ! lRelatedDiseases.isEmpty()) {
@@ -161,32 +171,60 @@ public class SupportedVaccineGroups implements SupportingData {
 			}
 		}
 		
+		///////
 		// Vaccine group priority
+		///////
 		int lVaccineGroupPriority = 0;
 		BigInteger lVaccineGroupPriorityInt = pIceVaccineGroupSpecificationFile.getPriority();
 		if (lVaccineGroupPriorityInt != null) {
 			lVaccineGroupPriority = lVaccineGroupPriorityInt.intValue();
 		}
-		LocallyCodedVaccineGroupItem lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lCdsVersions, lRelatedDiseasesCdsListItems, lPrimaryOpenCdsConcept, lVaccineGroupPriority);
+		
+		///////
+		// Create and add the LocallyCodedVaccineGroupItem
+		///////
+		LocallyCodedVaccineGroupItem lcvgi = null;
+		try {
+			lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lCdsVersions, lRelatedDiseasesCdsListItems, lPrimaryOpenCdsConcept, lVaccineGroupPriority);
+		}
+		catch (ImproperUsageException iue) {
+			String lErrStr = "Caught an unexpected ImproperUsageException during instantiation of LocallyCodedVaccineGroupItem for vaccine group" + lVaccineGroupCdsListItemName;
+			logger.error(_METHODNAME + lErrStr);
+			throw new ICECoreError(lErrStr);
+		}
 
 		// Add the mapping from the String to reference the vaccine group to LocallyCodedVaccineGroupItem
 		this.cdsListItemNameToVaccineGroupItem.put(lVaccineGroupCdsListItemName, lcvgi);
 	}
 	
-	
+	/*
 	public void removeSupportedVaccineGroupItem(String pVaccineGroupItemName) {
 		
 		if (pVaccineGroupItemName != null) { 
 			this.cdsListItemNameToVaccineGroupItem.remove(pVaccineGroupItemName);
 		}		
 	}
+	*/
 	
-	
-	public Collection<LocallyCodedVaccineGroupItem> getAllLocallyCodedVaccineGroupItems() {
+	public Collection<LocallyCodedVaccineGroupItem> getAllVaccineGroupItems() {
 		
 		return this.cdsListItemNameToVaccineGroupItem.values();
 	}
 
+
+	public boolean vaccineGroupItemExists(String pVaccineGroupItemName) {
+	
+		if (pVaccineGroupItemName == null) {
+			return false;
+		}
+		if (this.cdsListItemNameToVaccineGroupItem.get(pVaccineGroupItemName) != null) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 	
 	public LocallyCodedVaccineGroupItem getVaccineGroupItem(String pVaccineGroupItemName) {
 		
@@ -201,8 +239,45 @@ public class SupportedVaccineGroups implements SupportingData {
 			return lLCVGI;
 		}
 	}
+
+	
+	/**
+	 * Returns true if there is a vaccineGroupItem associated with the local CD, false if not. (Invoked getGroupVaccineGroupItem(CD) to determine.)
+	 */
+	public boolean vaccineGroupItemExists(CD pVaccineGroupCD) {
+		
+		LocallyCodedVaccineGroupItem lVGI = getVaccineGroupItem(pVaccineGroupCD);
+		if (lVGI == null) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
 	
 	
+	/**
+	 * Returns the vaccineGroupItem associated with the local CD. If none exists, returns null.
+	 */
+	public LocallyCodedVaccineGroupItem getVaccineGroupItem(CD pVaccineGroupCD) {
+		
+		if (pVaccineGroupCD == null) {
+			return null;
+		}
+		LocallyCodedCdsListItem llccli = this.supportedCdsLists.getCdsListItem(pVaccineGroupCD);
+		if (llccli == null) {
+			return null;
+		}
+		String lVaccineGroupCdsListItemName = llccli.getCdsListItemName();
+		if (this.cdsListItemNameToVaccineGroupItem.containsKey(lVaccineGroupCdsListItemName)) {
+			return this.cdsListItemNameToVaccineGroupItem.get(lVaccineGroupCdsListItemName);
+		}
+		else {
+			return null;
+		}	
+	}
+	
+
 	@Override
 	public String toString() {
 		

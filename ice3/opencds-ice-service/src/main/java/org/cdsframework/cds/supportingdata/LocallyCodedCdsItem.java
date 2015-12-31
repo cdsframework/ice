@@ -51,6 +51,32 @@ public abstract class LocallyCodedCdsItem {
 		return cdsVersions;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cdsItemName == null) ? 0 : cdsItemName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LocallyCodedCdsItem other = (LocallyCodedCdsItem) obj;
+		if (cdsItemName == null) {
+			if (other.cdsItemName != null)
+				return false;
+		} else if (!cdsItemName.equals(other.cdsItemName))
+			return false;
+		return true;
+	}
+
+	
 	/*
 	 * Inclusion of cdsVersions in equality?
 	@Override
@@ -100,29 +126,4 @@ public abstract class LocallyCodedCdsItem {
 	}
 	*/
 	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((cdsItemName == null) ? 0 : cdsItemName.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		LocallyCodedCdsItem other = (LocallyCodedCdsItem) obj;
-		if (cdsItemName == null) {
-			if (other.cdsItemName != null)
-				return false;
-		} else if (!cdsItemName.equals(other.cdsItemName))
-			return false;
-		return true;
-	}
-
 }

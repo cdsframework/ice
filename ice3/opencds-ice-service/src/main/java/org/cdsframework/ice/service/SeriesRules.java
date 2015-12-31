@@ -41,7 +41,7 @@ public class SeriesRules {
 
 	private String seriesId;
 	private String seriesName;
-	private SupportedVaccineGroupConcept vaccineGroup;
+	private String vaccineGroup;
 	private int numberOfDosesInSeries;
 	private boolean recurringDosesAfterSeriesComplete;
 	private boolean doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
@@ -57,7 +57,7 @@ public class SeriesRules {
 	 * @param pVaccineGroup Vaccine Group, must be provided
 	 * @throws IllegalArgumentException of series name or vaccine group is null
 	 */
-	public SeriesRules(String pSeriesName, SupportedVaccineGroupConcept pVaccineGroup) {
+	public SeriesRules(String pSeriesName, String pVaccineGroup) {
 
 		String _METHODNAME = "Series(): ";
 		if (pSeriesName == null || pVaccineGroup == null) {
@@ -83,7 +83,7 @@ public class SeriesRules {
 	 * @param pVaccineGroup
 	 * @param pApplicableSeasons
 	 */
-	public SeriesRules(String pSeriesName, SupportedVaccineGroupConcept pVaccineGroup, List<Season> pApplicableSeasons) {
+	public SeriesRules(String pSeriesName, String pVaccineGroup, List<Season> pApplicableSeasons) {
 	
 		this(pSeriesName, pVaccineGroup);
 		if (pApplicableSeasons != null && pApplicableSeasons.isEmpty() == false) {
@@ -153,7 +153,7 @@ public class SeriesRules {
 		this.seriesName = seriesName;
 	}
 	
-	public SupportedVaccineGroupConcept getVaccineGroup() {
+	public String getVaccineGroup() {
 		return vaccineGroup;
 	}
 

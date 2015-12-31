@@ -96,7 +96,7 @@ public class SupportedVaccines implements SupportingData {
 	 * @param pCdsVaccineItemName
 	 * @return LocallyCodedVaccineItem CdsVaccineItem, or null if not found
 	 */
-	public LocallyCodedVaccineItem getCdsVaccineItem(String pCdsVaccineItemName) {
+	public LocallyCodedVaccineItem getVaccineItem(String pCdsVaccineItemName) {
 		
 		if (pCdsVaccineItemName == null) {
 			return null;
@@ -116,6 +116,41 @@ public class SupportedVaccines implements SupportingData {
 		}
 	}
 	
+	/**
+	 * Returns true if there is a vaccineItem associated with the local CD, false if not. (Invoked getGroupVaccineGroupItem(CD) to determine.)
+	 */
+	public boolean vaccineItemExists(CD pVaccineCD) {
+		
+		LocallyCodedVaccineItem lVI = getVaccineItem(pVaccineCD);
+		if (lVI == null) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+	
+	
+	/**
+	 * Returns the vaccineItem associated with the local CD. If none exists, returns null.
+	 */
+	public LocallyCodedVaccineItem getVaccineItem(CD pVaccineCD) {
+		
+		if (pVaccineCD == null) {
+			return null;
+		}
+		LocallyCodedCdsListItem llccli = this.supportedCdsLists.getCdsListItem(pVaccineCD);
+		if (llccli == null) {
+			return null;
+		}
+		String lVaccineListItemName = llccli.getCdsListItemName();
+		if (this.cdsListItemNameToVaccineItem.containsKey(lVaccineListItemName)) {
+			return this.cdsListItemNameToVaccineItem.get(lVaccineListItemName);
+		}
+		else {
+			return null;
+		}	
+	}
 	
 	protected SupportedCdsLists getAssociatedSupportedCdsLists() {
 		
@@ -488,6 +523,7 @@ public class SupportedVaccines implements SupportingData {
 	 * Adds the minimum age, maximum age, unspecified formulation flag, and live virus vaccine flag from the ICE vaccine supporting data file to the vaccine component
 	 * @param pVaccineComponent
 	 * @param pIVSF
+	 * @throws an IllegalArgumentException, propagated from TimePeriod, if specified ages are in the wrong format.
 	 */
 	private void addPropertiesFromSDToVaccineComponent(VaccineComponent pVaccineComponent, IceVaccineSpecificationFile pIVSF) {
 		
