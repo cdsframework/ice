@@ -96,7 +96,7 @@ public class ICESupportingDataConfiguration {
 	 * @throws ImproperUsageException
 	 */
 	public ICESupportingDataConfiguration(List<String> pSupportedCdsVersions, File pBaseKnowledgeRepositoryLocation) 
-		throws ImproperUsageException {
+		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "ICESupportingDataConfiguration(): ";
 		
@@ -150,7 +150,7 @@ public class ICESupportingDataConfiguration {
 			String lErrStr = "Failed to obtain method to invoke for initializing supporting *CdsLists* data";
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
-		}		
+		}
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = "The following Cds Lists have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedCdsLists.toString();
@@ -180,7 +180,6 @@ public class ICESupportingDataConfiguration {
 		// Initialize the Vaccine supporting data
 		///////
 		this.supportedVaccines = new SupportedVaccines(this);
-		// initializeVaccineSupportingData(supportingDataVaccinesSubdirectory);
 		try {
 			Method sdMethodToInvoke = this.getClass().getMethod("addSupportedVaccineFromIceVaccineSpecificationFile", new Class[] { IceVaccineSpecificationFile.class } );
 			initializeSupportingData(supportingDataVaccinesSubdirectory, this.supportedVaccines, IceVaccineSpecificationFile.class, sdMethodToInvoke);
@@ -195,7 +194,7 @@ public class ICESupportingDataConfiguration {
 			lDebugStr += this.supportedVaccines.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}
-		if (! this.supportedVaccines.isVaccineSupportingDataConsistent()) {
+		if (! this.supportedVaccines.isSupportingDataConsistent()) {
 			String lErrStr = "The vaccine data supplied is inconsistent. Please ensure that all vaccine components for all vaccines have been defined in the supporting data";
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
@@ -297,7 +296,7 @@ public class ICESupportingDataConfiguration {
 	private <T> void initializeSupportingData(String pSDSubDirectory, SupportingData pSDObjectToInitialize, Class<T> pSupportingDataXMLClass, Method pSupportingDataMethodToInvoke) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 			
-		String _METHODNAME = "initializeSeasonsSupportingData(): ";
+		String _METHODNAME = "initializeSupportingData(): ";
 
 		if (pSDObjectToInitialize == null) {
 			String lErrStr = "supporting data object to initialize not specified";
@@ -357,6 +356,13 @@ public class ICESupportingDataConfiguration {
 					pSupportingDataMethodToInvoke.invoke(this, lIceDataSpecification);
 				}
 			}
+			catch (IllegalArgumentException ia) {
+				String lErrStr = "Supporting data did not pass validation checks: " + ia.getMessage();
+				throw new InconsistentConfigurationException(lErrStr);
+			}
+			catch (InconsistentConfigurationException ice) {
+				throw ice;
+			}
 			catch (SecurityException se) {
 				String lErrStr = "encountered an exception processing supporting data file";
 				logger.error(_METHODNAME + lErrStr, se);
@@ -369,15 +375,17 @@ public class ICESupportingDataConfiguration {
 			}
 			catch (IllegalAccessException iae) {
 				String lErrStr = "encountered an IllegalAccessException invoking the specified supporting data initialization routine";
-				logger.error(_METHODNAME + lErrStr);
+				logger.error(_METHODNAME + lErrStr, iae);
 				throw new ICECoreError(lErrStr);
 			}
 			catch(InvocationTargetException ite) {
 				String lErrStr = "encountered an InvocationTargetException invoking the specified supporting data initialization routine";
-				logger.error(_METHODNAME + lErrStr);
+				logger.error(_METHODNAME + lErrStr, ite);
 				throw new ICECoreError(lErrStr);
 			}
-		}		
+		}
+		
+		
 	}
 	
 	

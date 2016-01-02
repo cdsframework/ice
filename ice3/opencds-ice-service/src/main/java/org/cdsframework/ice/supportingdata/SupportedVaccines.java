@@ -158,7 +158,7 @@ public class SupportedVaccines implements SupportingData {
 	}
 	
 	
-	protected boolean isVaccineSupportingDataConsistent() {
+	public boolean isSupportingDataConsistent() {
 		
 		if (this.vaccineComponentCDToVaccinesNotFullySpecified.size() > 0) {
 			return false;
@@ -179,14 +179,10 @@ public class SupportedVaccines implements SupportingData {
 	 * @throws IncosistentConfigurationException if the information provided in the IceVaccineGroupSpecificationFile is not consistent
 	 * @throws ImproperUsageException if this method is used improperly
 	 */
-	protected boolean addSupportedVaccineItemFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecificationFile) 
+	protected void addSupportedVaccineItemFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecificationFile) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "addSupportedVaccineItemFromIceVaccineSpecificationFile(): ";
-		
-		if (pIceVaccineSpecificationFile == null || this.supportedCdsLists == null) {
-			return isVaccineSupportingDataConsistent();
-		}
 		
 		// If the vaccine specified is not in the list of SupportedCdsLists, throw an InconsistentConfigurationException
 		LocallyCodedCdsListItem llccli = this.supportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(pIceVaccineSpecificationFile.getVaccine()));
@@ -209,7 +205,7 @@ public class SupportedVaccines implements SupportingData {
 		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceVaccineSpecificationFile.getCdsVersions(), 
 				this.supportedCdsLists.getCdsVersions());
 		if (lIntersectionOfSupportedCdsVersions == null || lIntersectionOfSupportedCdsVersions.isEmpty()) {
-			return isVaccineSupportingDataConsistent();
+			return;
 		}
 		
 		////////////// Determine Primary OpenCDS Concept START //////////////		
@@ -417,8 +413,6 @@ public class SupportedVaccines implements SupportingData {
 			this.vaccineComponentCDToVaccinesNotFullySpecified.put(lVaccineComponentCD, lVaccinesNotFullySpecifiedSet);
 		}
 		///////
-
-		return isVaccineSupportingDataConsistent();
 				
 		/**
 		 * Examples

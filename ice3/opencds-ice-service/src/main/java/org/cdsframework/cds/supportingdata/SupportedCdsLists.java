@@ -39,11 +39,12 @@ public class SupportedCdsLists implements SupportingData {
 	private Map<String, String> codeSystemToCdsListName;							// LOCAL CODE-RELATED: cdsListCodeSystem -> cdsListCode (to ensure there are no conflicts)	
 	private Map<String, Integer> countOfCdsListItemsPerCdsList;						// LOCAL CODE-RELATED: cdsListCode -> number of cdsListItemCodes for the cdsList
 	private Map<String, Set<LocallyCodedCdsListItem>> cdsListNameToCdsListItems; 	// LOCAL CODE-RELATED: cdsListCode -> Set of CodedCdsListItems
-
+	private boolean isSupportingDataConsistent;
+	
 	// This class provides public methods for other classes to populate the IceConceptType.OPENCDS supported concepts, but other IceConceptType concepts
 	// are populated by this class when reading the XML. Concepts are stored in the following structure.
 	private SupportedCdsConcepts supportedCdsConcepts;
-		
+	
 	private static Log logger = LogFactory.getLog(SupportedCdsLists.class);
 		
 	
@@ -61,11 +62,11 @@ public class SupportedCdsLists implements SupportingData {
 		this.countOfCdsListItemsPerCdsList = new HashMap<String, Integer>();
 		this.cdsListNameToCdsListItems = new HashMap<String, Set<LocallyCodedCdsListItem>>();
 		this.supportedCdsConcepts = new SupportedCdsConcepts();
+		this.isSupportingDataConsistent = true;
 	}
 	
 	
-	public boolean isEmpty() {
-		
+	public boolean isEmpty() {		
 		if (this.cdsListItemNameToCdsListItem.isEmpty()) {
 			return true;
 		}
@@ -75,10 +76,15 @@ public class SupportedCdsLists implements SupportingData {
 	}
 	
 	
+	public boolean isSupportingDataConsistent() {
+		return this.isSupportingDataConsistent;
+	}
+	
+	
 	public List<String> getCdsVersions() {
-		
 		return this.cdsVersions;
 	}
+	
 	
 	/**
 	 * Adds an individual CdsListItem to the map of supported list concepts tracked by this class. This is currently a private method as all CdsListItems in the  
@@ -109,6 +115,7 @@ public class SupportedCdsLists implements SupportingData {
 			String lErrStr = "Attempt to add duplicate SupportedListItem: cannot add a supported list concept that already been added; must first remove the prior SupportedCdsListItem of the same name " + 
 				lSupportedListItemName;
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 
@@ -117,6 +124,7 @@ public class SupportedCdsLists implements SupportingData {
 		if (lSLCCdsListCode == null || lSLCCdsListCodeSystem == null) {
 			String lErrStr = "Attempt to add an unpopulated CdsList code or CdsList Code System";
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new ImproperUsageException(lErrStr);
 		}
 		
@@ -125,6 +133,7 @@ public class SupportedCdsLists implements SupportingData {
 		if (lPreviousMappedCdsListCodeSystem != null && ! lSLCCdsListCodeSystem.equals(lPreviousMappedCdsListCodeSystem)) {
 			String lErrStr = "Attempt to add a supported list concept whose code system does not match the code system of a previously previously added concept by the same cdsListCode";
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);				
 		}		
 		
@@ -133,6 +142,7 @@ public class SupportedCdsLists implements SupportingData {
 		if (lPreviousMappedCdsListName != null && ! lPreviousMappedCdsListName.equals(lPreviousMappedCdsListName)) {
 			String lErrStr = "Attempt to add a supported list concept whose cdsList code does not match the cdsList code of a previously previously added concept by the same code system";
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 

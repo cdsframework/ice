@@ -51,6 +51,7 @@ public class SupportedVaccineGroups implements SupportingData {
 	
 	private SupportedCdsLists supportedCdsLists;	// Supporting Data CdsLists from which this vaccine group supporting data is built
 	private Map<String, LocallyCodedVaccineGroupItem> cdsListItemNameToVaccineGroupItem;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineGroupItem
+	private boolean isSupportingDataConsistent;
 	
 	private static Log logger = LogFactory.getLog(SupportedVaccineGroups.class);	
 
@@ -77,6 +78,7 @@ public class SupportedVaccineGroups implements SupportingData {
 			throw new ImproperUsageException(lErrStr);
 		}
 		this.cdsListItemNameToVaccineGroupItem = new HashMap<String, LocallyCodedVaccineGroupItem>();
+		this.isSupportingDataConsistent = true;
 	}
 	
 	
@@ -90,6 +92,10 @@ public class SupportedVaccineGroups implements SupportingData {
 		}
 	}
 	
+	
+	public boolean isSupportingDataConsistent() {
+		return this.isSupportingDataConsistent;
+	}
 	
 	protected SupportedCdsLists getAssociatedSupportedCdsLists() {
 		

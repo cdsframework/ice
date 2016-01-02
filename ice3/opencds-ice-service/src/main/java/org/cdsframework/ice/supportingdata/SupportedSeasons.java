@@ -20,7 +20,6 @@ import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.ice.util.StringUtils;
 import org.cdsframework.util.support.data.ice.season.IceSeasonSpecificationFile;
-import org.codehaus.groovy.util.StringUtil;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.opencds.common.exceptions.ImproperUsageException;
@@ -30,7 +29,8 @@ public class SupportedSeasons implements SupportingData {
 	
 	private Map<String, LocallyCodedSeasonItem> cdsListItemNameToSeasonItem;					// cdsListItemName (cdsListCode.cdsListItemKey) to LocallyCodedSeasonItem
 	private Map<LocallyCodedVaccineGroupItem, List<Season>> vaccineGroupItemToSeasons;			// Internal tracking structure: List of Seasons supported for each vaccine group	
-	private SupportedVaccineGroups supportedVaccineGroups;									// Supporting vaccine groups from which this season data is built
+	private SupportedVaccineGroups supportedVaccineGroups;										// Supporting vaccine groups from which this season data is built
+	private boolean isSupportingDataConsistent;
 	
 	private static Log logger = LogFactory.getLog(SupportedSeasons.class);	
 
@@ -53,17 +53,22 @@ public class SupportedSeasons implements SupportingData {
 		}
 		this.cdsListItemNameToSeasonItem = new HashMap<String, LocallyCodedSeasonItem>();
 		this.vaccineGroupItemToSeasons = new HashMap<LocallyCodedVaccineGroupItem, List<Season>>();
+		this.isSupportingDataConsistent = true;
 	}
 
 	
 	public boolean isEmpty() {		
-		
 		if (this.cdsListItemNameToSeasonItem.size() == 0) {
 			return true;
 		}
 		else {
 			return false;
 		}
+	}
+	
+	
+	public boolean isSupportingDataConsistent() {
+		return this.isSupportingDataConsistent;
 	}
 	
 	
@@ -115,6 +120,7 @@ public class SupportedSeasons implements SupportingData {
 		if (StringUtils.isNullOrEmpty(lSeasonCode)) {
 			String lErrStr = "Required supporting data seasonCode element not provided in IceSeasonSpecificationFile";
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new ImproperUsageException(lErrStr);
 		}
 		else {
@@ -134,6 +140,7 @@ public class SupportedSeasons implements SupportingData {
 		if (this.cdsListItemNameToSeasonItem.containsKey(lSeasonCode)) {
 			String lErrStr = "Attempt to add a Season that was already specified previously: " + lSeasonCode;
 			logger.warn(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
@@ -143,6 +150,7 @@ public class SupportedSeasons implements SupportingData {
 		if (! ConceptUtils.requiredAttributesForCDSpecified(lVaccineGroupCD)) {
 			String lErrStr = "Required supporting data item vaccineGroup element not provided in IceVaccineGroupSpecificationFile:";
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new ImproperUsageException(lErrStr);
 		}
 		
@@ -152,6 +160,7 @@ public class SupportedSeasons implements SupportingData {
 			String lErrStr = "Attempt to add a season which specifies a vaccine group that is not in the list of SupportedCdsLists: " + 
 					(pIceSeasonSpecificationFile.getVaccineGroup() == null ? "null" : ConceptUtils.toInternalCD(pIceSeasonSpecificationFile.getVaccineGroup()));
 			logger.warn(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);			
 		}		
 		LocallyCodedVaccineGroupItem lcvgi = this.supportedVaccineGroups.getVaccineGroupItem(lccli.getCdsListItemName());
@@ -159,6 +168,7 @@ public class SupportedSeasons implements SupportingData {
 			String lErrStr = "Attempt to add a season which specifies a vaccine group that is not in the list of SupportedCdsVaccineGroups: " + 
 					(pIceSeasonSpecificationFile.getVaccineGroup() == null ? "null" : ConceptUtils.toInternalCD(pIceSeasonSpecificationFile.getVaccineGroup()));
 			logger.warn(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
 		
@@ -175,6 +185,7 @@ public class SupportedSeasons implements SupportingData {
 				String lErrStr = "Fully-specified season start and/or fully-specified season end date not specified for non-default season; start date: " + 
 						pIceSeasonSpecificationFile.getStartDate() + "; end date: " + pIceSeasonSpecificationFile.getEndDate();
 				logger.warn(_METHODNAME + lErrStr);
+				this.isSupportingDataConsistent = false;
 				throw new InconsistentConfigurationException(lErrStr);
 			}
 
@@ -197,6 +208,7 @@ public class SupportedSeasons implements SupportingData {
 				String lErrStr = "Default season start and/or default season end date not specified for default season; start date: " + 
 						lDefaultSeasonStartDate + "; end date: " + lDefaultSeasonEndDate;
 				logger.warn(_METHODNAME + lErrStr);
+				this.isSupportingDataConsistent = false;
 				throw new InconsistentConfigurationException(lErrStr);
 			}
 
@@ -210,6 +222,7 @@ public class SupportedSeasons implements SupportingData {
 			catch (IllegalArgumentException e) {
 				String lErrStr = "Default season start and/or default season end date invalid format; start date: " + lDefaultSeasonStartDate + "; end date: " + lDefaultSeasonEndDate;
 				logger.warn(_METHODNAME + lErrStr);
+				this.isSupportingDataConsistent = false;
 				throw new InconsistentConfigurationException(lErrStr);
 			}
 			Season lS = new Season(lSeasonCode, lcvgi.getCdsItemName(), true, lStartMonthDay.getMonthOfYear(), lStartMonthDay.getDayOfMonth(), 

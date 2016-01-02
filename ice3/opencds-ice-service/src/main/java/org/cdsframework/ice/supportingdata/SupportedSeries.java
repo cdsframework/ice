@@ -37,10 +37,11 @@ public class SupportedSeries implements SupportingData {
 	private SupportedVaccines supportedVaccines;
 	private SupportedSeasons supportedSeasons;
 
-	private Map<String, LocallyCodedSeriesItem> cdsListItemNameToSeriesItem;	// cdsListItemName (cdsListCode.cdsListItemKey) to LocallyCodedSeasonItem
-	private Map<LocallyCodedVaccineGroupItem, List<SeriesRules>> vaccineGroupItemToSeriesRules;
+	private boolean isSupportingDataConsistent;
+	private Map<String, LocallyCodedSeriesItem> cdsListItemNameToSeriesItem;					// cdsListItemName (cdsListCode.cdsListItemKey) to LocallyCodedSeriesItem
+	private Map<LocallyCodedVaccineGroupItem, List<SeriesRules>> vaccineGroupItemToSeriesRules;	// vaccine group -> List of associated series
 	
-	private static Log logger = LogFactory.getLog(SupportedSeasons.class);	
+	private static Log logger = LogFactory.getLog(SupportedSeries.class);	
 
 	
 	/**
@@ -84,17 +85,22 @@ public class SupportedSeries implements SupportingData {
 		
 		this.cdsListItemNameToSeriesItem = new HashMap<String,LocallyCodedSeriesItem>();
 		this.vaccineGroupItemToSeriesRules = new HashMap<LocallyCodedVaccineGroupItem, List<SeriesRules>>();
+		this.isSupportingDataConsistent = true;
 	}
 
 	
 	public boolean isEmpty() {		
-		
 		if (this.cdsListItemNameToSeriesItem.size() == 0) {
 			return true;
 		}
 		else {
 			return false;
 		}
+	}
+	
+	
+	public boolean isSupportingDataConsistent() {
+		return this.isSupportingDataConsistent;
 	}
 	
 	
@@ -136,6 +142,7 @@ public class SupportedSeries implements SupportingData {
 		if (this.cdsListItemNameToSeriesItem.containsKey(lSeriesCode)) {
 			String lErrStr = "Attempt to add a Series that was already specified previously; series code:  " + lSeriesCode;
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
@@ -151,6 +158,7 @@ public class SupportedSeries implements SupportingData {
 		if (lVaccineGroups.size() > 1) {
 			String lErrStr = "More than once vaccine group specified for series " + lSeriesCode + " in supporting data file. Currently, only one vaccine group per series is supported";
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
@@ -159,6 +167,7 @@ public class SupportedSeries implements SupportingData {
 		if (lVGI == null) {
 			String lErrStr = "Vaccine group specified for series supporting data file not a previously specified Vaccine Group item: " + lVaccineGroupCD;
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 
@@ -181,6 +190,7 @@ public class SupportedSeries implements SupportingData {
 		if (bi.intValue() != isdss.size()) {
 			String lErrStr = "Number of doses specified for the Series does not match the number of IceSeriesDoseSpecification elements; cannot continue. Series " + lSeriesCode;
 			logger.error(_METHODNAME + lErrStr);
+			this.isSupportingDataConsistent = false;
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
@@ -203,12 +213,14 @@ public class SupportedSeries implements SupportingData {
 			if (isds.getDoseNumber() == null) {
 				String lErrStr = "Dose number not specified in IceSeriesDoseSpecification file";
 				logger.error(_METHODNAME + lErrStr);
+				this.isSupportingDataConsistent = false;
 				throw new InconsistentConfigurationException(lErrStr);
 			}
 			int lDoseNumber = isds.getDoseNumber().intValue();
 			if (lDoseNumber != icseSeriesDoseSpecificationNumber) {
 				String lErrStr = "Dose number is not a valid dose number for series (1 <= [dose number]<= [number of doses in series]) or is not in *sequential order*. Cannot continue.";
 				logger.error(_METHODNAME + lErrStr);
+				this.isSupportingDataConsistent = false;
 				throw new InconsistentConfigurationException(lErrStr);
 			}
 			
@@ -216,6 +228,7 @@ public class SupportedSeries implements SupportingData {
 			if (CollectionUtils.isNullOrEmpty(lIDVSS)) {
 				String lWarnStr = "No valid vaccines were specified for Series " + lSeriesCode + ", dose number " + icseSeriesDoseSpecificationNumber;
 				logger.warn(_METHODNAME + lWarnStr);
+				this.isSupportingDataConsistent = false;
 				throw new InconsistentConfigurationException(lWarnStr);
 			}
 			///////
@@ -228,6 +241,7 @@ public class SupportedSeries implements SupportingData {
 					if (lIDVS == null) {
 						String lErrStr = "Encountered a null IceDoseVaccineSpecification in Series " + lSeriesCode + "; this should not happen. Not continuing.";
 						logger.error(_METHODNAME + lErrStr);
+						this.isSupportingDataConsistent = false;
 						throw new InconsistentConfigurationException(lErrStr);
 					}
 					org.opencds.vmr.v1_0.schema.CD lVaccineCD = lIDVS.getVaccine();
@@ -235,6 +249,7 @@ public class SupportedSeries implements SupportingData {
 					if (lcvi == null) {
 						String lErrStr = "A vaccine was specified for Series " + lSeriesCode + ", dose number " + icseSeriesDoseSpecificationNumber + " which is not a previously defined vaccine.";
 						logger.error(_METHODNAME + lErrStr);
+						this.isSupportingDataConsistent = false;
 						throw new InconsistentConfigurationException(lErrStr);
 					}
 					if (lIDVS.isPreferred()) {
@@ -273,6 +288,7 @@ public class SupportedSeries implements SupportingData {
 					if (idis == null) {
 						String lErrStr = "Encountered a null IceDoseIntervalSpecification in Series " + lSeriesCode + "; this should not happen. Not continuing.";
 						logger.error(_METHODNAME + lErrStr);
+						this.isSupportingDataConsistent = false;
 						throw new InconsistentConfigurationException(lErrStr);
 					}
 					BigInteger fromDoseNumberBI = idis.getFromDoseNumber();
@@ -280,6 +296,7 @@ public class SupportedSeries implements SupportingData {
 					if (fromDoseNumberBI == null || toDoseNumberBI == null) {
 						String lErrStr = "IceDoseIntervalSpecification fromDoseNumber or toDoseNumber elements not provided in Series " + lSeriesCode + "; cannot continue";
 						logger.error(_METHODNAME + lErrStr);
+						this.isSupportingDataConsistent = false;
 						throw new InconsistentConfigurationException(lErrStr);
 					}
 					int fromDoseNumber = fromDoseNumberBI.intValue();
@@ -288,6 +305,7 @@ public class SupportedSeries implements SupportingData {
 						if (thisDoseToNextDoseIntervalFound == true) {
 							String lErrStr = "Encountered more than one interval from dose number " + fromDoseNumber + " to dose number" + fromDoseNumber+1 + " for Series " +lSeriesCode;
 							logger.error(_METHODNAME + lErrStr);
+							this.isSupportingDataConsistent = false;
 							throw new InconsistentConfigurationException(lErrStr);
 						}
 						else {
@@ -373,6 +391,7 @@ public class SupportedSeries implements SupportingData {
 				if (lcsi == null || lcsi.getSeason() == null) {
 					String lErrStr = "Season \"" + s + "\" specified for the Series " + lSeriesCode + " does not exist";
 					logger.error(_METHODNAME + lErrStr);
+					this.isSupportingDataConsistent = false;
 					throw new InconsistentConfigurationException(lErrStr);
 				}
 				else {

@@ -33,9 +33,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
-import org.cdsframework.ice.service.DoseRule;
-import org.cdsframework.ice.service.ICELogicHelper;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 
 public class SeriesRules {
 
