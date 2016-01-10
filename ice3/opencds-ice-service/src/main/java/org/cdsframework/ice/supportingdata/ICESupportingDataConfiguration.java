@@ -458,7 +458,8 @@ public class ICESupportingDataConfiguration {
 				i=1;
 				for (IceSeriesDoseSpecification isds : lIceSeriesDoses) {
 					lDebugStrb += "\n\t(" + i + "): absolute minimum age: " + isds.getAbsoluteMinimumAge() + "; earliest recommended age: " + isds.getEarliestRecommendedAge() + 
-						"latest recommended age: " + isds.getLatestRecommendedAge() + "; minimum age: " + isds.getMinimumAge() + "; maximum age: " + isds.getMaximumAge();
+						"; latest recommended age: " + isds.getLatestRecommendedAge() + "; minimum age: " + isds.getMinimumAge() + "; maximum age: " + isds.getMaximumAge();
+					i++;
 				}
 			}
 			else {
@@ -473,8 +474,9 @@ public class ICESupportingDataConfiguration {
 				i=1;
 				for (IceDoseIntervalSpecification idis : lIceDoseIntervals) {
 					lDebugStrb += "\n\t("+i+"): from dose number: " + idis.getFromDoseNumber() + "; to dose number: " + idis.getToDoseNumber() + 
-						"absolute minimum interval: " + idis.getAbsoluteMinimumInterval() + "; minimum interval: " + idis.getMinimumInterval() + 
-						"earliest recommended interval: " + idis.getEarliestRecommendedInterval() + "; latest recommended interval: " + idis.getLatestRecommendedInterval();
+						"; absolute minimum interval: " + idis.getAbsoluteMinimumInterval() + "; minimum interval: " + idis.getMinimumInterval() + 
+						"; earliest recommended interval: " + idis.getEarliestRecommendedInterval() + "; latest recommended interval: " + idis.getLatestRecommendedInterval();
+					i++;
 				}
 			}
 			else {

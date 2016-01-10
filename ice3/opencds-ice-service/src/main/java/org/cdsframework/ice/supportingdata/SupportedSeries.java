@@ -121,6 +121,15 @@ public class SupportedSeries implements SupportingData {
 			return;			
 		}
 		
+		///////
+		// CDS Version validation checks
+		///////
+		// Validation Check: If no cdsVersions are specified, thrown an error
+		if (CollectionUtils.isNullOrEmpty(pIceSeriesSpecificationFile.getCdsVersions())) {
+			String lErrStr = "No cdsVersion(s) specified in series supporting data file.";
+			logger.error(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lCdsVersions = CollectionUtils.intersectionOfCollections(pIceSeriesSpecificationFile.getCdsVersions(), this.supportedCdsLists.getCdsVersions());
 		if (CollectionUtils.isNullOrEmpty(lCdsVersions)) {
@@ -376,8 +385,21 @@ public class SupportedSeries implements SupportingData {
 		///////
 		SeriesRules series1Rules = new SeriesRules(lSeriesCode, lVGI.getCdsItemName());
 		series1Rules.setSeriesDoseRules(seriesDoseRules);
-		series1Rules.setRecurringDosesAfterSeriesComplete(pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete());
-		series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered());
+		// Determine whether or not there are recurring doses for this series (default false)
+		if (pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete() != null) {
+			series1Rules.setRecurringDosesAfterSeriesComplete(pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete());
+		}
+		else {
+			// If not specified, assume there are no recurring doses of some kind after the series has been completed
+			series1Rules.setRecurringDosesAfterSeriesComplete(false);
+		}
+		// Determine if the dose number should be calculated based on the targeted diseases of each vaccine administered (default true)
+		if (pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() != null) {
+			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered());
+		}
+		else {
+			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(true);
+		}
 		
 		///////
 		// Store the Series in this supporting data 

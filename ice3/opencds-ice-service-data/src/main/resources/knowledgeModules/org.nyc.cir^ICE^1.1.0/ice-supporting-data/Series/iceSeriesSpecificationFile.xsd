@@ -26,63 +26,47 @@
     xmlns:is="org.cdsframework.util.support.data.ice.series"
     xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes"
     targetNamespace="org.cdsframework.util.support.data.ice.series">
-    <xs:import namespace="org.opencds.vmr.v1_0.schema.datatypes" schemaLocation="../../../schema/datatypes.xsd"/>
-    <xs:element name="seriesId" type="xs:string" />
-    <xs:element name="name" type="xs:string" />
-    <xs:element name="code" type="xs:string" />
-    <xs:element name="numberOfDosesInSeries" type="xs:integer" />
-    <xs:element name="doseNumber" type="xs:integer" />
-    <xs:element name="absoluteMinimumAge" type="xs:string" />
-    <xs:element name="minimumAge" type="xs:string" />
-    <xs:element name="maximumAge" type="xs:string" />
-    <xs:element name="earliestRecommendedAge" type="xs:string" />
-    <xs:element name="latestRecommendedAge" type="xs:string" />
-    <xs:element name="fromDoseNumber" type="xs:integer" />
-    <xs:element name="toDoseNumber" type="xs:integer" />
-    <xs:element name="absoluteMinimumInterval" type="xs:string" />
-    <xs:element name="minimumInterval" type="xs:string" />
-    <xs:element name="earliestRecommendedInterval" type="xs:string" />
-    <xs:element name="latestRecommendedInterval" type="xs:string" />
-    <xs:element name="preferred" type="xs:boolean" default="false"/>
-    <xs:element name="seasonCode" type="xs:string" />
+    <xs:import namespace="org.opencds.vmr.v1_0.schema.datatypes" schemaLocation="http://cds.hln.com/cdsframework/schema/datatypes.xsd"/>
     <xs:complexType name="iceDoseVaccineSpecification">
         <xs:sequence>
-            <xs:element ref="is:preferred" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="preferred" type="xs:boolean" default="false" minOccurs="1" maxOccurs="1"/>
             <xs:element name="vaccine" type="dt:CD" minOccurs="1" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="iceDoseIntervalSpecification">
         <xs:sequence>
-            <xs:element ref="is:fromDoseNumber" minOccurs="1" maxOccurs="1"/>
-            <xs:element ref="is:toDoseNumber" minOccurs="1" maxOccurs="1"/>
-            <xs:element ref="is:absoluteMinimumInterval" minOccurs="0" maxOccurs="1"/>
-            <xs:element ref="is:minimumInterval" minOccurs="0" maxOccurs="1"/>
-            <xs:element ref="is:earliestRecommendedInterval" minOccurs="0" maxOccurs="1"/>
-            <xs:element ref="is:latestRecommendedInterval" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="fromDoseNumber" type="xs:integer" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="toDoseNumber" type="xs:integer" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="absoluteMinimumInterval" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="minimumInterval" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="earliestRecommendedInterval" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="latestRecommendedInterval" type="xs:string" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="iceSeriesDoseSpecification">
         <xs:sequence>
-            <xs:element ref="is:doseNumber" minOccurs="1" maxOccurs="1"/>
-            <xs:element ref="is:absoluteMinimumAge" minOccurs="0" maxOccurs="1"/>
-            <xs:element ref="is:minimumAge" minOccurs="0" maxOccurs="1"/>
-            <xs:element ref="is:maximumAge" minOccurs="0" maxOccurs="1"/>
-            <xs:element ref="is:earliestRecommendedAge" minOccurs="0" maxOccurs="1"/>
-            <xs:element ref="is:latestRecommendedAge" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="doseNumber" type="xs:integer" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="absoluteMinimumAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="minimumAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="maximumAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="earliestRecommendedAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="latestRecommendedAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <xs:element name="doseVaccine" type="is:iceDoseVaccineSpecification" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="iceSeriesSpecification">
         <xs:sequence>
-            <xs:element ref="is:seriesId" minOccurs="1" maxOccurs="1"/>
-            <xs:element ref="is:name" minOccurs="1" maxOccurs="1"/>
-            <xs:element ref="is:code" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="seriesId" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="code" type="xs:string" minOccurs="1" maxOccurs="1"/>
             <xs:element name="cdsVersion" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
             <xs:element name="doseInterval" type="is:iceDoseIntervalSpecification" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element ref="is:numberOfDosesInSeries" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="numberOfDosesInSeries" type="xs:integer" minOccurs="1" maxOccurs="1"/>
             <xs:element name="vaccineGroup" type="dt:CD" minOccurs="1" maxOccurs="unbounded"/>
             <xs:element name="iceSeriesDose" type="is:iceSeriesDoseSpecification" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element ref="is:seasonCode" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="seasonCode" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="recurringDosesAfterSeriesComplete" type="xs:boolean" default="false" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered" type="xs:boolean" default="true" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
     <xs:element name="iceSeriesSpecificationFile" type="is:iceSeriesSpecification"/>
