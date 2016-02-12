@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -34,6 +34,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 
 public class TargetDose {
 	

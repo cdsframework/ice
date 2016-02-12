@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -28,11 +28,13 @@ package org.cdsframework.ice.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.ice.util.TimePeriod;
 
 
 public abstract class AbstractVaccine {
 
-	ICEConcept vaccineConcept;
+	CdsConcept vaccineConcept;
 	private String tradeName;
 	private String manufacturerCode;
 	private boolean unspecifiedFormulation;
@@ -54,14 +56,14 @@ public abstract class AbstractVaccine {
 			throw new IllegalArgumentException(errStr);
 		}
 		
-		ICEConcept ic = pAbstractVaccine.getVaccineConcept();
+		CdsConcept ic = pAbstractVaccine.getVaccineConcept();
 		if (ic == null) {
 			String errStr = "Concept code not supplied in Vaccine instance";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
 		
-		this.vaccineConcept = ICEConcept.constructDeepCopyOfICEConceptObject(ic);
+		this.vaccineConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(ic);
 		this.tradeName = pAbstractVaccine.getTradeName();
 		this.manufacturerCode = pAbstractVaccine.getManufacturerCode();
 		this.liveVirusVaccine = pAbstractVaccine.isLiveVirusVaccine();
@@ -77,7 +79,7 @@ public abstract class AbstractVaccine {
 	 * Constructor for AbstractVaccine object
 	 * @param pConceptCode conceptCode associated with this Vaccine; must be supplied
 	 */
-	public AbstractVaccine(ICEConcept pVaccineConcept) {
+	public AbstractVaccine(CdsConcept pVaccineConcept) {
 		
 		String _METHODNAME = "AbstractVaccine(ICEConcept): ";
 		if (pVaccineConcept == null) {
@@ -90,18 +92,18 @@ public abstract class AbstractVaccine {
 		this.tradeName = null;
 		this.manufacturerCode = null;
 		this.liveVirusVaccine = false;
-		this.unspecifiedFormulation = true;
+		this.unspecifiedFormulation = false;
 		this.validMinimumAgeOfUse = null;
 		this.validMaximumAgeOfUse = null;
 		this.licensedForUseMinimumAge = null;
 		this.licensedForUseMaximumAge = null;
 	}
 
-	public ICEConcept getVaccineConcept() {
+	public CdsConcept getVaccineConcept() {
 		return vaccineConcept;
 	}
 
-	public void setVaccineConcept(ICEConcept vaccineConcept) {
+	public void setVaccineConcept(CdsConcept vaccineConcept) {
 		this.vaccineConcept = vaccineConcept;
 	}
 	
@@ -156,6 +158,10 @@ public abstract class AbstractVaccine {
 	}
 
 
+	/**
+	 * Sets the unspecified formulation flag to whatever is specified by the parameter, overriding any previous (including calculated) unspecified formulation 
+	 * @param unspecifiedFormulation
+	 */
 	public void setUnspecifiedFormulation(boolean unspecifiedFormulation) {
 		this.unspecifiedFormulation = unspecifiedFormulation;
 	}

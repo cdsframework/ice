@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -28,7 +28,6 @@ package org.cdsframework.ice.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -103,12 +102,16 @@ public class FileNameWithExtensionFilterImpl implements FilenameFilter {
 		}
 		
 		int lInd = pFilename.lastIndexOf('.');
-		logger.debug(_METHODNAME + "Indice of filename extension is " + lInd);
+		if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "Indice of filename extension is " + lInd);
+		}
 		if (lInd < 0) {
 			return false;
 		}
 		String lExtension = pFilename.substring(lInd+1);
-		logger.debug(_METHODNAME + "Filename extension is " + lExtension);
+		if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "Filename extension is " + lExtension);
+		}
 		if (pFilename.startsWith(baseFilename) && validFileExtensions.contains(lExtension)) {
 			return true;
 		}

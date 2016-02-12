@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@
 
 package org.cdsframework.ice.service;
 
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 
 
 public class TargetSeriesSelection {

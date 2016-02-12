@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -32,13 +32,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.supportingdata.tmp.SupportedVaccineGroupConcept;
+import org.cdsframework.cds.CdsConcept;
 
 public class SeriesRules {
 
 	private String seriesId;
 	private String seriesName;
-	private SupportedVaccineGroupConcept vaccineGroup;
+	private String vaccineGroup;
 	private int numberOfDosesInSeries;
 	private boolean recurringDosesAfterSeriesComplete;
 	private boolean doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
@@ -54,7 +54,7 @@ public class SeriesRules {
 	 * @param pVaccineGroup Vaccine Group, must be provided
 	 * @throws IllegalArgumentException of series name or vaccine group is null
 	 */
-	public SeriesRules(String pSeriesName, SupportedVaccineGroupConcept pVaccineGroup) {
+	public SeriesRules(String pSeriesName, String pVaccineGroup) {
 
 		String _METHODNAME = "Series(): ";
 		if (pSeriesName == null || pVaccineGroup == null) {
@@ -80,7 +80,7 @@ public class SeriesRules {
 	 * @param pVaccineGroup
 	 * @param pApplicableSeasons
 	 */
-	public SeriesRules(String pSeriesName, SupportedVaccineGroupConcept pVaccineGroup, List<Season> pApplicableSeasons) {
+	public SeriesRules(String pSeriesName, String pVaccineGroup, List<Season> pApplicableSeasons) {
 	
 		this(pSeriesName, pVaccineGroup);
 		if (pApplicableSeasons != null && pApplicableSeasons.isEmpty() == false) {
@@ -105,7 +105,7 @@ public class SeriesRules {
 		lSR.vaccineGroup = pSR.getVaccineGroup();
 		lSR.recurringDosesAfterSeriesComplete = pSR.recurringDosesAfterSeriesComplete;
 		lSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = pSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
-		lSR.applicableSeasons = pSR.applicableSeasons;
+		// lSR.applicableSeasons = pSR.applicableSeasons;
 		lSR.applicableSeasons = new ArrayList<Season>();
 		
 		// Copy Doses
@@ -150,7 +150,7 @@ public class SeriesRules {
 		this.seriesName = seriesName;
 	}
 	
-	public SupportedVaccineGroupConcept getVaccineGroup() {
+	public String getVaccineGroup() {
 		return vaccineGroup;
 	}
 
@@ -162,11 +162,11 @@ public class SeriesRules {
 		this.numberOfDosesInSeries = numberOfDosesInSeries;
 	}
 	
-	public boolean isDoseNumberCalculationBasedOnDiseasesTargetedByEachVaccineAdministered() {
+	public boolean isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() {
 		return doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
 	}
 	
-	public void setDoseNumberCalculatationBasedOnDiseasesTargetedByEachVaccineAdministered(boolean yesno) {
+	public void setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(boolean yesno) {
 		doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = yesno;
 	}
 	
@@ -253,23 +253,22 @@ public class SeriesRules {
 			return false;
 		}
 
-		ICEConcept vIceConcept = v.getVaccineConcept();
-		logger.debug(_METHODNAME + "vaccine concept: " + vIceConcept + "; doseNumber: " + doseNumber + "; allowable any " + allowableForAnyDose);
+		CdsConcept vIceConcept = v.getVaccineConcept();
+		if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "vaccine concept: " + vIceConcept + "; doseNumber: " + doseNumber + "; allowable any " + allowableForAnyDose);
+		}
 		if (vIceConcept == null) {
-			logger.debug(_METHODNAME + "here-1");
 			return false;
 		}
 		String vOpenCdsConceptCode = vIceConcept.getOpenCdsConceptCode();
 		logger.debug(_METHODNAME + "opencds concept: " + vOpenCdsConceptCode);
 		if (vOpenCdsConceptCode == null) {
-			logger.debug(_METHODNAME + "here0");
 			return false;
 		}
 		for (DoseRule dr : seriesDoseRules) {
 			int drDoseNumber = dr.getDoseNumber();
 			logger.debug(_METHODNAME + "dose number: " + drDoseNumber);
 			if (! allowableForAnyDose && drDoseNumber < doseNumber) {
-				logger.debug(_METHODNAME + "here1; drDoseNumber " + drDoseNumber);
 				continue;
 			}
 			else if (allowableForAnyDose || dr.getDoseNumber() == doseNumber) {
@@ -277,27 +276,21 @@ public class SeriesRules {
 				List<Vaccine> allPermittedComponentVaccines = dr.getAllPermittedVaccines();
 				for (Vaccine permittedVaccine : allPermittedComponentVaccines) {
 					if (permittedVaccine != null) {
-						logger.debug(_METHODNAME + "here3");
-						ICEConcept iceConcept = permittedVaccine.getVaccineConcept();
-						logger.debug(_METHODNAME + "ice concept: " + (iceConcept == null ? "null" : iceConcept.getOpenCdsConceptCode()));
+						CdsConcept iceConcept = permittedVaccine.getVaccineConcept();
 						if (iceConcept == null) {
-							logger.debug(_METHODNAME + "here4");
 							continue;
 						}
 						if (vOpenCdsConceptCode.equals(iceConcept.getOpenCdsConceptCode())) {
-							logger.debug(_METHODNAME + "here4.5");
 							return true;
 						}
 					}
 				}
 			}
 			else {
-				logger.debug(_METHODNAME + "here5");
 				break;
 			}
 		}
 		
-		logger.debug(_METHODNAME + "here6");
 		return false;
 	}
 

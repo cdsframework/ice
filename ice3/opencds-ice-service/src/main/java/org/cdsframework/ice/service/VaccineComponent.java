@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -32,11 +32,11 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.supportingdata.tmp.SupportedDiseaseConcept;
+import org.cdsframework.cds.CdsConcept;
 
 public class VaccineComponent extends AbstractVaccine {
 
-	private Collection<SupportedDiseaseConcept> diseaseImmunityList;
+	private Collection<String> diseaseImmunityList;
 	
 	private static Log logger = LogFactory.getLog(VaccineComponent.class);
 	
@@ -53,7 +53,7 @@ public class VaccineComponent extends AbstractVaccine {
 	 * @param pDisease Disease that this vaccine component induces immunity to
 	 * @throws IllegalArgumentException If either parameter is not supplied
 	 */
-	public VaccineComponent(ICEConcept pVaccineConcept, List<SupportedDiseaseConcept> pDiseaseImmunityList) {
+	public VaccineComponent(CdsConcept pVaccineConcept, List<String> pDiseaseImmunityList) {
 		
 		super(pVaccineConcept);
 		
@@ -80,13 +80,6 @@ public class VaccineComponent extends AbstractVaccine {
 		super(pVaccine);
 		
 		// String _METHODNAME = "VaccineComponent(): ";
-		/*
-		if (pVaccine.isMemberOfMultipleVaccineGroups() == true) {
-			String errStr = "specified vaccine is a member of multiple vaccine groups; cannot be added as a Vaccine Component";
-			logger.warn(_METHODNAME + errStr);
-			throw new IllegalArgumentException(errStr);
-		}
-		*/
 		this.diseaseImmunityList = pVaccine.getAllDiseasesTargetedForImmunity();
 	}
 	
@@ -101,8 +94,8 @@ public class VaccineComponent extends AbstractVaccine {
 		}
 		
 		VaccineComponent lVC = new VaccineComponent(pV);
-		List<SupportedDiseaseConcept> lSDCList = new ArrayList<SupportedDiseaseConcept>();
-		for (SupportedDiseaseConcept pSD : pV.diseaseImmunityList) {
+		List<String> lSDCList = new ArrayList<String>();
+		for (String pSD : pV.diseaseImmunityList) {
 			lSDCList.add(pSD);
 		}
 		lVC.diseaseImmunityList = lSDCList;
@@ -111,7 +104,7 @@ public class VaccineComponent extends AbstractVaccine {
 	}
 	
 	
-	public Collection<SupportedDiseaseConcept> getDiseaseImmunityList() {
+	public Collection<String> getDiseaseImmunityList() {
 		return diseaseImmunityList;
 	}
 	
@@ -120,14 +113,14 @@ public class VaccineComponent extends AbstractVaccine {
 	 * Get list of diseases targeted for immunity by this vaccine
 	 * @return List<SupportedDiseaseConcept> of diseases targeted by this vaccine; empty list if none
 	 */
-	public Collection<SupportedDiseaseConcept> getAllDiseasesTargetedForImmunity() {
+	public Collection<String> getAllDiseasesTargetedForImmunity() {
 		
-		Collection<SupportedDiseaseConcept> lImmunityList = getDiseaseImmunityList();
+		Collection<String> lImmunityList = getDiseaseImmunityList();
 		if (lImmunityList != null) {
 			return lImmunityList;
 		}
 		else {
-			return new ArrayList<SupportedDiseaseConcept>();
+			return new ArrayList<String>();
 		}
 	}
 

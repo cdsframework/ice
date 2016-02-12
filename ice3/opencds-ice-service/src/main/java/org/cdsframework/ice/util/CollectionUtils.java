@@ -8,7 +8,10 @@ import java.util.List;
 public class CollectionUtils {
 
 
-	public static <K> boolean isNotSpecified(Collection<K> pCollection) {
+	/**
+	 * Returns true if the collection is null or empty; false otherwise.
+	 */
+	public static <K> boolean isNullOrEmpty(Collection<K> pCollection) {
 		
 		if (pCollection == null || pCollection.isEmpty()) {
 			return true;
@@ -18,40 +21,18 @@ public class CollectionUtils {
 		}
 	}
 	
-	
-	/*
-	public static <K> Collection<K> intersectionOfTwoCollections(Collection<K> pCollection1, Collection<K> pCollection2) {
 
-		if (pCollection1 == null || pCollection2 == null) {
-			return null;
-		}
-
-		Collection<K> lIntersectionList = new ArrayList<K>();
-		for (K lEntry : pCollection1) {
-			if (pCollection2.contains(lEntry)) {
-				lIntersectionList.add(lEntry);
-			}
-		}
-
-		return lIntersectionList;
-	}
-
-
-	public static <T> void addToList (List<T> listArg, T... elements) {
-		for (T x : elements) {
-			listArg.add(x);
-		}
-	}
-	*/
-
+	/**
+	 * Return a Collection that contains String arguments in all of the collections, or an empty set if there is no intersection of common elements (or argument provided is null).
+	 */
 	@SafeVarargs
 	public static Collection<String> intersectionOfStringCollections(Collection<String> ... pCollection) {
-
+		
 		if (pCollection == null) {
-			return null;
+			return new HashSet<String>();
 		}
 
-		if (pCollection.length == 1) {
+		if (pCollection.length == 0 || pCollection.length == 1) {
 			return pCollection[0];
 		}
 
@@ -63,8 +44,32 @@ public class CollectionUtils {
 
 		return lIntersectionSet;
 	}
+	
 
+	/**
+	 * Return a Collection that contains Comparable arguments in all of the collections, or an empty set if there is no intersection of common elements (or argument provided is null).
+	 */
+	@SafeVarargs 
+	public static <T extends Comparable<T>> Collection<T> intersectionOfCollections(Collection<T> ... pCollection) {
+		
+		if (pCollection == null) {
+			return new HashSet<T>();
+		}
 
+		if (pCollection.length == 0 || pCollection.length == 1) {
+			return pCollection[0];
+		}
+
+		HashSet<T> lIntersectionSet = new HashSet<T>();
+		lIntersectionSet.addAll(pCollection[0]);
+		for (Collection<T> lCollection : pCollection) {
+			lIntersectionSet.retainAll(lCollection);
+		}
+
+		return lIntersectionSet;
+	}
+	
+	
 	/**
 	 * Create a List that combines elements from both Lists and returns a new List in no particular order containing entries from both Lists. Duplicates
 	 * across the lists will be included in the combined list but null entries are not. If the specified Lists are both empty and/or null, an empty list 
@@ -92,26 +97,5 @@ public class CollectionUtils {
 
 		return lUnion;
 	}
-
-
-	/**
-	 * Create a unique Collection of elements from the specified attribute of the Collection in the parameter that is unique, or empty collection if none.
-	 *
-	public <X, Y> Collection<Y> getUnionOfAllUniqueElementsAcrossLists(Collection<X> pList, <attribute>) {
-
-		List<Y> elementList = new ArrayList<Y>();
-		if (pList == null) {
-			return elementList;
-		}
-
-		for (X ts : pList) {
-			if (ts != null && ! elementList.contains(ts)) {
-				elementList.add(ts);
-			}
-		}
-
-		return elementList;
-	}
-	 */
 
 }

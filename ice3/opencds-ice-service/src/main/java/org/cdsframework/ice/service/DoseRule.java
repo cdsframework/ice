@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -29,17 +29,26 @@ package org.cdsframework.ice.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.util.TimePeriod;
+
+/**
+ * The DoseRule contains the preferable, allowable, ages and intervals. Intervals expressed here are currently from this dose to the next (dosenumber+1) dose. This model be 
+ * extended to permit expressing intervals from any dose number to any other dose number in a future release. In the meantime, a custom rule will need to be written if this 
+ * capability is needed.
+ */
 public class DoseRule {
 
 	private int doseNumber;
-	private TimePeriod absoluteMinimumAge;			// absolute min age usually includes grace period
+	private TimePeriod absoluteMinimumAge;				// absolute minimum age is usually the minimum age - grace period
 	private TimePeriod minimumAge;
+	private TimePeriod maximumAge;
 	private TimePeriod earliestRecommendedAge;
 	private TimePeriod latestRecommendedAge;
-	private TimePeriod absoluteMinimumInterval;		// absolute min interval usually includes grace period
-	private TimePeriod minimumInterval;
-	private TimePeriod earliestRecommendedInterval;
-	private TimePeriod latestRecommendedInterval;
+	private TimePeriod absoluteMinimumInterval;			// absolute minimum interval is usually the minimum interval - grace period. 
+	private TimePeriod minimumInterval;					
+	private TimePeriod earliestRecommendedInterval;		
+	private TimePeriod latestRecommendedInterval;		
 	private List<Vaccine> preferableVaccines;
 	private List<Vaccine> allowableVaccines;
 	
@@ -77,6 +86,7 @@ public class DoseRule {
 		lDR.doseNumber = pDR.doseNumber;
 		lDR.absoluteMinimumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pDR.absoluteMinimumAge);
 		lDR.minimumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pDR.minimumAge);
+		lDR.maximumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pDR.maximumAge);
 		lDR.earliestRecommendedAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pDR.earliestRecommendedAge);
 		lDR.latestRecommendedAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pDR.latestRecommendedAge);
 		lDR.absoluteMinimumInterval = TimePeriod.constructDeepCopyOfTimePeriodObject(pDR.absoluteMinimumInterval);
@@ -247,6 +257,14 @@ public class DoseRule {
 	
 	public void setMinimumAge(TimePeriod minimumAge) {
 		this.minimumAge = minimumAge;
+	}
+	
+	public TimePeriod getMaximumAge() {
+		return maximumAge;
+	}
+	
+	public void setMaximumAge(TimePeriod maximumAge) {
+		this.maximumAge = maximumAge;
 	}
 	
 	public TimePeriod getEarliestRecommendedAge() {

@@ -1,5 +1,5 @@
-/*
- * Copyright (C) 2015 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+/**
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -27,14 +27,14 @@
 package org.cdsframework.ice.supportingdata;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.ICEConcept;
+import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.cds.supportingdata.LocallyCodedCdsItem;
 import org.opencds.common.exceptions.ImproperUsageException;
 
-public class LocallyCodedVaccineGroupItem {
+public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 	
 	/**
 	 * 
@@ -56,26 +56,22 @@ public class LocallyCodedVaccineGroupItem {
 		    <primaryOpenCdsConcept code="ICE202" displayName="Immunization Evaluation (Hep B Vaccine Group)"/>
 		</ns2:iceVaccineGroupSpecificationFile>
 	 */
-	private String vaccineGroupCdsListItemName;
+
 	private Collection<String> relatedDiseasesCdsListItemNames;
 	private int priority;
-	private ICEConcept primaryOpenCdsConcept;
-	private Collection<String> cdsVersions;
+	private CdsConcept primaryOpenCdsConcept;
+
 	
 	private static Log logger = LogFactory.getLog(LocallyCodedVaccineGroupItem.class);	
 
 
-	// public LocallyCodedVaccineGroupItem(CD pVaccineGroupCD, CD pPrimaryOpenCdsMembership, List<String> pCdsVersions) 
-	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, ICEConcept pPrimaryOpenCdsMembership) 
+	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, CdsConcept pPrimaryOpenCdsMembership) 
 		throws ImproperUsageException {
 
-		String _METHODNAME = "VaccineGroupItem(): ";
-		if (pVaccineGroupCdsListItemName == null || pCdsVersions == null || pVaccineGroupCdsListItemName.isEmpty() || pCdsVersions.isEmpty()) {
-			String lErrStr = "Vaccine Group List Item Name and/or CdsVersions not specified";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
-		}
+		super(pVaccineGroupCdsListItemName, pCdsVersions);
 		
+		String _METHODNAME = "VaccineGroupItem(): ";
+
 		// Check to make sure that the opencds concept code and code system are specified in the CD 
 		if (pPrimaryOpenCdsMembership == null || pPrimaryOpenCdsMembership.getOpenCdsConceptCode() == null) {
 			String lErrStr = "OpenCDS primary concept membership not specified or properly specified";
@@ -90,8 +86,6 @@ public class LocallyCodedVaccineGroupItem {
 			throw new ImproperUsageException(lErrStr);
 		}
 		
-		this.vaccineGroupCdsListItemName = pVaccineGroupCdsListItemName;
-		this.cdsVersions = pCdsVersions;
 		this.primaryOpenCdsConcept = pPrimaryOpenCdsMembership;
 		this.relatedDiseasesCdsListItemNames = pRelatedDiseasesCdsListItemNames;
 		this.priority = 0;
@@ -99,7 +93,7 @@ public class LocallyCodedVaccineGroupItem {
 	
 	
 	// protected LocallyCodedVaccineGroupItem(CD pVaccineGroupCD, CD pPrimaryOpenCdsMembership, List<String> pCdsVersions, int pPriority) 
-	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, ICEConcept pPrimaryOpenCdsMembership, int pPriority) 
+	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, CdsConcept pPrimaryOpenCdsMembership, int pPriority) 
 		throws ImproperUsageException {
 		
 		this(pVaccineGroupCdsListItemName, pCdsVersions, pRelatedDiseasesCdsListItemNames, pPrimaryOpenCdsMembership);
@@ -107,19 +101,8 @@ public class LocallyCodedVaccineGroupItem {
 	}
 
 	
-	public String getVaccineGroupItem() {
-		
-		return this.vaccineGroupCdsListItemName;
-	}
-
-
 	public Collection<String> getRelatedDiseasesCdsListItemNames() {
 		return relatedDiseasesCdsListItemNames;
-	}
-
-
-	public Collection<String> getCdsVersions() {
-		return cdsVersions;
 	}
 
 
@@ -128,13 +111,13 @@ public class LocallyCodedVaccineGroupItem {
 	}
 
 
-	public ICEConcept getPrimaryOpenCdsConcept() {
+	public CdsConcept getPrimaryOpenCdsConcept() {
 		return primaryOpenCdsConcept;
 	}
 
 	@Override
 	public String toString() {
-		String lStr = "LocallyCodedVaccineGroupItem [vaccineGroupCdsListItemName=" + vaccineGroupCdsListItemName + ", priority=" + priority + ", primaryOpenCdsConcept="	+ primaryOpenCdsConcept; 
+		String lStr = "LocallyCodedVaccineGroupItem [vaccineGroupCdsListItemName=" + getCdsItemName() + ", priority=" + priority + ", primaryOpenCdsConcept="	+ primaryOpenCdsConcept; 
 		lStr += "\ncdsListVersions= [";
 
 		for (String lDisease : getRelatedDiseasesCdsListItemNames()) {
