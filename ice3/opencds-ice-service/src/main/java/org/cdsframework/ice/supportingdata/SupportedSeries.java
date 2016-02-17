@@ -309,10 +309,9 @@ public class SupportedSeries implements SupportingData {
 			String minimumAge = isds.getMinimumAge();
 			String earliestRecommendedAge = isds.getEarliestRecommendedAge();
 			// absolute minimum age, minimum age and earliest recommended age are mandatory 
-			if (absoluteMinimumAge == null || minimumAge == null || earliestRecommendedAge == null) {
-				String lErrStr = "Absolute minimum age, minimum age and/or earliest recommended age not specified in Series " + lSeriesCode;
-				logger.error(_METHODNAME + lErrStr);
-				throw new InconsistentConfigurationException(lErrStr);
+			if (absoluteMinimumAge == null || minimumAge == null) {
+				String lInfoStr = "Absolute minimum age and/or minimum age not specified in a dose: " + lDoseNumber + "; Series " + lSeriesCode;
+				logger.error(_METHODNAME + lInfoStr);
 			}
 			String maximumAge = isds.getMaximumAge();			
 			String latestRecommendedAge = isds.getLatestRecommendedAge();
@@ -372,14 +371,17 @@ public class SupportedSeries implements SupportingData {
 			DoseRule dr = new DoseRule();
 			// Mandatory
 			dr.setDoseNumber(icseSeriesDoseSpecificationNumber);
-			// Mandatory
-			dr.setAbsoluteMinimumAge(new TimePeriod(absoluteMinimumAge));
-			// Mandatory
-			dr.setMinimumAge(new TimePeriod(minimumAge));
-			// Mandatory
-			dr.setEarliestRecommendedAge(new TimePeriod(earliestRecommendedAge));
 			dr.setPreferableVaccines(lPreferredDoseVaccines);
 			dr.setAllowableVaccines(lAllowableDoseVaccines);
+			if (absoluteMinimumAge != null) {
+			dr.setAbsoluteMinimumAge(new TimePeriod(absoluteMinimumAge));
+			}
+			if (minimumAge != null) {
+				dr.setMinimumAge(new TimePeriod(minimumAge));
+			}
+			if (earliestRecommendedAge != null) {
+				dr.setEarliestRecommendedAge(new TimePeriod(earliestRecommendedAge));
+			}
 			if (maximumAge != null) {
 				// Only if specified
 				dr.setMaximumAge(new TimePeriod(maximumAge));
@@ -417,7 +419,7 @@ public class SupportedSeries implements SupportingData {
 		///////
 		SeriesRules series1Rules = new SeriesRules(lSeriesCode, lVGI.getCdsItemName());
 		series1Rules.setSeriesDoseRules(seriesDoseRules);
-		// Determine whether or not there are recurring doses for this series (default false)
+		// Determine whether or not there are recurring doses for this series (**default false if not specified**)
 		if (pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete() != null) {
 			series1Rules.setRecurringDosesAfterSeriesComplete(pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete());
 		}
@@ -425,7 +427,7 @@ public class SupportedSeries implements SupportingData {
 			// If not specified, assume there are no recurring doses of some kind after the series has been completed
 			series1Rules.setRecurringDosesAfterSeriesComplete(false);
 		}
-		// Determine if the dose number should be calculated based on the targeted diseases of each vaccine administered (default true)
+		// Determine if the dose number should be calculated based on the targeted diseases of each vaccine administered (**default true if not specified**)
 		if (pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() != null) {
 			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered());
 		}

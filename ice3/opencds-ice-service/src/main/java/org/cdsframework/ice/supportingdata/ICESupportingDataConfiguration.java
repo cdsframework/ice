@@ -151,6 +151,11 @@ public class ICESupportingDataConfiguration {
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
 		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *CdsLists* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
+		}		
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = "The following Cds Lists have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedCdsLists.toString();
@@ -170,6 +175,11 @@ public class ICESupportingDataConfiguration {
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
 		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *Vaccine Groups* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
+		}		
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = "The following Vaccine Groups have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedVaccineGroups.toString();
@@ -188,6 +198,11 @@ public class ICESupportingDataConfiguration {
 			String lErrStr = "Failed to obtain method to invoke for initializing supporting *Vaccines* data";
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
+		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *Vaccines* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
 		}		
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = "The following Vaccines have been initialized into the " + this.getClass().getName() + ": \n";
@@ -213,6 +228,11 @@ public class ICESupportingDataConfiguration {
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
 		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *Seasons* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
+		}		
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = _METHODNAME + "The following Seasons have been initialized into the " + this.getClass().getName() + ":\n";
 			lDebugStr += this.supportedSeasons.toString();
@@ -231,6 +251,11 @@ public class ICESupportingDataConfiguration {
 			String lErrStr = "Failed to obtain method to invoke for initializing supporting *Series* data";
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
+		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *Series* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
 		}
 		
 		// Log configuration data parameters of data initialized
