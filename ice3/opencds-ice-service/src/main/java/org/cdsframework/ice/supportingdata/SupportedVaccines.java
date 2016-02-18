@@ -413,67 +413,7 @@ public class SupportedVaccines implements SupportingData {
 			this.vaccineComponentCDToVaccinesNotFullySpecified.put(lVaccineComponentCD, lVaccinesNotFullySpecifiedSet);
 		}
 		///////
-				
-		/**
-		 * Examples
-		 * 		
-		// _HEPA_PEDADOL_3_DOSE
-			ICEConcept hepAPedAdol3Dose = new ICEConcept(SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.getConceptDisplayNameValue());
-			lVaccineComponent = new VaccineComponent(hepAPedAdol3Dose, diseaseImmunityList);
-			lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
-			lVaccineComponent.setValidMaximumAgeForUse(null);
-			lVaccineComponent.setLiveVirusVaccine(false);
-			lVaccineComponent.setUnspecifiedFormulation(false);
-			lVaccineComponentList = new ArrayList<VaccineComponent>();
-			lVaccineComponentList.add(lVaccineComponent);
-			lVaccine = new Vaccine(hepAPedAdol3Dose, lVaccineComponentList);
-			lVaccine.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.DAYS));
-			lVaccine.setValidMaximumAgeForUse(null);
-			lVaccine.setLiveVirusVaccine(false);
-			supportedVaccinesMap.put(SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE, lVaccine);
-	
-			// _HEPA_PED_NOS
-			ICEConcept hepAPedNOS = new ICEConcept(SupportedVaccineConcept._HEPA_PED_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PED_NOS.getConceptDisplayNameValue());
-			lVaccineComponent = new VaccineComponent(hepAPedNOS, diseaseImmunityList);
-			lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
-			lVaccineComponent.setValidMaximumAgeForUse(null);
-			lVaccineComponent.setLiveVirusVaccine(false);
-			lVaccineComponent.setUnspecifiedFormulation(true);
-			lVaccineComponentList = new ArrayList<VaccineComponent>();
-			lVaccineComponentList.add(lVaccineComponent);
-			lVaccine = new Vaccine(hepAPedNOS, lVaccineComponentList);
-			lVaccine.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.DAYS));
-			lVaccine.setValidMaximumAgeForUse(null);
-			lVaccine.setLiveVirusVaccine(false);
-			supportedVaccinesMap.put(SupportedVaccineConcept._HEPA_PED_NOS, lVaccine);
 
-			//
-			// DTaP-HepB-IPV
-			//
-			diseaseImmunityList = new ArrayList<SupportedDiseaseConcept>();
-			diseaseImmunityList.add(SupportedDiseaseConcept.HepB);
-			diseaseImmunityList.add(SupportedDiseaseConcept.Diphtheria);
-			diseaseImmunityList.add(SupportedDiseaseConcept.Tetanus);
-			diseaseImmunityList.add(SupportedDiseaseConcept.Pertussis);
-			diseaseImmunityList.add(SupportedDiseaseConcept.Polio);
-			numberOfVGsEncompassingDiseases = getNumberOfVaccineGroupsEncompassingDiseases(diseaseImmunityList);
-			ic = new ICEConcept(SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptDisplayNameValue());
-			// Add HepB, DTaP, and IPV Vaccine Components START
-			lVaccineComponentList = new ArrayList<VaccineComponent>();
-			componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._DTAP);
-			lVaccineComponentList.add(new VaccineComponent(componentVaccine));
-			componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._HEPB_LESSTHAN_20);
-			lVaccineComponentList.add(new VaccineComponent(componentVaccine));
-			componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._IPV);
-			lVaccineComponentList.add(new VaccineComponent(componentVaccine));
-			// Add HepB, DTaP, and IPV Vaccine Components END
-			lVaccine = new Vaccine(ic, lVaccineComponentList);
-			lVaccine.setLiveVirusVaccine(false);
-			lVaccine.setCombinationVaccine(true);
-			supportedVaccinesMap.put(SupportedVaccineConcept._DTAP_HEPB_IPV, lVaccine);
-		 **/
-		
-		
 	}
 
 	
