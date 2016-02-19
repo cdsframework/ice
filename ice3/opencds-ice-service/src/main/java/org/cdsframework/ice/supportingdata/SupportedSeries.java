@@ -132,6 +132,16 @@ public class SupportedSeries implements SupportingData {
 	
 	
 	/**
+	 * Return a list of SeriesRules associated with the specified vaccine group. If the vaccine group is not supported, null is returned. If the vaccine group is supported 
+	 * but not SeriesRules have been specified for the vaccine group, an empty list is returned.
+	 */
+	public List<SeriesRules> getSeriesRulesForSpecifiedVaccineGroup(LocallyCodedVaccineGroupItem plcvg) {
+		
+		return this.vaccineGroupItemToSeriesRules.get(plcvg);
+	}
+	
+	
+	/**
 	 * Add the Series specified in the IceSeriesSpecificationFile to the supporting data tracked by this class.
 	 * @param pIceSeriesSpecificationFile
 	 * @throws InconsistentConfigurationException If data supplied in the supporting data file is inconsistent in some way
@@ -480,6 +490,7 @@ public class SupportedSeries implements SupportingData {
 		if (lSeriesRulesListForVG == null) {
 			lSeriesRulesListForVG = new ArrayList<SeriesRules>();
 		}
+		lSeriesRulesListForVG.add(series1Rules);
 		this.vaccineGroupItemToSeriesRules.put(lVGI, lSeriesRulesListForVG);
 	}
 
@@ -489,10 +500,7 @@ public class SupportedSeries implements SupportingData {
 		
 		String ltoStringStr = "";
 		
-		// First, print out whether or not the series data read in is consistent
-		ltoStringStr = "isSupportingDataConsistent(): " + isSupportingDataConsistent();
-
-		// Second, print out all of the series name -> series value map entries
+		// First, print out all of the series name -> series value map entries
 		ltoStringStr += "\ncdsListItemNameToSeriesItem: ";
 		Set<String> cdsListItemNames = this.cdsListItemNameToSeriesItem.keySet();
 		int i=1;
@@ -501,13 +509,13 @@ public class SupportedSeries implements SupportingData {
 			i++;
 		}
 
-		// Third, print out which series are associated with which vaccine groups
+		// Second, print out which series are associated with which vaccine groups
 		Set<LocallyCodedVaccineGroupItem> llcvgs = this.vaccineGroupItemToSeriesRules.keySet();
 		i=1;
 		for (LocallyCodedVaccineGroupItem llcvg : llcvgs) {
 			List<SeriesRules> seriesRulesAssociatedWithVG = this.vaccineGroupItemToSeriesRules.get(llcvg);
 			if (seriesRulesAssociatedWithVG != null) {
-				ltoStringStr += "\n{" + i + "} Series Rules for Vaccine Group: " + llcvg;
+				ltoStringStr += "\n{" + i + "} Series Rules for Vaccine Group: " + llcvg.getCdsItemName();
 				int j=1;
 				for (SeriesRules sr : seriesRulesAssociatedWithVG) {
 					ltoStringStr += "\n\t(" + j + "): LocallyCodedVaccineGroupItem " + llcvg + "; SeriesRule " + sr.toString();
@@ -519,7 +527,10 @@ public class SupportedSeries implements SupportingData {
 			}
 			i++;
 		}
-		
+
+		// Finally, print out whether or not the series data read in is consistent
+		ltoStringStr += "\n\nisSupportingDataConsistent(): " + isSupportingDataConsistent();
+
 		return ltoStringStr;
 	}
 	

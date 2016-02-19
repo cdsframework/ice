@@ -65,10 +65,7 @@ public class LocallyCodedSeriesItem extends LocallyCodedCdsItem {
 
 	@Override
 	public String toString() {
-		return "LocallyCodedSeriesItem [getCdsItemName()=" + getCdsItemName() + ", getCdsVersions()=" + getCdsVersions() + 
-			"seriesRules=" + this.seriesRules + "]";
+		return "LocallyCodedSeriesItem [getCdsItemName()=" + getCdsItemName() + "; getCdsVersions()=" + getCdsVersions() + "; seriesRules=" + this.seriesRules + "]";
 	}
 	
-	
-
 }

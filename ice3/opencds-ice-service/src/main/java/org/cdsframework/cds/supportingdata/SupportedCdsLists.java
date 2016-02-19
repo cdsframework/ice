@@ -208,14 +208,32 @@ public class SupportedCdsLists implements SupportingData {
 	public void addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(CdsListSpecificationFile pCdsListSpecificationFile) 
 		throws InconsistentConfigurationException {
 		
-		// String _METHODNAME = "addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(): ";
+		String _METHODNAME = "addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(): ";
 		
 		if (pCdsListSpecificationFile == null) {
 			return;
 		}
 		if (pCdsListSpecificationFile != null) {
 			List<CdsListItem> lcli = pCdsListSpecificationFile.getCdsListItems();
+			// Check to make sure that the cdsListCode was never provided by a different file; currently do not support the same cdsListCode across different files
 			try {
+				for (CdsListItem cli : lcli) {
+					if (cli != null) {
+						LocallyCodedCdsListItem slci = new LocallyCodedCdsListItem(pCdsListSpecificationFile, cli);
+						ICEConceptType lIceConceptType = ICEConceptType.getSupportedIceConceptType(slci.getCdsListCode());
+						if (lIceConceptType != null) {
+							if (this.supportedCdsConcepts.existsSupportedConceptsForSpecifiedICEConceptType(lIceConceptType) == true) {
+								String lErrStr = "cdsListSpecificationFile cdsListCode \"" + slci.getCdsListCode() + "\" already specified in a different file; cannot continue";
+								logger.error(_METHODNAME + lErrStr);
+								throw new InconsistentConfigurationException(lErrStr);
+							}
+							else {
+								break;
+							}
+						}
+						// continue until first non-null entry is found and verified
+					}
+				}
 				for (CdsListItem cli : lcli) {
 					addSupportedCdsListItemAndConcept(pCdsListSpecificationFile, cli);
 				}

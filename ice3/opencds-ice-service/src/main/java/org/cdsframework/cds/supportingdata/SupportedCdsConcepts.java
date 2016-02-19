@@ -136,6 +136,25 @@ public class SupportedCdsConcepts {
 
 	
 	/**
+	 * Return true if any supported concepts for the given ICEConceptType exist, false if not.
+	 */
+	public boolean existsSupportedConceptsForSpecifiedICEConceptType(ICEConceptType pICT) {
+		
+		if (pICT == null) {
+			return false;
+		}
+		
+		if (this.conceptTypeToConceptCdsListItemMap.containsKey(pICT)) {
+			Map<CdsConcept, LocallyCodedCdsListItem> lConceptCdsList = this.conceptTypeToConceptCdsListItemMap.get(pICT);
+			if (lConceptCdsList != null && lConceptCdsList.size() > 0) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * Return list of ICEConcepts that is also an OpenCDS concept for the given LocallyCodedCdsListItem. Returns empty list if none found 
 	 */
 	public Collection<CdsConcept> getOpenCDSICEConceptsAssociatedWithCdsListItem(LocallyCodedCdsListItem pLCCLI) {

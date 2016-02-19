@@ -134,20 +134,24 @@ public class Schedule {
 	
 	
 	/**
-	 * SD: Get SeriesRules based on vaccine group and series name
-	 * @param svg Vaccine group name
-	 * @param seriesName Series name
-	 * @return SeriesRule, or null if not found
+	 * Get SeriesRules based on vaccine group and series name. Returns the SeriesRules representing the specified series by name, or null if not found
 	 */
-	// TODO:
 	public SeriesRules getScheduleSeriesByName(String svg, String seriesName) {
 		
 		if (svg == null || seriesName == null) {
 			return null;
 		}
 
-		// LocallyCodedVaccineGroupItem lcvgi = this.iceSupportingDataConfiguration.getSupportedCdsVaccineGroups().getVaccineGroupItem(svg);
-
+		LocallyCodedVaccineGroupItem lcvgi = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getVaccineGroupItem(svg);    // getSupportedCdsVaccineGroups().getVaccineGroupItem(svg);
+		if (lcvgi == null) {
+			return null;
+		}
+		
+		List<SeriesRules> lSR = this.iceSupportingDataConfiguration.getSupportedSeries().getSeriesRulesForSpecifiedVaccineGroup(lcvgi);
+		if (lSR == null || lSR.isEmpty()) {
+			return null;
+		}
+		
 		return null;
 	}
 	

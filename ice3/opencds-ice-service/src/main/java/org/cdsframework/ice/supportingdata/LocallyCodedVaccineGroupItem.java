@@ -118,14 +118,15 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 	@Override
 	public String toString() {
 		String lStr = "LocallyCodedVaccineGroupItem [vaccineGroupCdsListItemName=" + getCdsItemName() + ", priority=" + priority + ", primaryOpenCdsConcept="	+ primaryOpenCdsConcept; 
-		lStr += "\ncdsListVersions= [";
 
+		lStr += "\nrelatedDiseases= [";
 		for (String lDisease : getRelatedDiseasesCdsListItemNames()) {
 			lStr += "\tRelatedDiseaseCdsListItemName=" + lDisease + "\n";
 		}
 		lStr += "\t]\n";		
 		lStr += "]";
 
+		lStr += "\ncdsVersions= [";
 		for (String lVersionStr : getCdsVersions()) {
 			lStr += "\tCdsVersion=" + lVersionStr + "\n";
 		}

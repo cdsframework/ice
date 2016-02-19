@@ -316,6 +316,15 @@ public class ICESupportingDataConfiguration {
 	
 	
 	/**
+	 * Get the ICE SupportedSeries data for this supporting data configuration
+	 */
+	public SupportedSeries getSupportedSeries() {
+		
+		return this.supportedSeries;
+	}
+	
+	
+	/**
 	 * Initialize supporting data from specified ICE XML data file
 	 * @param pSDSubDirectory Subdirectory where all of the XML files for this supporting data type are held
 	 * @param pSDObjectToInitialize The supporting data object to initialize
