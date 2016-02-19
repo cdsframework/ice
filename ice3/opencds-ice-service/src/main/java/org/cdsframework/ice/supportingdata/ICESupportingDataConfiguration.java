@@ -234,7 +234,7 @@ public class ICESupportingDataConfiguration {
 			throw new ICECoreError(lErrStr);			
 		}		
 		if (logger.isDebugEnabled()) {
-			String lDebugStr = _METHODNAME + "The following Seasons have been initialized into the " + this.getClass().getName() + ":\n";
+			String lDebugStr = "The following Seasons have been initialized into the " + this.getClass().getName() + ":\n";
 			lDebugStr += this.supportedSeasons.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}
@@ -256,6 +256,11 @@ public class ICESupportingDataConfiguration {
 			String lErrStr = "An error occurred processing supporting *Series* data";
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);			
+		}
+		if (logger.isDebugEnabled()) {
+			String lDebugStr = "The following Series have been initialized into the " + this.getClass().getName() + ":\n";
+			lDebugStr += this.supportedSeries.toString();
+			logger.debug(_METHODNAME + lDebugStr);
 		}
 		
 		// Log configuration data parameters of data initialized
@@ -311,7 +316,7 @@ public class ICESupportingDataConfiguration {
 	
 	
 	/**
-	 * Initialize the Vaccine Group Concepts from supporting iceVaccineGroupSpecificationFile XML data files
+	 * Initialize supporting data from specified ICE XML data file
 	 * @param pSDSubDirectory Subdirectory where all of the XML files for this supporting data type are held
 	 * @param pSDObjectToInitialize The supporting data object to initialize
 	 * @param pSupportingDataXMLClass The class of the supporting data XML to be read in

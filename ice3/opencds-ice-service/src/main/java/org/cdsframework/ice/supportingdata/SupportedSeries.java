@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -461,7 +462,7 @@ public class SupportedSeries implements SupportingData {
 		///////
 		LocallyCodedSeriesItem lcsi = null;
 		try {
-			new LocallyCodedSeriesItem(lSeriesCode, lCdsVersions, series1Rules);
+			lcsi = new LocallyCodedSeriesItem(lSeriesCode, lCdsVersions, series1Rules);
 		}
 		catch (ImproperUsageException iue) {
 			String lErrStr = "Caught an unexpected ImproperUsageException during instantiation of LocallyCodedSeriesItem for series" + lSeriesCode;
@@ -480,8 +481,46 @@ public class SupportedSeries implements SupportingData {
 			lSeriesRulesListForVG = new ArrayList<SeriesRules>();
 		}
 		this.vaccineGroupItemToSeriesRules.put(lVGI, lSeriesRulesListForVG);
-		this.isSupportingDataConsistent = true;
+	}
 
+	
+	@Override
+	public String toString() {
+		
+		String ltoStringStr = "";
+		
+		// First, print out whether or not the series data read in is consistent
+		ltoStringStr = "isSupportingDataConsistent(): " + isSupportingDataConsistent();
+
+		// Second, print out all of the series name -> series value map entries
+		ltoStringStr += "\ncdsListItemNameToSeriesItem: ";
+		Set<String> cdsListItemNames = this.cdsListItemNameToSeriesItem.keySet();
+		int i=1;
+		for (String s : cdsListItemNames) {
+			ltoStringStr += "\n{" + i + "} " + s + " = [ " + this.cdsListItemNameToSeriesItem.get(s).toString() + " ]\n";
+			i++;
+		}
+
+		// Third, print out which series are associated with which vaccine groups
+		Set<LocallyCodedVaccineGroupItem> llcvgs = this.vaccineGroupItemToSeriesRules.keySet();
+		i=1;
+		for (LocallyCodedVaccineGroupItem llcvg : llcvgs) {
+			List<SeriesRules> seriesRulesAssociatedWithVG = this.vaccineGroupItemToSeriesRules.get(llcvg);
+			if (seriesRulesAssociatedWithVG != null) {
+				ltoStringStr += "\n{" + i + "} Series Rules for Vaccine Group: " + llcvg;
+				int j=1;
+				for (SeriesRules sr : seriesRulesAssociatedWithVG) {
+					ltoStringStr += "\n\t(" + j + "): LocallyCodedVaccineGroupItem " + llcvg + "; SeriesRule " + sr.toString();
+					j++;
+				}
+			}
+			else {
+				ltoStringStr += "\n\tNo SeriesRules defined"; 
+			}
+			i++;
+		}
+		
+		return ltoStringStr;
 	}
 	
 }

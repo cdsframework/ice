@@ -348,6 +348,7 @@ public class SupportedSeasons implements SupportingData {
 			for (Season s: vgSeasons) {
 				ltoStringStr += s.getSeasonName() + "; ";
 			}
+			i++;
 		}
 		
 		return ltoStringStr;

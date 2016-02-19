@@ -419,4 +419,32 @@ public class SeriesRules {
 		return true;
 	}
 
+
+	@Override
+	public String toString() {
+		
+		String toStr = "SeriesRules [seriesId = " + seriesId + "; Series Name = " + seriesName + "; Vaccine Group = " + vaccineGroup
+				+ "; Number of Doses In Series = " + numberOfDosesInSeries + "; Recurring Doses (After Series Complete)? = "
+				+ recurringDosesAfterSeriesComplete + "; Dose Number Calculated By Diseases Targeted By Each Vaccine = " 
+				+ doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered; 
+		
+		int i=1;
+		toStr += "\nDose Rules [[ ";
+		for (DoseRule dr : seriesDoseRules) {
+			toStr += "\n\tDoseRule {" + i + "}: " + dr.toString();
+			i++;
+		}
+		toStr += "\t]]";
+		i=1;
+		toStr += "\nSeasons [[ ";
+		for (Season s : applicableSeasons) {
+			toStr +="\n\tSeason {" + i + "}: " + s.toString();
+			i++;
+		}
+		toStr += "\t]]";
+		toStr += "\n]\n";
+		
+		return toStr;
+	}
+	
 }
