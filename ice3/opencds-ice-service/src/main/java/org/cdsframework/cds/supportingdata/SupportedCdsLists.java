@@ -390,6 +390,7 @@ public class SupportedCdsLists implements SupportingData {
 	@Override
 	public String toString() {
 		
+		// First build string of the list of LocallyCodedCdsListItems stored in the cdsListItemNameToCdsListItem map.
 		Collection<LocallyCodedCdsListItem> slcic = this.cdsListItemNameToCdsListItem.values();
 		int i = 1;
 		String ltoStringStr = "[ ";
@@ -397,6 +398,9 @@ public class SupportedCdsLists implements SupportingData {
 			ltoStringStr += "\n{" + i + "} " + slci.toString();
 			i++;
 		}
+		
+		// Second build string of the associated SupportedConcepts
+		ltoStringStr += this.supportedCdsConcepts.toString();
 		
 		return ltoStringStr;
 	}

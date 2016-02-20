@@ -157,7 +157,7 @@ public class ICESupportingDataConfiguration {
 			throw new ICECoreError(lErrStr);			
 		}		
 		if (logger.isDebugEnabled()) {
-			String lDebugStr = "The following Cds Lists have been initialized into the " + this.getClass().getName() + ": \n";
+			String lDebugStr = "The following CdsLists have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedCdsLists.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}

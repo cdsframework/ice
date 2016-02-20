@@ -213,4 +213,58 @@ public class SupportedCdsConcepts {
 			return null;
 		}
 	}
+	
+	
+	/**
+	 * 
+	 */
+	public String toString() {
+		
+		// private Map<ICEConceptType, Map<CdsConcept, LocallyCodedCdsListItem>> conceptTypeToConceptCdsListItemMap;
+		// private Map<LocallyCodedCdsListItem, Set<CdsConcept>> cdsListItemToConceptList;
+		
+		String toStr = "CdsConcept [ conceptTypeToConceptCdsListItemMap [[";
+		Set<ICEConceptType> lConceptTypeSet = conceptTypeToConceptCdsListItemMap.keySet();
+		if (lConceptTypeSet != null) {
+			int i=1;
+			for (ICEConceptType lConceptType : lConceptTypeSet) {
+				toStr += "\n\t{" + i + "} ICEConceptType: " + lConceptType;
+				Map<CdsConcept, LocallyCodedCdsListItem> lCdsConceptToLCCLIMap = this.conceptTypeToConceptCdsListItemMap.get(lConceptType);
+				if (lCdsConceptToLCCLIMap != null) {
+					Set<CdsConcept> lCdsConceptSet = lCdsConceptToLCCLIMap.keySet();
+					if (lCdsConceptSet != null) {
+						for (CdsConcept lcc : lCdsConceptSet) {
+							toStr += "\n\t\tConcept: " + lcc.getOpenCdsConceptCode() + ", isOpenCdsConcept? " + lcc.isOpenCdsSupportedConcept() + "; LocallyCodedCdsListItem cdsListItemName: " + lCdsConceptToLCCLIMap.get(lcc).getCdsListItemName();
+						}
+					}
+				}
+				i++;
+			}
+		}
+		else {
+			toStr += "null";
+		}
+		toStr += "\t]]\n\tcdsListItemToConceptList [[";
+		Set<LocallyCodedCdsListItem> lLocallyCodedCdsListItemSet = this.cdsListItemToConceptList.keySet();
+		if (lLocallyCodedCdsListItemSet != null) {
+			int i=1;
+			for (LocallyCodedCdsListItem lccli : lLocallyCodedCdsListItemSet) {
+				toStr += "\n\t{" + i + "} LocallyCodedCdsListItem cdsListItemName: " + lccli.getCdsListItemName();
+				Set<CdsConcept> lCdsConceptSet = this.cdsListItemToConceptList.get(lccli);
+				if (lCdsConceptSet != null) {
+					for (CdsConcept lcc : lCdsConceptSet) {
+						toStr += "\n\t\tConcept: " + lcc.getOpenCdsConceptCode() + ", isOpenCdsConcept? " + lcc.isOpenCdsSupportedConcept();
+					}
+				}
+				i++;
+			}
+		}
+		else {
+			toStr += "null";
+		}
+		toStr += "\t]]";
+		
+		return toStr;
+	}
+	
 }
