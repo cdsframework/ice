@@ -192,6 +192,11 @@ public class SupportedVaccines implements SupportingData {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
+		if (ICEConceptType.VACCINE != ICEConceptType.getSupportedIceConceptType(llccli.getCdsListCode())) {
+			String lErrStr = "Attempt to add an item as a vaccine which is not a VACCINE ICEConceptType";
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 		
 		// If one of the supporting data files already defined this vaccine, thrown an InconsistentConfigurationException
 		if (this.cdsListItemNameToVaccineItem.containsKey(llccli.getCdsListItemName())) {
@@ -272,7 +277,13 @@ public class SupportedVaccines implements SupportingData {
 		for (org.opencds.vmr.v1_0.schema.CD lRelatedDisease : lRelatedDiseases) {
 			LocallyCodedCdsListItem lRelatedDiseaseCdsListItem = this.supportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(lRelatedDisease));
 			if (lRelatedDiseaseCdsListItem == null) {
-				String lErrStr = "Attempt to add a related disease to a vaccine that is not a supported disease concept specified in the list of Supported CdsLists";
+				String lErrStr = "Attempt to add a related disease to a vaccine that is not a supported disease concept specified in the list of Supported CdsLists: "+ 
+					ConceptUtils.toInternalCD(lRelatedDisease) == null ? "" : ConceptUtils.toInternalCD(lRelatedDisease).toString();
+				logger.warn(_METHODNAME + lErrStr);
+				throw new InconsistentConfigurationException(lErrStr);
+			}
+			if (ICEConceptType.DISEASE != ICEConceptType.getSupportedIceConceptType(lRelatedDiseaseCdsListItem.getCdsListCode())) {
+				String lErrStr = "Attempt to add an item as a related disease which is not a DISEASE ICEConceptType; item: " + lRelatedDiseaseCdsListItem.toString();
 				logger.warn(_METHODNAME + lErrStr);
 				throw new InconsistentConfigurationException(lErrStr);
 			}
@@ -349,7 +360,7 @@ public class SupportedVaccines implements SupportingData {
 					logger.error(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);					
 				}
-				if (! lVaccineComponentCD.getCodeSystem().equals(lVaccineCD.getCodeSystem())) {
+				if (lVaccineComponentCD.getCodeSystem() == null || lVaccineCD.getCodeSystem() == null || ! lVaccineComponentCD.getCodeSystem().equals(lVaccineCD.getCodeSystem())) {
 					String lErrStr = "Vaccine and Vaccine Component are specified using two different code systems in the supporting data. This is not permitted";
 					logger.error(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);
@@ -393,8 +404,7 @@ public class SupportedVaccines implements SupportingData {
 			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
 		}
 		lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
-		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), 
-				new LocallyCodedVaccineItem(llccli.getCdsListItemName(), lIntersectionOfSupportedCdsVersions, lVaccine));
+		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), new LocallyCodedVaccineItem(llccli.getCdsListItemName(), lIntersectionOfSupportedCdsVersions, lVaccine));
 		
 		///////
 		// END Creating and persisting the Vaccine

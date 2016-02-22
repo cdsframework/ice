@@ -27,11 +27,8 @@
 package org.cdsframework.ice.service;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,9 +38,6 @@ import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.supportingdata.ICESupportingDataConfiguration;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineItem;
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 
@@ -53,11 +47,6 @@ public class Schedule {
 	private List<String> cdsVersions;
 	private ICESupportingDataConfiguration iceSupportingDataConfiguration;
 	
-	// Structures to be deprecated
-	private Map<SupportedVaccineGroupConcept, List<SupportedDiseaseConcept>> vaccineGroupDiseases;
-	private Map<SupportedVaccineGroupConcept, List<SeriesRules>> vaccineGroupSeries;	// Vaccine Group -> List of SeriesRules
-	private Map<SupportedVaccineConcept, Vaccine> supportedVaccinesMap;
-
 	private static Log logger = LogFactory.getLog(Schedule.class);
 
 
@@ -124,7 +113,7 @@ public class Schedule {
 			return null;
 		}
 		
-		List<SeriesRules> lSRs = this.iceSupportingDataConfiguration.getSupportedSeries().getSeriesRulesForSpecifiedVaccineGroup(lcvgi);
+		List<SeriesRules> lSRs = this.iceSupportingDataConfiguration.getSupportedSeries().getCopyOfSeriesRulesForVaccineGroup(lcvgi);
 		if (lSRs == null || lSRs.isEmpty()) {
 			return null;
 		}
@@ -182,13 +171,16 @@ public class Schedule {
 			return null;
 		}
 		
-		// It's okay to simply return the list of cdsListItemNames directly; all these have been added as ICEConcepts too during supporting data initialization
-		return lCodedVaccineGroupItem.getRelatedDiseasesCdsListItemNames();
+		// It's okay to simply return the list of cdsListItemNames directly; all these have been added as ICEConcepts too during supporting data initialization, and 
+		// verified that they are indeed DISEASE ice concepts at that point in the process
+		return lCodedVaccineGroupItem.getCopyOfRelatedDiseasesCdsListItemNames();
 	}
 	
 
 	/**
-	 * Return true if the vaccine targets one or more of the specified diseases, false if it does not
+	 * Return true if the vaccine targets one or more of the specified diseases, false if it does not.
+	 * @param vaccine the vaccine in question to inspect
+	 * @param diseases the list of diseases in question; see supporting data file that has the ICEConceptType.DISEASE codes specified for a list of diseases
 	 */
 	public boolean vaccineTargetsOneOrMoreOfSpecifiedDiseases(Vaccine vaccine, Collection<String> diseases) {
 		
@@ -209,7 +201,7 @@ public class Schedule {
 	
 	/**
 	 * Utilizing supporting data. Get the number of vaccine groups across which the specified diseases are handled.
-	 * @param pSDCs The list of diseases in question
+	 * @param pSDCs The list of diseases in question; see supporting data file that has the ICEConceptType.DISEASE codes specified for a list of diseases
 	 * @return int specifying number of vaccine groups encompassing the union of the specified diseases
 	 */
 	private int getCountOfVaccineGroupsEncompassingDiseases(List<String> pSDCs) {
@@ -221,7 +213,7 @@ public class Schedule {
 		int i=0;
 		Collection<LocallyCodedVaccineGroupItem> lAllVaccineGroups = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getAllVaccineGroupItems();
 		for (LocallyCodedVaccineGroupItem lVaccineGroup : lAllVaccineGroups) {
-			Collection<String> lAllRelatedDiseases = lVaccineGroup.getRelatedDiseasesCdsListItemNames();
+			Collection<String> lAllRelatedDiseases = lVaccineGroup.getCopyOfRelatedDiseasesCdsListItemNames();
 			if (lAllRelatedDiseases != null) {			// should never be null
 				for (String lRelatedDiseaseName : lAllRelatedDiseases) {
 					if (pSDCs.contains(lRelatedDiseaseName)) {
@@ -236,224 +228,21 @@ public class Schedule {
 	}
 
 
-	// TODO: 
+	// Get a list of all SeriesRules supported by this Schedule.
 	public List<SeriesRules> getAllSeries() {
 
-		// String _METHODNAME = "getCandidateSeries(): ";
-
-		List<SeriesRules> allSeries = new ArrayList<SeriesRules>();
-		if (vaccineGroupSeries == null) {
-			return allSeries;
-		}
-		Collection<List<SeriesRules>> clts = vaccineGroupSeries.values();
-		Iterator<List<SeriesRules>> clIter = clts.iterator();
-		while (clIter.hasNext()) {
-			List<SeriesRules> lts = clIter.next();
-			if (lts != null) {
-				allSeries.addAll(lts);
-			}
-		}
-
-		return allSeries;
+		return this.iceSupportingDataConfiguration.getSupportedSeries().getCopyOfAllSeriesRules();
 	}
 
 	
 	/**
-	 * Incoming immunizations from the patient's history imply which diseases are being treated, and from this information, we return
-	 * all VaccineGroup series associated with each of these diseases as potential series to try to evaluate and forecast against. 
-	 * @return List<TargetSeries> candidate series to try to evaluate against; empty if no candidate series
+	 * This is deprecated; simply returns all series 
 	 */
-	 // TODO: 
+	@Deprecated
 	public List<SeriesRules> getCandidateSeries() {
 
-		List<SeriesRules> allSeries = new ArrayList<SeriesRules>();
-		if (vaccineGroupSeries == null) {
-			return allSeries;
-		}
-
-		List<SeriesRules> seriesRules = new ArrayList<SeriesRules>();
-		List<SeriesRules> seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.HepB);
-		if (seriesForVG != null)
-			seriesRules.addAll(seriesForVG);
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.HepA);
-		if (seriesForVG != null) 
-			seriesRules.addAll(seriesForVG);
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.MMR);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Varicella);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Rotavirus);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Hib);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.HPV);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.PCV);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.PPSV);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Influenza);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.H1N1);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Meningococcal);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Polio);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.DTP);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		
-		return seriesRules;
-	}
-	
-	
-	/** 
-	 * Check to make sure that all seasons do not overlap with each other, or if they do, they have the exact same season start and end dates. 
-	 * All series in the vaccine group must be seasonal series, or none of them. If some are or others aren't, this method logs a warning and returns false.
-	 * In addition, there cannot be more than one default series in a vaccine group.
-	 * @param svgc vaccine group in which to check series consistency.
-	 * @return true of these conditions are met, false if not.
-	 */
-	private boolean checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(SupportedVaccineGroupConcept svgc) {
-		
-		String _METHODNAME = "checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(): ";
-		if (svgc == null) {
-			return false;
-		}
-		
-		List<SeriesRules> srs = vaccineGroupSeries.get(svgc);
-		int countOfDefaultSeasonsAcrossSeries = 0;
-		int countOfSeasons = 0;
-		boolean aNonSeasonalSeriesExists = false;
-		List<Season> seasonsTracker = new ArrayList<Season>();
-		for (SeriesRules sr : srs) {
-			if (countOfDefaultSeasonsAcrossSeries > 1) {
-				logger.warn(_METHODNAME + "more than one default season across in vaccine group " + svgc.getConceptDisplayNameValue());
-				return false;
-			}
-			List<Season> seriesSeasons = sr.getSeasons();
-			if (seriesSeasons == null || seriesSeasons.isEmpty()) {
-				aNonSeasonalSeriesExists = true;
-				if (countOfSeasons > 0) {
-					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + svgc.getConceptDisplayNameValue());
-					return false;
-				}
-			}
-			for (Season s : seriesSeasons) {
-				if (aNonSeasonalSeriesExists) {
-					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + svgc.getConceptDisplayNameValue());
-					return false;
-				}
-				boolean lSeasonAlreadyEncountered = false;
-				if (seasonsTracker.contains(s)) {
-					lSeasonAlreadyEncountered = true;
-				}
-				else {
-					countOfSeasons++;
-				}
-				if (s.isDefaultSeason() == true) {
-					countOfDefaultSeasonsAcrossSeries++;
-					if (countOfDefaultSeasonsAcrossSeries >= 2) {
-						logger.warn(_METHODNAME + "more than one default season in Series in vaccine group " + svgc.getConceptDisplayNameValue());
-						return false;
-					}
-				}
-				else if (lSeasonAlreadyEncountered == false) {
-					for (Season seasonIter : seasonsTracker) {
-						// Check to see if the season start or end dates overlaps with another season. Overlaps are only allowed if the start and end dates 
-						// of the season for the different series are exactly the same. Default seasons do not have a specified start or end date, so they are 
-						// not checked here. (This is because if a fully-specified season can take place at a time when a default season is specified; it  
-						// overrides the default season which will then not be used.)
-						if (! s.seasonsHaveEquivalentStartAndEndDates(seasonIter) && s.seasonOverlapsWith(seasonIter)) {
-							logger.warn(_METHODNAME + "overlapping seasons exist in vaccine group " + svgc.getConceptDisplayNameValue());
-							return false;
-						}
-					}
-					seasonsTracker.add(s);
-				}
-			}
-		}
-		
-		int lNumberOfDistinctSeasons = seasonsTracker.size();
-		// if (seasonsTracker.size() > 0) {
-		if (lNumberOfDistinctSeasons > 0) {
-			if (countOfDefaultSeasonsAcrossSeries != 1 && countOfDefaultSeasonsAcrossSeries != 0 ) {
-				logger.warn(_METHODNAME + "a seasonal vaccine group must have exactly either 0 or 1 default seasons defined. The # of seasonal series " + 
-					"found for " + "vaccine group " + svgc.getConceptDisplayNameValue() + ": " + countOfDefaultSeasonsAcrossSeries);
-				return false;
-			}
-			else if (lNumberOfDistinctSeasons > 1 && countOfDefaultSeasonsAcrossSeries == 0) {
-				logger.warn(_METHODNAME + "a seasonal vaccine group wiht more than one season defined must also have a default season defined. No default season has been defined");
-				return false;
-			}
-			else {
-				// This is a properly configured seasonal vaccine group with a default season for evaluation
-				return true;
-			}
-		}
-		else if (countOfDefaultSeasonsAcrossSeries == 0 && seasonsTracker.size() == 0) {
-			// This is not a seasonal vaccine group
-			return true;
-		}
-		else {
-			return false;
-		}
+		return getAllSeries();
 	}
 
-	
-	private void addSeriesToSchedule(SeriesRules pTS) 
-		throws ImproperUsageException { 
-
-		String _METHODNAME = "addVaccineGroupSeriesToSchedule(): ";
-		if (pTS == null) {
-			throw new ImproperUsageException(_METHODNAME + "null VaccineGroup or SeriesRules parameter supplied"); 
-		}
-
-		SupportedVaccineGroupConcept vg = pTS.getVaccineGroup();
-		String requestedSeriesName = pTS.getSeriesName();
-		if (requestedSeriesName == null || vg == null) {
-			throw new ImproperUsageException(_METHODNAME + "supplied SeriesRules name or vaccine group is not populated"); 
-		}
-		List<SeriesRules> ts = vaccineGroupSeries.get(vg);
-		if (ts != null) {
-			// Check to make sure the SeriesRules name is unique
-			for (SeriesRules sr : ts) {
-				if (sr.getSeriesName().equalsIgnoreCase(requestedSeriesName)) {
-					throw new ImproperUsageException(_METHODNAME + "SeriesRules with name " + requestedSeriesName + " already in schedule");
-				}
-			}
-			ts.add(pTS);
-			vaccineGroupSeries.put(vg, ts);
-		}
-		else {
-			ts = new ArrayList<SeriesRules>();
-			ts.add(pTS);
-			vaccineGroupSeries.put(vg, ts);
-		}
-	}
 
 }

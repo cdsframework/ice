@@ -147,6 +147,11 @@ public class SupportedVaccineGroups implements SupportingData {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
+		if (ICEConceptType.VACCINE_GROUP != ICEConceptType.getSupportedIceConceptType(llccli.getCdsListCode())) {
+			String lErrStr = "Attempt to add an item as a vaccine group which is not a VACCINE_GROUP ICEConceptType";
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 		String lVaccineGroupCdsListItemName = llccli.getCdsListItemName();
 		if (this.cdsListItemNameToVaccineGroupItem.containsKey(lVaccineGroupCdsListItemName)) {
 			String lErrStr = "Attempt to add vaccine group that was already specified previously: " + 
@@ -169,7 +174,13 @@ public class SupportedVaccineGroups implements SupportingData {
 			for (org.opencds.vmr.v1_0.schema.CD lRelatedDisease : lRelatedDiseases) {
 				LocallyCodedCdsListItem lRelatedDiseaseCdsListItem = this.supportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(lRelatedDisease));
 				if (lRelatedDiseaseCdsListItem == null) {
-					String lErrStr = "Attempt to add a related vaccine to a vaccine group that is not in the list of SupportedCdsLists";
+					String lErrStr = "Attempt to add a related disease to a vaccine group that is not in the list of SupportedCdsLists" + 
+						ConceptUtils.toInternalCD(lRelatedDisease) == null ? "" : ConceptUtils.toInternalCD(lRelatedDisease).toString();
+					logger.warn(_METHODNAME + lErrStr);
+					throw new InconsistentConfigurationException(lErrStr);
+				}
+				if (ICEConceptType.DISEASE != ICEConceptType.getSupportedIceConceptType(lRelatedDiseaseCdsListItem.getCdsListCode())) {
+					String lErrStr = "Attempt to add an item as a related disease to a vaccine group which is not a DISEASE ICEConceptType; item: " + lRelatedDiseaseCdsListItem.toString();
 					logger.warn(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);
 				}
@@ -203,15 +214,7 @@ public class SupportedVaccineGroups implements SupportingData {
 		this.cdsListItemNameToVaccineGroupItem.put(lVaccineGroupCdsListItemName, lcvgi);
 	}
 	
-	/*
-	public void removeSupportedVaccineGroupItem(String pVaccineGroupItemName) {
-		
-		if (pVaccineGroupItemName != null) { 
-			this.cdsListItemNameToVaccineGroupItem.remove(pVaccineGroupItemName);
-		}		
-	}
-	*/
-	
+
 	public Collection<LocallyCodedVaccineGroupItem> getAllVaccineGroupItems() {
 		
 		return this.cdsListItemNameToVaccineGroupItem.values();

@@ -26,7 +26,9 @@
  
 package org.cdsframework.ice.supportingdata;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,7 +94,6 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 	}
 	
 	
-	// protected LocallyCodedVaccineGroupItem(CD pVaccineGroupCD, CD pPrimaryOpenCdsMembership, List<String> pCdsVersions, int pPriority) 
 	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, CdsConcept pPrimaryOpenCdsMembership, int pPriority) 
 		throws ImproperUsageException {
 		
@@ -101,19 +102,39 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 	}
 
 	
-	public Collection<String> getRelatedDiseasesCdsListItemNames() {
+	protected Collection<String> getRelatedDiseasesCdsListItemNames() {
 		return relatedDiseasesCdsListItemNames;
 	}
 
+	
+	public Collection<String> getCopyOfRelatedDiseasesCdsListItemNames() {
+		
+		if (this.relatedDiseasesCdsListItemNames == null) {
+			return null;
+		}
+		
+		Collection<String> copyOfrelatedDiseasesCdsListItemNames = new ArrayList<String>();
+		for (String lDisease : this.relatedDiseasesCdsListItemNames) {
+			copyOfrelatedDiseasesCdsListItemNames.add(lDisease);
+		}
+		return copyOfrelatedDiseasesCdsListItemNames;
+	}
 
+	
 	public int getPriority() {
 		return priority;
 	}
 
 
-	public CdsConcept getPrimaryOpenCdsConcept() {
+	protected CdsConcept getPrimaryOpenCdsConcept() {
 		return primaryOpenCdsConcept;
 	}
+	
+	
+	public CdsConcept getCopyOfPrimaryOpenCdsConcept() {
+		return CdsConcept.constructDeepCopyOfCdsConceptObject(primaryOpenCdsConcept);
+	}
+	
 
 	@Override
 	public String toString() {
