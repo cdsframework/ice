@@ -45,7 +45,6 @@ import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Season;
 import org.cdsframework.ice.service.SeriesRules;
 import org.cdsframework.ice.service.Vaccine;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.ice.util.StringUtils;
@@ -133,7 +132,7 @@ public class SupportedSeries implements SupportingData {
 			return false;
 		}
 		else {
-			return checkConsistencyOfSeasonsSupportingDataAcrossAllSeriesPerVaccineGroup();
+			return checkConsistencyOfSeasonsSupportingDataAcrossAllSeriesInAllVaccineGroups();
 		}
 	}
 	
@@ -144,18 +143,32 @@ public class SupportedSeries implements SupportingData {
 	 */
 	public List<SeriesRules> getCopyOfSeriesRulesForVaccineGroup(LocallyCodedVaccineGroupItem plcvg) {
 		
+		return getSeriesRulesForVaccineGroup(plcvg, false);
+	}
+		
+	/**
+	 * Return a reference to the list of SeriesRules associated with the specified vaccine group. If the vaccine group is not supported, null is returned. 
+	 * If the vaccine group is supported but not SeriesRules have been specified for the vaccine group, an empty list is returned.
+	 */
+	protected List<SeriesRules> getSeriesRulesForVaccineGroup(LocallyCodedVaccineGroupItem plcvg) {
+		
+		return getSeriesRulesForVaccineGroup(plcvg, false);
+	}
+	
+	private List<SeriesRules> getSeriesRulesForVaccineGroup(LocallyCodedVaccineGroupItem plcvg, boolean copyOf) {
+
 		List<SeriesRules> lSRs = this.vaccineGroupItemToSeriesRules.get(plcvg);
 		if (lSRs == null) {
 			return null;
 		}
-		
-		List<SeriesRules> lSRsCopy = new ArrayList<SeriesRules>();
+
+		List<SeriesRules> lSRsResult = new ArrayList<SeriesRules>();
 		for (SeriesRules lSR : lSRs) {
-			SeriesRules lSRcopy = SeriesRules.constructDeepCopyOfSeriesRulesObject(lSR);
-			lSRsCopy.add(lSRcopy);
+			SeriesRules lSRcopy = (copyOf == true) ? SeriesRules.constructDeepCopyOfSeriesRulesObject(lSR) : lSR;
+			lSRsResult.add(lSRcopy);
 		}
-		
-		return lSRsCopy;
+
+		return lSRsResult;		
 	}
 	
 	
@@ -163,6 +176,19 @@ public class SupportedSeries implements SupportingData {
 	 * Return a copy of all SeriesRules supported by this installation. If none, an empty list is returned.
 	 */
 	public List<SeriesRules> getCopyOfAllSeriesRules() {
+		
+		return getAllSeriesRules(true);
+	}	
+	
+	/**
+	 * Return a copy of all SeriesRules supported by this installation. If none, an empty list is returned.
+	 */
+	protected List<SeriesRules> getAllSeriesRules() {
+		
+		return getAllSeriesRules(false);
+	}
+	
+	private List<SeriesRules> getAllSeriesRules(boolean copyOf) {
 		
 		Collection<List<SeriesRules>> lCollectionOfSRs = this.vaccineGroupItemToSeriesRules.values();
 		if (lCollectionOfSRs == null) {
@@ -172,13 +198,14 @@ public class SupportedSeries implements SupportingData {
 		List<SeriesRules> lSRsCopy = new ArrayList<SeriesRules>();
 		for (List<SeriesRules> lSRs : lCollectionOfSRs) {
 			for (SeriesRules lSR : lSRs) {
-				SeriesRules lSRcopy = SeriesRules.constructDeepCopyOfSeriesRulesObject(lSR);
+				SeriesRules lSRcopy = (copyOf == true) ? SeriesRules.constructDeepCopyOfSeriesRulesObject(lSR) : lSR;
 				lSRsCopy.add(lSRcopy);
 			}
 		}
 		
 		return lSRsCopy;
 	}
+	
 	
 	
 	/**
@@ -464,32 +491,11 @@ public class SupportedSeries implements SupportingData {
 		}
 		
 		////////////// Gather the DoseRules END //////////////
-		
-		///////
-		// Create SeriesRules
-		///////
-		SeriesRules series1Rules = new SeriesRules(lSeriesCode, lVGI.getCdsItemName());
-		series1Rules.setSeriesDoseRules(seriesDoseRules);
-		// Determine whether or not there are recurring doses for this series (**default false if not specified**)
-		if (pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete() != null) {
-			series1Rules.setRecurringDosesAfterSeriesComplete(pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete());
-		}
-		else {
-			// If not specified, assume there are no recurring doses of some kind after the series has been completed
-			series1Rules.setRecurringDosesAfterSeriesComplete(false);
-		}
-		// Determine if the dose number should be calculated based on the targeted diseases of each vaccine administered (**default true if not specified**)
-		if (pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() != null) {
-			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered());
-		}
-		else {
-			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(true);
-		}
-		
+
 		///////
 		// Store the Series in this supporting data 
 		///////
-		// If any Seasons are specified, verify that they are seasons that have been previously specified
+		// Plus, if any Seasons are specified, verify that they are seasons that have been previously specified
 		Collection<String> lSeasonCodesFromIceSeriesSpecificationFile = pIceSeriesSpecificationFile.getSeasonCodes();
 		List<Season> lSeasons = new ArrayList<Season>();
 		if (lSeasonCodesFromIceSeriesSpecificationFile != null) {
@@ -506,7 +512,28 @@ public class SupportedSeries implements SupportingData {
 				}
 			}
 		}
-		
+
+		///////
+		// Now create SeriesRules
+		///////
+		SeriesRules series1Rules = (lSeasons.isEmpty()) ? new SeriesRules(lSeriesCode, lVGI.getCdsItemName()) : new SeriesRules(lSeriesCode, lVGI.getCdsItemName(), lSeasons);
+		series1Rules.setSeriesDoseRules(seriesDoseRules);
+		// Determine whether or not there are recurring doses for this series (**default false if not specified**)
+		if (pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete() != null) {
+			series1Rules.setRecurringDosesAfterSeriesComplete(pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete());
+		}
+		else {
+			// If not specified, assume there are no recurring doses of some kind after the series has been completed
+			series1Rules.setRecurringDosesAfterSeriesComplete(false);
+		}
+		// Determine if the dose number should be calculated based on the targeted diseases of each vaccine administered (**default true if not specified**)
+		if (pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() != null) {
+			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered());
+		}
+		else {
+			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(true);
+		}
+				
 		///////
 		// Create the SeriesItem and store it
 		///////
@@ -535,6 +562,24 @@ public class SupportedSeries implements SupportingData {
 	}
 
 
+	/**
+	 * Check to make sure that all of the seasons in each vaccine group are "consistent". Invokes checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup()
+	 * for each season. Results must be true for all invocations to to that method, or this method returns false.
+	 */
+	private boolean checkConsistencyOfSeasonsSupportingDataAcrossAllSeriesInAllVaccineGroups() {
+		
+		Set<LocallyCodedVaccineGroupItem> lVaccineGroupsToCheck = this.vaccineGroupItemToSeriesRules.keySet();
+		for (LocallyCodedVaccineGroupItem lcvgi : lVaccineGroupsToCheck) {
+			boolean consistentInVG = checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(lcvgi);
+			if (! consistentInVG) { 
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+
 	/** 
 	 * Check to make sure that all seasons do not overlap with each other, or if they do, they have the exact same season start and end dates. 
 	 * All series in the vaccine group must be seasonal series, or none of them. If some are or others aren't, this method logs a warning and returns false.
@@ -542,7 +587,97 @@ public class SupportedSeries implements SupportingData {
 	 * @param svgc vaccine group in which to check series consistency.
 	 * @return true of these conditions are met, false if not.
 	 */
-	private boolean checkConsistencyOfSeasonsSupportingDataAcrossAllSeriesPerVaccineGroup() {
+	private boolean checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(LocallyCodedVaccineGroupItem pcvgi) {
+		
+		String _METHODNAME = "checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(): ";
+		if (pcvgi == null) {
+			return false;
+		}
+		
+		List<SeriesRules> srs = getSeriesRulesForVaccineGroup(pcvgi);
+		if (srs == null) {
+			// Vaccine group is not supported - although this should not happen - just return true
+			return true;
+		}
+
+		int countOfDefaultSeasonsAcrossSeries = 0;
+		int countOfSeasons = 0;
+		boolean aNonSeasonalSeriesExists = false;
+		List<Season> seasonsTracker = new ArrayList<Season>();
+		for (SeriesRules sr : srs) {
+			if (countOfDefaultSeasonsAcrossSeries > 1) {
+				logger.warn(_METHODNAME + "more than one default season across in vaccine group " + pcvgi.getCdsItemName());
+				return false;
+			}
+			List<Season> seriesSeasons = sr.getSeasons();
+			if (seriesSeasons == null || seriesSeasons.isEmpty()) {
+				aNonSeasonalSeriesExists = true;
+				if (countOfSeasons > 0) {
+					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + pcvgi.getCdsItemName());
+					return false;
+				}
+			}
+			for (Season s : seriesSeasons) {
+				if (aNonSeasonalSeriesExists) {
+					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + pcvgi.getCdsItemName());
+					return false;
+				}
+				boolean lSeasonAlreadyEncountered = false;
+				if (seasonsTracker.contains(s)) {
+					lSeasonAlreadyEncountered = true;
+				}
+				else {
+					countOfSeasons++;
+				}
+				if (s.isDefaultSeason() == true) {
+					countOfDefaultSeasonsAcrossSeries++;
+					if (countOfDefaultSeasonsAcrossSeries >= 2) {
+						logger.warn(_METHODNAME + "more than one default season in Series in vaccine group " + pcvgi.getCdsItemName());
+						return false;
+					}
+				}
+				else if (lSeasonAlreadyEncountered == false) {
+					for (Season seasonIter : seasonsTracker) {
+						// Check to see if the season start or end dates overlaps with another season. Overlaps are only allowed if the start and end dates 
+						// of the season for the different series are exactly the same. Default seasons do not have a specified start or end date, so they are 
+						// not checked here. (This is because if a fully-specified season can take place at a time when a default season is specified; it  
+						// overrides the default season which will then not be used.)
+						if (! s.seasonsHaveEquivalentStartAndEndDates(seasonIter) && s.seasonOverlapsWith(seasonIter)) {
+							logger.warn(_METHODNAME + "overlapping seasons exist in vaccine group " + pcvgi.getCdsItemName());
+							return false;
+						}
+					}
+					seasonsTracker.add(s);
+				}
+			}
+		}
+		
+		int lNumberOfDistinctSeasons = seasonsTracker.size();
+		// if (seasonsTracker.size() > 0) {
+		if (lNumberOfDistinctSeasons > 0) {
+			if (countOfDefaultSeasonsAcrossSeries != 1 && countOfDefaultSeasonsAcrossSeries != 0 ) {
+				logger.warn(_METHODNAME + "a seasonal vaccine group must have exactly either 0 or 1 default seasons defined. The # of seasonal series " + 
+					"found for " + "vaccine group " + pcvgi.getCdsItemName() + ": " + countOfDefaultSeasonsAcrossSeries);
+				return false;
+			}
+			else if (lNumberOfDistinctSeasons > 1 && countOfDefaultSeasonsAcrossSeries == 0) {
+				logger.warn(_METHODNAME + "a seasonal vaccine group wiht more than one season defined must also have a default season defined. No default season has been defined");
+				return false;
+			}
+			else {
+				// This is a properly configured seasonal vaccine group with a default season for evaluation
+				return true;
+			}
+		}
+		else if (countOfDefaultSeasonsAcrossSeries == 0 && seasonsTracker.size() == 0) {
+			// This is not a seasonal vaccine group
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
 		
 		/*
 		String _METHODNAME = "checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(): ";
@@ -628,8 +763,6 @@ public class SupportedSeries implements SupportingData {
 			return false;
 		}
 		*/
-		return true;
-	}
 
 	
 	@Override

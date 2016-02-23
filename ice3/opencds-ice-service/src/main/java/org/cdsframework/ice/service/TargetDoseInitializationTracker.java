@@ -162,26 +162,28 @@ public class TargetDoseInitializationTracker {
 			
 			// If there is a season associated with the SeriesRules, ensure that the shot administration date falls within the set of dates
 			/*
-			Season targetSeason = targetSeries.getTargetSeason();
-			if (targetSeason == null) {
-				return true;
-			}
-			else {
-				Date dateOfShot = null;
-				try {
-					dateOfShot = ICELogicHelper.extractSingularDateValueFromIVLDate(sae.getAdministrationTimeInterval());
-				}
-				catch (InvalidDataException ide) {
-					return false;
-				}
-				if (targetSeason.dateIsApplicableToSeason(dateOfShot, true)) {
-					return true;
-				}
-				else {
-					return false;
-				}
-			}
-			*/
+			 * * * * * * * * 
+			 * Season targetSeason = targetSeries.getTargetSeason();
+			 *if (targetSeason == null) {
+			 *	return true;
+			 *}
+			 *else {
+			 *	Date dateOfShot = null;
+			 *	try {
+			 *		dateOfShot = ICELogicHelper.extractSingularDateValueFromIVLDate(sae.getAdministrationTimeInterval());
+			 *	}
+			 *	catch (InvalidDataException ide) {
+			 *		return false;
+			 *	}
+			 *	if (targetSeason.dateIsApplicableToSeason(dateOfShot, true)) {
+			 *		return true;
+			 *	}
+			 *	else {
+			 *		return false;
+			 *	}
+			 * }
+			 * * * * * * * * 
+			 */
 			return true;
 		}
 		else {

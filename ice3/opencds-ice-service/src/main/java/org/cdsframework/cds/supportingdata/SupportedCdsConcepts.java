@@ -197,7 +197,7 @@ public class SupportedCdsConcepts {
 	
 	
 	/**
-	 * Return LocallyCodedCdsListItem for the given IceConceptType and ICEConcept. Returns null if not found.
+	 * Return LocallyCodedCdsListItem for the given IceConceptType and CdsConcept (i.e. - ICEConcept which may or may not also be an OpenCDS concept). Returns null if not found.
 	 */
 	public LocallyCodedCdsListItem getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType pICT, CdsConcept pIC) {
 		
