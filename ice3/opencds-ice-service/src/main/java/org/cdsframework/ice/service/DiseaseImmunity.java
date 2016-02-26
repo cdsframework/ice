@@ -30,20 +30,18 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept;
 
 
 public class DiseaseImmunity {
 
-	private LocallyCodedCdsListItem disease;
+	private String disease;
 	private Date dateOfImmunity;
 	private String immunityReason;
 	
 	private static Log logger = LogFactory.getLog(DiseaseImmunity.class);
 	
 	
-	public DiseaseImmunity(LocallyCodedCdsListItem pDiseaseImmunityObtained) {
+	public DiseaseImmunity(String pDiseaseImmunityObtained) {
 		
 		String _METHODNAME = "DiseaseImmunity(): ";
 		if (pDiseaseImmunityObtained == null) {
@@ -55,20 +53,20 @@ public class DiseaseImmunity {
 		disease = pDiseaseImmunityObtained;
 	}
 
-	public DiseaseImmunity(LocallyCodedCdsListItem pDisease, Date pDateOfImmunity) {
+	public DiseaseImmunity(String pDisease, Date pDateOfImmunity) {
 		
 		this(pDisease);
 		dateOfImmunity = pDateOfImmunity;
 	}
 
-	public DiseaseImmunity(LocallyCodedCdsListItem pDisease, Date pDateOfImmunity, String pReason) {
+	public DiseaseImmunity(String pDisease, Date pDateOfImmunity, String pReason) {
 		
 		this(pDisease);
 		dateOfImmunity = pDateOfImmunity;
 		immunityReason = pReason;
 	}
 	
-	public LocallyCodedCdsListItem getDisease() {
+	public String getDisease() {
 		return disease;
 	}
 

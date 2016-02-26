@@ -26,7 +26,7 @@
 
 package org.cdsframework.ice.service;
 
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 
 
 public class TargetSeriesSelection {
@@ -35,32 +35,31 @@ public class TargetSeriesSelection {
 		SERIES_SELECTION_INSTANTIATED_ONLY_NOT_READY, SERIES_SELECTION_NOT_STARTED, SERIES_SELECTION_IN_PROCESS, SERIES_SELECTION_COMPLETE
 	}
 	
-	private SupportedVaccineGroupConcept seriesSelectionVaccineGroup;
+	private LocallyCodedVaccineGroupItem seriesSelectionVaccineGroup;
 	private Season seriesSelectionSeason;
 	private SeriesSelectionStatus seriesSelectionStatus;
 	private String selectedSeriesName;
 	
 	// private static Log logger = LogFactory.getLog(TargetSeriesSelection.class);
 	
-	private TargetSeriesSelection(SupportedVaccineGroupConcept seriesSelectionVG) {
+	private TargetSeriesSelection(LocallyCodedVaccineGroupItem seriesSelectionVG) {
 		this.seriesSelectionVaccineGroup = seriesSelectionVG;
 		this.seriesSelectionSeason = null;
 		this.seriesSelectionStatus = SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED;
-		// this.allSelectedSeries = new ArrayList<String>();
 		this.selectedSeriesName = null;
 	}
 	
-	public TargetSeriesSelection(SupportedVaccineGroupConcept seriesSelectionVG, Season s) {
+	public TargetSeriesSelection(LocallyCodedVaccineGroupItem seriesSelectionVG, Season s) {
 		
 		this(seriesSelectionVG);
 		this.seriesSelectionSeason = s;
 	}
 	
-	public SupportedVaccineGroupConcept getSeriesSelectionVaccineGroup() {
+	public LocallyCodedVaccineGroupItem getSeriesSelectionVaccineGroup() {
 		return seriesSelectionVaccineGroup;
 	}
 
-	public void setSeriesSelectionVaccineGroup(SupportedVaccineGroupConcept seriesSelection) {
+	public void setSeriesSelectionVaccineGroup(LocallyCodedVaccineGroupItem seriesSelection) {
 		this.seriesSelectionVaccineGroup = seriesSelection;
 	}
 	
@@ -86,7 +85,6 @@ public class TargetSeriesSelection {
 
 	public void setSeriesSelectionStatus(SeriesSelectionStatus seriesSelectionStatus)  {
 		
-		// String _METHODNAME = "setSeriesSelectionStatus(): ";
 		this.seriesSelectionStatus = seriesSelectionStatus;
 	}
 	

@@ -96,6 +96,7 @@ public class SupportedVaccineGroups implements SupportingData {
 	public boolean isSupportingDataConsistent() {
 		return this.isSupportingDataConsistent;
 	}
+
 	
 	protected SupportedCdsLists getAssociatedSupportedCdsLists() {
 		
@@ -235,12 +236,12 @@ public class SupportedVaccineGroups implements SupportingData {
 	}
 	
 	
-	public LocallyCodedVaccineGroupItem getVaccineGroupItem(String pVaccineGroupItemName) {
+	public LocallyCodedVaccineGroupItem getVaccineGroupItem(String pCdsListItemName) {
 		
-		if (pVaccineGroupItemName == null) {
+		if (pCdsListItemName == null) {
 			return null;
 		}
-		LocallyCodedVaccineGroupItem lLCVGI = this.cdsListItemNameToVaccineGroupItem.get(pVaccineGroupItemName);
+		LocallyCodedVaccineGroupItem lLCVGI = this.cdsListItemNameToVaccineGroupItem.get(pCdsListItemName);
 		if (lLCVGI == null) {
 			return null;
 		}
@@ -249,6 +250,26 @@ public class SupportedVaccineGroups implements SupportingData {
 		}
 	}
 
+	
+	/**
+	 * Returns the associated LocallyCodedCdsListItem 
+	 * @param pCdsListItemName
+	 * @return
+	 */
+	public LocallyCodedCdsListItem getCdsListItem(String pCdsListItemName) {
+		
+		if (pCdsListItemName == null) {
+			return null;
+		}
+		
+
+		if(! vaccineGroupItemExists(pCdsListItemName)) {
+			return null;
+		}
+		
+		return this.supportedCdsLists.getCdsListItem(pCdsListItemName);
+	}
+	
 	
 	/**
 	 * Returns true if there is a vaccineGroupItem associated with the local CD, false if not. (Invoked getGroupVaccineGroupItem(CD) to determine.)

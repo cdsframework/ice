@@ -3108,7 +3108,7 @@ public class TargetSeries {
 		seriesRules.setSeriesName(seriesName);
 	}
 
-	public SupportedVaccineGroupConcept getVaccineGroup() {
+	public String getVaccineGroup() {
 		return seriesRules.getVaccineGroup();
 	}
 

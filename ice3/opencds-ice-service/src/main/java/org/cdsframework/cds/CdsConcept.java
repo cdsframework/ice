@@ -46,7 +46,7 @@ public class CdsConcept extends VmrOpenCdsConcept {
 	}
 	
 	/**
-	 * Instantiate an OpenCdsConceptCode object
+	 * Instantiate an OpenCdsConceptCode object. It does not set the conceptTargetId, displayName or determinationMethodCode attributes of the VmrOpenCdsConcept
 	 * @param openCdsConceptCode Concept Code; mandatory
 	 * @throws IllegalArgumentException if concept code is null
 	 */
@@ -64,7 +64,7 @@ public class CdsConcept extends VmrOpenCdsConcept {
 	}
  	
 	/**
-	 * Instantiate an OpenCdsConceptCode object
+	 * Instantiate an CdsConcept object. It does not set the conceptTargetId or determinationMethodCode attributes of the VmrOpenCdsConcept
 	 * @param pOpenCdsConceptCode Concept Code; mandatory
 	 * @param pDisplayName Display Name
 	 * @throws IllegalArgumentException if concept code is null
@@ -75,6 +75,24 @@ public class CdsConcept extends VmrOpenCdsConcept {
 	}
 	
 
+	/**
+	 * Construct a CdsConcept from a VmrOpenCdsConcept
+	 * @param pVOCC
+	 * @return
+	 */
+	public static CdsConcept constructCdsConceptFromVmrOpenCdsConcept(VmrOpenCdsConcept pVOCC) {
+		
+		if (pVOCC == null) {
+			return null;
+		}
+		
+		CdsConcept lIC = new CdsConcept(pVOCC.getOpenCdsConceptCode(), true, pVOCC.getDisplayName());
+		lIC.conceptTargetId = pVOCC.getConceptTargetId();
+		lIC.determinationMethodCode = pVOCC.getDeterminationMethodCode();
+		return lIC;
+	}
+	
+	
 	public static CdsConcept constructDeepCopyOfCdsConceptObject(CdsConcept pIC) {
 		
 		if (pIC == null) {
@@ -125,16 +143,19 @@ public class CdsConcept extends VmrOpenCdsConcept {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		//if (!super.equals(obj))
-		//	return false;
 		if (getClass() != obj.getClass())
 			return false;
 		CdsConcept other = (CdsConcept) obj;
 		if (getOpenCdsConceptCode() == null) {
 			if (other.getOpenCdsConceptCode() != null)
 				return false;
-		} else if (!getOpenCdsConceptCode().equals(other.getOpenCdsConceptCode()) && isOpenCdsSupportedConcept() == other.isOpenCdsSupportedConcept())
+		} 
+		else if (!getOpenCdsConceptCode().equals(other.getOpenCdsConceptCode())) {
 			return false;
+		}
+		//else if (getOpenCdsConceptCode().equals(other.getOpenCdsConceptCode()) && isOpenCdsSupportedConcept() != other.isOpenCdsSupportedConcept()) {
+		//	return false;
+		//}
 		
 		return true;
 	}

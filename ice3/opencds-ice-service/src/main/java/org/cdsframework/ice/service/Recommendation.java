@@ -46,7 +46,7 @@ public class Recommendation {
 	private RecommendationStatus recommendationStatus;
 	private Vaccine recommendedVaccine;
 	private Date recommendationDate;
-	private CD recommendationReason;
+	private String recommendationReason;
 
 	private static Log logger = LogFactory.getLog(Recommendation.class);
 	
@@ -71,7 +71,7 @@ public class Recommendation {
 		recommendedVaccine = null;
 		recommendationDate = null;
 		recommendationStatus = RecommendationStatus.NOT_FORECASTED;
-		recommendationReason = new CD();
+		recommendationReason = null;
 	}
 	
 	public String getRecommendationIdentifier() {
@@ -113,13 +113,13 @@ public class Recommendation {
 		this.recommendationDate = recommendationDate;
 	}
 	
-	public CD getRecommendationReason() {
+	public String getRecommendationReason() {
 		return recommendationReason;
 	}
 
-	public void setRecommendationReason(CD recommendationReason) {
+	public void setRecommendationReason(String recommendationReason) {
 		if (recommendationReason == null) {
-			this.recommendationReason = new CD();
+			this.recommendationReason = null;
 		}
 		else {
 			this.recommendationReason = recommendationReason;

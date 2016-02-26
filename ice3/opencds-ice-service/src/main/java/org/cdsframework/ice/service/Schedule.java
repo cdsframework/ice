@@ -46,6 +46,7 @@ public class Schedule {
 	private String scheduleId;
 	private List<String> cdsVersions;
 	private ICESupportingDataConfiguration iceSupportingDataConfiguration;
+	private boolean scheduleHasBeenInitialized;
 	
 	private static Log logger = LogFactory.getLog(Schedule.class);
 
@@ -63,6 +64,8 @@ public class Schedule {
 		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "ScheduleImpl(): ";
+
+		this.scheduleHasBeenInitialized = false;
 		if (pScheduleId == null || pBaseKnowledgeRepositoryLocation == null) {
 			String lErrStr = "Schedule not properly initialized: one or more parameters null";
 			logger.error(_METHODNAME + lErrStr);
@@ -78,8 +81,15 @@ public class Schedule {
 		StringBuilder lSbScheduleInfo = new StringBuilder(80);
 		lSbScheduleInfo.append(_METHODNAME); lSbScheduleInfo.append("Completed Initialization of Schedule: "); lSbScheduleInfo.append(this.scheduleId);
 		logger.info(lSbScheduleInfo.toString());
+		this.scheduleHasBeenInitialized = true;
 	}
 
+	
+	public boolean isScheduleInitialized() {
+		
+		return this.scheduleHasBeenInitialized;
+	}
+	
 	
 	public String getScheduleId() {
 		return scheduleId;
@@ -91,12 +101,10 @@ public class Schedule {
 	}
 
 	
-	// TODO:
-	/*
-	public Map<SupportedVaccineGroupConcept, List<SeriesRules>> getScheduleSeries() {
-		return vaccineGroupSeries;
+	public ICESupportingDataConfiguration getICESupportingDataConfiguration() {
+		
+		return this.iceSupportingDataConfiguration;
 	}
-	*/
 	
 
 	/**
