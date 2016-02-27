@@ -27,13 +27,13 @@
 package org.cdsframework.ice.service;
 
 public enum DoseStatus {
-	ACCEPTED("SUPPORTED_EVALUATION_STATUS.ACCEPTED"), 
+	ACCEPTED("EVALUATION_STATUS_CONCEPT.ACCEPTED"), 
 	PRIMARY_SHOT_DETERMINATION_IN_PROCESS, 
 	EVALUATION_IN_PROCESS, 
 	EVALUATION_COMPLETE, 
 	NOT_EVALUATED, 
-	INVALID("SUPPORTED_EVALUATION_STATUS.INVALID"), 
-	VALID("SUPPORTED_EVALUATION_STATUS.VALID"), 
+	INVALID("EVALUATION_STATUS_CONCEPT.INVALID"), 
+	VALID("EVALUATION_STATUS_CONCEPT.VALID"), 
 	DECISION_RENDERED;
 	
 	private String doseStatusCdsListItem;
@@ -48,5 +48,15 @@ public enum DoseStatus {
 	
 	public String getDoseStatusCdsListItem() {
 		return this.doseStatusCdsListItem;
+	}
+	
+	public static String getDoseStatusCdsListItem(DoseStatus pDS) {
+		
+		if (pDS == null) {
+			return null;
+		}
+		else {
+			return pDS.getDoseStatusCdsListItem();
+		}
 	}
 }

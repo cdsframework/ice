@@ -32,12 +32,43 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class Recommendation {
 	
-	public enum RecommendationStatus { NOT_FORECASTED, EVALUATION_OF_HISTORY_REQUIRED, FORECASTING_IN_PROGRESS, FORECASTING_COMPLETE, RECOMMENDED, CONDITIONALLY_RECOMMENDED, 
-		NOT_RECOMMENDED, RECOMMENDED_IN_FUTURE }
+	public enum RecommendationStatus { 
+		NOT_FORECASTED, 
+		EVALUATION_OF_HISTORY_REQUIRED, 
+		FORECASTING_IN_PROGRESS, 
+		FORECASTING_COMPLETE, 
+		RECOMMENDED("RECOMMENDATION_STATUS_CONCEPT.RECOMMENDED"), 
+		CONDITIONALLY_RECOMMENDED("RECOMMENDATION_STATUS_CONCEPT.CONDITIONAL"), 
+		NOT_RECOMMENDED("RECOMMENDATION_STATUS_CONCEPT.NOT_RECOMMENDED"), 
+		RECOMMENDED_IN_FUTURE("RECOMMENDATION_STATUS_CONCEPT.FUTURE_RECOMMENDED"); 
+		
+		private String recommendationStatusCdsListItem;
+		
+		private RecommendationStatus() {
+			this.recommendationStatusCdsListItem = null;
+		}
+		
+		private RecommendationStatus(String pRecommendationStatusCdsListItem) {
+			this.recommendationStatusCdsListItem = pRecommendationStatusCdsListItem;
+		}
+		
+		public String getRecommendationStatusCdsListItem() {
+			return this.recommendationStatusCdsListItem;
+		}
+		
+		public static String getRecommendationStatusCdsListItem(RecommendationStatus pRS) {
+			
+			if (pRS == null) {
+				return null;
+			}
+			else {
+				return pRS.getRecommendationStatusCdsListItem();
+			}
+		}
+	}
 	
 	public enum RecommendationType { EARLIEST, EARLIEST_RECOMMENDED, LATEST_RECOMMENDED }
 	

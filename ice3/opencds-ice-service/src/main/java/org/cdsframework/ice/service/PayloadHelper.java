@@ -32,11 +32,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.ice.service.Recommendation.RecommendationStatus;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
-import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.drools.spi.KnowledgeHelper;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
@@ -77,7 +75,7 @@ public class PayloadHelper {
 	
 	
 	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, 
-			SubstanceAdministrationEvent sae, LocallyCodedVaccineGroupItem vg, TargetDose d) {
+			SubstanceAdministrationEvent sae, String vg, TargetDose d) {
 
 		String _METHODNAME = "OutputNestedImmEvaluationResult: ";
 		if (k == null || pNamedObjects == null || evalTime == null || sae == null || d == null) {
@@ -252,7 +250,7 @@ public class PayloadHelper {
 		       </relatedClinicalStatement>
 		   </substanceAdministrationProposal>
 	 */
-	public static void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, TargetSeries ts) 
+	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, TargetSeries ts) 
 			throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
@@ -323,10 +321,9 @@ public class PayloadHelper {
 		List<CD> interpretations = new ArrayList<CD>();
 		if (recs != null) {
 			for (Recommendation rec : recs) {
-				CD openCDSReasonCode = rec.getRecommendationReason();
-				if (openCDSReasonCode != null) {
-					String openCDSReasonCodeValue = openCDSReasonCode.getCode();
-					CD localCDInterp = getLocalCodeForRecommendationReason(openCDSReasonCodeValue);
+				String recommendationReasonCode = rec.getRecommendationReason();
+				if (recommendationReasonCode != null) {
+					CD localCDInterp = getLocalCodeForRecommendationReason(recommendationReasonCode);
 					if (localCDInterp != null && rec.getRecommendationStatus() == rs && ! interpretations.contains(localCDInterp))
 						interpretations.add(localCDInterp);
 				}
@@ -358,7 +355,7 @@ public class PayloadHelper {
 	 * @param pVG
 	 * @return local ICE3 code value, null if parameter supplied is null, null if local code value for supplied code is not found
 	 */
-	private CD getLocalCodeForEvaluationConcept(LocallyCodedVaccineGroupItem pVG) {
+	private CD getLocalCodeForEvaluationConcept(String pVG) {
 
 		String _METHODNAME = "getLocalCodeForEvaluationConcept(): ";
 		if (pVG == null) {
@@ -366,7 +363,7 @@ public class PayloadHelper {
 			return null;
 		}
 		
-		LocallyCodedCdsListItem lccli = this.backingSchedule.getICESupportingDataConfiguration().getSupportedVaccineGroups().getCdsListItem(pVG.getCdsItemName());
+		LocallyCodedCdsListItem lccli = this.backingSchedule.getICESupportingDataConfiguration().getSupportedVaccineGroups().getCdsListItem(pVG);
 		if (lccli == null) {
 			String lErrStr = "No associated LocallyCodedCdsListItem for the supplied LocallyCodedVaccineGroupItem: " + pVG;
 			logger.warn(_METHODNAME + lErrStr);
@@ -423,19 +420,19 @@ public class PayloadHelper {
 	
 	/**
 	 * Return local ICE3 recommendation code for the OpenCDS reason code value. 
-	 * @param reasonCode
+	 * @param pReasonCode
 	 * @return local ICE3 code value, null if parameter supplied is null, null if local code value for supplied code is not found
 	 */
-	public CD getLocalCodeForRecommendationReason(String reasonCode) {
+	public CD getLocalCodeForRecommendationReason(String pReasonCode) {
 
 		String _METHODNAME = "getLocalCodeForRecommendationReason(): ";
 
-		if (reasonCode == null) {
+		if (pReasonCode == null) {
 			logger.warn(_METHODNAME + "no reason code supplied; returning null");
 			return null;
 		}
 
-		LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(reasonCode);
+		LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(pReasonCode);
 		if (sv == null) {
 			String lErrStr = "reason code supplied is not one that is defined in the supporting data; returning null";
 			logger.warn(_METHODNAME + lErrStr);
@@ -448,18 +445,18 @@ public class PayloadHelper {
 	
 	/**
 	 * Return local ICE3 code for the OpenCDS reason code value. 
-	 * @param reasonCode
+	 * @param pReasonCode
 	 * @return local ICE3 code value, null if parameter supplied is null, null if local code value for supplied code is not found
 	 */
-	public CD getLocalCodeForEvaluationReason(String reasonCode) {
+	public CD getLocalCodeForEvaluationReason(String pReasonCode) {
 
 		String _METHODNAME = "getLocalCodeForEvaluationReason(): ";
-		if (reasonCode == null) {
+		if (pReasonCode == null) {
 			logger.warn(_METHODNAME + "no concept code supplied; returning null");
 			return null;
 		}
 
-		LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(reasonCode);
+		LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(pReasonCode);
 		if (sv == null) {
 			String lErrStr = "reason code supplied is not one that is defined in the supporting data; returning null";
 			logger.warn(_METHODNAME + lErrStr);
@@ -480,28 +477,29 @@ public class PayloadHelper {
 	 * @param pDS
 	 * @return local ICE3 code value, null if DoseStatus is null, "" if local code value for DoseStatus is not found
 	 */
-	public static CD getLocalCodeForEvaluationStatus(DoseStatus pDS) {
+	public CD getLocalCodeForEvaluationStatus(DoseStatus pDS) {
 
+		String _METHODNAME = "getLocalCodeForEvaluationStatus(): ";
 		if (pDS == null) {
 			return null;
 		}
 
-		if (pDS == DoseStatus.ACCEPTED) {
-			return SupportedEvaluationConcept._ACCEPTED_EVALUATION_STATUS.getLocalCodeConcept();
-		}
-		else if (pDS == DoseStatus.VALID) {
-			return SupportedEvaluationConcept._VALID_EVALUATION_STATUS.getLocalCodeConcept();
-		}
-		else if (pDS == DoseStatus.INVALID) {
-			return SupportedEvaluationConcept._INVALID_EVALUATION_STATUS.getLocalCodeConcept();
+		DoseStatus lDoseStatusToReturn = null;
+		if (pDS == DoseStatus.VALID || pDS == DoseStatus.ACCEPTED || pDS == DoseStatus.INVALID) {
+			lDoseStatusToReturn = pDS;
 		}
 		else {
-			CD retCD = new CD();
-			retCD.setCode(SupportedEvaluationConcept._ACCEPTED_EVALUATION_STATUS.getLocalCodeValue());
-			retCD.setCodeSystem(SupportedEvaluationConcept._ACCEPTED_EVALUATION_STATUS.getLocalCodeSystem());
-			retCD.setCodeSystemName(SupportedEvaluationConcept._ACCEPTED_EVALUATION_STATUS.getLocalCodeSystemName());
-			return retCD;
+			lDoseStatusToReturn = DoseStatus.ACCEPTED;
 		}
+
+		String lCdsListItemName = DoseStatus.getDoseStatusCdsListItem(lDoseStatusToReturn);
+		LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(lCdsListItemName);
+		if (sv == null) {
+			String lErrStr = "status code supplied is not one that is defined in the supporting data; returning null";
+			logger.warn(_METHODNAME + lErrStr);
+			return null;
+		}
+		return sv.getCdsListItemCD();
 	}
 
 
@@ -512,31 +510,31 @@ public class PayloadHelper {
 	 * RecommendationStatus.RECOMMENDED, RecommendationStatus.RECOMMENDED_IN_FUTURE, RecommendationStatus.CONDITIONALLY_RECOMMENDED, 
 	 * or RecommendationStatus.NOT_RECOMMENDED
 	 */
-	public static CD getLocalCodeForRecommendationStatus(RecommendationStatus recStatus) {
+	public CD getLocalCodeForRecommendationStatus(RecommendationStatus recStatus) {
 
+		String _METHODNAME = "getLocalCodeForRecommendationStatus(): ";
 		if (recStatus == null) {
 			return null;
 		}
 
-		if (recStatus == RecommendationStatus.RECOMMENDED) {
-			return SupportedRecommendationConcept._RECOMMENDED_RECOMMENDATION_STATUS.getLocalCodeConcept();
-		}
-		else if (recStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED) {
-			return SupportedRecommendationConcept._CONDITIONAL_RECOMMENDATION_STATUS.getLocalCodeConcept();
-		}
-		else if (recStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE) {
-			return SupportedRecommendationConcept._FUTURE_RECOMMEDATION_STATUS.getLocalCodeConcept();
-		}
-		else if (recStatus == RecommendationStatus.NOT_RECOMMENDED) {
-			return SupportedRecommendationConcept._NOT_RECOMMENDED_RECOMMENDATION_STATUS.getLocalCodeConcept();
+		RecommendationStatus lRecStatusToReturn = null;
+		if (recStatus == RecommendationStatus.RECOMMENDED || recStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED || recStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+			recStatus == RecommendationStatus.NOT_RECOMMENDED) {
+			lRecStatusToReturn = recStatus;
 		}
 		else {
-			CD retCD = new CD();
-			retCD.setCode(SupportedRecommendationConcept._RECOMMENDED_RECOMMENDATION_STATUS.getLocalCodeValue());
-			retCD.setCodeSystem(SupportedRecommendationConcept._RECOMMENDED_RECOMMENDATION_STATUS.getLocalCodeSystem());
-			retCD.setCodeSystemName(SupportedRecommendationConcept._RECOMMENDED_RECOMMENDATION_STATUS.getLocalCodeSystemName());
-			return retCD;
+			lRecStatusToReturn = RecommendationStatus.RECOMMENDED;
 		}
+		
+		String lCdsListItemName = RecommendationStatus.getRecommendationStatusCdsListItem(lRecStatusToReturn);
+		LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(lCdsListItemName);
+		if (sv == null) {
+			String lErrStr = "status code supplied is not one that is defined in the supporting data; returning null";
+			logger.warn(_METHODNAME + lErrStr);
+			return null;
+		}
+
+		return sv.getCdsListItemCD();
 	}
 
 }

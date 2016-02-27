@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,19 +42,10 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.DoseStatus;
-import org.cdsframework.ice.service.ICECoreError;
-import org.cdsframework.ice.service.ICELogicHelper;
-import org.cdsframework.ice.service.InconsistentConfigurationException;
-import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.service.Recommendation.RecommendationStatus;
 import org.cdsframework.ice.service.Recommendation.RecommendationType;
-import org.cdsframework.ice.service.Schedule;
-import org.cdsframework.ice.service.TargetDose;
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept;
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept;
-import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.ice.util.TimePeriod.DurationType;
 import org.cdsframework.ice.util.TimePeriodException;
@@ -87,9 +77,9 @@ public class TargetSeries {
 	private List<Recommendation> interimRecommendationsScheduleLatestRecommendedInterval;
 	private List<Recommendation> interimRecommendationsCustom;
 	// private List<Recommendation> interimRecommendationsScheduleLatest;
-	private Map<SupportedDiseaseConcept, Integer> interimEvaluationValidityCountByDisease;
-	private Map<SupportedDiseaseConcept, Map<Integer, Integer>> interimDosesToSkipByDisease;
-	private Map<SupportedDiseaseConcept, Date> diseaseImmunityDate;
+	private Map<String, Integer> interimEvaluationValidityCountByDisease;					// Disease -> evaluation validity count for disease
+	private Map<String, Map<Integer, Integer>> interimDosesToSkipByDisease;					// Disease -> skip dose instructions for disease
+	private Map<String, Date> diseaseImmunityDate;											// Disease -> disease immunity date
 	private Boolean manuallySetAccountForLiveVirusIntervalsInRecommendation;
 	private Vaccine recommendationVaccine;
 	private RecommendationStatus recommendationStatus;
@@ -150,17 +140,17 @@ public class TargetSeries {
 		finalRecommendationDate = null;
 		finalLatestRecommendationDate = null;
 
-		interimEvaluationValidityCountByDisease = new EnumMap<SupportedDiseaseConcept, Integer>(SupportedDiseaseConcept.class);
-		interimDosesToSkipByDisease = new EnumMap<SupportedDiseaseConcept, Map<Integer, Integer>>(SupportedDiseaseConcept.class);
-		Collection<SupportedDiseaseConcept> targetedDiseases = null; // TODO: (SD) pScheduleBackingSeries.getDiseasesTargetedByVaccineGroup(pSeriesRules.getVaccineGroup());
+		interimEvaluationValidityCountByDisease = new HashMap<String, Integer>();
+		interimDosesToSkipByDisease = new HashMap<String, Map<Integer, Integer>>();
+		Collection<String> targetedDiseases = pScheduleBackingSeries.getDiseasesTargetedByVaccineGroup(pSeriesRules.getVaccineGroup());
 		if (targetedDiseases != null) {
-			for (SupportedDiseaseConcept disease : targetedDiseases) {
+			for (String disease : targetedDiseases) {
 				interimEvaluationValidityCountByDisease.put(disease, new Integer(0));
 				interimDosesToSkipByDisease.put(disease, new HashMap<Integer, Integer>());
 			}
 		}
 
-		diseaseImmunityDate = new EnumMap<SupportedDiseaseConcept, Date>(SupportedDiseaseConcept.class);
+		diseaseImmunityDate = new HashMap<String, Date>();
 	}
 
 	
@@ -432,8 +422,8 @@ public class TargetSeries {
 	public void addSkipDoseEntryForDose(int doseNumberToSkipFrom, int doseNumberToSkipTo) {
 	
 		int lTargetDoseNumber = determineDoseNumberInSeries();
-		Collection<SupportedDiseaseConcept> lDiseasesSupportedByThisSeries = getDiseasesSupportedByThisSeries();
-		for (SupportedDiseaseConcept lSDC : lDiseasesSupportedByThisSeries) {
+		Collection<String> lDiseasesSupportedByThisSeries = getDiseasesSupportedByThisSeries();
+		for (String lSDC : lDiseasesSupportedByThisSeries) {
 			addSkipDoseEntryForSpecifiedDisease(doseNumberToSkipFrom, doseNumberToSkipTo, lSDC, lTargetDoseNumber);
 		}
 	}
@@ -446,10 +436,10 @@ public class TargetSeries {
 	 * @param pDoseNumberToSkipTo
 	 * @param pDisease
 	 * @throws IllegalArgumentException If doseNumberToSkipFrom and/or doseNumberToSkipTo is not possible for the series. The doseNumberToSkipFrom must be less than the doseNumberToSkipTo,
-	 * and the doseNumberToSkipFrom must equal the target dose number in this series
+	 * and the doseNumberToSkipFrom must equal the target dose number in this series. Also, if the supplied argument is not a known disease as available through the supporting data
 	 */
-	public void addSkipDoseEntryForSpecifiedDisease(int pDoseNumberToSkipFrom, int pDoseNumberToSkipTo, SupportedDiseaseConcept pDisease) {
-				
+	public void addSkipDoseEntryForSpecifiedDisease(int pDoseNumberToSkipFrom, int pDoseNumberToSkipTo, String pDisease) {
+		
 		int lTargetDoseNumber = determineDoseNumberInSeries();
 		addSkipDoseEntryForSpecifiedDisease(pDoseNumberToSkipFrom, pDoseNumberToSkipTo, pDisease, lTargetDoseNumber);
 	}
@@ -466,13 +456,24 @@ public class TargetSeries {
 	 * @throws IllegalArgumentException If doseNumberToSkipFrom and/or doseNumberToSkipTo is not possible for the series. The doseNumberToSkipFrom must be less than the doseNumberToSkipTo,
 	 * and the doseNumberToSkipFrom must equal the target dose number in this series
 	 */
-	private void addSkipDoseEntryForSpecifiedDisease(int pDoseNumberToSkipFrom, int pDoseNumberToSkipTo, SupportedDiseaseConcept pDisease, int pTargetDoseNumber) {
-
-		if (pDisease == null) {
-			return;
-		}
+	private void addSkipDoseEntryForSpecifiedDisease(int pDoseNumberToSkipFrom, int pDoseNumberToSkipTo, String pDisease, int pTargetDoseNumber) {
 
 		String _METHODNAME = "skipToDosesNumberForSpecifiedDisease(): ";
+
+		if (pDisease == null) {
+			String lErrStr = "No disease was specified in an attempt to add a skip dose entry";
+			logger.warn(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
+		
+		// HERE - check that it is a valid disease
+		if (this.scheduleBackingSeries.getICESupportingDataConfiguration().getSupportedCdsConcepts().
+				getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.DISEASE, new CdsConcept(pDisease, false)) == null) {
+			String lErrStr = "An invalid disease was specified in an attempt to add a skip dose entry; disease specified: " + pDisease;
+			logger.warn(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
+		
 		int numberOfDosesInSeries = getSeriesRules().getNumberOfDosesInSeries();
 		if (pDoseNumberToSkipTo < 1 || pDoseNumberToSkipTo > numberOfDosesInSeries || pDoseNumberToSkipFrom < 1 || 
 				pDoseNumberToSkipFrom > numberOfDosesInSeries) {
@@ -590,7 +591,7 @@ public class TargetSeries {
 	 * @return
 	 */
 	private int doseNumberDeterminationUpdateUtility(TargetDose pTD, boolean returnTargetDoseNumber, boolean updateInternalSeriesDoseNumberCount,
-			boolean takeSkipDoseEntriesIntoAccount,	Collection<SupportedDiseaseConcept> antigensToIncludeInDetermination) {
+			boolean takeSkipDoseEntriesIntoAccount,	Collection<String> antigensToIncludeInDetermination) {
 
 		String _METHODNAME = "doseNumberDeterminationUpdateUtility(): ";
 		if (pTD == null) {
@@ -611,14 +612,14 @@ public class TargetSeries {
 		// Initialize tally for supported diseases
 		/////// Collection<SupportedDiseaseConcept> allSupportedDiseases = antigensToIncludeInDetermination;
 		Collection<String> allSupportedDiseases = antigensToIncludeInDetermination;
-		for (SupportedDiseaseConcept disease : allSupportedDiseases) {
+		for (String disease : allSupportedDiseases) {
 			tallyOfDoseNumberByDisease.put(disease, new Integer(0));
 		}
 
 		// Record tally for disease immunity
 		Date targetDoseDate = pTD.getAdministrationDate();
 		Integer numberOfDosesInSeriesInt = new Integer(getSeriesRules().getNumberOfDosesInSeries());
-		for (SupportedDiseaseConcept sdc : this.diseaseImmunityDate.keySet()) {
+		for (String sdc : this.diseaseImmunityDate.keySet()) {
 			Date lDiseaseImmunityDate = this.diseaseImmunityDate.get(sdc);
 			if (targetDoseDate != null && lDiseaseImmunityDate != null && targetDoseDate.compareTo(lDiseaseImmunityDate) >= 0) {
 				this.interimEvaluationValidityCountByDisease.put(sdc, numberOfDosesInSeriesInt);
@@ -627,9 +628,9 @@ public class TargetSeries {
 		}
 
 		// Wherever disease immunity is recorded, remove the count from the tally so it does not skew the "least count" result
-		Collection<SupportedDiseaseConcept> tallyOfRelevantDiseaseImmunityKeys = tallyOfRelevantDiseaseImmunity.keySet();
+		Collection<String> tallyOfRelevantDiseaseImmunityKeys = tallyOfRelevantDiseaseImmunity.keySet();
 		if (!tallyOfRelevantDiseaseImmunityKeys.containsAll(tallyOfDoseNumberByDisease.keySet())) {
-			for (SupportedDiseaseConcept sdc : tallyOfRelevantDiseaseImmunityKeys) {
+			for (String sdc : tallyOfRelevantDiseaseImmunityKeys) {
 				tallyOfDoseNumberByDisease.remove(sdc);
 			}
 		}
@@ -750,7 +751,7 @@ public class TargetSeries {
 						} 
 						else {
 							if (logger.isDebugEnabled()) {
-								logger.debug(_METHODNAME + "dosenumber for disease: " + diseaseTargeted.getConceptDisplayNameValue() + "; dose number " + doseNumberForDisease + "; else: " + td);
+								logger.debug(_METHODNAME + "dosenumber for disease: " + diseaseTargeted + "; dose number " + doseNumberForDisease + "; else: " + td);
 							}
 							if (lIncrementDoseNumber) {
 								tallyOfDoseNumberByDisease.put(diseaseTargeted,	new Integer(doseNumberForDisease));
@@ -770,10 +771,10 @@ public class TargetSeries {
 		// highest dose number across them
 		int leastDoseNumberAcrossDiseases = -1;
 		int greatestDoseNumberAcrossDiseases = -1;
-		for (SupportedDiseaseConcept sdc : tallyOfDoseNumberByDisease.keySet()) {
+		for (String sdc : tallyOfDoseNumberByDisease.keySet()) {
 			Integer tallyDoseNumberInt = tallyOfDoseNumberByDisease.get(sdc);
 			if (logger.isDebugEnabled()) {
-				logger.debug(_METHODNAME + "tally disease: " + sdc.getConceptDisplayNameValue());
+				logger.debug(_METHODNAME + "tally disease: " + sdc);
 				logger.debug(_METHODNAME + "tally number: " + ((tallyDoseNumberInt != null) ? tallyDoseNumberInt : "null"));
 			}
 			if (tallyDoseNumberInt != null) {
@@ -810,14 +811,14 @@ public class TargetSeries {
 			}
 		}
 
-		for (SupportedDiseaseConcept sdc : diseaseImmunityDate.keySet()) {
+		for (String sdc : diseaseImmunityDate.keySet()) {
 			if (!tallyOfDoseNumberByDisease.containsKey(sdc)) {
 				tallyOfDoseNumberByDisease.put(sdc, new Integer(leastDoseNumberAcrossDiseases));
 			}
 		}
 
 		if (updateInternalSeriesDoseNumberCount) {
-			for (SupportedDiseaseConcept sdc : tallyOfDoseNumberByDisease.keySet()) {
+			for (String sdc : tallyOfDoseNumberByDisease.keySet()) {
 				if (tallyOfDoseNumberByDisease.containsKey(sdc)) {
 					Integer diseaseTally = tallyOfDoseNumberByDisease.get(sdc);
 					int newTally = diseaseTally.intValue();
@@ -2916,7 +2917,7 @@ public class TargetSeries {
 	 * 
 	 * @param pSDC SupportedDiseaseConcept
 	 */
-	public void markImmunityToSpecifiedDisease(SupportedDiseaseConcept pSDC, Date pDateOfImmunity) {
+	public void markImmunityToSpecifiedDisease(String pSDC, Date pDateOfImmunity) {
 
 		if (pSDC == null || pDateOfImmunity == null) {
 			return;
@@ -3220,12 +3221,12 @@ public class TargetSeries {
 		}
 	}
 
-	public Collection<SupportedDiseaseConcept> getDiseasesSupportedByThisSeries() {
+	public Collection<String> getDiseasesSupportedByThisSeries() {
 
 		return interimEvaluationValidityCountByDisease.keySet();
 	}
 
-	private int getInterimDiseaseEvaluationValidityCount(SupportedDiseaseConcept disease) {
+	private int getInterimDiseaseEvaluationValidityCount(String disease) {
 
 		if (disease == null) {
 			return 0;

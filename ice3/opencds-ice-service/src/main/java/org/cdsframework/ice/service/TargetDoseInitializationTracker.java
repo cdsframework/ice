@@ -37,11 +37,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.ICELogicHelper;
-import org.cdsframework.ice.service.Schedule;
-import org.cdsframework.ice.service.TargetDose;
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 import org.opencds.common.exceptions.InvalidDataException;
 import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
 import org.opencds.vmr.v1_0.internal.concepts.ImmunizationConcept;
@@ -101,17 +96,17 @@ public class TargetDoseInitializationTracker {
 		}
 		
 		// Get the vaccine component(s) associated with the vaccine group in focus and create a TargetDose for each (should only be 1 or something weird is going on)
-		SupportedVaccineGroupConcept vaccineGroup = ts.getSeriesRules().getVaccineGroup();
-		Collection<SupportedDiseaseConcept> targetedDiseases = null; // TODO: (SD) scheduleBackingSeries.getDiseasesTargetedByVaccineGroup(vaccineGroup);
-		Collection<VaccineComponent> vcsContainingTargetedDiseases = null; // TODO: (SD) vaccineAdministered.getVaccineComponentsTargetingSpecifiedDiseases(targetedDiseases);
+		String vaccineGroupStr = ts.getSeriesRules().getVaccineGroup();
+		Collection<String> targetedDiseases = scheduleBackingSeries.getDiseasesTargetedByVaccineGroup(vaccineGroupStr);
+		Collection<VaccineComponent> vcsContainingTargetedDiseases = vaccineAdministered.getVaccineComponentsTargetingSpecifiedDiseases(targetedDiseases);
 		List<TargetDose> initializedTargetDoses = new ArrayList<TargetDose>();
 		for (VaccineComponent vc : vcsContainingTargetedDiseases) {
 			String ctid = sae.getId();
 			String ctidvcc = ctid + vc.getVaccineConcept().getOpenCdsConceptCode();
-			if (! initializedTargetDoseByVgMap.containsKey(ctidvcc) || initializedTargetDoseByVgMap.get(ctidvcc).equals(vaccineGroup.getConceptCodeValue())) {
-				// TODO: For seasons, only add the TargetDose to the TargetSeries if the dose was administered during timeframe permitted by the Series 
-				// TargetDose td = new TargetDose(ctid, vaccineAdministered, vc, adminDate);
-				TargetDose td = null; // TODO: (SD) new TargetDose(ctid, vaccineAdministered, vc, adminDate, ts);
+			if (! initializedTargetDoseByVgMap.containsKey(ctidvcc) || initializedTargetDoseByVgMap.get(ctidvcc).equals(vaccineGroupStr)) {
+				/////// TODO: For seasons, only add the TargetDose to the TargetSeries if the dose was administered during timeframe permitted by the Series 
+				/////// TargetDose td = new TargetDose(ctid, vaccineAdministered, vc, adminDate);
+				TargetDose td = new TargetDose(ctid, vaccineAdministered, vc, adminDate, ts);
 				boolean lTargetDoseAdded = false;
 				if (overrideSeasonalDateRestriction) {
 					lTargetDoseAdded = ts.addTargetDoseToSeries(td, overrideSeasonalDateRestriction);
@@ -125,9 +120,8 @@ public class TargetDoseInitializationTracker {
 				String setAddition = ctidvcc + ts.getTargetSeriesIdentifier();	// Set tracker - SE+vaccinecomponent+targetSeriesIdentifier must be unique
 				initializedTargetDoseList.add(setAddition);
 				// ICELogicHelper.logDRLDebugMessage(_METHODNAME, "Set key: " + setAddition);
-				String vaccineGroupConceptCodeValue = vaccineGroup.getConceptCodeValue();
-				initializedTargetDoseByVgMap.put(ctidvcc, vaccineGroupConceptCodeValue);	// Map tracker - SE+vaccineComponentCC must be in the same vaccine group
-				// ICELogicHelper.logDRLDebugMessage(_METHODNAME, "Map key: " + ctidvcc + "; value " + vaccineGroupConceptCodeValue);
+				initializedTargetDoseByVgMap.put(ctidvcc, vaccineGroupStr);	// Map tracker - SE+vaccineComponentCC must be in the same vaccine group
+				// ICELogicHelper.logDRLDebugMessage(_METHODNAME, "Map key: " + ctidvcc + "; value " + vaccineGroupStr);
 				initializedTargetDoses.add(td);
 				if (logger.isDebugEnabled()) {
 					ICELogicHelper.logDRLDebugMessage(_METHODNAME, "Added " + td.toString() + " to TargetSeries " + ts.getSeriesName());
@@ -154,8 +148,8 @@ public class TargetDoseInitializationTracker {
 	 * @param vaccineAdministered Vaccine Administered
 	 * @return true or false according to criteria above
 	 */
-	public boolean shotAdministeredIsEligibleForInclusionInTargetSeries(ImmunizationConcept ic, SupportedVaccineGroupConcept svgc, 
-		SubstanceAdministrationEvent sae, TargetSeries targetSeries, Vaccine vaccineAdministered) {
+	public boolean shotAdministeredIsEligibleForInclusionInTargetSeries(ImmunizationConcept ic, String svgc, SubstanceAdministrationEvent sae, 
+		TargetSeries targetSeries, Vaccine vaccineAdministered) {
 	
 		if (specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(ic, svgc) == true &&
 			atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(sae, targetSeries, vaccineAdministered) == true) {
@@ -218,13 +212,9 @@ public class TargetDoseInitializationTracker {
 	
 	
 	private boolean specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(ImmunizationConcept ic, 
-		SupportedVaccineGroupConcept svgc) {
+		String vaccineGroup) {
 		
-		if (ic != null && svgc != null) {
-			String vaccineGroupConceptCode = svgc.getConceptCodeValue();
-			if (vaccineGroupConceptCode == null) {
-				return false;
-			}
+		if (ic != null && vaccineGroup != null) {
 			
 			String conceptTargetId = ic.getConceptTargetId();
 			String immunizationConcept = ic.getOpenCdsConceptCode();
@@ -233,7 +223,7 @@ public class TargetDoseInitializationTracker {
 			}
 			
 			String mapKey = conceptTargetId + immunizationConcept;
-			if (! initializedTargetDoseByVgMap.containsKey(mapKey) || initializedTargetDoseByVgMap.get(mapKey).equals(vaccineGroupConceptCode)) {
+			if (! initializedTargetDoseByVgMap.containsKey(mapKey) || initializedTargetDoseByVgMap.get(mapKey).equals(vaccineGroup)) {
 				return true;
 			}
 			else {

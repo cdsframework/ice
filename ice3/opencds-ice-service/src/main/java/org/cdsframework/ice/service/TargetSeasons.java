@@ -39,8 +39,6 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.ICECoreError;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
 import org.joda.time.LocalDate;
 
 public class TargetSeasons {
@@ -49,11 +47,11 @@ public class TargetSeasons {
 
 	//private Map<SupportedVaccineGroupConcept, Season> currentSeasonManuallySet;
 	// The current season for this invocation
-	private Map<SupportedVaccineGroupConcept, Season> currentSeason;			
+	private Map<String, Season> currentSeason;											// Vaccine Group -> Season			
 	// The TargetSeasons for this invocation., sorted in reverse order according to TargetSeasonComparator, default season is last
-	private Map<SupportedVaccineGroupConcept, NavigableSet<Season>> allSeasons;
+	private Map<String, NavigableSet<Season>> allSeasons;								// Vaccine Group -> Season
 	// The default season for this invocation
-	private Map<SupportedVaccineGroupConcept, Season> defaultSeason;			
+	private Map<String, Season> defaultSeason;					 						// Vaccine Group -> Season
 	
 	private static Log logger = LogFactory.getLog(TargetSeasons.class);
 	
@@ -62,9 +60,9 @@ public class TargetSeasons {
 		
 		evalTime = pEvalTime;
 		// currentSeasonManuallySet = new HashMap<SupportedVaccineGroupConcept, Season>();
-		currentSeason = new HashMap<SupportedVaccineGroupConcept, Season>();
-		allSeasons = new HashMap<SupportedVaccineGroupConcept, NavigableSet<Season>>();
-		defaultSeason = new HashMap<SupportedVaccineGroupConcept, Season>();
+		currentSeason = new HashMap<String, Season>();
+		allSeasons = new HashMap<String, NavigableSet<Season>>();
+		defaultSeason = new HashMap<String, Season>();
 	}
 	
 	
@@ -75,7 +73,7 @@ public class TargetSeasons {
 	 * @param pSVGC the vaccine group that scopes the set of TargetSeasons to scan for this criteria
 	 * @return true if a Season tracked by this class has been found for which this criteria is true, false if no such season is found.
 	 */
-	public boolean dateIsApplicableToOneOrMoreFullySpecifiedTargetSeasonsInVaccineGroup(Date pDate, SupportedVaccineGroupConcept pSVGC) {
+	public boolean dateIsApplicableToOneOrMoreFullySpecifiedTargetSeasonsInVaccineGroup(Date pDate, String pSVGC) {
 		
 		Season lS = getFullySpecifiedTargetSeasonInVaccineGroupApplicableToDate(pDate, pSVGC);
 		if (lS == null) {
@@ -92,9 +90,9 @@ public class TargetSeasons {
 	 * hasn't been defined) of those Seasons tracked by this class (i.e. - TargetSeasons). Default seasons do not meet this criteria. 
 	 * @param pDate
 	 * @param pSVGC
-	 * @return vaccine group Season that the date is applicable to, or null if none
+	 * @return vaccine group Season that the date is applicable to, or null if there is no season for the specified criteria
 	 */
-	public Season getFullySpecifiedTargetSeasonInVaccineGroupApplicableToDate(Date pDate, SupportedVaccineGroupConcept pSVGC) {
+	public Season getFullySpecifiedTargetSeasonInVaccineGroupApplicableToDate(Date pDate, String pSVGC) {
 		
 		if (pDate == null || pSVGC == null) {
 			return null;
@@ -124,8 +122,8 @@ public class TargetSeasons {
 	@SuppressWarnings("unused")
 	private void populateOffSeasonEndDatesForAllTargetSeasons() {
 		
-		Set<SupportedVaccineGroupConcept> lSeasonVGs = allSeasons.keySet();
-		for (SupportedVaccineGroupConcept lSVG : lSeasonVGs) {
+		Set<String> lSeasonVGs = allSeasons.keySet();
+		for (String lSVG : lSeasonVGs) {
 			populateOffSeasonEndDatesForTargetSeasonsInVaccineGroup(lSVG);
 		}
 	}
@@ -135,7 +133,7 @@ public class TargetSeasons {
 	 * Populate the off-season end date, as long as there are no ordering inconsistencies (i.e. - start date of next season starts on or before end date of previous season)
 	 * @param pSVGC
 	 */
-	private void populateOffSeasonEndDatesForTargetSeasonsInVaccineGroup(SupportedVaccineGroupConcept pSVGC) {
+	private void populateOffSeasonEndDatesForTargetSeasonsInVaccineGroup(String pSVGC) {
 
 		if (pSVGC == null) {
 			return;
@@ -246,7 +244,7 @@ public class TargetSeasons {
 			return;
 		}
 
-		SupportedVaccineGroupConcept svgc = pS.getVaccineGroup();
+		String svgc = pS.getVaccineGroup();
 		NavigableSet<Season> vgSeasons = allSeasons.get(svgc);
 		if (vgSeasons == null) {
 			vgSeasons = new TreeSet<Season>(new TargetSeasonComparator());
@@ -280,7 +278,7 @@ public class TargetSeasons {
 	/**
 	 * Get the next season for the specified SupportedVaccineGroupConcept with respect to the current season, or return null if it is not defined
 	 */
-	public Season getNextSeason(SupportedVaccineGroupConcept svgc) {
+	public Season getNextSeason(String svgc) {
 
 		String _METHODNAME = "getNextSeason(): ";
 		if (svgc == null) {
@@ -312,9 +310,9 @@ public class TargetSeasons {
 
 	
 	/**
-	 * Get the current season for the specified SupportedVaccineGroupConcept, or null if there is none.
+	 * Get the current season for the specified supported vaccine group, or null if there is none.
 	 */
-	public Season getCurrentSeason(SupportedVaccineGroupConcept svgc) {
+	public Season getCurrentSeason(String svgc) {
 		
 		if (svgc != null) {
 			return currentSeason.get(svgc);
@@ -326,10 +324,9 @@ public class TargetSeasons {
 	
 	
 	/**
-	 * Get the previous season with respect to the current season for the specified SupportedVaccineGroupConcept, or null if there is none or if it
-	 * is a default season.
+	 * Get the previous season with respect to the current season for the specified vaccine group, or null if there is none or if it is a default season.
 	 */
-	public Season getPreviousSeason(SupportedVaccineGroupConcept svgc) {
+	public Season getPreviousSeason(String svgc) {
 		
 		// String _METHODNAME = "getPreviousSeason(SupportedVaccineGroupConcept): ";
 
@@ -391,9 +388,9 @@ public class TargetSeasons {
 	
 	
 	/**
-	 * Get all seasons being tracked for the specified SupportedVaccineGroupConcept
+	 * Get all seasons being tracked for the specified vaccine group
 	 */
-	public NavigableSet<Season> getAllSeasons(SupportedVaccineGroupConcept svgc) {
+	public NavigableSet<Season> getAllSeasons(String svgc) {
 		
 		if (svgc == null) {
 			return null;
@@ -469,12 +466,12 @@ public class TargetSeasons {
 		if (allSeasons != null) {
 			toStr.append("    allSeasons {{{ ");
 			int i=1;
-			Set<Entry<SupportedVaccineGroupConcept, NavigableSet<Season>>> lASEntrySet = allSeasons.entrySet();
-			for (Entry<SupportedVaccineGroupConcept, NavigableSet<Season>> lASEntry : lASEntrySet) {
-				SupportedVaccineGroupConcept lSVGC = lASEntry.getKey();
+			Set<Entry<String, NavigableSet<Season>>> lASEntrySet = allSeasons.entrySet();
+			for (Entry<String, NavigableSet<Season>> lASEntry : lASEntrySet) {
+				String lSVGC = lASEntry.getKey();
 				NavigableSet<Season> lSeasons = lASEntry.getValue();
 				for (Season lSeason : lSeasons) {
-					toStr.append(i + ") " + lSVGC.toString() + ": ");
+					toStr.append(i + ") " + lSVGC + ": ");
 					toStr.append(lSeason.toString());
 					toStr.append("; ");
 					i++;
@@ -485,11 +482,11 @@ public class TargetSeasons {
 		if (currentSeason != null) {
 			int i=1;
 			toStr.append("    currentSeason {{{ ");
-			Set<Entry<SupportedVaccineGroupConcept, Season>> lCSEntrySet = currentSeason.entrySet();
-			for (Entry<SupportedVaccineGroupConcept, Season> lCSEntry : lCSEntrySet) {
-				SupportedVaccineGroupConcept lSVGC = lCSEntry.getKey();
+			Set<Entry<String, Season>> lCSEntrySet = currentSeason.entrySet();
+			for (Entry<String, Season> lCSEntry : lCSEntrySet) {
+				String lSVGC = lCSEntry.getKey();
 				Season lSeason = lCSEntry.getValue();
-				toStr.append(i + ") " + lSVGC.toString() + ": ");
+				toStr.append(i + ") " + lSVGC + ": ");
 				toStr.append(lSeason.toString());
 				i++;
 			}
@@ -498,11 +495,11 @@ public class TargetSeasons {
 		if (defaultSeason != null) {
 			int i=1;
 			toStr.append("    defaultSeason {{{ ");
-			Set<Entry<SupportedVaccineGroupConcept, Season>> lDefaultEntrySet = defaultSeason.entrySet();
-			for (Entry<SupportedVaccineGroupConcept, Season> lDefaultEntry : lDefaultEntrySet) {
-				SupportedVaccineGroupConcept lSVGC = lDefaultEntry.getKey();
+			Set<Entry<String, Season>> lDefaultEntrySet = defaultSeason.entrySet();
+			for (Entry<String, Season> lDefaultEntry : lDefaultEntrySet) {
+				String lSVGC = lDefaultEntry.getKey();
 				Season lSeason = lDefaultEntry.getValue();
-				toStr.append(i + ") " + lSVGC.toString() + ": ");
+				toStr.append(i + ") " + lSVGC + ": ");
 				toStr.append(lSeason.toString());
 				i++;
 			}
