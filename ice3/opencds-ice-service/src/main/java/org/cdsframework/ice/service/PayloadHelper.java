@@ -33,8 +33,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationStatus;
 import org.drools.spi.KnowledgeHelper;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
@@ -316,7 +316,7 @@ public class PayloadHelper {
 		childObs.setObservationValue(childObsValue);
 
 		// Observation interpretation
-		RecommendationStatus rs = ts.getRecommendationStatus();
+		BaseDataRecommendationStatus rs = ts.getRecommendationStatus();
 		List<Recommendation> recs = ts.getFinalRecommendations();
 		List<CD> interpretations = new ArrayList<CD>();
 		if (recs != null) {
@@ -510,23 +510,24 @@ public class PayloadHelper {
 	 * RecommendationStatus.RECOMMENDED, RecommendationStatus.RECOMMENDED_IN_FUTURE, RecommendationStatus.CONDITIONALLY_RECOMMENDED, 
 	 * or RecommendationStatus.NOT_RECOMMENDED
 	 */
-	public CD getLocalCodeForRecommendationStatus(RecommendationStatus recStatus) {
+	public CD getLocalCodeForRecommendationStatus(BaseDataRecommendationStatus recStatus) {
 
 		String _METHODNAME = "getLocalCodeForRecommendationStatus(): ";
 		if (recStatus == null) {
 			return null;
 		}
 
-		RecommendationStatus lRecStatusToReturn = null;
-		if (recStatus == RecommendationStatus.RECOMMENDED || recStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED || recStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
-			recStatus == RecommendationStatus.NOT_RECOMMENDED) {
+		BaseDataRecommendationStatus lRecStatusToReturn = null;
+		if (recStatus == BaseDataRecommendationStatus.RECOMMENDED || recStatus == BaseDataRecommendationStatus.CONDITIONALLY_RECOMMENDED || recStatus == BaseDataRecommendationStatus.RECOMMENDED_IN_FUTURE || 
+			recStatus == BaseDataRecommendationStatus.NOT_RECOMMENDED) {
 			lRecStatusToReturn = recStatus;
 		}
 		else {
-			lRecStatusToReturn = RecommendationStatus.RECOMMENDED;
+			lRecStatusToReturn = BaseDataRecommendationStatus.RECOMMENDED;
 		}
 		
-		String lCdsListItemName = RecommendationStatus.getRecommendationStatusCdsListItem(lRecStatusToReturn);
+		// String lCdsListItemName = RecommendationStatus.getRecommendationStatusCdsListItem(lRecStatusToReturn);
+		String lCdsListItemName = lRecStatusToReturn.getCdsListItemName();
 		LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(lCdsListItemName);
 		if (sv == null) {
 			String lErrStr = "status code supplied is not one that is defined in the supporting data; returning null";

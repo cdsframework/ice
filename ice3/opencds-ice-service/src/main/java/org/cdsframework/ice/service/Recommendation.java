@@ -32,49 +32,15 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationStatus;
 
 public class Recommendation {
-	
-	public enum RecommendationStatus { 
-		NOT_FORECASTED, 
-		EVALUATION_OF_HISTORY_REQUIRED, 
-		FORECASTING_IN_PROGRESS, 
-		FORECASTING_COMPLETE, 
-		RECOMMENDED("RECOMMENDATION_STATUS_CONCEPT.RECOMMENDED"), 
-		CONDITIONALLY_RECOMMENDED("RECOMMENDATION_STATUS_CONCEPT.CONDITIONAL"), 
-		NOT_RECOMMENDED("RECOMMENDATION_STATUS_CONCEPT.NOT_RECOMMENDED"), 
-		RECOMMENDED_IN_FUTURE("RECOMMENDATION_STATUS_CONCEPT.FUTURE_RECOMMENDED"); 
-		
-		private String recommendationStatusCdsListItem;
-		
-		private RecommendationStatus() {
-			this.recommendationStatusCdsListItem = null;
-		}
-		
-		private RecommendationStatus(String pRecommendationStatusCdsListItem) {
-			this.recommendationStatusCdsListItem = pRecommendationStatusCdsListItem;
-		}
-		
-		public String getRecommendationStatusCdsListItem() {
-			return this.recommendationStatusCdsListItem;
-		}
-		
-		public static String getRecommendationStatusCdsListItem(RecommendationStatus pRS) {
-			
-			if (pRS == null) {
-				return null;
-			}
-			else {
-				return pRS.getRecommendationStatusCdsListItem();
-			}
-		}
-	}
 	
 	public enum RecommendationType { EARLIEST, EARLIEST_RECOMMENDED, LATEST_RECOMMENDED }
 	
 	private String recommendationIdentifier;
 	private String targetSeriesIdentifier;
-	private RecommendationStatus recommendationStatus;
+	private BaseDataRecommendationStatus recommendationStatus;
 	private Vaccine recommendedVaccine;
 	private Date recommendationDate;
 	private String recommendationReason;
@@ -101,7 +67,7 @@ public class Recommendation {
 		targetSeriesIdentifier = pTS.getTargetSeriesIdentifier();
 		recommendedVaccine = null;
 		recommendationDate = null;
-		recommendationStatus = RecommendationStatus.NOT_FORECASTED;
+		recommendationStatus = BaseDataRecommendationStatus.NOT_FORECASTED;
 		recommendationReason = null;
 	}
 	
@@ -113,7 +79,7 @@ public class Recommendation {
 		return targetSeriesIdentifier;
 	}
 
-	public RecommendationStatus getRecommendationStatus() {
+	public BaseDataRecommendationStatus getRecommendationStatus() {
 		return recommendationStatus;
 	}
 
@@ -121,7 +87,7 @@ public class Recommendation {
 	 * Set the RecommendationStatus for this recommended. If the supplied parameter is null, RecommendationStatus is not changed
 	 * @param recommendationStatus
 	 */
-	public void setRecommendationStatus(RecommendationStatus recommendationStatus) {
+	public void setRecommendationStatus(BaseDataRecommendationStatus recommendationStatus) {
 		if (recommendationStatus == null) {
 			return;
 		}
@@ -165,7 +131,7 @@ public class Recommendation {
 	 * @param recList
 	 * @param recStatusOfInterest
 	 */
-	public static List<Recommendation> getRecommendationListSubsetWithSpecifiedStatuses(List<Recommendation> recList, List<RecommendationStatus> recStatusListOfInterest) {
+	public static List<Recommendation> getRecommendationListSubsetWithSpecifiedStatuses(List<Recommendation> recList, List<BaseDataRecommendationStatus> recStatusListOfInterest) {
 		
 		if (recList == null || recList.size() == 0 || recStatusListOfInterest == null || recStatusListOfInterest.size() == 0) {
 			return new ArrayList<Recommendation>();
@@ -173,7 +139,7 @@ public class Recommendation {
 		
 		List<Recommendation> lSubset = new ArrayList<Recommendation>();
 		for (Recommendation lRec : recList) {
-			RecommendationStatus lRecStatus = lRec.getRecommendationStatus();
+			BaseDataRecommendationStatus lRecStatus = lRec.getRecommendationStatus();
 			if (lRecStatus != null) {
 				if (recStatusListOfInterest.contains(lRecStatus)) {
 					lSubset.add(lRec);

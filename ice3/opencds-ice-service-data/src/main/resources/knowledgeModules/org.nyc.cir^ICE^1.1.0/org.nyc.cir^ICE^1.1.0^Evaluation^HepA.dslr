@@ -69,10 +69,11 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped Adol 2-d
 			- the name of the Series is "HepA Adult 3-Dose Series"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		The Immunization Schedule information $oSchedule must be known to complete writing this rule
+		// The Immunization Schedule information $oSchedule must be known to complete writing this rule
 		Confirm Elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y" && Elapsed time between $dtBirthDate and $assign_dtPrevAdministrationDate < "19y"	 
 	then
-		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber for Schedule $oSchedule
+		// Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber for Schedule $oSchedule
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
@@ -97,10 +98,11 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped Adol 3-d
 			- the name of the Series is "HepA Adult 3-Dose Series"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		The Immunization Schedule information $oSchedule must be known to complete writing this rule
+		// The Immunization Schedule information $oSchedule must be known to complete writing this rule
 		Confirm Elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y" && Elapsed time between $dtBirthDate and $assign_dtPrevAdministrationDate < "19y"	 
 	then
-		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber for Schedule $oSchedule
+		// Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber for Schedule $oSchedule
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
@@ -125,9 +127,10 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped NOS dose
 			- the name of the Series is "HepA Adult 3-Dose Series"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		The Immunization Schedule information $oSchedule must be known to complete writing this rule
+		// The Immunization Schedule information $oSchedule must be known to complete writing this rule
 		Confirm Elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y" && Elapsed time between $dtBirthDate and $assign_dtPrevAdministrationDate < "19y"	 
 	then
-		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber for Schedule $oSchedule
+		// Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber for Schedule $oSchedule
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber
 		Log that this Series Rule fired for the Series $targetSeries
 end

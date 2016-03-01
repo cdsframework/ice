@@ -139,7 +139,7 @@ public class Schedule {
 	 * @param openCdsConceptValue
 	 * @return Vaccine, or null if there is no associated Vaccine for the OpenCDS concept code provided
 	 */
-	public Vaccine getVaccineByOpenCDSConceptValue(String openCdsConceptValue) {
+	public Vaccine getVaccineByCdsConceptValue(String openCdsConceptValue) {
 
 		if (openCdsConceptValue == null) {
 			return null;
