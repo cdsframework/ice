@@ -492,7 +492,7 @@ public class PayloadHelper {
 			lDoseStatusToReturn = DoseStatus.ACCEPTED;
 		}
 
-		String lCdsListItemName = DoseStatus.getDoseStatusCdsListItem(lDoseStatusToReturn);
+		String lCdsListItemName = lDoseStatusToReturn.getCdsListItemName();
 		LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(lCdsListItemName);
 		if (sv == null) {
 			String lErrStr = "status code supplied is not one that is defined in the supporting data; returning null";

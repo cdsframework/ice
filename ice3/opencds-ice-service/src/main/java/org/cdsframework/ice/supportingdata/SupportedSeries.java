@@ -653,7 +653,6 @@ public class SupportedSeries implements SupportingData {
 		}
 		
 		int lNumberOfDistinctSeasons = seasonsTracker.size();
-		// if (seasonsTracker.size() > 0) {
 		if (lNumberOfDistinctSeasons > 0) {
 			if (countOfDefaultSeasonsAcrossSeries != 1 && countOfDefaultSeasonsAcrossSeries != 0 ) {
 				logger.warn(_METHODNAME + "a seasonal vaccine group must have exactly either 0 or 1 default seasons defined. The # of seasonal series " + 
@@ -678,92 +677,6 @@ public class SupportedSeries implements SupportingData {
 		}
 	}
 	
-		
-		/*
-		String _METHODNAME = "checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(): ";
-		if (svgc == null) {
-			return false;
-		}
-		
-		List<SeriesRules> srs = vaccineGroupSeries.get(svgc);
-		int countOfDefaultSeasonsAcrossSeries = 0;
-		int countOfSeasons = 0;
-		boolean aNonSeasonalSeriesExists = false;
-		List<Season> seasonsTracker = new ArrayList<Season>();
-		for (SeriesRules sr : srs) {
-			if (countOfDefaultSeasonsAcrossSeries > 1) {
-				logger.warn(_METHODNAME + "more than one default season across in vaccine group " + svgc.getConceptDisplayNameValue());
-				return false;
-			}
-			List<Season> seriesSeasons = sr.getSeasons();
-			if (seriesSeasons == null || seriesSeasons.isEmpty()) {
-				aNonSeasonalSeriesExists = true;
-				if (countOfSeasons > 0) {
-					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + svgc.getConceptDisplayNameValue());
-					return false;
-				}
-			}
-			for (Season s : seriesSeasons) {
-				if (aNonSeasonalSeriesExists) {
-					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + svgc.getConceptDisplayNameValue());
-					return false;
-				}
-				boolean lSeasonAlreadyEncountered = false;
-				if (seasonsTracker.contains(s)) {
-					lSeasonAlreadyEncountered = true;
-				}
-				else {
-					countOfSeasons++;
-				}
-				if (s.isDefaultSeason() == true) {
-					countOfDefaultSeasonsAcrossSeries++;
-					if (countOfDefaultSeasonsAcrossSeries >= 2) {
-						logger.warn(_METHODNAME + "more than one default season in Series in vaccine group " + svgc.getConceptDisplayNameValue());
-						return false;
-					}
-				}
-				else if (lSeasonAlreadyEncountered == false) {
-					for (Season seasonIter : seasonsTracker) {
-						// Check to see if the season start or end dates overlaps with another season. Overlaps are only allowed if the start and end dates 
-						// of the season for the different series are exactly the same. Default seasons do not have a specified start or end date, so they are 
-						// not checked here. (This is because if a fully-specified season can take place at a time when a default season is specified; it  
-						// overrides the default season which will then not be used.)
-						if (! s.seasonsHaveEquivalentStartAndEndDates(seasonIter) && s.seasonOverlapsWith(seasonIter)) {
-							logger.warn(_METHODNAME + "overlapping seasons exist in vaccine group " + svgc.getConceptDisplayNameValue());
-							return false;
-						}
-					}
-					seasonsTracker.add(s);
-				}
-			}
-		}
-		
-		int lNumberOfDistinctSeasons = seasonsTracker.size();
-		// if (seasonsTracker.size() > 0) {
-		if (lNumberOfDistinctSeasons > 0) {
-			if (countOfDefaultSeasonsAcrossSeries != 1 && countOfDefaultSeasonsAcrossSeries != 0 ) {
-				logger.warn(_METHODNAME + "a seasonal vaccine group must have exactly either 0 or 1 default seasons defined. The # of seasonal series " + 
-					"found for " + "vaccine group " + svgc.getConceptDisplayNameValue() + ": " + countOfDefaultSeasonsAcrossSeries);
-				return false;
-			}
-			else if (lNumberOfDistinctSeasons > 1 && countOfDefaultSeasonsAcrossSeries == 0) {
-				logger.warn(_METHODNAME + "a seasonal vaccine group wiht more than one season defined must also have a default season defined. No default season has been defined");
-				return false;
-			}
-			else {
-				// This is a properly configured seasonal vaccine group with a default season for evaluation
-				return true;
-			}
-		}
-		else if (countOfDefaultSeasonsAcrossSeries == 0 && seasonsTracker.size() == 0) {
-			// This is not a seasonal vaccine group
-			return true;
-		}
-		else {
-			return false;
-		}
-		*/
-
 	
 	@Override
 	public String toString() {

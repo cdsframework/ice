@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.ice.service.DoseStatus;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.util.ConceptUtils;
@@ -162,6 +163,12 @@ public class ICESupportingDataConfiguration {
 			logger.debug(_METHODNAME + lDebugStr);
 		}
 
+		// Check to make sure that the required base data codes have been supplied
+		if (! allBaseSupportingDataCdsListItemInitialized()) {
+			String lErrStr = "Some base supporting data cdsListItems not supplied; a minimum set of cdsListItem codes must be specified. See ICE documentation";
+			logger.error(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 		///////
 		// Initialize the Vaccine Group supporting data
 		///////
@@ -321,6 +328,58 @@ public class ICESupportingDataConfiguration {
 	public SupportedSeries getSupportedSeries() {
 		
 		return this.supportedSeries;
+	}
+	
+	
+	private boolean allBaseSupportingDataCdsListItemInitialized() {
+		
+		// Verify that all DoseStatus enumeration items been provided
+		if (! verifyCdsListItemExistsForAllEnumConstants(DoseStatus.class)) {
+			return false;
+		}
+		// Verify that all EvaluationReason items been provided
+		if (! verifyCdsListItemExistsForAllEnumConstants(BaseDataEvaluationReason.class)) {
+			return false;
+		}
+		// Verify that all RecommendationStatus items have been provided
+		if (! verifyCdsListItemExistsForAllEnumConstants(BaseDataRecommendationStatus.class)) {
+			return false;
+		}
+		// Verify that all RecommendationReason items have been provided
+		if (! verifyCdsListItemExistsForAllEnumConstants(BaseDataRecommendationReason.class)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
+	private <E extends Enum<E>> boolean verifyCdsListItemExistsForAllEnumConstants(Class<E> pEnum) {
+		
+		String _METHODNAME = "verifyCdsListItemForAllSpecifiedEnumConstants(): ";
+		
+		if (pEnum == null) {
+			logger.warn(_METHODNAME + "enumeration supplied is not of type BaseData");
+			return false;
+		}
+		
+		for (Enum<E> enumVal : pEnum.getEnumConstants()) {
+			if (enumVal instanceof BaseData) {
+				String lCdsListItemName = ((BaseData) enumVal).getCdsListItemName();
+				if (logger.isDebugEnabled()) {
+					logger.debug(_METHODNAME + "BaseData cdsListItemName" + pEnum.getSimpleName() + "." + lCdsListItemName);
+				}
+				if (! this.supportedCdsLists.cdsListItemExists(lCdsListItemName)) {
+					return false;
+				}
+			}
+			else {
+				logger.warn(_METHODNAME + "enumeration supplied not of type BaseData");
+				return false;
+			}
+		}
+
+		return true;
 	}
 	
 	

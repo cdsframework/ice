@@ -26,7 +26,9 @@
 
 package org.cdsframework.ice.service;
 
-public enum DoseStatus {
+import org.cdsframework.ice.supportingdata.BaseData;
+
+public enum DoseStatus implements BaseData {
 	ACCEPTED("EVALUATION_STATUS_CONCEPT.ACCEPTED"), 
 	PRIMARY_SHOT_DETERMINATION_IN_PROCESS, 
 	EVALUATION_IN_PROCESS, 
@@ -36,27 +38,18 @@ public enum DoseStatus {
 	VALID("EVALUATION_STATUS_CONCEPT.VALID"), 
 	DECISION_RENDERED;
 	
-	private String doseStatusCdsListItem;
+	private String cdsListItemName;
 	
 	private DoseStatus() {
-		this.doseStatusCdsListItem = null;
+		this.cdsListItemName = null;
 	}
 	
 	private DoseStatus(String pDoseStatusConcept) {
-		this.doseStatusCdsListItem = pDoseStatusConcept;
+		this.cdsListItemName = pDoseStatusConcept;
 	}
 	
-	public String getDoseStatusCdsListItem() {
-		return this.doseStatusCdsListItem;
+	public String getCdsListItemName() {
+		return this.cdsListItemName;
 	}
-	
-	public static String getDoseStatusCdsListItem(DoseStatus pDS) {
-		
-		if (pDS == null) {
-			return null;
-		}
-		else {
-			return pDS.getDoseStatusCdsListItem();
-		}
-	}
+
 }
