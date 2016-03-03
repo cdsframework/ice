@@ -208,15 +208,16 @@ public class SupportedCdsLists implements SupportingData {
 	public void addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(CdsListSpecificationFile pCdsListSpecificationFile) 
 		throws InconsistentConfigurationException {
 		
-		String _METHODNAME = "addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(): ";
+		// String _METHODNAME = "addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(): ";
 		
 		if (pCdsListSpecificationFile == null) {
 			return;
 		}
 		if (pCdsListSpecificationFile != null) {
 			List<CdsListItem> lcli = pCdsListSpecificationFile.getCdsListItems();
-			// Check to make sure that the cdsListCode was never provided by a different file; currently do not support the same cdsListCode across different files
 			try {
+				/*
+				// Check to make sure that the cdsListCode was never provided by a different file; currently do not support the same cdsListCode across different files
 				for (CdsListItem cli : lcli) {
 					if (cli != null) {
 						LocallyCodedCdsListItem slci = new LocallyCodedCdsListItem(pCdsListSpecificationFile, cli);
@@ -234,6 +235,7 @@ public class SupportedCdsLists implements SupportingData {
 						// continue until first non-null entry is found and verified
 					}
 				}
+				*/
 				for (CdsListItem cli : lcli) {
 					addSupportedCdsListItemAndConcept(pCdsListSpecificationFile, cli);
 				}

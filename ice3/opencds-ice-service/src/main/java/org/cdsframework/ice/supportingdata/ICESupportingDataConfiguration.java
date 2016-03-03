@@ -369,7 +369,7 @@ public class ICESupportingDataConfiguration {
 				if (logger.isDebugEnabled()) {
 					logger.debug(_METHODNAME + "BaseData cdsListItemName" + pEnum.getSimpleName() + "." + lCdsListItemName);
 				}
-				if (! this.supportedCdsLists.cdsListItemExists(lCdsListItemName)) {
+				if (lCdsListItemName != null && ! this.supportedCdsLists.cdsListItemExists(lCdsListItemName)) {
 					return false;
 				}
 			}
