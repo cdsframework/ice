@@ -24,9 +24,11 @@
  * correspondence to ice@hln.com.
  */
 
-package org.cdsframework.ice.supportingdata;
+package org.cdsframework.ice.service;
 
-public enum BaseDataRecommendationStatus implements BaseData {
+import org.cdsframework.ice.supportingdata.BaseData;
+
+public enum RecommendationStatus implements BaseData {
 	NOT_FORECASTED, 
 	EVALUATION_OF_HISTORY_REQUIRED, 
 	FORECASTING_IN_PROGRESS, 
@@ -38,11 +40,11 @@ public enum BaseDataRecommendationStatus implements BaseData {
 	
 	private String cdsListItemName;
 	
-	private BaseDataRecommendationStatus() {
+	private RecommendationStatus() {
 		this.cdsListItemName = null;
 	}
 	
-	private BaseDataRecommendationStatus(String pRecommendationStatusCdsListItem) {
+	private RecommendationStatus(String pRecommendationStatusCdsListItem) {
 		this.cdsListItemName = pRecommendationStatusCdsListItem;
 	}
 	

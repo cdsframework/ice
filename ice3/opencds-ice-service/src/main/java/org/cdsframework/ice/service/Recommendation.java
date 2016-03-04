@@ -32,7 +32,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.supportingdata.BaseDataRecommendationStatus;
 
 public class Recommendation {
 	
@@ -40,7 +39,7 @@ public class Recommendation {
 	
 	private String recommendationIdentifier;
 	private String targetSeriesIdentifier;
-	private BaseDataRecommendationStatus recommendationStatus;
+	private RecommendationStatus recommendationStatus;
 	private Vaccine recommendedVaccine;
 	private Date recommendationDate;
 	private String recommendationReason;
@@ -67,7 +66,7 @@ public class Recommendation {
 		targetSeriesIdentifier = pTS.getTargetSeriesIdentifier();
 		recommendedVaccine = null;
 		recommendationDate = null;
-		recommendationStatus = BaseDataRecommendationStatus.NOT_FORECASTED;
+		recommendationStatus = RecommendationStatus.NOT_FORECASTED;
 		recommendationReason = null;
 	}
 	
@@ -79,7 +78,7 @@ public class Recommendation {
 		return targetSeriesIdentifier;
 	}
 
-	public BaseDataRecommendationStatus getRecommendationStatus() {
+	public RecommendationStatus getRecommendationStatus() {
 		return recommendationStatus;
 	}
 
@@ -87,7 +86,7 @@ public class Recommendation {
 	 * Set the RecommendationStatus for this recommended. If the supplied parameter is null, RecommendationStatus is not changed
 	 * @param recommendationStatus
 	 */
-	public void setRecommendationStatus(BaseDataRecommendationStatus recommendationStatus) {
+	public void setRecommendationStatus(RecommendationStatus recommendationStatus) {
 		if (recommendationStatus == null) {
 			return;
 		}
@@ -131,7 +130,7 @@ public class Recommendation {
 	 * @param recList
 	 * @param recStatusOfInterest
 	 */
-	public static List<Recommendation> getRecommendationListSubsetWithSpecifiedStatuses(List<Recommendation> recList, List<BaseDataRecommendationStatus> recStatusListOfInterest) {
+	public static List<Recommendation> getRecommendationListSubsetWithSpecifiedStatuses(List<Recommendation> recList, List<RecommendationStatus> recStatusListOfInterest) {
 		
 		if (recList == null || recList.size() == 0 || recStatusListOfInterest == null || recStatusListOfInterest.size() == 0) {
 			return new ArrayList<Recommendation>();
@@ -139,7 +138,7 @@ public class Recommendation {
 		
 		List<Recommendation> lSubset = new ArrayList<Recommendation>();
 		for (Recommendation lRec : recList) {
-			BaseDataRecommendationStatus lRecStatus = lRec.getRecommendationStatus();
+			RecommendationStatus lRecStatus = lRec.getRecommendationStatus();
 			if (lRecStatus != null) {
 				if (recStatusListOfInterest.contains(lRecStatus)) {
 					lSubset.add(lRec);

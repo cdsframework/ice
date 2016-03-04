@@ -62,17 +62,10 @@ import org.cdsframework.ice.service.InconsistentConfigurationException
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.PayloadHelper
 import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.Schedule
 import org.cdsframework.ice.service.Season
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedImmunityConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetDoseInitializationTracker
 import org.cdsframework.ice.service.TargetSeasons
@@ -91,11 +84,12 @@ global java.lang.String clientLanguage
 global java.lang.String clientTimeZoneOffset
 global java.lang.String focalPersonId
 global java.util.Date evalTime
-global java.util.Date patientAgeTimeOfInterest
 global java.util.HashSet<String> assertions
 global java.util.HashMap<String,Object> namedObjects
-global java.io.File baseKnowledgeRepositoryLocation
-global java.lang.String requestedKmId
+
+// ICE specific
+global java.util.Date patientAgeTimeOfInterest
+global org.cdsframework.ice.service.Schedule schedule
 
 // global org.drools.runtime.KnowledgeContext kcontext
 
@@ -110,16 +104,11 @@ global java.lang.String requestedKmId
 rule "ImmunizationReferenceData.Initialize Immunization Schedule and Supporting Data" ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
    	when
-		not Schedule()
-		eval(baseKnowledgeRepositoryLocation != null && requestedKmId != null && requestedKmId.length() > 0)
+		eval(patientAgeTimeOfInterest == null)
 	then
+		String _RULENAME = kcontext.rule.name;
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
-		ArrayList cdsVersions = new ArrayList();
-		cdsVersions.add("org.cdsframework^ICE^1.1.0");
-		cdsVersions.add(requestedKmId);
-		Schedule s = new Schedule("requestedKmId", cdsVersions, baseKnowledgeRepositoryLocation);
-		insert(s);
-		ICELogicHelper.logDRLDebugMessage("Initialize Immunization Schedule", "Entered Initialize Immunization Schedule");		
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Initialized patientAgeTimeOfInterest" + evalTime);		
 end
 
 
@@ -131,7 +120,6 @@ rule "ImmunizationReferenceData.Initialize Focal Person Id" ruleflow-group "Immu
 	dialect "mvel"
 	salience 10
    	when
-   		not Schedule()
    		not LiveVirusFact()
    		not TargetSeasons()
 		$evaluatedPerson : EvaluatedPerson(isFocalPerson() == true)
@@ -139,7 +127,7 @@ rule "ImmunizationReferenceData.Initialize Focal Person Id" ruleflow-group "Immu
 	then
 		String _RULENAME = kcontext.rule.name;
 		kcontext.getKnowledgeRuntime().setGlobal("focalPersonId", $evaluatedPerson.getId());
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Initialized Focal Person ID");		
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Initialized Focal Person ID" + $evaluatedPerson.getId());		
 end
 
 
@@ -176,11 +164,10 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "ImmunizationReferenceData: Load SeriesRules and TargetDoseInitializationTracker on to Fact List" ruleflow-group "ImmunizationReferenceData"
+rule "InitializeSeriesAndSeasons: Load SeriesRules and TargetDoseInitializationTracker on to Fact List" ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "java"
 	salience 20
 	when
-		schedule: Schedule()
 		not SeriesRules()
 	then
 		String _RULENAME = drools.getRule().getName();
@@ -208,7 +195,7 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "ImmunizationReferenceData: Insert SeriesRules Seasons into TargetSeasons" ruleflow-group "ImmunizationReferenceData"
+rule "InitializeSeriesAndSeasons: Insert SeriesRules Seasons into TargetSeasons" ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
 	salience 20
 	when
@@ -228,7 +215,7 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "ImmunizationReferenceData: Update Seasons in Working Memory with Information from TargetSeasons" ruleflow-group "ImmunizationReferenceData"
+rule "InitializeSeriesAndSeasons: Update Seasons in Working Memory with Information from TargetSeasons" ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
 	salience 10
 	no-loop true
@@ -247,7 +234,7 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "ImmunizationReferenceData: Update Fully-Specified Seasons in Series with Information from TargetSeasons" ruleflow-group "ImmunizationReferenceData"
+rule "InitializeSeriesAndSeasons: Update Fully-Specified Seasons in Series with Information from TargetSeasons" ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
 	salience 5
 	no-loop true
@@ -267,7 +254,7 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "ImmunizationReferenceData: Log TargetSeasons Tracked for this Request" ruleflow-group "ImmunizationReferenceData"
+rule "InitializeSeriesAndSeasons: Log TargetSeasons Tracked for this Request" ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
 	salience -1
 	when
@@ -329,13 +316,12 @@ rule "CandidateSeriesIdentification: Initialize *Current* Season TargetSeries wi
 		$season : Season(isDefaultSeason() == true, dateIsApplicableToSeason(evalTime)) from $s.seasons
 		not (Season(isDefaultSeason() == false, vaccineGroup == $vg, dateIsApplicableToSeason(evalTime)))  
 		not (TargetSeries(seriesName == $s.seriesName, targetSeason != null, targetSeason == $season))
-		$schedule : Schedule()
 		$tseasons : TargetSeasons()
 	then
 		String _RULENAME = kcontext.rule.name;
 		Season fullySpecified = Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate($season, evalTime);
 		$tseasons.addTargetSeason(fullySpecified);
-		TargetSeries ts = new TargetSeries($s, $schedule, fullySpecified);
+		TargetSeries ts = new TargetSeries($s, schedule, fullySpecified);
 		$s.addFullySpecifiedSeason(fullySpecified);		
 		insert(ts);
 		insert(fullySpecified);
@@ -358,7 +344,7 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		$season : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, $season.dateIsApplicableToSeason($shotDate)) from $s.seasons
 		not (TargetSeries(seriesName == $s.seriesName, targetSeason != null, targetSeason == $season))
 		$schedule : Schedule()
-		eval($schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases($schedule.getVaccineByOpenCDSConceptTypeValue($occ), $schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)		
+		eval($schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases($schedule.getVaccineByCdsConceptValue($occ), $schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)		
 	then
 		String _RULENAME = kcontext.rule.name;
 		TargetSeries ts = new TargetSeries($s, $schedule, $season);
@@ -384,7 +370,7 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		not (TargetSeries(targetSeason != null, targetSeason == Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate($season, $shotDate))) 
 		$schedule : Schedule()
 		$tseasons : TargetSeasons()
-		eval($schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases($schedule.getVaccineByOpenCDSConceptTypeValue($occ), $schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)		
+		eval($schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases($schedule.getVaccineByCdsConceptValue($occ), $schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)		
 	then
 		String _RULENAME = kcontext.rule.name;
 		// Create a fully-specified season for this specific year using the default month and day
@@ -416,7 +402,7 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries when Shots Administ
 		$season : Season(isDefaultSeason() == false, vaccineGroup == $vg, dateIsApplicableToSeason($shotDate) == false)
 		not (TargetSeries(seriesName == $s.seriesName, targetSeason != null, targetSeason == $season))
 		$schedule : Schedule()
-		eval($schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases($schedule.getVaccineByOpenCDSConceptTypeValue($occ), $schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)		
+		eval($schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases($schedule.getVaccineByCdsConceptValue($occ), $schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)		
 	then
 		String _RULENAME = kcontext.rule.name;
 		TargetSeries ts = new TargetSeries($s, $schedule, $season);
@@ -426,7 +412,7 @@ end
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                            Custom TargetSeries Initialization Rules Start Here - TODO: Move to DSLRs                                       //
+//                                                            Custom TargetSeries Initialization Rules Start Here                                                             //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////// Influenza TargetSeries Initialization Rules /////////////////////////////////////////////////

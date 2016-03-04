@@ -162,9 +162,9 @@ public class SupportedVaccineGroups implements SupportingData {
 		}
 		
 		///////
-		// Primary OpenCds Concept - Vaccines are an OpenCDS concept as well.
+		// Primary OpenCds Concept from vaccine group
 		///////
-		CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), true, pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());
+		CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());
 		
 		///////
 		// Related Diseases

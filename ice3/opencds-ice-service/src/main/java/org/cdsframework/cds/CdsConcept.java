@@ -45,12 +45,31 @@ public class CdsConcept extends VmrOpenCdsConcept {
 		super();
 	}
 	
+	
 	/**
 	 * Instantiate an OpenCdsConceptCode object. It does not set the conceptTargetId, displayName or determinationMethodCode attributes of the VmrOpenCdsConcept
 	 * @param openCdsConceptCode Concept Code; mandatory
 	 * @throws IllegalArgumentException if concept code is null
 	 */
- 	public CdsConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept) {
+ 	public CdsConcept(String pOpenCdsConceptCode) {
+		super();
+		
+		if (pOpenCdsConceptCode == null) {
+			String _METHODNAME = "OpenCdsICEConcept(): ";
+			String errStr = "concept code not supplied";
+			logger.warn(_METHODNAME + errStr);
+			throw new IllegalArgumentException(errStr);
+		}
+		setOpenCdsConceptCode(pOpenCdsConceptCode);
+	}
+ 	
+ 	
+	/**
+	 * Instantiate an OpenCdsConceptCode object. It does not set the conceptTargetId, displayName or determinationMethodCode attributes of the VmrOpenCdsConcept
+	 * @param openCdsConceptCode Concept Code; mandatory
+	 * @throws IllegalArgumentException if concept code is null
+	 */
+ 	private CdsConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept) {
 		super();
 		
 		if (pOpenCdsConceptCode == null) {
@@ -69,8 +88,20 @@ public class CdsConcept extends VmrOpenCdsConcept {
 	 * @param pDisplayName Display Name
 	 * @throws IllegalArgumentException if concept code is null
 	 */
-	public CdsConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept, String pDisplayName) {
+	private CdsConcept(String pOpenCdsConceptCode, boolean pIsOpenCdsSupportedConcept, String pDisplayName) {
 		this(pOpenCdsConceptCode, pIsOpenCdsSupportedConcept);
+		setDisplayName(pDisplayName);
+	}
+	
+	
+	/**
+	 * Instantiate an CdsConcept object. It does not set the conceptTargetId or determinationMethodCode attributes of the VmrOpenCdsConcept
+	 * @param pOpenCdsConceptCode Concept Code; mandatory
+	 * @param pDisplayName Display Name
+	 * @throws IllegalArgumentException if concept code is null
+	 */
+	public CdsConcept(String pOpenCdsConceptCode, String pDisplayName) {
+		this(pOpenCdsConceptCode);
 		setDisplayName(pDisplayName);
 	}
 	

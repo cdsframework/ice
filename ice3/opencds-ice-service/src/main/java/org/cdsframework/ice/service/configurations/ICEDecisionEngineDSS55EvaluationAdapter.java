@@ -39,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.util.FileNameWithExtensionFilterImpl;
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
@@ -60,6 +62,7 @@ import org.omg.dss.RequiredDataNotProvidedExceptionFault;
 import org.omg.dss.UnrecognizedLanguageExceptionFault;
 import org.omg.dss.UnrecognizedScopedEntityExceptionFault;
 import org.omg.dss.UnsupportedLanguageExceptionFault;
+import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.structures.EvaluationRequestDataItem;
 import org.opencds.common.structures.EvaluationRequestKMItem;
 import org.opencds.config.api.KnowledgeRepository;
@@ -98,17 +101,13 @@ import org.opencds.plugin.PluginDataCache;
  * <p>
  * Company: OpenCDS
  * </p>
- *
- * @author David Shields
- * @version 2.1 for Drools 5.3 / 5.4
- * @date 11-09-2011
- * 
  */
+
 public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
 	private File baseKnowledgeRepositoryLocation = null;
 	private File knowledgeModuleLocation = null;
-	private boolean useSupportingXMLData = false;
+	private String baseRulesScopingKmId = null;
 	
 	private static Log logger = LogFactory.getLog(ICEDecisionEngineDSS55EvaluationAdapter.class);
 
@@ -285,16 +284,40 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		// observationResults
 		cmds.add(CommandFactory.newSetGlobal(NAMED_OBJECTS, namedObjects));
 
-		if (this.useSupportingXMLData == true) {
-			if (requestedKmId == null || requestedKmId.length() == 0) {
-				// This shouldn't happen 
-				String lErrStr = "knowledge module ID not supplied to drools adapter cannot continue";
-				logger.error(_METHODNAME + lErrStr);
-				throw new RuntimeException(lErrStr);
-			}
-			cmds.add(CommandFactory.newSetGlobal("requestedKmId", requestedKmId));
-			cmds.add(CommandFactory.newSetGlobal("baseKnowledgeRepositoryLocation", this.baseKnowledgeRepositoryLocation));
+		if (requestedKmId == null || requestedKmId.length() == 0) {
+			// This shouldn't happen 
+			String lErrStr = "knowledge module ID not supplied to drools adapter cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
 		}
+		cmds.add(CommandFactory.newSetGlobal("patientAgeTimeOfInterest", null));
+		
+		// Initialize the schedule
+		if (this.baseRulesScopingKmId == null || this.baseRulesScopingKmId.isEmpty()) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: base rules Scoping Km Id not set; cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		List<String> cdsVersions = new ArrayList<String>();
+		cdsVersions.add(this.baseRulesScopingKmId);
+		cdsVersions.add(requestedKmId);
+		Schedule lSchedule = null;
+		try {
+			lSchedule = new Schedule("requestedKmId", cdsVersions, baseKnowledgeRepositoryLocation);
+		}
+		catch (ImproperUsageException | InconsistentConfigurationException ii) {
+			String lErrStr = "Failed to initialize immunization schedule";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+
+		if (lSchedule == null || lSchedule.isScheduleInitialized() == false) {
+			String lErrStr = "Schedule has not been fully initialized; something went wrong";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);			
+		}
+		
+		cmds.add(CommandFactory.newSetGlobal("schedule", lSchedule));
 		
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -530,20 +553,6 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			}
 		}
 		String lBaseRulesScopingKmId = baseRulesScopingEntityId + "^" + lKMId.getBusinessId() + "^" + lKMId.getVersion();
-
-		// Use supporting data XML files or statically coded supporting data
-		String useSupportingDataFiles = lProps.getProperty("xml_supporting_data_available");
-		logger.info(_METHODNAME + "XML supporting data available: " + useSupportingDataFiles);
-		if (useSupportingDataFiles != null && useSupportingDataFiles.equals("Y")) {
-			String lInfoStr = "ICE rules will incorporate supporting data, as per properties file setting";
-			logger.info(_METHODNAME + lInfoStr);
-			this.useSupportingXMLData = true;
-		}
-		else {
-			this.useSupportingXMLData = false;
-			String lInfoStr = "ICE rules will be _not_ incorporate supporting data, as per properties file setting";
-			logger.info(_METHODNAME + lInfoStr);
-		}
 		
 		// Load knowledge from pkg file?
 		String loadRulesFromPkgFile = lProps.getProperty("load_knowledge_from_pkg_file");
@@ -708,7 +717,8 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		
 		knowledgePackageService.putPackage(knowledgeModule, lKnowledgeBase);
 
-		logger.info("Date/Time " + lRequestedKmId + " Initialized: " + new Date());
+		this.baseRulesScopingKmId = lBaseRulesScopingKmId;
+		logger.info("Date/Time " + lRequestedKmId + "; Base Rules Scoping Km Id: " + this.baseRulesScopingKmId + "; Initialized: " + new Date());
 		return lKnowledgeBase;
 	}
 

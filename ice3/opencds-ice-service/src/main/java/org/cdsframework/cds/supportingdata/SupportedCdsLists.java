@@ -196,7 +196,8 @@ public class SupportedCdsLists implements SupportingData {
 		///////
 		ICEConceptType lIceConceptType = ICEConceptType.getSupportedIceConceptType(lSLCCdsListCode);
 		if (lIceConceptType != null) {
-			CdsConcept lIC = new CdsConcept(lSupportedListItemName, false);		// Not an OpenCDS concept
+			CdsConcept lIC = new CdsConcept(lSupportedListItemName);			// Not an OpenCDS concept
+			lIC.setIsOpenCdsSupportedConcept(false);
 			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(lIceConceptType, lIC, slci);
 		}
 		

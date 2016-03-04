@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.ice.service.RecommendationStatus;
 import org.cdsframework.ice.service.DoseStatus;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
@@ -342,7 +343,7 @@ public class ICESupportingDataConfiguration {
 			return false;
 		}
 		// Verify that all RecommendationStatus items have been provided
-		if (! verifyCdsListItemExistsForAllEnumConstants(BaseDataRecommendationStatus.class)) {
+		if (! verifyCdsListItemExistsForAllEnumConstants(RecommendationStatus.class)) {
 			return false;
 		}
 		// Verify that all RecommendationReason items have been provided

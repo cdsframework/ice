@@ -15,85 +15,40 @@
   <process processType="Private" isExecutable="true" id="PrimaryProcess" name="PrimaryProcess" tns:packageName="Process_1" >
 
     <!-- nodes -->
-    <startEvent id="_1" name="Start"  isInterrupting="true"/>
+    <startEvent id="_1" name="Start" />
     <endEvent id="_2" name="End" >
         <terminateEventDefinition />
     </endEvent>
-    <businessRuleTask id="_3" name="Initialize Immunization Schedule" g:ruleFlowGroup="ImmunizationReferenceData" >
-      <ioSpecification>
-        <inputSet>
-        </inputSet>
-        <outputSet>
-        </outputSet>
-      </ioSpecification>
+    <businessRuleTask id="_3" name="Initialize Reference Data" g:ruleFlowGroup="ImmunizationReferenceData" >
     </businessRuleTask>
     <businessRuleTask id="_4" name="Return Results" g:ruleFlowGroup="ProcessResults" >
-      <ioSpecification>
-        <inputSet>
-        </inputSet>
-        <outputSet>
-        </outputSet>
-      </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_5" name="Identify Candidate Series" g:ruleFlowGroup="CandidateSeriesIdentification" >
-      <ioSpecification>
-        <inputSet>
-        </inputSet>
-        <outputSet>
-        </outputSet>
-      </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_6" name=" Evaluate History Against All Series" g:ruleFlowGroup="HistoryEvaluation" >
-      <ioSpecification>
-        <inputSet>
-        </inputSet>
-        <outputSet>
-        </outputSet>
-      </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_7" name="Forecast Recommendations for Selected Series" g:ruleFlowGroup="RecommendationForecast" >
-      <ioSpecification>
-        <inputSet>
-        </inputSet>
-        <outputSet>
-        </outputSet>
-      </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_8" name="Select Best Series" g:ruleFlowGroup="SeriesSelection" >
-      <ioSpecification>
-        <inputSet>
-        </inputSet>
-        <outputSet>
-        </outputSet>
-      </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_9" name="Record Disease Immunity" g:ruleFlowGroup="DiseaseImmunityRecord" >
-      <ioSpecification>
-        <inputSet>
-        </inputSet>
-        <outputSet>
-        </outputSet>
-      </ioSpecification>
     </businessRuleTask>
     <businessRuleTask id="_10" name="Identify Candidate Doses" g:ruleFlowGroup="CandidateDosesIdentification" >
-      <ioSpecification>
-        <inputSet>
-        </inputSet>
-        <outputSet>
-        </outputSet>
-      </ioSpecification>
+    </businessRuleTask>
+    <businessRuleTask id="_11" name="Initialize Series and Seasons" g:ruleFlowGroup="InitalizeSeriesAndSeasons" >
     </businessRuleTask>
 
     <!-- connections -->
     <sequenceFlow id="_4-_2" sourceRef="_4" targetRef="_2" />
     <sequenceFlow id="_1-_3" sourceRef="_1" targetRef="_3" />
     <sequenceFlow id="_7-_4" sourceRef="_7" targetRef="_4" />
-    <sequenceFlow id="_3-_5" sourceRef="_3" targetRef="_5" />
+    <sequenceFlow id="_11-_5" sourceRef="_11" targetRef="_5" />
     <sequenceFlow id="_9-_6" sourceRef="_9" targetRef="_6" />
     <sequenceFlow id="_8-_7" sourceRef="_8" targetRef="_7" />
     <sequenceFlow id="_6-_8" sourceRef="_6" targetRef="_8" />
     <sequenceFlow id="_10-_9" sourceRef="_10" targetRef="_9" />
     <sequenceFlow id="_5-_10" sourceRef="_5" targetRef="_10" />
+    <sequenceFlow id="_3-_11" sourceRef="_3" targetRef="_11" />
 
   </process>
 
@@ -112,7 +67,7 @@
         <dc:Bounds x="637" y="236" width="111" height="54" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="_5" >
-        <dc:Bounds x="548" y="21" width="269" height="57" />
+        <dc:Bounds x="1045" y="17" width="269" height="57" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="_6" >
         <dc:Bounds x="425" y="126" width="209" height="55" />
@@ -127,7 +82,10 @@
         <dc:Bounds x="769" y="134" width="170" height="48" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="_10" >
-        <dc:Bounds x="928" y="27" width="200" height="48" />
+        <dc:Bounds x="1083" y="130" width="200" height="48" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_11" >
+        <dc:Bounds x="619" y="22" width="202" height="48" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="_4-_2" >
         <di:waypoint x="692" y="263" />
@@ -141,9 +99,9 @@
         <di:waypoint x="401" y="260" />
         <di:waypoint x="692" y="263" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="_3-_5" >
-        <di:waypoint x="346" y="47" />
-        <di:waypoint x="682" y="49" />
+      <bpmndi:BPMNEdge bpmnElement="_11-_5" >
+        <di:waypoint x="720" y="46" />
+        <di:waypoint x="1179" y="45" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_9-_6" >
         <di:waypoint x="854" y="158" />
@@ -158,12 +116,16 @@
         <di:waypoint x="178" y="150" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_10-_9" >
-        <di:waypoint x="1028" y="51" />
+        <di:waypoint x="1183" y="154" />
         <di:waypoint x="854" y="158" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="_5-_10" >
-        <di:waypoint x="682" y="49" />
-        <di:waypoint x="1028" y="51" />
+        <di:waypoint x="1179" y="45" />
+        <di:waypoint x="1183" y="154" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_3-_11" >
+        <di:waypoint x="346" y="47" />
+        <di:waypoint x="720" y="46" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

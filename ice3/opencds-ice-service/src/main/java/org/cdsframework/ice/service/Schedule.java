@@ -34,6 +34,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
+import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
+import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.supportingdata.ICESupportingDataConfiguration;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
@@ -82,6 +84,24 @@ public class Schedule {
 		lSbScheduleInfo.append(_METHODNAME); lSbScheduleInfo.append("Completed Initialization of Schedule: "); lSbScheduleInfo.append(this.scheduleId);
 		logger.info(lSbScheduleInfo.toString());
 		this.scheduleHasBeenInitialized = true;
+	}
+
+	
+	/**
+	 * Get SupportedCdsConcepts associated with this schedule
+	 */
+	public SupportedCdsConcepts getSupportedCdsConcepts() {
+
+		return this.iceSupportingDataConfiguration.getSupportedCdsConcepts();
+	}
+
+	
+	/**
+	 * Get SupportedCdsLists associated with this schedule
+	 */
+	public SupportedCdsLists getSupportedCdsList() {
+
+		return this.iceSupportingDataConfiguration.getSupportedCdsLists();
 	}
 
 	
@@ -145,8 +165,8 @@ public class Schedule {
 			return null;
 		}
 
-		CdsConcept lIceVaccineConcept = new CdsConcept(openCdsConceptValue, true);		// All vaccine concepts are OpenCDS concepts
-		LocallyCodedCdsListItem lVaccineCdsItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, lIceVaccineConcept); 
+		LocallyCodedCdsListItem lVaccineCdsItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().
+			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, new CdsConcept(openCdsConceptValue)); 
 		if (lVaccineCdsItem == null) {
 			return null;
 		}
@@ -160,7 +180,7 @@ public class Schedule {
 		return lcvi.getVaccine();
 	}
 
-
+	
 	/**
 	 * Utilizing supporting data. Obtain the list of diseases targeted by the specified vaccine group. Both the String supplied as the parameter and String returned  
 	 * are compliant to LocallyCodedCdsListItem.getSupportedListConceptItemName().
