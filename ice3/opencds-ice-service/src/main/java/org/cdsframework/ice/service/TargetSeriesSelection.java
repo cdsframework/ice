@@ -26,40 +26,37 @@
 
 package org.cdsframework.ice.service;
 
-import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
-
-
 public class TargetSeriesSelection {
 
 	public enum SeriesSelectionStatus {
 		SERIES_SELECTION_INSTANTIATED_ONLY_NOT_READY, SERIES_SELECTION_NOT_STARTED, SERIES_SELECTION_IN_PROCESS, SERIES_SELECTION_COMPLETE
 	}
 	
-	private LocallyCodedVaccineGroupItem seriesSelectionVaccineGroup;
+	private String seriesSelectionVaccineGroup;
 	private Season seriesSelectionSeason;
 	private SeriesSelectionStatus seriesSelectionStatus;
 	private String selectedSeriesName;
 	
 	// private static Log logger = LogFactory.getLog(TargetSeriesSelection.class);
 	
-	private TargetSeriesSelection(LocallyCodedVaccineGroupItem seriesSelectionVG) {
+	private TargetSeriesSelection(String seriesSelectionVG) {
 		this.seriesSelectionVaccineGroup = seriesSelectionVG;
 		this.seriesSelectionSeason = null;
 		this.seriesSelectionStatus = SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED;
 		this.selectedSeriesName = null;
 	}
 	
-	public TargetSeriesSelection(LocallyCodedVaccineGroupItem seriesSelectionVG, Season s) {
+	public TargetSeriesSelection(String seriesSelectionVG, Season s) {
 		
 		this(seriesSelectionVG);
 		this.seriesSelectionSeason = s;
 	}
 	
-	public LocallyCodedVaccineGroupItem getSeriesSelectionVaccineGroup() {
+	public String getSeriesSelectionVaccineGroup() {
 		return seriesSelectionVaccineGroup;
 	}
 
-	public void setSeriesSelectionVaccineGroup(LocallyCodedVaccineGroupItem seriesSelection) {
+	public void setSeriesSelectionVaccineGroup(String seriesSelection) {
 		this.seriesSelectionVaccineGroup = seriesSelection;
 	}
 	

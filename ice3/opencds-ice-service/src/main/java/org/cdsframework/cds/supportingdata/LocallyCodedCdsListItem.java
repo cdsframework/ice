@@ -194,7 +194,8 @@ public class LocallyCodedCdsListItem {
 		this.opencdsConceptMappings = new ArrayList<CdsConcept>();
 		List<CdsListItemConceptMapping> clicm = pCdsLi.getCdsListItemConceptMappings();
 		for (CdsListItemConceptMapping clic : clicm) {
-			CdsConcept ic = new CdsConcept(clic.getCode(), true, clic.getDisplayName());
+			CdsConcept ic = new CdsConcept(clic.getCode(), clic.getDisplayName());
+			ic.setIsOpenCdsSupportedConcept(true);
 			ic.setDeterminationMethodCode(clic.getConceptDeterminationMethod());
 			// CdsListItemConceptMapping has codeSystem and codeSystemName attributes, but this is N/A for an OpenCDS concept code so not included here
 			this.opencdsConceptMappings.add(ic);

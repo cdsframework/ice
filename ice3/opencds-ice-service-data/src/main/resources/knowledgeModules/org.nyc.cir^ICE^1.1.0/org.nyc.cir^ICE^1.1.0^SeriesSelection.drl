@@ -1,0 +1,1029 @@
+/**
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package org.cdsframework.ice.v1_1_0
+
+import java.util.Date
+import java.util.Iterator
+import java.util.List
+import java.util.Set
+import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.Schedule
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.service.TargetSeriesSelection
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+global java.util.Date evalTime
+global org.cdsframework.ice.service.Schedule schedule
+
+
+
+///////////////////////////////////////////////////////////// Influenza-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+rule "SeriesSelection: DUMMY catch-all Influenza season rule, 2 dose-series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason == $sss)		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 2-Dose Series", selectedSeries == false, 
+			targetSeason == $sss)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);		
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+end
+
+
+// If there is only one Influenza series for the season, just select it for forecasting. This could happen, for example, if no season was defined
+// and the default season parameters are used
+rule "SeriesSelection: Select Only Influenza Series" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason == $sss)		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, targetSeason == $sss, $tsid : targetSeriesIdentifier)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, targetSeason == $sss, targetSeriesIdentifier != $tsid)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+end
+
+
+// If the patient is < 9 years of age and none of the 1-dose influenza series conditions are not met (via other rules), then 2-dose series applies
+rule "SeriesSelection: For the Influenza 2015-2016, 2014-2015, 2013-2014 or 2012-2013 season if the patient < 9yrs and all 2-dose series conditions met, then 2-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 110
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season" || seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || 
+				seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", 
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason != null && targetSeason == $sss)
+		// Get the "current" season for series selection
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 2-Dose Series", selectedSeries == false, 
+			targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)			
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);			
+end
+
+
+// For the Influenza 2014-2015 season, if the patient is >= 6months and < 9 years of age, then the 1-dose series applies if the following condition is met:
+//     c) The patient received at least 1 dose of seasonal influenza vaccine during the 8/1/2013-6/30/2014 influenza vaccine season
+rule "SeriesSelection: For the Influenza 2014-2015 season if the patient < 9yrs and 3rd 1-dose series condition met, then 1-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 120
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2014-2015 Influenza Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason != null && targetSeason == $sss)
+		// Determine and make note of the "current" season for series selection
+		$season : Season(seasonName == "2014-2015 Influenza Season", isDefinedBySeriesTableRules() == true, $seasonDefStart : fullySpecifiedSeasonStartDate, $seasonDefEnd : fullySpecifiedSeasonEndDate)
+		// Pick the TargetSeries that is actually in the 2014-2015 season, not just using the 2014-2015 season rules (which would be after 2014-2015 defined dates)	
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $seasonEndDate : targetSeason.fullySpecifiedSeasonEndDate, 
+			$seasonStartDate.compareTo($seasonDefStart) == 0 && $seasonEndDate.compareTo($seasonDefEnd) == 0, $tsid : targetSeriesIdentifier)
+		// Determine and make note of the prior "2013-2014" season; if 1 or more valid doses during 2013-2014, 1-dose series applies
+		$ts2013 : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason.seasonName == "2013-2014 Influenza Season")
+		accumulate($tsthis : TargetDose(isValid == true) from $ts2013.targetDoses; $countValid : count($tsthis); $countValid >= 1)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);				
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);	
+end
+
+
+// For the Influenza 2013-2014 season, if the patient is >= 6months and < 9 years of age then the 1-dose series applies if the following condition is met:
+//     b) The patient received at least 2 doses of seasonal influenza vaccine prior to July 2010 and at least one dose of monovalent 2009 H1N1 vaccine
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 season if the patient < 9yrs and 2nd 1-dose series condition met, then 1-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 120
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null, 
+			seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", 
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason != null && targetSeason == $sss)
+		// Determine and make note of the "current" season for series selection
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+
+		$currentAndPriorSeasonsInfluenzaSeasons : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, 
+			 targetSeason != null && targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate) || targetSeriesIdentifier == $tsid), collectList($tsInfluenzaThis))
+		$allh1n12009Seasons : List() from accumulate($thisH1N1Series : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1,
+			targetSeason != null && targetSeason.seasonName == "2009 H1N1 Season", selectedSeries == true), collectList($thisH1N1Series))
+		accumulate($tdpriorCondition2 : TargetDose(isValid == true, administrationDate < "01-Jul-2010") from getAllDosesAcrossListOfTargetSeries($currentAndPriorSeasonsInfluenzaSeasons);
+			$countPriorInfluenzaDosesCondition2 : count($tdpriorCondition2); $countPriorInfluenzaDosesCondition2 >= 2)
+		accumulate($tdpriorH1N1Condition2 : TargetDose(isValid == true) from getAllDosesAcrossListOfTargetSeries($allh1n12009Seasons);
+			$countPriorH1N1DosesCondition2 : count($tdpriorH1N1Condition2);	$countPriorH1N1DosesCondition2 >= 1)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);				
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+end
+
+
+// For the Influenza 2013-2014 season, if the patient is < 9 years of age then the 1-dose series applies if the following condition is met:
+//    a) The patient received at least 2 doses of seasonal influenza vaccine during prior influenza seasons, with at least one dose since July 2010
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 season if the patient < 9yrs and 1st 1-dose series condition met, then 1-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 120
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null, 
+			seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", 
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason == $sss)
+		// Determine which season we're looking at now for series selection
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+		//	The patient received at least 2 doses of seasonal influenza vaccine during prior influenza seasons, with at least one dose since July 2010
+		$priorSeasonsInfluenzaSeasons : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, 
+			targetSeason != null && targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)), collectList($tsInfluenzaThis))
+		accumulate($tdprior: TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenzaSeasons);
+			$latestInfluenzaDoseDateFromPriorSeasons : maxDate($shotDateCondition1), $countPriorDoses : count($tdprior); 
+			$latestInfluenzaDoseDateFromPriorSeasons != null, LocalDate.fromDateFields((Date) $latestInfluenzaDoseDateFromPriorSeasons).compareTo(new LocalDate(2010, 7, 1)) >= 0 && 
+				$countPriorDoses >=2)
+		// The patient is < 9 years of age
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+end
+
+
+// For the Influenza 2015-2016 season, if the patient is < 9 years of age then the 1-dose series applies if the following condition is met:
+// The child received at least 2 doses of seasonal influenza vaccine during any prior influenza seasons.
+rule "SeriesSelection: For the Influenza 2015-2016 season if the patient < 9yrs and at least 2 doses of seasonal influenza vaccine during any prior influenza seasons, then 1-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 120
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason == $sss)
+		// Determine which season we're looking at now for series selection
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+		//	The patient received at least 2 doses of seasonal influenza vaccine during prior influenza seasons
+		$priorSeasonsInfluenzaSeasons : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, 
+			targetSeason != null && targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)), collectList($tsInfluenzaThis))
+		accumulate($tdprior: TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenzaSeasons);
+			$countPriorDoses : count($tdprior);	$countPriorDoses >=2)
+		// The patient is < 9 years of age
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+end
+
+
+// If the patient is >= 9 and < 10 years of age and 2-dose influenza series conditions are not met (see next rule), then 1-dose series applies
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015 or 2015-2016 season if patient >= 9yrs and < 10yrs and 1-dose series conditions are met, then 1-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 110
+	activation-group "InfluenzaSeries9to10yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season" || seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || 
+				seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", 
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+			targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") >= 0 && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0)						
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);				
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);	
+end
+
+
+// For the Influenza 2015-2016, if the patient is >= 9 and < 10 years of age then the 2-dose influenza series applies if all of the following three conditions are met:
+//	* The patient received a dose of influenza at < 9 years of age during the current influenza vaccine season 
+// 	* The patient DID NOT receive at least 2 doses of seasonal influenza vaccine during prior influenza seasons, with at least one dose since July 2010
+// 	* The patient DID NOT receive at least 2 doses of seasonal influenza vaccine prior to July 2010 and at least one dose of monovalent 2009 H1N1 vaccine
+// Otherwise, the 1-dose series applies
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 season if patient >= 9yrs and < 10yrs and all 2-dose series conditions met, then 2-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 120
+	activation-group "InfluenzaSeries9to10yrSelectionCheck"	
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null, 
+			seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason == $sss)
+		// Determine and make note of the 2-Dose TargetSeries for this season
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 2-Dose Series", selectedSeries == false, 
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+		//
+		// Condition: the patient DID NOT receive at least 2 doses of seasonal influenza vaccine during prior influenza seasons, with at least one dose since July 2010
+		///
+		$priorSeasonsInfluenza : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, 
+			targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)), collectList($tsInfluenzaThis))
+		accumulate($tdpriorCondition1 : TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenza); 
+			$latestInfluenzaDoseDateFromPriorSeasons : maxDate($shotDateCondition1), $countPriorInfluenzaDosesCondition1 : count($tdpriorCondition1); 
+			$latestInfluenzaDoseDateFromPriorSeasons == null || (! ($countPriorInfluenzaDosesCondition1 >= 2 &&  
+				LocalDate.fromDateFields((Date) $latestInfluenzaDoseDateFromPriorSeasons).compareTo(new LocalDate(2010, 7, 1)) >= 0)))
+		//
+		// Condition: the patient DID NOT receive at least 2 doses of seasonal influenza vaccine prior to July 2010 (i.e. - across current season and prior season) and at least one
+		// dose of monovalent 2009 H1N1 vaccine
+		// 			
+		$currentAndPriorSeasonsInfluenza : List() from accumulate($tsInfluenzaThis2 : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, 
+			targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate) || targetSeriesIdentifier == $tsid), collectList($tsInfluenzaThis2))
+		$allh1n12009Season : List() from accumulate($thisH1N1Series : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1,
+		 	// (selected series is redundant since H1N1 VG has should have done through select series first, but this is a safeguard)
+			targetSeason != null && targetSeason.seasonName == "2009 H1N1 Season", selectedSeries == true), collectList($thisH1N1Series))	
+		$countPriorH1N1Doses : Number() from accumulate($td2009h1n1shot: TargetDose(isValid == true) from getAllDosesAcrossListOfTargetSeries($allh1n12009Season), count($td2009h1n1shot))
+ 		accumulate($tdpriorCondition2 : TargetDose(isValid == true, administrationDate < "01-Jul-2010") from getAllDosesAcrossListOfTargetSeries($currentAndPriorSeasonsInfluenza); 
+			$countPriorInfluenzaDosesCondition2 : count($tdpriorCondition2); (! ($countPriorInfluenzaDosesCondition2 >= 2 && $countPriorH1N1Doses >= 1)) == true)
+		//
+		// The patient is >= 9 and < 10 years of age and received a valid dose < 9 years of age *during the current influeza season*
+		//
+		$earliestInfluenzaDoseDateThisSeason : Date() from accumulate($tdcurr : TargetDose(isValid == true, $doseDatesThisSeason : administrationDate) from $ts.targetDoses, 
+			minDate($doseDatesThisSeason))
+		$person : EvaluatedPerson()
+		eval($earliestInfluenzaDoseDateThisSeason != null && TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $earliestInfluenzaDoseDateThisSeason, "9y") < 0 && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") >= 0 && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);		
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "patient age of interest " + patientAgeTimeOfInterest + "; SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+
+// For the Influenza 2015-2016 season, if the patient is >= 9 and < 10 years of age then the 2-dose influenza series applies if all of the following three conditions are met:
+//	* The patient received a dose of influenza at < 9 years of age during the current influenza vaccine season 
+// 	* The patient DID NOT receive at least 2 doses of seasonal influenza vaccine during prior influenza seasons
+// Otherwise, the 1-dose series applies
+rule "SeriesSelection: For the Influenza 2015-2016 season if patient >= 9yrs and < 10yrs and all 2-dose series conditions met, then 2-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 120
+	activation-group "InfluenzaSeries9to10yrSelectionCheck"	
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason == $sss)
+		// Determine and make note of the 2-Dose TargetSeries for this season
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 2-Dose Series", selectedSeries == false, 
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+		//
+		// Condition: the patient DID NOT receive at least 2 doses of seasonal influenza vaccine during prior influenza seasons
+		///
+		$priorSeasonsInfluenza : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, 
+			targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)), collectList($tsInfluenzaThis))
+		accumulate($tdpriorCondition1 : TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenza); 
+			$countPriorInfluenzaDosesCondition1 : count($tdpriorCondition1); (! ($countPriorInfluenzaDosesCondition1 >= 2)))
+		//
+		// The patient is >= 9 and < 10 years of age and received a valid dose < 9 years of age *during the current influeza season*
+		//
+		$earliestInfluenzaDoseDateThisSeason : Date() from accumulate($tdcurr : TargetDose(isValid == true, $doseDatesThisSeason : administrationDate) from $ts.targetDoses, 
+			minDate($doseDatesThisSeason))
+		$person : EvaluatedPerson()
+		eval($earliestInfluenzaDoseDateThisSeason != null && TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $earliestInfluenzaDoseDateThisSeason, "9y") < 0 && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") >= 0 && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);		
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "patient age of interest " + patientAgeTimeOfInterest + "; SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+
+
+// If the patient is >= 10 years of age then the 1-dose influenza series applies 
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015 and 2015-2016 seasons and patient >= 10yrs, 1-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 120
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season" || seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || 
+				seriesSelectionSeason.seasonName == "2012-2013 Influenza Season" || seriesSelectionSeason.seasonName == "2014-2015 Influenza Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Influenza, seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+			targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") >= 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "patient age of interest " + patientAgeTimeOfInterest + "; SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+
+///////////////////////////////////////////////////////////// H1N1-Specific Series Selection Rules Start Here ////////////////////////////////////////////////////////////
+
+// If there is only one Influenza series for the season, just select it for forecasting. This could happen, for example, if no season was defined
+// and the default season parameters are used
+rule "SeriesSelection: Select Only H1N1 Series" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.H1N1, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1, selectedSeries == true, targetSeason == $sss)		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1, targetSeason == $sss, $tsid : targetSeriesIdentifier)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1, targetSeason == $sss, targetSeriesIdentifier != $tsid)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);			
+end
+
+
+// If the patient is <10 years of age then the 1-dose h1n1 series applies 
+rule "SeriesSelection: For the H1N1 2009 season, patient < 10yrs, 2-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 110
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.H1N1, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009 H1N1 Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1, selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1, seriesRules.seriesName == "H1N1 2-Dose Series", selectedSeries == false, 
+			targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);		
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+
+// If the patient is >= 10 years of age then the 1-dose h1n1 series applies 
+rule "SeriesSelection: For the H1N1 2009 season, patient >= 10yrs and number of effective doses <= 1 at last shot date, 1-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 110
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.H1N1, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009 H1N1 Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1, selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1, seriesRules.seriesName == "H1N1 1-Dose Series", selectedSeries == false, 
+			targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") >= 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);		
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+
+// If the patient is <10 years of age then the 1-dose h1n1 series applies 
+rule "SeriesSelection: For the H1N1 2009 season, if effective number of doses >=2 on the date of the last shot, the 2-dose series applies" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 120
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.H1N1, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009 H1N1 Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1, selectedSeries == true, targetSeason == $sss)
+		$td : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate : administrationDate)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.H1N1, seriesRules.seriesName == "H1N1 2-Dose Series", selectedSeries == false,
+			targetSeason == $sss, containsTargetDose($td))
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "10y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);		
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+
+///////////////////////////////////////////////////////////// HPV-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+// Since there is only one HPV series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
+rule "SeriesSelection.SelectOnlyHPVSeries" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "HPVSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HPV, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HPV, selectedSeries == true))		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HPV, $tsid : targetSeriesIdentifier)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);	
+end
+
+
+///////////////////////////////////////////////////////////// Polio-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+rule "SeriesSelection.SelectOnlyPolioSeries" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "PolioSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Polio, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Polio, selectedSeries == true))		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Polio, $tsid : targetSeriesIdentifier)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);	
+end
+
+
+///////////////////////////////////////////////////////////// Meningococcal-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+rule "SeriesSelection.SelectOnlyMCVSeries" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "MCVSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Meningococcal, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Meningococcal, selectedSeries == true))		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Meningococcal, $tsid : targetSeriesIdentifier)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);	
+end
+
+///////////////////////////////////////////////////////////// PPSV-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+// Since there is only one PPSV series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
+rule "SeriesSelection.SelectOnlyPPSVSeries" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "PPSVSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.PPSV, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.PPSV, selectedSeries == true))		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.PPSV)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);	
+end
+
+
+///////////////////////////////////////////////////////////// PCV-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+// Since there is only one PCV series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
+rule "SeriesSelection.SelectOnlyPCVSeries" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "PCVSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.PCV, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.PCV, selectedSeries == true))		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.PCV)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);	
+end
+
+
+///////////////////////////////////////////////////////////// Hib-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+rule "SeriesSelection.SelectByDefaultHib4DoseSeries" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "HibSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Hib, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Hib, selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Hib, seriesRules.seriesName == "Hib 4-Dose Series",	selectedSeries == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
+end
+
+
+rule "SeriesSelection.SelectHibOMPSeriesIfFirstDoseHibOMPBefore7MonthsAndOnlyOneValidDoseTotal" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 200
+	activation-group "HibSeriesSelectionCheck"
+	when
+	//Hib OMP Series
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Hib, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Hib, selectedSeries == true)
+		$td : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate, 
+			vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HIB_PRP_OMP.conceptCodeValue, $td1UniqueId : uniqueId)
+		$ts: TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Hib, $sn : seriesRules.seriesName == "Hib OMP Series", selectedSeries == false, 
+			containsTargetDose($td), $effectiveDoses : determineEffectiveNumberOfDosesInSeries, numberOfShotsAdministeredInSeries == 1)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Hib, seriesRules.seriesName != $sn, 
+			getValidOrAcceptedShotByDoseNumber(1) != null && getValidOrAcceptedShotByDoseNumber(1).getAdministrationDate() < $administrationDate)			
+		$person : EvaluatedPerson($birthDate : demographics.birthTime)
+		eval($effectiveDoses == 1 && TimePeriod.calculateElapsedTimePeriod($birthDate, $administrationDate, DurationType.MONTHS).isLessThan(new TimePeriod(7, DurationType.MONTHS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts.getSeriesName());
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.getSeriesName());
+		update($ts);	
+end
+
+
+rule "SeriesSelection.SelectHibOMPSeriesIfTwoDosesHibOMPOneBefore7MonthsOtherBefore12Months" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 300
+	activation-group "HibSeriesSelectionCheck"
+	when
+	//Hib OMP Series
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Hib, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Hib, selectedSeries == true)
+		$td1 : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate1 : administrationDate, 
+			vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HIB_PRP_OMP.conceptCodeValue)
+		$td2 : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate2 : administrationDate, 
+			vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HIB_PRP_OMP.conceptCodeValue, $td2UniqueId : uniqueId)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Hib, $sn : seriesRules.seriesName == "Hib OMP Series", 
+			selectedSeries == false, containsTargetDose($td1), containsTargetDose($td2))
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Hib, seriesRules.seriesName != $sn, 
+			getValidOrAcceptedShotByDoseNumber(2) != null && getValidOrAcceptedShotByDoseNumber(2).getAdministrationDate() < $administrationDate2)
+		$person : EvaluatedPerson($birthDate : demographics.birthTime)
+		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, $administrationDate1, DurationType.MONTHS).isLessThan(new TimePeriod(7, DurationType.MONTHS)) && 
+			TimePeriod.calculateElapsedTimePeriod($birthDate, $administrationDate2, DurationType.MONTHS).isLessThan(new TimePeriod(12, DurationType.MONTHS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
+end
+
+
+///////////////////////////////////////////////////////////// Hep A-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+// Override general rule which picks the doses with the least number to complete the series
+rule "SeriesSelection.HepADoNOTSelectAlreadyCompleteSeriesWithFewestDosesIfExistsAndOtherSeriesPreviouslySelected" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "SeriesSelectionFewestDoses"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HepA, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		$ts : TargetSeries(selectedSeries == true, seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA)
+	then
+		String _RULENAME = kcontext.rule.name;
+		// Don't do anything - overriding general rule which picks least series
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+end
+
+
+rule "SeriesSelection.SelectHepA2DoseSeriesIfNoShotGiven" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "HepASeriesSelectionCheck"
+	no-loop true
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HepA, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA, selectedSeries == true)
+		not (TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA, numberOfShotsAdministeredInSeries > 0))
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA, seriesRules.seriesName == "HepA 2-Dose Child/Adult Series", 
+			selectedSeries == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+
+rule "SeriesSelection.SelectHepA2DoseSeriesForLessThan19YearsAndCertainVaccines" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "HepASeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HepA, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA, selectedSeries == true)
+		$td : TargetDose(vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE.conceptCodeValue || 
+			  vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.conceptCodeValue || 
+			  vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HEPA_PED_NOS.conceptCodeValue)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA, seriesRules.seriesName == "HepA 2-Dose Child/Adult Series", 
+			selectedSeries == false, containsTargetDose($td))
+		$person : EvaluatedPerson()
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.getAdministrationDate(), DurationType.YEARS).isLessThan(new TimePeriod(19, DurationType.YEARS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
+end
+
+
+rule "SeriesSelection.SelectHepA2DoseSeriesForCertainVaccines" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "HepASeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HepA, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA, selectedSeries == true)
+		$td : TargetDose(vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HEPA_ADULT.conceptCodeValue || 
+			  vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HEPA_NOS.conceptCodeValue)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA, seriesRules.seriesName == "HepA 2-Dose Child/Adult Series", 
+			selectedSeries == false, containsTargetDose($td))	
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.getSeriesName());
+		update($ts);		
+end
+
+
+rule "SeriesSelection.SelectHepA3DoseSeriesFor19YearsAndOverAndCertainVaccines" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 200
+	activation-group "HepASeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HepA, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA, selectedSeries == true)
+		$td : TargetDose(vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE.conceptCodeValue || 
+			  vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.conceptCodeValue || 
+			  vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._HEPA_PED_NOS.conceptCodeValue)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepA, seriesRules.seriesName == "HepA Adult 3-Dose Series", 
+			selectedSeries == false, containsTargetDose($td))
+		$person : EvaluatedPerson()
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.getAdministrationDate(), DurationType.YEARS).isGreaterThanEqualTo(new TimePeriod(19, DurationType.YEARS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
+end
+
+
+///////////////////////////////////////////////////////////// Hep B-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+rule "SeriesSelection.SelectHepBNewbornSeriesAtLeastOneShot" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "HepBSeriesSelectionCheck"
+	when	
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HepB, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepB, selectedSeries == true))
+		$person : EvaluatedPerson()
+		$td : TargetDose(administeredShotNumberInSeries == 1)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepB, seriesRules.seriesName == "HepB Newborn Series", 
+			selectedSeries == false, containsTargetDose($td))
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isLessThan(new TimePeriod(28, DurationType.DAYS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+
+rule "SeriesSelection.SelectHepBNewBornSeriesNoShot" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "HepBSeriesSelectionCheck"
+	no-loop true
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HepB, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepB, selectedSeries == true))	
+		$person : EvaluatedPerson()
+		$evalTime: EvalTime()
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepB, seriesRules.seriesName == "HepB Newborn Series", 
+			selectedSeries == false, targetDoses.empty)
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue,	DurationType.DAYS).isLessThan(new TimePeriod(28, DurationType.DAYS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+
+rule "SeriesSelection.SelectHepBChildAdultSeriesAtLeastOneShot" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "HepBSeriesSelectionCheck"
+	no-loop true
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HepB, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepB, selectedSeries == true))
+		$person : EvaluatedPerson()
+		$td : TargetDose(administeredShotNumberInSeries == 1)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepB, seriesRules.seriesName == "HepB Child/Adult Series", 
+			selectedSeries == false, containsTargetDose($td))
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isGreaterThanEqualTo(new TimePeriod(28, DurationType.DAYS)))	
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
+end
+
+
+rule "SeriesSelection.SelectHepBChildAdultSeriesNoShot" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "HepBSeriesSelectionCheck"
+	no-loop true
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.HepB, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepB, selectedSeries == true))	
+		$person : EvaluatedPerson()
+		$evalTime: EvalTime()
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.HepB, seriesRules.seriesName == "HepB Child/Adult Series", selectedSeries == false, targetDoses.empty)
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue, DurationType.DAYS).isGreaterThanEqualTo(new TimePeriod(28, DurationType.DAYS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+
+///////////////////////////////////////////////////////////// DTP-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+//
+// If the patient is >= 7 years of age and has zero doses on record prior to age 7 years, then the 3-dose series applies; otherwise the 5-dose series applies.
+//
+
+rule "SeriesSelection.SelectDTP5DoseSeriesIf3DoseSeriesNotSelected" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "DTPSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.DTP, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.DTP, selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.DTP, seriesRules.seriesName == "DTP 5-Dose Series")
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);	
+end
+
+
+rule "SeriesSelection.Select3DoseDTPSeriesIfNoShotsPriorTo7YrsAnd7YrsOldOrOlder" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 110
+	activation-group "DTPSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.DTP, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.DTP, selectedSeries == true))
+		$person : EvaluatedPerson($birthDate : demographics.birthTime, $ageAt7yrs : TimePeriod.addTimePeriod(demographics.birthTime, "7y"))
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.DTP, seriesRules.seriesName == "DTP 3-Dose Series")
+		not TargetDose(associatedTargetSeries == $ts, administrationDate < $ageAt7yrs)
+		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.YEARS).isGreaterThan(new TimePeriod(7, DurationType.YEARS), true))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);	
+end
+
+
+///////////////////////////////////////////////////////////// MMR-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+// Since there is only one MMR series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
+rule "SeriesSelection.SelectOnlyMMRSeries" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "MMRSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.MMR, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.MMR, selectedSeries == true))		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.MMR)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+
+///////////////////////////////////////////////////////////// Varicella-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+// Since there is only one Varicella series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
+rule "SeriesSelection.SelectOnlyVaricellaSeries" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	activation-group "VaricellaSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Varicella, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Varicella, selectedSeries == true))		
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Varicella)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+
+///////////////////////////////////////////////////////////// Rotavirus-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+// If no doses have been administered, then select the Rotavirus 3-dose series
+rule "SeriesSelection.SelectRotavirus3DoseSeriesDefault" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 140
+	activation-group "RotavirusSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Rotavirus, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Rotavirus, selectedSeries == true))	
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Rotavirus, seriesRules.seriesName == "Rotavirus 3-Dose Series")
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
+end
+
+// If CVX 116 (Rotavirus RV5 (RotaTeq, 3 dose)), CVX 74 (Rotavirus) or CVX 122 (Rotavirus NOS) is administered, then the 3 dose series applies.
+rule "SeriesSelection.SelectRotavirus3DoseSeriesIfCertainVaccinesAdministered" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 200
+	activation-group "RotavirusSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Rotavirus, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Rotavirus, selectedSeries == true))		
+		$td : TargetDose(isValid == true, countsTowardsCompletionOfSeries == true, 
+			(vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._ROTAVIRUS_RV5.conceptCodeValue || 
+			  vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._ROTAVIRUS_NOS.conceptCodeValue || 
+			  vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._ROTAVIRUS.conceptCodeValue))
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Rotavirus, seriesRules.seriesName == "Rotavirus 3-Dose Series", containsTargetDose($td))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
+end
+
+
+// If dose 1 is CVX 119 (Rotavirus RV1 (Rotarix, 2 dose)) then the 2 dose series applies
+rule "SeriesSelection.SelectRotavirus2DoseSeriesIf1DoseRV1" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 150
+	activation-group "RotavirusSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == SupportedVaccineGroupConcept.Rotavirus, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Rotavirus, selectedSeries == true))	
+		$td : TargetDose(isValid == true, doseNumberInSeries == 1, vaccineComponent.vaccineConcept.openCdsConceptCode == SupportedVaccineConcept._ROTAVIRUS_RV1.conceptCodeValue)
+		$ts : TargetSeries(seriesRules.vaccineGroup == SupportedVaccineGroupConcept.Rotavirus, seriesRules.seriesName == "Rotavirus 2-Dose Series", containsTargetDose($td))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
+end
