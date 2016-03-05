@@ -40,6 +40,7 @@ import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.supportingdata.ICESupportingDataConfiguration;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineItem;
+import org.cdsframework.ice.supportingdata.SupportedVaccineGroups;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 
@@ -104,6 +105,14 @@ public class Schedule {
 		return this.iceSupportingDataConfiguration.getSupportedCdsLists();
 	}
 
+	/**
+	 * Get SupportedVaccineGroups associated with this schedule
+	 */
+	public SupportedVaccineGroups getSupportedVaccineGroups() {
+		
+		return this.iceSupportingDataConfiguration.getSupportedVaccineGroups();
+	}
+	
 	
 	public boolean isScheduleInitialized() {
 		

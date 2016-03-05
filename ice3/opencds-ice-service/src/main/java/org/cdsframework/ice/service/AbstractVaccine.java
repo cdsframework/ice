@@ -34,7 +34,8 @@ import org.cdsframework.ice.util.TimePeriod;
 
 public abstract class AbstractVaccine {
 
-	CdsConcept vaccineConcept;
+	private CdsConcept vaccineConcept;
+	private String cdsListItemName;					// vaccine name
 	private String tradeName;
 	private String manufacturerCode;
 	private boolean unspecifiedFormulation;

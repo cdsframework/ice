@@ -37,7 +37,7 @@ import org.cdsframework.cds.CdsConcept;
 public class SeriesRules {
 
 	private String seriesId;
-	private String seriesName;
+	private String cdsListItemName;			// series name
 	private String vaccineGroup;
 	private int numberOfDosesInSeries;
 	private boolean recurringDosesAfterSeriesComplete;
@@ -64,7 +64,7 @@ public class SeriesRules {
 		}
 		// seriesId = pSeriesName;
 		seriesId = ICELogicHelper.generateUniqueString();
-		seriesName = pSeriesName;
+		cdsListItemName = pSeriesName;
 		vaccineGroup = pVaccineGroup;
 		seriesDoseRules = new ArrayList<DoseRule>();
 		applicableSeasons = new ArrayList<Season>();
@@ -101,7 +101,7 @@ public class SeriesRules {
 		
 		SeriesRules lSR = new SeriesRules(pSR.getSeriesName(), pSR.getVaccineGroup());
 		lSR.seriesId = ICELogicHelper.generateUniqueString();
-		lSR.seriesName = pSR.seriesName;
+		lSR.cdsListItemName = pSR.cdsListItemName;
 		lSR.vaccineGroup = pSR.getVaccineGroup();
 		lSR.recurringDosesAfterSeriesComplete = pSR.recurringDosesAfterSeriesComplete;
 		lSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = pSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
@@ -136,7 +136,7 @@ public class SeriesRules {
 
 	
 	public String getSeriesName() {
-		return seriesName;
+		return cdsListItemName;
 	}
 
 	/**
@@ -147,7 +147,7 @@ public class SeriesRules {
 		if (seriesName == null) {
 			throw new IllegalArgumentException("seriesName cannot be null");
 		}
-		this.seriesName = seriesName;
+		this.cdsListItemName = seriesName;
 	}
 	
 	public String getVaccineGroup() {
@@ -394,7 +394,7 @@ public class SeriesRules {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((seriesName == null) ? 0 : seriesName.hashCode());
+				+ ((cdsListItemName == null) ? 0 : cdsListItemName.hashCode());
 		result = prime * result
 				+ ((vaccineGroup == null) ? 0 : vaccineGroup.hashCode());
 		return result;
@@ -409,10 +409,10 @@ public class SeriesRules {
 		if (getClass() != obj.getClass())
 			return false;
 		SeriesRules other = (SeriesRules) obj;
-		if (seriesName == null) {
-			if (other.seriesName != null)
+		if (cdsListItemName == null) {
+			if (other.cdsListItemName != null)
 				return false;
-		} else if (!seriesName.equals(other.seriesName))
+		} else if (!cdsListItemName.equals(other.cdsListItemName))
 			return false;
 		if (vaccineGroup != other.vaccineGroup)
 			return false;
@@ -423,7 +423,7 @@ public class SeriesRules {
 	@Override
 	public String toString() {
 		
-		String toStr = "SeriesRules [seriesId = " + seriesId + "; Series Name = " + seriesName + "; Vaccine Group = " + vaccineGroup
+		String toStr = "SeriesRules [seriesId = " + seriesId + "; Series Name = " + cdsListItemName + "; Vaccine Group = " + vaccineGroup
 				+ "; Number of Doses In Series = " + numberOfDosesInSeries + "; Recurring Doses (After Series Complete)? = "
 				+ recurringDosesAfterSeriesComplete + "; Dose Number Calculated By Diseases Targeted By Each Vaccine = " 
 				+ doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered; 

@@ -36,7 +36,6 @@ import java.util.Set
 import java.util.HashSet
 import java.util.HashMap
 import org.drools.spi.KnowledgeHelper
-import org.joda.time.LocalDate;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance
 import org.opencds.vmr.v1_0.internal.ClinicalStatement
 import org.opencds.vmr.v1_0.internal.ClinicalStatementRelationship
@@ -73,13 +72,13 @@ import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.service.TargetSeriesSelection
 import org.cdsframework.ice.service.TargetSeriesSelection.SeriesSelectionStatus
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason
 import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Vaccine
 import org.cdsframework.ice.service.VaccineComponent
 
-import function org.joda.time.LocalDate.fromDateFields
 
 // OpenCDS specific
 global java.lang.String clientLanguage
@@ -1059,7 +1058,7 @@ rule "SeriesSelection: Insert TargetSeriesSelection (Tracker) on to the Fact Lis
 		not (TargetSeriesSelection(getSeriesSelectionVaccineGroup() == $vg, getSeriesSelectionSeason() == $tseason))
 	then
 		String _RULENAME = drools.getRule().getName();
-		TargetSeriesSelection tss = new TargetSeriesSelection($vg, $tseason);
+		TargetSeriesSelection tss = new TargetSeriesSelection($vg, $tseason, schedule);
 		insert(tss);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeriesSelection added to fact list: " + tss.toString());
 end
@@ -1071,16 +1070,16 @@ end
 rule "SeriesSelection: Initialize Next Non-Seasonal TargetSeriesSelection" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, $priority : seriesSelectionVaccineGroup.seriesSelectionPriority, 
+		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, $priority : seriesSelectionPriority, 
 			$vg : seriesSelectionVaccineGroup, seriesSelectionSeason == null)
 		// Perform selection on series; higher priority vaccine groups first and those with seasons in start date ascending order
-		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup != $vg, seriesSelectionVaccineGroup.seriesSelectionPriority > $priority)
+		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup != $vg, seriesSelectionPriority > $priority)
 	then
 		modify ($tss) {
-			setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS);
+			setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS);
 		}
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeriesSelection Initialized " + $tss.toString() + ", Vaccine Group Priority " + $tss.seriesSelectionVaccineGroup.seriesSelectionPriority);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeriesSelection Initialized " + $tss.toString() + ", Vaccine Group Priority " + $tss.seriesSelectionPriority);
 end
 
 
@@ -1090,18 +1089,18 @@ end
 rule "SeriesSelection: Initialize Next Seasonal TargetSeriesSelection" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, $priority : seriesSelectionVaccineGroup.seriesSelectionPriority, 
+		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, $priority : seriesSelectionPriority, 
 			$vg : seriesSelectionVaccineGroup, seriesSelectionSeason != null, $season : seriesSelectionSeason)
 		// Perform selection on series; higher priority vaccine groups first and those with seasons in start date ascending order
-		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup != $vg, seriesSelectionVaccineGroup.seriesSelectionPriority > $priority) 		
+		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup != $vg, seriesSelectionPriority > $priority) 		
 		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup == $vg, 
 			seriesSelectionSeason != null && seriesSelectionSeason.fullySpecifiedSeasonStartDate.isBefore($season.fullySpecifiedSeasonStartDate))
 	then
 		modify ($tss) { 
-			setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS);
+			setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS);
 		}
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeriesSelection Initialized " + $tss.toString() + ", Vaccine Group Priority " + $tss.seriesSelectionVaccineGroup.seriesSelectionPriority);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeriesSelection Initialized " + $tss.toString() + ", Vaccine Group Priority " + $tss.seriesSelectionPriority);
 end
 
 
@@ -1152,13 +1151,31 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
+rule "SeriesSelection: Default Series Selection Preprocess rule: invoke custom rules" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
+	no-loop true
+	when
+		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Invoking Series Selection rules for vaccine group: " + $tss.seriesSelectionVaccineGroup);
+		update($tss);
+		setFocus("customSeriesSelectionRules");
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
 rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelection that is not in the current season, set patient age time of interest to last date of season if no shots administered" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 2000
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
 	no-loop true
 	when
-		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
+		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
 		not TargetSeries(seriesRules.vaccineGroup == $tssvg, selectedSeries == true, targetSeason == $sss)
 		$ts : TargetSeries(vaccineGroup == $tssvg, selectedSeries == false,	targetSeason == $sss, numberOfShotsAdministeredInSeries == 0)
@@ -1166,8 +1183,10 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	then
 		String _RULENAME = kcontext.rule.name;
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", $ts.targetSeason.fullySpecifiedSeasonEndDate.toDate());
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: patientAgeTimeOfInterest set to season end date: " + patientAgeTimeOfInterest);
 		update($tss);
+		setFocus("customSeriesSelectionRules");
 end
 
 
@@ -1180,7 +1199,7 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
 	no-loop true
 	when
-		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
+		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
 		not TargetSeries(seriesRules.vaccineGroup == $tssvg, selectedSeries == true, targetSeason == $sss)
 		$ts : TargetSeries(vaccineGroup == $tssvg, selectedSeries == false,	targetSeason == $sss, numberOfShotsAdministeredInSeries > 0)
@@ -1188,8 +1207,10 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	then
 		String _RULENAME = kcontext.rule.name;	
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", $ts.lastShotAdministeredInSeries.administrationDate);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: patientAgeTimeOfInterest set to last shot date in series: " + patientAgeTimeOfInterest);
 		update($tss);
+		setFocus("customSeriesSelectionRules");
 end
 
 
@@ -1202,7 +1223,7 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
 	no-loop true
 	when
-		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
+		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
 		not TargetSeries(seriesRules.vaccineGroup == $tssvg, selectedSeries == true, targetSeason == $sss)
 		$ts : TargetSeries(vaccineGroup == $tssvg, selectedSeries == false, targetSeason == $sss)
@@ -1210,8 +1231,10 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	then
 		String _RULENAME = kcontext.rule.name;
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: patientAgeTimeOfInterest set to execution time: " + patientAgeTimeOfInterest +"; evalTime is " + evalTime);
 		update($tss);
+		setFocus("customSeriesSelectionRules");
 end
 
 
@@ -1850,7 +1873,7 @@ rule "RecommendationForecast/Post Recommendation Check: Recommend Not Recommende
 		String _RULENAME = kcontext.rule.name;
 		Recommendation $recommendation = new Recommendation($ts); 
 		$recommendation.setRecommendationStatus(RecommendationStatus.NOT_RECOMMENDED);
-		$recommendation.setRecommendationReason(SupportedRecommendationConcept._NOT_RECOMMENDED_COMPLETE_REASON.getConcept());
+		$recommendation.setRecommendationReason(BaseDataRecommendationReason._NOT_RECOMMENDED_COMPLETE_REASON.getCdsListItemName());
 		$ts.setSeriesComplete(true);
 		$ts.addInterimRecommendationForConsideration($recommendation, evalTime);
 		$ts.addSeriesRuleProcessed(_RULENAME);
@@ -1877,9 +1900,9 @@ rule "RecommendNotRecommendedIfImmuneToAllDiseasesInSeries" ruleflow-group "Reco
 		Iterator dilIter = $diseaseImmunityList.iterator();
 		while (dilIter.hasNext()) {	// Just take the first available immunity reason
 			DiseaseImmunity diConsequence = (DiseaseImmunity) dilIter.next();
-			SupportedRecommendationConcept src = SupportedRecommendationConcept.getSupportedRecommendationConceptByConceptCode(diConsequence.getImmunityReason());
+			String src = diConsequence.getImmunityReason();
 			if (src != null) {
-				$recommendation.setRecommendationReason(src.getConcept());
+				$recommendation.setRecommendationReason(src);
 				break;				
 			}
 		}
@@ -2047,30 +2070,4 @@ end
 //			depending on the setting of the toBeReturned flag.
 
 
-/*****************************************************************************************************************************************************************************/
-// 															General Purpose Functions for use in Accumulate and Collects
-/*****************************************************************************************************************************************************************************/
-
-function List getAllDosesAcrossListOfTargetSeries(List tss) {
-
-	List tds = new ArrayList();
-	if (tss == null) {
-		return tds;
-	}
-	
-	Iterator iter = tss.iterator();
-	while (iter.hasNext()) {
-		TargetSeries ts = (TargetSeries) iter.next();
-		Collection tsd = ts.getTargetDoses();
-		if (tsd != null) {
-			Iterator ii = tsd.iterator();
-			while (ii.hasNext()) {
-				TargetDose td = (TargetDose) ii.next();
-				tds.add(td);
-			}
-		}
-	}
-	
-	return tds;
-}
 
