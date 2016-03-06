@@ -72,7 +72,7 @@ rule "SeriesSelection: DUMMY catch-all Influenza season rule, 2 dose-series appl
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
 			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason == $sss)		
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 2-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false, 
 			targetSeason == $sss)
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -116,12 +116,12 @@ rule "SeriesSelection: For the Influenza 2015-2016, 2014-2015, 2013-2014 or 2012
 	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season" || seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || 
-				seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || 
+				seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", 
 			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason != null && targetSeason == $sss)
 		// Get the "current" season for series selection
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 2-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false, 
 			targetSeason == $sss)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)			
@@ -145,16 +145,16 @@ rule "SeriesSelection: For the Influenza 2014-2015 season if the patient < 9yrs 
 	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2014-2015 Influenza Season", $sss : seriesSelectionSeason)
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20142015InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason != null && targetSeason == $sss)
 		// Determine and make note of the "current" season for series selection
-		$season : Season(seasonName == "2014-2015 Influenza Season", isDefinedBySeriesTableRules() == true, $seasonDefStart : fullySpecifiedSeasonStartDate, $seasonDefEnd : fullySpecifiedSeasonEndDate)
+		$season : Season(seasonName == "20142015InfluenzaSeason", isDefinedBySeriesTableRules() == true, $seasonDefStart : fullySpecifiedSeasonStartDate, $seasonDefEnd : fullySpecifiedSeasonEndDate)
 		// Pick the TargetSeries that is actually in the 2014-2015 season, not just using the 2014-2015 season rules (which would be after 2014-2015 defined dates)	
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
 			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $seasonEndDate : targetSeason.fullySpecifiedSeasonEndDate, 
 			$seasonStartDate.compareTo($seasonDefStart) == 0 && $seasonEndDate.compareTo($seasonDefEnd) == 0, $tsid : targetSeriesIdentifier)
 		// Determine and make note of the prior "2013-2014" season; if 1 or more valid doses during 2013-2014, 1-dose series applies
-		$ts2013 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason.seasonName == "2013-2014 Influenza Season")
+		$ts2013 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason.seasonName == "20132014InfluenzaSeason")
 		accumulate($tsthis : TargetDose(isValid == true) from $ts2013.targetDoses; $countValid : count($tsthis); $countValid >= 1)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
@@ -179,17 +179,17 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
 			seriesSelectionSeason != null, 
-			seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", 
+			seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", 
 			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason != null && targetSeason == $sss)
 		// Determine and make note of the "current" season for series selection
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
 			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
 
 		$currentAndPriorSeasonsInfluenzaSeasons : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", 
 			 targetSeason != null && targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate) || targetSeriesIdentifier == $tsid), collectList($tsInfluenzaThis))
 		$allh1n12009Seasons : List() from accumulate($thisH1N1Series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1",
-			targetSeason != null && targetSeason.seasonName == "2009 H1N1 Season", selectedSeries == true), collectList($thisH1N1Series))
+			targetSeason != null && targetSeason.seasonName == "2009H1N1Season", selectedSeries == true), collectList($thisH1N1Series))
 		accumulate($tdpriorCondition2 : TargetDose(isValid == true, administrationDate < "01-Jul-2010") from getAllDosesAcrossListOfTargetSeries($currentAndPriorSeasonsInfluenzaSeasons);
 			$countPriorInfluenzaDosesCondition2 : count($tdpriorCondition2); $countPriorInfluenzaDosesCondition2 >= 2)
 		accumulate($tdpriorH1N1Condition2 : TargetDose(isValid == true) from getAllDosesAcrossListOfTargetSeries($allh1n12009Seasons);
@@ -217,11 +217,11 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
 			seriesSelectionSeason != null, 
-			seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", 
+			seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", 
 			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason == $sss)
 		// Determine which season we're looking at now for series selection
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
 			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
 		//	The patient received at least 2 doses of seasonal influenza vaccine during prior influenza seasons, with at least one dose since July 2010
 		$priorSeasonsInfluenzaSeasons : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", 
@@ -253,10 +253,10 @@ rule "SeriesSelection: For the Influenza 2015-2016 season if the patient < 9yrs 
 	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season", $sss : seriesSelectionSeason)
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason == $sss)
 		// Determine which season we're looking at now for series selection
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
 			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
 		//	The patient received at least 2 doses of seasonal influenza vaccine during prior influenza seasons
 		$priorSeasonsInfluenzaSeasons : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", 
@@ -285,11 +285,11 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015 or 2015
 	activation-group "InfluenzaSeries9to10yrSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season" || seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || 
-				seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || 
+				seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", 
 			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason == $sss)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
 			targetSeason == $sss)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") >= 0 && 
@@ -318,10 +318,10 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
 			seriesSelectionSeason != null, 
-			seriesSelectionSeason.seasonName == "2014-2015 Influenza Season" || seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || seriesSelectionSeason.seasonName == "2012-2013 Influenza Season", $sss : seriesSelectionSeason)
+			seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason == $sss)
 		// Determine and make note of the 2-Dose TargetSeries for this season
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 2-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false, 
 			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
 		//
 		// Condition: the patient DID NOT receive at least 2 doses of seasonal influenza vaccine during prior influenza seasons, with at least one dose since July 2010
@@ -340,7 +340,7 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
 			targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate) || targetSeriesIdentifier == $tsid), collectList($tsInfluenzaThis2))
 		$allh1n12009Season : List() from accumulate($thisH1N1Series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1",
 		 	// (selected series is redundant since H1N1 VG has should have done through select series first, but this is a safeguard)
-			targetSeason != null && targetSeason.seasonName == "2009 H1N1 Season", selectedSeries == true), collectList($thisH1N1Series))	
+			targetSeason != null && targetSeason.seasonName == "2009H1N1Season", selectedSeries == true), collectList($thisH1N1Series))	
 		$countPriorH1N1Doses : Number() from accumulate($td2009h1n1shot: TargetDose(isValid == true) from getAllDosesAcrossListOfTargetSeries($allh1n12009Season), count($td2009h1n1shot))
  		accumulate($tdpriorCondition2 : TargetDose(isValid == true, administrationDate < "01-Jul-2010") from getAllDosesAcrossListOfTargetSeries($currentAndPriorSeasonsInfluenza); 
 			$countPriorInfluenzaDosesCondition2 : count($tdpriorCondition2); (! ($countPriorInfluenzaDosesCondition2 >= 2 && $countPriorH1N1Doses >= 1)) == true)
@@ -375,10 +375,10 @@ rule "SeriesSelection: For the Influenza 2015-2016 season if patient >= 9yrs and
 	activation-group "InfluenzaSeries9to10yrSelectionCheck"	
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season", $sss : seriesSelectionSeason)
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason == $sss)
 		// Determine and make note of the 2-Dose TargetSeries for this season
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 2-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false, 
 			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
 		//
 		// Condition: the patient DID NOT receive at least 2 doses of seasonal influenza vaccine during prior influenza seasons
@@ -415,10 +415,10 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015 and 201
 	agenda-group "customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "2015-2016 Influenza Season" || seriesSelectionSeason.seasonName == "2013-2014 Influenza Season" || 
-				seriesSelectionSeason.seasonName == "2012-2013 Influenza Season" || seriesSelectionSeason.seasonName == "2014-2015 Influenza Season", $sss : seriesSelectionSeason)
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || 
+				seriesSelectionSeason.seasonName == "20122013InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", selectedSeries == true, targetSeason == $sss)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza 1-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
 			targetSeason == $sss)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") >= 0)
@@ -465,9 +465,9 @@ rule "SeriesSelection: For the H1N1 2009 season, patient < 10yrs, 2-dose series 
 	agenda-group "customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009 H1N1 Season", $sss : seriesSelectionSeason)
+			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009H1N1Season", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", selectedSeries == true, targetSeason == $sss)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", seriesRules.seriesName == "H1N1 2-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", seriesRules.seriesName == "H1N12DoseSeries", selectedSeries == false, 
 			targetSeason == $sss)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0)
@@ -489,9 +489,9 @@ rule "SeriesSelection: For the H1N1 2009 season, patient >= 10yrs and number of 
 	agenda-group "customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009 H1N1 Season", $sss : seriesSelectionSeason)
+			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009H1N1Season", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", selectedSeries == true, targetSeason == $sss)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", seriesRules.seriesName == "H1N1 1-Dose Series", selectedSeries == false, 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", seriesRules.seriesName == "H1N11DoseSeries", selectedSeries == false, 
 			targetSeason == $sss)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") >= 0)
@@ -513,10 +513,10 @@ rule "SeriesSelection: For the H1N1 2009 season, if effective number of doses >=
 	agenda-group "customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009 H1N1 Season", $sss : seriesSelectionSeason)
+			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009H1N1Season", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", selectedSeries == true, targetSeason == $sss)
 		$td : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate : administrationDate)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", seriesRules.seriesName == "H1N1 2-Dose Series", selectedSeries == false,
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.H1N1", seriesRules.seriesName == "H1N12DoseSeries", selectedSeries == false,
 			targetSeason == $sss, containsTargetDose($td))
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "10y") < 0)
@@ -653,7 +653,7 @@ rule "SeriesSelection.SelectByDefaultHib4DoseSeries" ruleflow-group "SeriesSelec
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", seriesRules.seriesName == "Hib 4-Dose Series",	selectedSeries == false)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", seriesRules.seriesName == "Hib4DoseSeries",	selectedSeries == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -674,7 +674,7 @@ rule "SeriesSelection.SelectHibOMPSeriesIfFirstDoseHibOMPBefore7MonthsAndOnlyOne
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", selectedSeries == true)
 		$td : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate, 
 			vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.49", $td1UniqueId : uniqueId)
-		$ts: TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", $sn : seriesRules.seriesName == "Hib OMP Series", selectedSeries == false, 
+		$ts: TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", $sn : seriesRules.seriesName == "HibOMPSeries", selectedSeries == false, 
 			containsTargetDose($td), $effectiveDoses : determineEffectiveNumberOfDosesInSeries, numberOfShotsAdministeredInSeries == 1)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", seriesRules.seriesName != $sn, 
 			getValidOrAcceptedShotByDoseNumber(1) != null && getValidOrAcceptedShotByDoseNumber(1).getAdministrationDate() < $administrationDate)			
@@ -702,7 +702,7 @@ rule "SeriesSelection.SelectHibOMPSeriesIfTwoDosesHibOMPOneBefore7MonthsOtherBef
 			vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.49")
 		$td2 : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate2 : administrationDate, 
 			vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.49", $td2UniqueId : uniqueId)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", $sn : seriesRules.seriesName == "Hib OMP Series", 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", $sn : seriesRules.seriesName == "HibOMPSeries", 
 			selectedSeries == false, containsTargetDose($td1), containsTargetDose($td2))
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", seriesRules.seriesName != $sn, 
 			getValidOrAcceptedShotByDoseNumber(2) != null && getValidOrAcceptedShotByDoseNumber(2).getAdministrationDate() < $administrationDate2)
@@ -746,7 +746,7 @@ rule "SeriesSelection.SelectHepA2DoseSeriesIfNoShotGiven" ruleflow-group "Series
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", selectedSeries == true)
 		not (TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", numberOfShotsAdministeredInSeries > 0))
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA 2-Dose Child/Adult Series", 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA2DoseChildAdultSeries", 
 			selectedSeries == false)
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -768,7 +768,7 @@ rule "SeriesSelection.SelectHepA2DoseSeriesForLessThan19YearsAndCertainVaccines"
 		$td : TargetDose(vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.83" || 
 			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.84" || 
 			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.31")
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA 2-Dose Child/Adult Series", 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA2DoseChildAdultSeries", 
 			selectedSeries == false, containsTargetDose($td))
 		$person : EvaluatedPerson()
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.getAdministrationDate(), DurationType.YEARS).isLessThan(new TimePeriod(19, DurationType.YEARS)))
@@ -791,7 +791,7 @@ rule "SeriesSelection.SelectHepA2DoseSeriesForCertainVaccines" ruleflow-group "S
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", selectedSeries == true)
 		$td : TargetDose(vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.52" || 
 			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.85")
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA 2-Dose Child/Adult Series", 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA2DoseChildAdultSeries", 
 			selectedSeries == false, containsTargetDose($td))	
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -813,7 +813,7 @@ rule "SeriesSelection.SelectHepA3DoseSeriesFor19YearsAndOverAndCertainVaccines" 
 		$td : TargetDose(vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.83" || 
 			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.84" || 
 			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.31")
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA Adult 3-Dose Series", 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepAAdult3DoseSeries", 
 			selectedSeries == false, containsTargetDose($td))
 		$person : EvaluatedPerson()
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.getAdministrationDate(), DurationType.YEARS).isGreaterThanEqualTo(new TimePeriod(19, DurationType.YEARS)))
@@ -838,7 +838,7 @@ rule "SeriesSelection.SelectHepBNewbornSeriesAtLeastOneShot" ruleflow-group "Ser
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", selectedSeries == true))
 		$person : EvaluatedPerson()
 		$td : TargetDose(administeredShotNumberInSeries == 1)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", seriesRules.seriesName == "HepB Newborn Series", 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", seriesRules.seriesName == "HepBNewbornSeries", 
 			selectedSeries == false, containsTargetDose($td))
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isLessThan(new TimePeriod(28, DurationType.DAYS)))
 	then
@@ -861,7 +861,7 @@ rule "SeriesSelection.SelectHepBNewBornSeriesNoShot" ruleflow-group "SeriesSelec
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", selectedSeries == true))	
 		$person : EvaluatedPerson()
 		$evalTime: EvalTime()
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", seriesRules.seriesName == "HepB Newborn Series", 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", seriesRules.seriesName == "HepBNewbornSeries", 
 			selectedSeries == false, targetDoses.empty)
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue,	DurationType.DAYS).isLessThan(new TimePeriod(28, DurationType.DAYS)))
 	then
@@ -884,7 +884,7 @@ rule "SeriesSelection.SelectHepBChildAdultSeriesAtLeastOneShot" ruleflow-group "
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", selectedSeries == true))
 		$person : EvaluatedPerson()
 		$td : TargetDose(administeredShotNumberInSeries == 1)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", seriesRules.seriesName == "HepB Child/Adult Series", 
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", seriesRules.seriesName == "HepBChildAdultSeries", 
 			selectedSeries == false, containsTargetDose($td))
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isGreaterThanEqualTo(new TimePeriod(28, DurationType.DAYS)))	
 	then
@@ -907,7 +907,7 @@ rule "SeriesSelection.SelectHepBChildAdultSeriesNoShot" ruleflow-group "SeriesSe
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", selectedSeries == true))	
 		$person : EvaluatedPerson()
 		$evalTime: EvalTime()
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", seriesRules.seriesName == "HepB Child/Adult Series", selectedSeries == false, targetDoses.empty)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPB", seriesRules.seriesName == "HepBChildAdultSeries", selectedSeries == false, targetDoses.empty)
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue, DurationType.DAYS).isGreaterThanEqualTo(new TimePeriod(28, DurationType.DAYS)))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -932,7 +932,7 @@ rule "SeriesSelection.SelectDTP5DoseSeriesIf3DoseSeriesNotSelected" ruleflow-gro
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.DTP", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.DTP", selectedSeries == true))
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.DTP", seriesRules.seriesName == "DTP 5-Dose Series")
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.DTP", seriesRules.seriesName == "DTP5DoseSeries")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -953,7 +953,7 @@ rule "SeriesSelection.Select3DoseDTPSeriesIfNoShotsPriorTo7YrsAnd7YrsOldOrOlder"
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.DTP", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.DTP", selectedSeries == true))
 		$person : EvaluatedPerson($birthDate : demographics.birthTime, $ageAt7yrs : TimePeriod.addTimePeriod(demographics.birthTime, "7y"))
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.DTP", seriesRules.seriesName == "DTP 3-Dose Series")
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.DTP", seriesRules.seriesName == "DTP3DoseSeries")
 		not TargetDose(associatedTargetSeries == $ts, administrationDate < $ageAt7yrs)
 		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.YEARS).isGreaterThan(new TimePeriod(7, DurationType.YEARS), true))
 	then
@@ -1024,7 +1024,7 @@ rule "SeriesSelection.SelectRotavirus3DoseSeriesDefault" ruleflow-group "SeriesS
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", selectedSeries == true))	
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesRules.seriesName == "Rotavirus 3-Dose Series")
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesRules.seriesName == "Rotavirus3DoseSeries")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -1046,7 +1046,7 @@ rule "SeriesSelection.SelectRotavirus3DoseSeriesIfCertainVaccinesAdministered" r
 			(vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.116" || 
 			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.122" || 
 			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.74"))
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesRules.seriesName == "Rotavirus 3-Dose Series", containsTargetDose($td))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesRules.seriesName == "Rotavirus3DoseSeries", containsTargetDose($td))
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -1066,7 +1066,7 @@ rule "SeriesSelection.SelectRotavirus2DoseSeriesIf1DoseRV1" ruleflow-group "Seri
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", selectedSeries == true))	
 		$td : TargetDose(isValid == true, doseNumberInSeries == 1, vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.119")
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesRules.seriesName == "Rotavirus 2-Dose Series", containsTargetDose($td))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesRules.seriesName == "Rotavirus2DoseSeries", containsTargetDose($td))
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
