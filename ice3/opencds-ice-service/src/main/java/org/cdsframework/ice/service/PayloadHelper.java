@@ -119,8 +119,9 @@ public class PayloadHelper {
 		AdministrableSubstance lAS = new AdministrableSubstance();
 		lAS.setId(ICELogicHelper.generateUniqueString());
 		CD asSubstanceCode = new CD();
-		// SupportedVaccineConcept lSVC = SupportedVaccineConcept.getSupportedVaccineConceptByConceptCode(d.getVaccineComponent().getVaccineConcept().getOpenCdsConceptCode());
-		LocallyCodedCdsListItem lSVC = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, d.getVaccineComponent().getVaccineConcept());
+		/////// SupportedVaccineConcept lSVC = SupportedVaccineConcept.getSupportedVaccineConceptByConceptCode(d.getVaccineComponent().getVaccineConcept().getOpenCdsConceptCode());
+		/////// LocallyCodedCdsListItem lSVC = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, d.getVaccineComponent().getVaccineConcept());
+		LocallyCodedCdsListItem lSVC = this.backingSchedule.getSupportedCdsLists().getCdsListItem(d.getVaccineComponent().getCdsListItemName());
 		asSubstanceCode.setCodeSystem(lSVC.getCdsListCodeSystem());
 		asSubstanceCode.setCode(lSVC.getCdsListItemKey());
 		asSubstanceCode.setDisplayName(lSVC.getCdsListItemValue());
@@ -389,7 +390,8 @@ public class PayloadHelper {
 
 		Vaccine lRecommendedVaccine = pTS.getRecommendationVaccine();
 		if (lRecommendedVaccine != null && atVaccineConceptLevelIfSpecificVaccineRecommended == true) {
-			LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, lRecommendedVaccine.getVaccineConcept());
+			// LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, lRecommendedVaccine.getVaccineConcept());
+			LocallyCodedCdsListItem sv = this.backingSchedule.getSupportedCdsLists().getCdsListItem(lRecommendedVaccine.getCdsListItemName());
 			if (sv != null) {
 				// A specific vaccine was recommended; indicate the vaccine recommended instead of othe vaccine group
 				return sv.getCdsListItemCD();

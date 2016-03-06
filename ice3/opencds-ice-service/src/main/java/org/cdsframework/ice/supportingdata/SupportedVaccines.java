@@ -339,7 +339,8 @@ public class SupportedVaccines implements SupportingData {
 			else {
 				///////
 				// Create the new VaccineComponent, and make note of this a vaccine component; record and will be a part of this Vaccine
-				VaccineComponent lVaccineComponent = new VaccineComponent(ic, lRelatedDiseasesCdsListItems);
+				/////// VaccineComponent lVaccineComponent = new VaccineComponent(ic, lRelatedDiseasesCdsListItems);
+				VaccineComponent lVaccineComponent = new VaccineComponent(llccli.getCdsListItemName(), lRelatedDiseasesCdsListItems);
 				addPropertiesFromSDToVaccineComponent(lVaccineComponent, pIceVaccineSpecificationFile); 
 				lVaccineComponentsToAddToVaccine.add(lVaccineComponent);
 				
@@ -387,10 +388,12 @@ public class SupportedVaccines implements SupportingData {
 		///////
 		Vaccine lVaccine = null;
 		if (lVaccineComponentsToAddToVaccine.size() == 0) {
-			lVaccine = new Vaccine(ic);
+			/////// lVaccine = new Vaccine(ic);
+			lVaccine = new Vaccine(llccli.getCdsListItemName());
 		}
 		else {
-			lVaccine = new Vaccine(ic, lVaccineComponentsToAddToVaccine, true);
+			// lVaccine = new Vaccine(ic, lVaccineComponentsToAddToVaccine, true);
+			lVaccine = new Vaccine(llccli.getCdsListItemName(), lVaccineComponentsToAddToVaccine, true);
 		}
 		
 		// Set combination vaccine, live virus, and unformulated formulations, if applicable

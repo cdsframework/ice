@@ -673,7 +673,7 @@ rule "SeriesSelection.SelectHibOMPSeriesIfFirstDoseHibOMPBefore7MonthsAndOnlyOne
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", selectedSeries == true)
 		$td : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate, 
-			vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE49", $td1UniqueId : uniqueId)
+			vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.49", $td1UniqueId : uniqueId)
 		$ts: TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", $sn : seriesRules.seriesName == "Hib OMP Series", selectedSeries == false, 
 			containsTargetDose($td), $effectiveDoses : determineEffectiveNumberOfDosesInSeries, numberOfShotsAdministeredInSeries == 1)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", seriesRules.seriesName != $sn, 
@@ -699,9 +699,9 @@ rule "SeriesSelection.SelectHibOMPSeriesIfTwoDosesHibOMPOneBefore7MonthsOtherBef
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", selectedSeries == true)
 		$td1 : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate1 : administrationDate, 
-			vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE49")
+			vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.49")
 		$td2 : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate2 : administrationDate, 
-			vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE49", $td2UniqueId : uniqueId)
+			vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.49", $td2UniqueId : uniqueId)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", $sn : seriesRules.seriesName == "Hib OMP Series", 
 			selectedSeries == false, containsTargetDose($td1), containsTargetDose($td2))
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", seriesRules.seriesName != $sn, 
@@ -765,9 +765,9 @@ rule "SeriesSelection.SelectHepA2DoseSeriesForLessThan19YearsAndCertainVaccines"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", selectedSeries == true)
-		$td : TargetDose(vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE83" || 
-			  vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE84" || 
-			  vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE31")
+		$td : TargetDose(vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.83" || 
+			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.84" || 
+			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.31")
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA 2-Dose Child/Adult Series", 
 			selectedSeries == false, containsTargetDose($td))
 		$person : EvaluatedPerson()
@@ -789,8 +789,8 @@ rule "SeriesSelection.SelectHepA2DoseSeriesForCertainVaccines" ruleflow-group "S
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", selectedSeries == true)
-		$td : TargetDose(vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE52" || 
-			  vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE85")
+		$td : TargetDose(vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.52" || 
+			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.85")
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA 2-Dose Child/Adult Series", 
 			selectedSeries == false, containsTargetDose($td))	
 	then
@@ -810,9 +810,9 @@ rule "SeriesSelection.SelectHepA3DoseSeriesFor19YearsAndOverAndCertainVaccines" 
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", selectedSeries == true)
-		$td : TargetDose(vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE83" || 
-			  vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE84" || 
-			  vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE31")
+		$td : TargetDose(vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.83" || 
+			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.84" || 
+			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.31")
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEPA", seriesRules.seriesName == "HepA Adult 3-Dose Series", 
 			selectedSeries == false, containsTargetDose($td))
 		$person : EvaluatedPerson()
@@ -1043,9 +1043,9 @@ rule "SeriesSelection.SelectRotavirus3DoseSeriesIfCertainVaccinesAdministered" r
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", selectedSeries == true))		
 		$td : TargetDose(isValid == true, countsTowardsCompletionOfSeries == true, 
-			(vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE116" || 
-			  vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE122" || 
-			  vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE74"))
+			(vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.116" || 
+			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.122" || 
+			  vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.74"))
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesRules.seriesName == "Rotavirus 3-Dose Series", containsTargetDose($td))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1065,7 +1065,7 @@ rule "SeriesSelection.SelectRotavirus2DoseSeriesIf1DoseRV1" ruleflow-group "Seri
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", selectedSeries == true))	
-		$td : TargetDose(isValid == true, doseNumberInSeries == 1, vaccineComponent.vaccineConcept.openCdsConceptCode == "ICE119")
+		$td : TargetDose(isValid == true, doseNumberInSeries == 1, vaccineComponent.cdsListItemName == "SUPPORTED_VACCINES.119")
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", seriesRules.seriesName == "Rotavirus 2-Dose Series", containsTargetDose($td))
 	then
 		String _RULENAME = kcontext.rule.name;

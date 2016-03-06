@@ -32,7 +32,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.cds.CdsConcept;
 
 public class SeriesRules {
 
@@ -253,34 +252,34 @@ public class SeriesRules {
 			return false;
 		}
 
-		CdsConcept vIceConcept = v.getVaccineConcept();
+		String vCdsListItemName = v.getCdsListItemName();
 		if (logger.isDebugEnabled()) {
-			logger.debug(_METHODNAME + "vaccine concept: " + vIceConcept + "; doseNumber: " + doseNumber + "; allowable any " + allowableForAnyDose);
+			logger.debug(_METHODNAME + "vaccine cdsListItemName: " + vCdsListItemName + "; doseNumber: " + doseNumber + "; allowable any " + allowableForAnyDose);
 		}
-		if (vIceConcept == null) {
+		if (vCdsListItemName == null) {
 			return false;
 		}
-		String vOpenCdsConceptCode = vIceConcept.getOpenCdsConceptCode();
-		logger.debug(_METHODNAME + "opencds concept: " + vOpenCdsConceptCode);
-		if (vOpenCdsConceptCode == null) {
-			return false;
-		}
+
 		for (DoseRule dr : seriesDoseRules) {
 			int drDoseNumber = dr.getDoseNumber();
-			logger.debug(_METHODNAME + "dose number: " + drDoseNumber);
+			if (logger.isDebugEnabled()) { 
+				logger.debug(_METHODNAME + "dose number: " + drDoseNumber);
+			}
 			if (! allowableForAnyDose && drDoseNumber < doseNumber) {
 				continue;
 			}
 			else if (allowableForAnyDose || dr.getDoseNumber() == doseNumber) {
-				logger.debug(_METHODNAME + "here2");
 				List<Vaccine> allPermittedComponentVaccines = dr.getAllPermittedVaccines();
 				for (Vaccine permittedVaccine : allPermittedComponentVaccines) {
 					if (permittedVaccine != null) {
-						CdsConcept iceConcept = permittedVaccine.getVaccineConcept();
-						if (iceConcept == null) {
+						String permittedVaccineCdsListItemName = permittedVaccine.getCdsListItemName();
+						if (permittedVaccineCdsListItemName == null) {
 							continue;
 						}
-						if (vOpenCdsConceptCode.equals(iceConcept.getOpenCdsConceptCode())) {
+						if (vCdsListItemName.equals(permittedVaccineCdsListItemName)) {
+							if (logger.isDebugEnabled()) {
+								logger.debug(_METHODNAME + "allowable vaccine: " + v.getCdsListItemName());
+							}
 							return true;
 						}
 					}
