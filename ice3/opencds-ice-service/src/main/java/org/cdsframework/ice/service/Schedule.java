@@ -201,17 +201,36 @@ public class Schedule {
 	/**
 	 * Utilizing supporting data. Obtain the list of diseases targeted by the specified vaccine group. Both the String supplied as the parameter and String returned  
 	 * are compliant to LocallyCodedCdsListItem.getSupportedListConceptItemName().
-	 * @param String specifying the vaccine group by name
+	 * @param String specifying the vaccine group by _concept_ name
 	 * @return Collection of Strings representing the diseases targeted by the vaccine group; empty collection if none. If the specified vaccine group is  
 	 * 		either null or not a vaccine group tracked in the supporting data, null is returned.
 	 */
-	public Collection<String> getDiseasesTargetedByVaccineGroup(String pVaccineGroupItemName) {
+	public Collection<String> getDiseasesTargetedByVaccineGroup(String pVaccineGroupConceptName) {
 		
-		if (pVaccineGroupItemName == null) {
+		if (pVaccineGroupConceptName == null) {
 			return null;
 		}
 		
-		LocallyCodedVaccineGroupItem lCodedVaccineGroupItem = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getVaccineGroupItem(pVaccineGroupItemName);
+		return getDiseasesTargetedByVaccineGroup(new CdsConcept(pVaccineGroupConceptName));
+	}
+	
+	
+	/**
+	 * Utilizing supporting data. Obtain the list of diseases targeted by the specified vaccine group. Both the String supplied as the parameter and String returned  
+	 * are compliant to LocallyCodedCdsListItem.getSupportedListConceptItemName().
+	 * @param String specifying the vaccine group by _concept_ name
+	 * @return Collection of Strings representing the diseases targeted by the vaccine group; empty collection if none. If the specified vaccine group is  
+	 * 		either null or not a vaccine group tracked in the supporting data, null is returned.
+	 */
+	public Collection<String> getDiseasesTargetedByVaccineGroup(CdsConcept pVaccineGroupConcept) {
+		
+		if (pVaccineGroupConcept == null) {
+			return null;
+		}
+		
+		LocallyCodedCdsListItem lCodedCdsListItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().
+			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE_GROUP, pVaccineGroupConcept);
+		LocallyCodedVaccineGroupItem lCodedVaccineGroupItem = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getVaccineGroupItem(lCodedCdsListItem.getCdsListItemName());
 		if (lCodedVaccineGroupItem == null) {
 			return null;
 		}

@@ -32,6 +32,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 
 public class VaccineComponent extends AbstractVaccine {
 
@@ -52,10 +53,10 @@ public class VaccineComponent extends AbstractVaccine {
 	 * @param pDisease Disease that this vaccine component induces immunity to
 	 * @throws IllegalArgumentException If either parameter is not supplied
 	 */
-	// public VaccineComponent(CdsConcept pVaccineConcept, List<String> pDiseaseImmunityList) {
-	public VaccineComponent(String pCdsListItemName, List<String> pDiseaseImmunityList) {
+	public VaccineComponent(CdsConcept pVaccineConcept, List<String> pDiseaseImmunityList) {
+	// public VaccineComponent(String pCdsListItemName, List<String> pDiseaseImmunityList) {
 		
-		super(pCdsListItemName);
+		super(pVaccineConcept);
 		
 		String _METHODNAME = "VaccineComponent(): ";
 		
@@ -128,7 +129,7 @@ public class VaccineComponent extends AbstractVaccine {
 	@Override
 	public String toString() {
 		return "VaccineComponent [diseaseImmunityList=" + diseaseImmunityList
-				+ ", getCdsListItemName()=" + getCdsListItemName()
+				+ ", getCdsListItemName()=" + getCdsConceptName()
 				+ ", isLiveVirusVaccine()=" + isLiveVirusVaccine()
 				+ ", getValidMinimumAgeForUse()=" + getValidMinimumAgeForUse()
 				+ ", getValidMaximumAgeForUse()=" + getValidMaximumAgeForUse()

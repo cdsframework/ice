@@ -34,6 +34,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 
 
 public class Vaccine extends AbstractVaccine {
@@ -55,10 +56,10 @@ public class Vaccine extends AbstractVaccine {
  
 	}
 	
-	// public Vaccine(CdsConcept pVaccineConcept) {
-	public Vaccine(String pCdsListItemName) {
-		// super(pVaccineConcept);
-		super(pCdsListItemName);
+	public Vaccine(CdsConcept pVaccineConcept) {
+	// public Vaccine(String pCdsListItemName) {
+
+		super(pVaccineConcept);
 		this.vaccineComponents = new ArrayList<VaccineComponent>();
 	}
 
@@ -75,11 +76,10 @@ public class Vaccine extends AbstractVaccine {
 	 * @throws IllegalArgumentException If parameters are not correctly populated (or either are null) with valid values; monovalent vaccines must have a vaccine component
 	 * with the same ICEConcept ID
 	 */
-	// public Vaccine(CdsConcept pVaccineConcept, List<VaccineComponent> pVaccineComponents) {
-	public Vaccine(String pCdsListItemName, List<VaccineComponent> pVaccineComponents) {
-		// this(pVaccineConcept, pVaccineComponents, false);
+	public Vaccine(CdsConcept pVaccineConcept, List<VaccineComponent> pVaccineComponents) {
+	// public Vaccine(String pCdsListItemName, List<VaccineComponent> pVaccineComponents) {
 		
-		this(pCdsListItemName, pVaccineComponents, false);
+		this(pVaccineConcept, pVaccineComponents, false);
 	}
 
 
@@ -95,10 +95,10 @@ public class Vaccine extends AbstractVaccine {
 	 * @throws IllegalArgumentException If parameters are not correctly populated (or either are null) with valid values; monovalent vaccines must have a vaccine component
 	 * with the same ICEConcept ID if permitUnequalVacconeComponentValueInMonovalentVaccine is false (which by default it is).
 	 */
-	// public Vaccine(CdsConcept pVaccineConcept, List<VaccineComponent> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
-	public Vaccine(String pCdsListItemName, List<VaccineComponent> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
+	public Vaccine(CdsConcept pVaccineConcept, List<VaccineComponent> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
+	// public Vaccine(String pCdsConceptName, List<VaccineComponent> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
 		
-		super(pCdsListItemName);
+		super(pVaccineConcept);
 
 		String _METHODNAME = "Vaccine(): ";
 		
@@ -118,7 +118,7 @@ public class Vaccine extends AbstractVaccine {
 		if (! permitUnequalVaccineComponentCodeValueInMonovalentVaccine && lVaccineComponentsSize == 1) {
 			VaccineComponent vc = pVaccineComponents.iterator().next();
 			// if (! vc.getVaccineConcept().equals(pVaccineConcept)) {
-			if (! vc.getCdsListItemName().equals(pCdsListItemName)) {
+			if (! vc.getCdsConceptName().equals(pVaccineConcept.getOpenCdsConceptCode())) {
 				String errStr = "vaccine component supplied for this monovalent vaccine has an unequal concept code value";
 				logger.warn(_METHODNAME + errStr);
 				throw new IllegalArgumentException(errStr);
@@ -265,7 +265,7 @@ public class Vaccine extends AbstractVaccine {
 	@Override
 	public String toString() {
 		
-		String toStr = "Vaccine [getCdsListItemName()=" + getCdsListItemName()		// "Vaccine [getVaccineConcept()=" + getVaccineConcept()
+		String toStr = "Vaccine [getCdsListItemName()=" + getCdsConceptName()		// "Vaccine [getVaccineConcept()=" + getVaccineConcept()
 			+ ", isLiveVirusVaccine()="	+ isLiveVirusVaccine() + ", getValidMinimumAgeForUse()="
 			+ getValidMinimumAgeForUse() + ", getValidMaximumAgeForUse()="
 			+ getValidMaximumAgeForUse() + ", getTradeName()="

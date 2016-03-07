@@ -17,20 +17,21 @@ import org.cdsframework.ice.supportingdata.ICEConceptType;
 
 /**
  * SupportedCdsConcepts is used to track the CAT-originated concepts defined in its supporting data files. All concepts, if defined in the supporting data, must be associated with 
- * an ICEConceptType, or may not be tracked by this class. Furthermore, no CdsConcept defined in the supporting data can be associated with more than one CdsListItem per 
- * ICEConceptType. This latter requirement is so that, on output for a request, the ICE response may be output using the locally coded values required by the client.
+ * an ICEConceptType, or may not be tracked by this class. Furthermore, no non-OpenCDS CdsConcept defined in the supporting data can be associated with more than one CdsListItem  
+ * per ICEConceptType. This latter requirement is so that, on output for a request, the ICE response may be output using the locally coded values required by the client. 
+ * FUTURE enhancement: OpenCDS concepts may continue to be associated with multiple cdsListItems.
  */
 public class SupportedCdsConcepts {
 
-	private Map<ICEConceptType, Map<CdsConcept, LocallyCodedCdsListItem>> conceptTypeToConceptCdsListItemMap;
-	private Map<LocallyCodedCdsListItem, Set<CdsConcept>> cdsListItemToConceptList;
+	private Map<ICEConceptType, Map<CdsConcept, LocallyCodedCdsListItem>> iceConceptTypeToConceptCdsListItemMap;	// ICEConceptType -> (map of cds concepts -> cdsListItem)  
+	private Map<LocallyCodedCdsListItem, Set<CdsConcept>> cdsListItemToConceptList;									// cdsListItem -> map of all OpenCDS and non-OpenCDS concepts
 	
 	private static Log logger = LogFactory.getLog(SupportedCdsConcepts.class);
 	
 	
 	public SupportedCdsConcepts() {
 		
-		conceptTypeToConceptCdsListItemMap = new EnumMap<ICEConceptType, Map<CdsConcept, LocallyCodedCdsListItem>>(ICEConceptType.class);
+		iceConceptTypeToConceptCdsListItemMap = new EnumMap<ICEConceptType, Map<CdsConcept, LocallyCodedCdsListItem>>(ICEConceptType.class);
 		cdsListItemToConceptList = new HashMap<LocallyCodedCdsListItem, Set<CdsConcept>>();
 	}
 	
@@ -48,15 +49,15 @@ public class SupportedCdsConcepts {
 	
 	
 	/**
-	 * Add the supported concept for the specified IceConceptType and associate the specified LocallyCodedCdsListItem with the concept. If either IceConceptType or ICEConcept 
-	 * arguments are null, this method simply returns. If the LocallyCodedCdsListItem is null, the ICEConcept is simply added to the list of concepts being tracked without 
+	 * Add the supported concept for the specified ICEConceptType and associate the specified LocallyCodedCdsListItem with the concept. If either ICEConceptType or CdsConcept 
+	 * arguments are null, this method simply returns. If the LocallyCodedCdsListItem is null, the CdsConcept is simply added to the list of concepts being tracked without 
 	 * a LocallyCodedCdsListItem 
 	 * @param pICT The ICEConceptType this concept will be associated with
 	 * @param pIC The concept to add
-	 * @param pLCCLI The LocallyCodedCdsListItem (a.k.a. locally coded CdsListItem) with which to associate the ICEConcept with.
+	 * @param pLCCLI The LocallyCodedCdsListItem (a.k.a. locally coded CdsListItem) with which to associate the CdsConcept with.
 	 * @throws InconsistentConfigurationException if the supporting data supplied is inconsistent with prior supporting data that has already been provided. This will happen
-	 * 		if ICEConcept is already associated with a LocallyCodedCdsListItem for the specified IceConceptType. (So, although at the OpenCDS level, concepts may map to multiple 
-	 * 		codes and code sets, at the supporting data level, only one code may be mapped to an ICEConcept [which may or may not also be an OpenCDS concept]).
+	 * 		if the CdsConcept is already associated with a LocallyCodedCdsListItem for the specified IceConceptType. (So, although at the OpenCDS level, concepts may map to  
+	 * 		multiple codes and code sets, at the supporting data level, only one code may be mapped to an CdsConcept [which may or may not also be an OpenCDS concept]).
 	 */
 	public void addSupportedCdsConceptWithCdsListItem(ICEConceptType pICT, CdsConcept pIC, LocallyCodedCdsListItem pLCCLI) 
 		throws InconsistentConfigurationException {
@@ -67,7 +68,7 @@ public class SupportedCdsConcepts {
 			return;
 		}
 
-		Map<CdsConcept, LocallyCodedCdsListItem> lIceConceptEntry = this.conceptTypeToConceptCdsListItemMap.get(pICT);
+		Map<CdsConcept, LocallyCodedCdsListItem> lIceConceptEntry = this.iceConceptTypeToConceptCdsListItemMap.get(pICT);
 		if (lIceConceptEntry == null) {
 			lIceConceptEntry = new HashMap<CdsConcept, LocallyCodedCdsListItem>();
 		}
@@ -77,7 +78,7 @@ public class SupportedCdsConcepts {
 			if (priorAssociatedLCCLI == null) {
 				lIceConceptEntry.put(pIC, pLCCLI);
 				// Record the Map<ICEConceptType, Map<ICEConcept, LocallyCodedCdsListItem> entry
-				this.conceptTypeToConceptCdsListItemMap.put(pICT, lIceConceptEntry);
+				this.iceConceptTypeToConceptCdsListItemMap.put(pICT, lIceConceptEntry);
 				// Record the Map<LocallyCodedCdsListItem, List<ICEConcept>> entry
 				if (lICEConceptListAssocWCdsListItem == null || ! lICEConceptListAssocWCdsListItem.contains(pIC)) {
 					if (lICEConceptListAssocWCdsListItem == null) {
@@ -116,14 +117,14 @@ public class SupportedCdsConcepts {
 				}
 			}
 			else {
-				this.conceptTypeToConceptCdsListItemMap.put(pICT, null);
+				this.iceConceptTypeToConceptCdsListItemMap.put(pICT, null);
 			}
 		}
 	}
 
 	
 	/**
-	 * Return map of supported concepts for the given ICEConceptType. Returns null if not found.
+	 * Return map of supported concepts for the given (non-OpenCDS) ICEConceptType. Returns null if not found.
 	 */
 	public Map<CdsConcept, LocallyCodedCdsListItem> getCdsConceptsAssociatedWithICEConceptType(ICEConceptType pICT) {
 
@@ -131,7 +132,7 @@ public class SupportedCdsConcepts {
 			return null;
 		}
 		
-		return this.conceptTypeToConceptCdsListItemMap.get(pICT);
+		return this.iceConceptTypeToConceptCdsListItemMap.get(pICT);
 	}
 
 	
@@ -144,8 +145,8 @@ public class SupportedCdsConcepts {
 			return false;
 		}
 		
-		if (this.conceptTypeToConceptCdsListItemMap.containsKey(pICT)) {
-			Map<CdsConcept, LocallyCodedCdsListItem> lConceptCdsList = this.conceptTypeToConceptCdsListItemMap.get(pICT);
+		if (this.iceConceptTypeToConceptCdsListItemMap.containsKey(pICT)) {
+			Map<CdsConcept, LocallyCodedCdsListItem> lConceptCdsList = this.iceConceptTypeToConceptCdsListItemMap.get(pICT);
 			if (lConceptCdsList != null && lConceptCdsList.size() > 0) {
 				return true;
 			}
@@ -205,7 +206,7 @@ public class SupportedCdsConcepts {
 			return null;
 		}
 		
-		Map<CdsConcept, LocallyCodedCdsListItem> lMap = this.conceptTypeToConceptCdsListItemMap.get(pICT);
+		Map<CdsConcept, LocallyCodedCdsListItem> lMap = this.iceConceptTypeToConceptCdsListItemMap.get(pICT);
 		if (lMap != null) {
 			return lMap.get(pIC);
 		}
@@ -224,12 +225,12 @@ public class SupportedCdsConcepts {
 		// private Map<LocallyCodedCdsListItem, Set<CdsConcept>> cdsListItemToConceptList;
 		
 		String toStr = "CdsConcept [ conceptTypeToConceptCdsListItemMap [[";
-		Set<ICEConceptType> lConceptTypeSet = conceptTypeToConceptCdsListItemMap.keySet();
+		Set<ICEConceptType> lConceptTypeSet = iceConceptTypeToConceptCdsListItemMap.keySet();
 		if (lConceptTypeSet != null) {
 			int i=1;
 			for (ICEConceptType lConceptType : lConceptTypeSet) {
 				toStr += "\n\t{" + i + "} ICEConceptType: " + lConceptType;
-				Map<CdsConcept, LocallyCodedCdsListItem> lCdsConceptToLCCLIMap = this.conceptTypeToConceptCdsListItemMap.get(lConceptType);
+				Map<CdsConcept, LocallyCodedCdsListItem> lCdsConceptToLCCLIMap = this.iceConceptTypeToConceptCdsListItemMap.get(lConceptType);
 				if (lCdsConceptToLCCLIMap != null) {
 					Set<CdsConcept> lCdsConceptSet = lCdsConceptToLCCLIMap.keySet();
 					if (lCdsConceptSet != null) {

@@ -32,12 +32,14 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 
 public class SeriesRules {
 
 	private String seriesId;
-	private String cdsListItemName;			// series name
-	private String vaccineGroup;
+	private String seriesNameCode;
+	/////// private String vaccineGroup;
+	private CdsConcept vaccineGroupConcept;
 	private int numberOfDosesInSeries;
 	private boolean recurringDosesAfterSeriesComplete;
 	private boolean doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
@@ -50,21 +52,22 @@ public class SeriesRules {
 	/**
 	 * Instantiate a series rules instance. SeriesDoseRules and applicableSeasons set to empty. Set flag to calculate dose number based on disease tally to true by default.
 	 * @param pSeriesName Series name, must be provided
-	 * @param pVaccineGroup Vaccine Group, must be provided
+	 * @param pVaccineGroup CdsConcept representing the vaccine group, must be provided
 	 * @throws IllegalArgumentException of series name or vaccine group is null
 	 */
-	public SeriesRules(String pSeriesName, String pVaccineGroup) {
+	/////// public SeriesRules(String pSeriesName, String pVaccineGroup) {
+	public SeriesRules(String pSeriesName, CdsConcept pVaccineGroup) {
 
 		String _METHODNAME = "Series(): ";
-		if (pSeriesName == null || pVaccineGroup == null) {
+		if (pSeriesName == null || pVaccineGroup == null || pVaccineGroup.getOpenCdsConceptCode() == null) {		// the latter condition should never occur
 			String str = "series name and/or vaccine group name is not supplied";
 			logger.warn(_METHODNAME + str);
 			throw new IllegalArgumentException(str);
 		}
 		// seriesId = pSeriesName;
 		seriesId = ICELogicHelper.generateUniqueString();
-		cdsListItemName = pSeriesName;
-		vaccineGroup = pVaccineGroup;
+		seriesNameCode = pSeriesName;
+		vaccineGroupConcept = pVaccineGroup;
 		seriesDoseRules = new ArrayList<DoseRule>();
 		applicableSeasons = new ArrayList<Season>();
 		numberOfDosesInSeries = 0;
@@ -79,7 +82,8 @@ public class SeriesRules {
 	 * @param pVaccineGroup
 	 * @param pApplicableSeasons
 	 */
-	public SeriesRules(String pSeriesName, String pVaccineGroup, List<Season> pApplicableSeasons) {
+	/////// public SeriesRules(String pSeriesName, String pVaccineGroup, List<Season> pApplicableSeasons) {
+	public SeriesRules(String pSeriesName, CdsConcept pVaccineGroup, List<Season> pApplicableSeasons) {
 	
 		this(pSeriesName, pVaccineGroup);
 		if (pApplicableSeasons != null && pApplicableSeasons.isEmpty() == false) {
@@ -98,13 +102,12 @@ public class SeriesRules {
 			return null;
 		}
 		
-		SeriesRules lSR = new SeriesRules(pSR.getSeriesName(), pSR.getVaccineGroup());
+		SeriesRules lSR = new SeriesRules(pSR.getSeriesName(), pSR.getVaccineGroupConcept());
 		lSR.seriesId = ICELogicHelper.generateUniqueString();
-		lSR.cdsListItemName = pSR.cdsListItemName;
-		lSR.vaccineGroup = pSR.getVaccineGroup();
+		lSR.seriesNameCode = pSR.seriesNameCode;
+		lSR.vaccineGroupConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(pSR.getVaccineGroupConcept());
 		lSR.recurringDosesAfterSeriesComplete = pSR.recurringDosesAfterSeriesComplete;
 		lSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = pSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
-		// lSR.applicableSeasons = pSR.applicableSeasons;
 		lSR.applicableSeasons = new ArrayList<Season>();
 		
 		// Copy Doses
@@ -135,7 +138,7 @@ public class SeriesRules {
 
 	
 	public String getSeriesName() {
-		return cdsListItemName;
+		return seriesNameCode;
 	}
 
 	/**
@@ -146,13 +149,17 @@ public class SeriesRules {
 		if (seriesName == null) {
 			throw new IllegalArgumentException("seriesName cannot be null");
 		}
-		this.cdsListItemName = seriesName;
+		this.seriesNameCode = seriesName;
+	}
+	
+	private CdsConcept getVaccineGroupConcept() {
+		return vaccineGroupConcept;
 	}
 	
 	public String getVaccineGroup() {
-		return vaccineGroup;
+		return vaccineGroupConcept.getOpenCdsConceptCode();
 	}
-
+	
 	public int getNumberOfDosesInSeries() {
 		return numberOfDosesInSeries;
 	}
@@ -252,7 +259,7 @@ public class SeriesRules {
 			return false;
 		}
 
-		String vCdsListItemName = v.getCdsListItemName();
+		String vCdsListItemName = v.getCdsConceptName();
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "vaccine cdsListItemName: " + vCdsListItemName + "; doseNumber: " + doseNumber + "; allowable any " + allowableForAnyDose);
 		}
@@ -272,13 +279,13 @@ public class SeriesRules {
 				List<Vaccine> allPermittedComponentVaccines = dr.getAllPermittedVaccines();
 				for (Vaccine permittedVaccine : allPermittedComponentVaccines) {
 					if (permittedVaccine != null) {
-						String permittedVaccineCdsListItemName = permittedVaccine.getCdsListItemName();
+						String permittedVaccineCdsListItemName = permittedVaccine.getCdsConceptName();
 						if (permittedVaccineCdsListItemName == null) {
 							continue;
 						}
 						if (vCdsListItemName.equals(permittedVaccineCdsListItemName)) {
 							if (logger.isDebugEnabled()) {
-								logger.debug(_METHODNAME + "allowable vaccine: " + v.getCdsListItemName());
+								logger.debug(_METHODNAME + "allowable vaccine: " + v.getCdsConceptName());
 							}
 							return true;
 						}
@@ -392,12 +399,11 @@ public class SeriesRules {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((cdsListItemName == null) ? 0 : cdsListItemName.hashCode());
-		result = prime * result
-				+ ((vaccineGroup == null) ? 0 : vaccineGroup.hashCode());
+		result = prime * result + ((seriesNameCode == null) ? 0 : seriesNameCode.hashCode());
+		result = prime * result + ((vaccineGroupConcept == null) ? 0 : vaccineGroupConcept.hashCode());
 		return result;
 	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -408,12 +414,15 @@ public class SeriesRules {
 		if (getClass() != obj.getClass())
 			return false;
 		SeriesRules other = (SeriesRules) obj;
-		if (cdsListItemName == null) {
-			if (other.cdsListItemName != null)
+		if (seriesNameCode == null) {
+			if (other.seriesNameCode != null)
 				return false;
-		} else if (!cdsListItemName.equals(other.cdsListItemName))
+		} else if (!seriesNameCode.equals(other.seriesNameCode))
 			return false;
-		if (vaccineGroup != other.vaccineGroup)
+		if (vaccineGroupConcept == null) {
+			if (other.vaccineGroupConcept != null)
+				return false;
+		} else if (!vaccineGroupConcept.equals(other.vaccineGroupConcept))
 			return false;
 		return true;
 	}
@@ -422,7 +431,7 @@ public class SeriesRules {
 	@Override
 	public String toString() {
 		
-		String toStr = "SeriesRules [seriesId = " + seriesId + "; Series Name = " + cdsListItemName + "; Vaccine Group = " + vaccineGroup
+		String toStr = "SeriesRules [seriesId = " + seriesId + "; Series Name = " + seriesNameCode + "; vaccineGroupConcept name = " + vaccineGroupConcept.getOpenCdsConceptCode()
 				+ "; Number of Doses In Series = " + numberOfDosesInSeries + "; Recurring Doses (After Series Complete)? = "
 				+ recurringDosesAfterSeriesComplete + "; Dose Number Calculated By Diseases Targeted By Each Vaccine = " 
 				+ doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered; 

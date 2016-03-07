@@ -516,7 +516,8 @@ public class SupportedSeries implements SupportingData {
 		///////
 		// Now create SeriesRules
 		///////
-		SeriesRules series1Rules = (lSeasons.isEmpty()) ? new SeriesRules(lSeriesCode, lVGI.getCdsItemName()) : new SeriesRules(lSeriesCode, lVGI.getCdsItemName(), lSeasons);
+		/////// SeriesRules series1Rules = (lSeasons.isEmpty()) ? new SeriesRules(lSeriesCode, lVGI.getCdsItemName()) : new SeriesRules(lSeriesCode, lVGI.getCdsItemName(), lSeasons);
+		SeriesRules series1Rules = (lSeasons.isEmpty()) ? new SeriesRules(lSeriesCode, lVGI.getCdsConcept()) : new SeriesRules(lSeriesCode, lVGI.getCdsConcept(), lSeasons);
 		series1Rules.setSeriesDoseRules(seriesDoseRules);
 		// Determine whether or not there are recurring doses for this series (**default false if not specified**)
 		if (pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete() != null) {

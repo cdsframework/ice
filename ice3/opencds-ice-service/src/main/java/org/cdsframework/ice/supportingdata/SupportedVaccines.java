@@ -117,7 +117,7 @@ public class SupportedVaccines implements SupportingData {
 	}
 	
 	/**
-	 * Returns true if there is a vaccineItem associated with the local CD, false if not. (Invoked getGroupVaccineGroupItem(CD) to determine.)
+	 * Returns true if there is a vaccineItem associated with the local CD, false if not. (Invoked getGroupItem(CD) to determine.)
 	 */
 	public boolean vaccineItemExists(CD pVaccineCD) {
 		
@@ -176,7 +176,7 @@ public class SupportedVaccines implements SupportingData {
 	 * @param the IceVaccineSpecification file
 	 * @param the SupportedCdsLists for this instance of supporting data
 	 * @return true if the vaccine data loaded to this point is consistent, false if it is not
-	 * @throws IncosistentConfigurationException if the information provided in the IceVaccineGroupSpecificationFile is not consistent
+	 * @throws IncosistentConfigurationException if the information provided in the IceVaccineSpecificationFile is not consistent
 	 * @throws ImproperUsageException if this method is used improperly
 	 */
 	protected void addSupportedVaccineItemFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecificationFile) 
@@ -224,7 +224,7 @@ public class SupportedVaccines implements SupportingData {
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
-		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with this CdsListItem?
+		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with this CdsListItem?  (OR: could alternatively just check for a CdsConcept of type vaccine)
 		CdsConcept ic = new CdsConcept(lPrimaryOpenCdsConcept.getCode(), lPrimaryOpenCdsConcept.getDisplayName());
 		ic.setIsOpenCdsSupportedConcept(true);
 		Collection<CdsConcept> lOpenCDSConcepts = this.supportedCdsLists.getSupportedCdsConcepts().getOpenCDSICEConceptsAssociatedWithCdsListItem(llccli);
@@ -339,8 +339,8 @@ public class SupportedVaccines implements SupportingData {
 			else {
 				///////
 				// Create the new VaccineComponent, and make note of this a vaccine component; record and will be a part of this Vaccine
-				/////// VaccineComponent lVaccineComponent = new VaccineComponent(ic, lRelatedDiseasesCdsListItems);
-				VaccineComponent lVaccineComponent = new VaccineComponent(llccli.getCdsListItemName(), lRelatedDiseasesCdsListItems);
+				VaccineComponent lVaccineComponent = new VaccineComponent(ic, lRelatedDiseasesCdsListItems);
+				/////// VaccineComponent lVaccineComponent = new VaccineComponent(llccli.getCdsListItemName(), lRelatedDiseasesCdsListItems);
 				addPropertiesFromSDToVaccineComponent(lVaccineComponent, pIceVaccineSpecificationFile); 
 				lVaccineComponentsToAddToVaccine.add(lVaccineComponent);
 				
@@ -388,12 +388,12 @@ public class SupportedVaccines implements SupportingData {
 		///////
 		Vaccine lVaccine = null;
 		if (lVaccineComponentsToAddToVaccine.size() == 0) {
-			/////// lVaccine = new Vaccine(ic);
-			lVaccine = new Vaccine(llccli.getCdsListItemName());
+			lVaccine = new Vaccine(ic);
+			/////// lVaccine = new Vaccine(llccli.getCdsListItemName());
 		}
 		else {
-			// lVaccine = new Vaccine(ic, lVaccineComponentsToAddToVaccine, true);
-			lVaccine = new Vaccine(llccli.getCdsListItemName(), lVaccineComponentsToAddToVaccine, true);
+			lVaccine = new Vaccine(ic, lVaccineComponentsToAddToVaccine, true);
+			/////// lVaccine = new Vaccine(llccli.getCdsListItemName(), lVaccineComponentsToAddToVaccine, true);
 		}
 		
 		// Set combination vaccine, live virus, and unformulated formulations, if applicable
@@ -408,7 +408,7 @@ public class SupportedVaccines implements SupportingData {
 			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
 		}
 		lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
-		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), new LocallyCodedVaccineItem(llccli.getCdsListItemName(), lIntersectionOfSupportedCdsVersions, lVaccine));
+		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), new LocallyCodedVaccineItem(llccli.getCdsListItemName(), ic.getOpenCdsConceptCode(), lIntersectionOfSupportedCdsVersions, lVaccine));
 		
 		///////
 		// END Creating and persisting the Vaccine

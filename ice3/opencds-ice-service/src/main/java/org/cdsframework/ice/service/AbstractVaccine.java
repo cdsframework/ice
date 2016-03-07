@@ -28,13 +28,14 @@ package org.cdsframework.ice.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.util.TimePeriod;
 
 
 public abstract class AbstractVaccine {
 
-	// private CdsConcept vaccineConcept;
-	private String cdsListItemName;
+	private CdsConcept cdsConcept;
+	/////// private String cdsListItemName;
 	private String tradeName;
 	private String manufacturerCode;
 	private boolean unspecifiedFormulation;
@@ -56,23 +57,14 @@ public abstract class AbstractVaccine {
 			throw new IllegalArgumentException(errStr);
 		}
 		
-		/*
-		CdsConcept ic = pAbstractVaccine.getVaccineConcept();
-		if (ic == null) {
-			String errStr = "Concept code not supplied in Vaccine instance";
-			logger.warn(_METHODNAME + errStr);
-			throw new IllegalArgumentException(errStr);
-		}
-		// this.vaccineConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(ic);
-		*/
-		
-		String lCdsListItemName = pAbstractVaccine.getCdsListItemName();
-		if (lCdsListItemName == null) {
-			String errStr = "Concept code not supplied in Vaccine instance";
-			logger.warn(_METHODNAME + errStr);
-			throw new IllegalArgumentException(errStr);
-		}
-		this.cdsListItemName = lCdsListItemName;
+		// String lCdsListItemName = pAbstractVaccine.getCdsListItemName();
+		//if (lCdsListItemName == null) {
+		//	String errStr = "cdsListItem code not supplied in Vaccine instance";
+		//	logger.warn(_METHODNAME + errStr);
+		//	throw new IllegalArgumentException(errStr);
+		//}
+		//this.cdsListItemName = lCdsListItemName;
+		this.cdsConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(pAbstractVaccine.getCdsConcept());
 		this.tradeName = pAbstractVaccine.getTradeName();
 		this.manufacturerCode = pAbstractVaccine.getManufacturerCode();
 		this.liveVirusVaccine = pAbstractVaccine.isLiveVirusVaccine();
@@ -86,17 +78,18 @@ public abstract class AbstractVaccine {
 	
 	/**
 	 * Constructor for AbstractVaccine object
-	 * @param pCdsListItemName cdsListItemName to be associated with this Vaccine must be supplied
+	 * @param pCdsConceptName cdsListItemName to be associated with this Vaccine must be supplied
 	 */
-	public AbstractVaccine(String pCdsListItemName) {
+	public AbstractVaccine(CdsConcept pCC) {
 		
 		String _METHODNAME = "AbstractVaccine(String): ";
-		if (pCdsListItemName == null) {
-			String errStr = "cdsListItemName code not supplied";
+		if (pCC == null || pCC.getOpenCdsConceptCode() == null) {			// The latter condition should never occur
+			String errStr = "cdsConceptName code not supplied";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		this.cdsListItemName = pCdsListItemName;
+		// this.cdsListItemName = pCdsListItemName;
+		this.cdsConcept = pCC;
 		this.tradeName = null;
 		this.manufacturerCode = null;
 		this.liveVirusVaccine = false;
@@ -107,44 +100,19 @@ public abstract class AbstractVaccine {
 		this.licensedForUseMaximumAge = null;
 	}
 
-	
-	/**
-	 * Constructor for AbstractVaccine object
-	 * @param pConceptCode conceptCode associated with this Vaccine; must be supplied
-	 */
+
 	/*
-	public AbstractVaccine(CdsConcept pVaccineConcept) {
-		
-		String _METHODNAME = "AbstractVaccine(ICEConcept): ";
-		if (pVaccineConcept == null) {
-			String errStr = "Concept code not supplied";
-			logger.warn(_METHODNAME + errStr);
-			throw new IllegalArgumentException(errStr);
-		}
-		
-		// this.vaccineConcept = pVaccineConcept;
-		
-		this.tradeName = null;
-		this.manufacturerCode = null;
-		this.liveVirusVaccine = false;
-		this.unspecifiedFormulation = false;
-		this.validMinimumAgeOfUse = null;
-		this.validMaximumAgeOfUse = null;
-		this.licensedForUseMinimumAge = null;
-		this.licensedForUseMaximumAge = null;
-	}
-
-	public CdsConcept getVaccineConcept() {
-		return vaccineConcept;
-	}
-
-	public void setVaccineConcept(CdsConcept vaccineConcept) {
-		this.vaccineConcept = vaccineConcept;
-	}
-	*/
-	
 	public String getCdsListItemName() {
 		return this.cdsListItemName;
+	}
+	*/
+
+	public CdsConcept getCdsConcept() {
+		return this.cdsConcept;
+	}
+	
+	public String getCdsConceptName() {
+		return this.cdsConcept.getOpenCdsConceptCode();
 	}
 
 	public boolean isLiveVirusVaccine() {
@@ -244,7 +212,7 @@ public abstract class AbstractVaccine {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((this.cdsListItemName == null) ? 0 : this.cdsListItemName.hashCode());
+				+ ((this.cdsConcept == null) ? 0 : this.cdsConcept.hashCode());
 		return result;
 	}
 
@@ -257,41 +225,13 @@ public abstract class AbstractVaccine {
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractVaccine other = (AbstractVaccine) obj;
-		if (this.cdsListItemName == null) {
-			if (other.cdsListItemName != null)
+		if (this.cdsConcept == null) {
+			if (other.cdsConcept != null)
 				return false;
-		} else if (!this.cdsListItemName.equals(other.cdsListItemName))
+		} else if (!this.cdsConcept.equals(other.cdsConcept))
 			return false;
 		return true;
-	}
-	
-	/*
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((vaccineConcept == null) ? 0 : vaccineConcept.hashCode());
-		return result;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AbstractVaccine other = (AbstractVaccine) obj;
-		if (vaccineConcept == null) {
-			if (other.vaccineConcept != null)
-				return false;
-		} else if (!vaccineConcept.equals(other.vaccineConcept))
-			return false;
-		return true;
-	}
-	*/
-	
 }
 

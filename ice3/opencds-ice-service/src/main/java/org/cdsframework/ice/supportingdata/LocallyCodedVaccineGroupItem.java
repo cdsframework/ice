@@ -60,26 +60,17 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 
 	private Collection<String> relatedDiseasesCdsListItemNames;
 	private int priority;
-	private CdsConcept primaryOpenCdsConcept;
-
 	
 	private static Log logger = LogFactory.getLog(LocallyCodedVaccineGroupItem.class);	
 
 
-	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, CdsConcept pPrimaryOpenCdsMembership) 
+	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, CdsConcept pVaccineGroupCdsConcept, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames) 
 		throws ImproperUsageException {
 
-		super(pVaccineGroupCdsListItemName, pCdsVersions);
+		super(pVaccineGroupCdsListItemName, pVaccineGroupCdsConcept, pCdsVersions);
 		
 		String _METHODNAME = "VaccineGroupItem(): ";
 
-		// Check to make sure that the opencds concept code and code system are specified in the CD 
-		if (pPrimaryOpenCdsMembership == null || pPrimaryOpenCdsMembership.getOpenCdsConceptCode() == null) {
-			String lErrStr = "OpenCDS primary concept membership not specified or properly specified";
-			logger.error(_METHODNAME + lErrStr);
-			throw new ImproperUsageException(lErrStr);
-		}
-		
 		// Check to make sure related vaccines list is specified
 		if (pRelatedDiseasesCdsListItemNames == null) {
 			String lErrStr = "Related vaccines not specified";
@@ -87,16 +78,15 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 			throw new ImproperUsageException(lErrStr);
 		}
 		
-		this.primaryOpenCdsConcept = pPrimaryOpenCdsMembership;
 		this.relatedDiseasesCdsListItemNames = pRelatedDiseasesCdsListItemNames;
 		this.priority = 0;
 	}
 	
 	
-	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, CdsConcept pPrimaryOpenCdsMembership, int pPriority) 
+	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, CdsConcept pVaccineGroupCdsConcept, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames, int pPriority) 
 		throws ImproperUsageException {
 		
-		this(pVaccineGroupCdsListItemName, pCdsVersions, pRelatedDiseasesCdsListItemNames, pPrimaryOpenCdsMembership);
+		this(pVaccineGroupCdsListItemName, pVaccineGroupCdsConcept, pCdsVersions, pRelatedDiseasesCdsListItemNames);
 		this.priority = pPriority;
 	}
 
@@ -124,7 +114,7 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 		return priority;
 	}
 
-
+	/*
 	protected CdsConcept getPrimaryOpenCdsConcept() {
 		return primaryOpenCdsConcept;
 	}
@@ -133,11 +123,11 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 	public CdsConcept getCopyOfPrimaryOpenCdsConcept() {
 		return CdsConcept.constructDeepCopyOfCdsConceptObject(primaryOpenCdsConcept);
 	}
-	
+	*/
 
 	@Override
 	public String toString() {
-		String lStr = "LocallyCodedVaccineGroupItem [vaccineGroupCdsListItemName=" + getCdsItemName() + ", priority=" + priority + ", primaryOpenCdsConcept="	+ primaryOpenCdsConcept; 
+		String lStr = "LocallyCodedVaccineGroupItem [vaccineGroupCdsListItemName=" + getCdsItemName() + ", priority=" + priority + ", primaryOpenCdsConcept="	+ getCdsConceptName(); 
 
 		lStr += "\nrelatedDiseases= [";
 		for (String lDisease : getRelatedDiseasesCdsListItemNames()) {

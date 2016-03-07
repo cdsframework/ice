@@ -162,10 +162,16 @@ public class SupportedVaccineGroups implements SupportingData {
 		}
 		
 		///////
-		// Primary OpenCds Concept from vaccine group
+		// Primary OpenCds Concept from vaccine group - check to make sure that the specified vaccine group CdsConcept has been specified with this vaccine group's cdsListItem definition
 		///////
 		CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());
-		
+		if (! llccli.equals(this.supportedCdsLists.getSupportedCdsConcepts().
+			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE_GROUP, lPrimaryOpenCdsConcept))) {
+			String lErrStr = "Attempt to add vaccine group with a Primary CdsConcept that is not associated with the vaccine group; vaccine group" + lVaccineGroupCdsListItemName + 
+					"; Primary CdsConcept: " + lPrimaryOpenCdsConcept; 
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 		///////
 		// Related Diseases
 		///////
@@ -203,7 +209,7 @@ public class SupportedVaccineGroups implements SupportingData {
 		///////
 		LocallyCodedVaccineGroupItem lcvgi = null;
 		try {
-			lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lCdsVersions, lRelatedDiseasesCdsListItems, lPrimaryOpenCdsConcept, lVaccineGroupPriority);
+			lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lPrimaryOpenCdsConcept, lCdsVersions, lRelatedDiseasesCdsListItems, lVaccineGroupPriority);
 		}
 		catch (ImproperUsageException iue) {
 			String lErrStr = "Caught an unexpected ImproperUsageException during instantiation of LocallyCodedVaccineGroupItem for vaccine group" + lVaccineGroupCdsListItemName;
