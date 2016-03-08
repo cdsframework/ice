@@ -3,7 +3,7 @@ package org.cdsframework.ice.supportingdata;
 public enum BaseDataPerson implements BaseData {
 
 	_GENDER_FEMALE("SUPPORTED_PERSON_CONCEPT.F"),
-	_GENDER_MALe("SUPPORTED_PERSON_CONCEPT.M");
+	_GENDER_MALE("SUPPORTED_PERSON_CONCEPT.M");
 	
 	private String cdsListItemName;
 	

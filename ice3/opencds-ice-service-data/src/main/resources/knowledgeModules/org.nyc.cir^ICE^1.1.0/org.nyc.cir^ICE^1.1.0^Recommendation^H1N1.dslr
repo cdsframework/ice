@@ -36,14 +36,9 @@ import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.Schedule
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -63,7 +58,7 @@ rule "H1N1: Post Recommendation Check: Recommend Not Recommended and Vaccine Gro
 	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.H1N1
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_H1N1"
 			- the Series is a Seasonal Series
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
@@ -71,7 +66,7 @@ rule "H1N1: Post Recommendation Check: Recommend Not Recommended and Vaccine Gro
 		The date $recommendationDate is after $seasonEndDate
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._NOT_RECOMMENDED_VAC_GROUP_NO_LONGER_REC.getConcept()
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.VAC_GROUP_NO_LONGER_REC"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Mark the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -85,11 +80,11 @@ rule "H1N1: Recommend Not Recommended with reason of Complete if Series is Compl
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.H1N1
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_H1N1"
 			- the Series is Complete
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._NOT_RECOMMENDED_COMPLETE_REASON.getConcept()
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -101,13 +96,13 @@ rule "H1N1: Recommend Not Recommended with reason of Vaccine Group No Longer Rec
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.H1N1
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_H1N1"
 			- the Series is Not Complete
 			- make note of the Season End Date as $seasonEndDate
 		The Date evalTime is after $seasonEndDate
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._NOT_RECOMMENDED_VAC_GROUP_NO_LONGER_REC.getConcept()
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries

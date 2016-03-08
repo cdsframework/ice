@@ -36,16 +36,11 @@ import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedPersonConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.supportingdata.BaseDataPerson
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Vaccine
@@ -64,12 +59,12 @@ rule "HPV: If patient is male, >= 22 yrs and < 27 yrs and has no doses on record
 			- make note of the patient's birthdate as $dtBirthDate
 			- the Patient is Male
 		There is a Series $targetSeries that needs Forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.HPV
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HPV"
 			- the effective dose number in the Series is == 1
 		Confirm elapsed time between $dtBirthDate and evalTime >= "22y" && elapsed time between $dtBirthDate and evalTime < "27y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON.getConcept()
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -88,7 +83,7 @@ rule "HPV: Recommend an interval of 6m between doses 1 & 3" ruleflow-group "Reco
 		There is a Series $targetSeries that needs Forecasting
 			- the Series contains the Dose $dose1
 			- the effective dose number in the Series is == 3
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.HPV
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HPV"
 			- the Series is not Complete
 	then
 		Add 6 DurationType.MONTHS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
@@ -107,12 +102,12 @@ rule "HPV: Recommend NOT_RECOMMENDED TOO_OLD If Patient >=27 yrs and does not ha
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the Date as $assign_dtDateAtAge when the Patient is "27y" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.HPV
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HPV"
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "27y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._NOT_RECOMMENDED_TOO_OLD_REASON.getConcept()
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.TOO_OLD"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -128,13 +123,13 @@ rule "HPV: Recommend Conditionally ABOVE_AGE_MAY_COMPLETE if Series Not Complete
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the Date as $assign_dtDateAtAge when the Patient is "27y" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.HPV
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HPV"
 			- the Series is Not Complete
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is > 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "27y"	
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._CONDITIONAL_RECOMMENDATION_ABOVE_AGE_MAY_COMPLETE_REASON.getConcept()
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ABOVE_AGE_MAY_COMPLETE"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries

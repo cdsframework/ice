@@ -34,9 +34,7 @@ import org.cdsframework.ice.service.DiseaseImmunity
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus
-import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -54,7 +52,7 @@ rule "Varicella: Recommend conditional/high risk if born prior to 1/1/1980 and s
 	agenda-group "customRecommendationRule"
     when       
         There is a Series $targetSeries that needs forecasting
-        	- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Varicella
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_VARICELLA"
         	- the Series is not complete
         The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- the patient's birthdate is < "01-Jan-1980"
@@ -72,7 +70,7 @@ rule "Varicella: 84 day Recommended Interval From Dose 1 to Dose 2 if < 13 Years
 	activation-group "recommendationIntervalCheck"
     when
 		There is a Series $targetSeries that needs forecasting
-        	- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Varicella 
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_VARICELLA" 
         	- the Series is not Complete
         	- the effective dose number in the Series is == 2
 			- make note of the date that the most recent shot was administered as $dtAdministrationDate
@@ -92,7 +90,7 @@ rule "Varicella: 28 day Recommended Interval From Dose 1 to Dose 2 if >= 13 Year
 	activation-group "recommendationIntervalCheck"
     when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Varicella
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_VARICELLA"
         	- the Series is not Complete
         	- the effective dose number in the Series is == 2
         	- make note of the date that the most recent shot was administered as $dtAdministrationDate
@@ -111,7 +109,7 @@ rule "Varicella: 28-day Recommended Interval for Valid Dose 1 When Previously Ad
 	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Varicella 
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_VARICELLA" 
         	- the Series is not Complete
         	- the effective dose number in the Series is == 1
 			- the Number of Administered Shots is > 0

@@ -36,12 +36,8 @@ import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -60,7 +56,7 @@ agenda-group "customRecommendationRule"
 dialect "mvel"
 when
 	There is a Series $ppsvSeries that needs forecasting
-		- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PPSV
+		- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PPSV"
 		- the Effective Dose Number in the series is == 1
 		- the number of Administered Shots is > 0
 		- make note of the date that the most recent Shot was Administered as $dtAdministrationDate
@@ -79,12 +75,12 @@ rule "PPSV: Recommended interval 56 days from PCV if due for PPSV" ruleflow-grou
 	agenda-group "postRecommendationCheck"
 	when
 		There is a Series $ppsvSeries
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PPSV
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PPSV"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made and a recommendation date has been determined
 			- make note of the recommendation date as $ppsvRecommendationDate
 		There is a Series $pcvSeries
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.PCV
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
 			- the number of administered shots is > 0
 			- make note of the date that the most recent shot was administered as $dtPCVShotDate
 	then

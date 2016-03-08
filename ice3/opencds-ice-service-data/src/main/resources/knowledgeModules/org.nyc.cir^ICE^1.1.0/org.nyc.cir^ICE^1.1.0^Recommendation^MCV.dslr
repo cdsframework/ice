@@ -35,13 +35,8 @@ import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -67,8 +62,8 @@ rule "Meningococcal: Mark the Series Complete if Dose 1 is Administered >= 16yrs
 			- that has already been evaluated and whose Shot Validity is VALID
 			- make note of the date this shot was administered as $dtAdministrationDate
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group SupportedVaccineGroupConcept.Meningococcal
-			- the name of the Series is "MCV4 2-Dose Series"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT_MENINGOCOCCAL"
+			- the name of the Series is "MCV42DoseSeries"
 			- the Series contains the Dose $shot
 			- the Series is Not Complete
 			- the number of Doses Administered is == 1
@@ -90,7 +85,7 @@ rule "Meningococcal: Recommend Dose 1 at 16yrs of age if Patient >= 16yrs and < 
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAge when the patient is "16y" of age				
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group SupportedVaccineGroupConcept.Meningococcal
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT_MENINGOCOCCAL"
 			- the name of the Series is "MCV4 2-Dose Series"
 			- the Series is Not Complete
 			- the number of Doses Administered is == 0
@@ -107,11 +102,11 @@ rule "Meningococcal: If a patient completed the series, recommendation is Not Re
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Meningococcal
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_MENINGOCOCCAL"
 			- the Series is Complete	
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._NOT_RECOMMENDED_COMPLETE_HIGH_RISK.getConcept()
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete		// to ensure that no other rules override this recommendation
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -126,13 +121,13 @@ rule "Meningococcal: If a patient is >= 19 years and did NOT complete the series
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Meningococcal
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_MENINGOCOCCAL"
 			- the Series is Not Complete
 		Confirm elapsed time between $dtBirthDate and evalTime >= "19y"
     then
         Mark that the Series $targetSeries cannot be forecasted as Complete
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON.getConcept()
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete		// to ensure that no other rules override this recommendation
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
