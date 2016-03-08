@@ -73,7 +73,7 @@ rule "CandidateDosesIdentification: Initialize TargetDose in PPSV or PCV Vaccine
 		// vaccine, and if so -- in conjunction with other pneumococcal initialization rules (such as patient's age) -- allow initialization of the proper series 
 		// with the shot). This is actually more restrictive in terms of letting a TargetDose be initialized within a TargetSeries		
 		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), 
-			getVaccineGroup() == "VACCINE_GROUP_CONCEPT.PPSV" || getVaccineGroup() == "VACCINE_GROUP_CONCEPT.PCV", 
+			getVaccineGroup() == "VACCINE_GROUP_CONCEPT_PPSV" || getVaccineGroup() == "VACCINE_GROUP_CONCEPT_PCV", 
 			vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
 		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
 		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
@@ -110,7 +110,7 @@ rule "CandidateDosesIdentification: Initialize CVX109 Dose Into PPSV Series if P
 		// vaccine, and if so -- in conjunction with other pneumococcal initialization rules (such as patient's age) -- allow initialization of the proper series 
 		// with the shot)		
 		// PSV Series
-		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.PPSV", 
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT_PPSV", 
 			vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
 		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
 		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
@@ -151,7 +151,7 @@ rule "CandidateDosesIdentification: Initialize CVX109 Dose Into PCV Series if Pa
 		// with the shot)		
 		$schedule : Schedule()
 		// PCV Series
-		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.PPSV", 
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT_PPSV", 
 			vaccineIsAllowableInOneOrMoreDoseRules($schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
 		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
 		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 

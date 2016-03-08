@@ -35,9 +35,6 @@ import org.cdsframework.ice.service.Schedule
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -55,7 +52,8 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped Adol 2-d
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the administered shot number is > 1
-			- the Vaccine Administered is SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE
+			// SupportedVaccineConcept._HEPA_PEDADOL_2_DOSE
+			- the Vaccine Administered is "ICE83"
 			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the Dose Number as $assign_nDoseNumber
@@ -64,9 +62,9 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped Adol 2-d
 			- make note of the Date this Shot was Administered as $assign_dtPrevAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series also contains the Dose $previousDose
-			- the name of the Series is "HepA 2-Dose Child/Adult Series"
+			- the name of the Series is "HepA2DoseChildAdultSeries"
 		There is a Series $seriesToSwitchTo
-			- the name of the Series is "HepA Adult 3-Dose Series"
+			- the name of the Series is "HepAAdult3DoseSeries"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		// The Immunization Schedule information $oSchedule must be known to complete writing this rule
@@ -85,7 +83,8 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped Adol 3-d
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the administered shot number is > 1
-			- the Vaccine Administered is SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE
+			// SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE
+			- the Vaccine Administered is "ICE84"	
 			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the Dose Number as $assign_nDoseNumber
@@ -94,9 +93,9 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped Adol 3-d
 			- make note of the Date this Shot was Administered as $assign_dtPrevAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series also contains the Dose $previousDose
-			- the name of the Series is "HepA 2-Dose Child/Adult Series"
+			- the name of the Series is "HepA2DoseChildAdultSeries"
 		There is a Series $seriesToSwitchTo
-			- the name of the Series is "HepA Adult 3-Dose Series"
+			- the name of the Series is "HepAAdult3DoseSeries"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		// The Immunization Schedule information $oSchedule must be known to complete writing this rule
@@ -114,7 +113,8 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped NOS dose
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the administered shot number is > 1
-			- the Vaccine Administered is SupportedVaccineConcept._HEPA_PED_NOS
+			// SupportedVaccineConcept._HEPA_PED_NOS
+			- the Vaccine Administered is "ICE31"
 			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the Dose Number as $assign_nDoseNumber
@@ -123,9 +123,9 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped NOS dose
 			- make note of the Date this Shot was Administered as $assign_dtPrevAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series also contains the Dose $previousDose
-			- the name of the Series is "HepA 2-Dose Child/Adult Series"
+			- the name of the Series is "HepA2DoseChildAdultSeries"
 		There is a Series $seriesToSwitchTo
-			- the name of the Series is "HepA Adult 3-Dose Series"
+			- the name of the Series is "HepAAdult3DoseSeries"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		// The Immunization Schedule information $oSchedule must be known to complete writing this rule

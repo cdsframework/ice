@@ -53,7 +53,7 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries for *Current* *Infl
 	dialect "mvel"
 	agenda-group "customCandidateSeriesIdentificationRule"
 	when
-		$s : SeriesRules($vg : vaccineGroup, $sseriesName : seriesName, vaccineGroup == "VACCINE_GROUP_CONCEPT.INFLUENZA", seasons.size() > 0)
+		$s : SeriesRules($vg : vaccineGroup, $sseriesName : seriesName, vaccineGroup == "VACCINE_GROUP_CONCEPT_INFLUENZA", seasons.size() > 0)
 		not Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $vg, dateIsApplicableToSeason(evalTime))
 		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $vg, $priorSeasonStart : fullySpecifiedSeasonStartDate, 
 			$priorSeasonStart.toDate() < evalTime, $priorSeasonName : seasonName)

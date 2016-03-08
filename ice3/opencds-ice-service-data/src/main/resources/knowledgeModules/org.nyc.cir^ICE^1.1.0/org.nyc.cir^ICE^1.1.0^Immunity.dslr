@@ -36,109 +36,120 @@ import org.opencds.vmr.v1_0.internal.datatypes.IVLDate
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.ICELogicHelper
-import org.cdsframework.ice.supportingdatatmp.SupportedImmunityConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept
 
 global java.util.Date evalTime
 
 expander ../org.cdsframework^ICE^1.1.0/org.cdsframework^ICE^1.1.0.dsl
 
+	// SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY = "ICE1000"
+	// SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED = "ICE998"	
+	// SupportedImmunityConcept.__HEPB_DISEASE_IMMUNITY_FOCUS = "ICE997"
+	// SupportedImmunityConcept.__HEPA_DISEASE_IMMUNITY_FOCUS = "ICE996"
+	// SupportedImmunityConcept.__MEASLES_DISEASE_IMMUNITY_FOCUS = "ICE997"
+	// SupportedImmunityConcept.__MUMPS_DISEASE_IMMUNITY_FOCUS = "ICE994"
+	// SupportedImmunityConcept.__RUBELLA_DISEASE_IMMUNITY_FOCUS = "ICE993"
+	// SupportedImmunityConcept._VARICELLA = "ICE992"
+	// SupportedDiseaseConcept.HepB = "SUPPORTED_DISEASE_CONCEPT.070.30"
+	// SupportedDiseaseConcept.HepA = "SUPPORTED_DISEASE_CONCEPT.070.1"
+	// SupportedDiseaseConcept.Measles = "SUPPORTED_DISEASE_CONCEPT.055.9"
+	// SupportedDiseaseConcept.Mumps = "SUPPORTED_DISEASE_CONCEPT.072.9"
+	// SupportedDiseaseConcept.Rubella = "SUPPORTED_DISEASE_CONCEPT.056.9"	
+	// SupportedDiseaseConcept.Varicella = "SUPPORTED_DISEASE_CONCEPT.052.9"	
+	
 
 rule "Make Note of Disease Immunity for Hep B Due to Disease Documented" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._HEPB_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE997" due to reason "ICE998"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.HepB with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.070.30" with Immunity Date as $immunityDate and reason "ICE998" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for HepB and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Hep B Due to Proof of Immunity" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._HEPB_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE997" due to reason "ICE1000"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.HepB with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.070.30" with Immunity Date as $immunityDate and reason "ICE1000" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for HepB and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Hep A Due to Disease Documented" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._HEPA_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE996" due to reason "ICE998"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.HepA with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.070.1" with Immunity Date as $immunityDate and reason "ICE998" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for HepA and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Hep A Due to Proof of Immunity" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._HEPA_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE996" due to reason "ICE1000"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.HepA with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.070.1" with Immunity Date as $immunityDate and reason "ICE1000" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for HepA and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Measles Due to Disease Documented" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._MEASLES_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE995" due to reason "ICE998"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.Measles with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.055.9" with Immunity Date as $immunityDate and reason "ICE998" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for Measles and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Measles Due to Proof of Immunity" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._MEASLES_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE995" due to reason "ICE1000"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.Measles with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.055.9" with Immunity Date as $immunityDate and reason "ICE1000" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for Measles and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Mumps Due to Disease Documented" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._MUMPS_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE994" due to reason "ICE998"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.Mumps with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.072.9" with Immunity Date as $immunityDate and reason "ICE998" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for Mumps and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Mumps Due to Proof of Immunity" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._MUMPS_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE994" due to reason "ICE1000"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.Mumps with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.072.9" with Immunity Date as $immunityDate and reason "ICE1000" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for Mumps and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Rubella Due to Disease Documented" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._RUBELLA_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE993" due to reason "ICE998"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.Rubella with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.056.9" with Immunity Date as $immunityDate and reason "ICE998" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for Rubella and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Rubella Due to Proof of Immunity" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._RUBELLA_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE993" due to reason "ICE1000"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.Rubella with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.056.9" with Immunity Date as $immunityDate and reason "ICE1000" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for Rubella and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Varicella Due to Disease Documented" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._VARICELLA_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE992" due to reason "ICE998"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.Varicella with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_IMMUNITY_DOCUMENTED for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.052.9" with Immunity Date as $immunityDate and reason "ICE998" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for Varicella and Immunity Date $immunityDate
 end
 
 rule "Make Note of Disease Immunity for Varicella Due to Proof of Immunity" ruleflow-group "DiseaseImmunityRecord"
 	when
-		The Immunization History indicates that the Patient has obtained Immunity to SupportedImmunityConcept._VARICELLA_DISEASE_IMMUNITY_FOCUS due to reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY
+		The Immunization History indicates that the Patient has obtained Immunity to "ICE992" due to reason "ICE1000"
 	then
-		Make note of the Patient's Immunity to SupportedDiseaseConcept.Varicella with Immunity Date as $immunityDate and reason SupportedEvaluationConcept._DISEASE_PROOF_OF_IMMUNITY for Evaluation and Forecasting Purposes
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.052.9" with Immunity Date as $immunityDate and reason "ICE1000" for Evaluation and Forecasting Purposes
 		Log that Immunity was noted for Varicella and Immunity Date $immunityDate
 end
 
