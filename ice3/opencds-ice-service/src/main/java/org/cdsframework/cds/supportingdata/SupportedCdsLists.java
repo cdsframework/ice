@@ -196,7 +196,8 @@ public class SupportedCdsLists implements SupportingData {
 		///////
 		ICEConceptType lIceConceptType = ICEConceptType.getSupportedIceConceptType(lSLCCdsListCode);
 		if (lIceConceptType != null) {
-			CdsConcept lIC = new CdsConcept(lSupportedListItemName, false);		// Not an OpenCDS concept
+			CdsConcept lIC = new CdsConcept(lSupportedListItemName);			// Not an OpenCDS concept
+			lIC.setIsOpenCdsSupportedConcept(false);
 			this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(lIceConceptType, lIC, slci);
 		}
 		
@@ -208,12 +209,34 @@ public class SupportedCdsLists implements SupportingData {
 	public void addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(CdsListSpecificationFile pCdsListSpecificationFile) 
 		throws InconsistentConfigurationException {
 		
+		// String _METHODNAME = "addSupportedCdsListItemsAndConceptsFromCdsListSpecificationFile(): ";
+		
 		if (pCdsListSpecificationFile == null) {
 			return;
 		}
 		if (pCdsListSpecificationFile != null) {
 			List<CdsListItem> lcli = pCdsListSpecificationFile.getCdsListItems();
 			try {
+				/*
+				// Check to make sure that the cdsListCode was never provided by a different file; currently do not support the same cdsListCode across different files
+				for (CdsListItem cli : lcli) {
+					if (cli != null) {
+						LocallyCodedCdsListItem slci = new LocallyCodedCdsListItem(pCdsListSpecificationFile, cli);
+						ICEConceptType lIceConceptType = ICEConceptType.getSupportedIceConceptType(slci.getCdsListCode());
+						if (lIceConceptType != null) {
+							if (this.supportedCdsConcepts.existsSupportedConceptsForSpecifiedICEConceptType(lIceConceptType) == true) {
+								String lErrStr = "cdsListSpecificationFile cdsListCode \"" + slci.getCdsListCode() + "\" already specified in a different file; cannot continue";
+								logger.error(_METHODNAME + lErrStr);
+								throw new InconsistentConfigurationException(lErrStr);
+							}
+							else {
+								break;
+							}
+						}
+						// continue until first non-null entry is found and verified
+					}
+				}
+				*/
 				for (CdsListItem cli : lcli) {
 					addSupportedCdsListItemAndConcept(pCdsListSpecificationFile, cli);
 				}
@@ -370,6 +393,7 @@ public class SupportedCdsLists implements SupportingData {
 	@Override
 	public String toString() {
 		
+		// First build string of the list of LocallyCodedCdsListItems stored in the cdsListItemNameToCdsListItem map.
 		Collection<LocallyCodedCdsListItem> slcic = this.cdsListItemNameToCdsListItem.values();
 		int i = 1;
 		String ltoStringStr = "[ ";
@@ -377,6 +401,9 @@ public class SupportedCdsLists implements SupportingData {
 			ltoStringStr += "\n{" + i + "} " + slci.toString();
 			i++;
 		}
+		
+		// Second build string of the associated SupportedConcepts
+		ltoStringStr += this.supportedCdsConcepts.toString();
 		
 		return ltoStringStr;
 	}

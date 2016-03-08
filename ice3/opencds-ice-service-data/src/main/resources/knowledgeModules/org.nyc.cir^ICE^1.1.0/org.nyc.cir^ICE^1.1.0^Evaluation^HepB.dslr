@@ -36,10 +36,7 @@ import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Schedule
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
 import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -56,7 +53,8 @@ rule "HepB: Verify Adherece to the Maximum Valid Age for the Vaccine if HepB Hig
 	when
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
         There is an Administered Shot $oTargetDose that needs to be evaluated
-        	- the vaccine administered is SupportedVaccineConcept._HEPB_HIGHRISK_INFANT
+        	// SupportedVaccineConcept._HEPB_HIGHRISK_INFANT
+        	- the vaccine administered is "ICE42"
         	- the vaccine administered has a maximum valid age
         There is a Series $oTargetSeries that contains the Dose $oTargetDose
         Confirm the age of the patient $oEvaluatedPerson at the time the vaccine was administered for dose $oTargetDose is greater than the maximum allowable age for the vaccine
@@ -73,7 +71,8 @@ rule "HepB: Verify Adherence to the Maximum Valid Age for the Vaccine if HepB Pe
     when
     	The patient information $oEvaluatedPerson must be known to complete writing this rule
     	There is an Administered Shot $oTargetDose that needs to be evaluated
-       		- the vaccine administered is SupportedVaccineConcept._HEPB_LESSTHAN_20
+    		// SupportedVaccineConcept._HEPB_LESSTHAN_20
+       		- the vaccine administered is "ICE08"
        		- the vaccine administered has a maximum valid age
 		There is a Series $oTargetSeries that contains the Dose $oTargetDose
 		Confirm the age of the patient $oEvaluatedPerson at the time the vaccine was administered for dose $oTargetDose is greater than the maximum allowable age for the vaccine
@@ -96,7 +95,7 @@ rule "HepB: Evaluate the Minimum Interval Between Doses 1 and 3" ruleflow-group 
 			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series also contains the Dose $previousDose
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.HepB
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HEPB"
 		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "108d"
 	then
 		Mark the shot $currentDose as Invalid for this Series due to "Below Minimum Interval"
@@ -129,7 +128,7 @@ rule "HepB: Enough is Enough Rule" ruleflow-group "HistoryEvaluation"
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series also contains the Dose $doseTwo
 			- the Series also contains the Dose $administeredShotThree 
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.HepB
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HEPB"
 			- the number of doses required to complete this series is >= $nDoseNumber
 			- make note of the absolute minimum interval for dose 2 in this series as $minIntervalDoseTwo
 			- make note of the absolute minimum age for dose 3 in this series as $minimumAgeDoseCurrentDose
@@ -149,16 +148,18 @@ rule "HepB: Mark Series Complete if Two Adult Doses Given to Patient between >= 
 		There is an Administered Shot $doseTwo
 			- the dose number in the series is == 2
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered is SupportedVaccineConcept._HEPB_GREATEREQUAL_20
+			// SupportedVaccineConcept._HEPB_GREATEREQUAL_20
+			- the vaccine administered is "ICE43"
 			- make note of the date this shot was administered as $dtAdministrationDateDoseTwo
 		There is an Administered Shot $doseOne
 			- the dose number in the series is == 1
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered is SupportedVaccineConcept._HEPB_GREATEREQUAL_20
+			// SupportedVaccineConcept._HEPB_GREATEREQUAL_20
+			- the vaccine administered is "ICE43"
 			- make note of the date this shot was administered as $dtAdministrationDateDoseOne
 		There is a Series $targetSeries that contains the Dose $doseTwo
 			- the Series also contains the Dose $doseOne
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.HepB
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HEPB"
 		Confirm elapsed time between $dtAdministrationDateDoseOne and $dtAdministrationDateDoseTwo >= "4m-4d"
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateDoseOne >= 11 DurationType.YEARS
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateDoseOne < 16 DurationType.YEARS

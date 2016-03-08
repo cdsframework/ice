@@ -57,9 +57,12 @@ public class Vaccine extends AbstractVaccine {
 	}
 	
 	public Vaccine(CdsConcept pVaccineConcept) {
+	// public Vaccine(String pCdsListItemName) {
+
 		super(pVaccineConcept);
 		this.vaccineComponents = new ArrayList<VaccineComponent>();
 	}
+
 	
 	/**
 	 * Instantiate a vaccine object. If there is only one vaccine component, the vaccine component code must be the same as that specified by the ICEConcept if using this constructor.
@@ -74,10 +77,12 @@ public class Vaccine extends AbstractVaccine {
 	 * with the same ICEConcept ID
 	 */
 	public Vaccine(CdsConcept pVaccineConcept, List<VaccineComponent> pVaccineComponents) {
-	
+	// public Vaccine(String pCdsListItemName, List<VaccineComponent> pVaccineComponents) {
+		
 		this(pVaccineConcept, pVaccineComponents, false);
 	}
-	
+
+
 	/**
 	 * Instantiate a Vaccine object. Both parameters are mandatory.
 	 * @param pVaccineConcept ICEConcept representing the vaccine
@@ -91,9 +96,12 @@ public class Vaccine extends AbstractVaccine {
 	 * with the same ICEConcept ID if permitUnequalVacconeComponentValueInMonovalentVaccine is false (which by default it is).
 	 */
 	public Vaccine(CdsConcept pVaccineConcept, List<VaccineComponent> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
-		super(pVaccineConcept);
+	// public Vaccine(String pCdsConceptName, List<VaccineComponent> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
 		
+		super(pVaccineConcept);
+
 		String _METHODNAME = "Vaccine(): ";
+		
 		if (pVaccineComponents == null || pVaccineComponents.size() == 0) {
 			String errStr = "vaccine component not populated";
 			logger.warn(_METHODNAME + errStr);
@@ -109,7 +117,8 @@ public class Vaccine extends AbstractVaccine {
 		int lVaccineComponentsSize = pVaccineComponents.size();
 		if (! permitUnequalVaccineComponentCodeValueInMonovalentVaccine && lVaccineComponentsSize == 1) {
 			VaccineComponent vc = pVaccineComponents.iterator().next();
-			if (! vc.getVaccineConcept().equals(pVaccineConcept)) {
+			// if (! vc.getVaccineConcept().equals(pVaccineConcept)) {
+			if (! vc.getCdsConceptName().equals(pVaccineConcept.getOpenCdsConceptCode())) {
 				String errStr = "vaccine component supplied for this monovalent vaccine has an unequal concept code value";
 				logger.warn(_METHODNAME + errStr);
 				throw new IllegalArgumentException(errStr);
@@ -256,7 +265,7 @@ public class Vaccine extends AbstractVaccine {
 	@Override
 	public String toString() {
 		
-		String toStr = "Vaccine [getVaccineConcept()=" + getVaccineConcept()
+		String toStr = "Vaccine [getCdsListItemName()=" + getCdsConceptName()		// "Vaccine [getVaccineConcept()=" + getVaccineConcept()
 			+ ", isLiveVirusVaccine()="	+ isLiveVirusVaccine() + ", getValidMinimumAgeForUse()="
 			+ getValidMinimumAgeForUse() + ", getValidMaximumAgeForUse()="
 			+ getValidMaximumAgeForUse() + ", getTradeName()="
@@ -278,64 +287,4 @@ public class Vaccine extends AbstractVaccine {
 		return toStr;
 	}
 	
-
-	/**
-	 * Given a vaccine concept code, get the minimum age that the specified vaccine can be used
-	 * @param pVaccineConceptCode
-	 * @return Minimum age that the specified vaccine can be used
-	 * @throws IllegalArgumentException If the vaccine code supplied is not 
-	public TimePeriod getMinimumAgeOfUseForVaccineComponent(String pVaccineConceptCode) {
-		
-		String _METHODNAME = "getValidMinimumAgeForUse(): ";
-		
-		if (pVaccineConceptCode == null) {
-			String errStr = "concept code parameter not supplied";
-			logger.warn(_METHODNAME +errStr);
-			throw new IllegalArgumentException(errStr);
-		}
-		
-		for (VaccineComponent vc : vaccineComponents) {
-			if (pVaccineConceptCode.equals(vc.getVaccineConcept().getOpenCdsConceptCode())) {
-				return vc.getValidMinimumAgeForUse();
-			}
-		}
-		
-		String errStr = "invalid concept code parameter supplied - concept code does not refer to a vaccine component represented by this vaccine";
-		logger.warn(_METHODNAME + errStr);
-		throw new IllegalArgumentException(errStr);
-	}
-	
-	**
-	 * Given a vaccine concept code, get the minimum age that the specified vaccine can be used
-	 * @param pVaccineConceptCode
-	 * @return Minimum age that the specified vaccine can be used
-	 * @throws IllegalArgumentException If the vaccine code supplied is not 
-	 *
-	public TimePeriod getMaximumAgeOfUseForVaccineComponent(String pVaccineConceptCode) {
-		
-		String _METHODNAME = "getValidMaximumAgeForUse(): ";
-		
-		if (pVaccineConceptCode == null) {
-			String errStr = "concept code parameter not supplied";
-			logger.warn(_METHODNAME +errStr);
-			throw new IllegalArgumentException(errStr);
-		}
-		
-		for (VaccineComponent vc : vaccineComponents) {
-			if (pVaccineConceptCode.equals(vc.getVaccineConcept().getOpenCdsConceptCode())) {
-				return vc.getValidMaximumAgeForUse();
-			}
-		}
-		
-		String errStr = "invalid concept code parameter supplied - concept code does not refer to a vaccine component represented by this vaccine";
-		logger.warn(_METHODNAME + errStr);
-		throw new IllegalArgumentException(errStr);
-	}
-	*/
-	
-	/**
-	 * Get the minimum age for this vaccine
-	 * @return
-	 */
-
 }

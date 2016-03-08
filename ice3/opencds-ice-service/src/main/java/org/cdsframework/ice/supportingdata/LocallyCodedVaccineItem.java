@@ -43,10 +43,10 @@ public class LocallyCodedVaccineItem extends LocallyCodedCdsItem {
 	/**
 	 * Create a LocallyCodedVaccineItem. All parameters to this method must be specified, or an ImproperUsageException is thrown.
 	 */
-	protected LocallyCodedVaccineItem(String pVaccineCdsListItemName, Collection<String> pCdsVersions, Vaccine pVaccine) 
+	protected LocallyCodedVaccineItem(String pVaccineCdsListItemName, String pVaccineConceptItemName, Collection<String> pCdsVersions, Vaccine pVaccine) 
 		throws ImproperUsageException {
 		
-		super(pVaccineCdsListItemName, pCdsVersions);
+		super(pVaccineCdsListItemName, pVaccineConceptItemName, pCdsVersions);
 		
 		String _METHODNAME = "LocallyCodedVaccineItem(): ";
 		if (pVaccine == null) {

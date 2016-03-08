@@ -36,13 +36,9 @@ import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
 import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -65,7 +61,7 @@ rule "DTP(Any): Note that Tdap needed if primary series complete and patient has
 	dialect "mvel"
 	when
 		There is a Series $targetSeries
-			- the series belongs to the vaccine group SupportedVaccineGroupConcept.DTP
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT_DTP"
 			- the series is complete
 		The Patient information $evaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge when the patient is "7y" of age
@@ -87,7 +83,7 @@ rule "DTP(Any): Retract Tdap needed if patient _has_ received a dose of pertussi
 	dialect "mvel"
 	when
 		There is a Series $targetSeries
-			- the series belongs to the vaccine group SupportedVaccineGroupConcept.DTP
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT_DTP"
 		The Patient information $evaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge when the patient is "7y" of age
 		There exists an IceFact
@@ -108,7 +104,7 @@ rule "DTP(Any): Retract Tdap needed if primary DTP series not complete"
 	dialect "mvel"
 	when
 		There is a Series $targetSeries
-			- the series belongs to the vaccine group SupportedVaccineGroupConcept.DTP
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT_DTP"
 			- the series is not complete
 		There is an IceFact $iceTdapFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue

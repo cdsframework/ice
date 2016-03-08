@@ -54,6 +54,7 @@ public class VaccineComponent extends AbstractVaccine {
 	 * @throws IllegalArgumentException If either parameter is not supplied
 	 */
 	public VaccineComponent(CdsConcept pVaccineConcept, List<String> pDiseaseImmunityList) {
+	// public VaccineComponent(String pCdsListItemName, List<String> pDiseaseImmunityList) {
 		
 		super(pVaccineConcept);
 		
@@ -128,7 +129,7 @@ public class VaccineComponent extends AbstractVaccine {
 	@Override
 	public String toString() {
 		return "VaccineComponent [diseaseImmunityList=" + diseaseImmunityList
-				+ ", getVaccineConcept()=" + getVaccineConcept()
+				+ ", getCdsListItemName()=" + getCdsConceptName()
 				+ ", isLiveVirusVaccine()=" + isLiveVirusVaccine()
 				+ ", getValidMinimumAgeForUse()=" + getValidMinimumAgeForUse()
 				+ ", getValidMaximumAgeForUse()=" + getValidMaximumAgeForUse()

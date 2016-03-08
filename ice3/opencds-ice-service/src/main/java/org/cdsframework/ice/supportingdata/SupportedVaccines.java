@@ -117,7 +117,7 @@ public class SupportedVaccines implements SupportingData {
 	}
 	
 	/**
-	 * Returns true if there is a vaccineItem associated with the local CD, false if not. (Invoked getGroupVaccineGroupItem(CD) to determine.)
+	 * Returns true if there is a vaccineItem associated with the local CD, false if not. (Invoked getGroupItem(CD) to determine.)
 	 */
 	public boolean vaccineItemExists(CD pVaccineCD) {
 		
@@ -176,7 +176,7 @@ public class SupportedVaccines implements SupportingData {
 	 * @param the IceVaccineSpecification file
 	 * @param the SupportedCdsLists for this instance of supporting data
 	 * @return true if the vaccine data loaded to this point is consistent, false if it is not
-	 * @throws IncosistentConfigurationException if the information provided in the IceVaccineGroupSpecificationFile is not consistent
+	 * @throws IncosistentConfigurationException if the information provided in the IceVaccineSpecificationFile is not consistent
 	 * @throws ImproperUsageException if this method is used improperly
 	 */
 	protected void addSupportedVaccineItemFromIceVaccineSpecificationFile(IceVaccineSpecificationFile pIceVaccineSpecificationFile) 
@@ -191,6 +191,11 @@ public class SupportedVaccines implements SupportingData {
 					(pIceVaccineSpecificationFile.getVaccine() == null ? "null" : ConceptUtils.toInternalCD(pIceVaccineSpecificationFile.getVaccine()));
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
+		}
+		if (ICEConceptType.VACCINE != ICEConceptType.getSupportedIceConceptType(llccli.getCdsListCode())) {
+			String lErrStr = "Attempt to add an item as a vaccine which is not a VACCINE ICEConceptType";
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
 		// If one of the supporting data files already defined this vaccine, thrown an InconsistentConfigurationException
@@ -219,8 +224,9 @@ public class SupportedVaccines implements SupportingData {
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
-		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with this CdsListItem?
-		CdsConcept ic = new CdsConcept(lPrimaryOpenCdsConcept.getCode(), true, lPrimaryOpenCdsConcept.getDisplayName());
+		// The corresponding OpenCDS concept was specified in the file. Was the OpenCDS concept previously specified with this CdsListItem?  (OR: could alternatively just check for a CdsConcept of type vaccine)
+		CdsConcept ic = new CdsConcept(lPrimaryOpenCdsConcept.getCode(), lPrimaryOpenCdsConcept.getDisplayName());
+		ic.setIsOpenCdsSupportedConcept(true);
 		Collection<CdsConcept> lOpenCDSConcepts = this.supportedCdsLists.getSupportedCdsConcepts().getOpenCDSICEConceptsAssociatedWithCdsListItem(llccli);
 		boolean lPrimaryOpenCDSConceptForVaccineIdentified = false;
 		for (CdsConcept lIC : lOpenCDSConcepts) {
@@ -272,7 +278,13 @@ public class SupportedVaccines implements SupportingData {
 		for (org.opencds.vmr.v1_0.schema.CD lRelatedDisease : lRelatedDiseases) {
 			LocallyCodedCdsListItem lRelatedDiseaseCdsListItem = this.supportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(lRelatedDisease));
 			if (lRelatedDiseaseCdsListItem == null) {
-				String lErrStr = "Attempt to add a related disease to a vaccine that is not a supported disease concept specified in the list of Supported CdsLists";
+				String lErrStr = "Attempt to add a related disease to a vaccine that is not a supported disease concept specified in the list of Supported CdsLists: "+ 
+					ConceptUtils.toInternalCD(lRelatedDisease) == null ? "" : ConceptUtils.toInternalCD(lRelatedDisease).toString();
+				logger.warn(_METHODNAME + lErrStr);
+				throw new InconsistentConfigurationException(lErrStr);
+			}
+			if (ICEConceptType.DISEASE != ICEConceptType.getSupportedIceConceptType(lRelatedDiseaseCdsListItem.getCdsListCode())) {
+				String lErrStr = "Attempt to add an item as a related disease which is not a DISEASE ICEConceptType; item: " + lRelatedDiseaseCdsListItem.toString();
 				logger.warn(_METHODNAME + lErrStr);
 				throw new InconsistentConfigurationException(lErrStr);
 			}
@@ -328,6 +340,7 @@ public class SupportedVaccines implements SupportingData {
 				///////
 				// Create the new VaccineComponent, and make note of this a vaccine component; record and will be a part of this Vaccine
 				VaccineComponent lVaccineComponent = new VaccineComponent(ic, lRelatedDiseasesCdsListItems);
+				/////// VaccineComponent lVaccineComponent = new VaccineComponent(llccli.getCdsListItemName(), lRelatedDiseasesCdsListItems);
 				addPropertiesFromSDToVaccineComponent(lVaccineComponent, pIceVaccineSpecificationFile); 
 				lVaccineComponentsToAddToVaccine.add(lVaccineComponent);
 				
@@ -349,7 +362,7 @@ public class SupportedVaccines implements SupportingData {
 					logger.error(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);					
 				}
-				if (! lVaccineComponentCD.getCodeSystem().equals(lVaccineCD.getCodeSystem())) {
+				if (lVaccineComponentCD.getCodeSystem() == null || lVaccineCD.getCodeSystem() == null || ! lVaccineComponentCD.getCodeSystem().equals(lVaccineCD.getCodeSystem())) {
 					String lErrStr = "Vaccine and Vaccine Component are specified using two different code systems in the supporting data. This is not permitted";
 					logger.error(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);
@@ -376,9 +389,11 @@ public class SupportedVaccines implements SupportingData {
 		Vaccine lVaccine = null;
 		if (lVaccineComponentsToAddToVaccine.size() == 0) {
 			lVaccine = new Vaccine(ic);
+			/////// lVaccine = new Vaccine(llccli.getCdsListItemName());
 		}
 		else {
 			lVaccine = new Vaccine(ic, lVaccineComponentsToAddToVaccine, true);
+			/////// lVaccine = new Vaccine(llccli.getCdsListItemName(), lVaccineComponentsToAddToVaccine, true);
 		}
 		
 		// Set combination vaccine, live virus, and unformulated formulations, if applicable
@@ -393,8 +408,7 @@ public class SupportedVaccines implements SupportingData {
 			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
 		}
 		lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
-		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), 
-				new LocallyCodedVaccineItem(llccli.getCdsListItemName(), lIntersectionOfSupportedCdsVersions, lVaccine));
+		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), new LocallyCodedVaccineItem(llccli.getCdsListItemName(), ic.getOpenCdsConceptCode(), lIntersectionOfSupportedCdsVersions, lVaccine));
 		
 		///////
 		// END Creating and persisting the Vaccine
@@ -413,67 +427,7 @@ public class SupportedVaccines implements SupportingData {
 			this.vaccineComponentCDToVaccinesNotFullySpecified.put(lVaccineComponentCD, lVaccinesNotFullySpecifiedSet);
 		}
 		///////
-				
-		/**
-		 * Examples
-		 * 		
-		// _HEPA_PEDADOL_3_DOSE
-			ICEConcept hepAPedAdol3Dose = new ICEConcept(SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE.getConceptDisplayNameValue());
-			lVaccineComponent = new VaccineComponent(hepAPedAdol3Dose, diseaseImmunityList);
-			lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
-			lVaccineComponent.setValidMaximumAgeForUse(null);
-			lVaccineComponent.setLiveVirusVaccine(false);
-			lVaccineComponent.setUnspecifiedFormulation(false);
-			lVaccineComponentList = new ArrayList<VaccineComponent>();
-			lVaccineComponentList.add(lVaccineComponent);
-			lVaccine = new Vaccine(hepAPedAdol3Dose, lVaccineComponentList);
-			lVaccine.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.DAYS));
-			lVaccine.setValidMaximumAgeForUse(null);
-			lVaccine.setLiveVirusVaccine(false);
-			supportedVaccinesMap.put(SupportedVaccineConcept._HEPA_PEDADOL_3_DOSE, lVaccine);
-	
-			// _HEPA_PED_NOS
-			ICEConcept hepAPedNOS = new ICEConcept(SupportedVaccineConcept._HEPA_PED_NOS.getConceptCodeValue(), true, SupportedVaccineConcept._HEPA_PED_NOS.getConceptDisplayNameValue());
-			lVaccineComponent = new VaccineComponent(hepAPedNOS, diseaseImmunityList);
-			lVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.YEARS));
-			lVaccineComponent.setValidMaximumAgeForUse(null);
-			lVaccineComponent.setLiveVirusVaccine(false);
-			lVaccineComponent.setUnspecifiedFormulation(true);
-			lVaccineComponentList = new ArrayList<VaccineComponent>();
-			lVaccineComponentList.add(lVaccineComponent);
-			lVaccine = new Vaccine(hepAPedNOS, lVaccineComponentList);
-			lVaccine.setValidMinimumAgeForUse(new TimePeriod(0, DurationType.DAYS));
-			lVaccine.setValidMaximumAgeForUse(null);
-			lVaccine.setLiveVirusVaccine(false);
-			supportedVaccinesMap.put(SupportedVaccineConcept._HEPA_PED_NOS, lVaccine);
 
-			//
-			// DTaP-HepB-IPV
-			//
-			diseaseImmunityList = new ArrayList<SupportedDiseaseConcept>();
-			diseaseImmunityList.add(SupportedDiseaseConcept.HepB);
-			diseaseImmunityList.add(SupportedDiseaseConcept.Diphtheria);
-			diseaseImmunityList.add(SupportedDiseaseConcept.Tetanus);
-			diseaseImmunityList.add(SupportedDiseaseConcept.Pertussis);
-			diseaseImmunityList.add(SupportedDiseaseConcept.Polio);
-			numberOfVGsEncompassingDiseases = getNumberOfVaccineGroupsEncompassingDiseases(diseaseImmunityList);
-			ic = new ICEConcept(SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptCodeValue(), true, SupportedVaccineConcept._DTAP_HEPB_IPV.getConceptDisplayNameValue());
-			// Add HepB, DTaP, and IPV Vaccine Components START
-			lVaccineComponentList = new ArrayList<VaccineComponent>();
-			componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._DTAP);
-			lVaccineComponentList.add(new VaccineComponent(componentVaccine));
-			componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._HEPB_LESSTHAN_20);
-			lVaccineComponentList.add(new VaccineComponent(componentVaccine));
-			componentVaccine = supportedVaccinesMap.get(SupportedVaccineConcept._IPV);
-			lVaccineComponentList.add(new VaccineComponent(componentVaccine));
-			// Add HepB, DTaP, and IPV Vaccine Components END
-			lVaccine = new Vaccine(ic, lVaccineComponentList);
-			lVaccine.setLiveVirusVaccine(false);
-			lVaccine.setCombinationVaccine(true);
-			supportedVaccinesMap.put(SupportedVaccineConcept._DTAP_HEPB_IPV, lVaccine);
-		 **/
-		
-		
 	}
 
 	

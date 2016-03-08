@@ -34,7 +34,8 @@ import org.cdsframework.ice.util.TimePeriod;
 
 public abstract class AbstractVaccine {
 
-	CdsConcept vaccineConcept;
+	private CdsConcept cdsConcept;
+	/////// private String cdsListItemName;
 	private String tradeName;
 	private String manufacturerCode;
 	private boolean unspecifiedFormulation;
@@ -56,14 +57,14 @@ public abstract class AbstractVaccine {
 			throw new IllegalArgumentException(errStr);
 		}
 		
-		CdsConcept ic = pAbstractVaccine.getVaccineConcept();
-		if (ic == null) {
-			String errStr = "Concept code not supplied in Vaccine instance";
-			logger.warn(_METHODNAME + errStr);
-			throw new IllegalArgumentException(errStr);
-		}
-		
-		this.vaccineConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(ic);
+		// String lCdsListItemName = pAbstractVaccine.getCdsListItemName();
+		//if (lCdsListItemName == null) {
+		//	String errStr = "cdsListItem code not supplied in Vaccine instance";
+		//	logger.warn(_METHODNAME + errStr);
+		//	throw new IllegalArgumentException(errStr);
+		//}
+		//this.cdsListItemName = lCdsListItemName;
+		this.cdsConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(pAbstractVaccine.getCdsConcept());
 		this.tradeName = pAbstractVaccine.getTradeName();
 		this.manufacturerCode = pAbstractVaccine.getManufacturerCode();
 		this.liveVirusVaccine = pAbstractVaccine.isLiveVirusVaccine();
@@ -73,22 +74,22 @@ public abstract class AbstractVaccine {
 		this.licensedForUseMinimumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getLicensedMinimumAgeForUse());
 		this.licensedForUseMaximumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getLicensedMaximumAgeForUse());
 	}
-	
+
 	
 	/**
 	 * Constructor for AbstractVaccine object
-	 * @param pConceptCode conceptCode associated with this Vaccine; must be supplied
+	 * @param pCdsConceptName cdsListItemName to be associated with this Vaccine must be supplied
 	 */
-	public AbstractVaccine(CdsConcept pVaccineConcept) {
+	public AbstractVaccine(CdsConcept pCC) {
 		
-		String _METHODNAME = "AbstractVaccine(ICEConcept): ";
-		if (pVaccineConcept == null) {
-			String errStr = "Concept code not supplied";
+		String _METHODNAME = "AbstractVaccine(String): ";
+		if (pCC == null || pCC.getOpenCdsConceptCode() == null) {			// The latter condition should never occur
+			String errStr = "cdsConceptName code not supplied";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
-		this.vaccineConcept = pVaccineConcept;
+		// this.cdsListItemName = pCdsListItemName;
+		this.cdsConcept = pCC;
 		this.tradeName = null;
 		this.manufacturerCode = null;
 		this.liveVirusVaccine = false;
@@ -99,14 +100,21 @@ public abstract class AbstractVaccine {
 		this.licensedForUseMaximumAge = null;
 	}
 
-	public CdsConcept getVaccineConcept() {
-		return vaccineConcept;
-	}
 
-	public void setVaccineConcept(CdsConcept vaccineConcept) {
-		this.vaccineConcept = vaccineConcept;
+	/*
+	public String getCdsListItemName() {
+		return this.cdsListItemName;
+	}
+	*/
+
+	public CdsConcept getCdsConcept() {
+		return this.cdsConcept;
 	}
 	
+	public String getCdsConceptName() {
+		return this.cdsConcept.getOpenCdsConceptCode();
+	}
+
 	public boolean isLiveVirusVaccine() {
 		return liveVirusVaccine;
 	}
@@ -199,13 +207,12 @@ public abstract class AbstractVaccine {
 		this.licensedForUseMaximumAge = licensedForUseMaximumAge;
 	}
 
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((vaccineConcept == null) ? 0 : vaccineConcept.hashCode());
+				+ ((this.cdsConcept == null) ? 0 : this.cdsConcept.hashCode());
 		return result;
 	}
 
@@ -218,13 +225,13 @@ public abstract class AbstractVaccine {
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractVaccine other = (AbstractVaccine) obj;
-		if (vaccineConcept == null) {
-			if (other.vaccineConcept != null)
+		if (this.cdsConcept == null) {
+			if (other.cdsConcept != null)
 				return false;
-		} else if (!vaccineConcept.equals(other.vaccineConcept))
+		} else if (!this.cdsConcept.equals(other.cdsConcept))
 			return false;
 		return true;
 	}
-	
+
 }
 

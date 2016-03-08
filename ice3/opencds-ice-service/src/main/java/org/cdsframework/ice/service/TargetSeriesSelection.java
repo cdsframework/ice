@@ -26,44 +26,71 @@
 
 package org.cdsframework.ice.service;
 
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class TargetSeriesSelection {
 
 	public enum SeriesSelectionStatus {
-		SERIES_SELECTION_INSTANTIATED_ONLY_NOT_READY, SERIES_SELECTION_NOT_STARTED, SERIES_SELECTION_IN_PROCESS, SERIES_SELECTION_COMPLETE
+		SERIES_SELECTION_NOT_STARTED, SERIES_SELECTION_IN_PREPROCESS, SERIES_SELECTION_IN_PROCESS, SERIES_SELECTION_IN_POSTPROCESS, SERIES_SELECTION_COMPLETE
 	}
 	
-	private SupportedVaccineGroupConcept seriesSelectionVaccineGroup;
+	private String seriesSelectionVaccineGroup;
 	private Season seriesSelectionSeason;
 	private SeriesSelectionStatus seriesSelectionStatus;
 	private String selectedSeriesName;
+	private int seriesSelectionPriority;
 	
-	// private static Log logger = LogFactory.getLog(TargetSeriesSelection.class);
+	private static Log logger = LogFactory.getLog(TargetSeriesSelection.class);
 	
-	private TargetSeriesSelection(SupportedVaccineGroupConcept seriesSelectionVG) {
+	private TargetSeriesSelection(String seriesSelectionVG, Schedule pSchedule) {
+		
+		String _METHODNAME = "TargetSeriesSelection(): ";
+		if (pSchedule == null) {
+			String lErrStr = "Schedule supplied is not initialized";
+			logger.error(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
+		
+		if (! pSchedule.getSupportedVaccineGroups().vaccineGroupItemExists(seriesSelectionVG)) {
+			String lErrStr = "specified vaccine group does not exist for this schedule; vaccine group specified: " + seriesSelectionVG;
+			logger.error(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
+		else {
+			this.seriesSelectionPriority = pSchedule.getSupportedVaccineGroups().getVaccineGroupItem(seriesSelectionVG).getPriority();
+		}
 		this.seriesSelectionVaccineGroup = seriesSelectionVG;
 		this.seriesSelectionSeason = null;
 		this.seriesSelectionStatus = SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED;
-		// this.allSelectedSeries = new ArrayList<String>();
 		this.selectedSeriesName = null;
 	}
 	
-	public TargetSeriesSelection(SupportedVaccineGroupConcept seriesSelectionVG, Season s) {
+	/**
+	 * Initialize TargetSeriesSelection
+	 * @param seriesSelectionVG representing the vaccine group
+	 * @param season the season, or null if none
+	 * @param schedule the backing schedule
+	 * @throws if specified vaccine group or schedule does not exist
+	 */
+	public TargetSeriesSelection(String seriesSelectionVG, Season season, Schedule schedule) {
 		
-		this(seriesSelectionVG);
-		this.seriesSelectionSeason = s;
+		this(seriesSelectionVG, schedule);
+		this.seriesSelectionSeason = season;
 	}
 	
-	public SupportedVaccineGroupConcept getSeriesSelectionVaccineGroup() {
+	public String getSeriesSelectionVaccineGroup() {
 		return seriesSelectionVaccineGroup;
 	}
 
-	public void setSeriesSelectionVaccineGroup(SupportedVaccineGroupConcept seriesSelection) {
+	public void setSeriesSelectionVaccineGroup(String seriesSelection) {
 		this.seriesSelectionVaccineGroup = seriesSelection;
 	}
 	
+	public int getSeriesSelectionPriority() {
+		return seriesSelectionPriority;
+	}
+
 	public Season getSeriesSelectionSeason() {
 		return this.seriesSelectionSeason;
 	}
@@ -86,7 +113,6 @@ public class TargetSeriesSelection {
 
 	public void setSeriesSelectionStatus(SeriesSelectionStatus seriesSelectionStatus)  {
 		
-		// String _METHODNAME = "setSeriesSelectionStatus(): ";
 		this.seriesSelectionStatus = seriesSelectionStatus;
 	}
 	

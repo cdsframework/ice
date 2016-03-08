@@ -35,13 +35,8 @@ import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -63,13 +58,13 @@ rule "Hib: Recommend Hib Conditional High Risk if Patient Age >=5yrs and Series 
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $assign_dtDateAtAge when the patient is "5y" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Hib
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
 			- make note of the number of doses required to complete this series as $assign_nNumberOfDosesRequired
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is < $assign_nNumberOfDosesRequired
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to SupportedRecommendationConcept._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON.getConcept()
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -85,8 +80,8 @@ rule "Hib: Include Recommendation with Date 7months in 4-Dose Hib Series and Tar
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Hib
-			- the name of the Series is "Hib 4-Dose Series"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
+			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 2
 			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
@@ -106,8 +101,8 @@ rule "Hib: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose 
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age	
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Hib
-			- the name of the Series is "Hib 4-Dose Series"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
+			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 3
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is < 2
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "15m"
@@ -128,8 +123,8 @@ rule "Hib: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose Hib Se
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Hib
-			- the name of the Series is "Hib 4-Dose Series"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
+			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 4
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is == 2
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "15m"
@@ -149,8 +144,8 @@ rule "Hib: Set Recommendation Date to 15months and TargetDose 4 in 4-Dose Hib Se
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeFifteenMonths when the Patient is "15m" of age					
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.Hib
-			- the name of the Series is "Hib 4-Dose Series"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
+			- the name of the Series is "Hib4DoseSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- the effective dose number in the Series is <= 4
 			- the Effective Number of Doses in the Series before $dtDateAtAgeFifteenMonths is < $assign_nNumberOfDosesRequired

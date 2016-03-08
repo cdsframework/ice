@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -126,8 +127,85 @@ public class SupportedSeries implements SupportingData {
 	
 	
 	public boolean isSupportingDataConsistent() {
-		return this.isSupportingDataConsistent;
+		
+		if (this.isSupportingDataConsistent == false) {
+			return false;
+		}
+		else {
+			return checkConsistencyOfSeasonsSupportingDataAcrossAllSeriesInAllVaccineGroups();
+		}
 	}
+	
+	
+	/**
+	 * Return a *copy* of the list of SeriesRules associated with the specified vaccine group. If the vaccine group is not supported, null is returned. 
+	 * If the vaccine group is supported but not SeriesRules have been specified for the vaccine group, an empty list is returned.
+	 */
+	public List<SeriesRules> getCopyOfSeriesRulesForVaccineGroup(LocallyCodedVaccineGroupItem plcvg) {
+		
+		return getSeriesRulesForVaccineGroup(plcvg, false);
+	}
+		
+	/**
+	 * Return a reference to the list of SeriesRules associated with the specified vaccine group. If the vaccine group is not supported, null is returned. 
+	 * If the vaccine group is supported but not SeriesRules have been specified for the vaccine group, an empty list is returned.
+	 */
+	protected List<SeriesRules> getSeriesRulesForVaccineGroup(LocallyCodedVaccineGroupItem plcvg) {
+		
+		return getSeriesRulesForVaccineGroup(plcvg, false);
+	}
+	
+	private List<SeriesRules> getSeriesRulesForVaccineGroup(LocallyCodedVaccineGroupItem plcvg, boolean copyOf) {
+
+		List<SeriesRules> lSRs = this.vaccineGroupItemToSeriesRules.get(plcvg);
+		if (lSRs == null) {
+			return null;
+		}
+
+		List<SeriesRules> lSRsResult = new ArrayList<SeriesRules>();
+		for (SeriesRules lSR : lSRs) {
+			SeriesRules lSRcopy = (copyOf == true) ? SeriesRules.constructDeepCopyOfSeriesRulesObject(lSR) : lSR;
+			lSRsResult.add(lSRcopy);
+		}
+
+		return lSRsResult;		
+	}
+	
+	
+	/**
+	 * Return a copy of all SeriesRules supported by this installation. If none, an empty list is returned.
+	 */
+	public List<SeriesRules> getCopyOfAllSeriesRules() {
+		
+		return getAllSeriesRules(true);
+	}	
+	
+	/**
+	 * Return a copy of all SeriesRules supported by this installation. If none, an empty list is returned.
+	 */
+	protected List<SeriesRules> getAllSeriesRules() {
+		
+		return getAllSeriesRules(false);
+	}
+	
+	private List<SeriesRules> getAllSeriesRules(boolean copyOf) {
+		
+		Collection<List<SeriesRules>> lCollectionOfSRs = this.vaccineGroupItemToSeriesRules.values();
+		if (lCollectionOfSRs == null) {
+			return new ArrayList<SeriesRules>();
+		}
+		
+		List<SeriesRules> lSRsCopy = new ArrayList<SeriesRules>();
+		for (List<SeriesRules> lSRs : lCollectionOfSRs) {
+			for (SeriesRules lSR : lSRs) {
+				SeriesRules lSRcopy = (copyOf == true) ? SeriesRules.constructDeepCopyOfSeriesRulesObject(lSR) : lSR;
+				lSRsCopy.add(lSRcopy);
+			}
+		}
+		
+		return lSRsCopy;
+	}
+	
 	
 	
 	/**
@@ -282,7 +360,7 @@ public class SupportedSeries implements SupportingData {
 					org.opencds.vmr.v1_0.schema.CD lVaccineCD = lIDVS.getVaccine();
 					LocallyCodedVaccineItem lcvi = this.supportedVaccines.getVaccineItem(ConceptUtils.toInternalCD(lVaccineCD));
 					if (lcvi == null) {
-						String lErrStr = "A vaccine was specified for Series " + lSeriesCode + ", dose number " + icseSeriesDoseSpecificationNumber + " which is not a previously defined vaccine.";
+						String lErrStr = "A vaccine which was not previously defined was specified for Series " + lSeriesCode + "; dose number " + icseSeriesDoseSpecificationNumber + "; vaccine: " + ConceptUtils.toStringCD(lVaccineCD);
 						logger.error(_METHODNAME + lErrStr);
 						this.isSupportingDataConsistent = false;
 						throw new InconsistentConfigurationException(lErrStr);
@@ -309,10 +387,9 @@ public class SupportedSeries implements SupportingData {
 			String minimumAge = isds.getMinimumAge();
 			String earliestRecommendedAge = isds.getEarliestRecommendedAge();
 			// absolute minimum age, minimum age and earliest recommended age are mandatory 
-			if (absoluteMinimumAge == null || minimumAge == null || earliestRecommendedAge == null) {
-				String lErrStr = "Absolute minimum age, minimum age and/or earliest recommended age not specified in Series " + lSeriesCode;
-				logger.error(_METHODNAME + lErrStr);
-				throw new InconsistentConfigurationException(lErrStr);
+			if (absoluteMinimumAge == null || minimumAge == null) {
+				String lInfoStr = "Absolute minimum age and/or minimum age not specified in a dose: " + lDoseNumber + "; Series " + lSeriesCode;
+				logger.info(_METHODNAME + lInfoStr);
 			}
 			String maximumAge = isds.getMaximumAge();			
 			String latestRecommendedAge = isds.getLatestRecommendedAge();
@@ -372,14 +449,17 @@ public class SupportedSeries implements SupportingData {
 			DoseRule dr = new DoseRule();
 			// Mandatory
 			dr.setDoseNumber(icseSeriesDoseSpecificationNumber);
-			// Mandatory
-			dr.setAbsoluteMinimumAge(new TimePeriod(absoluteMinimumAge));
-			// Mandatory
-			dr.setMinimumAge(new TimePeriod(minimumAge));
-			// Mandatory
-			dr.setEarliestRecommendedAge(new TimePeriod(earliestRecommendedAge));
 			dr.setPreferableVaccines(lPreferredDoseVaccines);
 			dr.setAllowableVaccines(lAllowableDoseVaccines);
+			if (absoluteMinimumAge != null) {
+			dr.setAbsoluteMinimumAge(new TimePeriod(absoluteMinimumAge));
+			}
+			if (minimumAge != null) {
+				dr.setMinimumAge(new TimePeriod(minimumAge));
+			}
+			if (earliestRecommendedAge != null) {
+				dr.setEarliestRecommendedAge(new TimePeriod(earliestRecommendedAge));
+			}
 			if (maximumAge != null) {
 				// Only if specified
 				dr.setMaximumAge(new TimePeriod(maximumAge));
@@ -411,32 +491,11 @@ public class SupportedSeries implements SupportingData {
 		}
 		
 		////////////// Gather the DoseRules END //////////////
-		
-		///////
-		// Create SeriesRules
-		///////
-		SeriesRules series1Rules = new SeriesRules(lSeriesCode, lVGI.getCdsItemName());
-		series1Rules.setSeriesDoseRules(seriesDoseRules);
-		// Determine whether or not there are recurring doses for this series (default false)
-		if (pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete() != null) {
-			series1Rules.setRecurringDosesAfterSeriesComplete(pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete());
-		}
-		else {
-			// If not specified, assume there are no recurring doses of some kind after the series has been completed
-			series1Rules.setRecurringDosesAfterSeriesComplete(false);
-		}
-		// Determine if the dose number should be calculated based on the targeted diseases of each vaccine administered (default true)
-		if (pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() != null) {
-			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered());
-		}
-		else {
-			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(true);
-		}
-		
+
 		///////
 		// Store the Series in this supporting data 
 		///////
-		// If any Seasons are specified, verify that they are seasons that have been previously specified
+		// Plus, if any Seasons are specified, verify that they are seasons that have been previously specified
 		Collection<String> lSeasonCodesFromIceSeriesSpecificationFile = pIceSeriesSpecificationFile.getSeasonCodes();
 		List<Season> lSeasons = new ArrayList<Season>();
 		if (lSeasonCodesFromIceSeriesSpecificationFile != null) {
@@ -453,13 +512,35 @@ public class SupportedSeries implements SupportingData {
 				}
 			}
 		}
-		
+
+		///////
+		// Now create SeriesRules
+		///////
+		/////// SeriesRules series1Rules = (lSeasons.isEmpty()) ? new SeriesRules(lSeriesCode, lVGI.getCdsItemName()) : new SeriesRules(lSeriesCode, lVGI.getCdsItemName(), lSeasons);
+		SeriesRules series1Rules = (lSeasons.isEmpty()) ? new SeriesRules(lSeriesCode, lVGI.getCdsConcept()) : new SeriesRules(lSeriesCode, lVGI.getCdsConcept(), lSeasons);
+		series1Rules.setSeriesDoseRules(seriesDoseRules);
+		// Determine whether or not there are recurring doses for this series (**default false if not specified**)
+		if (pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete() != null) {
+			series1Rules.setRecurringDosesAfterSeriesComplete(pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete());
+		}
+		else {
+			// If not specified, assume there are no recurring doses of some kind after the series has been completed
+			series1Rules.setRecurringDosesAfterSeriesComplete(false);
+		}
+		// Determine if the dose number should be calculated based on the targeted diseases of each vaccine administered (**default true if not specified**)
+		if (pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() != null) {
+			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(pIceSeriesSpecificationFile.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered());
+		}
+		else {
+			series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(true);
+		}
+				
 		///////
 		// Create the SeriesItem and store it
 		///////
 		LocallyCodedSeriesItem lcsi = null;
 		try {
-			new LocallyCodedSeriesItem(lSeriesCode, lCdsVersions, series1Rules);
+			lcsi = new LocallyCodedSeriesItem(lSeriesCode, lCdsVersions, series1Rules);
 		}
 		catch (ImproperUsageException iue) {
 			String lErrStr = "Caught an unexpected ImproperUsageException during instantiation of LocallyCodedSeriesItem for series" + lSeriesCode;
@@ -477,138 +558,164 @@ public class SupportedSeries implements SupportingData {
 		if (lSeriesRulesListForVG == null) {
 			lSeriesRulesListForVG = new ArrayList<SeriesRules>();
 		}
+		lSeriesRulesListForVG.add(series1Rules);
 		this.vaccineGroupItemToSeriesRules.put(lVGI, lSeriesRulesListForVG);
-		
-		/**
-		 * Example Seasons declarations:
-		 * 
-		   Fully-Specified Seasons:
-		
-			List<Season> influenzaSeasons = new ArrayList<Season>();
-			influenzaSeasons.add(new Season("2015-2016 Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 2015, 6, 30, 2016));
-			influenzaSeasons.add(new Season("2014-2015 Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 2014, 6, 30, 2015));
-			influenzaSeasons.add(new Season("2013-2014 Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 2013, 6, 30, 2014));
-			influenzaSeasons.add(new Season("2012-2013 Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 2012, 6, 30, 2013));
+	}
 
-		   Default Season: 
 
-			Season influenzaSeasonDefault = new Season("Default Influenza Season", SupportedVaccineGroupConcept.Influenza, true, 8, 1, 6, 30);
-			List<Season> influenzaDefaultSeasons = new ArrayList<Season>();
-			influenzaDefaultSeasons.add(influenzaSeasonDefault);	
-
-		 *
-		 * Example population of SeriesRules and DoseRule classes
-		 * 		
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// DTP Vaccine Group
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-			///////
-			// Create Series "DTP 5-Dose Series" //////////////////////////////////////////////////////////////////////////////////
-			// Allowable CVX codes: 01, 20, 28, 106, 107, 115*, 09*, 113*, 138*, 139*, 22, 50, 102, 110, 120, 130, 132, 146
-			///////
-	
-			// DTP allowable vaccines
-			List<Vaccine> dtpVaccines = new ArrayList<Vaccine>();
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTP));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTAP));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTAP_5PERTUSSIS_ANTIGENS));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTAP_UNSPECIFIED));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTP_HIB));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTAP_HIB));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTP_HIB_HEPB));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTAP_HEPB_IPV));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTAP_HIB_IPV));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTAP_IPV));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTAP_IPV_HIB_HEPB_HISTORICAL));
-			dtpVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DTAP_IPV_HIB_HEPB));
-	
-			// Tdap vccines
-			List<Vaccine> tdapVaccines = new ArrayList<Vaccine>();
-			tdapVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._TDAP));
-			
-			// Td vaccines
-			List<Vaccine> tdVaccines = new ArrayList<Vaccine>();
-			tdVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._DT));
-			tdVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._TD_ABSORBED));
-			tdVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._TD_NOTABSORBED));
-			tdVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._TD_NOS));
-			tdVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._TD_PRESERVATIVEFREE));
-			tdVaccines.add(supportedVaccinesMap.get(SupportedVaccineConcept._TDAP));
-			
-			DoseRule dtpSeries1DoseRule1 = new DoseRule();
-			dtpSeries1DoseRule1.setDoseNumber(1);
-			dtpSeries1DoseRule1.setAbsoluteMinimumAge(new TimePeriod("38d"));
-			dtpSeries1DoseRule1.setMinimumAge(new TimePeriod("42d"));
-			dtpSeries1DoseRule1.setEarliestRecommendedAge(new TimePeriod("2m"));
-			dtpSeries1DoseRule1.setAbsoluteMinimumInterval(new TimePeriod("24d"));
-			dtpSeries1DoseRule1.setMinimumInterval(new TimePeriod("28d"));
-			dtpSeries1DoseRule1.setEarliestRecommendedInterval(new TimePeriod("28d"));
-			dtpSeries1DoseRule1.setPreferableVaccines(dtpVaccines);
-			dtpSeries1DoseRule1.setAllowableVaccines(tdapVaccines);
-			dtpSeries1DoseRule1.addAllowableVaccines(tdVaccines);
-			
-			DoseRule dtpSeries1DoseRule2 = new DoseRule();
-			dtpSeries1DoseRule2.setDoseNumber(2);
-			dtpSeries1DoseRule2.setAbsoluteMinimumAge(new TimePeriod("66d"));
-			dtpSeries1DoseRule2.setMinimumAge(new TimePeriod("70d"));
-			dtpSeries1DoseRule2.setEarliestRecommendedAge(new TimePeriod("4m"));
-			dtpSeries1DoseRule2.setAbsoluteMinimumInterval(new TimePeriod("24d"));
-			dtpSeries1DoseRule2.setMinimumInterval(new TimePeriod("28d"));
-			dtpSeries1DoseRule2.setEarliestRecommendedInterval(new TimePeriod("28d"));
-			dtpSeries1DoseRule2.setPreferableVaccines(dtpVaccines);
-			dtpSeries1DoseRule2.setAllowableVaccines(tdapVaccines);
-			dtpSeries1DoseRule2.addAllowableVaccines(tdVaccines);
-			
-			DoseRule dtpSeries1DoseRule3 = new DoseRule();
-			dtpSeries1DoseRule3.setDoseNumber(3);
-			dtpSeries1DoseRule3.setAbsoluteMinimumAge(new TimePeriod("94d"));
-			dtpSeries1DoseRule3.setMinimumAge(new TimePeriod("98d"));
-			dtpSeries1DoseRule3.setEarliestRecommendedAge(new TimePeriod("6m"));
-			dtpSeries1DoseRule3.setAbsoluteMinimumInterval(new TimePeriod("4m"));
-			dtpSeries1DoseRule3.setMinimumInterval(new TimePeriod("6m"));
-			dtpSeries1DoseRule3.setEarliestRecommendedInterval(new TimePeriod("6m"));
-			dtpSeries1DoseRule3.setPreferableVaccines(dtpVaccines);
-			dtpSeries1DoseRule3.setAllowableVaccines(tdapVaccines);
-			dtpSeries1DoseRule3.addAllowableVaccines(tdVaccines);
-	
-			DoseRule dtpSeries1DoseRule4 = new DoseRule();
-			dtpSeries1DoseRule4.setDoseNumber(4);
-			dtpSeries1DoseRule4.setAbsoluteMinimumAge(new TimePeriod("361d"));
-			dtpSeries1DoseRule4.setMinimumAge(new TimePeriod("365d"));
-			dtpSeries1DoseRule4.setEarliestRecommendedAge(new TimePeriod("15m"));
-			dtpSeries1DoseRule4.setAbsoluteMinimumInterval(new TimePeriod("6m-4d"));
-			dtpSeries1DoseRule4.setMinimumInterval(new TimePeriod("6m"));
-			dtpSeries1DoseRule4.setEarliestRecommendedInterval(new TimePeriod("6m"));
-			dtpSeries1DoseRule4.setPreferableVaccines(dtpVaccines);
-			dtpSeries1DoseRule4.setAllowableVaccines(tdapVaccines);
-			dtpSeries1DoseRule4.addAllowableVaccines(tdVaccines);
-	
-			DoseRule dtpSeries1DoseRule5 = new DoseRule();
-			dtpSeries1DoseRule5.setDoseNumber(5);
-			dtpSeries1DoseRule5.setAbsoluteMinimumAge(new TimePeriod("4y-4d"));
-			dtpSeries1DoseRule5.setMinimumAge(new TimePeriod("4y"));
-			dtpSeries1DoseRule5.setEarliestRecommendedAge(new TimePeriod("4y"));
-			dtpSeries1DoseRule5.setPreferableVaccines(dtpVaccines);
-			dtpSeries1DoseRule5.setAllowableVaccines(tdapVaccines);
-			dtpSeries1DoseRule5.addAllowableVaccines(tdVaccines);
-	
-			// Create encompassing Series Rule for "DTP 5-Dose Series" /////////////////////////////////////////////////////
-			SeriesRules dtpSeries1Rules = new SeriesRules("DTP 5-Dose Series", SupportedVaccineGroupConcept.DTP);
-			tds = new ArrayList<DoseRule>();
-			tds.add(dtpSeries1DoseRule1);
-			tds.add(dtpSeries1DoseRule2);
-			tds.add(dtpSeries1DoseRule3);
-			tds.add(dtpSeries1DoseRule4);
-			tds.add(dtpSeries1DoseRule5);
-			dtpSeries1Rules.setSeriesDoseRules(tds);
-			dtpSeries1Rules.setRecurringDosesAfterSeriesComplete(true);
-			dtpSeries1Rules.setDoseNumberCalculatationBasedOnDiseasesTargetedByEachVaccineAdministered(false);
-	
-			// Insert Series into the Schedule ///////////////////////////////////////////////////////////////////////////////////////
-			addSeriesToSchedule(dtpSeries1Rules);
-		*/
+	/**
+	 * Check to make sure that all of the seasons in each vaccine group are "consistent". Invokes checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup()
+	 * for each season. Results must be true for all invocations to to that method, or this method returns false.
+	 */
+	private boolean checkConsistencyOfSeasonsSupportingDataAcrossAllSeriesInAllVaccineGroups() {
 		
+		Set<LocallyCodedVaccineGroupItem> lVaccineGroupsToCheck = this.vaccineGroupItemToSeriesRules.keySet();
+		for (LocallyCodedVaccineGroupItem lcvgi : lVaccineGroupsToCheck) {
+			boolean consistentInVG = checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(lcvgi);
+			if (! consistentInVG) { 
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+
+	/** 
+	 * Check to make sure that all seasons do not overlap with each other, or if they do, they have the exact same season start and end dates. 
+	 * All series in the vaccine group must be seasonal series, or none of them. If some are or others aren't, this method logs a warning and returns false.
+	 * In addition, there cannot be more than one default series in a vaccine group.
+	 * @param svgc vaccine group in which to check series consistency.
+	 * @return true of these conditions are met, false if not.
+	 */
+	private boolean checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(LocallyCodedVaccineGroupItem pcvgi) {
+		
+		String _METHODNAME = "checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(): ";
+		if (pcvgi == null) {
+			return false;
+		}
+		
+		List<SeriesRules> srs = getSeriesRulesForVaccineGroup(pcvgi);
+		if (srs == null) {
+			// Vaccine group is not supported - although this should not happen - just return true
+			return true;
+		}
+
+		int countOfDefaultSeasonsAcrossSeries = 0;
+		int countOfSeasons = 0;
+		boolean aNonSeasonalSeriesExists = false;
+		List<Season> seasonsTracker = new ArrayList<Season>();
+		for (SeriesRules sr : srs) {
+			if (countOfDefaultSeasonsAcrossSeries > 1) {
+				logger.warn(_METHODNAME + "more than one default season across in vaccine group " + pcvgi.getCdsItemName());
+				return false;
+			}
+			List<Season> seriesSeasons = sr.getSeasons();
+			if (seriesSeasons == null || seriesSeasons.isEmpty()) {
+				aNonSeasonalSeriesExists = true;
+				if (countOfSeasons > 0) {
+					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + pcvgi.getCdsItemName());
+					return false;
+				}
+			}
+			for (Season s : seriesSeasons) {
+				if (aNonSeasonalSeriesExists) {
+					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + pcvgi.getCdsItemName());
+					return false;
+				}
+				boolean lSeasonAlreadyEncountered = false;
+				if (seasonsTracker.contains(s)) {
+					lSeasonAlreadyEncountered = true;
+				}
+				else {
+					countOfSeasons++;
+				}
+				if (s.isDefaultSeason() == true) {
+					countOfDefaultSeasonsAcrossSeries++;
+					if (countOfDefaultSeasonsAcrossSeries >= 2) {
+						logger.warn(_METHODNAME + "more than one default season in Series in vaccine group " + pcvgi.getCdsItemName());
+						return false;
+					}
+				}
+				else if (lSeasonAlreadyEncountered == false) {
+					for (Season seasonIter : seasonsTracker) {
+						// Check to see if the season start or end dates overlaps with another season. Overlaps are only allowed if the start and end dates 
+						// of the season for the different series are exactly the same. Default seasons do not have a specified start or end date, so they are 
+						// not checked here. (This is because if a fully-specified season can take place at a time when a default season is specified; it  
+						// overrides the default season which will then not be used.)
+						if (! s.seasonsHaveEquivalentStartAndEndDates(seasonIter) && s.seasonOverlapsWith(seasonIter)) {
+							logger.warn(_METHODNAME + "overlapping seasons exist in vaccine group " + pcvgi.getCdsItemName());
+							return false;
+						}
+					}
+					seasonsTracker.add(s);
+				}
+			}
+		}
+		
+		int lNumberOfDistinctSeasons = seasonsTracker.size();
+		if (lNumberOfDistinctSeasons > 0) {
+			if (countOfDefaultSeasonsAcrossSeries != 1 && countOfDefaultSeasonsAcrossSeries != 0 ) {
+				logger.warn(_METHODNAME + "a seasonal vaccine group must have exactly either 0 or 1 default seasons defined. The # of seasonal series " + 
+					"found for " + "vaccine group " + pcvgi.getCdsItemName() + ": " + countOfDefaultSeasonsAcrossSeries);
+				return false;
+			}
+			else if (lNumberOfDistinctSeasons > 1 && countOfDefaultSeasonsAcrossSeries == 0) {
+				logger.warn(_METHODNAME + "a seasonal vaccine group wiht more than one season defined must also have a default season defined. No default season has been defined");
+				return false;
+			}
+			else {
+				// This is a properly configured seasonal vaccine group with a default season for evaluation
+				return true;
+			}
+		}
+		else if (countOfDefaultSeasonsAcrossSeries == 0 && seasonsTracker.size() == 0) {
+			// This is not a seasonal vaccine group
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	
+	@Override
+	public String toString() {
+		
+		String ltoStringStr = "";
+		
+		// First, print out all of the series name -> series value map entries
+		ltoStringStr += "\ncdsListItemNameToSeriesItem: ";
+		Set<String> cdsListItemNames = this.cdsListItemNameToSeriesItem.keySet();
+		int i=1;
+		for (String s : cdsListItemNames) {
+			ltoStringStr += "\n{" + i + "} " + s + " = [ " + this.cdsListItemNameToSeriesItem.get(s).toString() + " ]\n";
+			i++;
+		}
+
+		// Second, print out which series are associated with which vaccine groups
+		Set<LocallyCodedVaccineGroupItem> llcvgs = this.vaccineGroupItemToSeriesRules.keySet();
+		i=1;
+		for (LocallyCodedVaccineGroupItem llcvg : llcvgs) {
+			List<SeriesRules> seriesRulesAssociatedWithVG = this.vaccineGroupItemToSeriesRules.get(llcvg);
+			if (seriesRulesAssociatedWithVG != null) {
+				ltoStringStr += "\n{" + i + "} Series Rules for Vaccine Group: " + llcvg.getCdsItemName();
+				int j=1;
+				for (SeriesRules sr : seriesRulesAssociatedWithVG) {
+					ltoStringStr += "\n\t(" + j + "): LocallyCodedVaccineGroupItem " + llcvg + "; SeriesRule " + sr.toString();
+					j++;
+				}
+			}
+			else {
+				ltoStringStr += "\n\tNo SeriesRules defined"; 
+			}
+			i++;
+		}
+
+		// Finally, print out whether or not the series data read in is consistent
+		ltoStringStr += "\n\nisSupportingDataConsistent(): " + isSupportingDataConsistent();
+
+		return ltoStringStr;
 	}
 	
 }

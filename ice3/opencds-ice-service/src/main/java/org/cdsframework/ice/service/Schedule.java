@@ -27,22 +27,21 @@
 package org.cdsframework.ice.service;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
+import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
+import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.supportingdata.ICESupportingDataConfiguration;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept;
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept;
+import org.cdsframework.ice.supportingdata.LocallyCodedVaccineItem;
+import org.cdsframework.ice.supportingdata.SupportedVaccineGroups;
+import org.cdsframework.ice.supportingdata.SupportedVaccines;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 
@@ -51,12 +50,8 @@ public class Schedule {
 	private String scheduleId;
 	private List<String> cdsVersions;
 	private ICESupportingDataConfiguration iceSupportingDataConfiguration;
+	private boolean scheduleHasBeenInitialized;
 	
-	// Structures to be deprecated
-	private Map<SupportedVaccineGroupConcept, List<SupportedDiseaseConcept>> vaccineGroupDiseases;
-	private Map<SupportedVaccineGroupConcept, List<SeriesRules>> vaccineGroupSeries;	// Vaccine Group -> List of SeriesRules
-	private Map<SupportedVaccineConcept, Vaccine> supportedVaccinesMap;
-
 	private static Log logger = LogFactory.getLog(Schedule.class);
 
 
@@ -73,6 +68,8 @@ public class Schedule {
 		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "ScheduleImpl(): ";
+
+		this.scheduleHasBeenInitialized = false;
 		if (pScheduleId == null || pBaseKnowledgeRepositoryLocation == null) {
 			String lErrStr = "Schedule not properly initialized: one or more parameters null";
 			logger.error(_METHODNAME + lErrStr);
@@ -88,8 +85,48 @@ public class Schedule {
 		StringBuilder lSbScheduleInfo = new StringBuilder(80);
 		lSbScheduleInfo.append(_METHODNAME); lSbScheduleInfo.append("Completed Initialization of Schedule: "); lSbScheduleInfo.append(this.scheduleId);
 		logger.info(lSbScheduleInfo.toString());
+		this.scheduleHasBeenInitialized = true;
 	}
 
+	
+	/**
+	 * Get SupportedCdsConcepts associated with this schedule
+	 */
+	public SupportedCdsConcepts getSupportedCdsConcepts() {
+
+		return this.iceSupportingDataConfiguration.getSupportedCdsConcepts();
+	}
+
+	
+	/**
+	 * Get SupportedCdsLists associated with this schedule
+	 */
+	public SupportedCdsLists getSupportedCdsLists() {
+
+		return this.iceSupportingDataConfiguration.getSupportedCdsLists();
+	}
+
+	/**
+	 * Get SupportedVaccineGroups associated with this schedule
+	 */
+	public SupportedVaccineGroups getSupportedVaccineGroups() {
+		
+		return this.iceSupportingDataConfiguration.getSupportedVaccineGroups();
+	}
+
+	/**
+	 * Get SupportedVaccines associated with this schedule
+	 */
+	public SupportedVaccines getSupportedVaccines() {
+		
+		return this.iceSupportingDataConfiguration.getSupportedVaccines();
+	}
+	
+	public boolean isScheduleInitialized() {
+		
+		return this.scheduleHasBeenInitialized;
+	}
+	
 	
 	public String getScheduleId() {
 		return scheduleId;
@@ -101,168 +138,113 @@ public class Schedule {
 	}
 
 	
-	// TODO:
-	/*
-	public Map<SupportedVaccineGroupConcept, List<SeriesRules>> getScheduleSeries() {
-		return vaccineGroupSeries;
-	}
-	*/
-	
-	/**
-	 * Get SeriesRules based on vaccine group and series name
-	 * @param svg
-	 * @param seriesName
-	 * @return SeriesRule, or null if not found
-	 */
-	/*
-	@Deprecated
-	public SeriesRules getScheduleSeriesByName(SupportedVaccineGroupConcept svg, String seriesName) {
+	public ICESupportingDataConfiguration getICESupportingDataConfiguration() {
 		
-		if (svg == null || seriesName == null) {
-			return null;
-		}
-		
-		List<SeriesRules> srs = vaccineGroupSeries.get(svg);
-		for (SeriesRules sr : srs) {
-			if (seriesName.equals(sr.getSeriesName())) {
-				return sr;
-			}
-		}
-		return null;
+		return this.iceSupportingDataConfiguration;
 	}
-	*/
 	
-	
+
 	/**
-	 * SD: Get SeriesRules based on vaccine group and series name
-	 * @param svg Vaccine group name
-	 * @param seriesName Series name
-	 * @return SeriesRule, or null if not found
+	 * Get SeriesRules based on vaccine group and series name. Returns the SeriesRules representing the specified series by name, or null if not found
 	 */
-	// TODO:
 	public SeriesRules getScheduleSeriesByName(String svg, String seriesName) {
 		
 		if (svg == null || seriesName == null) {
 			return null;
 		}
 
-		// LocallyCodedVaccineGroupItem lcvgi = this.iceSupportingDataConfiguration.getSupportedCdsVaccineGroups().getVaccineGroupItem(svg);
-
+		LocallyCodedVaccineGroupItem lcvgi = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getVaccineGroupItem(svg);    // getSupportedCdsVaccineGroups().getVaccineGroupItem(svg);
+		if (lcvgi == null) {
+			return null;
+		}
+		
+		List<SeriesRules> lSRs = this.iceSupportingDataConfiguration.getSupportedSeries().getCopyOfSeriesRulesForVaccineGroup(lcvgi);
+		if (lSRs == null || lSRs.isEmpty()) {
+			return null;
+		}
+		for (SeriesRules sr : lSRs) {
+			if (seriesName.equals(sr.getSeriesName())) {
+				return sr;
+			}
+		}
 		return null;
 	}
 	
 
-	@Deprecated
-	public Vaccine getVaccineBySupportedVaccineConceptTypeValue(SupportedVaccineConcept vaccineValue) {
-
-		if (vaccineValue == null) {
-			return null;
-		}
-
-		return supportedVaccinesMap.get(vaccineValue);
-	}
-
-	
 	/**
 	 * Utilizing supporting data. Return the Vaccine associated with its OpenCDS concept code value
 	 * @param openCdsConceptValue
 	 * @return Vaccine, or null if there is no associated Vaccine for the OpenCDS concept code provided
 	 */
-	public Vaccine getVaccineByOpenCDSConceptValue(String openCdsConceptValue) {
+	public Vaccine getVaccineByCdsConceptValue(String openCdsConceptValue) {
 
 		if (openCdsConceptValue == null) {
 			return null;
 		}
 
-		CdsConcept lIceVaccineConcept = new CdsConcept(openCdsConceptValue, true);		// All vaccine concepts are OpenCDS concepts
-		LocallyCodedCdsListItem lVaccineCdsItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, lIceVaccineConcept); 
+		LocallyCodedCdsListItem lVaccineCdsItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().
+			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, new CdsConcept(openCdsConceptValue)); 
 		if (lVaccineCdsItem == null) {
 			return null;
 		}
 		
 		// Supporting data restrictions ensure all of the values are non-null
-		return this.iceSupportingDataConfiguration.getSupportedVaccines().getVaccineItem(lVaccineCdsItem.getCdsListName()).getVaccine();
+		LocallyCodedVaccineItem lcvi = this.iceSupportingDataConfiguration.getSupportedVaccines().getVaccineItem(lVaccineCdsItem.getCdsListName());
+		if (lcvi == null) {
+			return null;
+		}
+		
+		return lcvi.getVaccine();
 	}
 
 	
 	/**
-	 * Utilizing supporting data. Return the VaccineComponent associated with its OpenCDS concept code value and 
-	 * @param openCdsConceptValue
-	 * @param sdc
-	 * @return
+	 * Utilizing supporting data. Obtain the list of diseases targeted by the specified vaccine group. Both the String supplied as the parameter and String returned  
+	 * are compliant to LocallyCodedCdsListItem.getSupportedListConceptItemName().
+	 * @param String specifying the vaccine group by _concept_ name
+	 * @return Collection of Strings representing the diseases targeted by the vaccine group; empty collection if none. If the specified vaccine group is  
+	 * 		either null or not a vaccine group tracked in the supporting data, null is returned.
 	 */
-	/*
-	// TODO:
-	public VaccineComponent getVaccineByOpenCDSConceptTypeValueAndDisease(String openCdsConceptValue, SupportedDiseaseConcept sdc) {
+	public Collection<String> getDiseasesTargetedByVaccineGroup(String pVaccineGroupConceptName) {
 		
-		return null;
-	}
-	 */
-	
-	
-	/**
-	 * @deprecated Once CAT-ICE integration complete, will be replaced by {@link getDiseasesTargetedByVaccineGroup(String) }
-	 * @param pSVGC
-	 * @return null if SupportedVaccineGroupConcept is null; Collection of diseases if not
-	 */
-	/*
-	@Deprecated 
-	public Collection<SupportedDiseaseConcept> getDiseasesTargetedByVaccineGroup(SupportedVaccineGroupConcept pSVGC) {
-		
-		if (pSVGC == null) {
+		if (pVaccineGroupConceptName == null) {
 			return null;
 		}
 		
-		List<SupportedDiseaseConcept> targetedDiseases = vaccineGroupDiseases.get(pSVGC);
-		return targetedDiseases;
+		return getDiseasesTargetedByVaccineGroup(new CdsConcept(pVaccineGroupConceptName));
 	}
-	*/
 	
 	
 	/**
 	 * Utilizing supporting data. Obtain the list of diseases targeted by the specified vaccine group. Both the String supplied as the parameter and String returned  
 	 * are compliant to LocallyCodedCdsListItem.getSupportedListConceptItemName().
-	 * @param String specifying the vaccine group by name
+	 * @param String specifying the vaccine group by _concept_ name
 	 * @return Collection of Strings representing the diseases targeted by the vaccine group; empty collection if none. If the specified vaccine group is  
 	 * 		either null or not a vaccine group tracked in the supporting data, null is returned.
 	 */
-	public Collection<String> getDiseasesTargetedByVaccineGroup(String pVaccineGroupItemName) {
+	public Collection<String> getDiseasesTargetedByVaccineGroup(CdsConcept pVaccineGroupConcept) {
 		
-		if (pVaccineGroupItemName == null) {
+		if (pVaccineGroupConcept == null) {
 			return null;
 		}
 		
-		LocallyCodedVaccineGroupItem lCodedVaccineGroupItem = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getVaccineGroupItem(pVaccineGroupItemName);
+		LocallyCodedCdsListItem lCodedCdsListItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().
+			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE_GROUP, pVaccineGroupConcept);
+		LocallyCodedVaccineGroupItem lCodedVaccineGroupItem = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getVaccineGroupItem(lCodedCdsListItem.getCdsListItemName());
 		if (lCodedVaccineGroupItem == null) {
 			return null;
 		}
 		
-		return lCodedVaccineGroupItem.getRelatedDiseasesCdsListItemNames();
+		// It's okay to simply return the list of cdsListItemNames directly; all these have been added as ICEConcepts too during supporting data initialization, and 
+		// verified that they are indeed DISEASE ice concepts at that point in the process
+		return lCodedVaccineGroupItem.getCopyOfRelatedDiseasesCdsListItemNames();
 	}
 	
-	
-	/*
-	@Deprecated 
-	public boolean vaccineTargetsOneOrMoreOfSpecifiedDiseases(Vaccine vaccine, Collection<SupportedDiseaseConcept> diseases) {
-		
-		if (diseases == null || vaccine == null) {
-			return false;
-		}
-		
-		Collection<SupportedDiseaseConcept> sds = vaccine.getAllDiseasesTargetedForImmunity();
-		for (SupportedDiseaseConcept sdc : sds) {
-			if (diseases.contains(sdc)) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	*/
-	
-	
+
 	/**
-	 * Utilizing supporting data. Return true if the vaccine targets one or more of the specified diseases, false if it does not
+	 * Return true if the vaccine targets one or more of the specified diseases, false if it does not.
+	 * @param vaccine the vaccine in question to inspect
+	 * @param diseases the list of diseases in question; see supporting data file that has the ICEConceptType.DISEASE codes specified for a list of diseases
 	 */
 	public boolean vaccineTargetsOneOrMoreOfSpecifiedDiseases(Vaccine vaccine, Collection<String> diseases) {
 		
@@ -283,7 +265,7 @@ public class Schedule {
 	
 	/**
 	 * Utilizing supporting data. Get the number of vaccine groups across which the specified diseases are handled.
-	 * @param pSDCs The list of diseases in question
+	 * @param pSDCs The list of diseases in question; see supporting data file that has the ICEConceptType.DISEASE codes specified for a list of diseases
 	 * @return int specifying number of vaccine groups encompassing the union of the specified diseases
 	 */
 	private int getCountOfVaccineGroupsEncompassingDiseases(List<String> pSDCs) {
@@ -295,7 +277,7 @@ public class Schedule {
 		int i=0;
 		Collection<LocallyCodedVaccineGroupItem> lAllVaccineGroups = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getAllVaccineGroupItems();
 		for (LocallyCodedVaccineGroupItem lVaccineGroup : lAllVaccineGroups) {
-			Collection<String> lAllRelatedDiseases = lVaccineGroup.getRelatedDiseasesCdsListItemNames();
+			Collection<String> lAllRelatedDiseases = lVaccineGroup.getCopyOfRelatedDiseasesCdsListItemNames();
 			if (lAllRelatedDiseases != null) {			// should never be null
 				for (String lRelatedDiseaseName : lAllRelatedDiseases) {
 					if (pSDCs.contains(lRelatedDiseaseName)) {
@@ -310,224 +292,21 @@ public class Schedule {
 	}
 
 
-	// TODO: 
+	// Get a list of all SeriesRules supported by this Schedule.
 	public List<SeriesRules> getAllSeries() {
 
-		// String _METHODNAME = "getCandidateSeries(): ";
-
-		List<SeriesRules> allSeries = new ArrayList<SeriesRules>();
-		if (vaccineGroupSeries == null) {
-			return allSeries;
-		}
-		Collection<List<SeriesRules>> clts = vaccineGroupSeries.values();
-		Iterator<List<SeriesRules>> clIter = clts.iterator();
-		while (clIter.hasNext()) {
-			List<SeriesRules> lts = clIter.next();
-			if (lts != null) {
-				allSeries.addAll(lts);
-			}
-		}
-
-		return allSeries;
+		return this.iceSupportingDataConfiguration.getSupportedSeries().getCopyOfAllSeriesRules();
 	}
 
 	
 	/**
-	 * Incoming immunizations from the patient's history imply which diseases are being treated, and from this information, we return
-	 * all VaccineGroup series associated with each of these diseases as potential series to try to evaluate and forecast against. 
-	 * @return List<TargetSeries> candidate series to try to evaluate against; empty if no candidate series
+	 * This is deprecated; simply returns all series 
 	 */
-	 // TODO: 
+	@Deprecated
 	public List<SeriesRules> getCandidateSeries() {
 
-		List<SeriesRules> allSeries = new ArrayList<SeriesRules>();
-		if (vaccineGroupSeries == null) {
-			return allSeries;
-		}
-
-		List<SeriesRules> seriesRules = new ArrayList<SeriesRules>();
-		List<SeriesRules> seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.HepB);
-		if (seriesForVG != null)
-			seriesRules.addAll(seriesForVG);
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.HepA);
-		if (seriesForVG != null) 
-			seriesRules.addAll(seriesForVG);
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.MMR);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Varicella);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Rotavirus);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Hib);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.HPV);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.PCV);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.PPSV);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Influenza);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.H1N1);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Meningococcal);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.Polio);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		seriesForVG = vaccineGroupSeries.get(SupportedVaccineGroupConcept.DTP);
-		if (seriesForVG != null) {
-			seriesRules.addAll(seriesForVG);
-		}
-		
-		return seriesRules;
-	}
-	
-	
-	/** 
-	 * Check to make sure that all seasons do not overlap with each other, or if they do, they have the exact same season start and end dates. 
-	 * All series in the vaccine group must be seasonal series, or none of them. If some are or others aren't, this method logs a warning and returns false.
-	 * In addition, there cannot be more than one default series in a vaccine group.
-	 * @param svgc vaccine group in which to check series consistency.
-	 * @return true of these conditions are met, false if not.
-	 */
-	private boolean checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(SupportedVaccineGroupConcept svgc) {
-		
-		String _METHODNAME = "checkConsistencyOfSeasonsSupportingDataAcrossSeriesInVaccineGroup(): ";
-		if (svgc == null) {
-			return false;
-		}
-		
-		List<SeriesRules> srs = vaccineGroupSeries.get(svgc);
-		int countOfDefaultSeasonsAcrossSeries = 0;
-		int countOfSeasons = 0;
-		boolean aNonSeasonalSeriesExists = false;
-		List<Season> seasonsTracker = new ArrayList<Season>();
-		for (SeriesRules sr : srs) {
-			if (countOfDefaultSeasonsAcrossSeries > 1) {
-				logger.warn(_METHODNAME + "more than one default season across in vaccine group " + svgc.getConceptDisplayNameValue());
-				return false;
-			}
-			List<Season> seriesSeasons = sr.getSeasons();
-			if (seriesSeasons == null || seriesSeasons.isEmpty()) {
-				aNonSeasonalSeriesExists = true;
-				if (countOfSeasons > 0) {
-					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + svgc.getConceptDisplayNameValue());
-					return false;
-				}
-			}
-			for (Season s : seriesSeasons) {
-				if (aNonSeasonalSeriesExists) {
-					logger.warn(_METHODNAME + "a non-seasonal series was found in a vaccine group with seasons " + svgc.getConceptDisplayNameValue());
-					return false;
-				}
-				boolean lSeasonAlreadyEncountered = false;
-				if (seasonsTracker.contains(s)) {
-					lSeasonAlreadyEncountered = true;
-				}
-				else {
-					countOfSeasons++;
-				}
-				if (s.isDefaultSeason() == true) {
-					countOfDefaultSeasonsAcrossSeries++;
-					if (countOfDefaultSeasonsAcrossSeries >= 2) {
-						logger.warn(_METHODNAME + "more than one default season in Series in vaccine group " + svgc.getConceptDisplayNameValue());
-						return false;
-					}
-				}
-				else if (lSeasonAlreadyEncountered == false) {
-					for (Season seasonIter : seasonsTracker) {
-						// Check to see if the season start or end dates overlaps with another season. Overlaps are only allowed if the start and end dates 
-						// of the season for the different series are exactly the same. Default seasons do not have a specified start or end date, so they are 
-						// not checked here. (This is because if a fully-specified season can take place at a time when a default season is specified; it  
-						// overrides the default season which will then not be used.)
-						if (! s.seasonsHaveEquivalentStartAndEndDates(seasonIter) && s.seasonOverlapsWith(seasonIter)) {
-							logger.warn(_METHODNAME + "overlapping seasons exist in vaccine group " + svgc.getConceptDisplayNameValue());
-							return false;
-						}
-					}
-					seasonsTracker.add(s);
-				}
-			}
-		}
-		
-		int lNumberOfDistinctSeasons = seasonsTracker.size();
-		// if (seasonsTracker.size() > 0) {
-		if (lNumberOfDistinctSeasons > 0) {
-			if (countOfDefaultSeasonsAcrossSeries != 1 && countOfDefaultSeasonsAcrossSeries != 0 ) {
-				logger.warn(_METHODNAME + "a seasonal vaccine group must have exactly either 0 or 1 default seasons defined. The # of seasonal series " + 
-					"found for " + "vaccine group " + svgc.getConceptDisplayNameValue() + ": " + countOfDefaultSeasonsAcrossSeries);
-				return false;
-			}
-			else if (lNumberOfDistinctSeasons > 1 && countOfDefaultSeasonsAcrossSeries == 0) {
-				logger.warn(_METHODNAME + "a seasonal vaccine group wiht more than one season defined must also have a default season defined. No default season has been defined");
-				return false;
-			}
-			else {
-				// This is a properly configured seasonal vaccine group with a default season for evaluation
-				return true;
-			}
-		}
-		else if (countOfDefaultSeasonsAcrossSeries == 0 && seasonsTracker.size() == 0) {
-			// This is not a seasonal vaccine group
-			return true;
-		}
-		else {
-			return false;
-		}
+		return getAllSeries();
 	}
 
-	
-	private void addSeriesToSchedule(SeriesRules pTS) 
-		throws ImproperUsageException { 
-
-		String _METHODNAME = "addVaccineGroupSeriesToSchedule(): ";
-		if (pTS == null) {
-			throw new ImproperUsageException(_METHODNAME + "null VaccineGroup or SeriesRules parameter supplied"); 
-		}
-
-		SupportedVaccineGroupConcept vg = pTS.getVaccineGroup();
-		String requestedSeriesName = pTS.getSeriesName();
-		if (requestedSeriesName == null || vg == null) {
-			throw new ImproperUsageException(_METHODNAME + "supplied SeriesRules name or vaccine group is not populated"); 
-		}
-		List<SeriesRules> ts = vaccineGroupSeries.get(vg);
-		if (ts != null) {
-			// Check to make sure the SeriesRules name is unique
-			for (SeriesRules sr : ts) {
-				if (sr.getSeriesName().equalsIgnoreCase(requestedSeriesName)) {
-					throw new ImproperUsageException(_METHODNAME + "SeriesRules with name " + requestedSeriesName + " already in schedule");
-				}
-			}
-			ts.add(pTS);
-			vaccineGroupSeries.put(vg, ts);
-		}
-		else {
-			ts = new ArrayList<SeriesRules>();
-			ts.add(pTS);
-			vaccineGroupSeries.put(vg, ts);
-		}
-	}
 
 }

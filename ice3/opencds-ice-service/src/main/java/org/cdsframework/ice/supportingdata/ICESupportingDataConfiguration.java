@@ -44,6 +44,8 @@ import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.DoseStatus;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.util.ConceptUtils;
@@ -151,12 +153,23 @@ public class ICESupportingDataConfiguration {
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
 		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *CdsLists* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
+		}		
 		if (logger.isDebugEnabled()) {
-			String lDebugStr = "The following Cds Lists have been initialized into the " + this.getClass().getName() + ": \n";
+			String lDebugStr = "The following CdsLists have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedCdsLists.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}
 
+		// Check to make sure that the required base data codes have been supplied
+		if (! allBaseSupportingDataCdsListItemInitialized()) {
+			String lErrStr = "Some base supporting data cdsListItems not supplied; a minimum set of cdsListItem codes must be specified. See ICE documentation";
+			logger.error(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 		///////
 		// Initialize the Vaccine Group supporting data
 		///////
@@ -170,6 +183,11 @@ public class ICESupportingDataConfiguration {
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
 		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *Vaccine Groups* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
+		}		
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = "The following Vaccine Groups have been initialized into the " + this.getClass().getName() + ": \n";
 			lDebugStr += this.supportedVaccineGroups.toString();
@@ -188,6 +206,11 @@ public class ICESupportingDataConfiguration {
 			String lErrStr = "Failed to obtain method to invoke for initializing supporting *Vaccines* data";
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
+		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *Vaccines* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
 		}		
 		if (logger.isDebugEnabled()) {
 			String lDebugStr = "The following Vaccines have been initialized into the " + this.getClass().getName() + ": \n";
@@ -213,8 +236,13 @@ public class ICESupportingDataConfiguration {
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
 		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *Seasons* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
+		}		
 		if (logger.isDebugEnabled()) {
-			String lDebugStr = _METHODNAME + "The following Seasons have been initialized into the " + this.getClass().getName() + ":\n";
+			String lDebugStr = "The following Seasons have been initialized into the " + this.getClass().getName() + ":\n";
 			lDebugStr += this.supportedSeasons.toString();
 			logger.debug(_METHODNAME + lDebugStr);
 		}
@@ -231,6 +259,16 @@ public class ICESupportingDataConfiguration {
 			String lErrStr = "Failed to obtain method to invoke for initializing supporting *Series* data";
 			logger.error(_METHODNAME + lErrStr, e);
 			throw new ICECoreError(lErrStr);
+		}
+		catch (Exception e) {
+			String lErrStr = "An error occurred processing supporting *Series* data";
+			logger.error(_METHODNAME + lErrStr, e);
+			throw new ICECoreError(lErrStr);			
+		}
+		if (logger.isDebugEnabled()) {
+			String lDebugStr = "The following Series have been initialized into the " + this.getClass().getName() + ":\n";
+			lDebugStr += this.supportedSeries.toString();
+			logger.debug(_METHODNAME + lDebugStr);
 		}
 		
 		// Log configuration data parameters of data initialized
@@ -286,7 +324,68 @@ public class ICESupportingDataConfiguration {
 	
 	
 	/**
-	 * Initialize the Vaccine Group Concepts from supporting iceVaccineGroupSpecificationFile XML data files
+	 * Get the ICE SupportedSeries data for this supporting data configuration
+	 */
+	public SupportedSeries getSupportedSeries() {
+		
+		return this.supportedSeries;
+	}
+	
+	
+	private boolean allBaseSupportingDataCdsListItemInitialized() {
+		
+		// Verify that all DoseStatus enumeration items been provided
+		if (! verifyCdsListItemExistsForAllEnumConstants(DoseStatus.class)) {
+			return false;
+		}
+		// Verify that all EvaluationReason items been provided
+		if (! verifyCdsListItemExistsForAllEnumConstants(BaseDataEvaluationReason.class)) {
+			return false;
+		}
+		// Verify that all RecommendationStatus items have been provided
+		if (! verifyCdsListItemExistsForAllEnumConstants(RecommendationStatus.class)) {
+			return false;
+		}
+		// Verify that all RecommendationReason items have been provided
+		if (! verifyCdsListItemExistsForAllEnumConstants(BaseDataRecommendationReason.class)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	
+	private <E extends Enum<E>> boolean verifyCdsListItemExistsForAllEnumConstants(Class<E> pEnum) {
+		
+		String _METHODNAME = "verifyCdsListItemForAllSpecifiedEnumConstants(): ";
+		
+		if (pEnum == null) {
+			logger.warn(_METHODNAME + "enumeration supplied is not of type BaseData");
+			return false;
+		}
+		
+		for (Enum<E> enumVal : pEnum.getEnumConstants()) {
+			if (enumVal instanceof BaseData) {
+				String lCdsListItemName = ((BaseData) enumVal).getCdsListItemName();
+				if (logger.isDebugEnabled()) {
+					logger.debug(_METHODNAME + "BaseData cdsListItemName" + pEnum.getSimpleName() + "." + lCdsListItemName);
+				}
+				if (lCdsListItemName != null && ! this.supportedCdsLists.cdsListItemExists(lCdsListItemName)) {
+					return false;
+				}
+			}
+			else {
+				logger.warn(_METHODNAME + "enumeration supplied not of type BaseData");
+				return false;
+			}
+		}
+
+		return true;
+	}
+	
+	
+	/**
+	 * Initialize supporting data from specified ICE XML data file
 	 * @param pSDSubDirectory Subdirectory where all of the XML files for this supporting data type are held
 	 * @param pSDObjectToInitialize The supporting data object to initialize
 	 * @param pSupportingDataXMLClass The class of the supporting data XML to be read in

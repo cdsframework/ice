@@ -36,14 +36,9 @@ import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.Recommendation.RecommendationStatus
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedDiseaseConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedEvaluationConcept
 import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedRecommendationConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineConcept
-import org.cdsframework.ice.supportingdatatmp.SupportedVaccineGroupConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -68,7 +63,7 @@ rule "Evaluate HPV Shot As Accepted If Patient >=27 yrs and does not have one or
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.HPV
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HPV"
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is == 0
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "27y"
 	then
@@ -92,7 +87,7 @@ rule "HPV: Evaluate the Minimum Interval Between Doses 1 and 3 - 112 days requir
 			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series also contains the Dose $previousDose
-			- the Series belongs to the Vaccine Group SupportedVaccineGroupConcept.HPV
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HPV"
 		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "112d"
 	then
 		Mark the shot $currentDose as Invalid for this Series due to "Below Minimum Interval"

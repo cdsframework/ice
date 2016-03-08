@@ -32,12 +32,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class Recommendation {
-	
-	public enum RecommendationStatus { NOT_FORECASTED, EVALUATION_OF_HISTORY_REQUIRED, FORECASTING_IN_PROGRESS, FORECASTING_COMPLETE, RECOMMENDED, CONDITIONALLY_RECOMMENDED, 
-		NOT_RECOMMENDED, RECOMMENDED_IN_FUTURE }
 	
 	public enum RecommendationType { EARLIEST, EARLIEST_RECOMMENDED, LATEST_RECOMMENDED }
 	
@@ -46,7 +42,7 @@ public class Recommendation {
 	private RecommendationStatus recommendationStatus;
 	private Vaccine recommendedVaccine;
 	private Date recommendationDate;
-	private CD recommendationReason;
+	private String recommendationReason;
 
 	private static Log logger = LogFactory.getLog(Recommendation.class);
 	
@@ -71,7 +67,7 @@ public class Recommendation {
 		recommendedVaccine = null;
 		recommendationDate = null;
 		recommendationStatus = RecommendationStatus.NOT_FORECASTED;
-		recommendationReason = new CD();
+		recommendationReason = null;
 	}
 	
 	public String getRecommendationIdentifier() {
@@ -113,13 +109,13 @@ public class Recommendation {
 		this.recommendationDate = recommendationDate;
 	}
 	
-	public CD getRecommendationReason() {
+	public String getRecommendationReason() {
 		return recommendationReason;
 	}
 
-	public void setRecommendationReason(CD recommendationReason) {
+	public void setRecommendationReason(String recommendationReason) {
 		if (recommendationReason == null) {
-			this.recommendationReason = new CD();
+			this.recommendationReason = null;
 		}
 		else {
 			this.recommendationReason = recommendationReason;

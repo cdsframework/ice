@@ -96,6 +96,7 @@ public class SupportedVaccineGroups implements SupportingData {
 	public boolean isSupportingDataConsistent() {
 		return this.isSupportingDataConsistent;
 	}
+
 	
 	protected SupportedCdsLists getAssociatedSupportedCdsLists() {
 		
@@ -147,6 +148,11 @@ public class SupportedVaccineGroups implements SupportingData {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);			
 		}
+		if (ICEConceptType.VACCINE_GROUP != ICEConceptType.getSupportedIceConceptType(llccli.getCdsListCode())) {
+			String lErrStr = "Attempt to add an item as a vaccine group which is not a VACCINE_GROUP ICEConceptType";
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 		String lVaccineGroupCdsListItemName = llccli.getCdsListItemName();
 		if (this.cdsListItemNameToVaccineGroupItem.containsKey(lVaccineGroupCdsListItemName)) {
 			String lErrStr = "Attempt to add vaccine group that was already specified previously: " + 
@@ -156,10 +162,16 @@ public class SupportedVaccineGroups implements SupportingData {
 		}
 		
 		///////
-		// Primary OpenCds Concept - Vaccines are an OpenCDS concept as well.
+		// Primary OpenCds Concept from vaccine group - check to make sure that the specified vaccine group CdsConcept has been specified with this vaccine group's cdsListItem definition
 		///////
-		CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), true, pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());
-		
+		CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getCode(), pIceVaccineGroupSpecificationFile.getPrimaryOpenCdsConcept().getDisplayName());
+		if (! llccli.equals(this.supportedCdsLists.getSupportedCdsConcepts().
+			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE_GROUP, lPrimaryOpenCdsConcept))) {
+			String lErrStr = "Attempt to add vaccine group with a Primary CdsConcept that is not associated with the vaccine group; vaccine group" + lVaccineGroupCdsListItemName + 
+					"; Primary CdsConcept: " + lPrimaryOpenCdsConcept; 
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
 		///////
 		// Related Diseases
 		///////
@@ -169,7 +181,13 @@ public class SupportedVaccineGroups implements SupportingData {
 			for (org.opencds.vmr.v1_0.schema.CD lRelatedDisease : lRelatedDiseases) {
 				LocallyCodedCdsListItem lRelatedDiseaseCdsListItem = this.supportedCdsLists.getCdsListItem(ConceptUtils.toInternalCD(lRelatedDisease));
 				if (lRelatedDiseaseCdsListItem == null) {
-					String lErrStr = "Attempt to add a related vaccine to a vaccine group that is not in the list of SupportedCdsLists";
+					String lErrStr = "Attempt to add a related disease to a vaccine group that is not in the list of SupportedCdsLists" + 
+						ConceptUtils.toInternalCD(lRelatedDisease) == null ? "" : ConceptUtils.toInternalCD(lRelatedDisease).toString();
+					logger.warn(_METHODNAME + lErrStr);
+					throw new InconsistentConfigurationException(lErrStr);
+				}
+				if (ICEConceptType.DISEASE != ICEConceptType.getSupportedIceConceptType(lRelatedDiseaseCdsListItem.getCdsListCode())) {
+					String lErrStr = "Attempt to add an item as a related disease to a vaccine group which is not a DISEASE ICEConceptType; item: " + lRelatedDiseaseCdsListItem.toString();
 					logger.warn(_METHODNAME + lErrStr);
 					throw new InconsistentConfigurationException(lErrStr);
 				}
@@ -191,7 +209,7 @@ public class SupportedVaccineGroups implements SupportingData {
 		///////
 		LocallyCodedVaccineGroupItem lcvgi = null;
 		try {
-			lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lCdsVersions, lRelatedDiseasesCdsListItems, lPrimaryOpenCdsConcept, lVaccineGroupPriority);
+			lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lPrimaryOpenCdsConcept, lCdsVersions, lRelatedDiseasesCdsListItems, lVaccineGroupPriority);
 		}
 		catch (ImproperUsageException iue) {
 			String lErrStr = "Caught an unexpected ImproperUsageException during instantiation of LocallyCodedVaccineGroupItem for vaccine group" + lVaccineGroupCdsListItemName;
@@ -203,15 +221,7 @@ public class SupportedVaccineGroups implements SupportingData {
 		this.cdsListItemNameToVaccineGroupItem.put(lVaccineGroupCdsListItemName, lcvgi);
 	}
 	
-	/*
-	public void removeSupportedVaccineGroupItem(String pVaccineGroupItemName) {
-		
-		if (pVaccineGroupItemName != null) { 
-			this.cdsListItemNameToVaccineGroupItem.remove(pVaccineGroupItemName);
-		}		
-	}
-	*/
-	
+
 	public Collection<LocallyCodedVaccineGroupItem> getAllVaccineGroupItems() {
 		
 		return this.cdsListItemNameToVaccineGroupItem.values();
@@ -232,12 +242,12 @@ public class SupportedVaccineGroups implements SupportingData {
 	}
 	
 	
-	public LocallyCodedVaccineGroupItem getVaccineGroupItem(String pVaccineGroupItemName) {
+	public LocallyCodedVaccineGroupItem getVaccineGroupItem(String pCdsListItemName) {
 		
-		if (pVaccineGroupItemName == null) {
+		if (pCdsListItemName == null) {
 			return null;
 		}
-		LocallyCodedVaccineGroupItem lLCVGI = this.cdsListItemNameToVaccineGroupItem.get(pVaccineGroupItemName);
+		LocallyCodedVaccineGroupItem lLCVGI = this.cdsListItemNameToVaccineGroupItem.get(pCdsListItemName);
 		if (lLCVGI == null) {
 			return null;
 		}
@@ -246,6 +256,26 @@ public class SupportedVaccineGroups implements SupportingData {
 		}
 	}
 
+	
+	/**
+	 * Returns the associated LocallyCodedCdsListItem 
+	 * @param pCdsListItemName
+	 * @return
+	 */
+	public LocallyCodedCdsListItem getCdsListItem(String pCdsListItemName) {
+		
+		if (pCdsListItemName == null) {
+			return null;
+		}
+		
+
+		if(! vaccineGroupItemExists(pCdsListItemName)) {
+			return null;
+		}
+		
+		return this.supportedCdsLists.getCdsListItem(pCdsListItemName);
+	}
+	
 	
 	/**
 	 * Returns true if there is a vaccineGroupItem associated with the local CD, false if not. (Invoked getGroupVaccineGroupItem(CD) to determine.)

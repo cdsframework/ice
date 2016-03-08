@@ -279,7 +279,7 @@ public class SupportedSeasons implements SupportingData {
 		  *
 		  **/
 	}
-	
+
 	
 	/**
 	 * Get MonthDay object for month and day string represented by MM-DD 
@@ -348,6 +348,7 @@ public class SupportedSeasons implements SupportingData {
 			for (Season s: vgSeasons) {
 				ltoStringStr += s.getSeasonName() + "; ";
 			}
+			i++;
 		}
 		
 		return ltoStringStr;

@@ -4,19 +4,22 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 public abstract class LocallyCodedCdsItem {
 
 	private String cdsItemName;
+	private CdsConcept cdsConcept;
 	private Collection<String> cdsVersions;
 
 	private static Log logger = LogFactory.getLog(LocallyCodedCdsItem.class);
 	
 	/**
-	 * Creates a LocallyCodedCdsItem. Both the CdsItemName and CdsVersions must be specified, or an ImproerUsageException is thrown is thrown. If the CdsItemName does not 
-	 * follow the naming conventions set forth by LocallyCodedCdsListItem's attributeNameConformsToRequiredNamingConvention(), and furthermore that an call to 
-	 * LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention would modify the supplied parameter (as it should not), an IllegalArgumentException is thrown.
+	 * Creates a LocallyCodedCdsItem. Both the CdsItemName and CdsVersions must be specified, or an ImproerUsageException is thrown is thrown. If the CdsItemName 
+	 * does not follow the naming conventions set forth by LocallyCodedCdsListItem's attributeNameConformsToRequiredNamingConvention(), and furthermore that an call to 
+	 * LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention would modify the supplied parameter (as it should not), an IllegalArgumentException 
+	 * is thrown.
 	 */
 	public LocallyCodedCdsItem(String pCdsItemName, Collection<String> pCdsVersions) 
 		throws ImproperUsageException, IllegalArgumentException {
@@ -43,8 +46,37 @@ public abstract class LocallyCodedCdsItem {
 		this.cdsVersions = pCdsVersions;
 	}
 
+	/**
+	 * Creates a LocallyCodedCdsItem. CdsItemName, CdsConceptName and CdsVersions must be specified, or an ImproerUsageException is thrown is thrown. If the CdsItemName  
+	 * does not follow the naming conventions set forth by LocallyCodedCdsListItem's attributeNameConformsToRequiredNamingConvention(), and furthermore that an call to 
+	 * LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention would modify the supplied parameter (as it should not), an IllegalArgumentException 
+	 * is thrown. The CdsConceptName specifies the CdsConcept that is associated with this LocallyCodedCdsItem.
+	 */
+	public LocallyCodedCdsItem(String pCdsItemName, CdsConcept pCdsConcept, Collection<String> pCdsVersions) 
+		throws ImproperUsageException, IllegalArgumentException {
+		
+		this(pCdsItemName, pCdsVersions);
+		String _METHODNAME = "LocallyCodedCdsItem(): ";
+		
+		if (pCdsConcept == null || pCdsConcept.getOpenCdsConceptCode() == null) {				// the latter should not happen
+			String lErrStr = "CdsConcept name not specified";
+			logger.warn(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
+		
+		this.cdsConcept = pCdsConcept;
+	}
+
 	public String getCdsItemName() {
 		return cdsItemName;
+	}
+	
+	public CdsConcept getCdsConcept() {
+		return this.cdsConcept;
+	}
+	
+	public String getCdsConceptName() {
+		return this.cdsConcept.getOpenCdsConceptCode();
 	}
 
 	public Collection<String> getCdsVersions() {
@@ -59,6 +91,9 @@ public abstract class LocallyCodedCdsItem {
 		return result;
 	}
 
+	/**
+	 * Two LocallyCodedCdsItems are equal if their cdsItemNames are equal.
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -76,6 +111,8 @@ public abstract class LocallyCodedCdsItem {
 		return true;
 	}
 
+
+	/*************************************************************************************************************************************************/
 	
 	/*
 	 * Inclusion of cdsVersions in equality?

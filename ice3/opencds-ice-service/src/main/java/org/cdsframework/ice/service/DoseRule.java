@@ -315,4 +315,32 @@ public class DoseRule {
 		this.latestRecommendedInterval = recommendedInterval;
 	}
 
+	@Override
+	public String toString() {
+		
+		String toString = "DoseRule [doseNumber=" + doseNumber + "; absoluteMinimumAge=" + absoluteMinimumAge + "; minimumAge="
+				+ minimumAge + "; maximumAge=" + maximumAge + "; earliestRecommendedAge=" + earliestRecommendedAge
+				+ "; latestRecommendedAge=" + latestRecommendedAge + "; absoluteMinimumInterval="
+				+ absoluteMinimumInterval + "; minimumInterval=" + minimumInterval + "; earliestRecommendedInterval="
+				+ earliestRecommendedInterval + "; latestRecommendedInterval=" + latestRecommendedInterval;
+		
+		toString += "\npreferableVaccines [[ ";
+		int i=1;
+		for (Vaccine v : preferableVaccines) {
+			toString += "\n\tpreferableVaccine {" + i + "}: " + v.toString();
+			i++;
+		}
+		toString += "\n\t]]";
+		i=1;
+		for (Vaccine v : allowableVaccines) {
+			toString += "\n\tallowableVaccine {" + i + "}: " + v.toString();
+			i++;
+		}
+		toString += "\n\t]]";
+		toString += "\n]";
+		
+		return toString;
+	}
+
+	
 }
