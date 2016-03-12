@@ -33,6 +33,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.util.support.data.cds.list.CdsListItem;
 import org.cdsframework.util.support.data.cds.list.CdsListItemConceptMapping;
 import org.cdsframework.util.support.data.cds.list.CdsListSpecificationFile;
@@ -86,7 +87,6 @@ public class LocallyCodedCdsListItem {
 	private CD cdsListItemCD;
 	
 	private static Log logger = LogFactory.getLog(LocallyCodedCdsListItem.class);	
-	private static final String _attributeNamingConvention = "[a-zA-Z0-9_\\.\\- ]+";
 
 	
 	/**
@@ -127,8 +127,8 @@ public class LocallyCodedCdsListItem {
 		this.cdsListId = pCdsLsf.getListId();
 		this.cdsListCode = pCdsLsf.getCode();			
 		if (cdsListCode != null) {
-			if (! attributeNameConformsToRequiredNamingConvention(cdsListCode)) {
-				String lErrStr = "required element cdsListCode \"" + this.cdsListCode + "\"  contains invalid characters; must conform to " + _attributeNamingConvention;
+			if (! ConceptUtils.attributeNameConformsToRequiredNamingConvention(cdsListCode)) {
+				String lErrStr = "required element cdsListCode \"" + this.cdsListCode + "\"  contains invalid characters " + ConceptUtils._attributeNamingConvention;
 				logger.error(_METHODNAME + lErrStr);
 				throw new ImproperUsageException(lErrStr);
 			}
@@ -141,8 +141,8 @@ public class LocallyCodedCdsListItem {
 		}
 		String lCdsListItemKey = pCdsLi.getCdsListItemKey();
 		if (lCdsListItemKey != null) {
-			if (! attributeNameConformsToRequiredNamingConvention(lCdsListItemKey)) {
-				String lErrStr = "required element cdsListItemKey \"" + lCdsListItemKey + "\" contains invalid characters; must conform to " + _attributeNamingConvention;
+			if (! ConceptUtils.attributeNameConformsToRequiredNamingConvention(lCdsListItemKey)) {
+				String lErrStr = "required element cdsListItemKey \"" + lCdsListItemKey + "\" contains invalid characters; must conform to " + ConceptUtils._attributeNamingConvention;
 				logger.error(_METHODNAME + lErrStr);
 				throw new ImproperUsageException(lErrStr);
 			}
@@ -217,43 +217,6 @@ public class LocallyCodedCdsListItem {
 		this.cdsListItemCD.setCodeSystemName(this.cdsListCodeSystemName);
 	}
 
-	
-	
-	/**
-	 * Return a modified String of the argument supplied as the attribute name which conforms to the required naming convention ([a-zA-Z0-9_\\.\\- ]) by stripping out all
-	 * spaces, tabs, line feeds, newline and carriage return characters. If an argument is such that it cannot be modified, then throw an IllegalArgumentException.
-	 * @param pAttributeName
-	 * @return
-	 * @throws IllegalArgumentException
-	 */
-	public static String modifyAttributeNameToConformToRequiredNamingConvention(String pAttributeName) 
-		throws IllegalArgumentException {
-		
-		String _METHODNAME = "modifyAttributeNameToConformToRequiredNamingConvention(): ";
-		if (! attributeNameConformsToRequiredNamingConvention(pAttributeName)) {
-			String lErrStr = "argument \"" + pAttributeName + "\"  contains invalid characters; must conform to " + _attributeNamingConvention;
-			logger.info(_METHODNAME + lErrStr);
-			throw new IllegalArgumentException(lErrStr);
-		}
-		
-		String lAttributeName = pAttributeName;
-		lAttributeName.replaceAll("[ \t\n\f\r]", "_");
-		return lAttributeName;
-	}
-	
-	
-	public static boolean attributeNameConformsToRequiredNamingConvention(String pAttributeName) {
-
-		if (pAttributeName == null) {
-			return false;
-		}
-		if (! pAttributeName.matches(_attributeNamingConvention)) {
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
 
 	/**
 	 * Returns the CdsListItemName that has been assigned to this CdsListItem. The CdsListItemName is always populated.

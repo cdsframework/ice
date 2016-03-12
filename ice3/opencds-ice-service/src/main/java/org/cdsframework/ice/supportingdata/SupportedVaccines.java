@@ -37,6 +37,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
@@ -45,7 +46,6 @@ import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Vaccine;
 import org.cdsframework.ice.service.VaccineComponent;
 import org.cdsframework.ice.util.CollectionUtils;
-import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.util.support.data.ice.vaccine.IceVaccineSpecificationFile;
 import org.opencds.common.exceptions.ImproperUsageException;
@@ -408,7 +408,7 @@ public class SupportedVaccines implements SupportingData {
 			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
 		}
 		lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
-		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), new LocallyCodedVaccineItem(llccli.getCdsListItemName(), ic.getOpenCdsConceptCode(), lIntersectionOfSupportedCdsVersions, lVaccine));
+		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), new LocallyCodedVaccineItem(llccli.getCdsListItemName(), ic, lIntersectionOfSupportedCdsVersions, lVaccine));
 		
 		///////
 		// END Creating and persisting the Vaccine

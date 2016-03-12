@@ -36,6 +36,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
@@ -46,7 +47,6 @@ import org.cdsframework.ice.service.Season;
 import org.cdsframework.ice.service.SeriesRules;
 import org.cdsframework.ice.service.Vaccine;
 import org.cdsframework.ice.util.CollectionUtils;
-import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.ice.util.StringUtils;
 import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.util.support.data.ice.series.IceDoseIntervalSpecification;
@@ -250,7 +250,7 @@ public class SupportedSeries implements SupportingData {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		else {
-			lSeriesCode = LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention(lSeriesCode);
+			lSeriesCode = ConceptUtils.modifyAttributeNameToConformToRequiredNamingConvention(lSeriesCode);
 		}
 		if (this.cdsListItemNameToSeriesItem.containsKey(lSeriesCode)) {
 			String lErrStr = "Attempt to add a Series that was already specified previously; series code:  " + lSeriesCode;

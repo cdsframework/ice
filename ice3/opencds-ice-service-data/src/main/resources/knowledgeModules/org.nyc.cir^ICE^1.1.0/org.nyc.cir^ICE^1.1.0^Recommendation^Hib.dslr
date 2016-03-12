@@ -58,7 +58,7 @@ rule "Hib: Recommend Hib Conditional High Risk if Patient Age >=5yrs and Series 
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $assign_dtDateAtAge when the patient is "5y" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- make note of the number of doses required to complete this series as $assign_nNumberOfDosesRequired
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is < $assign_nNumberOfDosesRequired
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
@@ -80,7 +80,7 @@ rule "Hib: Include Recommendation with Date 7months in 4-Dose Hib Series and Tar
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 2
 			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 0
@@ -101,7 +101,7 @@ rule "Hib: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose 
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age	
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 3
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is < 2
@@ -123,7 +123,7 @@ rule "Hib: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose Hib Se
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 4
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is == 2
@@ -144,7 +144,7 @@ rule "Hib: Set Recommendation Date to 15months and TargetDose 4 in 4-Dose Hib Se
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeFifteenMonths when the Patient is "15m" of age					
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_HIB"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- the name of the Series is "Hib4DoseSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- the effective dose number in the Series is <= 4

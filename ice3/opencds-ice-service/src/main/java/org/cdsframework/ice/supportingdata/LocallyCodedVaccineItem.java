@@ -30,6 +30,7 @@ import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsItem;
 import org.cdsframework.ice.service.Vaccine;
 import org.opencds.common.exceptions.ImproperUsageException;
@@ -43,10 +44,10 @@ public class LocallyCodedVaccineItem extends LocallyCodedCdsItem {
 	/**
 	 * Create a LocallyCodedVaccineItem. All parameters to this method must be specified, or an ImproperUsageException is thrown.
 	 */
-	protected LocallyCodedVaccineItem(String pVaccineCdsListItemName, String pVaccineConceptItemName, Collection<String> pCdsVersions, Vaccine pVaccine) 
+	protected LocallyCodedVaccineItem(String pVaccineCdsListItemName, CdsConcept pVaccineConceptItem, Collection<String> pCdsVersions, Vaccine pVaccine) 
 		throws ImproperUsageException {
 		
-		super(pVaccineCdsListItemName, pVaccineConceptItemName, pCdsVersions);
+		super(pVaccineCdsListItemName, pVaccineConceptItem, pCdsVersions);
 		
 		String _METHODNAME = "LocallyCodedVaccineItem(): ";
 		if (pVaccine == null) {

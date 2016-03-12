@@ -37,13 +37,13 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Season;
 import org.cdsframework.ice.util.CollectionUtils;
-import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.ice.util.StringUtils;
 import org.cdsframework.util.support.data.ice.season.IceSeasonSpecificationFile;
 import org.joda.time.LocalDate;
@@ -150,7 +150,7 @@ public class SupportedSeasons implements SupportingData {
 			throw new ImproperUsageException(lErrStr);
 		}
 		else {
-			lSeasonCode = LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention(lSeasonCode);
+			lSeasonCode = ConceptUtils.modifyAttributeNameToConformToRequiredNamingConvention(lSeasonCode);
 		}
 		// If adding a code that is not one of the supported cdsVersions, then return
 		Collection<String> lIntersectionOfSupportedCdsVersions = CollectionUtils.intersectionOfStringCollections(pIceSeasonSpecificationFile.getCdsVersions(), 

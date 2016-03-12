@@ -238,7 +238,7 @@
 [consequence][][Aa]dd {nDuration}  {oDurationType} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, new TimePeriod({nDuration}, {oDurationType}));
 [consequence][][Aa]dd {oTimePeriod} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, {oTimePeriod});
 /////// [consequence][][Ee]valuate $currentShot as a part of the vaccine group SupportedVaccineGroupConcept.PCV=
-[consequence][][Ee]valuate {currentShot} as a part of the vaccine group "VACCINE_GROUP_CONCEPT_PCV"=
+[consequence][][Ee]valuate {currentShot} as a part of the vaccine group "VACCINE_GROUP_CONCEPT.PCV"=
 [consequence][][Mm]ark that the [Rr]ecommendation for [Ss]eries {refer_oTargetSeries} must take [Ll]ive [Vv]irus [Ii]nterval into [Aa]ccount={refer_oTargetSeries}.setManuallySetAccountForLiveVirusIntervalsInRecommendation(true);
 [consequence][][Mm]ark that the [Rr]ecommendation for [Ss]eries {refer_oTargetSeries} must not take [Ll]ive [Vv]irus [Ii]nterval into [Aa]ccount={refer_oTargetSeries}.setManuallySetAccountForLiveVirusIntervalsInRecommendation(false);
 // [consequence][][Mm]odify the [Nn]umber of [Dd]oses in the [Ss]eries {refer_oTargetSeries} to {nNumberOfDoses}={refer_oTargetSeries}.setManuallySetNumberOfDosesInSeries({nNumberOfDoses});

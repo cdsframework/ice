@@ -36,13 +36,13 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.util.CollectionUtils;
-import org.cdsframework.ice.util.ConceptUtils;
 import org.cdsframework.util.support.data.ice.vaccinegroup.IceVaccineGroupSpecificationFile;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
@@ -161,6 +161,7 @@ public class SupportedVaccineGroups implements SupportingData {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
+		/*
 		///////
 		// Primary OpenCds Concept from vaccine group - check to make sure that the specified vaccine group CdsConcept has been specified with this vaccine group's cdsListItem definition
 		///////
@@ -172,6 +173,20 @@ public class SupportedVaccineGroups implements SupportingData {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
+		*/
+
+		///////
+		// CdsListItem is a CdsConcept of type vaccine group? - check to make sure that the specified vaccine group CdsConcept has been specified with this vaccine group's cdsListItem definition
+		///////
+		CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(lVaccineGroupCdsListItemName, llccli.getCdsListItemValue());
+		if (! llccli.equals(this.supportedCdsLists.getSupportedCdsConcepts().
+			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE_GROUP, lPrimaryOpenCdsConcept))) {
+			String lErrStr = "Attempt to add vaccine group with a Primary CdsConcept that is not associated with the vaccine group; vaccine group" + lVaccineGroupCdsListItemName + 
+					"; Primary CdsConcept: " + lPrimaryOpenCdsConcept; 
+			logger.warn(_METHODNAME + lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
+		
 		///////
 		// Related Diseases
 		///////

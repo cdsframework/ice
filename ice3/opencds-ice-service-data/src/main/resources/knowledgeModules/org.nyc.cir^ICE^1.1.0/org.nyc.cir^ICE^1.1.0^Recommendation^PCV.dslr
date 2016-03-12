@@ -59,12 +59,12 @@ rule "PCV: Recommended interval 56 days from PPSV if due for PCV" ruleflow-group
 	agenda-group "postRecommendationCheck"
 	when
 		There is a Series $pcvSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made and a recommendation date has been determined
 			- make note of the recommendation date as $pcvRecommendationDate
 		There is a Series $ppsvSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PPSV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PPSV"
 			- the number of administered shots is > 0
 			- make note of the date that the most recent shot was administered as $dtPPSVShotDate
 	then
@@ -81,7 +81,7 @@ rule "PCV: Recommend at the vaccine level in 4-Dose PCV Series; vaccine recommen
 	agenda-group "postRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- post processing on the Series forecast has not already been run
 			- the name of the Series is "PCV4DoseSeries"
 			- a Forecast for the Series has been made and a shot is recommended
@@ -102,7 +102,7 @@ rule "PCV: Mark that the Series cannot be ever be completed if Patient is >= 5yr
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Series is Not Complete
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
@@ -121,7 +121,7 @@ rule "PCV: Recommend dose if series complete if no prior VALID PCV13 doses, is <
 	salience 210
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Series is Complete
 			- the Number of Administered Shots is > 0
@@ -150,7 +150,7 @@ rule "PCV: Recommend a Conditional High_Risk if Patient is <5yrs, had no prior d
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Number of Administered Shots is > 0
 			- make note of the date that the most recent shot was administered as $shotDate			 
@@ -177,7 +177,7 @@ rule "PCV: Recommend a Conditional High_Risk dose of PCV_13 if Patient is >= 5yr
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- the name of the Series is "PCV4DoseSeries"				 
 		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "ICE133" is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
@@ -201,7 +201,7 @@ rule "PCV: Recommend Conditional High Risk in 4-Dose PCV Series if Patient Age >
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $assign_dtDateAtAge when the patient is "5y" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Series is Not Complete
 			- make note of the number of doses required to complete this series as $assign_nNumberOfDosesRequired
@@ -226,7 +226,7 @@ rule "PCV: Include Recommendation with Date 7months in 4-Dose PCV Series and Tar
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- the name of the Series is "PCV4DoseSeries"
 			- the effective dose number in the Series is <= 2
 			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 0
@@ -249,7 +249,7 @@ rule "PCV: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose 
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age	
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- the name of the Series is "PCV4DoseSeries"
 			- the effective dose number in the Series is <= 3
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is < 2
@@ -273,7 +273,7 @@ rule "PCV: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose PCV Se
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- the name of the Series is "PCV4DoseSeries"
 			- the effective dose number in the Series is <= 4
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is == 2
@@ -296,7 +296,7 @@ rule "PCV: Set Recommendation Date to 24months and TargetDose 4 in 4-Dose PCV Se
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeTwentyFourMonths when the Patient is "24m" of age					
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
 			- the name of the Series is "PCV4DoseSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- the effective dose number in the Series is <= 4
