@@ -828,22 +828,9 @@ public class ICESupportingDataConfiguration {
 			}
 
 			// Priority
-			List<CD> lRelatedVaccines = pIceVaccineGroupSpecification.getRelatedVaccines();
 			lDebugStrb += "\ngetPriority(): " + pIceVaccineGroupSpecification.getPriority();
 
-			// Related Vaccines
-			lDebugStrb += "\ngetRelatedVaccines(): ";
-			if (lRelatedVaccines != null) {
-				i=1;
-				for (CD lRelatedVaccine : lRelatedVaccines) {
-					lDebugStrb += "\n" + i + ") " + ConceptUtils.toStringCD(lRelatedVaccine);
-					i++;
-				}
-			}
-			else {
-				lDebugStrb += "\n\tNo related vaccines specified";
-			}
-
+			
 			// Disease Immunities
 			List<CD> lDiseaseImmunities = pIceVaccineGroupSpecification.getDiseaseImmunities();
 			lDebugStrb += "\ngetDiseaseImmunities(): ";

@@ -108,6 +108,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 	private File baseKnowledgeRepositoryLocation = null;
 	private File knowledgeModuleLocation = null;
 	private String baseRulesScopingKmId = null;
+	private Schedule schedule = null;
 	
 	private static Log logger = LogFactory.getLog(ICEDecisionEngineDSS55EvaluationAdapter.class);
 
@@ -298,26 +299,14 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
-		List<String> cdsVersions = new ArrayList<String>();
-		cdsVersions.add(this.baseRulesScopingKmId);
-		cdsVersions.add(requestedKmId);
-		Schedule lSchedule = null;
-		try {
-			lSchedule = new Schedule("requestedKmId", cdsVersions, baseKnowledgeRepositoryLocation);
-		}
-		catch (ImproperUsageException | InconsistentConfigurationException ii) {
-			String lErrStr = "Failed to initialize immunization schedule";
-			logger.error(_METHODNAME + lErrStr);
-			throw new RuntimeException(lErrStr);
-		}
 
-		if (lSchedule == null || lSchedule.isScheduleInitialized() == false) {
-			String lErrStr = "Schedule has not been fully initialized; something went wrong";
+		if (schedule == null || schedule.isScheduleInitialized() == false) {
+			String lErrStr = "Schedule has not been fully initialized; something went wrong; cannot process request";
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);			
 		}
 		
-		cmds.add(CommandFactory.newSetGlobal("schedule", lSchedule));
+		cmds.add(CommandFactory.newSetGlobal("schedule", schedule));
 		
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -530,14 +519,13 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 				logger.info(lInfoStr);
 			}
 		}
-		this.knowledgeModuleLocation = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lRequestedKmId);
-		if (! this.knowledgeModuleLocation.exists()) {
-			this.knowledgeModuleLocation = null;
+
+		File lKnowledgeModulesDirectory = new File(baseConfigurationLocation, knowledgeModulesSubDirectory);
+		if (! new File(lKnowledgeModulesDirectory, lRequestedKmId).exists()) {
 			String lErrStr = "ICE knowledge repository data location specified in properties file does not exist";
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
-		this.baseKnowledgeRepositoryLocation = new File(baseConfigurationLocation);
 		
 		// Get the default scoping ID for the base ICE rules
 		String baseRulesScopingEntityId = lProps.getProperty("ice_base_rules_scoping_entity_id");
@@ -662,7 +650,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 				logger.debug(lDebugStr);
 			}
 
-			logger.info(_METHODNAME + "Loading knowledge base with custom DRL and DSLR files: ");
+			logger.info(_METHODNAME + "Loading knowledge base with custom DRL and DSLR files: do DRL first, then DSLR");
 			File customRuleFile = null;
 			if (lResultFiles != null) {
 				for (int i=0; i < lResultFiles.length; i++) {
@@ -676,7 +664,16 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 							knowledgeBuilder.add(ResourceFactory.newFileResource(customRuleFile), ResourceType.DRL);
 							logger.info(_METHODNAME + "Loaded DRL file " + customRuleFile.getPath());
 						}
-						else if (lResultFile.endsWith(".dslr") || lResultFile.endsWith(".DSLR")) {
+					}
+				}
+				for (int i=0; i < lResultFiles.length; i++) {
+					String lResultFile = lResultFiles[i];
+					customRuleFile = new File(dslrFileDirectory, lResultFile);
+					if (customRuleFile.equals(drlFile) || customRuleFile.equals(drlFileDuplicateShotSameDay)) {
+						continue;
+					}
+					if (customRuleFile != null && customRuleFile.exists()) {
+						if (lResultFile.endsWith(".dslr") || lResultFile.endsWith(".DSLR")) {
 							knowledgeBuilder.add(ResourceFactory.newFileResource(customRuleFile), ResourceType.DSLR);
 							logger.info(_METHODNAME + "Loaded DSLR file " + customRuleFile.getPath());
 						}
@@ -719,6 +716,21 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
 		this.baseRulesScopingKmId = lBaseRulesScopingKmId;
 		logger.info("Date/Time " + lRequestedKmId + "; Base Rules Scoping Km Id: " + this.baseRulesScopingKmId + "; Initialized: " + new Date());
+
+		// Initialize schedule 
+		logger.info("Initializing Schedule");
+		List<String> cdsVersions = new ArrayList<String>();
+		cdsVersions.add(this.baseRulesScopingKmId);
+		cdsVersions.add(lRequestedKmId);
+		try {
+			this.schedule = new Schedule("requestedKmId", cdsVersions, lKnowledgeModulesDirectory);
+		}
+		catch (ImproperUsageException | InconsistentConfigurationException ii) {
+			String lErrStr = "Failed to initialize immunization schedule";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		logger.info("Schedule Initialization complete");
 		return lKnowledgeBase;
 	}
 
