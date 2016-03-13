@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    /**
+     * Copyright (C) 2013 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Contributions by HLN Consulting, LLC
+     *
+     * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+     * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+     * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+     * details.
+     *
+     * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+     * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+     * limitation, and warranty) complete irrevocable access and rights to this project.
+     *
+     * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+     *
+     * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+     * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+     * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+     * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+     * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     *
+     * For more information about this software, see http://www.hln.com/ice or send
+     * correspondence to ice@hln.com.
+     */
+
+-->
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:iv="org.cdsframework.util.support.data.ice.vaccine"
+    xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes"
+    targetNamespace="org.cdsframework.util.support.data.ice.vaccine">
+    <xs:import namespace="org.opencds.vmr.v1_0.schema.datatypes"
+               schemaLocation="http://cds.hln.com/cdsframework/schema/datatypes.xsd"/>
+    <xs:element name="liveVirusVaccine" type="xs:boolean" default="false" />
+    <xs:element name="unspecifiedFormulation" type="xs:boolean" default="false"/>
+    <xs:element name="vaccineActive" type="xs:boolean" default="true" />
+    <xs:element name="tradeName" type="xs:string" />
+    <xs:element name="manufacturerCode" type="dt:CD" />
+    <xs:element name="validMinimumAgeForUse" type="xs:string" />
+    <xs:element name="validMaximumAgeForUse" type="xs:string" />
+    <xs:element name="licensedMinimumAgeForUse" type="xs:string" />
+    <xs:element name="licensedMaximumAgeForUse" type="xs:string" />
+    <xs:element name="minimumDateForUse" type="xs:date" />
+    <xs:element name="maximumDateForUse" type="xs:date" />
+    <xs:complexType name="vaccineSpecification">
+        <xs:sequence>
+            <xs:element name="vaccine" type="dt:CD" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="vaccineGroup" type="dt:CD" minOccurs="1" maxOccurs="unbounded"/>		<!--  TODO: ?Remove?: This is not needed or used -->
+            <xs:element name="cdsVersion" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element ref="iv:unspecifiedFormulation" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:liveVirusVaccine" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:vaccineActive" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:tradeName" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:manufacturerCode" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:validMinimumAgeForUse" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:validMaximumAgeForUse" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:licensedMinimumAgeForUse" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:licensedMaximumAgeForUse" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:minimumDateForUse" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:maximumDateForUse" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="vaccineComponent" type="dt:CD" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="diseaseImmunity" type="dt:CD" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="conflictingVaccine" type="dt:CD" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="openCdsMembership" type="dt:CD" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="primaryOpenCdsConcept" type="dt:CD" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="iceVaccineSpecificationFile" type="iv:vaccineSpecification"/>
+</xs:schema>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    /**
+     * Copyright (C) 2013 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Contributions by HLN Consulting, LLC
+     *
+     * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+     * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+     * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+     * details.
+     *
+     * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+     * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+     * limitation, and warranty) complete irrevocable access and rights to this project.
+     *
+     * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+     *
+     * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+     * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+     * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+     * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+     * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     *
+     * For more information about this software, see http://www.hln.com/ice or send
+     * correspondence to ice@hln.com.
+     */
+
+-->
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:tc="org.cdsframework.util.support.data.cds.testcase"
+    xmlns:vmr="org.opencds.vmr.v1_0.schema.vmr"
+    xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput"
+    xmlns:out="org.opencds.vmr.v1_0.schema.cdsoutput"
+    targetNamespace="org.cdsframework.util.support.data.cds.testcase">
+    <xs:annotation>
+        <xs:documentation xml:lang="en">Schema definition for a test case based on the cdsInput and cdsOutput VMR specification.</xs:documentation>
+    </xs:annotation>
+    <xs:import namespace="org.opencds.vmr.v1_0.schema.cdsinput" schemaLocation="http://cds.hln.com/cdsframework/schema/cdsInput.xsd"/>
+    <xs:import namespace="org.opencds.vmr.v1_0.schema.cdsoutput" schemaLocation="http://cds.hln.com/cdsframework/schema/cdsOutput.xsd"/>
+    <xs:element name="name" type="xs:string">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The test case name.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="suiteName" type="xs:string">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The name of the suite the test case belongs to.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="groupName" type="xs:string">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The name of the group the test case belongs to.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ignore" type="xs:boolean">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">Used to determine whether a test case is executed in a suite or group run.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ruletotest" type="xs:string">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The rationale for the test case. The specific purpose of the test case.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="notes" type="xs:string">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">Miscellaneous test case notes.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="executiondate" type="xs:dateTime">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The date at which this test case is run.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="propertyName" type="xs:string">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The name of the property for the testCaseProperty type.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="propertyValue" type="xs:string">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The value of the property for the testCaseProperty type.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="propertyType" type="xs:string">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The type of the property for the testCaseProperty type. This identifier is the xml type identifier minus any prefix (e.g. string, integer, date, time, duration, etc.).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="testCaseProperty">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">Domain specific test case properties can be defined via this type.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element ref="tc:propertyName"/>
+            <xs:element ref="tc:propertyValue"/>
+            <xs:element ref="tc:propertyType"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="testCase">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The test case type.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element ref="tc:name"/>
+            <xs:element ref="tc:ignore"/>
+            <xs:element ref="tc:suiteName"/>
+            <xs:element ref="tc:groupName"/>
+            <xs:element name="property" type="tc:testCaseProperty" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list of test case properties.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="tc:ruletotest"/>
+            <xs:element ref="tc:notes"/>
+            <xs:element ref="tc:executiondate" minOccurs="0"/>
+            <xs:element ref="in:cdsInput"/>
+            <xs:element ref="out:cdsOutput"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="TestCase" type="tc:testCase">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The test case instance.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+</xs:schema>

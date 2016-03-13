@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    /**
+     * Copyright (C) 2013 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Contributions by HLN Consulting, LLC
+     *
+     * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+     * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+     * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+     * details.
+     *
+     * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+     * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+     * limitation, and warranty) complete irrevocable access and rights to this project.
+     *
+     * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+     *
+     * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+     * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+     * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+     * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+     * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     *
+     * For more information about this software, see http://www.hln.com/ice or send
+     * correspondence to ice@hln.com.
+     */
+
+-->
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:rl="org.cdsframework.util.support.data.cds.list"
+           targetNamespace="org.cdsframework.util.support.data.cds.list">
+    <xs:annotation>
+        <xs:documentation xml:lang="en">Schema definition for CDS list
+            specification.</xs:documentation>
+    </xs:annotation>
+    <xs:complexType name="cdsListItemConceptMapping">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The list item concept mapping.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="code" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping code.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="displayName" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping display
+                        name.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="codeSystem" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping code
+                        system.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="codeSystemName" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping code system
+                        name.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="conceptDeterminationMethod" type="xs:string" minOccurs="0"
+                        maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping concept determination
+                        method.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="cdsListItem">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The list item.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="cdsListItemKey" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list item key.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="cdsListItemValue" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list item value.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="cdsListItemConceptMapping" type="rl:cdsListItemConceptMapping"
+                        minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="cdsList">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The list.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="listId" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list id.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="code" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list code.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list name.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="listType" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list type. i.e. AD_HOC, AD_HOC_CONCEPT, CONCEPT,
+                        CONCEPT_TYPE, CODE_SYSTEM, JAVA_ENUM, VALUE_SET;</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list description.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="enumClass" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list enumClass.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="codeSystem" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list code system OID.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="codeSystemName" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list code system name.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="valueSet" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list value set OID.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="openCdsConceptType" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list OpenCDS concept type.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="cdsListItem" type="rl:cdsListItem" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list items.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="cdsVersion" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The list of cds versions this list is assigned.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="cdsListSpecificationFile" type="rl:cdsList">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The list.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+</xs:schema>

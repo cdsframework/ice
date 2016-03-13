@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+
+    /**
+     * Copyright (C) 2013 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Contributions by HLN Consulting, LLC
+     *
+     * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+     * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+     * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+     * details.
+     *
+     * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+     * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+     * limitation, and warranty) complete irrevocable access and rights to this project.
+     *
+     * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+     *
+     * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+     * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+     * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+     * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+     * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     *
+     * For more information about this software, see http://www.hln.com/ice or send
+     * correspondence to ice@hln.com.
+     */
+
+-->
+<ns2:TestCase xmlns:ns2="org.cdsframework.util.support.data.cds.testcase"
+    xmlns:ns3="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput"
+    xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">
+    <ns2:name>Interval between Dose 1 and Target Dose 2. Recommended Interval (2 months).
+        Recommendation in February of a leap year (i.e., 29 days in the month). </ns2:name>
+    <ns2:ignore>false</ns2:ignore>
+    <ns2:suiteName>HPV Test Cases</ns2:suiteName>
+    <ns2:groupName>HPV Recommended Interval</ns2:groupName>
+    <property>
+        <ns2:propertyName>vaccineGroup</ns2:propertyName>
+        <ns2:propertyValue>Human Papillomavirus (840)</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>suiteCreateId</ns2:propertyName>
+        <ns2:propertyValue>regina</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>suiteCreateDatetime</ns2:propertyName>
+        <ns2:propertyValue>20121206101858</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>suiteLastModDatetime</ns2:propertyName>
+        <ns2:propertyValue>20131002211445</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>groupCreateId</ns2:propertyName>
+        <ns2:propertyValue>amoniz</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>groupCreateDatetime</ns2:propertyName>
+        <ns2:propertyValue>20121220090426</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>groupLastModId</ns2:propertyName>
+        <ns2:propertyValue>amoniz</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>groupLastModDatetime</ns2:propertyName>
+        <ns2:propertyValue>20130820073658</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>createId</ns2:propertyName>
+        <ns2:propertyValue>amoniz</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>createDatetime</ns2:propertyName>
+        <ns2:propertyValue>20130104092500</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <property>
+        <ns2:propertyName>lastModDatetime</ns2:propertyName>
+        <ns2:propertyValue>20131001110358</ns2:propertyValue>
+        <ns2:propertyType>string</ns2:propertyType>
+    </property>
+    <ns2:ruletotest>Recommended Interval between Dose 1 and Dose 2 is 2 months. When calculating
+        recommended interval using calendar months, if the anniversary day does not exist (because
+        the anniversary month has fewer than 31 days), use the last day of the anniversary
+        month.</ns2:ruletotest>
+    <ns2:notes>2000, 2004, 2008, 2012, 2016 are leap years where Feb. 29 exists.</ns2:notes>
+    <ns2:executiondate>2008-04-10T00:00:00</ns2:executiondate>
+    <ns4:cdsInput>
+        <templateId root="2.16.840.1.113883.3.795.11.1.1"/>
+        <cdsContext>
+            <cdsSystemUserPreferredLanguage code="en" codeSystem="2.16.840.1.113883.6.99"
+                displayName="English"/>
+        </cdsContext>
+        <vmrInput>
+            <templateId root="2.16.840.1.113883.3.795.11.1.1"/>
+            <patient>
+                <templateId root="2.16.840.1.113883.3.795.11.2.1.1"/>
+                <id root="2.16.840.1.113883.3.795.12.100.11" extension="1423"/>
+                <demographics>
+                    <birthTime value="19981231"/>
+                    <gender code="M" codeSystem="2.16.840.1.113883.5.1"/>
+                </demographics>
+                <clinicalStatements>
+                    <observationResults/>
+                    <substanceAdministrationEvents>
+                        <substanceAdministrationEvent>
+                            <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                            <id root="2.16.840.1.113883.3.795.12.100.10" extension="8937"/>
+                            <substanceAdministrationGeneralPurpose code="384810002"
+                                codeSystem="2.16.840.1.113883.6.5"/>
+                            <substance>
+                                <id root="81a69759-252f-4172-9246-3ac4e79e4a7f"/>
+                                <substanceCode code="62" codeSystem="2.16.840.1.113883.12.292"/>
+                            </substance>
+                            <administrationTimeInterval high="20071231" low="20071231"/>
+                        </substanceAdministrationEvent>
+                    </substanceAdministrationEvents>
+                </clinicalStatements>
+            </patient>
+        </vmrInput>
+    </ns4:cdsInput>
+    <ns5:cdsOutput>
+        <vmrOutput>
+            <templateId root="2.16.840.1.113883.3.795.11.1.1"/>
+            <patient>
+                <templateId root="2.16.840.1.113883.3.795.11.2.1.1"/>
+                <id root="2.16.840.1.113883.3.795.12.100.11" extension="1423"/>
+                <demographics>
+                    <birthTime value="19981231"/>
+                    <gender code="M" codeSystem="2.16.840.1.113883.5.1"/>
+                </demographics>
+                <clinicalStatements>
+                    <observationResults/>
+                    <substanceAdministrationEvents>
+                        <substanceAdministrationEvent>
+                            <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                            <id root="2.16.840.1.113883.3.795.12.100.10" extension="8937"/>
+                            <substanceAdministrationGeneralPurpose code="384810002"
+                                codeSystem="2.16.840.1.113883.6.5"/>
+                            <substance>
+                                <id root="8db1531e-10da-4274-a851-c2400838a7fb"/>
+                                <substanceCode code="62" codeSystem="2.16.840.1.113883.12.292"/>
+                            </substance>
+                            <administrationTimeInterval high="20071231" low="20071231"/>
+                            <relatedClinicalStatement>
+                                <targetRelationshipToSource code="PERT"
+                                    codeSystem="2.16.840.1.113883.5.1002"/>
+                                <substanceAdministrationEvent>
+                                    <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                                    <id root="03b88aef-7737-44f8-894b-78ec083f1e93"/>
+                                    <substanceAdministrationGeneralPurpose code="384810002"
+                                        codeSystem="2.16.840.1.113883.6.5"/>
+                                    <substance>
+                                        <id root="19157b71-ac7b-4b2e-afdf-f70e1f55202e"/>
+                                        <substanceCode code="62"
+                                            codeSystem="2.16.840.1.113883.12.292"/>
+                                    </substance>
+                                    <administrationTimeInterval high="20071231" low="20071231"/>
+                                    <isValid value="true"/>
+                                    <relatedClinicalStatement>
+                                        <targetRelationshipToSource code="PERT"
+                                            codeSystem="2.16.840.1.113883.5.1002"/>
+                                        <observationResult>
+                                            <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                                            <id root="7f370d0d-e130-4588-a5b7-96cba75bb744"/>
+                                            <observationFocus code="840"
+                                                codeSystem="2.16.840.1.113883.3.795.12.100.1"/>
+                                            <observationValue>
+                                                <concept code="VALID"
+                                                  codeSystem="2.16.840.1.113883.3.795.12.100.2"/>
+                                            </observationValue>
+                                        </observationResult>
+                                    </relatedClinicalStatement>
+                                </substanceAdministrationEvent>
+                            </relatedClinicalStatement>
+                        </substanceAdministrationEvent>
+                    </substanceAdministrationEvents>
+                    <substanceAdministrationProposals>
+                        <substanceAdministrationProposal>
+                            <templateId root="2.16.840.1.113883.3.795.11.9.3.1"/>
+                            <id root="39b9673d-b261-49be-a121-e1ad94b80cf7"/>
+                            <substanceAdministrationGeneralPurpose code="384810002"
+                                codeSystem="2.16.840.1.113883.6.5"/>
+                            <substance>
+                                <id root="c51ff204-0e82-4718-b6db-d5bd0c68a263"/>
+                                <substanceCode code="840"
+                                    codeSystem="2.16.840.1.113883.3.795.12.100.1"/>
+                            </substance>
+                            <proposedAdministrationTimeInterval high="20080229" low="20080229"/>
+                            <relatedClinicalStatement>
+                                <targetRelationshipToSource code="RSON"
+                                    codeSystem="2.16.840.1.113883.5.1002"/>
+                                <observationResult>
+                                    <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                                    <id root="882a4e07-d225-44ca-bed4-d50f28c6ebc1"/>
+                                    <observationFocus code="840"
+                                        codeSystem="2.16.840.1.113883.3.795.12.100.1"/>
+                                    <observationValue>
+                                        <concept code="RECOMMENDED"
+                                            codeSystem="2.16.840.1.113883.3.795.12.100.5"/>
+                                    </observationValue>
+                                    <interpretation code="DUE_NOW"
+                                        codeSystem="2.16.840.1.113883.3.795.12.100.6"/>
+                                </observationResult>
+                            </relatedClinicalStatement>
+                        </substanceAdministrationProposal>
+                    </substanceAdministrationProposals>
+                </clinicalStatements>
+            </patient>
+        </vmrOutput>
+    </ns5:cdsOutput>
+</ns2:TestCase>

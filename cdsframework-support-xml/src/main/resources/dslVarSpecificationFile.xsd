@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    /**
+     * Copyright (C) 2013 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Contributions by HLN Consulting, LLC
+     *
+     * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+     * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+     * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+     * details.
+     *
+     * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+     * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+     * limitation, and warranty) complete irrevocable access and rights to this project.
+     *
+     * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+     *
+     * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+     * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+     * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+     * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+     * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     *
+     * For more information about this software, see http://www.hln.com/ice or send
+     * correspondence to ice@hln.com.
+     */
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:rl="org.cdsframework.util.support.data.cds.list"
+           xmlns:rl4="org.cdsframework.util.support.data.rule.dsl.var.name"
+           xmlns:rl6="org.cdsframework.util.support.data.rule.dsl.var"
+           targetNamespace="org.cdsframework.util.support.data.rule.dsl.var"
+           version="1.0">
+    <xs:import namespace="org.cdsframework.util.support.data.cds.list" schemaLocation="cdsListSpecificationFile.xsd"/>
+    <xs:import namespace="org.cdsframework.util.support.data.rule.dsl.var.name" schemaLocation="dslVarNameSpecificationFile.xsd"/>
+    <xs:element name="DslVarSpecificationFile" type="rl6:dslVar"/>
+    <xs:complexType name="dslVar">
+        <xs:sequence>
+            <xs:element minOccurs="0" name="cdsList" type="rl:cdsList"/>
+            <xs:element minOccurs="0" name="createDatetime" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="createId" type="xs:string"/>
+            <xs:element minOccurs="0" name="dslResourceId" type="xs:int"/>
+            <xs:element minOccurs="0" name="dslResourceVarId" type="xs:int"/>
+            <xs:element minOccurs="0" name="dslVarName" type="rl4:dslVarName"/>
+            <xs:element minOccurs="0" name="dslVarType" type="rl6:dslVarType"/>
+            <xs:element minOccurs="0" name="lastModDatetime" type="xs:dateTime"/>
+            <xs:element minOccurs="0" name="lastModId" type="xs:string"/>
+            <xs:element minOccurs="0" name="name" type="xs:string"/>
+            <xs:element minOccurs="0" name="regEx" type="xs:string"/>
+            <xs:element minOccurs="0" name="varKey" type="xs:int"/>
+            <xs:element minOccurs="0" name="varReference" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:simpleType name="dslVarType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Assign"/>
+            <xs:enumeration value="Refer"/>
+            <xs:enumeration value="String"/>
+            <xs:enumeration value="Number"/>
+            <xs:enumeration value="Date"/>
+            <xs:enumeration value="Dropdown"/>
+            <xs:enumeration value="Conditions"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

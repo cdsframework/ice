@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<!--
+
+    /**
+     * Copyright (C) 2013 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Contributions by HLN Consulting, LLC
+     *
+     * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+     * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+     * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+     * details.
+     *
+     * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+     * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+     * limitation, and warranty) complete irrevocable access and rights to this project.
+     *
+     * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+     *
+     * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+     * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+     * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+     * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+     * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     *
+     * For more information about this software, see http://www.hln.com/ice or send
+     * correspondence to ice@hln.com.
+     */
+
+-->
+<xs:schema version="1.0"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:is="org.cdsframework.util.support.data.ice.season"
+           xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes"
+           targetNamespace="org.cdsframework.util.support.data.ice.season"
+           elementFormDefault="qualified">
+    <xs:import namespace="org.opencds.vmr.v1_0.schema.datatypes"
+               schemaLocation="http://cds.hln.com/cdsframework/schema/datatypes.xsd"/>
+    <xs:complexType name="season">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">An ICE season.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="seasonId" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The season id. A unique identifier tied to this season instance.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The season name.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="code" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The season code. An alphanumeric value used as a reference string.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="startDate" type="xs:date" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The season start date. Should only have a value if defaultSeason is false.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="endDate" type="xs:date" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The season end date. Should only have a value if defaultSeason is false.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="defaultSeason" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The whether this is the default season within a vaccine group and ice version. There can be only one.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="defaultStartMonthAndDay" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The default season start month and day. Should only have a value if defaultSeason is true.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="defaultStopMonthAndDay" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The default season stop month and day. Should only have a value if defaultSeason is true.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="notes" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The season notes.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="vaccineGroup" type="dt:CD" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">A vaccine group code that this season is associated with.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="cdsVersion" type="xs:string" minOccurs="1" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">A cds version that this season is associated with.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="iceSeasonSpecificationFile" type="is:season">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The ICE Season</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+
+</xs:schema>
