@@ -554,7 +554,7 @@ public class SupportedSeries implements SupportingData {
 		/////// 
 		// Add the Series to the list of Series being tracked for each vaccine group START 
 		///////
-		List<SeriesRules> lSeriesRulesListForVG = this.vaccineGroupItemToSeriesRules.get(lcsi);
+		List<SeriesRules> lSeriesRulesListForVG = this.vaccineGroupItemToSeriesRules.get(lVGI);
 		if (lSeriesRulesListForVG == null) {
 			lSeriesRulesListForVG = new ArrayList<SeriesRules>();
 		}

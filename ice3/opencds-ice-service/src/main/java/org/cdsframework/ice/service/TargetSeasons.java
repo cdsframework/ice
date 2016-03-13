@@ -138,7 +138,7 @@ public class TargetSeasons {
 		if (pSVGC == null) {
 			return;
 		}
-
+		
 		String _METHODNAME = "populateOffSeasonEndDatesForTargetSeasonsInVaccineGroup(): ";
 		NavigableSet<Season> lVGSeasonSet = allSeasons.get(pSVGC);
 		if (lVGSeasonSet == null) {
@@ -166,8 +166,10 @@ public class TargetSeasons {
 					if (lMostRecentExaminedOffSeasonEndDate.compareTo(lMostRecentSeasonExamined.getFullySpecifiedSeasonEndDate()) >= 0) {
 						if (lMostRecentSeasonExamined.isOffSeasonPermitted()) {
 							LocalDate lOffSeasonEndDateBasedOnDefault = determineOffSeasonEndDateForFullySpecifiedSeasonBasedOnDefaultSeason(lMostRecentSeasonExamined, lIdentifiedDefaultSeason);
-							if (lMostRecentExaminedOffSeasonEndDate.isAfter(lOffSeasonEndDateBasedOnDefault) && 
-									lMostRecentExaminedOffSeasonEndDate.isBefore(lOffSeasonEndDateBasedOnDefault.plusYears(1))) {
+							/////// if (lMostRecentExaminedOffSeasonEndDate.isAfter(lOffSeasonEndDateBasedOnDefault) &&
+							////// DEBUG: first line
+							if (lOffSeasonEndDateBasedOnDefault == null || (lMostRecentExaminedOffSeasonEndDate.isAfter(lOffSeasonEndDateBasedOnDefault) && 
+									lMostRecentExaminedOffSeasonEndDate.isBefore(lOffSeasonEndDateBasedOnDefault.plusYears(1)))) {
 								lMostRecentSeasonExamined.setOffSeasonEndDateForFullySpecifiedSeason(lMostRecentExaminedOffSeasonEndDate);
 							}
 							else {
@@ -189,6 +191,7 @@ public class TargetSeasons {
 			LocalDate lOffSeasonEndDate = determineOffSeasonEndDateForFullySpecifiedSeasonBasedOnDefaultSeason(lMostRecentSeasonExamined, lIdentifiedDefaultSeason);
 			lMostRecentSeasonExamined.setOffSeasonEndDateForFullySpecifiedSeason(lOffSeasonEndDate);
 		}
+		
 	}
 	
 	
@@ -244,12 +247,12 @@ public class TargetSeasons {
 			return;
 		}
 
+		// String _METHODNAME = "addTargetSeason(): ";
 		String svgc = pS.getVaccineGroup();
 		NavigableSet<Season> vgSeasons = allSeasons.get(svgc);
 		if (vgSeasons == null) {
 			vgSeasons = new TreeSet<Season>(new TargetSeasonComparator());
 		}
-		
 		if (vgSeasons.contains(pS)) {
 			if (pS.isDefaultSeason() == false) {
 				Season lMatching = getMatchingTargetSeason(pS);
@@ -263,8 +266,9 @@ public class TargetSeasons {
 		vgSeasons.add(pS);
 		allSeasons.put(svgc, vgSeasons);
 		populateOffSeasonEndDatesForTargetSeasonsInVaccineGroup(svgc);
-		
+				
 		Season lCurrentSeason = getFullySpecifiedTargetSeasonInVaccineGroupApplicableToDate(evalTime, svgc);
+		
 		if (lCurrentSeason == null) {
 			currentSeason.remove(svgc);
 		}
@@ -375,6 +379,7 @@ public class TargetSeasons {
 	 * list of seasons to be tracked, it is also added. Any previous settings for current season are overridden.
 	 * @param pS Season to set the current season to
 	 *
+	///////
 	public void setCurrentSeason(Season pS) {
 		
 		if (pS == null || pS.isDefaultSeason()) {
@@ -384,6 +389,7 @@ public class TargetSeasons {
 		addTargetSeason(pS);
 		currentSeasonManuallySet.put(pS.getAssociatedVaccineGroup(), pS);
 	}
+	///////
 	*/
 	
 	
@@ -506,6 +512,7 @@ public class TargetSeasons {
 			toStr.append(" }}}\n");
 		}
 		/*
+		///////
 		if (currentSeasonManuallySet != null) {
 			toStr.append("    currentSeasonManuallySet {{{ ");
 			int i=1;
@@ -519,6 +526,7 @@ public class TargetSeasons {
 			}
 			toStr.append(" }}}\n");
 		}
+		///////
 		*/
 		toStr.append("]");
 		

@@ -280,8 +280,8 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries Custom Rules Invoca
 		$s : SeriesRules()
 	then
 		String _RULENAME = kcontext.rule.name;
-		setFocus("customCandidateSeriesIdentificationRule");
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Invoke Custom CandidateSeriesIdentificationRule for SeriesRules: " + $s.toString());
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Invoke Custom CandidateSeriesIdentificationRule for SeriesRules: " + $s.getSeriesName());
+		setFocus("customCandidateSeriesIdentificationRule");		
 end
 
 
@@ -2007,7 +2007,8 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series" ruleflow-gr
 		$evalTime: EvalTime()
 	then
 		String _RULENAME = kcontext.rule.name;
-		PayloadHelper.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
 
@@ -2024,7 +2025,8 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 		not TargetSeries(vaccineGroup == $vg, targetSeason != null,	targetSeason.fullySpecifiedSeasonStartDate.isAfter($tseasonStartDate)) 
 	then
 		String _RULENAME = kcontext.rule.name;
-		PayloadHelper.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
 

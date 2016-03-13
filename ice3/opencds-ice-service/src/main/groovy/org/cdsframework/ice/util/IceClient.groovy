@@ -19,7 +19,7 @@ class IceClient {
 
 		def params = [
 			kmEvaluationRequest:[scopingEntityId: 'org.nyc.cir', businessId: 'ICE', version: '1.1.0'],
-			specifiedTime: '2011-11-01'
+			specifiedTime: '2016-03-01'
 		]
 		def params1_0_0 = [
 			kmEvaluationRequest:[scopingEntityId: 'org.nyc.cir', businessId: 'ICE', version: '1.0.0'],
