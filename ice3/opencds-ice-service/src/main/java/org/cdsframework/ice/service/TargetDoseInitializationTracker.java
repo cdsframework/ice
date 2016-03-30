@@ -187,8 +187,8 @@ public class TargetDoseInitializationTracker {
 	}
 	
 	
-	private boolean atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(SubstanceAdministrationEvent sae, 
-		TargetSeries targetSeries, Vaccine vaccine) {
+	private boolean atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(SubstanceAdministrationEvent sae, TargetSeries targetSeries, 
+		Vaccine vaccine) {
 		
 		if (vaccine == null || sae == null || targetSeries == null) {
 			return false;
