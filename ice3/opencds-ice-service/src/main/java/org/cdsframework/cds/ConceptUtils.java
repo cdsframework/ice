@@ -1,10 +1,51 @@
-package org.cdsframework.ice.util;
+package org.cdsframework.cds;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class ConceptUtils {
 
+	public static final String _attributeNamingConvention = "[a-zA-Z0-9_\\/\\.\\- ]+";	
+	private static Log logger = LogFactory.getLog(ConceptUtils.class);	
 	
+	
+	/**
+	 * Return a modified String of the argument supplied as the attribute name which conforms to the required naming convention ([a-zA-Z0-9_\\.\\- ]) by stripping out all
+	 * spaces, tabs, line feeds, newline and carriage return characters. If an argument is such that it cannot be modified, then throw an IllegalArgumentException.
+	 * @param pAttributeName
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public static String modifyAttributeNameToConformToRequiredNamingConvention(String pAttributeName) 
+		throws IllegalArgumentException {
+		
+		String _METHODNAME = "modifyAttributeNameToConformToRequiredNamingConvention(): ";
+		if (! attributeNameConformsToRequiredNamingConvention(pAttributeName)) {
+			String lErrStr = "argument \"" + pAttributeName + "\"  contains invalid characters; must conform to " + _attributeNamingConvention;
+			logger.info(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
+		
+		String lAttributeName = pAttributeName;
+		lAttributeName.replaceAll("[ \t\n\f\r]", "_");
+		return lAttributeName;
+	}
+	
+	
+	public static boolean attributeNameConformsToRequiredNamingConvention(String pAttributeName) {
+
+		if (pAttributeName == null) {
+			return false;
+		}
+		if (! pAttributeName.matches(_attributeNamingConvention)) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+
 	/**
 	 * Checks to make sure that the schema CD element is populated with at least the code and codeSystem attributes.
 	 * @param CD CD element

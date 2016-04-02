@@ -183,13 +183,13 @@ public class Schedule {
 		}
 
 		LocallyCodedCdsListItem lVaccineCdsItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().
-			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, new CdsConcept(openCdsConceptValue)); 
+			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.OPENCDS, new CdsConcept(openCdsConceptValue)); 
 		if (lVaccineCdsItem == null) {
 			return null;
 		}
 		
 		// Supporting data restrictions ensure all of the values are non-null
-		LocallyCodedVaccineItem lcvi = this.iceSupportingDataConfiguration.getSupportedVaccines().getVaccineItem(lVaccineCdsItem.getCdsListName());
+		LocallyCodedVaccineItem lcvi = this.iceSupportingDataConfiguration.getSupportedVaccines().getVaccineItem(lVaccineCdsItem.getCdsListItemName());
 		if (lcvi == null) {
 			return null;
 		}

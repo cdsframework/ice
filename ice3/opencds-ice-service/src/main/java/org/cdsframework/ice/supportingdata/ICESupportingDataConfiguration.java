@@ -41,14 +41,14 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
-import org.cdsframework.ice.service.RecommendationStatus;
 import org.cdsframework.ice.service.DoseStatus;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
-import org.cdsframework.ice.util.ConceptUtils;
+import org.cdsframework.ice.service.RecommendationStatus;
 import org.cdsframework.ice.util.XMLSupportingDataFilenameFilterImpl;
 import org.cdsframework.util.support.data.cds.list.CdsListItem;
 import org.cdsframework.util.support.data.cds.list.CdsListItemConceptMapping;
@@ -828,22 +828,9 @@ public class ICESupportingDataConfiguration {
 			}
 
 			// Priority
-			List<CD> lRelatedVaccines = pIceVaccineGroupSpecification.getRelatedVaccines();
 			lDebugStrb += "\ngetPriority(): " + pIceVaccineGroupSpecification.getPriority();
 
-			// Related Vaccines
-			lDebugStrb += "\ngetRelatedVaccines(): ";
-			if (lRelatedVaccines != null) {
-				i=1;
-				for (CD lRelatedVaccine : lRelatedVaccines) {
-					lDebugStrb += "\n" + i + ") " + ConceptUtils.toStringCD(lRelatedVaccine);
-					i++;
-				}
-			}
-			else {
-				lDebugStrb += "\n\tNo related vaccines specified";
-			}
-
+			
 			// Disease Immunities
 			List<CD> lDiseaseImmunities = pIceVaccineGroupSpecification.getDiseaseImmunities();
 			lDebugStrb += "\ngetDiseaseImmunities(): ";

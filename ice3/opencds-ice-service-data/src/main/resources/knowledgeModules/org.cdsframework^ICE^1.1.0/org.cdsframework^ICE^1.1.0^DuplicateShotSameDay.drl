@@ -156,7 +156,7 @@ rule "Duplicate Shots/Same Day Overview Rule #4-DTP-Pertussis: If both shots are
 	salience 10
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, vaccineComponent.isUnspecifiedFormulation() == true,
-			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.033.9", associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT_DTP")
+			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.033.9", associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200")
 		not TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false, associatedTargetSeries == $td.associatedTargetSeries)
 		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID || status == DoseStatus.ACCEPTED, 
 			associatedTargetSeries == $td.associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == true, 
@@ -199,7 +199,7 @@ rule "Duplicate Shots/Same Day non-DTP Rule 5a: non-DTP shots; set the 2nd shot 
 	auto-focus true
 	salience 10
 	when	
-		eval($td.getAssociatedTargetSeries().getVaccineGroup() != "VACCINE_GROUP_CONCEPT_DTP" && 
+		eval($td.getAssociatedTargetSeries().getVaccineGroup() != "VACCINE_GROUP_CONCEPT.200" && 
 			$td.getAssociatedTargetSeries().getSeriesRules().isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() == true && 
 			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().size() == $td.getVaccineComponent().getAllDiseasesTargetedForImmunity().size() &&
 			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().containsAll($td.getVaccineComponent().getAllDiseasesTargetedForImmunity()))
@@ -237,7 +237,7 @@ rule "Duplicate Shots/Same Day DTP Rule 5a: If one DTP shot is pertussis-contain
 	auto-focus true
 	salience 10
 	when	
-		eval($td.getAssociatedTargetSeries().getVaccineGroup() == "VACCINE_GROUP_CONCEPT_DTP" && 
+		eval($td.getAssociatedTargetSeries().getVaccineGroup() == "VACCINE_GROUP_CONCEPT.200" && 
 			$td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && 
 			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9"))
 	then
@@ -264,7 +264,7 @@ rule "Duplicate Shot/Same Day DTP Rule 5b: If neither shot contains pertussis or
 	auto-focus true
 	salience 10
 	when
-		eval($td.getAssociatedTargetSeries().getVaccineGroup() == "VACCINE_GROUP_CONCEPT_DTP" && 
+		eval($td.getAssociatedTargetSeries().getVaccineGroup() == "VACCINE_GROUP_CONCEPT.200" && 
 			($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && 
 			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") || 
 			! $td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") &&

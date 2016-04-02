@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    /**
+     * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Contributions by HLN Consulting, LLC
+     *
+     * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+     * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+     * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+     * details.
+     *
+     * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+     * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+     * limitation, and warranty) complete irrevocable access and rights to this project.
+     *
+     * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+     *
+     * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+     * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+     * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+     * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+     * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     *
+     * For more information about this software, see http://www.hln.com/ice or send
+     * correspondence to ice@hln.com.
+     */
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:sc="org.opencds.term.supportedConcepts" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes">
+    <xs:import namespace="org.opencds.term.supportedConcepts" schemaLocation="supportedConceptType.xsd"/>
+    <xs:import namespace="org.opencds.vmr.v1_0.schema.datatypes" schemaLocation="http://cds.hln.com/cdsframework/schema/datatypes.xsd"/>
+    <xs:element name="specificationNotes" type="xs:string"/>
+    <xs:element name="membersForCodeSystem">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="CD" type="dt:CD" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="codeSystem" use="required" type="xs:string"/>
+            <xs:attribute name="codeSystemName" use="required" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="OpenCdsConceptMappingSpecificationFile">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="specificationNotes"/>
+                <xs:element name="openCdsConcept" type="sc:openCdsConcept"/>
+                <xs:element name="conceptDeterminationMethod" type="sc:openCdsConcept" minOccurs="1" maxOccurs="1"/>
+                <xs:element ref="membersForCodeSystem"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <!-- <xs:element name="OpenCdsConceptMappingSpecificationFile" type="oc:OpenCdsConceptMappingSpecificationFile"/> -->
+</xs:schema>

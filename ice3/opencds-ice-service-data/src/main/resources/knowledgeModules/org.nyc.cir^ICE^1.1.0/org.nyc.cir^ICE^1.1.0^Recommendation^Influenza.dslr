@@ -56,7 +56,7 @@ rule "Influenza: Manually Set Not To Take Live Virus Intervals into Consideratio
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_INFLUENZA"	
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.800"	
 	then
 		Mark that the Recommendation for Series $targetSeries must not take Live Virus Interval into account
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries

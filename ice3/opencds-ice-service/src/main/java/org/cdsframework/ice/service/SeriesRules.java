@@ -255,7 +255,6 @@ public class SeriesRules {
 
 		String _METHODNAME = "isAllowableVaccineForDoseRule(): ";
 		if (seriesDoseRules == null || v == null) {
-			logger.debug(_METHODNAME + "here-2");
 			return false;
 		}
 

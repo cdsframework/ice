@@ -280,8 +280,8 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries Custom Rules Invoca
 		$s : SeriesRules()
 	then
 		String _RULENAME = kcontext.rule.name;
-		setFocus("customCandidateSeriesIdentificationRule");
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Invoke Custom CandidateSeriesIdentificationRule for SeriesRules: " + $s.toString());
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Invoke Custom CandidateSeriesIdentificationRule for SeriesRules: " + $s.getSeriesName());
+		setFocus("customCandidateSeriesIdentificationRule");		
 end
 
 
@@ -470,7 +470,8 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Non-Seasonal* Targ
 			insert(initializedTargetDose);
 		}
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");		
 end
 
 
@@ -498,7 +499,8 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Seasonal* TargetSe
 			insert(initializedTargetDose);
 		}
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);	
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");	
 end
 
 ///////// ***
@@ -532,7 +534,8 @@ rule "CandidateDosesIdentification: Initialize Outlier TargetDose into Existing 
 			insert(initializedTargetDose);
 		}
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed; TargetSeries " + $ts);	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);	
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed; TargetSeries " + $ts);	
 end
 
 
@@ -1153,8 +1156,8 @@ end
 ///////// ***
 rule "SeriesSelection: Default Series Selection Preprocess rule: invoke custom rules" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	no-loop true
+	// activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
+	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS) 
 	then
@@ -1173,7 +1176,7 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	dialect "mvel"
 	salience 2000
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	no-loop true
+	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
@@ -1184,7 +1187,7 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 		String _RULENAME = kcontext.rule.name;
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", $ts.targetSeason.fullySpecifiedSeasonEndDate.toDate());
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: patientAgeTimeOfInterest set to season end date: " + patientAgeTimeOfInterest);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: patientAgeTimeOfInterest set to season end date: " + $ts.targetSeason.fullySpecifiedSeasonEndDate.toDate());
 		update($tss);
 		setFocus("customSeriesSelectionRules");
 end
@@ -1197,7 +1200,7 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	dialect "mvel"
 	salience 2000
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	no-loop true
+	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
@@ -1208,7 +1211,7 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 		String _RULENAME = kcontext.rule.name;	
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", $ts.lastShotAdministeredInSeries.administrationDate);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: patientAgeTimeOfInterest set to last shot date in series: " + patientAgeTimeOfInterest);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: patientAgeTimeOfInterest set to last shot date in series: " + $ts.lastShotAdministeredInSeries.administrationDate);
 		update($tss);
 		setFocus("customSeriesSelectionRules");
 end
@@ -1221,7 +1224,7 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	dialect "mvel"
 	salience 2500
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	no-loop true
+	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
@@ -1232,7 +1235,7 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 		String _RULENAME = kcontext.rule.name;
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: patientAgeTimeOfInterest set to execution time: " + patientAgeTimeOfInterest +"; evalTime is " + evalTime);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: patientAgeTimeOfInterest set to execution time: " + evalTime);
 		update($tss);
 		setFocus("customSeriesSelectionRules");
 end
@@ -1955,7 +1958,8 @@ rule "ProcessResults: Return Evaluations" ruleflow-group "ProcessResults"
 		$evalTime: EvalTime()
 	then
 		String _RULENAME = kcontext.rule.name;
-		PayloadHelper.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, $sae, $vaccineGroup, $td);
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, $sae, $vaccineGroup, $td);
 		$sae.setToBeReturned(true);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
@@ -2007,7 +2011,8 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series" ruleflow-gr
 		$evalTime: EvalTime()
 	then
 		String _RULENAME = kcontext.rule.name;
-		PayloadHelper.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
 
@@ -2024,7 +2029,8 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 		not TargetSeries(vaccineGroup == $vg, targetSeason != null,	targetSeason.fullySpecifiedSeasonStartDate.isAfter($tseasonStartDate)) 
 	then
 		String _RULENAME = kcontext.rule.name;
-		PayloadHelper.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
 

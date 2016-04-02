@@ -5,6 +5,7 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.cds.ConceptUtils;
 import org.opencds.common.exceptions.ImproperUsageException;
 
 public abstract class LocallyCodedCdsItem {
@@ -31,7 +32,7 @@ public abstract class LocallyCodedCdsItem {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
-		if (! pCdsItemName.equals(LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention(pCdsItemName))) {
+		if (! pCdsItemName.equals(ConceptUtils.modifyAttributeNameToConformToRequiredNamingConvention(pCdsItemName))) {
 			String lErrStr = "CdsItemName supplied \"" + pCdsItemName + "\" does not follow contains invalid characters; must conform to attribute naming conventions set forth by LocallyCodedCdsListItems";
 			logger.warn(_METHODNAME + lErrStr);
 			throw new IllegalArgumentException(_METHODNAME);

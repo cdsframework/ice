@@ -119,11 +119,10 @@ public class PayloadHelper {
 		AdministrableSubstance lAS = new AdministrableSubstance();
 		lAS.setId(ICELogicHelper.generateUniqueString());
 		CD asSubstanceCode = new CD();
-		/////// SupportedVaccineConcept lSVC = SupportedVaccineConcept.getSupportedVaccineConceptByConceptCode(d.getVaccineComponent().getVaccineConcept().getOpenCdsConceptCode());
-		LocallyCodedCdsListItem lSVC = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, d.getVaccineComponent().getCdsConcept());
-		/////// LocallyCodedCdsListItem lSVC = this.backingSchedule.getSupportedCdsLists().getCdsListItem(d.getVaccineComponent().getCdsListItemName());
+		// Get the associated vaccine concept associated with the TargetDose
+		LocallyCodedCdsListItem lSVC = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.OPENCDS, d.getVaccineComponent().getCdsConcept());
 		if (lSVC == null) {
-			String lErrStr = "LocallyCodedCdsListItem not found for specified TargetDose; this should not occur";
+			String lErrStr = "LocallyCodedCdsListItem Vaccine not found for specified TargetDose; this should not occur";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ICECoreError(lErrStr);
 		}
@@ -395,14 +394,14 @@ public class PayloadHelper {
 
 		Vaccine lRecommendedVaccine = pTS.getRecommendationVaccine();
 		if (lRecommendedVaccine != null && atVaccineConceptLevelIfSpecificVaccineRecommended == true) {
-			LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE, lRecommendedVaccine.getCdsConcept());
+			LocallyCodedCdsListItem sv = this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsConcepts().getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.OPENCDS, lRecommendedVaccine.getCdsConcept());
 			/////// LocallyCodedCdsListItem sv = this.backingSchedule.getSupportedCdsLists().getCdsListItem(lRecommendedVaccine.getCdsListItemName());
 			if (sv != null) {
 				// A specific vaccine was recommended; indicate the vaccine recommended instead of othe vaccine group
 				return sv.getCdsListItemCD();
 			}
 			else {
-				logger.warn(_METHODNAME + "A vaccine was recommended but no corresponding SupportedVaccineConcept exists; cannot recommend by vaccine");
+				logger.warn(_METHODNAME + "A vaccine was recommended but no corresponding SupportedVaccineConcept exists; cannot recommend by vaccine; vaccine: " + lRecommendedVaccine);
 			}
 		}
 

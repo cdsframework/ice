@@ -68,7 +68,7 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >
 			- the dose number in the series is == 2
 			- make note of the date this shot was administered as $dtAdministrationDatePrev
 		There is a Series $targetSeries that contains the shot $dose3
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_POLIO"
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the series is not complete
 			- the series also contains the dose $prevdose2
 			- the number of doses administered is == 3
@@ -100,7 +100,7 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are OPV, patient >
 			- the dose number in the series is == 2
 			- make note of the date this shot was administered as $dtAdministrationDatePrev
 		There is a Series $targetSeries that contains the shot $dose3
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_POLIO"
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the series is not complete
 			- the series also contains the dose $prevdose2
 			- the number of doses administered is == 3
@@ -124,7 +124,7 @@ rule "Polio: Modify DoseRule4 parameters for TargetDose 4 if administered before
 			- the administration date of the shot is < "01-Jan-2010"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 		There is a Series $targetSeries that contains the shot $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_POLIO"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 	then
 		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
 		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "122d"
@@ -153,7 +153,7 @@ rule "Polio: Create a 5th dose for the series if born >= 1/1/2006 and 4 doses ad
 			- the administration date of the shot is < "01-Jan-2010"
 			- make note of the date this shot was administered as $dtAdministrationDate
 		There is a Series $targetSeries
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_POLIO"
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the number of doses required to complete this Series is != 5
 			- the series contains the dose $dose4
 			- the number of doses administered is == 4

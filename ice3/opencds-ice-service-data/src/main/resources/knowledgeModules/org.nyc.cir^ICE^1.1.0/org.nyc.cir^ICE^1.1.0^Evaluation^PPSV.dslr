@@ -60,7 +60,7 @@ rule "Evaluate PPSV Shot as Accepted if given before absolute minimum age of fir
 			- the dose number in the series is == 1
 			- make note of the Date this Shot was Administered as $assign_administrationDate
 		There is a Series $targetSeries that contains the shot $currentShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PPSV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.720"
 			- make note of the Absolute Minimum Age for Dose 1 in this Series as $assign_strTimePeriod
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -86,7 +86,7 @@ when
 		- the administered shot number is == $nAdministeredShotNumber-1
 		- make note of the date this shot was administered as $administrationPPSVDatePrev
 	There is a Series $targetSeries that contains the shot $currentShot
-		- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PPSV"
+		- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.720"
 		- the Series also contains the shot $prevShot
 	Confirm elapsed time between $administrationPPSVDatePrev and $administrationPPSVDate < "5y-4d"
 then
@@ -108,9 +108,9 @@ rule "PPSV: Evaluate PPSV Shot as Invalid if patient <19yrs at time of first sho
 			- make note of the date this Shot was Administered as $administrationPCVDate
 			- the administration date of the shot is < $administrationPPSVDate
 		There is a Series $targetSeries that contains the shot $currentShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PPSV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.720"
 		There is a Series $pcvSeries that contains the shot $pcvShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $administrationPCVDate < "19y" && elapsed time between $administrationPPSVDate and $administrationPCVDate < "52d"	
@@ -132,9 +132,9 @@ end
 			- make note of the date this Shot was Administered as $administrationPCVDate
 			- the administration date of the Shot is < $administrationPPSVDate 				
 		There is a Series $targetSeries that contains the shot $ppsvShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PPSV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.720"
 		There is a Series $pcvSeries that contains the shot $pcvShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT_PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $administrationPCVDate >= "19y" && elapsed time between $administrationPCVDate and $administrationPPSVDate < "52d"
