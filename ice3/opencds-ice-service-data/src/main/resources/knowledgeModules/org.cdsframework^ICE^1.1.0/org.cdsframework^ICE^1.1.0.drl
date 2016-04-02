@@ -466,11 +466,12 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Non-Seasonal* Targ
 	then
 		String _RULENAME = kcontext.rule.name;
 		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
-		//for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule)) {
-			//insert(initializedTargetDose);
-		//}
+		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule)) {
+			insert(initializedTargetDose);
+		}
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");		
 end
 
 
@@ -498,7 +499,8 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Seasonal* TargetSe
 			insert(initializedTargetDose);
 		}
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);	
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");	
 end
 
 ///////// ***
@@ -532,7 +534,8 @@ rule "CandidateDosesIdentification: Initialize Outlier TargetDose into Existing 
 			insert(initializedTargetDose);
 		}
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed; TargetSeries " + $ts);	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);	
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed; TargetSeries " + $ts);	
 end
 
 
