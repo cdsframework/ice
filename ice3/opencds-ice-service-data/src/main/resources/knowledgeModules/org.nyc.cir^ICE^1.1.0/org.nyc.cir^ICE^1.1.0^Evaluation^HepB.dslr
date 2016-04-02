@@ -95,7 +95,7 @@ rule "HepB: Evaluate the Minimum Interval Between Doses 1 and 3" ruleflow-group 
 			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series also contains the Dose $previousDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEPB"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
 		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "108d"
 	then
 		Mark the shot $currentDose as Invalid for this Series due to "Below Minimum Interval"
@@ -128,7 +128,7 @@ rule "HepB: Enough is Enough Rule" ruleflow-group "HistoryEvaluation"
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series also contains the Dose $doseTwo
 			- the Series also contains the Dose $administeredShotThree 
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEPB"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
 			- the number of doses required to complete this series is >= $nDoseNumber
 			- make note of the absolute minimum interval for dose 2 in this series as $minIntervalDoseTwo
 			- make note of the absolute minimum age for dose 3 in this series as $minimumAgeDoseCurrentDose
@@ -159,7 +159,7 @@ rule "HepB: Mark Series Complete if Two Adult Doses Given to Patient between >= 
 			- make note of the date this shot was administered as $dtAdministrationDateDoseOne
 		There is a Series $targetSeries that contains the Dose $doseTwo
 			- the Series also contains the Dose $doseOne
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEPB"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
 		Confirm elapsed time between $dtAdministrationDateDoseOne and $dtAdministrationDateDoseTwo >= "4m-4d"
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateDoseOne >= 11 DurationType.YEARS
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateDoseOne < 16 DurationType.YEARS

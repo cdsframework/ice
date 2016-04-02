@@ -61,9 +61,9 @@ rule "PCV: Evaluate PCV Shot as Invalid if patient <19yrs and <absolute minimum 
 			- make note of the date this Shot was Administered as $administrationPPSVDate
 			- the administration date of the shot is <= $administrationPCVDate
 		There is a Series $targetSeries that contains the shot $currentShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 		There is a Series $ppsvSeries that contains the shot $ppsvShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $administrationPPSVDate < "19y" && elapsed time between $administrationPCVDate and $administrationPPSVDate < "52d"
@@ -85,9 +85,9 @@ end
 			- make note of the date this Shot was Administered as $administrationPPSVDate
 			- the administration date of the Shot is <= $administrationPCVDate 				
 		There is a Series $targetSeries that contains the shot $pcvShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 		There is a Series $ppsvSeries that contains the shot $ppsvShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PPSV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.720"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $administrationPPSVDate >= "19y" && elapsed time between $administrationPCVDate and $administrationPPSVDate < "361d" 
@@ -115,7 +115,7 @@ rule "PCV: Evaluate PCV Shot as Valid if Patient < 5yrs, interval is >= 52 days 
 			- the administered shot number is == $nShotNumber-1
 			- make note of the Date this Shot was Administered as $previousAdministrationDate
 		There is a Series $targetSeries that contains the shot $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Series also contains the shot $previousShot
 			- the Series is Complete
@@ -148,7 +148,7 @@ rule "PCV: Evaluate PCV Shot as Invalid if Patient < 5yrs, interval is < 52 days
 			- the administered shot number is == $nShotNumber-1
 			- make note of the Date this Shot was Administered as $previousAdministrationDate
 		There is a Series $targetSeries that contains the shot $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Series also contains the shot $previousShot
 			- the Series is Complete
@@ -176,7 +176,7 @@ rule "PCV: Evaluate PCV Shot As Accepted If Patient >=5 Yrs and Series Not Compl
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the target dose number for this shot as $assign_nDoseNumber
 		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is < $assign_nNumberOfDosesRequired
@@ -201,7 +201,7 @@ rule "PCV: Cancel Extra Dose Rule for PCV Shot if Patient >=5 Yrs and Series Not
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the target dose number for this shot as $assign_nDoseNumber
 		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is < $assign_nNumberOfDosesRequired
@@ -224,7 +224,7 @@ rule "PCV: Exception 1: Evaluate PCV Shot as Below Minimum Age for Final Dose of
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- the Dose Number in the Series is == 4			
 		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Number of Doses Administered before $dateOfInterest is == 0			
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "361d"	
@@ -246,7 +246,7 @@ rule "PCV: Exception 1: Set Series Dose Number to 2 in 4-Dose PCV Series if No S
 			- make note of the date as $assign_dtDateAtAge when the patient is "7m" of age
 		There is a Series $targetSeries
 			- the Number of Administered Shots is == 0
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
@@ -268,7 +268,7 @@ rule "PCV: Exception 1: Skip Dose Number to 2 in 4-Dose PCV Series for Patient B
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "7m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "12m"
 	then
@@ -288,7 +288,7 @@ rule "PCV: Exception 2: Set Series Dose Number to 3 in 4-Dose PCV Series if No S
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Number of Administered Shots is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"	
@@ -312,7 +312,7 @@ rule "PCV: Exception 2: Skip Dose Number to 3 in 4-Dose PCV Series if Patient Be
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Number of Doses Administered before $dateOfInterest is < 2			
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "12m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "24m"
@@ -337,7 +337,7 @@ rule "PCV: Exception 2: Skip Dose Number to 4 in 4-Dose PCV Series if Patient Be
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Number of Doses Administered before $dateOfInterest is == 2
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "12m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "24m"
@@ -358,7 +358,7 @@ rule "PCV: Exception 3: Set Series Dose Number to 4 in 4-Dose PCV Series if No S
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 			- the Number of Administered Shots is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "24m" && elapsed time between $dtBirthDate and evalTime < "5y"	
@@ -381,7 +381,7 @@ rule "PCV: Exception 3: Skip Dose Number to 4 in 4-Dose PCV Series for Patient >
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PCV"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.700"
 			- the name of the Series is "PCV4DoseSeries"
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "24m"
 	then

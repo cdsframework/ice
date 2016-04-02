@@ -52,7 +52,7 @@ rule "MMR: Recommend conditional/high risk if born prior to 1/1/1957 and series 
 	agenda-group "customRecommendationRule"
     when
         There is a Series $targetSeries that needs forecasting
-        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MMR"
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
         	- the Series is not complete
         The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- the patient's birthdate is < "01-Jan-1957"

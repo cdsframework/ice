@@ -53,7 +53,7 @@ rule "Rotavirus: Not Recommended When >= 105 days and No Valid Shots" ruleflow-g
 	activation-group "recommendationAgeCheck"
     when
         There is a Series $targetSeries that needs forecasting
-        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.ROTAVIRUS"
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.820"
         	- the Series is not complete
         	- the effective dose number in the Series is == 1
         The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -74,7 +74,7 @@ rule "Rotavirus: Series is Complete if Over 8 Years of Age or Will Be as of the 
 	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.ROTAVIRUS"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.820"
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
 		The Patient information $patientInfo must be known to complete writing this rule

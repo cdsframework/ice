@@ -55,7 +55,7 @@ rule "Rotavirus: Mark Dose as Accepted if Patient Greater Than 8 Months of Age" 
 		There is an administered shot $currentDose that needs to be evaluated
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 		There is a series $targetSeries that contains the dose $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.ROTAVIRUS"	
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.820"	
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateCurrentDose > "8m"

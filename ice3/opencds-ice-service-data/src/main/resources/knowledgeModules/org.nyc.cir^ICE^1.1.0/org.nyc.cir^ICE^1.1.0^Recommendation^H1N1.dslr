@@ -58,7 +58,7 @@ rule "H1N1: Post Recommendation Check: Recommend Not Recommended and Vaccine Gro
 	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.H1N1"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.890"
 			- the Series is a Seasonal Series
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
@@ -80,7 +80,7 @@ rule "H1N1: Recommend Not Recommended with reason of Complete if Series is Compl
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.H1N1"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.890"
 			- the Series is Complete
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
@@ -96,7 +96,7 @@ rule "H1N1: Recommend Not Recommended with reason of Vaccine Group No Longer Rec
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.H1N1"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.890"
 			- the Series is Not Complete
 			- make note of the Season End Date as $seasonEndDate
 		The Date evalTime is after $seasonEndDate
