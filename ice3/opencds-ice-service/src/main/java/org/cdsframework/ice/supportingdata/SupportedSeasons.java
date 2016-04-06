@@ -219,7 +219,7 @@ public class SupportedSeasons implements SupportingData {
 			LocalDate lJodaFullySpecifiedSeasonEndDate = LocalDate.fromDateFields(pIceSeasonSpecificationFile.getEndDate());
 			Season lS = new Season(lSeasonCode, lcvgi.getCdsItemName(), true, 
 					lJodaFullySpecifiedSeasonStartDate.getMonthOfYear(), lJodaFullySpecifiedSeasonStartDate.getDayOfMonth(), lJodaFullySpecifiedSeasonStartDate.getYear(), 
-					lJodaFullySpecifiedSeasonEndDate.getMonthOfYear(), lJodaFullySpecifiedSeasonStartDate.getDayOfMonth(), lJodaFullySpecifiedSeasonEndDate.getYear());
+					lJodaFullySpecifiedSeasonEndDate.getMonthOfYear(), lJodaFullySpecifiedSeasonEndDate.getDayOfMonth(), lJodaFullySpecifiedSeasonEndDate.getYear());
 			lSeasonsListForVG.add(lS);
 			this.cdsListItemNameToSeasonItem.put(lSeasonCode, new LocallyCodedSeasonItem(lSeasonCode, pIceSeasonSpecificationFile.getCdsVersions(), lS));
 			this.vaccineGroupItemToSeasons.put(lcvgi, lSeasonsListForVG);

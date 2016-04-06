@@ -37,6 +37,8 @@ public class DiseaseImmunity {
 	private String disease;
 	private Date dateOfImmunity;
 	private String immunityReason;
+	private String evaluationReasonResult;
+	private String recommendationReasonResult;
 	
 	private static Log logger = LogFactory.getLog(DiseaseImmunity.class);
 	
@@ -53,17 +55,27 @@ public class DiseaseImmunity {
 		disease = pDiseaseImmunityObtained;
 	}
 
-	public DiseaseImmunity(String pDisease, Date pDateOfImmunity) {
-		
+	public DiseaseImmunity(String pDisease, Date pDateOfImmunity) {		
 		this(pDisease);
 		dateOfImmunity = pDateOfImmunity;
 	}
 
-	public DiseaseImmunity(String pDisease, Date pDateOfImmunity, String pReason) {
-		
+	public DiseaseImmunity(String pDisease, Date pDateOfImmunity, String pReason) {		
 		this(pDisease);
 		dateOfImmunity = pDateOfImmunity;
 		immunityReason = pReason;
+	}
+
+	public DiseaseImmunity(String pDisease, Date pDateOfImmunity, String pEvaluationReasonResult, String pRecommendationReasonResult) {		
+		this(pDisease, pDateOfImmunity);
+		evaluationReasonResult = pEvaluationReasonResult;
+		recommendationReasonResult = pRecommendationReasonResult;
+	}
+	
+	public DiseaseImmunity(String pDisease, Date pDateOfImmunity, String pImmunityReason, String pEvaluationReasonResult, String pRecommendationReasonResult) {		
+		this(pDisease, pDateOfImmunity, pImmunityReason);
+		evaluationReasonResult = pEvaluationReasonResult;
+		recommendationReasonResult = pRecommendationReasonResult;
 	}
 	
 	public String getDisease() {
@@ -77,6 +89,14 @@ public class DiseaseImmunity {
 	
 	public String getImmunityReason() {
 		return immunityReason;
+	}
+
+	public String getEvaluationReasonResult() {
+		return evaluationReasonResult;
+	}
+
+	public String getRecommendationReasonResult() {
+		return recommendationReasonResult;
 	}
 		
 }
