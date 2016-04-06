@@ -720,7 +720,7 @@ rule "HistoryEvaluation: Check if Shot should be marked Accepted and Series Comp
 		Iterator dilIter = $diseaseImmunityList.iterator();
 		while (dilIter.hasNext()) {
 			DiseaseImmunity diConsequence = (DiseaseImmunity) dilIter.next();
-			$targetDose.addAcceptedReason(diConsequence.getImmunityReason());				
+			$targetDose.addAcceptedReason(diConsequence.getEvaluationReasonResult());				
 		}
 		modify ($targetDose) { setStatus(DoseStatus.EVALUATION_COMPLETE) } ///// Note for docs: marking this dose valid, so we mark evaluation complete override all other "negative check" rules
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $targetDose.toString() + " in TargetSeries " + $targetSeries .getSeriesName());
@@ -1036,7 +1036,8 @@ rule "HistoryEvaluation: Set Immunity Flag in Series to True if Immune to All Di
 		$ts : TargetSeries($diseasesSupportedByThisSeries : diseasesSupportedByThisSeries, isImmunityToAllDiseasesRecorded() == false)
 		not TargetDose(hasBeenEvaluated == false) from $ts.targetDoses
 		$diseaseImmunityList : List(size == $diseasesSupportedByThisSeries.size()) from 
-			accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, $r : immunityReason, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
+			// accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, $r : immunityReason, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
+			accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($ts) {
@@ -1895,7 +1896,8 @@ rule "RecommendNotRecommendedIfImmuneToAllDiseasesInSeries" ruleflow-group "Reco
 		$targetSeries : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, $diseasesSupportedByThisSeries : diseasesSupportedByThisSeries)
 		do[invokeCustomRecommendationRules]
 		$diseaseImmunityList : List(size == $diseasesSupportedByThisSeries.size()) from 
-			accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, $r : immunityReason, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
+			// accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, $r : immunityReason, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
+			accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 	then
 		String _RULENAME = drools.getRule().getName();
 		Recommendation $recommendation = new Recommendation($targetSeries); 
@@ -1903,7 +1905,7 @@ rule "RecommendNotRecommendedIfImmuneToAllDiseasesInSeries" ruleflow-group "Reco
 		Iterator dilIter = $diseaseImmunityList.iterator();
 		while (dilIter.hasNext()) {	// Just take the first available immunity reason
 			DiseaseImmunity diConsequence = (DiseaseImmunity) dilIter.next();
-			String src = diConsequence.getImmunityReason();
+			String src = diConsequence.getRecommendationReasonResult();
 			if (src != null) {
 				$recommendation.setRecommendationReason(src);
 				break;				

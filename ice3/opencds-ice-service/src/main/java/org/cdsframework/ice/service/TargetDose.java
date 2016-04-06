@@ -367,8 +367,9 @@ public class TargetDose {
 	public String toString() {
 		
 		String s = "TargetDose [uniqueId=" + uniqueId + ", doseId=" + doseId + ", administeredShotNumber=" + administeredShotNumberInSeries + 
-				", doseNumber=" + doseNumberInSeries + ", vaccine=" + administeredVaccine + ", vaccineComponent=" + vaccineComponent + 
-				", administrationDate=" + administrationDate + ", status=" + status + ", isValid=" + isValid;
+				", doseNumber=" + doseNumberInSeries + ", vaccine=" + administeredVaccine.getCdsConceptName() + 
+				", vaccineComponent=" + vaccineComponent.getCdsConceptName() + ", administrationDate=" + administrationDate + ", status=" + status + 
+				", isValid=" + isValid;
 		int i=0;
 		for (String reason : validReasons) {
 			if (i == 0)
