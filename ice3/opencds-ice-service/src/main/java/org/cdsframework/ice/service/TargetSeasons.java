@@ -431,7 +431,7 @@ public class TargetSeasons {
 	 */
 	public void updateFullySpecifiedSeasonWithOffSeasonDates(Season pS) {
 		
-		if (pS.isDefaultSeason() == false) {
+		if (pS.isDefaultSeason() == true) {
 			return;
 		}
 		Season lMatchingSeason = getMatchingTargetSeason(pS);

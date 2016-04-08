@@ -49,7 +49,7 @@
     <xs:complexType name="vaccineSpecification">
         <xs:sequence>
             <xs:element name="vaccine" type="dt:CD" minOccurs="1" maxOccurs="1"/>
-            <xs:element name="vaccineGroup" type="dt:CD" minOccurs="1" maxOccurs="unbounded"/>		<!--  TODO: ?Remove?: This is not needed or used -->
+            <xs:element name="vaccineGroup" type="dt:CD" minOccurs="0" maxOccurs="unbounded"/>		<!--  TODO: ?Remove?: This is not currently used in any way though could be useful override -->
             <xs:element name="cdsVersion" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
             <xs:element ref="iv:unspecifiedFormulation" minOccurs="0" maxOccurs="1"/>
             <xs:element ref="iv:liveVirusVaccine" minOccurs="0" maxOccurs="1"/>

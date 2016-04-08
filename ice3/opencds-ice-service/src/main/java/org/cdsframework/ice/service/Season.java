@@ -1088,8 +1088,9 @@ public class Season {
 	
 	@Override
 	public String toString() {
-		return "Season [getSeasonName()=" + getSeasonName() + "getAssociatedVaccineGroup()="
-				+ getVaccineGroup() + ", isDefaultSeason()=" + isDefaultSeason() + 
+		return "Season [getSeasonName()=" + getSeasonName() + 
+				", getAssociatedVaccineGroup()=" + getVaccineGroup() + 
+				", isDefaultSeason()=" + isDefaultSeason() + 
 				", getSeasonStartMonth()=" + getSeasonStartMonth() + 
 				", getSeasonStartDay()=" + + getSeasonStartDay() +
 				", getSeasonStartYear()=" + getSeasonStartYear() + 
