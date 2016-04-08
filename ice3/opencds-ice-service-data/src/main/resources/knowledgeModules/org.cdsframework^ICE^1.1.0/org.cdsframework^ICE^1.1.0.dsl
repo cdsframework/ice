@@ -10,8 +10,8 @@
 
 [condition][]The [Pp]atient [Ii]nformation {assign_oEvaluatedPerson} must be known to complete writing this rule={assign_oEvaluatedPerson} : EvaluatedPerson()
 [condition][]- [Tt]he [Pp]atient's birthdate is {aOp}  {dtDate}=demographics.birthTime {aOp} {dtDate}
-[condition][]- [Tt]he [Pp]atient is [Ff]emale=demographics.gender.code == BaseDataPerson._GENDER_FEMALE.cdsListItemName
-[condition][]- [Tt]he [Pp]atient is [Mm]ale=demographics.gender.code == BaseDataPerson._GENDER_MALE.cdsListItemName
+[condition][]- [Tt]he [Pp]atient is [Ff]emale=demographics.gender.code != null, demographics.gender.equals(schedule.getSupportedCdsLists().getCdsListItem(BaseDataPerson._GENDER_FEMALE.cdsListItemName).getCdsListItemCD())
+[condition][]- [Tt]he [Pp]atient is [Mm]ale=demographics.gender.code != null, demographics.gender.equals(schedule.getSupportedCdsLists().getCdsListItem(BaseDataPerson._GENDER_MALE.cdsListItemName).getCdsListItemCD())
 [condition][]- [Mm]ake [Nn]ote of the [Pp]atient's birthdate as {assign_dtBirthDate}={assign_dtBirthDate} : demographics.birthTime
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate as {assign_dtDateAtAge} when the [Pp]atient is {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})} of [Aa]ge={assign_dtDateAtAge} : TimePeriod.addTimePeriod(demographics.birthTime, {sDuration})
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate as {assign_dtDateAtAge} when the [Pp]atient is {refer_oTimePeriod} of [Aa]ge={assign_dtDateAtAge} : TimePeriod.addTimePeriod(demographics.birthTime, {refer_oTimePeriod})
