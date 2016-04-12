@@ -1,0 +1,184 @@
+/**
+ * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+ package org.cdsframework.ice.v1_1_0
+
+import java.util.List
+import java.util.Set
+import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+expander ../org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
+
+//declare any global variables here
+global java.util.Date evalTime
+global org.drools.runtime.KnowledgeContext kcontext
+
+
+// Series complete with 3 doses if all administered doses are IPVs (CVX 10) or all administered doses are OPVs (CVX 02), and dose 3 was administered when the 
+// patient was >= 4 years and was administered at least 6 months - 4 days after the previous dose, then the series is complete with 3 doses.
+rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >= 4yrs when dose 3 administered, and dose 3 >= 6m-4d after previous dose" ruleflow-group "HistoryEvaluation" 
+	dialect "mvel"
+	agenda-group "postEvaluationCheck"
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		There is an Administered Shot $dose3
+			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
+			- the dose number in the series is == 3
+			- make note of the date this shot was administered as $dtAdministrationDate
+		There is an Administered Shot $prevdose2
+			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
+			- the dose number in the series is == 2
+			- make note of the date this shot was administered as $dtAdministrationDatePrev
+		There is a Series $targetSeries that contains the shot $dose3
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the series is not complete
+			- the series also contains the dose $prevdose2
+			- the number of doses administered is == 3
+		// SupportedVaccineConcept._IPV
+		Verify that the count of doses administered in Series $targetSeries with vaccine "ICE10" is == 3
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "4y" && elapsed time between $dtAdministrationDatePrev and $dtAdministrationDate >= "6m-4d"
+	then
+		Mark the Series $targetSeries Complete
+		Refresh all Facts in the Series $targetSeries for Evaluation
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Series complete with 3 doses if all administered doses are IPVs (CVX 10) or all administered doses are OPVs (CVX 02), and dose 3 was administered when the 
+// patient was >= 4 years and was administered at least 6 months - 4 days after the previous dose, then the series is complete with 3 doses.
+rule "Polio: Series is Complete if 3 prior doses, all 3 doses are OPV, patient >= 4yrs when dose 3 administered, and dose 3 >= 6m-4d after previous dose" ruleflow-group "HistoryEvaluation" 
+	dialect "mvel"
+	agenda-group "postEvaluationCheck"
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		There is an Administered Shot $dose3
+			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
+			- the dose number in the series is == 3
+			- make note of the date this shot was administered as $dtAdministrationDate
+		There is an Administered Shot $prevdose2
+			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
+			- the dose number in the series is == 2
+			- make note of the date this shot was administered as $dtAdministrationDatePrev
+		There is a Series $targetSeries that contains the shot $dose3
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the series is not complete
+			- the series also contains the dose $prevdose2
+			- the number of doses administered is == 3
+		// SupportedVaccineConcept._OPV
+		Verify that the count of doses administered in Series $targetSeries with vaccine "ICE02" is == 3
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "4y" && elapsed time between $dtAdministrationDatePrev and $dtAdministrationDate >= "6m-4d"
+	then
+		Mark the Series $targetSeries Complete
+		Refresh all Facts in the Series $targetSeries for Evaluation
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Polio: Modify DoseRule4 parameters for TargetDose 4 if administered before 1/1/2010" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	no-loop true
+	when
+		There is an Administered Shot $currentDose that needs to be evaluated
+			- the dose number in the series is == 4
+			- the administration date of the shot is < "01-Jan-2010"
+			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+		There is a Series $targetSeries that contains the shot $currentDose
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+	then
+		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
+		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "122d"
+		Set the Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "126d"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule4
+		Obtain the existing DoseRule for Dose Number 3 in the Series $targetSeries as $assign_oDoseRule3
+		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule3 to TimePeriod "24d"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule3 to TimePeriod "28d"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule3
+		Refresh all Facts in the Series $targetSeries for Evaluation
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries	
+end
+
+
+// Series complete with 5 doses:
+// For children born >= 1/1/2006, who received four doses before 1/1/2010 and before 4 years - 4 days of age, an additional dose (dose 5) is recommended 
+// at >= 4 years of age.  Recommended interval from dose 4 to dose 5 is 6 months; minimum interval (for evaluation) is 6 months minus 4 days.
+rule "Polio: Create a 5th dose for the series if born >= 1/1/2006 and 4 doses administered before 1/1/2010 and < 4y-4d age (and a 5th shot can be evaluated or recommended by separate rules)" ruleflow-group "HistoryEvaluation"
+	agenda-group "postEvaluationCheck"
+	no-loop true
+	when
+		There is an Administered Shot $dose4
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the dose number in the series is == 4
+			- the administration date of the shot is < "01-Jan-2010"
+			- make note of the date this shot was administered as $dtAdministrationDate
+		There is a Series $targetSeries
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the number of doses required to complete this Series is != 5
+			- the series contains the dose $dose4
+			- the number of doses administered is == 4
+			 -make note of the Allowable Vaccines for Dose 4 in the Series as $assign_oAllowableVaccines4
+			- make note of the Preferable Vaccines for Dose 4 in the Series as $assign_oPreferableVaccines4
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- the patient's birthdate is >= "01-Jan-2006"
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm Elapsed time between $dtBirthDate and $dtAdministrationDate < "4y-4d"
+	then
+		// Create the Dose 5 Rule
+		Create the next DoseRule as $assign_oDoseRule5 which may be added to the SeriesRules for Series $targetSeries
+		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule5 to TimePeriod "4y-4d"
+		Set the Earliest Recommended Age for DoseRule $assign_oDoseRule5 to TimePeriod "4y"
+		Set the list of Preferable Vaccines for DoseRule $assign_oDoseRule5 to $assign_oPreferableVaccines4 
+		Set the list of Allowable Vaccines for DoseRule $assign_oDoseRule5 to $assign_oAllowableVaccines4 
+		Add the new DoseRule $assign_oDoseRule5 to the SeriesRules for Series $targetSeries
+		//// Now add the intervals to the existing Dose 4 rule  
+		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
+		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule4 to TimePeriod "6m-4d"
+		Set the Earliest Recommended Interval for DoseRule $assign_oDoseRule4 to TimePeriod "6m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule4
+		Refresh all Facts in the Series $targetSeries for Evaluation
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+ 
