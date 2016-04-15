@@ -54,6 +54,23 @@ global org.drools.runtime.KnowledgeContext kcontext
 /*************************************************************************************************************************************************************************************
 If the patient has completed the primary DTP series (3-dose or 5-dose) but has not received a dose of pertussis at >= 7 years, then an adolescent Tdap (CVX 115) is needed.
 /************************************************************************************************************************************************************************************/
+rule "DTP(Any): Mark that dose of pertussis has not been administered for a shot if the shot is not valid"
+	agenda-group "customAnyRuleflowGroupRule"
+	auto-focus true
+	dialect "mvel"
+	when
+		There is an administered shot $shot
+			- that has already been evaluated and whose shot validity status is not DoseStatus.VALID
+			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
+			- the collection $collectionOfStrReasons does not contain "EVALUATION_REASON_CONCEPT.D_AND_T_INVALID/P_VALID"
+		There is an IceFact $iceFactFinding 
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has associated administered shot $shot
+	then
+		Retract IceFact $iceFactFinding from Working Memory
+		Log that this Dose Rule fired for the dose $shot
+end
+
 
 rule "DTP(Any): Note that Tdap needed if primary series complete and patient has _not_ received a dose of pertussis >= 7 years of age"
 	agenda-group "customAnyRuleflowGroupRule"

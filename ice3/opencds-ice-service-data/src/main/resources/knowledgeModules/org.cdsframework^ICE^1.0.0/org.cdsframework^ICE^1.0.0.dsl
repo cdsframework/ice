@@ -63,9 +63,12 @@
 [condition][]- [Tt]he [Dd]ose [Nn]umber in the [Ss]eries is one of {list_oDoseNumbers:([\\(]{1})([0-9\\.\\-_\\"\\,\\ \\(\\)]+)([\\)]{1})}=$assign_nDoseNumber : new Integer(getDoseNumberInSeries()).toString(), $assign_nDoseNumber in {list_oDoseNumbers} 
 [condition][]- [Tt]he [Dd]ose [Nn]umber in the [Ss]eries is one of {list_oDoseNumbers:([\\(]{1})[a-zA-Z0-9\\.\\_\\,\\\-\\+\\$\\ ]+([\\)]{1})}=$assign_nDoseNumber : new Integer(getDoseNumberInSeries()).toString(), $assign_nDoseNumber in {list_oDoseNumbers} 
 [condition][]- [Tt]he [Dd]ose [Nn]umber in the [Ss]eries is {aOp} {nDoseNumber}=doseNumberInSeries {aOp} {nDoseNumber}
+[condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity [Ss]tatus is not {oShotValidityStatus}=status != {oShotValidityStatus} && (status == DoseStatus.INVALID || status == DoseStatus.VALID || status == DoseStatus.ACCEPTED)
+[condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity [Ss]tatus is {oShotValidityStatus}=status == {oShotValidityStatus} && (status == DoseStatus.INVALID || status == DoseStatus.VALID || status == DoseStatus.ACCEPTED)
 [condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity is VALID or ACCEPTED=status == DoseStatus.VALID || status == DoseStatus.ACCEPTED
 [condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity is VALID=status == DoseStatus.VALID
 [condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity is INVALID=status == DoseStatus.INVALID
+[condition][]- [Tt]hat has already been [Ee]valuated=status == DoseStatus.INVALID || status == DoseStatus.VALID || status == DoseStatus.ACCEPTED
 [condition][]- [Tt]he [Aa]dministration [Dd]ate of the [Ss]hot is {aOp:[\=\\<\\>]+}  {dtOtherDate}=administrationDate {aOp} {dtOtherDate}
 [condition][]- [Tt]he [Ss]hot has not already been marked as a [Ll]ive [Vv]irus [Cc]onflict \(as we do not want this [Rr]ule executing more than necessary\)=containsInvalidReason(BaseDataEvaluationReason._TOO_EARLY_LIVE_VIRUS.getCdsListItemName()) == false
 [condition][]- [Mm]ake [Nn]ote of the [Aa]dministered [Ss]hot [Nn]umber as {assign_nAdministeredShotNumber}={assign_nAdministeredShotNumber} : administeredShotNumberInSeries

@@ -308,7 +308,7 @@ public class TimePeriod {
 		}
 		else {
 			String str = "Invalid TimePeriod.DurationType supplied";
-			logger.info(_METHODNAME + str);
+			logger.warn(_METHODNAME + str);
 			throw new IllegalArgumentException(str);
 		}
 		
