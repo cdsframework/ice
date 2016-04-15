@@ -705,6 +705,7 @@ public class ICESupportingDataConfiguration {
 			
 			// Live virus vaccine
 			lDebugStrb += "\nLive Virus: " + pIceVaccineSpecification.isLiveVirusVaccine().toString();
+			lDebugStrb += "\nUnspecified Formulation: " + pIceVaccineSpecification.isUnspecifiedFormulation();
 			
 			// age restrictions
 			lDebugStrb += "\nValid Minimum Age: " + pIceVaccineSpecification.getValidMinimumAgeForUse();

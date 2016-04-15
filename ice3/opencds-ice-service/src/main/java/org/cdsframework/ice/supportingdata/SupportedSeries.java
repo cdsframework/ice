@@ -389,7 +389,7 @@ public class SupportedSeries implements SupportingData {
 			// absolute minimum age, minimum age and earliest recommended age are mandatory 
 			if (absoluteMinimumAge == null || minimumAge == null) {
 				String lInfoStr = "Absolute minimum age and/or minimum age not specified in a dose: " + lDoseNumber + "; Series " + lSeriesCode;
-				logger.info(_METHODNAME + lInfoStr);
+				logger.warn(_METHODNAME + lInfoStr);
 			}
 			String maximumAge = isds.getMaximumAge();			
 			String latestRecommendedAge = isds.getLatestRecommendedAge();

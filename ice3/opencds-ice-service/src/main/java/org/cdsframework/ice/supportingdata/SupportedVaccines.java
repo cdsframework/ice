@@ -494,6 +494,12 @@ public class SupportedVaccines implements SupportingData {
 		if (lBL != null) {
 			pVaccineComponent.setLiveVirusVaccine(lBL.booleanValue());
 		}
+		// Unspecified Formulation
+		lBL = pIVSF.isUnspecifiedFormulation();
+		if (lBL != null) {
+			pVaccineComponent.setUnspecifiedFormulation(lBL.booleanValue());
+		}
+		
 	}
 	
 	

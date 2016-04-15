@@ -40,7 +40,9 @@ public class XMLSupportingDataFilenameFilterImpl implements FilenameFilter {
 	
 	
 	public XMLSupportingDataFilenameFilterImpl() {
-		logger.info("XMLFilenameFilterImpl instantiated");
+		if (logger.isDebugEnabled()) {
+			logger.info("XMLFilenameFilterImpl instantiated");
+		}
 	}
 	
 	/**
