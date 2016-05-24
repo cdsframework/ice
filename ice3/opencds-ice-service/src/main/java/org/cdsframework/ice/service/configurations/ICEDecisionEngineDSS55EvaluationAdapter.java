@@ -69,12 +69,13 @@ import org.opencds.config.api.KnowledgeRepository;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.KnowledgeModule;
 import org.opencds.config.api.model.PluginId;
+import org.opencds.config.api.model.SupportingData;
 import org.opencds.config.api.service.KnowledgePackageService;
+import org.opencds.config.util.EntityIdentifierUtil;
 import org.opencds.dss.evaluate.Evaluater;
 import org.opencds.plugin.OpencdsPlugin;
 import org.opencds.plugin.PluginContext;
 import org.opencds.plugin.PluginContext.PreProcessPluginContext;
-import org.opencds.plugin.PluginDataCache;
 
 /**
  * DroolsAdapter.java
@@ -105,8 +106,6 @@ import org.opencds.plugin.PluginDataCache;
 
 public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
-	private File baseKnowledgeRepositoryLocation = null;
-	private File knowledgeModuleLocation = null;
 	private String baseRulesScopingKmId = null;
 	private Schedule schedule = null;
 	
@@ -156,15 +155,27 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		}
 		
 		String requestedKmId = evaluationRequestKMItem.getRequestedKmId();
+		/*
+		 * Prior:
+			KnowledgeModule knowledgeModule = knowledgeRepository.getKnowledgeModuleService().find(requestedKmId);
+			// TODO: For now we'll leave supportingData support out of this work.
+			//        List<SupportingData> supportingDataList = knowledgeRepository.getSupportingDataService().find(knowledgeModule.getKMId());
+			Map<String, org.opencds.plugin.SupportingData> supportingData = new LinkedHashMap<>();
+			//        for (SupportingData sd : supportingDataList) {
+			//            Object data = knowledgeRepository.getSupportingDataPackageService().get(sd);
+			//            supportingData.put(sd.getIdentifier(), org.opencds.plugin.SupportingData.create(sd.getIdentifier(), EntityIdentifierUtil.makeEIString(sd.getKMId()), sd.getPackageId(), sd.getPackageType(), data));
+			//        }
+		 */
+		
 		KnowledgeModule knowledgeModule = knowledgeRepository.getKnowledgeModuleService().find(requestedKmId);
-		// TODO: For now we'll leave supportingData support out of this work.
-		//        List<SupportingData> supportingDataList = knowledgeRepository.getSupportingDataService().find(knowledgeModule.getKMId());
-		Map<String, org.opencds.plugin.SupportingData> supportingData = new LinkedHashMap<>();
-		//        for (SupportingData sd : supportingDataList) {
-		//            Object data = knowledgeRepository.getSupportingDataPackageService().get(sd);
-		//            supportingData.put(sd.getIdentifier(), org.opencds.plugin.SupportingData.create(sd.getIdentifier(), EntityIdentifierUtil.makeEIString(sd.getKMId()), sd.getPackageId(), sd.getPackageType(), data));
-		//        }
-
+        List<SupportingData> supportingDataList = knowledgeRepository.getSupportingDataService().find(knowledgeModule.getKMId());
+        Map<String, org.opencds.plugin.SupportingData> supportingData = new LinkedHashMap<>();
+        for (SupportingData sd : supportingDataList) {
+            byte[] data = knowledgeRepository.getSupportingDataPackageService().getPackageBytes(sd);
+            supportingData.put(sd.getIdentifier(), org.opencds.plugin.SupportingData.create(sd.getIdentifier(), EntityIdentifierUtil.makeEIString(sd.getKMId()), 
+            		EntityIdentifierUtil.makeEIString(sd.getLoadedBy()), sd.getPackageId(), sd.getPackageType(), data));
+        }
+        
 		EvaluationRequestDataItem evalRequestDataItem = evaluationRequestKMItem.getEvaluationRequestDataItem();
 
 		Date evalTime = evalRequestDataItem.getEvalTime();
@@ -213,8 +224,6 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
 		Map<String, Object> namedObjects = new HashMap<>();
 		Map<String, Object> globals = new HashMap<>();
-		// FIXME
-		PluginDataCache cache = null;
 
 		/*
 		 * PreProcess plugins
@@ -242,7 +251,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 						logger.debug("applying plugin: " + pluginId.toString());
 					}
 					OpencdsPlugin<PreProcessPluginContext> opencdsPlugin = knowledgeRepository.getPluginPackageService().load(pluginId);
-					PreProcessPluginContext preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData, cache);
+					PreProcessPluginContext preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData, knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
 					opencdsPlugin.execute(preContext);
 				}
 			}
@@ -260,11 +269,10 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		 * Load the Globals and Fact lists: evalTime, language, timezoneOffset
 		 */
 
-		//      WorkingMemoryInMemorylog memorylog        = new WorkingMemoryInMemorylog (statelessKnowledgeSession);
-		//      WorkingMemoryFilelog         filelog              = new WorkingMemoryFilelog (statelessKnowledgeSession);      
+		// WorkingMemoryInMemoryLogger memorylog = new WorkingMemoryInMemoryLogger (statelessKnowledgeSession);
+		// WorkingMemoryFileLogger filelog = new WorkingMemoryFilelLogger (statelessKnowledgeSession);      
 		// If using the Filelog, Set the log file that we will be using to log Working Memory (aka session)          
-		//      filelog.setFileName("/Users/phillip/lib/tomcat/logs/drools-event-log"); 
-		//TODO:         make the above choice based on configuration settings
+		// filelog.setFileName("/Users/phillip/lib/tomcat/logs/drools-event-log"); 
 
 		@SuppressWarnings("rawtypes")
 		List<Command> cmds = Collections.synchronizedList(new ArrayList<Command>());
@@ -440,10 +448,24 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		 * Retrieve the Results for this requested KM and stack them in the DSS
 		 * fkmResponse NOTE: Each additional requested KM will have a separate
 		 * output payload
+		 * 
+		 * For now (ICE): not executing post-process plugins
+        List<PluginId> allPostProcessPluginIds = knowledgeModule.getPostProcessPluginIds();
+        if (allPostProcessPluginIds != null) {
+        	for (PluginId pluginId : plugins) {
+        		// and supporting data loadedBy plugin
+        		if (allPostProcessPluginIds.contains(pluginId)) {
+        			logger.debug("applying plugin: " + pluginId.toString());
+        			OpencdsPlugin<PostProcessPluginContext> opencdsPlugin = knowledgeRepository
+        					.getPluginPackageService().load(pluginId);
+        			PostProcessPluginContext postContext = PluginContext.createPostProcessPluginContext(allFactLists,
+        					namedObjects, assertions, resultFactLists, supportingData, knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
+        			opencdsPlugin.execute(postContext);
+        		}
+        	}
+        }
 		 */
 
-		// FIXME: if post-process plugins exist...
-		//        PostProcessPluginContext postContext = PluginContext.createPostProcessPluginContext(assertions, resultFactLists);
 		if (logger.isDebugEnabled()) {
 			logger.debug("II: " + interactionId + " KMId: " + requestedKmId + " completed Drools inferencing engine");
 		}
