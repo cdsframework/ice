@@ -12,8 +12,8 @@ import org.opencds.plugin.PluginDataCache;
 import org.opencds.plugin.PreProcessPlugin;
 import org.opencds.plugin.SupportingData;
 
-public class SupportingDataPlugin implements PreProcessPlugin {
-    private static final Log log = LogFactory.getLog(SupportingDataPlugin.class);
+public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
+    private static final Log logger = LogFactory.getLog(ICESupportingDataLoaderPlugin.class);
 
     private static final String SD_CONCEPTS = "concepts";
 
@@ -23,7 +23,9 @@ public class SupportingDataPlugin implements PreProcessPlugin {
         PluginDataCache cache = context.getCache();
 
         SupportingData sd = supportingData.get(SD_CONCEPTS);
-        log.debug("SD: " + sd);
+        if (logger.isDebugEnabled()) {
+        	logger.debug("SD: " + sd);
+        }
         Properties concepts = new Properties();
         if (sd != null) {
             concepts = cache.get(sd);
@@ -41,7 +43,8 @@ public class SupportingDataPlugin implements PreProcessPlugin {
                 // how do we know which supporting data is the one?
             }
         }
-
+        
+        concepts.list(System.out);
     }
 
 }

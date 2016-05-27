@@ -73,6 +73,7 @@ import org.opencds.config.api.model.SupportingData;
 import org.opencds.config.api.service.KnowledgePackageService;
 import org.opencds.config.util.EntityIdentifierUtil;
 import org.opencds.dss.evaluate.Evaluater;
+import org.opencds.evaluation.service.SupportingDataUtil;
 import org.opencds.plugin.OpencdsPlugin;
 import org.opencds.plugin.PluginContext;
 import org.opencds.plugin.PluginContext.PreProcessPluginContext;
@@ -135,6 +136,39 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 	 * This means that we are considering the OMG-CDSS concept of
 	 * KnowledgeModule equivalent to the Drools concept of KnowledgeBase.
 	 */
+	
+	
+    private static Map<String, org.opencds.plugin.SupportingData> getSupportingData(KnowledgeRepository knowledgeRepository, KnowledgeModule knowledgeModule) {
+        List<SupportingData> supportingDataList = filterByKM(knowledgeModule.getKMId(), knowledgeRepository.getSupportingDataService().getAll());
+
+        Map<String, org.opencds.plugin.SupportingData> supportingData = new LinkedHashMap<>();
+        for (SupportingData sd : supportingDataList) {
+            byte[] data = knowledgeRepository.getSupportingDataPackageService().getPackageBytes(sd);
+            supportingData.put(sd.getIdentifier(), org.opencds.plugin.SupportingData.create(sd.getIdentifier(),
+                    EntityIdentifierUtil.makeEIString(sd.getKMId()),
+                    EntityIdentifierUtil.makeEIString(sd.getLoadedBy()), sd.getPackageId(), sd.getPackageType(), data));
+        }
+        return supportingData;
+    }
+    
+    /**
+     * Inclusion filter by SupportingData by KMId, or SDs that have no
+     * associated KMId.
+     * 
+     * @param kmId
+     * @param sds
+     * @return
+     */
+    private static List<SupportingData> filterByKM(KMId kmId, List<SupportingData> sds) {
+        List<SupportingData> sdList = new ArrayList<>();
+        for (SupportingData sd : sds) {
+            if (sd.getKMId() == null || sd.getKMId().equals(kmId)) {
+                sdList.add(sd);
+            }
+        }
+        return sdList;
+    }
+    
 
 	@Override
 	public Map<String, List<?>> getOneResponse(KnowledgeRepository knowledgeRepository, EvaluationRequestKMItem evaluationRequestKMItem)
@@ -155,18 +189,12 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		}
 		
 		String requestedKmId = evaluationRequestKMItem.getRequestedKmId();
-		/*
-		 * Prior:
-			KnowledgeModule knowledgeModule = knowledgeRepository.getKnowledgeModuleService().find(requestedKmId);
-			// TODO: For now we'll leave supportingData support out of this work.
-			//        List<SupportingData> supportingDataList = knowledgeRepository.getSupportingDataService().find(knowledgeModule.getKMId());
-			Map<String, org.opencds.plugin.SupportingData> supportingData = new LinkedHashMap<>();
-			//        for (SupportingData sd : supportingDataList) {
-			//            Object data = knowledgeRepository.getSupportingDataPackageService().get(sd);
-			//            supportingData.put(sd.getIdentifier(), org.opencds.plugin.SupportingData.create(sd.getIdentifier(), EntityIdentifierUtil.makeEIString(sd.getKMId()), sd.getPackageId(), sd.getPackageType(), data));
-			//        }
-		 */
-		
+        KnowledgeModule knowledgeModule = knowledgeRepository.getKnowledgeModuleService().find(requestedKmId);
+        Map<String, org.opencds.plugin.SupportingData> supportingData = getSupportingData(knowledgeRepository, knowledgeModule);
+        // SuportingDataUtil.getSupportingData(KnowledgeRepository knowledgeRepository, KnowledgeModule knowledgeModule)
+        
+        /*
+         * Prior most recent
 		KnowledgeModule knowledgeModule = knowledgeRepository.getKnowledgeModuleService().find(requestedKmId);
         List<SupportingData> supportingDataList = knowledgeRepository.getSupportingDataService().find(knowledgeModule.getKMId());
         Map<String, org.opencds.plugin.SupportingData> supportingData = new LinkedHashMap<>();
@@ -175,7 +203,8 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
             supportingData.put(sd.getIdentifier(), org.opencds.plugin.SupportingData.create(sd.getIdentifier(), EntityIdentifierUtil.makeEIString(sd.getKMId()), 
             		EntityIdentifierUtil.makeEIString(sd.getLoadedBy()), sd.getPackageId(), sd.getPackageType(), data));
         }
-        
+        */
+
 		EvaluationRequestDataItem evalRequestDataItem = evaluationRequestKMItem.getEvaluationRequestDataItem();
 
 		Date evalTime = evalRequestDataItem.getEvalTime();
@@ -251,7 +280,8 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 						logger.debug("applying plugin: " + pluginId.toString());
 					}
 					OpencdsPlugin<PreProcessPluginContext> opencdsPlugin = knowledgeRepository.getPluginPackageService().load(pluginId);
-					PreProcessPluginContext preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData, knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
+					PreProcessPluginContext preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData, 
+							knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
 					opencdsPlugin.execute(preContext);
 				}
 			}
