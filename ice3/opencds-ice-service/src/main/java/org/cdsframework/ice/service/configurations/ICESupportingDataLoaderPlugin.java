@@ -18,7 +18,7 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
     private static final String SD_ICE = "ice-supporting-data";
 
     
-    public static boolean supportingDataAlreadyLoadedForContext(PreProcessPluginContext context) {
+    public static boolean supportingDataAlreadyLoadedInContext(PreProcessPluginContext context) {
 
     	String _METHODNAME = "supportingDataAlreadyLoadedForContext(): ";
     	if (context == null) {
@@ -30,17 +30,20 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
         SupportingData sd = context.getSupportingData().get(SD_ICE);
         if (sd == null) {
         	if (logger.isDebugEnabled()) {
-        		logger.debug(_METHODNAME + "supporting data not populated for " + SD_ICE);
+        		logger.debug(_METHODNAME + "supporting data populated in context for " + SD_ICE);
         	}
         	return false;
         }
         String lKmId = sd.getKmId();
     	if (logger.isDebugEnabled()) {
-    		logger.debug(_METHODNAME + "supportingData KmID for " + SD_ICE + "is: " + lKmId);
+    		logger.debug(_METHODNAME + "supporting data populated in context for " + SD_ICE + "; KmID is: " + lKmId);
     	}
 
         PluginDataCache cache = context.getCache();            	
     	if (cache == null || cache.get(lKmId) == null) {
+    		if (logger.isDebugEnabled()) {
+        		logger.debug(_METHODNAME + "No cache in context; returning false");
+        	}
     		return false;
     	}
 

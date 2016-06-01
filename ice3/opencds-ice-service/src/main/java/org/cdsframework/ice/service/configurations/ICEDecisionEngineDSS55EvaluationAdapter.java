@@ -156,12 +156,20 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
     private static Map<String, org.opencds.plugin.SupportingData> getSupportingData(KnowledgeRepository knowledgeRepository, KnowledgeModule knowledgeModule, 
     		boolean getRawData) {
     	
+    	String _METHODNAME = "getSupportingData(): ";
+    	
         List<SupportingData> supportingDataList = filterByKM(knowledgeModule.getKMId(), knowledgeRepository.getSupportingDataService().getAll());
         Map<String, org.opencds.plugin.SupportingData> supportingDataListWithoutRawData = new LinkedHashMap<>();
         for (SupportingData sd : supportingDataList) {
             byte[] data = new byte[0];
             if (getRawData) {
+            	if (logger.isDebugEnabled()) {
+            		logger.debug(_METHODNAME + "raw data to be loaded in with supporting data metadata");
+            	}
             	data = knowledgeRepository.getSupportingDataPackageService().getPackageBytes(sd);
+            }
+            else {
+            	
             }
             org.opencds.plugin.SupportingData lSD = org.opencds.plugin.SupportingData.create(sd.getIdentifier(), EntityIdentifierUtil.makeEIString(sd.getKMId()),
                     EntityIdentifierUtil.makeEIString(sd.getLoadedBy()), sd.getPackageId(), sd.getPackageType(), data);
@@ -212,19 +220,6 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		String requestedKmId = evaluationRequestKMItem.getRequestedKmId();
         KnowledgeModule knowledgeModule = knowledgeRepository.getKnowledgeModuleService().find(requestedKmId);
         Map<String, org.opencds.plugin.SupportingData> supportingData = getSupportingData(knowledgeRepository, knowledgeModule, false);
-        // SuportingDataUtil.getSupportingData(KnowledgeRepository knowledgeRepository, KnowledgeModule knowledgeModule)
-        
-        /*
-         * Prior most recent
-		KnowledgeModule knowledgeModule = knowledgeRepository.getKnowledgeModuleService().find(requestedKmId);
-        List<SupportingData> supportingDataList = knowledgeRepository.getSupportingDataService().find(knowledgeModule.getKMId());
-        Map<String, org.opencds.plugin.SupportingData> supportingData = new LinkedHashMap<>();
-        for (SupportingData sd : supportingDataList) {
-            byte[] data = knowledgeRepository.getSupportingDataPackageService().getPackageBytes(sd);
-            supportingData.put(sd.getIdentifier(), org.opencds.plugin.SupportingData.create(sd.getIdentifier(), EntityIdentifierUtil.makeEIString(sd.getKMId()), 
-            		EntityIdentifierUtil.makeEIString(sd.getLoadedBy()), sd.getPackageId(), sd.getPackageType(), data));
-        }
-        */
 
 		EvaluationRequestDataItem evalRequestDataItem = evaluationRequestKMItem.getEvaluationRequestDataItem();
 
@@ -290,7 +285,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		 *      - load initially (eager loading) -- think of how we might do this when we cache the knowledge package
 		 */
 		if (logger.isDebugEnabled()) {
-			logger.debug("Plugin processing...");
+			logger.debug("PreProcessPlugin processing...");
 		}
 		List<PluginId> plugins = knowledgeRepository.getPluginPackageService().getAllPluginIds();
 		List<PluginId> allPreProcessPluginIds = knowledgeModule.getPreProcessPluginIds();
@@ -298,20 +293,27 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			for (PluginId pluginId : plugins) {
 				if (allPreProcessPluginIds.contains(pluginId)) {
 					if (logger.isDebugEnabled()) {
-						logger.debug("applying plugin: " + pluginId.toString());
+						logger.debug("applying preprocess plugin: " + pluginId.toString());
 					}
 					OpencdsPlugin<PreProcessPluginContext> opencdsPlugin = knowledgeRepository.getPluginPackageService().load(pluginId);
 					PreProcessPluginContext preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData, 
 							knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
 
-					// Refactor in upgrade to OpenCDS 2.1... (Cheating here by calling ICEPlugin implementation directly.) 
+					// Refactor in upgrade to OpenCDS 2.1... (Cheating here by calling ICEPlugin implementation directly :( ) 
 					// If the supporting data content has not been loaded into the cache, read the raw data from the file so that it can be loaded
-					if (! ICESupportingDataLoaderPlugin.supportingDataAlreadyLoadedForContext(preContext)) {
+					if (! ICESupportingDataLoaderPlugin.supportingDataAlreadyLoadedInContext(preContext)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug(_METHODNAME + "preprocess plugin: supporting data content not loaded into context: content to be loaded now");
+						}
 						supportingData = getSupportingData(knowledgeRepository, knowledgeModule, true);
 						preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData, 
 							knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
 					}
-					
+					else {
+						if (logger.isDebugEnabled()) {
+							logger.debug(_METHODNAME + "preprocess plugin: supporting data content (already) loaded into context");
+						}
+					}
 					// Execute the preprocess plugin to get the supportng data
 					opencdsPlugin.execute(preContext);
 				}
