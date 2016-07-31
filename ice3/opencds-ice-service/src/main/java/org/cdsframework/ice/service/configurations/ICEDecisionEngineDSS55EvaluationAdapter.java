@@ -108,6 +108,7 @@ import org.opencds.plugin.PluginContext.PreProcessPluginContext;
 public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
 	private String baseRulesScopingKmId = null;
+	private Boolean outputNumberOfDosesRemaining = null;
 	private Schedule schedule = null;
 	
 	private static Log logger = LogFactory.getLog(ICEDecisionEngineDSS55EvaluationAdapter.class);
@@ -376,8 +377,14 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);			
 		}
-		
 		cmds.add(CommandFactory.newSetGlobal("schedule", schedule));
+		
+		if (outputNumberOfDosesRemaining == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: output number of doses remaining flag not set; cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		cmds.add(CommandFactory.newSetGlobal("outputNumberOfDosesRemaining", outputNumberOfDosesRemaining));
 		
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -641,6 +648,16 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			logger.info(_METHODNAME + lInfoStr);
 		}
 		
+		// Output doses remaining for each series recommendation?
+		String lOutputDosesRemaining = lProps.getProperty("output_number_of_doses_remaining");
+		if (lOutputDosesRemaining != null && lOutputDosesRemaining.equals("Y")) {
+			outputNumberOfDosesRemaining = new Boolean(true);
+		}
+		else {
+			outputNumberOfDosesRemaining = new Boolean(false);
+		}
+		
+		/////// Set up knowledge base
 		KnowledgeBase lKnowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
 
 		if (loadRulesFromPkgFileBool == true && pkgFile != null && pkgFile.exists()) {
