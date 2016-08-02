@@ -20,7 +20,6 @@ package org.cdsframework.ice.service.configurations;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
@@ -39,9 +38,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
 import org.cdsframework.ice.util.FileNameWithExtensionFilterImpl;
+import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
 import org.drools.builder.KnowledgeBuilder;
@@ -62,7 +63,6 @@ import org.omg.dss.RequiredDataNotProvidedExceptionFault;
 import org.omg.dss.UnrecognizedLanguageExceptionFault;
 import org.omg.dss.UnrecognizedScopedEntityExceptionFault;
 import org.omg.dss.UnsupportedLanguageExceptionFault;
-import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.structures.EvaluationRequestDataItem;
 import org.opencds.common.structures.EvaluationRequestKMItem;
 import org.opencds.config.api.KnowledgeRepository;
@@ -73,7 +73,6 @@ import org.opencds.config.api.model.SupportingData;
 import org.opencds.config.api.service.KnowledgePackageService;
 import org.opencds.config.util.EntityIdentifierUtil;
 import org.opencds.dss.evaluate.Evaluater;
-import org.opencds.evaluation.service.SupportingDataUtil;
 import org.opencds.plugin.OpencdsPlugin;
 import org.opencds.plugin.PluginContext;
 import org.opencds.plugin.PluginContext.PreProcessPluginContext;
@@ -288,6 +287,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		if (logger.isDebugEnabled()) {
 			logger.debug("PreProcessPlugin processing...");
 		}
+		Schedule lSchedule = null;
 		List<PluginId> plugins = knowledgeRepository.getPluginPackageService().getAllPluginIds();
 		List<PluginId> allPreProcessPluginIds = knowledgeModule.getPreProcessPluginIds();
 		if (allPreProcessPluginIds != null) {
@@ -300,6 +300,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 					PreProcessPluginContext preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData, 
 							knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
 
+					/*
 					// Refactor in upgrade to OpenCDS 2.1... (Cheating here by calling ICEPlugin implementation directly :( ) 
 					// If the supporting data content has not been loaded into the cache, read the raw data from the file so that it can be loaded
 					if (! ICESupportingDataLoaderPlugin.supportingDataAlreadyLoadedInContext(preContext)) {
@@ -315,16 +316,23 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 							logger.debug(_METHODNAME + "preprocess plugin: supporting data content (already) loaded into context");
 						}
 					}
-					// Execute the preprocess plugin to get the supportng data
+					*/
+					// Execute the preprocess plugin to get the supporting data
 					opencdsPlugin.execute(preContext);
+					lSchedule = preContext.getCache().get(requestedKmId);
 				}
 			}
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug("Plugin processing done.");
 		}
-
-		//        EncountersFromProblemAndProcedureConcepts plugin = new EncountersFromProblemAndProcedureConcepts();
+		
+		if (lSchedule == null) {
+			// Immunization schedule not loaded 
+			String lErrStr = "Immunization schedule not loaded; something went wrong. Incorrect configuration or requested knowledge module ID likely: " + requestedKmId;
+			logger.error(_METHODNAME + lErrStr);
+			throw new ICECoreError(lErrStr);
+		}
 
 		Map<String, List<?>> resultFactLists = new ConcurrentHashMap<>();
 		Set<String> assertions = new HashSet<>();
@@ -372,12 +380,12 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			throw new RuntimeException(lErrStr);
 		}
 
-		if (schedule == null || schedule.isScheduleInitialized() == false) {
+		if (lSchedule == null || lSchedule.isScheduleInitialized() == false) {
 			String lErrStr = "Schedule has not been fully initialized; something went wrong; cannot process request";
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);			
 		}
-		cmds.add(CommandFactory.newSetGlobal("schedule", schedule));
+		cmds.add(CommandFactory.newSetGlobal("schedule", lSchedule));
 		
 		if (outputNumberOfDosesRemaining == null) {
 			String lErrStr = "An error occurred: knowledge module not properly initialized: output number of doses remaining flag not set; cannot continue";
@@ -569,7 +577,8 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			throw new IllegalArgumentException(errStr);
 		}
 
-		String lRequestedKmId = lKMId.getScopingEntityId() + "^" + lKMId.getBusinessId() + "^" + lKMId.getVersion();
+		///////String lRequestedKmId = lKMId.getScopingEntityId() + "^" + lKMId.getBusinessId() + "^" + lKMId.getVersion();
+		String lRequestedKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(lKMId.getScopingEntityId(), lKMId.getBusinessId(), lKMId.getVersion());
 		logger.info("Initializing ICE3 Drools 5.5 KnowledgeBase");
 		KnowledgeBuilderConfiguration config = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration();
 		config.setProperty("drools.accumulate.function.maxDate", "org.cdsframework.ice.service.MaximumDateAccumulateFunction");
@@ -582,9 +591,10 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		File dslFile = null;
 		File bpmnFile = null;
 
-		Properties lProps = load("ice.properties");
+		ICEPropertiesDataConfiguration iceconfig = new ICEPropertiesDataConfiguration();
+		Properties lProps = iceconfig.getProperties();
 		
-		// Get the ICE knowledge repository directory location
+		/////// Get the ICE knowledge repository directory location
 		String baseConfigurationLocation = lProps.getProperty("ice_knowledge_repository_location");
 		if (baseConfigurationLocation == null) {
 			String lErrStr = "ICE knowledge repository data location not specified in properties file";
@@ -598,7 +608,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			}
 		}
 		
-		// Get the ICE knowledge modules subdirectory location
+		/////// Get the ICE knowledge modules subdirectory location
 		String knowledgeModulesSubDirectory = lProps.getProperty("ice_knowledge_modules_subdirectory");
 		if (knowledgeModulesSubDirectory == null) {
 			String lErrStr = "ICE knowledge modules subdirectory location not specified in properties file";
@@ -611,29 +621,36 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 				logger.info(lInfoStr);
 			}
 		}
-
+		
+		/////// 
+		// Determine Base Knowledge Modules Directory Location
+		///////
 		File lKnowledgeModulesDirectory = new File(baseConfigurationLocation, knowledgeModulesSubDirectory);
 		if (! new File(lKnowledgeModulesDirectory, lRequestedKmId).exists()) {
-			String lErrStr = "ICE knowledge repository data location specified in properties file does not exist";
+			String lErrStr = "Requested ICE knowledge module does not exist: " + lKnowledgeModulesDirectory.getAbsolutePath() + "; knowledge module " + lRequestedKmId;
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "Requested ICE knowledge module directory: " + lKnowledgeModulesDirectory.getAbsolutePath() + "; knowledge module " + lRequestedKmId);
+		}
 		
+		///////
 		// Get the default scoping ID for the base ICE rules
-		String baseRulesScopingEntityId = lProps.getProperty("ice_base_rules_scoping_entity_id");
-		if (baseRulesScopingEntityId == null) {
-			String lErrStr = "ICE base rules scoping entity ID not specified in the properties file";
+		///////
+		///////String lBaseRulesScopingKmId = iceconfig.getBaseRulesScopingEntityId() + "^" + lKMId.getBusinessId() + "^" + lKMId.getVersion();
+		String lBaseRulesScopingKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceconfig.getBaseRulesScopingEntityId(), lKMId.getBusinessId(), lKMId.getVersion());
+		if (! new File(lKnowledgeModulesDirectory, lBaseRulesScopingKmId).exists()) {
+			String lErrStr = "Base ICE knowledge module does not exist" + lKnowledgeModulesDirectory.getAbsolutePath() + "; knowledge module " + lBaseRulesScopingKmId;;
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
-		else {
-			if (logger.isInfoEnabled()) {
-				String lErrStr = "ICE base rules scoping entity ID specified in properties file: " + baseRulesScopingEntityId;
-				logger.info(lErrStr);
-			}
+		else if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "Base knowledge modules directory: " + lKnowledgeModulesDirectory.getAbsolutePath()+ "; knowledge module " + lBaseRulesScopingKmId);
 		}
-		String lBaseRulesScopingKmId = baseRulesScopingEntityId + "^" + lKMId.getBusinessId() + "^" + lKMId.getVersion();
+		///////
 		
+		///////
 		// Load knowledge from pkg file?
 		String loadRulesFromPkgFile = lProps.getProperty("load_knowledge_from_pkg_file");
 		boolean loadRulesFromPkgFileBool = false;
@@ -819,46 +836,8 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		this.baseRulesScopingKmId = lBaseRulesScopingKmId;
 		logger.info("Date/Time " + lRequestedKmId + "; Base Rules Scoping Km Id: " + this.baseRulesScopingKmId + "; Initialized: " + new Date());
 
-		// Initialize schedule 
-		logger.info("Initializing Schedule");
-		List<String> cdsVersions = new ArrayList<String>();
-		cdsVersions.add(this.baseRulesScopingKmId);
-		cdsVersions.add(lRequestedKmId);
-		try {
-			this.schedule = new Schedule("requestedKmId", cdsVersions, lKnowledgeModulesDirectory);
-		}
-		catch (ImproperUsageException | InconsistentConfigurationException ii) {
-			String lErrStr = "Failed to initialize immunization schedule";
-			logger.error(_METHODNAME + lErrStr);
-			throw new RuntimeException(lErrStr);
-		}
-		logger.info("Schedule Initialization complete");
 		return lKnowledgeBase;
 	}
-
-
-	private Properties load(String filename) {
-
-		String _METHODNAME = "load(): ";
-
-		if(filename == null) { 
-			String lErrStr = "No FileName given to load. Defaulting to mci.properties";
-			logger.error(_METHODNAME + "No FileName given to load. Defaulting to mci.properties");
-			throw new RuntimeException(lErrStr);
-		}
-
-		Properties lProps = new Properties();
-		try {
-			// lProps.load( new FileInputStream(filename) );
-			lProps.load(this.getClass().getClassLoader().getResourceAsStream(filename));
-		} 
-		catch(IOException e) {
-			String lErrStr = "ICE properties file not found or could not be loaded: " + filename;
-			logger.error(_METHODNAME + "Properties file not found: " + filename); 
-			throw new RuntimeException(lErrStr); 
-		}
-
-		return lProps;
-	}
+	
 }
 

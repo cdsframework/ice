@@ -117,6 +117,14 @@ public class ICESupportingDataConfiguration {
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "Base Knowledge Repository Location: " + pBaseKnowledgeRepositoryLocation.getAbsolutePath());
+			int i=1;
+			for (String lCdsVersion : pSupportedCdsVersions) {
+				logger.debug(_METHODNAME + "CDS version #" + i + ": " + lCdsVersion);
+				i++;
+			}
+		}
 
 		this.supportingDataDirectoryLocations = new ArrayList<File>();
 		this.supportedCdsVersions = new ArrayList<String>();
@@ -288,32 +296,6 @@ public class ICESupportingDataConfiguration {
 		logger.info(lSbSDlocation.toString());	
 	}
 
-	
-	private void extractAll(URI fromZip, Path toDirectory) throws IOException{
-	    FileSystem zipFs = FileSystems.newFileSystem(fromZip, new HashMap<String,Object>());
-
-	    for(Path root : zipFs.getRootDirectories()) {
-	        Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
-	            @Override
-	            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) 
-	                    throws IOException {
-	                // You can do anything you want with the path here
-	            	
-	                return FileVisitResult.CONTINUE;
-	            }
-
-	            @Override
-	            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) 
-	                    throws IOException {
-	                // In a full implementation, you'd need to create each 
-	                // sub-directory of the destination directory before 
-	                // copying files into it
-	                return super.preVisitDirectory(dir, attrs);
-	            }
-	        });
-	    }
-	}
-	
 
 	/**
 	 * Get the ICE SupportedCdsLists data for this supporting data configuration 
