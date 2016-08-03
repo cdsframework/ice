@@ -63,9 +63,6 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
     	Map<String, SupportingData> supportingData = context.getSupportingData();
         PluginDataCache cache = context.getCache();
         SupportingData sd = supportingData.get(SD_ICE);
-        if (logger.isDebugEnabled()) {
-        	logger.debug(_METHODNAME + "SD: " + sd);
-        }
     	String lKMId = sd.getKmId();
         Schedule schedule = cache.get(lKMId); 
         if (schedule == null) {
@@ -95,6 +92,9 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
     	
     	Schedule s = pCache.get(pRequestedKMIdStr);
     	if (s != null) {
+    		if (logger.isDebugEnabled()) {
+    			logger.debug(_METHODNAME + "Immunization schedule already loaded");
+    		}
     		// Schedule is already loaded
     		return;
     	}
