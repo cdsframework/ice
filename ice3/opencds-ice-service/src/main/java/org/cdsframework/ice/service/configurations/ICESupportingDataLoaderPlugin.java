@@ -69,7 +69,7 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
         	// Schedule has not been stored in supporting data - load it - This should only happen once.
         	logger.info("Loading immunization schedule for Knowledge Module: " + lKMId);
         	loadImmunizationSchedule(lKMId, cache);
-        	logger.info(_METHODNAME + "Complete: immunization schedule cached for knowledge module: " + lKMId);
+        	logger.info(_METHODNAME + "Immunization schedule loaded for knowledge module: " + lKMId);
         }
         else if (logger.isDebugEnabled()) {
         	logger.debug(_METHODNAME + "Immunization schedule previously loaded");

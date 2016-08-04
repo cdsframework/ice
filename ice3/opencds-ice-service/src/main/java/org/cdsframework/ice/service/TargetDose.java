@@ -295,7 +295,7 @@ public class TargetDose {
 		if (status != null) {
 			if (status == DoseStatus.ACCEPTED || status == DoseStatus.INVALID || status == DoseStatus.VALID)
 				setHasBeenEvaluated(true);
-			if (status == DoseStatus.ACCEPTED || status == DoseStatus.VALID) {
+			if (status == DoseStatus.VALID) {
 				setIsValid(true);
 			}
 			else {
