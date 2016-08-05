@@ -720,6 +720,7 @@ end
 
 ///////////////////////////////////////////////////////////// Hep A-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
+
 // Override general rule which picks the doses with the least number to complete the series
 rule "SeriesSelection.HepADoNOTSelectAlreadyCompleteSeriesWithFewestDosesIfExistsAndOtherSeriesPreviouslySelected" ruleflow-group "SeriesSelection"
 	dialect "mvel"
@@ -736,28 +737,7 @@ rule "SeriesSelection.HepADoNOTSelectAlreadyCompleteSeriesWithFewestDosesIfExist
 end
 
 
-rule "SeriesSelection.SelectHepA2DoseSeriesIfNoShotGiven" ruleflow-group "SeriesSelection"
-	dialect "mvel"
-	salience 100
-	agenda-group "customSeriesSelectionRules"
-	activation-group "HepASeriesSelectionCheck"
-	no-loop true
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
-		not (TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", numberOfShotsAdministeredInSeries > 0))
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepA2DoseChildAdultSeries", 
-			selectedSeries == false)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		update($ts);
-end
-
-
-rule "SeriesSelection.SelectHepA2DoseSeriesForLessThan19YearsAndCertainVaccines" ruleflow-group "SeriesSelection"
+rule "SeriesSelection.SelectByDefaultHepA2DoseSeries" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 100
 	agenda-group "customSeriesSelectionRules"
@@ -765,13 +745,7 @@ rule "SeriesSelection.SelectHepA2DoseSeriesForLessThan19YearsAndCertainVaccines"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
-		$td : TargetDose(vaccineComponent.cdsConceptName == "ICE83" || 
-			  vaccineComponent.cdsConceptName == "ICE84" || 
-			  vaccineComponent.cdsConceptName == "ICE31")
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepA2DoseChildAdultSeries", 
-			selectedSeries == false, containsTargetDose($td))
-		$person : EvaluatedPerson()
-		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.getAdministrationDate(), DurationType.YEARS).isLessThan(new TimePeriod(19, DurationType.YEARS)))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepA2DoseChildAdultSeries",	selectedSeries == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -781,7 +755,7 @@ rule "SeriesSelection.SelectHepA2DoseSeriesForLessThan19YearsAndCertainVaccines"
 end
 
 
-rule "SeriesSelection.SelectHepA2DoseSeriesForCertainVaccines" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: Select Hep-A 3-Dose Series if Dose 2 given >= 24 days and < 6 months - 4 days from dose 1 and patient >= 18 years old" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 100
 	agenda-group "customSeriesSelectionRules"
@@ -789,20 +763,24 @@ rule "SeriesSelection.SelectHepA2DoseSeriesForCertainVaccines" ruleflow-group "S
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
-		$td : TargetDose(vaccineComponent.cdsConceptName == "ICE52" || 
-			  vaccineComponent.cdsConceptName == "ICE85")
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepA2DoseChildAdultSeries", 
-			selectedSeries == false, containsTargetDose($td))	
+		$td1 : TargetDose(doseNumberInSeries == 1, isValid == true, $td1administrationDate : administrationDate)
+		$td2 : TargetDose(doseNumberInSeries == 2, isValid == true, $td2administrationDate : administrationDate)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepAAdult3DoseSeries", selectedSeries == false, 
+			containsTargetDose($td1), containsTargetDose($td2))
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $td1administrationDate, "18y") >= 0 &&
+			TimePeriod.compareElapsedTimePeriodToDateRange($td1administrationDate, $td2administrationDate, "24d") >= 0 &&
+			TimePeriod.compareElapsedTimePeriodToDateRange($td1administrationDate, $td2administrationDate, "6m-4d") < 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.getSeriesName());
-		update($ts);		
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
 end
 
 
-rule "SeriesSelection.SelectHepA3DoseSeriesFor19YearsAndOverAndCertainVaccines" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: Select Hep-A 3-Dose Series if >= 19yrs for Hep-A pediatric and NOS vaccines" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 200
 	agenda-group "customSeriesSelectionRules"
@@ -810,11 +788,9 @@ rule "SeriesSelection.SelectHepA3DoseSeriesFor19YearsAndOverAndCertainVaccines" 
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
-		$td : TargetDose(vaccineComponent.cdsConceptName == "ICE83" || 
-			  vaccineComponent.cdsConceptName == "ICE84" || 
-			  vaccineComponent.cdsConceptName == "ICE31")
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepAAdult3DoseSeries", 
-			selectedSeries == false, containsTargetDose($td))
+		$td : TargetDose(doseNumberInSeries == 1 || doseNumberInSeries == 2, isValid == true,
+			vaccineComponent.cdsConceptName == "ICE83" || vaccineComponent.cdsConceptName == "ICE84" || vaccineComponent.cdsConceptName == "ICE31")
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepAAdult3DoseSeries", selectedSeries == false, containsTargetDose($td))
 		$person : EvaluatedPerson()
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.getAdministrationDate(), DurationType.YEARS).isGreaterThanEqualTo(new TimePeriod(19, DurationType.YEARS)))
 	then
