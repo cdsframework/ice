@@ -755,7 +755,7 @@ rule "SeriesSelection.SelectByDefaultHepA2DoseSeries" ruleflow-group "SeriesSele
 end
 
 
-rule "SeriesSelection: Select Hep-A 3-Dose Series if Dose 2 given >= 24 days and < 6 months - 4 days from dose 1 and patient >= 18 years old" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: Select Hep-A 3-Dose Series if Dose 2 given >= 24 days and < 6m-4d from dose 1 and patient >= 18 years old" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 100
 	agenda-group "customSeriesSelectionRules"
@@ -768,7 +768,7 @@ rule "SeriesSelection: Select Hep-A 3-Dose Series if Dose 2 given >= 24 days and
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepAAdult3DoseSeries", selectedSeries == false, 
 			containsTargetDose($td1), containsTargetDose($td2))
 		$person : EvaluatedPerson()
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $td1administrationDate, "18y") >= 0 &&
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "18y") >= 0 &&
 			TimePeriod.compareElapsedTimePeriodToDateRange($td1administrationDate, $td2administrationDate, "24d") >= 0 &&
 			TimePeriod.compareElapsedTimePeriodToDateRange($td1administrationDate, $td2administrationDate, "6m-4d") < 0)
 	then
