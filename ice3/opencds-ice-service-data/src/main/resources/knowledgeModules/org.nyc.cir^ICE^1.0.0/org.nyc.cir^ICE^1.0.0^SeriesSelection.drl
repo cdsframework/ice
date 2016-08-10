@@ -737,6 +737,8 @@ rule "SeriesSelection.HepADoNOTSelectAlreadyCompleteSeriesWithFewestDosesIfExist
 end
 
 
+// Select 2-dos series by default. Note that additional series selection rules for Hep A are not required since the rules "switch" from 2-dose to 3-dose during evaluation 
+// in all circumstances when needed.
 rule "SeriesSelection.SelectByDefaultHepA2DoseSeries" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 100
@@ -746,53 +748,6 @@ rule "SeriesSelection.SelectByDefaultHepA2DoseSeries" ruleflow-group "SeriesSele
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepA2DoseChildAdultSeries",	selectedSeries == false)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		update($ts);	
-end
-
-
-rule "SeriesSelection: Select Hep-A 3-Dose Series if Dose 2 given >= 24 days and < 6m-4d from dose 1 and patient >= 18 years old" ruleflow-group "SeriesSelection"
-	dialect "mvel"
-	salience 100
-	agenda-group "customSeriesSelectionRules"
-	activation-group "HepASeriesSelectionCheck"
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
-		$td1 : TargetDose(doseNumberInSeries == 1, isValid == true, $td1administrationDate : administrationDate)
-		$td2 : TargetDose(doseNumberInSeries == 2, isValid == true, $td2administrationDate : administrationDate)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepAAdult3DoseSeries", selectedSeries == false, 
-			containsTargetDose($td1), containsTargetDose($td2))
-		$person : EvaluatedPerson()
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "18y") >= 0 &&
-			TimePeriod.compareElapsedTimePeriodToDateRange($td1administrationDate, $td2administrationDate, "24d") >= 0 &&
-			TimePeriod.compareElapsedTimePeriodToDateRange($td1administrationDate, $td2administrationDate, "6m-4d") < 0)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		update($ts);	
-end
-
-
-rule "SeriesSelection: Select Hep-A 3-Dose Series if >= 19yrs for Hep-A pediatric and NOS vaccines" ruleflow-group "SeriesSelection"
-	dialect "mvel"
-	salience 200
-	agenda-group "customSeriesSelectionRules"
-	activation-group "HepASeriesSelectionCheck"
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
-		$td : TargetDose(doseNumberInSeries == 1 || doseNumberInSeries == 2, isValid == true,
-			vaccineComponent.cdsConceptName == "ICE83" || vaccineComponent.cdsConceptName == "ICE84" || vaccineComponent.cdsConceptName == "ICE31")
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepAAdult3DoseSeries", selectedSeries == false, containsTargetDose($td))
-		$person : EvaluatedPerson()
-		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.getAdministrationDate(), DurationType.YEARS).isGreaterThanEqualTo(new TimePeriod(19, DurationType.YEARS)))
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);

@@ -70,30 +70,91 @@ rule "HepA: Shot 2 Valid if administered >= 6 months from Dose 1, even if there 
 end 
 
 
-rule "Switch from 2-Dose HepA series to 3-Dose HepA series for HepA Ped Adol 2-dose, HepA Ped Adol 3-dose shot, or HepA Ped NOS shot after 18yrs of Age and prior shot administered before 18yrs of age" ruleflow-group "HistoryEvaluation"
+/*
+rule "Switch from 2-Dose HepA series to 3-Dose HepA series if CVX 83 (Hep A, ped/adol, 2 dose) or CVX 84 (Hep A, ped/adol, 3 dose) or CVX 31 (Hep A, pediatric, unspecified formulation) is given to a patient >= 19 years old as dose 1 or dose 2 " ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
-	agenda-group "customEvaluationRule"
+	agenda-group "postEvaluationCheck"
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the administered shot number is > 1
+			- the dose number in the series is <= 2
 			- the vaccine administered a member of ("ICE83", "ICE84", "ICE31")
 			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the Dose Number as $assign_nDoseNumber
-		There is an Administered Shot $previousDose
-			- the administered shot number is == $assign_nAdministeredShotNumber-1
-			- make note of the Date this Shot was Administered as $assign_dtPrevAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series also contains the Dose $previousDose
 			- the name of the Series is "HepA2DoseChildAdultSeries"
 		There is a Series $seriesToSwitchTo
 			- the name of the Series is "HepAAdult3DoseSeries"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		// The Immunization Schedule information $oSchedule must be known to complete writing this rule
-		Confirm Elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "18y" && Elapsed time between $dtBirthDate and $assign_dtPrevAdministrationDate < "18y"	 
+		Confirm Elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y"
 	then
-		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber and evaluate using interval for prior dose to this dose from switchedTo series
+		Refresh all facts in the Series $targetSeries for Evaluation
+		Log that this Series Rule fired for the Series $targetSeries
+end
+*/
+
+rule "Switch from 2-Dose HepA series to 3-Dose HepA series if CVX 83 (Hep A, ped/adol, 2 dose) or CVX 84 (Hep A, ped/adol, 3 dose) or CVX 31 (Hep A, pediatric, unspecified formulation) is given to a patient >= 19 years old as dose 1 or dose 2 " ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "postEvaluationCheck"
+	when
+		There is a Series $targetSeries
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810"
+			- the name of the Series is "HepA2DoseChildAdultSeries"
+		The Patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAge19y when the patient is "19y" of age
+		There is an Administered Shot $shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the Dose Number in the series is <= 2
+			- the Administration Date of the shot is >= $dtDateAtAge19y
+			- the vaccine administered a member of ("ICE83", "ICE84", "ICE31")
+			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
+			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
+			- make note of the Dose Number as $assign_nDoseNumber
+		There is a Series $seriesToSwitchTo
+			- the name of the Series is "HepAAdult3DoseSeries"
+		Confirm Elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y"
+	then
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber and evaluate using interval for prior dose to this dose from switchedTo series
+		Refresh all facts in the Series $targetSeries for Evaluation
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Switch from 2-Dose HepA series to 3-Dose HepA series if Dose 2 is given >= 24d and < 6m-4d from dose 1 and dose 2 is given to a patient >= 18yrs old" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "SwitchFromHepA2DoseTo3Dose"
+	salience 10
+	when
+		There is a Series $targetSeries
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810"
+			- the series is not complete
+			- the name of the series is "HepA2DoseChildAdultSeries"
+		There is an Administered Shot $currentDose that needs to be evaluated
+			- the dose number in the series is == 2
+			- the shot belongs to the Series $targetSeries
+			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
+			- make note of the date this shot was administered as $dtAdministrationDateTwo
+		There is an Administered Shot $previousShot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the Dose Number in the series is == 1
+			- the administered shot number is == $assign_nAdministeredShotNumber-1
+			- make note of the date this shot was administered as $dtAdministrationDateOne
+		There is a Series $seriesToSwitchTo
+			- the name of the Series is "HepAAdult3DoseSeries"
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateTwo >= "18y"
+		Confirm elapsed time between $dtAdministrationDateOne and $dtAdministrationDateTwo < "6m-4d"
+		Confirm elapsed time between $dtAdministrationDateOne and $dtAdministrationDateTwo >= "24d"
+	then
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number 2 and evaluate using interval for prior dose to this dose from switchedTo series
 		Refresh all facts in the Series $targetSeries for Evaluation
 		Log that this Series Rule fired for the Series $targetSeries
 end
