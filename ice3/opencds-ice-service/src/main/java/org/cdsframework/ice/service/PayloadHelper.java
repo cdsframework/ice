@@ -254,13 +254,20 @@ public class PayloadHelper {
 		       </relatedClinicalStatement>
 		   </substanceAdministrationProposal>
 	 */
-	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, TargetSeries ts) 
-			throws ImproperUsageException, InconsistentConfigurationException {
+	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, 
+			TargetSeries ts) 
+		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
 
+		if (ts == null || pNamedObjects == null || drools == null || ts.getTargetSeriesIdentifier() == null) {
+			String lErrStr = "Error outputting SubstanceAdministrationProposal: one or more method parameters not initialized";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
 		SubstanceAdministrationProposal sap = new SubstanceAdministrationProposal();
-		String uniqueSarIdValue = ICELogicHelper.generateUniqueString();
+		// String uniqueSarIdValue = ICELogicHelper.generateUniqueString();
+		String uniqueSarIdValue = ts.getTargetSeriesIdentifier();
 		sap.setId(uniqueSarIdValue);
 		String[] subsAdmPropTemplateArr = { "2.16.840.1.113883.3.795.11.9.3.1" };
 		sap.setTemplateId(subsAdmPropTemplateArr);
@@ -353,6 +360,55 @@ public class PayloadHelper {
 		pNamedObjects.put("rel" + nestedIdValue, rel);
 	}
 
+	
+	public void OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, 
+			String pDosesRemaining, SubstanceAdministrationProposal pSAP) 
+		throws ImproperUsageException {
+		
+		String _METHODNAME = "OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal: ";
+		if (drools == null || pNamedObjects == null|| pSAP == null || pDosesRemaining == null) {
+			String lErrStr = "Unable to output doses remaining: one or more parameters not specified";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
+		
+		// Now create the nested observation result
+		String nestedIdValue = ICELogicHelper.generateUniqueString();
+		// Observation
+		ObservationResult childObs = new ObservationResult();
+		childObs.setId(nestedIdValue);
+		childObs.setEvaluatedPersonId(focalPersonId);
+		childObs.setSubjectIsFocalPerson(true); 
+
+		// Set the Observation Focus - always the vaccine group
+		CD localCD = new CD();
+		localCD.setCodeSystem("2.16.840.1.113883.3.795.12.100.10");
+		localCD.setCode("NUMBER_OF_DOSES_REMAINING");
+		localCD.setDisplayName("Doses Remaining");
+		localCD.setOriginalText("Number of doses remaining in the series, as of the evaluation date");
+		childObs.setObservationFocus(localCD);
+
+		// Observation Value
+		ObservationValue childObsValue = new ObservationValue();
+		childObsValue.setText(pDosesRemaining);
+		childObs.setObservationValue(childObsValue);
+		childObs.setClinicalStatementToBeRoot(false);
+		childObs.setToBeReturned(true);
+		drools.insert(childObs);
+		pNamedObjects.put("childObs" + nestedIdValue, childObs);
+
+		// Therefore, create as a relatedClinicalStatement
+		ClinicalStatementRelationship rel = new ClinicalStatementRelationship();
+		rel.setSourceId(pSAP.getId());
+		rel.setTargetId(nestedIdValue);
+		CD relCodeSR = new CD();
+		relCodeSR.setCodeSystem("2.16.840.1.113883.5.1002");
+		relCodeSR.setCode("RSON");
+		relCodeSR.setDisplayName("has pertaining reason");
+		rel.setTargetRelationshipToSource(relCodeSR);
+		drools.insert(rel);
+		pNamedObjects.put("rel" + nestedIdValue, rel);
+	}
 	
 	/**
 	 * Return local ICE3 Observation Evaluation Focus code for the Vaccine Group

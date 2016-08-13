@@ -14,7 +14,8 @@ public enum SupportedFactConcept {
 	_DTP_5_DOSE_SERIES_EXCEPTION2("ICE_FACT-DTP_5_DOSE_SERIES_EXCEPTION2", "DTP 5-Dose Series Exception 2"),
 	_DUPLICATE_SHOT_SAME_DAY("ICE_FACT-DUPLICATE_SHOT_SAME_DAY", "Duplicate shot/same day"),
 	_INVALID_AGE("ICE_FACT-INVALID_AGE", "Invalid Age"),
-	_INVALID_VACCINE("ICE_FACT-INVALID_VACCINE", "Invalid Vaccine");
+	_INVALID_VACCINE("ICE_FACT-INVALID_VACCINE", "Invalid Vaccine"),
+	_OUTPUT_NUMBER_OF_DOSES_REMAINING("ICE_FACT-OUTPUT_NUMBER_OF_DOSES_REMAINING", "Output number of doses remaining");
 
 
 	private CD supportedFactConcept;

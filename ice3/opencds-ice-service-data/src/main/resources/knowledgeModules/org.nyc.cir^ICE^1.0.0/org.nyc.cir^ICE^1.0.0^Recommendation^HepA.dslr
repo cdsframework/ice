@@ -46,9 +46,9 @@ global org.drools.runtime.KnowledgeContext kcontext
 expander ../org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
 
 
-//If a person => 2 years old and did NOT get a shot, recommendation should be Conditional / Recommended for High Risk Groups.
+//If a person => 18 years old and did NOT get a shot, recommendation should be Conditional / Recommended for High Risk Groups.
 // Overrides routine recommendationAgeCheck
-rule "HepA: Recommend Conditional/High Risk when >= 2 years old and no shots" ruleflow-group "RecommendationForecast"
+rule "HepA: Recommend Conditional/High Risk when >= 18 years old and no shots" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationRule"
 	activation-group "recommendationAgeCheck"
     when
@@ -57,7 +57,7 @@ rule "HepA: Recommend Conditional/High Risk when >= 2 years old and no shots" ru
         	- the number of Administered Shots is == 0
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime >= 2 DurationType.YEARS
+		Confirm elapsed time between $dtBirthDate and evalTime >= 18 DurationType.YEARS
 	then
 		Add "2y" to $dtBirthDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries

@@ -91,6 +91,7 @@ global java.util.HashMap<String,Object> namedObjects
 // ICE specific
 global java.util.Date patientAgeTimeOfInterest
 global org.cdsframework.ice.service.Schedule schedule
+global java.lang.Boolean outputNumberOfDosesRemaining
 
 // global org.drools.runtime.KnowledgeContext kcontext
 
@@ -159,6 +160,22 @@ rule "ImmunizationReferenceData: Initialize Target Seasons Fact Object" ruleflow
 		TargetSeasons tseasons = new TargetSeasons(evalTime);
 		insert(tseasons);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeasons Fact Object Initialized");
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+/////////
+rule "InitializeReferenceData: Output Number of Doses Remaining?" ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+when
+	not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue)
+	eval(outputNumberOfDosesRemaining != null && outputNumberOfDosesRemaining.booleanValue() == true)
+then
+	String _RULENAME = kcontext.rule.name;
+	ICEFactTypeFinding iftf = new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue);
+	insert(iftf);
+	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Output number of doses remaining? Initialized");
 end
 
 
@@ -1036,7 +1053,6 @@ rule "HistoryEvaluation: Set Immunity Flag in Series to True if Immune to All Di
 		$ts : TargetSeries($diseasesSupportedByThisSeries : diseasesSupportedByThisSeries, isImmunityToAllDiseasesRecorded() == false)
 		not TargetDose(hasBeenEvaluated == false) from $ts.targetDoses
 		$diseaseImmunityList : List(size == $diseasesSupportedByThisSeries.size()) from 
-			// accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, $r : immunityReason, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 			accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1297,6 +1313,24 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Retracted for Already Complete Series: " + $ts2);
 		update($ts1);
 		update($ts2);	
+end
+
+
+// Select only available series if there is only one in the vaccine group
+rule "SeriesSelection.SelectOnlySeriesRemainingInVaccineGroup" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	when
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == false)
+		accumulate($tsthis : TargetSeries(vaccineGroup == $ssvg); $countInVG : count($tsthis); $countInVG == 1)		
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
 end
 
 
@@ -2014,11 +2048,12 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series" ruleflow-gr
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		insert(sap);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
 
-
+	
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
@@ -2034,6 +2069,90 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 		PayloadHelper p = new PayloadHelper(schedule);
 		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
+end
+
+
+///////// ***
+// Supplemental Output rule... Output doses remaining to Recommendation for a Series that is Not Recurring and Not Complete
+///////// ***
+rule "ProcessResults: Append Number of Doses Remaining to Recommendation for a Series that is Not Recurring and Not Complete" ruleflow-group "ProcessResults"
+	dialect "mvel"
+	no-loop true
+	salience 5
+	when
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
+		$sap : SubstanceAdministrationProposal($sapid : id)
+		$ts : TargetSeries(targetSeriesIdentifier == $sapid, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false, isSeriesComplete() == false,
+			$numberOfDosesAdministered : determineEffectiveNumberOfDosesInSeries(), $numberOfDosesInSeries : seriesRules.numberOfDosesInSeries, 
+			recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
+	then
+		String _RULENAME = kcontext.rule.name;
+		int lNumberRemaining = $numberOfDosesInSeries-$numberOfDosesAdministered;
+		String lStrNumberRemaining = String.valueOf(lNumberRemaining);
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, lStrNumberRemaining, $sap);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Doses remaining for series \"" + $ts.getSeriesRules().getSeriesName() + "\": " + lStrNumberRemaining);	
+end
+
+
+///////// ***
+// Supplemental Output rule... Output Zero Doses Remaining to Recommendation for a Series that is Not Recurring and Complete
+///////// ***
+rule "ProcessResults: Append Zero Doses Remaining to Recommendation for a Series that is Not Recurring and Complete" ruleflow-group "ProcessResults"
+	dialect "mvel"
+	no-loop true
+	salience 5
+	when
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
+		$sap : SubstanceAdministrationProposal($sapid : id)
+		$ts : TargetSeries(targetSeriesIdentifier == $sapid, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false, isSeriesComplete() == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		String lStrNumberRemaining = "0"
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, lStrNumberRemaining, $sap);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Doses remaining for series \"" + $ts.getSeriesRules().getSeriesName() + "\": " + lStrNumberRemaining);	
+end
+
+
+///////// ***
+// Supplemental Output rule... Output doses N/A for Doses Remaining to Recommendation for a Series that is Recurring
+///////// ***
+rule "ProcessResults: Append N/A for Doses Remaining to Recommendation for a Series that is Recurring" ruleflow-group "ProcessResults"
+	dialect "mvel"
+	no-loop true
+	salience 5
+	when
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
+		$sap : SubstanceAdministrationProposal($sapid : id)
+		$ts : TargetSeries(targetSeriesIdentifier == $sapid, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == true, 
+			recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
+	then
+		String _RULENAME = kcontext.rule.name;
+		String lStrNumberRemaining = "RECURRING";
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, lStrNumberRemaining, $sap);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Doses remaining for series \"" + $ts.getSeriesRules().getSeriesName() + "\": " + lStrNumberRemaining);
+end
+
+
+///////// ***
+// Supplemental Output rule... Output doses N/A for Doses Remaining to Recommendation for a Series that is Not Recommended
+///////// ***
+rule "ProcessResults: Append N/A for Doses Remaining to Recommendation for a Series that is Not Recommended" ruleflow-group "ProcessResults"
+	dialect "mvel"
+	no-loop true
+	salience 5
+	when
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
+		$sap : SubstanceAdministrationProposal($sapid : id)
+		$ts : TargetSeries(targetSeriesIdentifier == $sapid, recommendationStatus == RecommendationStatus.NOT_RECOMMENDED || recommendationStatus == RecommendationStatus.NOT_RECOMMENDED)
+	then
+		String _RULENAME = kcontext.rule.name;
+		String lStrNumberRemaining = "N/A";
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, lStrNumberRemaining, $sap);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Doses remaining for series \"" + $ts.getSeriesRules().getSeriesName() + "\": " + lStrNumberRemaining);
 end
 
 

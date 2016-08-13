@@ -238,7 +238,7 @@ public class TargetSeries {
 	 *             to switch to does not exist in the specified series
 	 */
 	// public void convertToSpecifiedSeries(Schedule schedule, String seriesToConvertTo, int doseNumberFromWhichToBeginSwitch)
-	public void convertToSpecifiedSeries(String seriesToConvertTo, int doseNumberFromWhichToBeginSwitch)
+	public void convertToSpecifiedSeries(String seriesToConvertTo, int doseNumberFromWhichToBeginSwitch, boolean useDoseIntervalOfPriorDoseFromSwitchToSeries)
 		throws InconsistentConfigurationException {
 
 		String _METHODNAME = "switchSeries(): ";
@@ -250,7 +250,6 @@ public class TargetSeries {
 
 		// Get the specified SeriesRules
 		SeriesRules srOfSwitchSeries = scheduleBackingSeries.getScheduleSeriesByName(this.seriesRules.getVaccineGroup(), seriesToConvertTo);
-		// SeriesRules srOfSwitchSeries = null; // TODO:  (SD) schedule.getScheduleSeriesByName(this.seriesRules.getVaccineGroup(), seriesToConvertTo);
 		if (srOfSwitchSeries == null) {
 			String str = _METHODNAME + "specified series not found";
 			logger.error(str);
@@ -282,7 +281,7 @@ public class TargetSeries {
 			throw new InconsistentConfigurationException(str);
 		}
 		
-		// Remove existing DoseRules starting with the existing dose number
+		// Remove existing DoseRules starting with the existing dose number.
 		int size = thisSeriesDoseRules.size();
 		thisSeriesDoseRules.subList(doseNumberFromWhichToBeginSwitch - 1, size).clear();
 		if (logger.isDebugEnabled()) {
@@ -295,6 +294,17 @@ public class TargetSeries {
 				logger.debug(debugStr);
 			}
 		}
+		
+		// If the specified dose number is > 1, then modify the interval values from the series to switch to and change only those interval values leaving the remaining
+		if (useDoseIntervalOfPriorDoseFromSwitchToSeries && doseNumberFromWhichToBeginSwitch > 1) {
+			DoseRule thisSeriesLastDoseRuleFromPriorSeries = thisSeriesDoseRules.get(doseNumberFromWhichToBeginSwitch-2);
+			DoseRule newSeriesPriorDoseRuleForIntervalOnly = srOfSwitchSeries.getSeriesDoseRuleByDoseNumber(doseNumberFromWhichToBeginSwitch-1);
+			thisSeriesLastDoseRuleFromPriorSeries.setAbsoluteMinimumInterval(newSeriesPriorDoseRuleForIntervalOnly.getAbsoluteMinimumInterval());
+			thisSeriesLastDoseRuleFromPriorSeries.setMinimumInterval(newSeriesPriorDoseRuleForIntervalOnly.getMinimumInterval());
+			thisSeriesLastDoseRuleFromPriorSeries.setEarliestRecommendedInterval(newSeriesPriorDoseRuleForIntervalOnly.getEarliestRecommendedInterval());
+			thisSeriesLastDoseRuleFromPriorSeries.setLatestRecommendedInterval(newSeriesPriorDoseRuleForIntervalOnly.getLatestRecommendedInterval());
+		}
+		
 		// Add new DoseRules starting with the existing dose number
 		List<DoseRule> ssDoseRulesToAdd = srOfSwitchSeries.getSeriesDoseRules().subList(doseNumberFromWhichToBeginSwitch - 1, sizeNewSeries);
 		if (logger.isDebugEnabled()) {
