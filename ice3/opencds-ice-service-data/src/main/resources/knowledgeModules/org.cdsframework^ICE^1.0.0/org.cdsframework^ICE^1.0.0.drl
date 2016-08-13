@@ -1053,7 +1053,6 @@ rule "HistoryEvaluation: Set Immunity Flag in Series to True if Immune to All Di
 		$ts : TargetSeries($diseasesSupportedByThisSeries : diseasesSupportedByThisSeries, isImmunityToAllDiseasesRecorded() == false)
 		not TargetDose(hasBeenEvaluated == false) from $ts.targetDoses
 		$diseaseImmunityList : List(size == $diseasesSupportedByThisSeries.size()) from 
-			// accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, $r : immunityReason, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 			accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1314,6 +1313,24 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Retracted for Already Complete Series: " + $ts2);
 		update($ts1);
 		update($ts2);	
+end
+
+
+// Select only available series if there is only one in the vaccine group
+rule "SeriesSelection.SelectOnlySeriesRemainingInVaccineGroup" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	when
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == false)
+		accumulate($tsthis : TargetSeries(vaccineGroup == $ssvg); $countInVG : count($tsthis); $countInVG == 1)		
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);	
 end
 
 
