@@ -956,8 +956,8 @@ public class ICESupportingDataConfiguration {
 	public static void main(String[] args) {
 			
 		List<String> lCdsVersions = new ArrayList<String>();
-		lCdsVersions.add("org.cdsframework^ICE^1.1.0");
-		lCdsVersions.add("org.nyc.cir^ICE^1.1.0");
+		lCdsVersions.add("org.cdsframework^ICE^1.0.0");
+		lCdsVersions.add("org.nyc.cir^ICE^1.0.0");
 		try {
 			ICESupportingDataConfiguration icdh = new ICESupportingDataConfiguration(lCdsVersions, new File("/usr/local/projects/ice/ice3/opencds-ice-service-data/src/main/resources/knowledgeModules"));
 		}

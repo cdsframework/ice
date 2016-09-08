@@ -57,8 +57,6 @@ public class Vaccine extends AbstractVaccine {
 	}
 	
 	public Vaccine(CdsConcept pVaccineConcept) {
-	// public Vaccine(String pCdsListItemName) {
-
 		super(pVaccineConcept);
 		this.vaccineComponents = new ArrayList<VaccineComponent>();
 	}
@@ -76,9 +74,7 @@ public class Vaccine extends AbstractVaccine {
 	 * @throws IllegalArgumentException If parameters are not correctly populated (or either are null) with valid values; monovalent vaccines must have a vaccine component
 	 * with the same ICEConcept ID
 	 */
-	public Vaccine(CdsConcept pVaccineConcept, List<VaccineComponent> pVaccineComponents) {
-	// public Vaccine(String pCdsListItemName, List<VaccineComponent> pVaccineComponents) {
-		
+	public Vaccine(CdsConcept pVaccineConcept, List<VaccineComponent> pVaccineComponents) {		
 		this(pVaccineConcept, pVaccineComponents, false);
 	}
 
@@ -96,8 +92,6 @@ public class Vaccine extends AbstractVaccine {
 	 * with the same ICEConcept ID if permitUnequalVacconeComponentValueInMonovalentVaccine is false (which by default it is).
 	 */
 	public Vaccine(CdsConcept pVaccineConcept, List<VaccineComponent> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
-	// public Vaccine(String pCdsConceptName, List<VaccineComponent> pVaccineComponents, boolean permitUnequalVaccineComponentCodeValueInMonovalentVaccine) {
-		
 		super(pVaccineConcept);
 
 		String _METHODNAME = "Vaccine(): ";
