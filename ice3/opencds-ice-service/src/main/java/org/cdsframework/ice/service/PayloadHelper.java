@@ -33,6 +33,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.drools.spi.KnowledgeHelper;
 import org.opencds.common.exceptions.ImproperUsageException;
@@ -318,7 +319,7 @@ public class PayloadHelper {
 
 		// Observation interpretation
 		List<CD> interpretations = new ArrayList<CD>();
-		interpretations.add(getLocalCodeForEvaluationReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED"));
+		interpretations.add(getLocalCodeForEvaluationReason(BaseDataEvaluationReason._VACCINE_NOT_SUPPORTED_REASON.getCdsListItemName()));  // "EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED"
 		childObs.setInterpretation(interpretations);
 
 		// This is a nested clinical statement

@@ -1990,7 +1990,7 @@ rule "ProcessResults: Return Evaluations" ruleflow-group "ProcessResults"
 	when
 		$sae : SubstanceAdministrationEvent()	
 		$td : TargetDose(doseId == $sae.id)
-		$ts : TargetSeries(containsTargetDose($td), $vaccineGroup : seriesRules.vaccineGroup)
+		$ts : TargetSeries(containsTargetDose($td), $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true)
 		$evalTime: EvalTime()
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -2016,7 +2016,8 @@ rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported" ruleflow-
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		// p.OutputNestedImmEvaluationNotSupported(drools, namedObjects, $evalTime, focalPersonId, $sae, "VACCINE_GROUP_CONCEPT.999"); 
+		p.OutputNestedImmEvaluationNotSupported(drools, namedObjects, $evalTime, focalPersonId, $sae, "VACCINE_GROUP_CONCEPT.999");
+		$sae.setToBeReturned(true);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $sae);	
 end
 
