@@ -73,12 +73,12 @@ public class PayloadHelper {
 	}
 	
 	
-	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, 
-			SubstanceAdministrationEvent sae, String vg, TargetDose d) {
+	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, SubstanceAdministrationEvent sae, 
+			String vg, TargetDose d) {
 
 		String _METHODNAME = "OutputNestedImmEvaluationResult: ";
 		if (k == null || pNamedObjects == null || evalTime == null || sae == null || d == null) {
-			String str = "Caller supplied either NULL KnowledgeHelper, NamedObject HashMap, evalTime, SubstanceAdministrationEvent, TargetDose or Schedule parameter";
+			String str = "Caller supplied either NULL KnowledgeHelper, NamedObject HashMap, evalTime, SubstanceAdministrationEvent or TargetDose parameter";
 			logger.warn(_METHODNAME + str);
 			throw new IllegalArgumentException(str);
 		}
@@ -228,7 +228,121 @@ public class PayloadHelper {
 		pNamedObjects.put("rel" + nestedIdValue, relO);
 	}
 
+	public void OutputNestedImmEvaluationNotSupported(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, SubstanceAdministrationEvent sae, 
+			String vg) {
 
+		String _METHODNAME = "OutputNestedImmEvaluationNotSupported: ";
+		if (k == null || pNamedObjects == null || evalTime == null || sae == null || vg == null) {
+			String str = "Caller supplied either NULL KnowledgeHelper, NamedObject HashMap, evalTime, or SubstanceAdministrationEvent parameter";
+			logger.warn(_METHODNAME + str);
+			throw new IllegalArgumentException(str);
+		}
+
+		if (logger.isDebugEnabled()) {
+			String str = "focalPersonId " + focalPersonId + ", sae: " + sae.getId() + ", VG: " + vg;
+			logger.debug(str);
+		}
+		String conceptTargetId = sae.getId();
+
+		// SubstanceAdministrationEvent
+		SubstanceAdministrationEvent lSAE = new SubstanceAdministrationEvent();
+		String uniqueSarIdValue = ICELogicHelper.generateUniqueString();
+		lSAE.setId(uniqueSarIdValue);
+		String[] subsAdmEvtTemplateArr = { "2.16.840.1.113883.3.795.11.9.1.1" };
+		lSAE.setTemplateId(subsAdmEvtTemplateArr);
+		lSAE.setEvaluatedPersonId(focalPersonId); 
+		lSAE.setSubjectIsFocalPerson(true); 
+		// Substance Proposal General Purpose
+		CD subsAdmGeneralPurposeCD = new CD();
+		subsAdmGeneralPurposeCD.setCodeSystem("2.16.840.1.113883.6.5");
+		subsAdmGeneralPurposeCD.setCodeSystemName("SNOMED CT");
+		subsAdmGeneralPurposeCD.setCode("384810002");
+		subsAdmGeneralPurposeCD.setDisplayName("Immunization/vaccination management (procedure)");
+		lSAE.setSubstanceAdministrationGeneralPurpose(subsAdmGeneralPurposeCD);
+		// Administration Time Interval
+		lSAE.setAdministrationTimeInterval(sae.getAdministrationTimeInterval());
+		// AdministrableSubstance sae
+		AdministrableSubstance lsaeAS = sae.getSubstance();
+		// AdministrableSubstance (new)
+		AdministrableSubstance lAS = lsaeAS;
+		lAS.setToBeReturned(true);
+		lSAE.setSubstance(lAS);
+
+		// This is a nested clinical statement
+		lSAE.setClinicalStatementToBeRoot(false);
+		lSAE.setToBeReturned(true);
+		// k.insert(lSAE);
+		k.insert(lSAE);
+		pNamedObjects.put("lSAE" + uniqueSarIdValue, lSAE);
+
+		// Therefore, create as a relatedClinicalStatement
+		ClinicalStatementRelationship rel = new ClinicalStatementRelationship();
+		rel.setSourceId(conceptTargetId);
+		rel.setTargetId(uniqueSarIdValue);
+		CD relCodeSR = new CD();
+		relCodeSR.setCodeSystem("2.16.840.1.113883.5.1002");
+		relCodeSR.setCode("PERT");
+		relCodeSR.setDisplayName("has pertinent information");
+		rel.setTargetRelationshipToSource(relCodeSR);
+		// k.insert(rel);
+		k.insert(rel);
+		pNamedObjects.put("rel" + uniqueSarIdValue, rel);
+
+		//
+		// Observation
+		//
+		String nestedIdValue = ICELogicHelper.generateUniqueString();
+		ObservationResult childObs = new ObservationResult();
+		String[] obsTemplateArr = { "2.16.840.1.113883.3.795.11.6.1.1" };
+		childObs.setTemplateId(obsTemplateArr);
+
+		// Eval Time
+		IVLDate obsTime = new IVLDate(); 
+		obsTime.setLow(evalTime.getEvalTimeValue()); 
+		obsTime.setHigh(evalTime.getEvalTimeValue()); 
+		childObs.setId(nestedIdValue);
+		childObs.setEvaluatedPersonId(focalPersonId);
+		childObs.setObservationEventTime(obsTime);
+		childObs.setSubjectIsFocalPerson(true); 
+
+		// Observation Focus
+		CD localCD = getLocalCodeForEvaluationConcept(vg);
+		childObs.setObservationFocus(localCD);
+
+		// Observation Value
+		DoseStatus doseStatus = DoseStatus.NOT_EVALUATED;
+		CD localObsCD = getLocalCodeForEvaluationStatus(doseStatus);
+		ObservationValue childObsValue = new ObservationValue();
+		childObsValue.setConcept(localObsCD);
+		childObs.setObservationValue(childObsValue);
+
+		// Observation interpretation
+		List<CD> interpretations = new ArrayList<CD>();
+		interpretations.add(getLocalCodeForEvaluationReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED"));
+		childObs.setInterpretation(interpretations);
+
+		// This is a nested clinical statement
+		childObs.setClinicalStatementToBeRoot(false);
+		childObs.setToBeReturned(true);
+		// k.insert(childObs);
+		k.insert(childObs);
+		pNamedObjects.put("childObs" + nestedIdValue, childObs);
+
+		// Therefore, create as a relatedClinicalStatement
+		ClinicalStatementRelationship relO = new ClinicalStatementRelationship();
+		relO.setSourceId(uniqueSarIdValue);
+		relO.setTargetId(nestedIdValue);
+		CD relCodeSO = new CD();
+		relCodeSO.setCodeSystem("2.16.840.1.113883.5.1002");
+		relCodeSO.setCode("PERT");
+		relCodeSO.setDisplayName("has pertinent information");
+		rel.setTargetRelationshipToSource(relCodeSO);
+		// k.insert(relO);
+		k.insert(relO);
+		pNamedObjects.put("rel" + nestedIdValue, relO);
+	}
+
+	
 	/**
 	 * This method creates a root SubstanceAdministrationProposal in the following format
 		   <substanceAdministrationProposal>
@@ -546,7 +660,7 @@ public class PayloadHelper {
 		}
 
 		DoseStatus lDoseStatusToReturn = null;
-		if (pDS == DoseStatus.VALID || pDS == DoseStatus.ACCEPTED || pDS == DoseStatus.INVALID) {
+		if (pDS == DoseStatus.VALID || pDS == DoseStatus.ACCEPTED || pDS == DoseStatus.INVALID || pDS == DoseStatus.NOT_EVALUATED) {
 			lDoseStatusToReturn = pDS;
 		}
 		else {
