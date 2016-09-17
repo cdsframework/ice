@@ -43,6 +43,7 @@ import org.opencds.vmr.v1_0.internal.EntityBase
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.ObservationResult
+import org.opencds.vmr.v1_0.internal.ObservationValue
 import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent
 import org.opencds.vmr.v1_0.internal.SubstanceAdministrationProposal
 import org.opencds.vmr.v1_0.internal.concepts.ImmunizationConcept
@@ -2094,6 +2095,27 @@ end
 
 
 ///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "ProcessResults: Return Recommendations for Vaccines Not Supported" ruleflow-group "ProcessResults"
+	dialect "mvel"
+	salience 10
+	when
+		exists ObservationResult(observationValue.concept == PayloadHelper.getLocalCodeForEvaluationStatus(DoseStatus.NOT_EVALUATED, schedule))
+		not SubstanceAdministrationProposal(substance.substanceCode == PayloadHelper.getLocalCodeForRecommendationStatus(RecommendationStatus.RECOMMENDATION_NOT_AVAILABLE, schedule))
+	then
+		String _RULENAME = kcontext.rule.name;
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.outputOtherImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId); 
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");		
+end
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Output number of doses remaining START
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////// ***
 // Supplemental Output rule... Output doses remaining to Recommendation for a Series that is Not Recurring and Not Complete
 ///////// ***
 rule "ProcessResults: Append Number of Doses Remaining to Recommendation for a Series that is Not Recurring and Not Complete" ruleflow-group "ProcessResults"
@@ -2176,6 +2198,14 @@ rule "ProcessResults: Append N/A for Doses Remaining to Recommendation for a Ser
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Doses remaining for series \"" + $ts.getSeriesRules().getSeriesName() + "\": " + lStrNumberRemaining);
 end
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Output number of doses remaining END
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Set flag to be returned for all Entities and ClinicalStatements number of doses remaining START
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////// ***
 // General Design rule... Do not Edit
@@ -2203,6 +2233,11 @@ rule "BounceAllClinicalStatements" ruleflow-group "ProcessResults"
 		$cs.setToBeReturned( true );
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Set flag to be returned for all Entities and ClinicalStatements number of doses remaining END
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 //NOTE:  all demographics about the Patient are always returned in the result 
