@@ -228,7 +228,7 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
 			targetSeason != null && targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)), collectList($tsInfluenzaThis))
 		accumulate($tdprior: TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenzaSeasons);
 			$latestInfluenzaDoseDateFromPriorSeasons : maxDate($shotDateCondition1), $countPriorDoses : count($tdprior); 
-			$latestInfluenzaDoseDateFromPriorSeasons != null, LocalDate.fromDateFields((Date) $latestInfluenzaDoseDateFromPriorSeasons).compareTo(new LocalDate(2010, 7, 1)) >= 0 && 
+			$latestInfluenzaDoseDateFromPriorSeasons != null && LocalDate.fromDateFields((Date) $latestInfluenzaDoseDateFromPriorSeasons).compareTo(new LocalDate(2010, 7, 1)) >= 0 && 
 				$countPriorDoses >=2)
 		// The patient is < 9 years of age
 		$person : EvaluatedPerson()
@@ -330,7 +330,7 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
 			targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)), collectList($tsInfluenzaThis))
 		accumulate($tdpriorCondition1 : TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenza); 
 			$latestInfluenzaDoseDateFromPriorSeasons : maxDate($shotDateCondition1), $countPriorInfluenzaDosesCondition1 : count($tdpriorCondition1); 
-			$latestInfluenzaDoseDateFromPriorSeasons == null || (! ($countPriorInfluenzaDosesCondition1 >= 2 &&  
+			$latestInfluenzaDoseDateFromPriorSeasons == null || (! ($countPriorInfluenzaDosesCondition1 >= 2 && $latestInfluenzaDoseDateFromPriorSeasons != null &&
 				LocalDate.fromDateFields((Date) $latestInfluenzaDoseDateFromPriorSeasons).compareTo(new LocalDate(2010, 7, 1)) >= 0)))
 		//
 		// Condition: the patient DID NOT receive at least 2 doses of seasonal influenza vaccine prior to July 2010 (i.e. - across current season and prior season) and at least one
