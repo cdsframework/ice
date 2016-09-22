@@ -81,3 +81,19 @@ rule "Influenza: Evaluate the Influenza Shot as Outside Flu Season if it does no
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries 
 end 
 
+
+rule "Influenza: Verify Adherence to the Maximum Valid Age for the Vaccine if CVX 161 (injectable quadrivalent, preservative-free, pediatric) is Administered" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "maximumAgeVaccineCheck"
+    when
+    	The patient information $oEvaluatedPerson must be known to complete writing this rule
+    	There is an Administered Shot $oTargetDose that needs to be evaluated
+       		- the vaccine administered is "ICE161"
+       		- the vaccine administered has a maximum valid age
+		There is a Series $oTargetSeries that contains the Dose $oTargetDose
+		Confirm the age of the patient $oEvaluatedPerson at the time the vaccine was administered for dose $oTargetDose is greater than the maximum allowable age for the vaccine
+    then
+        Mark the shot $oTargetDose as Invalid for this Series due to "Insufficient Antigen"
+        Record that this dose rule was Processed for the TargetDose $oTargetDose
+        Log that this dose rule fired for the dose $oTargetDose in the Series $oTargetSeries
+end

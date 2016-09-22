@@ -2118,21 +2118,42 @@ end
 ///////// ***
 // Supplemental Output rule... Output doses remaining to Recommendation for a Series that is Not Recurring and Not Complete
 ///////// ***
-rule "ProcessResults: Append Number of Doses Remaining to Recommendation for a Series that is Not Recurring and Not Complete" ruleflow-group "ProcessResults"
+rule "ProcessResults: Append Number of Doses Remaining to Recommendation for a Series (not Influenza) that is Not Recurring and Not Complete" ruleflow-group "ProcessResults"
 	dialect "mvel"
 	no-loop true
 	salience 5
 	when
 		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$sap : SubstanceAdministrationProposal($sapid : id)
-		$ts : TargetSeries(targetSeriesIdentifier == $sapid, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false, isSeriesComplete() == false,
-			$numberOfDosesAdministered : determineEffectiveNumberOfDosesInSeries(), $numberOfDosesInSeries : seriesRules.numberOfDosesInSeries, 
+		$ts : TargetSeries(targetSeriesIdentifier == $sapid, vaccineGroup != "VACCINE_GROUP_CONCEPT.800", getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false, 
+			isSeriesComplete() == false, $numberOfDosesAdministered : determineEffectiveNumberOfDosesInSeries(), $numberOfDosesInSeries : seriesRules.numberOfDosesInSeries, 
 			recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
 			recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
 	then
 		String _RULENAME = kcontext.rule.name;
 		int lNumberRemaining = $numberOfDosesInSeries-$numberOfDosesAdministered;
 		String lStrNumberRemaining = String.valueOf(lNumberRemaining);
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, lStrNumberRemaining, $sap);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Doses remaining for series \"" + $ts.getSeriesRules().getSeriesName() + "\": " + lStrNumberRemaining);	
+end
+
+
+///////// ***
+// Supplemental Output rule... Output "Recurring" to Recommendation for Influenza; overrides appending of number of doses remaining
+///////// ***
+rule "ProcessResults: Append Recurring to Recommendation for Influenza" ruleflow-group "ProcessResults"
+	dialect "mvel"
+	no-loop true
+	salience 5
+	when
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
+		$sap : SubstanceAdministrationProposal($sapid : id)
+		$ts : TargetSeries(targetSeriesIdentifier == $sapid, vaccineGroup == "VACCINE_GROUP_CONCEPT.800", recommendationStatus == RecommendationStatus.RECOMMENDED || 
+			recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
+	then
+		String _RULENAME = kcontext.rule.name;
+		String lStrNumberRemaining = "RECURRING";
 		PayloadHelper p = new PayloadHelper(schedule);
 		p.OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, lStrNumberRemaining, $sap);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Doses remaining for series \"" + $ts.getSeriesRules().getSeriesName() + "\": " + lStrNumberRemaining);	
@@ -2164,7 +2185,7 @@ end
 ///////// ***
 // Supplemental Output rule... Output doses N/A for Doses Remaining to Recommendation for a Series that is Recurring
 ///////// ***
-rule "ProcessResults: Append N/A for Doses Remaining to Recommendation for a Series that is Recurring" ruleflow-group "ProcessResults"
+rule "ProcessResults: Append Recurring for Doses Remaining to Recommendation for a Series that is Recurring" ruleflow-group "ProcessResults"
 	dialect "mvel"
 	no-loop true
 	salience 5
