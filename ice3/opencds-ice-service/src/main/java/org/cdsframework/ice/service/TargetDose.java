@@ -34,6 +34,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
 
 
 public class TargetDose {
@@ -67,14 +68,15 @@ public class TargetDose {
 	 * @param pAdministrationDate
 	 * @throws IllegalArgumentException if the Dose ID, vaccine or administration date is not populated
 	 */
-	public TargetDose(String pDoseId, Vaccine pAdministeredVaccine, VaccineComponent pVaccineComponentToBeEvaluated, Date pAdministrationDate, TargetSeries pEncompassingTargetSeries) {	
+	public TargetDose(Vaccine pAdministeredVaccine, VaccineComponent pVaccineComponentToBeEvaluated, Date pAdministrationDate, TargetSeries pEncompassingTargetSeries,
+			SubstanceAdministrationEvent pAssociatedSAE) {	
 		
-		if (pDoseId == null || pAdministeredVaccine == null || pVaccineComponentToBeEvaluated == null || pAdministrationDate == null || pEncompassingTargetSeries == null) {
-			logger.error("TargetDose(): Dose ID, Vaccine, Vaccine Component to be Evaluated, Administration Date not supplied and/or Encompassing TargetSeries not supplied");
+		if (pAdministeredVaccine == null || pVaccineComponentToBeEvaluated == null || pAdministrationDate == null || pEncompassingTargetSeries == null || pAssociatedSAE == null) {
+			logger.error("TargetDose(): Dose ID, Vaccine, Vaccine Component to be Evaluated, Administration Date not supplied, Associated SubstanceAdministrationEvent and/or Encompassing TargetSeries not supplied");
 			throw new IllegalArgumentException("TargetDose(): Dose ID, Vaccine Component to be Evaluated, Vaccine, Administration Date not supplied and/or Encompassing TargetSeries not supplied");
 		}
 		uniqueId = ICELogicHelper.generateUniqueString();
-		doseId = pDoseId;
+		doseId = pAssociatedSAE.getId();
 		associatedTargetSeries = pEncompassingTargetSeries;
 		administeredVaccine = pAdministeredVaccine;
 		vaccineComponent = pVaccineComponentToBeEvaluated;
@@ -179,12 +181,11 @@ public class TargetDose {
 		return associatedTargetSeries;
 	}
 	
+	/**
+	 * Return ID of this TargetDose, which matches the ID of the associated SubstanceAdministrationEvent when this TargetDose was created
+	 */
 	public String getDoseId() {
 		return doseId;
-	}
-
-	public void setDoseId(String doseId) {
-		this.doseId = doseId;
 	}
 
 	/**

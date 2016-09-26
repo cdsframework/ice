@@ -107,7 +107,7 @@ public class TargetDoseInitializationTracker {
 			if (! initializedTargetDoseByVgMap.containsKey(ctidvcc) || initializedTargetDoseByVgMap.get(ctidvcc).equals(vaccineGroupStr)) {
 				/////// TODO: For seasons, only add the TargetDose to the TargetSeries if the dose was administered during timeframe permitted by the Series 
 				/////// TargetDose td = new TargetDose(ctid, vaccineAdministered, vc, adminDate);
-				TargetDose td = new TargetDose(ctid, vaccineAdministered, vc, adminDate, ts);
+				TargetDose td = new TargetDose(vaccineAdministered, vc, adminDate, ts, sae);
 				boolean lTargetDoseAdded = false;
 				if (overrideSeasonalDateRestriction) {
 					lTargetDoseAdded = ts.addTargetDoseToSeries(td, overrideSeasonalDateRestriction);

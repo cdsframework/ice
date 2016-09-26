@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.ice.service.ICECoreError;
+import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
 import org.cdsframework.ice.util.FileNameWithExtensionFilterImpl;
@@ -731,82 +732,62 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 				logger.info(_METHODNAME + "Loaded DSL file " + dslFile.getPath());
 				knowledgeBuilder.add(ResourceFactory.newFileResource(dslFile), ResourceType.DSL);
 			}
-			if (drlFile  != null) {
-				knowledgeBuilder.add( ResourceFactory.newFileResource(drlFile), ResourceType.DRL );
-				logger.info(_METHODNAME + "Loaded DRL file " + drlFile.getPath());
-			}
-			if (drlFileDuplicateShotSameDay  != null) {
-				knowledgeBuilder.add( ResourceFactory.newFileResource(drlFileDuplicateShotSameDay), ResourceType.DRL );
-				logger.info(_METHODNAME + "Loaded DRL file " + drlFileDuplicateShotSameDay.getPath());
-			}
-			//////////////////////////////////////////////////////////////////////
-
+			
 			//////////////////////////////////////////////////////////////////////
 			// Now load the Knowledge Module specific rules - Do so by reading all of the files that fit the filter for the knowledge module directory
-			File dslrFileDirectory = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lRequestedKmId);
-			if (dslrFileDirectory == null || dslrFileDirectory.exists() == false || dslrFileDirectory.isDirectory() == false) {
-				String lErrStr = "Knowledge module specific directory does not exist; cannot continue";
+			//////////////////////////////////////////////////////////////////////
+			List<File> lFilesToExcludeFromKB = new ArrayList<File>();
+			// lFilesToExcludeFromKB.add(drlFile);
+			// lFilesToExcludeFromKB.add(drlFileDuplicateShotSameDay);
+
+			// Add base rules to knowledge base
+			File dslrBaseFileDirectory = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lBaseRulesScopingKmId);
+			List<File> lBaseFilesToLoad = retrieveCollectionOfDSLRsToAddToKnowledgeBase(lBaseRulesScopingKmId, dslrBaseFileDirectory, lFilesToExcludeFromKB);
+			if (lBaseFilesToLoad.isEmpty()) {
+				String lErrStr = "No base ICE rules found; cannot continue";
 				logger.error(_METHODNAME + lErrStr);
-				throw new RuntimeException(lErrStr);
+				throw new InconsistentConfigurationException(lErrStr);
+			}
+			// Load the files - only DRL files permitted for the base cdsframework rules
+			for (File lFileToLoad : lBaseFilesToLoad) {
+				if (lFileToLoad != null) {
+					if (lFileToLoad.getName().endsWith(".drl") || lFileToLoad.getName().endsWith(".DRL")) {
+						knowledgeBuilder.add(ResourceFactory.newFileResource(lFileToLoad), ResourceType.DRL);
+						logger.info(_METHODNAME + "Loaded DRL file " + lFileToLoad.getPath());
+					}
+				}
 			}
 
-			// Obtain the files in this directory that adheres to the base and extension, ordered.
-			String[] lValidFileExtensionsForCustomRules = { "drl", "dslr" };
-			String[] lResultFiles = dslrFileDirectory.list(new FileNameWithExtensionFilterImpl(lRequestedKmId, lValidFileExtensionsForCustomRules));
-			if (lResultFiles != null && lResultFiles.length > 0) {
-				Arrays.sort(lResultFiles);
-			}
-			if (logger.isDebugEnabled()) {
-				String lDebugStr = "Custom rule files to be loaded into this knowledge module:\n";
-				for (int i=0; i < lResultFiles.length; i++) {
-					if (i == lResultFiles.length-1) {
-						lDebugStr += lResultFiles[i];
-					}
-					else {
-						lDebugStr += lResultFiles[i] + "\n";
+			// Add custom rules to knowledge base - both DRL and DSLR files permitted, DRL files loaded first.
+			File dslrFileDirectory = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lRequestedKmId);
+			List<File> lFilesToLoad = retrieveCollectionOfDSLRsToAddToKnowledgeBase(lRequestedKmId, dslrFileDirectory, lFilesToExcludeFromKB);
+			// First do the DRL files, then the DSLR files
+			for (File lFileToLoad : lFilesToLoad) {
+				if (lFileToLoad != null) {
+					if (lFileToLoad.getName().endsWith(".drl") || lFileToLoad.getName().endsWith(".DRL")) {
+						knowledgeBuilder.add(ResourceFactory.newFileResource(lFileToLoad), ResourceType.DRL);
+						logger.info(_METHODNAME + "Loaded DRL file " + lFileToLoad.getPath());
 					}
 				}
-				logger.debug(lDebugStr);
+			}
+			for (File lFileToLoad : lFilesToLoad) {
+				if (lFileToLoad != null) {
+					if (lFileToLoad.getName().endsWith(".dslr") || lFileToLoad.getName().endsWith(".DSLR")) {
+						knowledgeBuilder.add(ResourceFactory.newFileResource(lFileToLoad), ResourceType.DSLR);
+						logger.info(_METHODNAME + "Loaded DSLR file " + lFileToLoad.getPath());
+					}
+				}
 			}
 
-			logger.info(_METHODNAME + "Loading knowledge base with custom DRL and DSLR files: do DRL first, then DSLR");
-			File customRuleFile = null;
-			if (lResultFiles != null) {
-				for (int i=0; i < lResultFiles.length; i++) {
-					String lResultFile = lResultFiles[i];
-					customRuleFile = new File(dslrFileDirectory, lResultFile);
-					if (customRuleFile.equals(drlFile) || customRuleFile.equals(drlFileDuplicateShotSameDay)) {
-						continue;
-					}
-					if (customRuleFile != null && customRuleFile.exists()) {
-						if (lResultFile.endsWith(".drl") || lResultFile.endsWith(".DRL")) {
-							knowledgeBuilder.add(ResourceFactory.newFileResource(customRuleFile), ResourceType.DRL);
-							logger.info(_METHODNAME + "Loaded DRL file " + customRuleFile.getPath());
-						}
-					}
-				}
-				for (int i=0; i < lResultFiles.length; i++) {
-					String lResultFile = lResultFiles[i];
-					customRuleFile = new File(dslrFileDirectory, lResultFile);
-					if (customRuleFile.equals(drlFile) || customRuleFile.equals(drlFileDuplicateShotSameDay)) {
-						continue;
-					}
-					if (customRuleFile != null && customRuleFile.exists()) {
-						if (lResultFile.endsWith(".dslr") || lResultFile.endsWith(".DSLR")) {
-							knowledgeBuilder.add(ResourceFactory.newFileResource(customRuleFile), ResourceType.DSLR);
-							logger.info(_METHODNAME + "Loaded DSLR file " + customRuleFile.getPath());
-						}
-					}
-				}
-			}
 			//////////////////////////////////////////////////////////////////////
 
-			if ( knowledgeBuilder.hasErrors() ) {
+			if (knowledgeBuilder.hasErrors() ) {
 				throw new RuntimeException("KnowledgeBuilder had errors on build of: '" + lRequestedKmId + "', "+ knowledgeBuilder.getErrors().toString() );
 			}	
 			if (knowledgeBuilder.getKnowledgePackages().size() == 0) {
 				throw new RuntimeException("KnowledgeBuilder did not find any VALID '.drl', 'dsl', '.bpmn' or '.pkg' files for: '" + lRequestedKmId + "', "+ knowledgeBuilder.getErrors().toString());
 			}
+			//////////////////////////////////////////////////////////////////////
 
 			lKnowledgeBase.addKnowledgePackages(knowledgeBuilder.getKnowledgePackages());
 		}
@@ -839,5 +820,64 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		return lKnowledgeBase;
 	}
 	
-}
+	
+	private List<File> retrieveCollectionOfDSLRsToAddToKnowledgeBase(String pRequestedKmId, File pDSLRFileDirectory, List<File> pFilesToExcludeFromKB) {
+		
+		String _METHODNAME = "retrieveCollectionOfDSLRsToAddToKnowledgeBase(): ";
+		
+		if (pDSLRFileDirectory == null || pDSLRFileDirectory.exists() == false || pDSLRFileDirectory.isDirectory() == false) {
+			String lErrStr = "Knowledge module specific directory does not exist; cannot continue. Directory: " + pDSLRFileDirectory.getAbsolutePath();
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
 
+		// Obtain the files in this directory that adheres to the base and extension, ordered.
+		String[] lValidFileExtensionsForCustomRules = { "drl", "dslr" };
+		String[] lResultFiles = pDSLRFileDirectory.list(new FileNameWithExtensionFilterImpl(pRequestedKmId, lValidFileExtensionsForCustomRules));
+		if (lResultFiles != null && lResultFiles.length > 0) {
+			Arrays.sort(lResultFiles);
+		}
+		if (logger.isDebugEnabled()) {
+			String lDebugStr = "Custom rule files to be loaded into this knowledge module:\n";
+			for (int i=0; i < lResultFiles.length; i++) {
+				if (i == lResultFiles.length-1) {
+					lDebugStr += lResultFiles[i];
+				}
+				else {
+					lDebugStr += lResultFiles[i] + "\n";
+				}
+			}
+			logger.debug(lDebugStr);
+		}
+
+		logger.info(_METHODNAME + "Determining knowledge base with custom DRL and DSLR files");
+		List<File> drlFilesToAddToKB = new ArrayList<>();
+		File customRuleFile = null;
+		if (lResultFiles != null) {
+			// Add DRL files first to KB
+			for (int i=0; i < lResultFiles.length; i++) {
+				boolean exclusionFound = false;
+				String lResultFile = lResultFiles[i];
+				customRuleFile = new File(pDSLRFileDirectory, lResultFile);
+				for (File lExclusion : pFilesToExcludeFromKB) {
+					if (customRuleFile.equals(lExclusion)) {
+						exclusionFound = true;
+						break;
+					}
+				}
+				if (exclusionFound) {
+					continue;
+				}
+				if (customRuleFile != null && customRuleFile.exists()) {
+					if (lResultFile.endsWith(".drl") || lResultFile.endsWith(".DRL") || lResultFile.endsWith(".dslr") || lResultFile.endsWith(".DSLR")) {
+						drlFilesToAddToKB.add(customRuleFile);
+					}
+				}
+			}
+			
+		}
+		
+		return drlFilesToAddToKB;
+	}
+	
+}

@@ -228,7 +228,7 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
 			targetSeason != null && targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)), collectList($tsInfluenzaThis))
 		accumulate($tdprior: TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenzaSeasons);
 			$latestInfluenzaDoseDateFromPriorSeasons : maxDate($shotDateCondition1), $countPriorDoses : count($tdprior); 
-			$latestInfluenzaDoseDateFromPriorSeasons != null, LocalDate.fromDateFields((Date) $latestInfluenzaDoseDateFromPriorSeasons).compareTo(new LocalDate(2010, 7, 1)) >= 0 && 
+			$latestInfluenzaDoseDateFromPriorSeasons != null && LocalDate.fromDateFields((Date) $latestInfluenzaDoseDateFromPriorSeasons).compareTo(new LocalDate(2010, 7, 1)) >= 0 && 
 				$countPriorDoses >=2)
 		// The patient is < 9 years of age
 		$person : EvaluatedPerson()
@@ -330,7 +330,7 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
 			targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)), collectList($tsInfluenzaThis))
 		accumulate($tdpriorCondition1 : TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenza); 
 			$latestInfluenzaDoseDateFromPriorSeasons : maxDate($shotDateCondition1), $countPriorInfluenzaDosesCondition1 : count($tdpriorCondition1); 
-			$latestInfluenzaDoseDateFromPriorSeasons == null || (! ($countPriorInfluenzaDosesCondition1 >= 2 &&  
+			$latestInfluenzaDoseDateFromPriorSeasons == null || (! ($countPriorInfluenzaDosesCondition1 >= 2 && $latestInfluenzaDoseDateFromPriorSeasons != null &&
 				LocalDate.fromDateFields((Date) $latestInfluenzaDoseDateFromPriorSeasons).compareTo(new LocalDate(2010, 7, 1)) >= 0)))
 		//
 		// Condition: the patient DID NOT receive at least 2 doses of seasonal influenza vaccine prior to July 2010 (i.e. - across current season and prior season) and at least one
@@ -553,6 +553,28 @@ rule "SeriesSelection.SelectOnlyHPVSeries" ruleflow-group "SeriesSelection"
 		update($ts);	
 end
 
+
+///////////////////////////////////////////////////////////// Zoster-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+// Since there is only one Zoster series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
+rule "SeriesSelection.SelectOnlyZosterSeries" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 100
+	agenda-group "customSeriesSelectionRules"
+	activation-group "ZosterSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true))		
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", $tsid : targetSeriesIdentifier)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);	
+end
 
 ///////////////////////////////////////////////////////////// Polio-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
