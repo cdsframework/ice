@@ -66,9 +66,6 @@ public class TargetSeries {
 	private boolean immunityToAllDiseasesRecorded;
 	private boolean historyEvaluationInitiated;
 	private boolean postForecastCheckCompleted;
-	
-	
-	// private boolean performForecastCheck;
 	private int manuallySetDoseNumberToRecommend;
 
 	private List<Recommendation> interimRecommendationsScheduleEarliest;
@@ -495,12 +492,14 @@ public class TargetSeries {
 			logger.warn(errStr);
 			return;
 		}
+		/*
 		if (pDoseNumberToSkipTo < pDoseNumberToSkipFrom) {
 			String errStr = "dose number to skip from (" + pDoseNumberToSkipFrom + ") is greater than dose number to skip to (" + pDoseNumberToSkipTo + ")";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-
+		*/
+		
 		int lTargetDoseNumber = 0;
 		if (pTargetDoseNumber <= 0) {
 			lTargetDoseNumber = determineDoseNumberInSeries();
@@ -941,7 +940,7 @@ public class TargetSeries {
 	}
 
 	/**
-	 * Return a simple count of valid or accepted shots administered in this series. Does not take into account immunity or skipped doses
+	 * Return a simple count of valid shots administered in this series. Does not take into account immunity or skipped doses
 	 */
 	public int determineNumberOfDosesAdministeredInSeries() {
 
@@ -3407,7 +3406,6 @@ public class TargetSeries {
 				this.finalRecommendations.add(r);
 			}
 		}
-		/////// this.finalRecommendations = recommendation;
 	}
 	
 	private void addFinalRecommendations(List<Recommendation> recommendations) {

@@ -70,32 +70,6 @@ rule "HepA: Shot 2 Valid if administered >= 6 months from Dose 1, even if there 
 end 
 
 
-/*
-rule "Switch from 2-Dose HepA series to 3-Dose HepA series if CVX 83 (Hep A, ped/adol, 2 dose) or CVX 84 (Hep A, ped/adol, 3 dose) or CVX 31 (Hep A, pediatric, unspecified formulation) is given to a patient >= 19 years old as dose 1 or dose 2 " ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	agenda-group "postEvaluationCheck"
-	when
-		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the dose number in the series is <= 2
-			- the vaccine administered a member of ("ICE83", "ICE84", "ICE31")
-			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
-			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
-			- make note of the Dose Number as $assign_nDoseNumber
-		There is a Series $targetSeries that contains the Dose $currentDose
-			- the name of the Series is "HepA2DoseChildAdultSeries"
-		There is a Series $seriesToSwitchTo
-			- the name of the Series is "HepAAdult3DoseSeries"
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		// The Immunization Schedule information $oSchedule must be known to complete writing this rule
-		Confirm Elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y"
-	then
-		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber and evaluate using interval for prior dose to this dose from switchedTo series
-		Refresh all facts in the Series $targetSeries for Evaluation
-		Log that this Series Rule fired for the Series $targetSeries
-end
-*/
-
 rule "Switch from 2-Dose HepA series to 3-Dose HepA series if CVX 83 (Hep A, ped/adol, 2 dose) or CVX 84 (Hep A, ped/adol, 3 dose) or CVX 31 (Hep A, pediatric, unspecified formulation) is given to a patient >= 19 years old as dose 1 or dose 2 " ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "postEvaluationCheck"
