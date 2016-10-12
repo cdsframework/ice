@@ -619,18 +619,18 @@ rule "SeriesSelection.SelectOnlyMCVSeries" ruleflow-group "SeriesSelection"
 		update($ts);	
 end
 
-///////////////////////////////////////////////////////////// PPSV-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////// Pneumococcal-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
-// Since there is only one PPSV series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
-rule "SeriesSelection.SelectOnlyPPSVSeries" ruleflow-group "SeriesSelection"
+// Pneumococcal: The Adult Series applies if the patient is >= 5 years old
+rule "SeriesSelection.SelectAdultPneumococcalSeries" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	salience 100
 	agenda-group "customSeriesSelectionRules"
-	activation-group "PPSVSeriesSelectionCheck"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.720", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.720", selectedSeries == true))		
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.720")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.750", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", selectedSeries == true)		
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", seriesRules.seriesName == "PneumococcalAdultSeries", selectedSeries == true)
+		$person: EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "5y") >= 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -642,18 +642,16 @@ rule "SeriesSelection.SelectOnlyPPSVSeries" ruleflow-group "SeriesSelection"
 end
 
 
-///////////////////////////////////////////////////////////// PCV-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
-
-// Since there is only one PCV series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
-rule "SeriesSelection.SelectOnlyPCVSeries" ruleflow-group "SeriesSelection"
+// Pneumococcal: The Child Series applies if the patient is < 5 years old
+rule "SeriesSelection.SelectChildPneumococcalSeries" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	salience 100
 	agenda-group "customSeriesSelectionRules"
-	activation-group "PCVSeriesSelectionCheck"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.700", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.700", selectedSeries == true))		
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.700")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.750", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", selectedSeries == true)		
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", seriesRules.seriesName == "PneumococcalChildSeries", selectedSeries == true)
+		$person: EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "5y") < 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
