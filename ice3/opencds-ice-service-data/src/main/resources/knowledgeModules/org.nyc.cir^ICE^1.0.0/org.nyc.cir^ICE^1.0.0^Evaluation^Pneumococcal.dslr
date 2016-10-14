@@ -166,20 +166,28 @@ rule "Pneumococcal Adult Series: Minimum interval from PCV 7 = 0d" ruleflow-grou
 		Log that this dose rule fired for the dose $currentShotForIntervalCheck in the Series $targetSeriesForIntervalCheck
 end
 
+
 //////////////
 
-// Child Series: If CVX 33 is administered in the Child Series, then mark the shot as *Accepted* (rather than INVALID) with a reason code of VACCINE_NOT_ALLOWED_FOR_THIS_DOSE. (Overrides general "allowableVaccineCheck" rule)
-rule "Pneumococcal Child Series: Evaluate PPSV shot (CVX 33) in Child Series as Accepted with a reason code of VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" ruleflow-group "HistoryEvaluation"
+// Child Series: If an invalid vaccine is administered in the Child Series, mark the shot as *Accepted* (rather than INVALID) with a reason code of VACCINE_NOT_ALLOWED_FOR_THIS_DOSE. 
+// As of 10/2016, only CVX 33. (Overrides general "allowableVaccineCheck" rule)
+rule "Pneumococcal Child Series: Evaluate shot with invalid vaccine as Accepted with reason code of VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
-		There is an administered shot $currentDose that needs to be evaluated
-			- the vaccine administered is "ICE33"
+		There is an Administered Shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalChildSeries"
+			- make note of the administered vaccine as $vaccineAdministered
+			- make note of the dose number as $doseNumber
+		There is a Series $targetSeries that contains the shot $currentShot
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalChildSeries"
+			- the vaccine $vaccineAdministered is not permitted for dose number $doseNumber in this series
 	then
-		Mark the shot $currentDose as Accepted for this Series due to "Vaccine Not Allowed For This Dose"
-		Record that this dose rule was processed for the TargetDose $currentDose
+		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Allowed For This Dose"
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
 
@@ -291,9 +299,9 @@ rule "Pneumococcal Child Series: Switch from Child Series to Adult Series if sho
 		There is a Series $seriesToSwitchTo
 			- the name of the Series is "PneumococcalAdultSeries"
 	then
-		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $nDoseNumber and evaluate using interval for prior dose to this dose from switchedTo series
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $nDoseNumber and evaluate using interval for prior dose to this dose from switchedFrom series
 		// Reset the dose number back to 1 now that we are in the adult series
-		Set Dose Number of $currentDose to 2
+		// Set Dose Number of $currentDose to 1
 		Skip Series Dose Number to 1 from $nDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Refresh all facts in the Series $targetSeries for Evaluation
 		Log that this Series Rule fired for the Series $targetSeries
@@ -311,7 +319,7 @@ rule "Pneumococcal Child Series: Switch from Child Series to Adult Series if pat
 		There is a Series $seriesToSwitchTo
 			- the name of the Series is "PneumococcalAdultSeries"
 	then
-		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assignEffectiveDoseNumber and evaluate using interval for prior dose to this dose from switchedTo series
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assignEffectiveDoseNumber and evaluate using interval for prior dose to this dose from switchedFrom series
 		// Reset the dose number back to 1 now that we are in the adult series
 		Skip Series Dose Number to 1 from $assignEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Refresh all facts in the Series $targetSeries for Evaluation

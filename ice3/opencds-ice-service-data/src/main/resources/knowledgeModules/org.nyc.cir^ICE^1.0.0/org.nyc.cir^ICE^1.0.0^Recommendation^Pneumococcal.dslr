@@ -52,7 +52,7 @@ global org.drools.runtime.KnowledgeContext kcontext
 global org.cdsframework.ice.service.Schedule schedule
 
 
-// Post Recommendation Check: When pneumococcal conjugate is recommended (in the future or now; not conditionally), always recommend at the vaccine level; vaccine recommended should be PCV 13 (CVX 133).
+// Post Recommendation Check: When recommending in the Child Series (in the future or not, not conditonally), always recommend at the CVX level; vaccine recommended should be PCV 13 (CVX 133).
 rule "Pneumococcal Child Series: Recommend at the vaccine level in 4-Dose PCV Series; vaccine recommended should be PCV 13 (CVX 133)" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "postRecommendationCheck"
@@ -70,25 +70,8 @@ rule "Pneumococcal Child Series: Recommend at the vaccine level in 4-Dose PCV Se
 end
 
 
-// If the child is >= 5yrs old and the series is not complete, mark that the series can never be completed
-rule "Pneumococcal Child Series: Mark that the Series cannot be ever be completed if Patient is >= 5yrs and series is not already complete" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	agenda-group "customRecommendationRule"
-	salience 300
-	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
-			- the Series is Not Complete
-		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
-	then
-		Mark that the Series $targetSeries cannot be forecasted as Complete
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
+// If a patient is < 5 years and has completed the Child series (including meeting the PCV 13 Rule), then the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK.  
+// No custom rule required. This rule taken care of by the default series rules
 
 // If a child is complete for the series, has had one or more doses but not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old and will be < 5 years old at the recommended due date, 
 // then a dose of PCV 13 (CVX 133) is recommended. Recommended interval = 8 weeks and minimum interval = 52 days from the previous shot.
@@ -144,45 +127,17 @@ rule "Pneumococcal Child Series: Recommend a Conditional High_Risk if Patient is
 end
 
 
-// If a child is => 5 years old but does not have a dose of PCV 13 then recommendation = Conditional, reason = HIGH_RISK even if they have completed 
-// their PCV series (with PCV7 or PCV NOS)
-rule "Pneumococcal Child Series: Recommend a Conditional High_Risk dose of PCV_13 if Patient is >= 5yrs and no prior dose of PCV_13" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	agenda-group "customRecommendationRule"
-	salience 210
-	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"				 
-		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "ICE133" is == 0
-		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Mark Forecasting of the Series $targetSeries Complete
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-		
-
-// Rule for patients >=5 years old
-rule "Pneumococcal Child Series: Recommend Conditional High Risk in 4-Dose PCV Series if Patient Age >=5yrs and Series Not Complete by 5yrs of Age" ruleflow-group "RecommendationForecast"
+// Rule for patients >=5 years old and < 65 years old: recommend CONDITIONAL and HIGH_RISK
+rule "Pneumococcal Series: Recommend Conditional High Risk if Patient Age >=5yrs and < 65yrs of Age" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	salience 200
 	when
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $assign_dtDateAtAge when the patient is "5y" of age
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
-			- the Series is Not Complete
-			- make note of the number of doses required to complete this series as $assign_nNumberOfDosesRequired
-		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "65y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
