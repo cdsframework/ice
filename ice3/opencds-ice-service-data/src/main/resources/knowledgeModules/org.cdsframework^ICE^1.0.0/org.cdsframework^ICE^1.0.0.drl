@@ -1510,6 +1510,9 @@ rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirus" ruleflow-group
 end 
 
 
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
 rule "RecommendationForecast.adjustRecommendedStatusForFinalRecommendationDateWithRespectToEvalTime" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "supplementalSeriesRule"
@@ -1530,7 +1533,7 @@ end
 
 
 ///////// ***
-// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// General Design rule... Do not Edit
 // Per ICE SME group, if recommendation is conditional, do not display a recommendation date.
 ///////// ***
 rule "RecommendationForecast.doNotReturnForecastDateForConditionalRecommendations" ruleflow-group "RecommendationForecast"
@@ -1547,7 +1550,7 @@ end
 
 
 ///////// ***
-// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// General Design rule... Do not Edit
 // If the list of recommended vaccines are inconsistent (i.e. - different interim recommendation forecasts with different vaccines), and the patient is recommended 
 // for a forecast, then log the inconsistency and recommend at the vaccine group level
 ///////// ***
@@ -1566,7 +1569,7 @@ end
 
 	
 ///////// ***
-// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// General Design rule... Do not Edit
 // If the list of recommended vaccines are consistent and not all empty, and the patient is recommended for a forecast, then recommend at the vaccine level of the only specified vaccine
 ///////// ***
 rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsistent" ruleflow-group "RecommendationForecast"
