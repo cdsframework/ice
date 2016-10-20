@@ -169,7 +169,6 @@
 //
 // TargetDose accumulates
 //
-/////// [condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine {dd_oSupportedVaccineConcept} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(isValid == true, vaccineComponent.vaccineConcept.openCdsConceptCode == {dd_oSupportedVaccineConcept}.conceptCodeValue || $td.administeredVaccine.vaccineConcept.openCdsConceptCode == {dd_oSupportedVaccineConcept}.conceptCodeValue) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 [condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine {dd_oVaccineCdsListItem} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || $td.administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 
 
