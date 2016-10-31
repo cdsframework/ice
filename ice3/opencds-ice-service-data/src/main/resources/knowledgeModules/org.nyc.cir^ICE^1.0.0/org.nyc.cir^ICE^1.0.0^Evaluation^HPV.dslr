@@ -68,7 +68,7 @@ rule "Evaluate HPV Shot As Accepted If Patient >=27 yrs and does not have one or
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "27y"
 	then
 		Mark the shot $currentDose as Accepted for this Series due to "Above Recommended Age"
- 		Specify that evaluation of the shot $currentDose is complete and therefore should not be reevaluated by any other rules
+ 		Mark that evaluation of shot $currentDose is complete and therefore should not be reevaluated by any other rules
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end
