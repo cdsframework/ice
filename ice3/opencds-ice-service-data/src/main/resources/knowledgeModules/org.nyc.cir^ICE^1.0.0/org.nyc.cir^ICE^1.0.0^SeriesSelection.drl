@@ -533,16 +533,115 @@ end
 
 ///////////////////////////////////////////////////////////// HPV-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
-// Since there is only one HPV series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
-rule "SeriesSelection.SelectOnlyHPVSeries" ruleflow-group "SeriesSelection"
+/**
+The HPV 2-dose series applies if any one of the following is true:
+  1) If the patient < 15 years old and no doses have been administered
+  2) If dose 1 was administered and is CVX 165 and is given to a patient >= 9 years - 4 days old and < 15 years old
+  3) If dose 1 was administered and is CVX 165 and is given to a patient >= 9 years - 4 days old and < 15 years old 
+    + and target dose 2 is valid for the HPV 2-dose series, the HPV 2-dose series applies.
+    + target dose 2 is invalid or accepted for the HPV 2-dose series, but valid for HPV 3-dose series, the HPV 3-dose series applies. 
+    + target dose 2 is invalid or accepted for BOTH the HPV 2-dose series and HPV 3-dose series, the HPV 2-dose series applies.
+  4) Otherwise, the HPV 3-dose series applies.
+*/
+
+// By default, select the 3-dose series
+rule "SeriesSelection.HPV: Default to 3-dose series if 2-dose series not otherwiser selected" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	salience 100
 	agenda-group "customSeriesSelectionRules"
-	activation-group "HPVSeriesSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))		
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", $tsid : targetSeriesIdentifier)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries")
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);	
+end
+
+
+// If the patient < 15 years old and no doses have been administered, the HPV 2-Dose Series applies
+rule "SeriesSelection.HPV: Select 2-dose series if patient < 15yrs and no doses have been adminstered" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 10
+	agenda-group "customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries", $numberOfDoses : determineNumberOfDosesAdministeredInSeries)
+		$person : EvaluatedPerson()
+		eval($numberOfDoses == 0 && TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "15y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+
+// If there is only 1 dose which was administered and is CVX 165 and is given to a patient >= 9y-4d old and < 15 years old, the HPV 2-Dose Series applies
+rule "SeriesSelection.HPV: Select 2-Dose Series if 1-dose administered to a patient < 15yrs of age" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 10
+	agenda-group "customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$td : TargetDose(doseNumberInSeries == 1, isValid == true, $tdAdministrationDate : administrationDate)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries", containsTargetDose($td), 
+			$numberOfDoses : determineNumberOfDosesAdministeredInSeries)
+		$person : EvaluatedPerson()
+		eval($numberOfDoses == 1 && TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $tdAdministrationDate, "15y") < 0)	
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+
+// If there is only 1 dose which was administered and is CVX 165 and is given to a patient >= 9y-4d old and < 15 years old and target dose 2 is invalid or accepted for the 
+// HPV 2-dose series, but valid for HPV 3-dose series, the HPV 3-dose series applies. (In short, if 2 doses in the 3-dose series but only 1-dose in the 2-dose series)
+// (If 3-dose series has 2-doses and 2-dose series has 1-dose, the HPV 3-Dose Series applies)
+rule "SeriesSelection.HPV: Select 3-dose series if patient has 1 dose administered to a patient < 15yrs of age in 2-dose series but >= 2 doses in 3-dose series"  
+		extends "SeriesSelection.HPV: Select 2-Dose Series if 1-dose administered to a patient < 15yrs of age"
+	ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 20
+	agenda-group "customSeriesSelectionRules"
+	when
+		$ts3dose: TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries", 
+			$numberOfDosesIn3Dose : determineNumberOfDosesAdministeredInSeries)
+		eval($numberOfDosesIn3Dose >= 2)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3dose);
+		$ts3dose.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3dose.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts3dose);
+end
+
+
+// If the HPV 2-dose series is complete, select the HPV 2-Dose Series applies
+rule "SeriesSelection.HPV: Select 2-dose Series if series is complete" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 30
+	agenda-group "customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries", isSeriesComplete() == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);

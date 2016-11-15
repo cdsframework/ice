@@ -941,7 +941,7 @@ public class TargetSeries {
 	}
 
 	/**
-	 * Return a simple count of valid or accepted shots administered in this series. Does not take into account immunity or skipped doses
+	 * Return a simple count of valid shots administered in this series. Does not take into account immunity or skipped doses
 	 */
 	public int determineNumberOfDosesAdministeredInSeries() {
 
