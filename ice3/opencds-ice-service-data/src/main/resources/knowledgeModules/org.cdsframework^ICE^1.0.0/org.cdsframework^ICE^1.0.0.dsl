@@ -214,6 +214,7 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Proof of Immunity"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Above Recommended Age"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.ABOVE_REC_AGE_SERIES");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Below Recommended Age"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.BELOW_REC_AGE_SERIES"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Vaccine Not Licensed For Males"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_LICENSED_FOR_MALES");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addInvalidReason({oReason});
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Vv]alid for this [Ss]eries=
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {strReason:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({strReason});

@@ -44,12 +44,35 @@ import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Vaccine
+import org.cdsframework.ice.supportingdata.BaseDataPerson
 
 expander ../org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
 
 //declare any global variables here
 global java.util.Date evalTime
 global org.drools.runtime.KnowledgeContext kcontext
+global org.cdsframework.ice.service.Schedule schedule
+
+
+// If CVX 118 (HPV, bivalent (Cervarix) is reported for a male patient, then evaluate as Accepted and the reason code is VACCINE_NOT_LICENSED_FOR_MALES.
+// Mark that the shot should be ignored when determining further evaluations and recommendations
+rule "HPV: Evaluate CVX 118 administered to male patient as Accepted with reason VACCINE_NOT_LICENSED_FOR_MALES; Ignore shot for completion of the Series" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	when
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- the patient is male
+		There is an administered shot $currentShot that needs to be evaluated
+			- the vaccine administered is "ICE118"
+		There is a Series $targetSeries that contains the Dose $currentShot
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+	then
+		Mark that the shot $currentShot does not count towards completion of the Series
+		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Licensed For Males"
+		Specify that evaluation of the shot $currentShot is complete and therefore should not be reevaluated by any other rules
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
 
 
 rule "Evaluate HPV Shot As Accepted If Patient >=27 yrs and does not have one or more Doses <27 yrs" ruleflow-group "HistoryEvaluation"
@@ -74,7 +97,7 @@ rule "Evaluate HPV Shot As Accepted If Patient >=27 yrs and does not have one or
 end
 
 
-rule "HPV: Evaluate the Absolute Minimum Interval Between Doses 1 and 3 - 112 days required" ruleflow-group "HistoryEvaluation"
+rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 - 112 days required" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	when  
@@ -88,6 +111,7 @@ rule "HPV: Evaluate the Absolute Minimum Interval Between Doses 1 and 3 - 112 da
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series also contains the Dose $previousDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the name of the Series is "HPV3DoseSeries"
 		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "112d"
 	then
 		Mark the shot $currentDose as Invalid for this Series due to "Below Minimum Interval"
