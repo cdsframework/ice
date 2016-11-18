@@ -1094,7 +1094,7 @@ rule "SeriesSelection.SelectRotavirus3DoseSeriesIfCertainVaccinesAdministered" r
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.820", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", selectedSeries == true))		
-		$td : TargetDose(isValid == true, countsTowardsCompletionOfSeries == true, 
+		$td : TargetDose(isValid == true, isShotIgnoredForCompletionOfSeries() == false, 
 			(vaccineComponent.cdsConceptName == "ICE116" || 
 			  vaccineComponent.cdsConceptName == "ICE122" || 
 			  vaccineComponent.cdsConceptName == "ICE74"))

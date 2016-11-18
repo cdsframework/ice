@@ -219,8 +219,8 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Vv]alid for this [Ss]eries=
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {strReason:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({strReason});
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)]+} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({oReason});
-[consequence][][Mm]ark that the [Ss]hot {refer_oTargetDose} does not [Cc]ount towards [Cc]ompletion of the [Ss]eries={refer_oTargetDose}.setCountsTowardsCompletionOfSeries(false);
-[consequence][][Mm]ark that the [Ss]hot {refer_oTargetDose} [Cc]ounts towards [Cc]ompletion of the [Ss]eries={refer_oTargetDose}.setCountsTowardsCompletionOfSeries(true);
+[consequence][][Mm]ark that the [Ss]hot {refer_oTargetDose} does not [Cc]ount towards [Cc]ompletion of the [Ss]eries={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(true);
+[consequence][][Mm]ark that the [Ss]hot {refer_oTargetDose} [Cc]ounts towards [Cc]ompletion of the [Ss]eries={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(false);
 [consequence][][Ss]et [Dd]ose [Nn]umber of {refer_oTargetDose} to {nDoseNumber}=modify({refer_oTargetDose}) \{ setDoseNumberInSeries({nDoseNumber}); \};
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Nn]ot [Ee]valuated for this [Ss]eries=modify({refer_oTargetDose}) \{ setStatus(DoseStatus.NOT_EVALUATED), removeAllEvaluationReasonsFromAllReasonSets(); \};
 

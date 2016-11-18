@@ -67,7 +67,6 @@ rule "Evaluate PPSV Shot as Accepted if given before absolute minimum age of fir
 		Confirm elapsed time between $dtBirthDate and $assign_administrationDate < $assign_strTimePeriod
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Below Recommended Age"
-		// Mark that the shot $currentShot does not count towards completion of the series
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end

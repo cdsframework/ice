@@ -682,7 +682,7 @@ public class TargetSeries {
 					// BEGIN: Determine if the disease tally should be incremented or not - based on whether (1) this shot is valid; (2) it counts towards completion of the series, 
 					// and/or (3) it is a duplicate shot, taking into account targeted diseases if this series bases its dose count on the count of targeted diseases
 					boolean lIncrementDoseNumber = false;
-					if (statusThisTD == DoseStatus.VALID && td.countsTowardsCompletionOfSeries()) {
+					if (statusThisTD == DoseStatus.VALID && td.isShotIgnoredForCompletionOfSeries() == false) {
 						boolean lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered();
 						if (lDuplicateShotSameDayValidDoseFoundDate != null) {
 							// If duplicate shot same day valid dose found date is not null, then it is equal to this shot date or it would have been null'd above
@@ -896,20 +896,40 @@ public class TargetSeries {
 	}
 
 	/**
-	 * Determines if the series is complete, updates the seriesComplete instance variable, and returns the last target dose in this TargetSeries. Note that 
-	 * seriesCompleteFlagManuallySet is _not_ updated by this method.
-	 * 
+	 * Invokes determineIfSeriesCompleteAndReturnLastDose(boolean exludeIgnoredShots) with excludeIgnoredShots set to true.
 	 * @return last dose in the series, regardless of whether the series is complete or null is no doses have been administered
 	 */
 	private TargetDose determineIfSeriesCompleteAndReturnLastDose() {
+		
+		return determineIfSeriesCompleteAndReturnLastDose(false);
+	}
+	
+	/**
+	 * Determines if the series is complete, updates the seriesComplete instance variable, and returns the last target dose in this TargetSeries. If the
+	 * excludeIgnoredShots parameter is set to true, the shot will only be returned if it is not a shot marked to be ignored. 
+	 * Note that seriesCompleteFlagManuallySet is _not_ updated by this method.
+	 * @param excludeIgnoredShots indicates whether an ignored shot may be returned.
+	 * @return last dose in the series, regardless of whether the series is complete or null is no doses have been administered
+	 */
+	private TargetDose determineIfSeriesCompleteAndReturnLastDose(boolean excludeIgnoredShots) {
 
 		TargetDose lastDoseAdministered = null;
 
 		int numberOfEffectiveDoses = determineEffectiveNumberOfDosesInSeries();
 
-		if (!targetDoses.isEmpty()) {
+		if (excludeIgnoredShots == false && !targetDoses.isEmpty()) {
 			lastDoseAdministered = targetDoses.last();
-		} 
+		}
+		else if (excludeIgnoredShots == true && !targetDoses.isEmpty()) {
+			Iterator<TargetDose> tdIter = targetDoses.descendingIterator();
+			while (tdIter.hasNext()) {
+				TargetDose td = tdIter.next();
+				if (! td.isShotIgnoredForCompletionOfSeries()) {
+					lastDoseAdministered = td;
+					break;
+				}
+			}
+		}
 		else {
 			if (seriesCompleteFlagManuallySet == false) {
 				if (seriesRules.getNumberOfDosesInSeries() == 0) {
@@ -1270,7 +1290,7 @@ public class TargetSeries {
 			throw new ImproperUsageException(_METHODNAME + errStr);
 		}
 
-		TargetDose lastDoseAdministered = determineIfSeriesCompleteAndReturnLastDose();
+		TargetDose lastDoseAdministered = determineIfSeriesCompleteAndReturnLastDose(true);		// Recommendation interval based on last ignored shot
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Last dose # administered: " + ((lastDoseAdministered == null) ? "none" : lastDoseAdministered.getDoseNumberInSeries()));
 		}
