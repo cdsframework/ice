@@ -31,7 +31,7 @@ An overview of the capabilities of ICE is available http://www.hln.com/ice/. Thi
 
 This version of ICE requires Java 7, and has been tested under the latest version of Tomcat 7 and Tomcat 8. It is recommended that at least 1GB of memory be allocated to the Tomcat instance, though in our internal performance tests, we have noted a significant performance increase when allocating 2GB of memory.
 
-To install the software, please follow the directions at https://cdsframework.atlassian.net/wiki/display/CDSF/ICE+Web+Service+Installation+and+Setup to configure and interact with the service. The out-of-the-box working ICE service executable is available at this location.
+To install the software, please follow the directions at https://cdsframework.atlassian.net/wiki/display/ICE/Installing+ICE to configure and interact with the service. The out-of-the-box working ICE service executable is available at this location.
 
 Alternatively, to build the software via source:
 1) Edit opencds/opencds-parent/opencds.properties to suit your installation.
