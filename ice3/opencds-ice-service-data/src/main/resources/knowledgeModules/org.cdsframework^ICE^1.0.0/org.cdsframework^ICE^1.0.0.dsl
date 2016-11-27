@@ -214,12 +214,13 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Proof of Immunity"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Above Recommended Age"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.ABOVE_REC_AGE_SERIES");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Below Recommended Age"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.BELOW_REC_AGE_SERIES"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Vaccine Not Licensed For Males"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_LICENSED_FOR_MALES");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addInvalidReason({oReason});
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Vv]alid for this [Ss]eries=
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {strReason:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({strReason});
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)]+} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({oReason});
-[consequence][][Mm]ark that the [Ss]hot {refer_oTargetDose} does not [Cc]ount towards [Cc]ompletion of the [Ss]eries={refer_oTargetDose}.setCountsTowardsCompletionOfSeries(false);
-[consequence][][Mm]ark that the [Ss]hot {refer_oTargetDose} [Cc]ounts towards [Cc]ompletion of the [Ss]eries={refer_oTargetDose}.setCountsTowardsCompletionOfSeries(true);
+[consequence][][Mm]ark that the [Ss]hot {refer_oTargetDose} does not [Cc]ount towards [Cc]ompletion of the [Ss]eries={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(true);
+[consequence][][Mm]ark that the [Ss]hot {refer_oTargetDose} [Cc]ounts towards [Cc]ompletion of the [Ss]eries={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(false);
 [consequence][][Ss]et [Dd]ose [Nn]umber of {refer_oTargetDose} to {nDoseNumber}=modify({refer_oTargetDose}) \{ setDoseNumberInSeries({nDoseNumber}); \};
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Nn]ot [Ee]valuated for this [Ss]eries=modify({refer_oTargetDose}) \{ setStatus(DoseStatus.NOT_EVALUATED), removeAllEvaluationReasonsFromAllReasonSets(); \};
 
