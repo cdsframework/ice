@@ -49,7 +49,7 @@ public class TargetDose {
 	private int doseNumberInSeries;
 	private boolean isPrimarySeriesShot;
 	private boolean isValid;
-	private boolean countsTowardsCompletionOfSeries;
+	private boolean isShotIgnored;
 	private boolean hasBeenEvaluated;
 	private boolean postEvaluationCheckCompleted;
 	private DoseStatus status;
@@ -90,7 +90,7 @@ public class TargetDose {
 		doseRulesProcessed = new HashSet<String>();
 		isPrimarySeriesShot = false;
 		isValid = false;
-		countsTowardsCompletionOfSeries = true;
+		isShotIgnored = false;
 		hasBeenEvaluated = false;
 		postEvaluationCheckCompleted = false;
 	}
@@ -248,12 +248,12 @@ public class TargetDose {
 		this.isValid = isValid;
 	}
 
-	public boolean countsTowardsCompletionOfSeries() {
-		return countsTowardsCompletionOfSeries;
+	public boolean isShotIgnoredForCompletionOfSeries() {
+		return isShotIgnored;
 	}
 
-	public void setCountsTowardsCompletionOfSeries(boolean countsTowardsCompletionOfSeries) {
-		this.countsTowardsCompletionOfSeries = countsTowardsCompletionOfSeries;
+	public void setIsShotIgnoredForCompletionOfSeries(boolean ignoredForCompletionOfSeries) {
+		this.isShotIgnored = ignoredForCompletionOfSeries;
 	}
 
 	public boolean hasBeenEvaluated() {
