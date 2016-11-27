@@ -144,6 +144,9 @@ rule "Evaluate Shot as Accepted & Above Recommended Age if age at administration
 end
 
 
+/**
+ *
+ Rule is redundant. Shot >= 19yrs is marked as accepted, above.
 rule "Mark that the Shot Administered >= 19yrs of age does not count towards completion of the series" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
@@ -160,4 +163,4 @@ rule "Mark that the Shot Administered >= 19yrs of age does not count towards com
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
-
+*/

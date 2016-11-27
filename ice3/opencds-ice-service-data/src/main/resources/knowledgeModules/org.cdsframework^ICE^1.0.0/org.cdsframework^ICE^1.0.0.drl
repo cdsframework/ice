@@ -980,8 +980,9 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval" ruleflow-group "His
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $admindose: administeredShotNumberInSeries >= 2, $doseNumber : doseNumberInSeries, $tddate : administrationDate, 
 			$tdAssociatedTargetSeries : associatedTargetSeries)
-		$tdprev : TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administeredShotNumberInSeries < $admindose, administrationDate < $tddate, $tdprevdate : administrationDate)
-		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate)
+		$tdprev : TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administeredShotNumberInSeries < $admindose, administrationDate < $tddate, 
+			isShotIgnoredForCompletionOfSeries() == false, $tdprevdate : administrationDate)
+		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate, isShotIgnoredForCompletionOfSeries() == false)
 		$ts : TargetSeries(containsTargetDose($td) && containsTargetDose($tdprev), seriesRules.numberOfDosesInSeries >= $doseNumber)
 		not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1)
 	then
@@ -1012,16 +1013,18 @@ rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasona
 		not TargetSeries(targetSeriesIdentifier != $tsprev.targetSeriesIdentifier, targetSeason != null, vaccineGroup == $vaccineGroup,
 			targetDoses.size() > 0, targetSeason.fullySpecifiedSeasonStartDate.isAfter($tseasonPrev.getFullySpecifiedSeasonStartDate()) && 
 			targetSeason.fullySpecifiedSeasonStartDate.isBefore($tseason.getFullySpecifiedSeasonStartDate()))
+		$lastFromPrev: TargetDose(associatedTargetSeries == $tsprev, isShotIgnoredForCompletionOfSeries() == false, $shotNumber: administeredShotNumberInSeries)
+		not TargetDose(associatedTargetSeries == $tsprev, isShotIgnoredForCompletionOfSeries() == false, administeredShotNumberInSeries > $shotNumber)
 	then
 		String _RULENAME = kcontext.rule.name;
-		TargetDose lastFromPrev = $tsprev.getTargetDoses().last();
-		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, lastFromPrev);
+		// TargetDose lastFromPrev = $tsprev.getTargetDoses().last();
+		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, $lastFromPrev);
 		if ($td.containsInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_INTERVAL_EVALUATION_REASON.getCdsListItemName())) {
 			ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), $td);
 			insert(hef)				
 		}
 		$td.addDoseRuleProcessed(_RULENAME);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in " + $ts + "; Prior Dose " + lastFromPrev + " in " + $tsprev);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in " + $ts + "; Prior Dose " + $lastFromPrev + " in " + $tsprev);
 end
 
 
