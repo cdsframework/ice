@@ -52,24 +52,6 @@ global org.cdsframework.ice.service.Schedule schedule
 global org.drools.runtime.KnowledgeContext kcontext
 
 
-// When recommending in the HPV 2-dose series amd dose 1 is administered, then recommend CVX 165 for dose 2
-rule "HPV: Recommend CVX 165 for dose 2 of the HPV 2-Dose Series" ruleflow-group "RecommendationForecast"
-	agenda-group "customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
-			- the name of the Series is "HPV2DoseSeries"
-			- the Series is not Complete
-			- the effective dose number in the Series is == 2
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE165"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
 // If patient is male, >= 22 yrs and < 27 yrs and has no doses on record, series is conditionally recommended, reason = HIGH RISK
 rule "HPV: If patient is male, >= 22 yrs and < 27 yrs and has no doses on record, series is conditionally recommended, reason = HIGH RISK" ruleflow-group "RecommendationForecast"
 	salience 200
