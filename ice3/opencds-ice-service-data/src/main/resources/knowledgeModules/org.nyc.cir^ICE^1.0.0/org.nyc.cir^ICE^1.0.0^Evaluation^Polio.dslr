@@ -115,13 +115,13 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are OPV, patient >
 end
 
 
-rule "Polio: Modify DoseRule4 parameters for TargetDose 4 if administered before 1/1/2010" ruleflow-group "HistoryEvaluation"
+rule "Polio: Modify DoseRule4 parameters for TargetDose 4 if administered before 8/7/2010" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	no-loop true
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
 			- the dose number in the series is == 4
-			- the administration date of the shot is < "01-Jan-2010"
+			- the administration date of the shot is < "07-Aug-2010"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 		There is a Series $targetSeries that contains the shot $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
@@ -141,16 +141,16 @@ end
 
 
 // Series complete with 5 doses:
-// For children born >= 1/1/2006, who received four doses before 1/1/2010 and before 4 years - 4 days of age, an additional dose (dose 5) is recommended 
+// For those who received four doses before 8/7/2010 and before 4 years - 4 days of age, an additional dose (dose 5) is recommended 
 // at >= 4 years of age.  Recommended interval from dose 4 to dose 5 is 6 months; minimum interval (for evaluation) is 6 months minus 4 days.
-rule "Polio: Create a 5th dose for the series if born >= 1/1/2006 and 4 doses administered before 1/1/2010 and < 4y-4d age (and a 5th shot can be evaluated or recommended by separate rules)" ruleflow-group "HistoryEvaluation"
+rule "Polio: Create a 5th dose for the series if 4 doses administered before 8/7/2010 and < 4y-4d age (and a 5th shot can be evaluated or recommended by separate rules)" ruleflow-group "HistoryEvaluation"
 	agenda-group "postEvaluationCheck"
 	no-loop true
 	when
 		There is an Administered Shot $dose4
 			- that has already been evaluated and whose Shot Validity is VALID
 			- the dose number in the series is == 4
-			- the administration date of the shot is < "01-Jan-2010"
+			- the administration date of the shot is < "07-Aug-2010"
 			- make note of the date this shot was administered as $dtAdministrationDate
 		There is a Series $targetSeries
 			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
@@ -159,10 +159,6 @@ rule "Polio: Create a 5th dose for the series if born >= 1/1/2006 and 4 doses ad
 			- the number of doses administered is == 4
 			 -make note of the Allowable Vaccines for Dose 4 in the Series as $assign_oAllowableVaccines4
 			- make note of the Preferable Vaccines for Dose 4 in the Series as $assign_oPreferableVaccines4
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- the patient's birthdate is >= "01-Jan-2006"
-			- make note of the patient's birthdate as $dtBirthDate
-		Confirm Elapsed time between $dtBirthDate and $dtAdministrationDate < "4y-4d"
 	then
 		// Create the Dose 5 Rule
 		Create the next DoseRule as $assign_oDoseRule5 which may be added to the SeriesRules for Series $targetSeries
