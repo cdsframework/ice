@@ -635,7 +635,7 @@ end
 
 
 // If the HPV 2-dose series is complete, select the HPV 2-Dose Series applies
-rule "SeriesSelection.HPV: Select 2-dose Series if series is complete" ruleflow-group "SeriesSelection"
+rule "SeriesSelection.HPV: Select 2-dose Series if series is complete with the first dose adminstered < 15yrs of age" ruleflow-group "SeriesSelection" 
 	dialect "mvel"
 	salience 30
 	agenda-group "customSeriesSelectionRules"
@@ -643,6 +643,9 @@ rule "SeriesSelection.HPV: Select 2-dose Series if series is complete" ruleflow-
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries", isSeriesComplete() == true)
+		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, $tdAdministrationDate: administrationDate)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $tdAdministrationDate, "15y") < 0)	
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
