@@ -68,7 +68,7 @@ rule "HPV: Evaluate CVX 118 administered to male patient as Accepted with reason
 		There is a Series $targetSeries that contains the Dose $currentShot
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
 	then
-		Mark that the shot $currentShot as Ignored
+		Mark the shot $currentShot as Ignored
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Licensed For Males"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries

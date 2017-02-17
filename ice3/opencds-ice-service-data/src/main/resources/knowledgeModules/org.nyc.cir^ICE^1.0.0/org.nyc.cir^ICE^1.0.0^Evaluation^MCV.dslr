@@ -95,7 +95,7 @@ rule "Meningococcal: Evaluate shot as Accepted/Below Recommended Age, does not c
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $shotDate < $minAgeDoseOne && elapsed time between $dtBirthDate and $shotDate >= $validMinAgeVaccine 
 	then
-		Mark that the Shot $currentShot as Ignored
+		Mark the Shot $currentShot as Ignored
 		Mark the shot $currentShot as Accepted for this Series due to "Below Recommended Age"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
