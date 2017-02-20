@@ -159,6 +159,9 @@ rule "Polio: Create a 5th dose for the series if 4 doses administered before 8/7
 			- the number of doses administered is == 4
 			 -make note of the Allowable Vaccines for Dose 4 in the Series as $assign_oAllowableVaccines4
 			- make note of the Preferable Vaccines for Dose 4 in the Series as $assign_oPreferableVaccines4
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm Elapsed time between $dtBirthDate and $dtAdministrationDate < "4y-4d"
 	then
 		// Create the Dose 5 Rule
 		Create the next DoseRule as $assign_oDoseRule5 which may be added to the SeriesRules for Series $targetSeries
