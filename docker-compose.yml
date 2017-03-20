@@ -1,0 +1,10 @@
+opencds:
+  build: opencds
+  volumes:
+   - ./ice3/opencds-ice-service/src/main/resources:/root/.opencds/opencds-ice-service/src/main/resources
+   - ./opencds/opencds-parent/opencds-decision-support-service/src/main/resources:/root/.opencds/odss
+   - ./ice3/opencds-ice-service-data/src/main/resources:/var/lib/tomcat/webapps/opencds-decision-support-service/opencds-ice-service-data/src/main/resources
+  environment:
+   - JAVA_OPTS="-Xmx2g"
+  ports:
+   - "80:8080"
