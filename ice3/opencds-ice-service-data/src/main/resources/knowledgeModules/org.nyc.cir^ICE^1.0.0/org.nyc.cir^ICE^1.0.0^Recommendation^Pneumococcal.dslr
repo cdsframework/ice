@@ -198,7 +198,7 @@ end
 
 
 // If patient is >= 5 years and < 65 years, then the Recommendation is Conditional and the reason code is HIGH_RISK.
-rule "Pneumococcal Series: if patient *is* >= 5yrs and < 65yrs of age, then recommend Conditional High Risk if Patient Age >=5yrs and < 65yrs of Age" ruleflow-group "RecommendationForecast"
+rule "Pneumococcal Series: if patient *is* >= 5yrs and < 65yrs of age, then recommend Conditional High Risk" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	salience 200
@@ -221,6 +221,7 @@ end
 // Post Recommendation Check: If patient will be >= 5 years at the recommended due date and < 65 years at the recommended due date, then the Recommendation is Conditional and  
 // the reason code is HIGH_RISK. (Rule "Pneumococcal Series: Recommend Conditional High Risk if Patient Age >=5yrs and < 65yrs of Age" already checks if patient age is >= 5yrs 
 // and < 65yrs. This rule will only fire if there is a recommendation date attached to the final recommendation (i.e. - if the recommendation status is RECOMMENDED or RECOMMENDED_IN_FUTURE)
+// and with the added conditional recommendation, ICE will override that recommendation with the conditionally recommended (as per general ICE rules)
 rule "Pneumococcal: if patient *will be* >= 5 years at the recommended due date and < 65 years, then recommend Conditional and HIGH_RISK" ruleflow-group "RecommendationForecast"
 	agenda-group "postRecommendationCheck"
 	when
@@ -240,6 +241,55 @@ rule "Pneumococcal: if patient *will be* >= 5 years at the recommended due date 
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+// Recommended Interval: if a PPSV23 (CVX 33) shot has been given, the recommended interval is 0 days from the PPSV23 to the next target dose of PCV in the child series. 
+// For the purpose of recommendation, ignore the PPSV23 shot.
+rule "Pneumococcal: if the patient < 2yrs, if a PPSV23 (CVX 33) shot has been given, the recommended interval is 0 days from the PPSV23 to the next target dose of PCV" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalChildSeries"
+			- make note of the Last Shot Administered in the Series as $lastAdministeredShot
+		There is an administered shot $shot
+			- that is the same shot as $lastAdministeredShot
+			- the vaccine administered is "ICE33"
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime < "2y"
+	then
+		Mark the shot $shot as Ignored
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Recommended Interval: if a PPSV23 (CVX 33) shot has been given, the recommended interval is 0 days from the PPSV23 to the next target dose of PCV in the child series. 
+// For the purpose of recommendation, ignore the PPSV23 shot.
+rule "Pneumococcal: if the patient >= 2yrs and < 5 years, if a PPSV23 (CVX 33) shot has been given, the recommended interval is 56 days from the PPSV23 to the next target dose of PCV" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalChildSeries"
+			- make note of the Last Shot Administered in the Series as $lastAdministeredShot
+		There is an administered shot $shot
+			- that is the same shot as $lastAdministeredShot
+			- the vaccine administered is "ICE33"
+			- Make note of the date this shot was administered as $dtAdministrationDate
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "2y" && elapsed time between $dtBirthDate and evalTime < "5y"
+	then
+		Add "56d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
 
 /*************************************************************************************************************************************************************************************
  END Recommendation Rules based on Age

@@ -1289,7 +1289,7 @@ public class TargetSeries {
 			throw new ImproperUsageException(_METHODNAME + errStr);
 		}
 
-		TargetDose lastDoseAdministered = determineIfSeriesCompleteAndReturnLastDose(true);		// Recommendation interval based on last ignored shot
+		TargetDose lastDoseAdministered = determineIfSeriesCompleteAndReturnLastDose(true);		// Recommendation interval based on last shot that was not ignored
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Last dose # administered: " + ((lastDoseAdministered == null) ? "none" : lastDoseAdministered.getDoseNumberInSeries()));
 		}
