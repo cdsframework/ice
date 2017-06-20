@@ -180,7 +180,7 @@ public class TargetDose {
 		
 		return associatedTargetSeries;
 	}
-	
+
 	/**
 	 * Return ID of this TargetDose, which matches the ID of the associated SubstanceAdministrationEvent when this TargetDose was created
 	 */

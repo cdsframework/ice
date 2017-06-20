@@ -73,7 +73,8 @@ rule "Pneumococcal Child Series: Recommend at the vaccine level in child series;
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the Series is not complete
-			- the name of the Series is "PneumococcalChildSeries"
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the series is <= 4
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
@@ -94,8 +95,8 @@ rule "Pneumococcal Adult Series: Recommend PCV 13 (CVX 133) for target dose 1 if
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalAdultSeries"
-			- the effective dose number in the Series is == 1
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the Series is == 5
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "65y"			
@@ -116,11 +117,11 @@ rule "Pneumococcal Adult Series: If the patient is >= 65 years old, always recom
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalAdultSeries"
-			- the effective dose number in the Series is == 2
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the Series is == 6
 		There is an administered shot $currentShot
 			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is == 1
+			- the dose number in the Series is == 4
 			- the vaccine administered a member of ("ICE133", "ICE152")
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -142,11 +143,11 @@ rule "Pneumococcal Adult Series: If the patient is >= 65 years old, always recom
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalAdultSeries"
-			- the effective dose number in the Series is == 2
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the Series is == 6
 		There is an administered shot $currentShot
 			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is == 1
+			- the dose number in the Series is == 5
 			- the vaccine administered a member of ("ICE33", "ICE109")
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -179,7 +180,7 @@ rule "Pneumococcal Child Series: if patient < 5yrs completed the Child series (i
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
+			- the name of the Series is "PneumococcalSeries"
 			- the Series is Complete
 		There is an administered shot $shot
 			- the shot belongs to the Series $targetSeries
@@ -251,14 +252,15 @@ rule "Pneumococcal: if the patient < 2yrs, if a PPSV23 (CVX 33) shot has been gi
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
+			- the name of the Series is "PneumococcalSeries"
 			- make note of the Last Shot Administered in the Series as $lastAdministeredShot
+			- make note of the Date that the most recent Shot was Administered as $dateLastAdministeredShot
 		There is an administered shot $shot
 			- that is the same shot as $lastAdministeredShot
 			- the vaccine administered is "ICE33"
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime < "2y"
+		Confirm elapsed time between $dtBirthDate and $dateLastAdministeredShot < "2y"
 	then
 		Mark the shot $shot as Ignored
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -274,15 +276,16 @@ rule "Pneumococcal: if the patient >= 2yrs and < 5 years, if a PPSV23 (CVX 33) s
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
+			- the name of the Series is "PneumococcalSeries"
 			- make note of the Last Shot Administered in the Series as $lastAdministeredShot
+			- make note of the Date that the most recent Shot was Administered as $dateLastAdministeredShot
 		There is an administered shot $shot
 			- that is the same shot as $lastAdministeredShot
 			- the vaccine administered is "ICE33"
 			- Make note of the date this shot was administered as $dtAdministrationDate
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime >= "2y" && elapsed time between $dtBirthDate and evalTime < "5y"
+		Confirm elapsed time between $dtBirthDate and $dateLastAdministeredShot >= "2y" && elapsed time between $dtBirthDate and $dateLastAdministeredShot < "5y"
 	then
 		Add "56d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
@@ -310,7 +313,7 @@ rule "Pneumococcal Child Series: Recommend dose if series complete if no prior V
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
+			- the name of the Series is "PneumococcalSeries"
 			- the Series is Complete
 			- the Number of Administered Shots is > 0
 			- make note of the date that the most recent shot was administered as $shotDate			
@@ -347,7 +350,7 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-D
 			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
+			- the name of the Series is "PneumococcalSeries"
 			- the effective dose number in the Series is <= 2
 			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
@@ -370,7 +373,7 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 12months and T
 			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age	
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
+			- the name of the Series is "PneumococcalSeries"
 			- the effective dose number in the Series is <= 3
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is < 2
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
@@ -394,7 +397,7 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 12months and TargetD
 			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
+			- the name of the Series is "PneumococcalSeries"
 			- the effective dose number in the Series is <= 4
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is == 2
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
@@ -417,14 +420,39 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 24months and TargetD
 			- make note of the date as $dtDateAtAgeTwentyFourMonths when the Patient is "24m" of age					
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalChildSeries"
+			- the name of the Series is "PneumococcalSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- the effective dose number in the Series is <= 4
-			- the Effective Number of Doses in the Series before $dtDateAtAgeTwentyFourMonths is < $assign_nNumberOfDosesRequired
+			- the Effective Number of Doses in the Series before $dtDateAtAgeTwentyFourMonths is < 4
 		Confirm elapsed time between $dtBirthDate and evalTime >= "24m" && elapsed time between $dtBirthDate and evalTime < "5y"
 	then
 		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeTwentyFourMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Exception 4
+rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and TargetDose 5 in if Patient >= 5y" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 200
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeFiveYears when the Patient is "5y" of age					
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
+			- the effective dose number in the Series is <= 5
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
+	then
+		// Mark the series as not complete, since the childhood portion of this series may have been marked complete
+		Mark the Series $targetSeries Not Complete
+		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeFiveYears for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 5 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end

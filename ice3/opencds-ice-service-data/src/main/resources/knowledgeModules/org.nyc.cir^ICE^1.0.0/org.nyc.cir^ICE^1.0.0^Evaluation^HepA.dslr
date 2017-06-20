@@ -93,7 +93,7 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series if CVX 83 (Hep A, ped
 			- the name of the Series is "HepAAdult3DoseSeries"
 		Confirm Elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y"
 	then
-		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber and evaluate using interval for prior dose to this dose from switchedTo series
+		Convert from Series $targetSeries Dose Number $assign_nDoseNumber to Series $seriesToSwitchTo Dose Number $assign_nDoseNumber and evaluate using interval from prior dose to this dose from switchedTo series
 		Refresh all facts in the Series $targetSeries for Evaluation
 		Log that this Series Rule fired for the Series $targetSeries
 end
@@ -128,7 +128,7 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series if Dose 2 is given >=
 		Confirm elapsed time between $dtAdministrationDateOne and $dtAdministrationDateTwo < "6m-4d"
 		Confirm elapsed time between $dtAdministrationDateOne and $dtAdministrationDateTwo >= "24d"
 	then
-		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number 2 and evaluate using interval for prior dose to this dose from switchedTo series
+		Convert from Series $targetSeries Dose Number 2 to Series $seriesToSwitchTo Dose Number 2 and evaluate using interval from prior dose to this dose from switchedTo series
 		Refresh all facts in the Series $targetSeries for Evaluation
 		Log that this Series Rule fired for the Series $targetSeries
 end
