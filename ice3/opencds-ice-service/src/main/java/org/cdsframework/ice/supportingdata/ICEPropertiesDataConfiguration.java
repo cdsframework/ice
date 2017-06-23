@@ -113,6 +113,28 @@ public class ICEPropertiesDataConfiguration {
 	}
 	
 	
+	public String getBaseRulesVersion() { 
+
+		String _METHODNAME = "getBaseRulesVersion(): ";
+		
+		// Get the version for the base ICE rules
+		String baseRulesVersion = iceProps.getProperty("ice_base_rules_version");
+		if (baseRulesVersion == null) {
+			String lErrStr = "ICE base rules version not specified in the properties file";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		else {
+			if (logger.isInfoEnabled()) {
+				String lErrStr = "ICE base rules version specified in properties file: " + baseRulesVersion;
+				logger.info(lErrStr);
+			}
+		}
+		
+		return baseRulesVersion;
+	}
+	
+	
 	public File getBaseKnowledgeModulesDirectory() { 
 
 		String _METHODNAME = "getKnowledgeModulesDirectoryAsFile(): ";
