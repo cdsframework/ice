@@ -302,7 +302,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 							knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
 
 					/*
-					// Refactor in upgrade to OpenCDS 2.1... (Cheating here by calling ICEPlugin implementation directly :( ) 
+					// Refactor in upgrade to OpenCDS 2.1 or above... (Cheating here by calling ICEPlugin implementation directly :( ) 
 					// If the supporting data content has not been loaded into the cache, read the raw data from the file so that it can be loaded
 					if (! ICESupportingDataLoaderPlugin.supportingDataAlreadyLoadedInContext(preContext)) {
 						if (logger.isDebugEnabled()) {
@@ -318,8 +318,12 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 						}
 					}
 					*/
-					// Execute the preprocess plugin to get the supporting data
-					opencdsPlugin.execute(preContext);
+					// Execute the preprocess plugin to get the supporting data - fix in OpenCDS upgrade
+					if (! (opencdsPlugin instanceof ICESupportingDataLoaderPlugin)) {
+						logger.error(_METHODNAME + "unknown supporting data plugin");
+						throw new RuntimeException("initialization error: unknown supporting data plugin");
+					}
+					((ICESupportingDataLoaderPlugin) opencdsPlugin).execute(preContext, requestedKmId);
 					lSchedule = preContext.getCache().get(requestedKmId);
 				}
 			}
@@ -640,7 +644,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		// Get the default scoping ID for the base ICE rules
 		///////
 		///////String lBaseRulesScopingKmId = iceconfig.getBaseRulesScopingEntityId() + "^" + lKMId.getBusinessId() + "^" + lKMId.getVersion();
-		String lBaseRulesScopingKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceconfig.getBaseRulesScopingEntityId(), lKMId.getBusinessId(), lKMId.getVersion());
+		String lBaseRulesScopingKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceconfig.getBaseRulesScopingEntityId(), lKMId.getBusinessId(), iceconfig.getBaseRulesVersion());
 		if (! new File(lKnowledgeModulesDirectory, lBaseRulesScopingKmId).exists()) {
 			String lErrStr = "Base ICE knowledge module does not exist" + lKnowledgeModulesDirectory.getAbsolutePath() + "; knowledge module " + lBaseRulesScopingKmId;;
 			logger.error(_METHODNAME + lErrStr);
