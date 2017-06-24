@@ -1537,18 +1537,18 @@ end
 
 ///////// ***
 // General Design rule... Do not Edit
-// Per ICE SME group, if recommendation is conditional, do not display a recommendation date.
+// Per ICE SME group, if recommendation is conditional, do not display a recommendation date. This can be overrided via TargetSeries.setDisplayForecastDateForConditionalRecommendations()
 ///////// ***
 rule "RecommendationForecast.doNotReturnForecastDateForConditionalRecommendations" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
+	dialect "java"
 	agenda-group "supplementalSeriesRule"
 	when
-		$ts : TargetSeries(recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null)
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null, isForecastDateDisplayedForConditionalRecommendations() == false)
 	then
-		String _RULENAME = kcontext.rule.name;
+		String _RULENAME = drools.getRule().getName();
 		$ts.setFinalRecommendationDate(null);
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.getSeriesName());
 end
 
 
@@ -1937,7 +1937,6 @@ rule "RecommendNotRecommendedIfImmuneToAllDiseasesInSeries" ruleflow-group "Reco
 		$targetSeries : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, $diseasesSupportedByThisSeries : diseasesSupportedByThisSeries)
 		do[invokeCustomRecommendationRules]
 		$diseaseImmunityList : List(size == $diseasesSupportedByThisSeries.size()) from 
-			// accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, $r : immunityReason, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 			accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 	then
 		String _RULENAME = drools.getRule().getName();

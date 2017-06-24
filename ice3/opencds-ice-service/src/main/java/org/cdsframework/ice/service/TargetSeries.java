@@ -87,6 +87,7 @@ public class TargetSeries {
 	private Date finalLatestRecommendationDate;
 	private List<Recommendation> finalRecommendations;
 	private List<String> seriesRulesProcessed;
+	private boolean displayForecastDateForConditionalRecommendations;
 
 	private static Log logger = LogFactory.getLog(TargetSeries.class);
 
@@ -137,6 +138,7 @@ public class TargetSeries {
 		finalEarliestDate = null;
 		finalRecommendationDate = null;
 		finalLatestRecommendationDate = null;
+		displayForecastDateForConditionalRecommendations = false;
 
 		interimEvaluationValidityCountByDisease = new HashMap<String, Integer>();
 		interimDosesToSkipByDisease = new HashMap<String, Map<Integer, Integer>>();
@@ -238,8 +240,8 @@ public class TargetSeries {
 		convertToSpecifiedSeries(seriesToConvertTo, doseNumberFromWhichToBeginSwitch, doseNumberFromWhichToBeginSwitch, useDoseIntervalOfPriorDoseFromSwitchToSeries);
 	}
 
-
-	public void convertToSpecifiedSeries(String seriesToConvertTo, int doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch, int doseNumberOfSwitchToSeriesToWhichToSwitch, 
+	
+	private void convertToSpecifiedSeries(String seriesToConvertTo, int doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch, int doseNumberOfSwitchToSeriesToWhichToSwitch, 
 			boolean useDoseIntervalOfPriorDoseFromSwitchToSeries) 
 		throws InconsistentConfigurationException {
 
@@ -250,6 +252,13 @@ public class TargetSeries {
 			throw new IllegalArgumentException(str);
 		}
 
+		if (doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch != doseNumberOfSwitchToSeriesToWhichToSwitch) {
+			// For now, mechanims are not in place permit/support moving from one dose number to a different dose number; additionally, it does not fit into
+			// the definition of converting to a series. (E.g. - doesn't make sense to go from dose 3 of "from" series to dose 2 of "to" series)
+			String lErrStr = "Dose number from series to switch from does not equal the dose number of the series being switched to";
+			logger.error(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
 		// Get the specified SeriesRules
 		SeriesRules srOfSwitchSeries = scheduleBackingSeries.getScheduleSeriesByName(this.seriesRules.getVaccineGroup(), seriesToConvertTo);
 		if (srOfSwitchSeries == null) {
@@ -3336,7 +3345,18 @@ public class TargetSeries {
 		}
 	}
 
+	
+	/**
+	 * Specify if forecast date should be displayed for conditional recommendations
+	 */
+	public void setForecastDateToBeDisplayedForConditionalRecommendations(boolean yesno) {
+		this.displayForecastDateForConditionalRecommendations = yesno;
+	}
 
+	public boolean isForecastDateDisplayedForConditionalRecommendations() {
+		return this.displayForecastDateForConditionalRecommendations;
+	}
+	
 	/**
 	 * Clear any prior recommendations; typically will be used if one wishes to reprocess all recommendations
 	 */

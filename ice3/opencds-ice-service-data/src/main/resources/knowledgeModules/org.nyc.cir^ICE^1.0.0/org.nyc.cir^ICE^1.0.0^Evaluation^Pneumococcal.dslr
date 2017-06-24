@@ -32,6 +32,7 @@ import org.drools.spi.KnowledgeHelper
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
@@ -167,7 +168,28 @@ rule "Pneumococcal Adult Series: Note that the Absolute Minimum interval from PC
 		Record that this dose rule was processed for the TargetDose $currentShot
 end
 
-/////////////////////
+////////////////////
+// Adult Series: If PCV (CVX 133 or 152) is administered for dose 5 (1st dose of adult series), then the absolute minimum age and minimum age is 19 years. 
+// Otherwise, the vaccine administered is a CVX (33, 109) and should have absolute minimum age and minimum age are 65y-4d and 65y, respectively, as per the series definition.
+rule "Pneumococcal Adult Series: If PCV (CVX 133, 152) administered for dose 5, modify DoseRule5 absolute minimum and minimum age to 19y" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the dose number in the series is == 5
+			- the vaccine administered a member of ("ICE133", "ICE152")
+		There is a Series $targetSeries that contains the shot $currentShot
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+	then
+		Obtain the existing DoseRule for Dose Number 5 in the Series $targetSeries as $assign_oDoseRule5
+		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule5 to TimePeriod "19y"
+		Set the Minimum Age for DoseRule $assign_oDoseRule5 to TimePeriod "19y"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule5
+		Refresh all Facts in the Series $targetSeries for Evaluation
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
 
 /////////////////////
 // Child Series: If an invalid vaccine is administered in the Child Series, mark the shot as *Accepted* (rather than INVALID) with a reason code of VACCINE_NOT_ALLOWED_FOR_THIS_DOSE. 
