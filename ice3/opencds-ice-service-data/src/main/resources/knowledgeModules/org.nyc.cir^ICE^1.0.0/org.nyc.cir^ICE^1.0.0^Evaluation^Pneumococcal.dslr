@@ -499,8 +499,7 @@ rule "Pneumococcal Adult Series: Exception 4: Set Series Dose Number to 5 if No 
 			- the Number of Administered Shots is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
-		// Mark the series as not complete, since the childhood portion of this series may have been marked complete
-		Mark the Series $targetSeries Not Complete
+		/////// Mark the series as not complete, since the childhood portion of this series may have been marked complete
 		Skip Series Dose Number to 5 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
@@ -523,7 +522,7 @@ rule "Pneumococcal Child Series: Exception 4: Skip Dose Number to 5 for Patient 
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "24m"
 	then
 		// Mark the series as not complete, since the childhood portion of this series may have been marked complete
-		Mark the Series $targetSeries Not Complete
+		/////// Mark the Series $targetSeries Not Complete
 		Set Dose Number of $currentDose to 5
 		Skip Series Dose Number to 5 from $assign_nDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries

@@ -149,7 +149,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Rr]equired to [Cc]omplete this [Ss]eries as {assign_nNumberOfDosesRequired}={assign_nNumberOfDosesRequired} : seriesRules.numberOfDosesInSeries
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate that the most recent [Ss]hot was [Aa]dministered as {assign_dtShotDate}={assign_dtShotDate} : getAdministrationDateOfTargetDoseByShotNumberNumber(getNumberOfShotsAdministeredInSeries())
 [condition][]- [Mm]ake [Nn]ote of the [Rr]ecommendation [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalRecommendationDate
-[condition][]- [Mm]ake [Nn]ote of the [Rr]ecommended [Vv]accine as {assign_strRecommendationShot}={assign_strRecommendationShot} : recommendationVaccine.cdsConceptName
+[condition][]- [Mm]ake [Nn]ote of the [Rr]ecommended [Vv]accine as {assign_strRecommendationShot}={assign_strRecommendationShot} : recommendationVaccine!.cdsConceptName
 [condition][]- [Mm]ake [Nn]ote of the [Nn]umber of [Ss]hots [Aa]dministered as {assign_nNumberOfShotsAdministered}={assign_nNumberOfShotsAdministered} : numberOfShotsAdministeredInSeries()
 [condition][]- [Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Aa]dministered as {assign_nNumberOfDoses}={assign_nNumberOfDoses} : determineNumberOfDosesAdministeredInSeries()
 [condition][]- [Mm]ake [Nn]ote of the [Ee]ffective [Dd]ose [Nn]umber in the [Ss]eries as {assign_nEffectiveDoseNumber}={assign_nEffectiveDoseNumber} : determineDoseNumberInSeries()
