@@ -60,7 +60,7 @@ rule "DTP(Any): Mark that dose of pertussis has not been administered for a shot
 	dialect "mvel"
 	when
 		There is an administered shot $shot
-			- that has already been evaluated and whose shot validity status is not DoseStatus.VALID
+			- that has already been evaluated and whose shot validity status is not VALID
 			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
 			- the collection $collectionOfStrReasons does not contain "EVALUATION_REASON_CONCEPT.D_AND_T_INVALID/P_VALID"
 		There is an IceFact $iceFactFinding 

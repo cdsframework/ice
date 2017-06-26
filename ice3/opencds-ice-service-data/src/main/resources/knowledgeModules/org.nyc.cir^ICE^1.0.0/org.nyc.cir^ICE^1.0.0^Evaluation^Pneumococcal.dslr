@@ -105,7 +105,7 @@ rule "Pneumococcal Adult Series: Minimum interval from the accepted PPSV to PPSV
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShotForIntervalCheck that needs to be evaluated
-			- the dose number in the Series is == 5
+			- the dose number in the Series is >= 5
 			- that is the same shot as $currentShotForAgeCheck
 			- make note of the administered shot number as $nShotNumber
 		There is an Administered Shot $previousShot
@@ -305,33 +305,6 @@ rule "Pneumococcal Child Series: Evaluate PCV Shot as Invalid if Patient < 5yrs,
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-
-/*
-rule "Pneumococcal Child Series: Switch from Child Series to Adult Series if shot given to a patient >= 5yrs old" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	agenda-group "customEvaluationRule"
-	salience 10
-	when
-		There is a Series $targetSeries
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the series is "PneumococcalChildSeries"
-		The Patient information $evaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge when the patient is "5y" of age	
-		There is an Administered Shot $currentDose that needs to be evaluated
-			- the shot belongs to the Series $targetSeries
-			- make note of the Dose Number as $nDoseNumber
-			- the administration date of the shot is >= $dtDateAtAge
-		There is a Series $seriesToSwitchTo
-			- the name of the Series is "PneumococcalAdultSeries"
-	then
-		Convert from Series $targetSeries Dose Number $nDoseNumber to Series $seriesToSwitchTo Dose Number 1 and evaluate using interval from prior dose to this dose from switchedFrom series
-		// Reset the dose number back to 1 now that we are in the adult series
-		// Set Dose Number of $currentDose to 1
-		Skip Series Dose Number to 1 from $nDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
-		Refresh all facts in the Series $targetSeries for Evaluation
-		Log that this Series Rule fired for the Series $targetSeries
-end
-*/
 
 rule "Pneumococcal Child Series: Exception 1: Evaluate PCV Shot as Below Minimum Age for Final Dose if 4th Dose Administered < 361 Days of Age and Received 0 Doses Administered Prior to 7m of Age" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -555,5 +528,3 @@ rule "Pneumococcal Child Series: Exception 4: Skip Dose Number to 5 for Patient 
 		Skip Series Dose Number to 5 from $assign_nDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-
-

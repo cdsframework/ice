@@ -60,12 +60,72 @@ Rules for Adult Recommending Intervals from Dose 5 to Dose 6 (Adult Dose 1 to Do
     + If PPSV is the recommended vaccine, then the recommended interval is 5 years
     + If PCV is the recommended vaccine, then the recommended interval is 1 year
 /************************************************************************************************************************************************************************************/
+// Pneumococcal Adult Series: Set Recommended Interval of 1yrs from accepted PPSV dose 5 shot if administered before the absolute minimum age. Recommended vaccine, if any, will have
+// been set by a rule with a higher saleience. The absolute minimum age will have been set by another rule in the HistoryEvaluation ruleflow-group by the time this rule fires 
+// (or if not, have been preset by the series supporting data), so we can be assured it is correct when accessed here. This rule will ensure that a 1yr recommended interval is added  
+// to all such accepted shots (not just the most recent administered shot)
+rule "Pneumococcal Adult Series: Set Recommended Interval of 1yrs from accepted PPSV dose 5 shot administered before the absolute minimum age to recommended PCV vaccine" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the series is >= 5
+			- there is an absolute minimum age for dose 5 in this Series
+			- make note of the absolute minimum age for dose 5 in this Series as $absoluteMinimumAgeDose5
+			- make note of the recommended vaccine as $recommendedVaccine
+			- the string $recommendedVaccine == "ICE133"
+		There is an administered shot $shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity status is not VALID
+			- the dose number in the Series is == 5
+			- the vaccine administered a member of ("ICE33","ICE109")
+			- make note of the date this Shot was administered as $dateAdultPPSVAdministeredBelowAbsMinAge
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < $absoluteMinimumAgeDose5
+	then
+		Add "1y" to $dateAdultPPSVAdministeredBelowAbsMinAge and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Pneumococcal Adult Series: Set Recommended Interval of 5yrs from accepted PPSV dose 5 shot administered before the absolute minimum age to recommended PPSV vaccine
+rule "Pneumococcal Adult Series: Set Recommended Interval of 5yrs from accepted PPSV dose 5 shot administered before the absolute minimum age to recommended PPSV vaccine" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the series is >= 5
+			- there is an absolute minimum age for dose 5 in this Series
+			- make note of the absolute minimum age for dose 5 in this Series as $absoluteMinimumAgeDose5
+			- make note of the recommended vaccine as $recommendedVaccine
+			- the string $recommendedVaccine == "ICE33"
+		There is an administered shot $shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity status is not VALID
+			- the dose number in the Series is == 5
+			- the vaccine administered a member of ("ICE33","ICE109")
+			- make note of the date this Shot was administered as $dateAdultPPSVAdministeredBelowAbsMinAge
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < $absoluteMinimumAgeDose5
+	then
+		Add "5y" to $dateAdultPPSVAdministeredBelowAbsMinAge and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
 
 
 /*************************************************************************************************************************************************************************************
- END Rules for Adult Recommending Intervals from Dose 5 to Dose 6 (Adult Dose 1 to Dose 2)
+ END Rules for Adult Recommending Intervals from shots administered below absolute minimum age for Dose 5 (Adult Dose 1)
 /************************************************************************************************************************************************************************************/
-
 
 
 /*************************************************************************************************************************************************************************************
@@ -84,6 +144,7 @@ Rules for Recommending at the CVX Code vs. Vaccine Group Level
 rule "Pneumococcal Child Series: Recommend at the vaccine level in child series; vaccine recommended should be PCV 13 (CVX 133)" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
+	salience 100
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
@@ -165,6 +226,7 @@ rule "Pneumococcal Adult Series: If the patient is >= 65 years old, always recom
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
 			- the name of the Series is "PneumococcalSeries"
 			- the effective dose number in the Series is == 6
 			- make note of the recommended age for dose 5 in this Series as $recommendedAge
