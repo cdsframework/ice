@@ -311,6 +311,37 @@ rule "Pneumococcal Child Series: Evaluate the minimum interval as 0 days between
 end
 
 
+/////////////////////
+// Child Series: If a shot is administered < 5 years of age and is an extra dose (more than 4), mark the shot as ACCEPTED and EXTRA_DOSE. Note that the PCV13 rule (below) 
+// must execute before this one. (This rule is needed because Child and Adult series have been combined into one, so base rules will not automatically mark the shot as an EXTRA shot)
+/////////////////////
+rule "Pneumococcal Child Series: Evaluate extra shots before 5 yrs of age as ACCEPTED / EXTRA_DOSE" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "extraDoseCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"	
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the series $targetSeries
+			- the dose number in the series is > 4
+			- make note of the Date this Shot was Administered as $administrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $administrationDate < "5y"
+	then
+		Mark the shot $currentShot as Accepted for this Series due to "Extra Dose"
+		Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
+		Record that this dose rule was processed for the TargetDose $currentShot
+end
+
+
+/*************************************************************************************************************************************************************************************
+PCV 13 Rule: If a child is complete for the series, has not had a dose of PCV 13 (CVX 133), is currently < 5 years old, and will be < 5 years old at the recommended due date, 
+then a dose of PCV 13 (CVX 133) is recommended. Recommended interval is 8 weeks
+/************************************************************************************************************************************************************************************/
+
 // Abstract rule for PCV13 rule: patient < 5yrs of age, series is complete and no prior PCV shots until the current shot under evaluation
 rule "Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, series is complete and no prior PCV shots" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -348,6 +379,7 @@ rule "Pneumococcal Child Series: Evaluate PCV Shot as Valid if Patient < 5yrs, i
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck"
+	salience 50
 	when
 		Confirm elapsed time between $previousAdministrationDate and $administrationDate >= "52d"
 	then
@@ -364,6 +396,7 @@ rule "Pneumococcal Child Series: Evaluate PCV Shot as Invalid if Patient < 5yrs,
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck"
+	salience 50
 	when
 		Confirm elapsed time between $previousAdministrationDate and $administrationDate < "52d"
 	then
@@ -371,6 +404,10 @@ rule "Pneumococcal Child Series: Evaluate PCV Shot as Invalid if Patient < 5yrs,
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+
+/*************************************************************************************************************************************************************************************
+ END PCV 13 Rule
+/************************************************************************************************************************************************************************************/
 
 
 rule "Pneumococcal Child Series: Exception 1: Evaluate PCV Shot as Below Minimum Age for Final Dose if 4th Dose Administered < 361 Days of Age and Received 0 Doses Administered Prior to 7m of Age" ruleflow-group "HistoryEvaluation"
