@@ -142,15 +142,17 @@ Rules for Recommending at the CVX Code vs. Vaccine Group Level
 
 // Pneumococcal Child Series: When recommending in the Child Series, always recommend at the CVX level; vaccine recommended should be PCV 13 (CVX 133).
 rule "Pneumococcal Child Series: Recommend at the vaccine level in child series; vaccine recommended should be PCV 13 (CVX 133)" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
+	dialect "java"
 	agenda-group "customRecommendationRule"
 	salience 100
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the Series is not complete
+			/////// - the Series is not complete
 			- the name of the Series is "PneumococcalSeries"
-			- the effective dose number in the series is <= 4
+			- the effective dose number in the series is < 5
+			// - make note of the effective dose number in the Series as $nDoseNumber
+		// Confirm the variable $nDoseNumber is < 5
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
@@ -248,21 +250,59 @@ end
 
 
 /*************************************************************************************************************************************************************************************
+PCV 13 Rule: If a child is complete for the series, has not had a dose of PCV 13 (CVX 133), is currently < 5 years old, and will be < 5 years old at the recommended due date, 
+then a dose of PCV 13 (CVX 133) is recommended. Recommended interval is 8 weeks
+/************************************************************************************************************************************************************************************/
+
+// If a child is complete for the series, has had one or more doses but not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old and will be < 5 years old at the recommended due date, 
+// then a dose of PCV 13 (CVX 133) is recommended. Recommended interval = 8 weeks from the previous shot.
+rule "Pneumococcal Child Series: Recommend dose if series complete if no prior VALID PCV13 doses, is <5 yrs old and will be less than 5yrs old upon recommendation date" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 450
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the Series is == 5
+			- the Number of Administered Shots is > 0
+			- make note of the date that the most recent shot was administered as $shotDate			
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "ICE133" is == 0
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
+		Confirm elapsed time between $dtBirthDate and (calculate date from addition of $shotDate with TimePeriod "8w") < "5y"
+	then
+		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
+		Include a recommendation as $recommendation with forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
+		Mark forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ END PCV 13 Rule
+/************************************************************************************************************************************************************************************/
+
+
+/*************************************************************************************************************************************************************************************
 Recommendation Rules based on Age
 * If a patient is < 5 years and has completed the Child series (including meeting the PCV 13 Rule), then the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK.  
 * If a patient is >= 5 years (or will be >= 5 years at the recommended due date) and < 65 years, then the Recommendation is Conditional and the reason code is HIGH_RISK.
 /************************************************************************************************************************************************************************************/
 
-// If patient is < 5 years and has completed the Child series (including meeting the PCV 13 Rule), then the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK.  
+
+// If patient is < 5 years and has completed the Child series (including meeting the PCV 13 Rule), then the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK. Has a lower
+// salience then the PCV13 rule
 rule "Pneumococcal Child Series: if patient < 5yrs completed the Child series (including the PCV13 rule), recommend Not Recommended with reason COMPLETE_HIGH_RISK" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
-	salience 510
+	salience 425
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-			- the Series is Complete
+			- the effective dose number in the Series is == 5
 		There is an administered shot $shot
 			- the shot belongs to the Series $targetSeries
 			- the vaccine administered is "ICE133"
@@ -383,42 +423,6 @@ end
 
 
 /*************************************************************************************************************************************************************************************
-PCV 13 Rule: If a child is complete for the series, has not had a dose of PCV 13 (CVX 133), is currently < 5 years old, and will be < 5 years old at the recommended due date, 
-then a dose of PCV 13 (CVX 133) is recommended. Recommended interval is 8 weeks
-/************************************************************************************************************************************************************************************/
-
-// If a child is complete for the series, has had one or more doses but not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old and will be < 5 years old at the recommended due date, 
-// then a dose of PCV 13 (CVX 133) is recommended. Recommended interval = 8 weeks from the previous shot.
-rule "Pneumococcal Child Series: Recommend dose if series complete if no prior VALID PCV13 doses, is <5 yrs old and will be less than 5yrs old upon recommendation date" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	agenda-group "customRecommendationRule"
-	salience 510
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalSeries"
-			- the Series is Complete
-			- the Number of Administered Shots is > 0
-			- make note of the date that the most recent shot was administered as $shotDate			
-		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "ICE133" is == 0
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
-		Confirm elapsed time between $dtBirthDate and (calculate date from addition of $shotDate with TimePeriod "8w") < "5y"
-	then
-		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
-		Include a recommendation as $recommendation with forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
-		Mark forecasting of the Series $targetSeries Complete
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-/*************************************************************************************************************************************************************************************
- END PCV 13 Rule
-/************************************************************************************************************************************************************************************/
-
-
-/*************************************************************************************************************************************************************************************
 Pneumococcal Child Series 4-dose Series Exception Rules
 /************************************************************************************************************************************************************************************/
 
@@ -532,8 +536,7 @@ rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and TargetDose 5
 			- the effective dose number in the Series is <= 5
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
-		// Mark the series as not complete, since the childhood portion of this series may have been marked complete
-		Mark the Series $targetSeries Not Complete
+		/////// Mark the Series $targetSeries Not Complete
 		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeSixtyFiveYears for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 5 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries

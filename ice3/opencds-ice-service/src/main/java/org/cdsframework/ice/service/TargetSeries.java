@@ -503,8 +503,7 @@ public class TargetSeries {
 		}
 
 		int numberOfDosesInSeries = getSeriesRules().getNumberOfDosesInSeries();
-		if (pDoseNumberToSkipTo < 1 || pDoseNumberToSkipTo > numberOfDosesInSeries || pDoseNumberToSkipFrom < 1 || 
-				pDoseNumberToSkipFrom > numberOfDosesInSeries) {
+		if (pDoseNumberToSkipTo < 1 || pDoseNumberToSkipTo > numberOfDosesInSeries || pDoseNumberToSkipFrom < 1 || pDoseNumberToSkipFrom > numberOfDosesInSeries) {
 			String errStr = "number of doses in series " + seriesRules.getSeriesName() + " is " + numberOfDosesInSeries + "; " + "dose number to skip from (" + 
 					pDoseNumberToSkipFrom	+ ") or dose number to skip to (" + pDoseNumberToSkipTo + ") is not valid";
 			logger.warn(_METHODNAME + errStr);
@@ -521,7 +520,7 @@ public class TargetSeries {
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		 */
+		*/
 
 		int lTargetDoseNumber = 0;
 		if (pTargetDoseNumber <= 0) {
@@ -533,7 +532,9 @@ public class TargetSeries {
 		if (pDoseNumberToSkipFrom != lTargetDoseNumber) {
 			String errStr = "dose number to skip from (" + pDoseNumberToSkipFrom + ") does not equal the target dose number of the series (" + lTargetDoseNumber + ")";
 			logger.warn(_METHODNAME + errStr);
-			throw new IllegalArgumentException(errStr);
+			// AI:
+			/////// throw new IllegalArgumentException(errStr);
+			return;
 		}
 
 		Map<Integer, Integer> skipDoseEntry = interimDosesToSkipByDisease.get(pDisease);
@@ -542,9 +543,9 @@ public class TargetSeries {
 		}
 
 		Integer lInterimValidityCountForDisease = interimEvaluationValidityCountByDisease.get(pDisease);
-		if (lInterimValidityCountForDisease.intValue() == 0 && pDoseNumberToSkipFrom == 1) {
+		/////// if (lInterimValidityCountForDisease.intValue() == 0 && pDoseNumberToSkipFrom == 1) {
 			interimEvaluationValidityCountByDisease.put(pDisease, pDoseNumberToSkipTo-1);
-		}
+		/////// }
 	}
 
 	public int determineDoseNumberInSeries() {
@@ -1089,7 +1090,28 @@ public class TargetSeries {
 		// String _METHODNAME = "determineEffectiveNumberOfDosesInSeries()";
 
 		if (this.targetDoses == null || this.targetDoses.isEmpty()) {
-			return 0;
+			if (this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered()) {
+				Collection<Integer> lDiseaseValidityCountList = this.interimEvaluationValidityCountByDisease.values();
+				int lLowestCount = 0;
+				for (Integer lValidityCountInt : lDiseaseValidityCountList) {
+					if (lValidityCountInt != null) {
+						int lValidityCount = lValidityCountInt.intValue();
+						if (lValidityCount <= 0) {
+							return 0;
+						}
+						else if (lLowestCount == 0) {
+							lLowestCount = lValidityCount;
+						}
+						else if (lLowestCount < lValidityCount) {
+							lLowestCount = lValidityCount;
+						}
+					}
+				}
+				return lLowestCount;
+			}
+			else {
+				return 0;
+			}
 		}
 		else {
 			TargetDose lastDose = this.targetDoses.last();
@@ -1105,6 +1127,7 @@ public class TargetSeries {
 		}
 	}
 
+	
 	public void recommendNextShotBasedOnEarliestAgeRule(Date pEvalPersonBirthTime, Date pEvalDate)
 			throws ImproperUsageException, InconsistentConfigurationException {
 

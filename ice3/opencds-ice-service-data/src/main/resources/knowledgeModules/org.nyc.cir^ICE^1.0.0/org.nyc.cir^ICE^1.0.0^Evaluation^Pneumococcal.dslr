@@ -306,7 +306,8 @@ rule "Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient <
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-			- the Series is Complete
+			/////// - the Series is Complete
+			- the effective dose number in the series is == 5
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the series $targetSeries
 			- the vaccine administered is "ICE133"
