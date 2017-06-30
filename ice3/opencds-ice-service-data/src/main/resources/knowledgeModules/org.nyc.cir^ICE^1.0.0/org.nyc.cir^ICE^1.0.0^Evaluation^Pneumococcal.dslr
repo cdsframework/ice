@@ -74,22 +74,35 @@ rule "Pneumococcal Adult Series: Evaluate PSV Shot >= 5yrs and < 19yrs as Accept
 end
 
 
-rule "Pneumococcal Adult Series: Evaluate PPSV Shot (CVX 33, 109) >= 5yrs and < 65y-4d as Accepted with reason code BELOW_REC_AGE_SERIES" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Adult Series: (Abstract) PPSV Shot (CVX 33, 109) >= 5yrs and < 65y-4d (below minimum age)" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	when
+		There is an Administered Shot $adultPPSVShot1BelowMinAge
+			- the dose number in the Series is == 5
+			- the vaccine administered a member of ("ICE33", "ICE109")
+			- make note of the date this shot was Administered as $adultPPSVShot1Date
+		There is a Series $targetSeriesForAgeCheck that contains the Dose $adultPPSVShot1BelowMinAge
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $adultPPSVShot1Date >= "5y"
+		Confirm elapsed time between $dtBirthDate and $adultPPSVShot1Date < "65y-4d"		
+	then
+		Record that this dose rule was processed for the TargetDose $adultPPSVShot1BelowMinAge
+		Log that this dose rule fired for the dose $adultPPSVShot1BelowMinAge in the Series $targetSeriesForAgeCheck
+end
+
+
+rule "Pneumococcal Adult Series: Evaluate target dose 1 PPSV Shot as Accepted with reason code BELOW_REC_AGE_SERIES" extends 
+		"Pneumococcal Adult Series: (Abstract) PPSV Shot (CVX 33, 109) >= 5yrs and < 65y-4d (below minimum age)" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentShotForAgeCheck that needs to be evaluated
-			- the dose number in the Series is >= 5
-			- the vaccine administered a member of ("ICE33", "ICE109")
-			- make note of the date this shot was Administered as $administrationDate
-		There is a Series $targetSeriesForAgeCheck that contains the Dose $currentShotForAgeCheck
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalSeries"
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and $administrationDate >= "5y"
-		Confirm elapsed time between $dtBirthDate and $administrationDate < "65y-4d"			
+			- that is the same shot as $adultPPSVShot1BelowMinAge
 	then
 		Mark the shot $currentShotForAgeCheck as Accepted for this Series due to "Below Recommended Age"
 		Record that this dose rule was processed for the TargetDose $currentShotForAgeCheck
@@ -98,25 +111,24 @@ end
 
 
 // Adult Series: Minimum interval from the accepted PPSV to PPSV (target dose in the adult series) = 5 years
-rule "Pneumococcal Adult Series: Minimum interval from the accepted PPSV to PPSV (target dose in the adult series) = 5 years" 
-		extends "Pneumococcal Adult Series: Evaluate PPSV Shot (CVX 33, 109) >= 5yrs and < 65y-4d as Accepted with reason code BELOW_REC_AGE_SERIES"
-	dialect "mvel"		
-	ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Adult Series: Minimum interval from the accepted dose 1 of PPSV to PPSV target dose 1 in the adult series = 5 years" extends 
+		"Pneumococcal Adult Series: (Abstract) PPSV Shot (CVX 33, 109) >= 5yrs and < 65y-4d (below minimum age)" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"		
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShotForIntervalCheck that needs to be evaluated
-			- the dose number in the Series is >= 5
-			- that is the same shot as $currentShotForAgeCheck
+			- the dose number in the Series is == 5
+			- the vaccine administered a member of ("ICE33", "ICE109")
 			- make note of the administered shot number as $nShotNumber
+			 - make note of the date this shot was Administered as $adultPPSVShot2Date
 		There is an Administered Shot $previousShot
 			- the administered shot number is == $nShotNumber-1
-			- the vaccine administered a member of ("ICE33", "ICE109")
-			- the dose number in the Series is == 5
-			- make note of the date this shot was administered as $dtAdministrationDatePreviousShot
-		There is a Series $targetSeriesForIntervalCheck
+			- that is the same shot as $adultPPSVShot1BelowMinAge
+		There is a Series $targetSeriesForIntervalCheck that contains the Dose $currentShotForIntervalCheck
 			- that is the same series as $targetSeriesForAgeCheck
 			- the Series also contains the shot $previousShot
-		Confirm Elapsed time between $dtAdministrationDatePreviousShot and $administrationDate < "5y"	
+		Confirm Elapsed time between $adultPPSVShot1Date and $adultPPSVShot2Date < "5y"
 	then
 		Mark the shot $currentShotForIntervalCheck as Invalid for this Series due to "Below Minimum Interval"
 		Record that this dose rule was processed for the TargetDose $currentShotForIntervalCheck
@@ -124,10 +136,11 @@ rule "Pneumococcal Adult Series: Minimum interval from the accepted PPSV to PPSV
 end
 
 
+//////////////
 /////// Adult Series: Minimum interval from the accepted PPSV to PCV (target dose in the adult series) = 0 days
 /////// (This rule does not need to be implemented because the default absolute minimum interval from dose 1 for the Adult Series is 0 days, 
 /////// as per the current supporting data 
-///////
+//////////////
 
 
 ////////////////////
