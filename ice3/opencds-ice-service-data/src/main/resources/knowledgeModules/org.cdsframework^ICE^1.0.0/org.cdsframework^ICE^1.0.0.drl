@@ -950,8 +950,8 @@ rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "History
 	salience 100
 	activation-group "minimumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null)
-		$ts : TargetSeries(containsTargetDose($td))
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $vaccine : administeredVaccine, $doseNumber : doseNumberInSeries)
+		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries, seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
 	then

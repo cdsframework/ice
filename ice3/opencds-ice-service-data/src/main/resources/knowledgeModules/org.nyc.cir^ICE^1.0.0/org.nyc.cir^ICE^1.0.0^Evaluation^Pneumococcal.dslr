@@ -57,7 +57,7 @@ rule "Pneumococcal Adult Series: Evaluate PSV Shot >= 5yrs and < 19yrs as Accept
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
-			- the dose number in the Series is >= 5
+			- the dose number in the Series is >= 6
 			- the vaccine administered a member of ("ICE133", "ICE152")
 			- make note of the date this shot was Administered as $administrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
@@ -79,7 +79,7 @@ rule "Pneumococcal Adult Series: (Abstract) PPSV Shot (CVX 33, 109) >= 5yrs and 
 	agenda-group "customEvaluationRule"
 	when
 		There is an Administered Shot $adultPPSVShot1BelowMinAge
-			- the dose number in the Series is == 5
+			- the dose number in the Series is == 6
 			- the vaccine administered a member of ("ICE33", "ICE109")
 			- make note of the date this shot was Administered as $adultPPSVShot1Date
 		There is a Series $targetSeriesForAgeCheck that contains the Dose $adultPPSVShot1BelowMinAge
@@ -118,7 +118,7 @@ rule "Pneumococcal Adult Series: Minimum interval from the accepted dose 1 of PP
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShotForIntervalCheck that needs to be evaluated
-			- the dose number in the Series is == 5
+			- the dose number in the Series is == 6
 			- the vaccine administered a member of ("ICE33", "ICE109")
 			- make note of the administered shot number as $nShotNumber
 			 - make note of the date this shot was Administered as $adultPPSVShot2Date
@@ -147,21 +147,21 @@ end
 // Adult Series: If PCV (CVX 133 or 152) is administered for dose 5 (1st dose of adult series), then the absolute minimum age and minimum age is 19 years. 
 // Otherwise, the vaccine administered is a CVX (33, 109) and should have absolute minimum age and minimum age are 65y-4d and 65y, respectively, as per the series definition.
 /////////////////////
-rule "Pneumococcal Adult Series: If PCV (CVX 133, 152) administered for dose 5, modify DoseRule5 absolute minimum and minimum age to 19y" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Adult Series: If PCV (CVX 133, 152) administered for Adult Series dose 1, modify DoseRule6 absolute minimum age / minimum age to 19y" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	no-loop true
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the dose number in the series is == 5
+			- the dose number in the series is == 6
 			- the vaccine administered a member of ("ICE133", "ICE152")
 		There is a Series $targetSeries that contains the shot $currentShot
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 	then
-		Obtain the existing DoseRule for Dose Number 5 in the Series $targetSeries as $assign_oDoseRule5
-		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule5 to TimePeriod "19y"
-		Set the Minimum Age for DoseRule $assign_oDoseRule5 to TimePeriod "19y"
-		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule5
+		Obtain the existing DoseRule for Dose Number 6 in the Series $targetSeries as $assign_oDoseRule6
+		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule6 to TimePeriod "19y"
+		Set the Minimum Age for DoseRule $assign_oDoseRule6 to TimePeriod "19y"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule6
 		Refresh all Facts in the Series $targetSeries for Evaluation
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -169,18 +169,18 @@ end
 
 
 // Adult Series: Vaccine allowable shots for dose 6 (adult dose 2) if dose 5 was CVX 133 or 152 (PCV) is CVX 109 or 33 (PPSV) 
-rule "Pneumococcal Adult Series: If PCV (CVX 133, 152) administered for dose 5, dose 6 must be a PPSV (CVX 109, 33)" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Adult Series: If PCV (CVX 133, 152) administered for Adult Series dose 1, dose 2 must be a PPSV (CVX 109, 33)" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the dose number in the series is == 6
+			- the dose number in the series is == 7
 			- the vaccine administered not a member of ("ICE109", "ICE33")
 		There is an administered shot $priorValidShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the dose number in the series is == 5
+			- the dose number in the series is == 6
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE133", "ICE152")
 		There is a Series $targetSeries that contains the shot $currentShot
@@ -193,18 +193,18 @@ end
 
 
 // Adult Series: Vaccine allowable shots for dose 6 (adult dose 2) if dose 5 was CVX 133 or 152 (PCV) is CVX 109 or 33 (PPSV) 
-rule "Pneumococcal Adult Series: If PPSV (CVX 33, 109) administered for dose 5, dose 6 must be a PCV (CVX 133, 152)" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Adult Series: If PPSV (CVX 33, 109) administered for Adult Series dose 1, dose 2 must be a PCV (CVX 133, 152)" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the dose number in the series is == 6
+			- the dose number in the series is == 7
 			- the vaccine administered not a member of ("ICE133", "ICE152")
 		There is an administered shot $priorValidShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the dose number in the series is == 5
+			- the dose number in the series is == 6
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE109", "ICE33")
 		There is a Series $targetSeries that contains the shot $currentShot
@@ -232,7 +232,7 @@ rule "Pneumococcal Adult Series: Evaluate PCV 7 shot (CVX 100) as Accepted with 
 		There is an administered shot $currentShot that needs to be evaluated
 			- the vaccine administered is "ICE100"
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the dose number in the Series is >= 5
+			- the dose number in the Series is >= 6
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Allowed"
 		Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
@@ -249,7 +249,7 @@ rule "Pneumococcal Adult Series: Note that the Absolute Minimum interval from PC
 		There is an administered shot $currentShot that needs to be evaluated
 			- the vaccine administered is "ICE100"
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the dose number in the Series is >= 5
+			- the dose number in the Series is >= 6
 	then
 		Mark the shot $currentShot as Ignored
 		Record that this dose rule was processed for the TargetDose $currentShot
@@ -260,7 +260,7 @@ end
 // Child Series: If an invalid vaccine is administered in the Child Series, mark the shot as *Accepted* (rather than INVALID) with a reason code of VACCINE_NOT_ALLOWED_FOR_THIS_DOSE. 
 // As of 10/2016, only CVX 33. (Overrides general "allowableVaccineCheck" rule)
 /////////////////////
-rule "Pneumococcal Child Series: Evaluate shot with invalid vaccine as Accepted with reason code of VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Child Series: Evaluate shot administered with an invalid vaccine as Accepted with reason code of VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -272,7 +272,7 @@ rule "Pneumococcal Child Series: Evaluate shot with invalid vaccine as Accepted 
 		There is a Series $targetSeries that contains the shot $currentShot
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-			- the effective dose number in the series is <= 4
+			- the effective dose number in the series is <= 5
 			- the vaccine $vaccineAdministered is not permitted for dose number $doseNumber in this series
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Allowed For This Dose"
@@ -290,7 +290,7 @@ rule "Pneumococcal Child Series: Evaluate the minimum interval as 0 days between
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-			- the effective dose number in the series is <= 4
+			- the effective dose number in the series is <= 5
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the series $targetSeries
 			- the administered shot number is > 1
@@ -338,12 +338,12 @@ end
 
 
 /*************************************************************************************************************************************************************************************
-PCV 13 Rule: If a child is complete for the series, has not had a dose of PCV 13 (CVX 133), is currently < 5 years old, and will be < 5 years old at the recommended due date, 
+PCV 13 Rule: If a child is complete for the Child series, has not had a dose of PCV 13 (CVX 133), is currently < 5 years old, and will be < 5 years old at the recommended due date, 
 then a dose of PCV 13 (CVX 133) is recommended. Recommended interval is 8 weeks
 /************************************************************************************************************************************************************************************/
 
 // Abstract rule for PCV13 rule: patient < 5yrs of age, series is complete and no prior PCV shots until the current shot under evaluation
-rule "Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, series is complete and no prior PCV shots" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, Child Series is Complete and no prior PCV shots" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	when
@@ -374,7 +374,7 @@ end
 // If a child is already complete for the series, has not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old in the Child Series, then this PCV 13 shot 
 // is evaluated to VALID as long as an interval of 52 days has elapsed since last shot.
 rule "Pneumococcal Child Series: Evaluate PCV Shot as Valid if Patient < 5yrs, interval is >= 52 days and Series is Complete" extends 
-		"Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, series is complete and no prior PCV shots" 
+		"Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, Child Series is Complete and no prior PCV shots" 
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
@@ -392,7 +392,7 @@ end
 // If a child is already complete for the series, and this shot is PCV 13 (CVX 133), is currently < 5 yrs old, then this PCV 13 shot is evaluated to INVALID if an interval 
 // of 52 days has not elapsed since last shot.
 rule "Pneumococcal Child Series: Evaluate PCV Shot as Invalid if Patient < 5yrs, interval is < 52 days and Series is Complete" extends 
-	"Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, series is complete and no prior PCV shots" ruleflow-group "HistoryEvaluation"
+	"Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, Child Series is Complete and no prior PCV shots" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -457,6 +457,7 @@ rule "Pneumococcal Child Series: Exception 1: Skip Dose Number to 2 for Patient 
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	salience 200
+	no-loop true
 	when
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -500,6 +501,7 @@ rule "Pneumococcal Child Series: Exception 2: Skip Dose Number to 3 if Patient B
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	salience 200
+	no-loop true
 	when
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -525,6 +527,7 @@ rule "Pneumococcal Child Series: Exception 2: Skip Dose Number to 4 if Patient B
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	salience 200
+	no-loop true
 	when
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -566,10 +569,11 @@ rule "Pneumococcal Child Series: Exception 3: Set Series Dose Number to 4 if No 
 end
 
 
-rule "Pneumococcal Child Series: Exception 3: Skip Dose Number to 4 for Patient >= 24m at Shot Date" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Child Series: Exception 3: Skip Dose Number to 4 for Patient >= 24m and < 5y at Shot Date" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	salience 200
+	no-loop true
 	when
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -580,7 +584,7 @@ rule "Pneumococcal Child Series: Exception 3: Skip Dose Number to 4 for Patient 
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "24m"
+		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "24m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "5y"
 	then
 		Set Dose Number of $currentDose to 4
 		// Pneumococcal pneumonia
@@ -589,7 +593,7 @@ rule "Pneumococcal Child Series: Exception 3: Skip Dose Number to 4 for Patient 
 end
 
 
-rule "Pneumococcal Adult Series: Exception 4: Set Series Dose Number to 5 if No Shots Administered and Patient >= 5y of Age at Execution Date" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Adult Series: Exception 4: Set Series Dose Number to 6 (AdultSeries) if No Shots Administered and Patient >= 5y of Age at Execution Date" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	salience 200
@@ -603,28 +607,29 @@ rule "Pneumococcal Adult Series: Exception 4: Set Series Dose Number to 5 if No 
 			- the Number of Administered Shots is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
-		Skip Series Dose Number to 5 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Skip Series Dose Number to 6 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
 
-rule "Pneumococcal Child Series: Exception 4: Skip Dose Number to 5 for Patient >= 5y at Shot Date" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Child Series: Exception 4: Skip Dose Number to 6 (Adult Series) for Patient >= 5y at Shot Date" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	salience 200
+	no-loop true
 	when
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the Dose Number in the Series is < 5
+			- the Dose Number in the Series is < 6
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "24m"
+		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "5y"
 	then
-		Set Dose Number of $currentDose to 5
-		Skip Series Dose Number to 5 from $assign_nDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Set Dose Number of $currentDose to 6
+		Skip Series Dose Number to 6 from $assign_nDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end

@@ -240,10 +240,10 @@ public class TargetSeries {
 		convertToSpecifiedSeries(seriesToConvertTo, doseNumberFromWhichToBeginSwitch, doseNumberFromWhichToBeginSwitch, useDoseIntervalOfPriorDoseFromSwitchToSeries);
 	}
 
-	
+
 	private void convertToSpecifiedSeries(String seriesToConvertTo, int doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch, int doseNumberOfSwitchToSeriesToWhichToSwitch, 
 			boolean useDoseIntervalOfPriorDoseFromSwitchToSeries) 
-		throws InconsistentConfigurationException {
+					throws InconsistentConfigurationException {
 
 		String _METHODNAME = "switchSeries(): ";
 		if (seriesToConvertTo == null) {
@@ -520,7 +520,7 @@ public class TargetSeries {
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		*/
+		 */
 
 		int lTargetDoseNumber = 0;
 		if (pTargetDoseNumber <= 0) {
@@ -544,13 +544,46 @@ public class TargetSeries {
 
 		Integer lInterimValidityCountForDisease = interimEvaluationValidityCountByDisease.get(pDisease);
 		/////// if (lInterimValidityCountForDisease.intValue() == 0 && pDoseNumberToSkipFrom == 1) {
-			interimEvaluationValidityCountByDisease.put(pDisease, pDoseNumberToSkipTo-1);
+		interimEvaluationValidityCountByDisease.put(pDisease, pDoseNumberToSkipTo-1);
 		/////// }
 	}
 
+	
 	public int determineDoseNumberInSeries() {
 
-		return determineEffectiveNumberOfDosesInSeries() + 1;
+		int lEffectiveNumberOfDoses = determineEffectiveNumberOfDosesInSeries();
+		Integer lEffectiveDoseNumberPlus1Int = new Integer(lEffectiveNumberOfDoses+1);
+		
+		//////////////
+		// If dose number determined by disease count and there is a skip dose from the (next) target dose for all other diseases in this target series, take that into account
+		//////////////
+		if (this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered()) {
+			int lNumberOfDiseasesCoveredByThisTS = this.interimDosesToSkipByDisease.size();
+			int lNumberOfDiseasesWithSkipDoseAtNextTargetDose = 0;
+			int lLowestCount = lEffectiveNumberOfDoses;
+			Collection<Map<Integer, Integer>> lSkipDoseCollection = this.interimDosesToSkipByDisease.values();
+			for (Map<Integer, Integer> lSkipDose : lSkipDoseCollection) {
+				if (lSkipDose != null && lSkipDose.containsKey(lEffectiveDoseNumberPlus1Int)) {
+					int lSkipDoseTo = lSkipDose.get(lEffectiveDoseNumberPlus1Int);
+					if (lLowestCount == lEffectiveNumberOfDoses || lSkipDoseTo < lLowestCount) {
+						lLowestCount = lSkipDoseTo;
+					}
+					lNumberOfDiseasesWithSkipDoseAtNextTargetDose++;
+				}
+			}
+			if (lNumberOfDiseasesCoveredByThisTS == lNumberOfDiseasesWithSkipDoseAtNextTargetDose) {
+				return lLowestCount;
+			}
+			else {
+				return lEffectiveNumberOfDoses+1;
+			}
+		}
+		//////////////
+		// END taking skip dose into account
+		//////////////
+		else {
+			return lEffectiveNumberOfDoses+1;
+		}
 	}
 
 
@@ -614,23 +647,36 @@ public class TargetSeries {
 	/**
 	 * Determines the dose number of the specified target dose. Updates the series dose number for the series
 	 * 
-	 * @param pTD TargetDose to determine dose number for
+	 * @param pTD TargetDose to determine dose number for; if null and the number of targetDoses in this series is 0, returns the target dose number assuming no shots
 	 * @param updateInternalSeriesDoseNumberCount if set to true, increment the validity counters for all of the diseases
 	 * @param antigensToIncludeInDetermination limit which diseases to look at in the determination of the dose number. Under usual circumstances, use
 	 *            interimDiseaseEvaluationValidityCount.keySet(), to take into account all diseases for which this series induces immunity
 	 * @param takeSkipDoseEntriesIntoAccount If set to true, take any skip dose entries into account when determining dose number
-	 * @return
+	 * @return the dose number or target dose number
+	 * @throws IllegalArgumentException if pTD is null and there are shots administered in this target series
 	 */
 	private int doseNumberDeterminationUpdateUtility(TargetDose pTD, boolean returnTargetDoseNumber, boolean updateInternalSeriesDoseNumberCount,
 			boolean takeSkipDoseEntriesIntoAccount,	Collection<String> antigensToIncludeInDetermination) {
 
 		String _METHODNAME = "doseNumberDeterminationUpdateUtility(): ";
-		if (pTD == null) {
+		
+		///////////////////////////////////
+		// If no shots administered, return dose number based solely on the count by diseases
+		///////////////////////////////////
+		if (pTD != null && (this.targetDoses == null || this.targetDoses.isEmpty())) {
+			String str = "Supplied TargetDose parameter is not null but there are no administered shots in this target series";
+			logger.warn(_METHODNAME + str);
+			throw new IllegalArgumentException(str);
+		}
+		else if (pTD == null) {
 			String str = "Supplied TargetDose parameter is null";
 			logger.warn(_METHODNAME + str);
 			throw new IllegalArgumentException(str);
 		}
-
+		///////////////////////////////////
+		// END if no shots administered
+		///////////////////////////////////
+		
 		int highestSkipDoseNumberToEntry = 0;
 		int highestNonSkipDoseNumberToEntry = 0;
 
@@ -1127,7 +1173,7 @@ public class TargetSeries {
 		}
 	}
 
-	
+
 	public void recommendNextShotBasedOnEarliestAgeRule(Date pEvalPersonBirthTime, Date pEvalDate)
 			throws ImproperUsageException, InconsistentConfigurationException {
 
@@ -3368,7 +3414,7 @@ public class TargetSeries {
 		}
 	}
 
-	
+
 	/**
 	 * Specify if forecast date should be displayed for conditional recommendations
 	 */
@@ -3379,7 +3425,7 @@ public class TargetSeries {
 	public boolean isForecastDateDisplayedForConditionalRecommendations() {
 		return this.displayForecastDateForConditionalRecommendations;
 	}
-	
+
 	/**
 	 * Clear any prior recommendations; typically will be used if one wishes to reprocess all recommendations
 	 */

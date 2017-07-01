@@ -327,6 +327,7 @@
 [consequence][][Ll]og that this [Dd]ose [Rr]ule fired for the [Dd]ose {refer_oTargetDose}=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), {refer_oTargetDose}.toString() + " in TargetSeries " + {refer_oTargetDose}.getAssociatedTargetSeries().getSeriesName());
 [consequence][][Ll]og that this [Ss]eries [Rr]ule fired for the [Ss]eries {refer_oTargetSeries}=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "in TargetSeries " + {refer_oTargetSeries}.getSeriesName());
 [consequence][][Ll]og that this [Rr]ule fired=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "fired");
+[consequence][][Ll]og [Dd]ebugging [Ii]nformation about [Oo]bject [Nn]amed {strObjectName} and [Vv]alue {oDebugObject}=ICELogicHelper.logDRLDebugMessage("DEBUG INFORMATION for " + drools.getRule().getName(), {strObjectName} + ": " + {oDebugObject});
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
