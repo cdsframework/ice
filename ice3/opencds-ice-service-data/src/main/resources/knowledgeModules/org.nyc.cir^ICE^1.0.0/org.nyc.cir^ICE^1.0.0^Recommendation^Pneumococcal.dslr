@@ -128,6 +128,7 @@ end
 /************************************************************************************************************************************************************************************/
 
 
+
 /*************************************************************************************************************************************************************************************
 Rules for Recommending at the CVX Code vs. Vaccine Group Level
 
@@ -140,26 +141,28 @@ Rules for Recommending at the CVX Code vs. Vaccine Group Level
         - If dose 1 was a PPSV (CVX 33, 109), then PCV13 (CVX 133) should be recommended for dose 2.
 /************************************************************************************************************************************************************************************/
 
-// Pneumococcal Child Series: When recommending in the Child Series, always recommend at the CVX level; vaccine recommended should be PCV 13 (CVX 133).
+
 rule "Pneumococcal Child Series: Recommend at the vaccine level in child series; vaccine recommended should be PCV 13 (CVX 133)" ruleflow-group "RecommendationForecast"
-	dialect "java"
-	agenda-group "customRecommendationRule"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
 	salience 100
 	when
-		There is a Series $targetSeries that needs forecasting
+		There is a Series $targetSeries
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			/////// - the Series is not complete
+			- post processing on the Series forecast has not already been run
 			- the name of the Series is "PneumococcalSeries"
 			- the effective dose number in the series is < 6
-			/////// - make note of the effective dose number in the Series as $nDoseNumber
-		/////// Confirm the variable $nDoseNumber is < 5
+			- make note of the Recommendation Date as $recommendationDate
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and evalTime < "5y" && elapsed time between $birthDate and $recommendationDate < "5y"
 	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
 
 //////////////
 // Pneumococcal Adult Series: If the patient is < 65 years old, then recommend at the vaccine group level
@@ -243,10 +246,10 @@ rule "Pneumococcal Adult Series: If the patient is >= 65 years old, always recom
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-
 /*************************************************************************************************************************************************************************************
  END Rules for Recommending at the Vaccine vs. Vaccine Group Level
 /************************************************************************************************************************************************************************************/
+
 
 
 /*************************************************************************************************************************************************************************************
@@ -275,6 +278,7 @@ rule "Pneumococcal Child Series: Recommend dose if series complete if no prior V
 	then
 		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
 		Include a recommendation as $recommendation with forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
+		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
 		Mark forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -291,7 +295,6 @@ Recommendation Rules based on Age
 * If a patient is >= 5 years (or will be >= 5 years at the recommended due date) and < 65 years, then the Recommendation is Conditional and the reason code is HIGH_RISK.
 /************************************************************************************************************************************************************************************/
 
-
 // If patient is < 5 years and has completed the Child series (including meeting the PCV 13 Rule), then the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK. Has a lower
 // salience then the PCV13 rule
 rule "Pneumococcal Child Series: if patient < 5yrs completed the Child series (including the PCV13 rule), recommend Not Recommended with reason COMPLETE_HIGH_RISK" ruleflow-group "RecommendationForecast"
@@ -307,6 +310,7 @@ rule "Pneumococcal Child Series: if patient < 5yrs completed the Child series (i
 		There is an administered shot $shot
 			- the shot belongs to the Series $targetSeries
 			- the vaccine administered is "ICE133"
+			- that has already been evaluated and whose Shot Validity is VALID
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
@@ -417,10 +421,10 @@ rule "Pneumococcal: if the patient >= 2yrs and < 5 years, if a PPSV23 (CVX 33) s
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-
 /*************************************************************************************************************************************************************************************
  END Recommendation Rules based on Age
 /************************************************************************************************************************************************************************************/
+
 
 
 /*************************************************************************************************************************************************************************************
