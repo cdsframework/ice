@@ -286,6 +286,7 @@ end
 rule "Pneumococcal Child Series: Evaluate the minimum interval as 0 days between a PPSV23 (CVX 33) and a shot of PCV (CVX 100, 133, 152, 109) administered at < 5yrs of age" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
+	activation-group "doseIntervalCheck"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
