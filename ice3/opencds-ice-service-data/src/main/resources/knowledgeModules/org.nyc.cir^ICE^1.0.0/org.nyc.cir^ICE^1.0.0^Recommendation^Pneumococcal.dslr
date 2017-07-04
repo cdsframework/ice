@@ -458,7 +458,6 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-D
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-			// - the effective dose number in the Series is <= 2
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 2
 			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 0
@@ -485,7 +484,6 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 12months and T
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-			// - the effective dose number in the Series is <= 3
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 3
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is < 2
@@ -513,7 +511,6 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 12months and TargetD
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-			// - the effective dose number in the Series is <= 4
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 4
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is == 2
@@ -541,7 +538,6 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 24months and TargetD
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
-			// - the effective dose number in the Series is <= 4
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 4
 			- the Effective Number of Doses in the Series before $dtDateAtAgeTwentyFourMonths is < 4
@@ -569,12 +565,10 @@ rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
-			// - the effective dose number in the Series is <= 6
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 6
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
-		/////// Mark the Series $targetSeries Not Complete
 		Skip Series Dose Number to 6 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeSixtyFiveYears for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 6 in Series $targetSeries
