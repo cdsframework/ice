@@ -164,6 +164,7 @@ rule "DTP: Override default series rule that evaluates extra Tdap shots in the s
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+
 /*************************************************************************************************************************************************************************************
 // A dose of pertussis is defined as one of the following:
 //     * A primary series (3-dose series or 5-dose series) dose of CVX 01, 20, 106, 107, or 115
@@ -237,7 +238,6 @@ rule "DTP(3): A primary dose of pertussis exists if a (valid) dose for adolescen
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot
 end
-
 
 /*************************************************************************************************************************************************************************************
 Definition of "A dose of pertussis" END
@@ -368,127 +368,28 @@ If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is given as target dose 1, 2 or 
 the next target dose due and when evaluating the next shot based on the minimum interval for that target dose.
 *************************************************************************************************************************************************************************************/
 
-rule "DTP(HistoryEvaluation): Override default series minimum interval rule from prior shot containing D,T,&P when evaluating minimum interval in 5-dose series for target doses 1-3 for patient < 7y-4d" ruleflow-group "HistoryEvaluation"
+rule "DTP(HistoryEvaluation): If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is administered as target dose 1, 2 or 3 to a patient < 7yrs-4days, shot should be ignored when calculating intervals" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
-	activation-group "doseIntervalCheck"
-	when
-		// The shot being evaluated
-		There is an Administered Shot $currentShot that needs to be evaluated
-			- the dose number in the series is <= 3     
-			- make note of the administered shot number as $nAdministeredShotNumber
-			- make note of the dose number as $nDoseNumber
-			- make note of the date this shot was administered as $administrationDate
-			- Make note of the associated Series as $currentShotSeries
-		// The prior shot from which the minimum interval will be checked
-		There is an Administered Shot $administeredPrior
-			- the shot belongs to the Series $currentShotSeries
-			- the administration date of the shot is < $administrationDate
-			- the vaccine administered not a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-			- make note of the administered shot number as $nAdministeredShotNumberPrior
-			- make note of the Date this Shot was Administered as $administrationDatePrior
-		There does not exist an Administered Shot
-			- the shot belongs to the Series $currentShotSeries
-			- the administration date of the shot is > $administrationDatePrior
-			- the administration date of the shot is < $administrationDate
-			- the vaccine administered not a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-		// The shot from which to obtain the minimum interval DoseRule criteria... AI:  Refactor
-		There is an Administered Shot $priorDose
-			- the shot belongs to the Series $currentShotSeries
-			- the dose number in the series is one of ($nDoseNumber-1, $nDoseNumber)
-			- make note of the dose number as $nDoseNumberDoseRule
-			- make note of the Absolute Minimum Interval from this dose to the next dose as $oTimePeriodMinimumIntervalToNext
-		There does not exist an Administered Shot
-			- the shot belongs to the Series $currentShotSeries
-			- the dose number in the series is == $nDoseNumberDoseRule-1
-			- the numeric $nDoseNumberDoseRule is == $nDoseNumber
-		// Determine the most recent Tdap or Td shot and which is after the shot from which we're checking the minimum interval. This Tdap or Td is neeed to get the administration date to 
-		// check if it was administered before the vaccine minimum age to determine whether or not it should be ignored in its descendent rule
-		There is an Administered Shot $administeredPriorSkip
-			- the shot belongs to the Series $currentShotSeries
-			- the administered shot number is < $nAdministeredShotNumber
-			- the administered shot number is > $nAdministeredShotNumberPrior
-			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-			- make note of the minimum vaccine age for this Shot as $validMinimumAge
-			- make note of the administered shot number as $nAdministeredPriorSkipShotNumber
-			- make note of the Date this Shot was Administered as $administeredTdOrTdapPriorSkip			
-		There does not exist an Administered Shot
-			- the shot belongs to the Series $currentShotSeries
-			- the administered shot number is < $nAdministeredShotNumber
-			- the administered shot number is > $nAdministeredPriorSkipShotNumber
-			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-		// The Series
-		There is a Series $targetSeries that contains the Shot $currentShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the series is "DTP5DoseSeries"
-			- the Series contains the shot $administeredPrior
-			- the Series contains the shot $priorDose
-			- the Series contains the shot $administeredPriorSkip
-		The Patient information $evaluatedPerson must be known to complete writing this rule
-			- make note of the Patient's birthdate as $birthdate
-		// Check that Td or Tdap was admininstered < 7y-4d of age
-		Confirm elapsed time between $birthdate and $administeredTdOrTdapPriorSkip < $validMinimumAge
-	then
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-
-
-rule "DTP(HistoryEvaluation): Evaluate Minimum Interval as Invalid from prior shot containing D,T,&P when evaluating minimum interval in 5-dose series for target doses 1-3 for patient < 7y-4d"
-	extends "DTP(HistoryEvaluation): Override default series minimum interval rule from prior shot containing D,T,&P when evaluating minimum interval in 5-dose series for target doses 1-3 for patient < 7y-4d"
-	ruleflow-group "HistoryEvaluation"
-	agenda-group "customEvaluationRule"
-	when
-		Confirm elapsed time between $administrationDatePrior and $administrationDate < $oTimePeriodMinimumIntervalToNext
-	then
-		Mark the shot $currentShot as Invalid for this Series due to "Below Minimum Interval"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries 
-end
-
-
-rule "DTP(HistoryEvaluation): Override default series minimum interval rule if _NO_ prior shot containing D,T,&P when evaluating minimum interval in 5-dose series for target doses 1-3 for patient < 7y-4d" ruleflow-group "HistoryEvaluation"
-	agenda-group "customEvaluationRule"
-	activation-group "doseIntervalCheck"
 	when
 		// The shot being evaluated
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the dose number in the series is <= 3
-			- make note of the administered shot number as $nAdministeredShotNumber
-			- make note of the dose number as $nDoseNumber
-			- Make note of the associated Series as $currentShotSeries
-		// Check that there is no prior shots that is not a Td or Tdap - therefore no minimum interval checks should be done
-		There does not exist an Administered Shot
-			- the shot belongs to the Series $currentShotSeries
-			- the administered shot number is < $nAdministeredShotNumber
-			- the vaccine administered not a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-		// Determine the Tdap or Td shot we're dealing with, to get the administration date to check if it was administered before the vaccine minimum age to determine 
-		// whether or not it should be ignored in its descendent rule
-		There is an Administered Shot $administeredPriorSkip
-			- the shot belongs to the Series $currentShotSeries
-			- the administered shot number is < $nAdministeredShotNumber
 			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-			- make note of the minimum vaccine age for this Shot as $validMinimumAge
-			- make note of the administered shot number as $nAdministeredPriorSkipShotNumber
-			- make note of the date this Shot was Administered as $administeredTdOrTdapPriorSkip			
-		There does not exist an Administered Shot
-			- the shot belongs to the Series $currentShotSeries
-			- the administered shot number is < $nAdministeredShotNumber
-			- the administered shot number is > $nAdministeredPriorSkipShotNumber
-			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-		// The series
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the minimum vaccine age for this Shot as $validMinimumAgeVaccine
+		// The Series
 		There is a Series $targetSeries that contains the Shot $currentShot
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the name of the series is "DTP5DoseSeries"
-			- the Series contains the shot $administeredPriorSkip
 		The Patient information $evaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
 		// Check that Td or Tdap was admininstered < 7y-4d of age
-		Confirm elapsed time between $birthdate and $administeredTdOrTdapPriorSkip < $validMinimumAge
+		Confirm elapsed time between $birthdate and $administrationDate < $validMinimumAgeVaccine
 	then
+		Mark the shot $currentShot as Ignored
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
-
 
 /*************************************************************************************************************************************************************************************
 5-Dose Series Special Rules END
@@ -506,7 +407,6 @@ Exception 1: Series Complete with 3 Doses
 Exception 2: Series Complete with 4 Doses
     * If 4 doses have been administered and the 4th dose is administered at >= 4 years of age, then the series is complete with 4 doses; the 5th (booster) dose is not needed.
  *************************************************************************************************************************************************************************************/
-
 
 rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for Patient >=7 yrs if 3 doses have been administered, with the first dose at >= 12m and at least 1 dose at >= 4yrs" 
  	ruleflow-group "HistoryEvaluation"

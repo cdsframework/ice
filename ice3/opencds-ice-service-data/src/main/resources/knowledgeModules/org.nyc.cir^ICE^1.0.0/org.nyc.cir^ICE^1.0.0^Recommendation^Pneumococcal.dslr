@@ -64,7 +64,7 @@ Rules for Adult Recommending Intervals from Dose 5 to Dose 6 (Adult Dose 1 to Do
 // been set by a rule with a higher saleience. The absolute minimum age will have been set by another rule in the HistoryEvaluation ruleflow-group by the time this rule fires 
 // (or if not, have been preset by the series supporting data), so we can be assured it is correct when accessed here. This rule will ensure that a 1yr recommended interval is added  
 // to all such accepted shots (not just the most recent administered shot)
-rule "Pneumococcal Adult Series: Set Recommended Interval of 1yrs from accepted Adult Series PPSV target dose 1 administered before the absolute minimum age to recommended PCV vaccine" ruleflow-group "RecommendationForecast"
+rule "Pneumococcal Adult Series: Recommended Interval of 1yr from accepted Adult Series PPSV target dose 1, administered before the absolute minimum age, to the next target dose of PCV" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
@@ -94,7 +94,7 @@ end
 
 
 // Pneumococcal Adult Series: Set Recommended Interval of 5yrs from accepted PPSV dose 5 shot administered before the absolute minimum age to recommended PPSV vaccine
-rule "Pneumococcal Adult Series: Set Recommended Interval of 5yrs from accepted Adult Series PPSV target dose 1 administered before the absolute minimum age to recommended PPSV vaccine" ruleflow-group "RecommendationForecast"
+rule "Pneumococcal Adult Series: Recommended Interval of 5yrs from accepted Adult Series PPSV target dose 1, administered before the absolute minimum age, to the next target dose of PPSV" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
@@ -143,7 +143,7 @@ PPSV->PCV Interval Interaction Rules in Child Series
 
 // Recommended Interval: if a PPSV23 (CVX 33) shot has been given, the recommended interval is 0 days from the PPSV23 to the next target dose of PCV in the child series. 
 // For the purpose of recommendation, ignore the PPSV23 shot.
-rule "Pneumococcal: if the patient < 2yrs, if a PPSV23 (CVX 33) shot has been given, the recommended interval is 0 days from the PPSV23 to the next target dose of PCV" ruleflow-group "RecommendationForecast"
+rule "Pneumococcal: if the patient < 2yrs, if a PPSV23 (CVX 33) shot has been given, recommended interval of 0 days from the PPSV23 to the next target dose of PCV" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
@@ -168,7 +168,7 @@ end
 
 // Recommended Interval: if a PPSV23 (CVX 33) shot has been given, the recommended interval is 0 days from the PPSV23 to the next target dose of PCV in the child series. 
 // For the purpose of recommendation, ignore the PPSV23 shot.
-rule "Pneumococcal: if the patient >= 2yrs and < 5 years, if a PPSV23 (CVX 33) shot has been given, the recommended interval is 56 days from the PPSV23 to the next target dose of PCV" ruleflow-group "RecommendationForecast"
+rule "Pneumococcal: if the patient >= 2yrs and < 5 years, if a PPSV23 (CVX 33) shot has been given, recommended interval of 56 days from the PPSV23 to the next target dose of PCV" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
