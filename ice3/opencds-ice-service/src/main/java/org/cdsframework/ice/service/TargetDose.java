@@ -51,6 +51,7 @@ public class TargetDose {
 	private boolean isValid;
 	private boolean isShotIgnored;
 	private boolean hasBeenEvaluated;
+	private boolean preEvaluationCheckCompleted;
 	private boolean postEvaluationCheckCompleted;
 	private DoseStatus status;
 	private HashSet<String> validReasons;
@@ -92,6 +93,7 @@ public class TargetDose {
 		isValid = false;
 		isShotIgnored = false;
 		hasBeenEvaluated = false;
+		preEvaluationCheckCompleted = false;
 		postEvaluationCheckCompleted = false;
 	}
 
@@ -263,6 +265,14 @@ public class TargetDose {
 	public void setHasBeenEvaluated(boolean hasBeenEvaluated) {
 		this.hasBeenEvaluated = hasBeenEvaluated;
 	}
+
+	public boolean isPreEvaluationCheckCompleted() {
+		return preEvaluationCheckCompleted;
+	}
+	
+	public void setPreEvaluationCheckCompleted(boolean truefalse) {
+		this.preEvaluationCheckCompleted = truefalse;
+	}
 	
 	public boolean isPostEvaluationCheckCompleted() {
 		return postEvaluationCheckCompleted;
@@ -301,6 +311,11 @@ public class TargetDose {
 			}
 			else {
 				setIsValid(false);
+			}
+			if (status == DoseStatus.NOT_EVALUATED || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS) {
+				setPostEvaluationCheckCompleted(false);
+				setPreEvaluationCheckCompleted(false);
+				removeAllEvaluationReasonsFromAllReasonSets();
 			}
 		}
 	}

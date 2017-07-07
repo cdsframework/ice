@@ -612,10 +612,11 @@ rule "HistoryEvaluation.setNextTargetDoseInNonSeasonalSeriesForEvaluation" rulef
 		$ts : TargetSeries(targetSeason == null, containsTargetDose($td), areNoEarlierAdministeredShotsNotEvaluated($td))
 	then
 		String _RULENAME = kcontext.rule.name;
-		$tddosenumber = $ts.determineDoseNumberInSeries($td);
+		/////// $tddosenumber = $ts.determineDoseNumberInSeries($td);
+		int tddosenumber = $ts.determineDoseNumberInSeries();
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
-			setDoseNumberInSeries($tddosenumber);
+			setDoseNumberInSeries(tddosenumber);
 		}
 		$ts.setHistoryEvaluationInitiated(true);
 		update($ts);
@@ -635,10 +636,11 @@ rule "HistoryEvaluation.setNextTargetDoseInSeasonalSeriesForEvaluation" ruleflow
 			$vg : vaccineGroup, $tsid : targetSeriesIdentifier, $tseasonStartDate : targetSeason.fullySpecifiedSeasonStartDate)
 	then
 		String _RULENAME = kcontext.rule.name;
-		$tddosenumber = $ts.determineDoseNumberInSeries($td);
+		/////// $tddosenumber = $ts.determineDoseNumberInSeries($td);
+		int tddosenumber = $ts.determineDoseNumberInSeries();
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS), 
-			setDoseNumberInSeries($tddosenumber);
+			setDoseNumberInSeries(tddosenumber);
 		}
 		$ts.setHistoryEvaluationInitiated(true);
 		update($ts);
@@ -756,7 +758,7 @@ rule "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day" 
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		$td: TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
+		$td: TargetDose(isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
 			$doseNumber : doseNumberInSeries)
 		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries == $tdAdministeredShotNumber-1, $tdprevDoseNumber: doseNumberInSeries, $tdprevDoseNumber < $doseNumber)
 		$targetSeries : TargetSeries(containsTargetDose($td), containsTargetDose($tdprev))
@@ -777,13 +779,14 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
+		eval($tdprev.isShotIgnoredForCompletionOfSeries() == false || ($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() != null &&
-			! $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS)))
+			! $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS))))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($td) {
-			setDoseNumberInSeries($tdprevDoseNumber);
+			setDoseNumberInSeries($tdprevDoseNumber), 
+			setPreEvaluationCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
 		setFocus("customEvaluationRule");
@@ -801,11 +804,14 @@ rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 d
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) == null || 
+		eval($tdprev.isShotIgnoredForCompletionOfSeries() == true || $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) == null || 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() == null ||
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS)))
 	then
 		String _RULENAME = kcontext.rule.name;
+		modify ($td) {
+			setPreEvaluationCheckCompleted(true);
+		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
 		setFocus("customEvaluationRule");
 end
@@ -819,10 +825,14 @@ rule "Not Duplicate Shot/Same Day: No duplicate shots to shot being evaluated; I
 	dialect "mvel"
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	when
-		$td: TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, $tdAssociatedTargetSeries : associatedTargetSeries)
+		$td: TargetDose(isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
+			$tdAssociatedTargetSeries : associatedTargetSeries)
 		not TargetDose(this != $td, administrationDate == $administrationDate, administeredShotNumberInSeries < $tdAdministeredShotNumber, associatedTargetSeries == $tdAssociatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
+		modify ($td) {
+			setPreEvaluationCheckCompleted(true);
+		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $tdAssociatedTargetSeries);
 		setFocus("customEvaluationRule");
 end

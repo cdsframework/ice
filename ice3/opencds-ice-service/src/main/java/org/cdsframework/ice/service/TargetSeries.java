@@ -758,10 +758,12 @@ public class TargetSeries {
 							// If the diseases should be taken into account for this series in determining dose number, and this disease has already been accounted for 
 							// on this day, then we have a duplicate shot
 							if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == false) {
-								lIncrementDoseNumber = false;
+								/////// ORIG: lIncrementDoseNumber = false; ///////
+								lIncrementDoseNumber = true;
 							}
 							else if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == true && lDuplicateShotDiseases.contains(diseaseTargeted)) {
-								lIncrementDoseNumber = false;
+								/////// ORIG: lIncrementDoseNumber = false; ///////
+								lIncrementDoseNumber = true;
 							}
 							else {
 								if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == true) {
@@ -785,11 +787,13 @@ public class TargetSeries {
 									}
 								}
 								if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == false && lInnerCountOfPriorValidShotsSameDay > 0) {
-									lIncrementDoseNumber = false;
+									/////// ORIG: lIncrementDoseNumber = false; ///////
+									lIncrementDoseNumber = true;
 								}
 								else if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == true && lDuplicateShotDiseases.contains(diseaseTargeted)) {
 									// A duplicate shot is noted. Make note of the diseases 
-									lIncrementDoseNumber = false;
+									/////// ORIG: lIncrementDoseNumber = false; ///////
+									lIncrementDoseNumber = true;
 								}
 								else {		
 									// the lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered is true

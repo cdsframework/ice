@@ -447,6 +447,7 @@ rule "Pneumococcal Child Series: Exception 1: Set Series Dose Number to 2 if No 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is == 0
+			- the effective dose number in the series is < 2
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
 	then
 		Skip Series Dose Number to 2 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
@@ -489,6 +490,7 @@ rule "Pneumococcal Child Series: Exception 2: Set Series Dose Number to 3 if No 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
+			- the effective dose number in the series is < 3
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"	
 	then
 		// Pneumoccocal pneumonia
@@ -561,6 +563,7 @@ rule "Pneumococcal Child Series: Exception 3: Set Series Dose Number to 4 if No 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
+			- the effective dose number in the series is < 4
 		Confirm elapsed time between $dtBirthDate and evalTime >= "24m" && elapsed time between $dtBirthDate and evalTime < "5y"	
 	then
 		// Pneumoccocal pneumonia
@@ -605,6 +608,7 @@ rule "Pneumococcal Adult Series: Exception 4: Set Series Dose Number to 6 (Adult
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
+			- the effective dose number in the series is < 6
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
 		Skip Series Dose Number to 6 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
