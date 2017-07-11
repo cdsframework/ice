@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -55,118 +55,14 @@ global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
 
 
-///////////////////////////////////////////////////////////// PCV and PPSV Specific Series Initialization Rules /////////////////////////////////////////////////
+///////////////////////////////////////////////////////////// Custom Candidate Doses Initialization Rules /////////////////////////////////////////////////
 
-// Specialized initialization rule for PCV and PPSV vaccine group
-rule "CandidateDosesIdentification: Initialize TargetDose in PPSV or PCV Vaccine Group Series" ruleflow-group "CandidateDosesIdentification"
-	dialect "java"
-	agenda-group "customCandidateDosesIdentificationRule"
-	salience 55
-	no-loop true
+rule "CandidateDosesIdentification: Custom TargetDose Initialization" ruleflow-group "CandidateDosesIdentification"
+	dialect "mvel"
 	when
-		$i : ImmunizationConcept($ctid : getConceptTargetId(), $occ : getOpenCdsConceptCode())
-		$sae : SubstanceAdministrationEvent(id == $ctid)
-		// SeriesRules fact check: Because according to NYC rules, the Pneumococcal disease is associated with two vaccine groups, we can't simply check if the  
-		// vaccine targets a disease associated with the vaccine group because that would cotentially initialize this shot with series in both vaccine groups. 
-		// (A Pneumococcal shot is sometimes be according to the rules associated with a series in the PCV vaccine group and sometimes associated with another 
-		// a sries in a PPSV vaccine group. Thus, for PCV and PPSV vaccine groups, we instead check if the series supports one or more doses with the administered 
-		// vaccine, and if so -- in conjunction with other pneumococcal initialization rules (such as patient's age) -- allow initialization of the proper series 
-		// with the shot). This is actually more restrictive in terms of letting a TargetDose be initialized within a TargetSeries		
-		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), 
-			getVaccineGroup() == "VACCINE_GROUP_CONCEPT.720" || getVaccineGroup() == "VACCINE_GROUP_CONCEPT.700", 
-			vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
-		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
-		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
-		// this SubstanceAdministrationEvent and this OpenCDS concept, that the value of this key is the same as concept code as that of the vaccine group's. 
-		// Furthermore, if there exists a vaccine component within this shot administered that has not been initialized in this series for this vaccine group, 
-		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
+		// Empty rule
 	then
 		String _RULENAME = drools.getRule().getName();
-		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
-		List<TargetDose> initializedTargetDoses = $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule);
-		for (TargetDose initializedTargetDose : initializedTargetDoses) {
-			insert(initializedTargetDose);
-		}
-		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");
 end
 
-
-// Specialized initalization rule for PPSV and PCV when CVX 109 is administered. When CVX 109 (Pneumococcal NOS) is recorded for a patient => 5 years old, 
-// ICE will evaluate the shot as part of the pneumococcal polysaccharide group.
-rule "CandidateDosesIdentification: Initialize CVX109 Dose Into PPSV Series if Patient >= 5yrs" ruleflow-group "CandidateDosesIdentification"
-	dialect "java"
-	agenda-group "customCandidateDosesIdentificationRule"
-	salience 60
-	no-loop true
-	when
-		// This is a PCV 109 shot
-		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() == "ICE109", $occ : getOpenCdsConceptCode())
-		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval())
-		// SeriesRules fact check: Because according to NYC rules, the Pneumococcal disease is associated with two vaccine groups, we can't simply check if the  
-		// vaccine targets a disease associated with the vaccine group because that would cotentially initialize this shot with series in both vaccine groups. 
-		// (A Pneumococcal shot is sometimes be according to the rules associated with a series in the PCV vaccine group and sometimes associated with another 
-		// a sries in a PPSV vaccine group. Thus, for PCV and PPSV vaccine groups, we simply check if the series supports one or more doses with the administered 
-		// vaccine, and if so -- in conjunction with other pneumococcal initialization rules (such as patient's age) -- allow initialization of the proper series 
-		// with the shot)		
-		// PSV Series
-		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.720", 
-			vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
-		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
-		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
-		// this SubstanceAdministrationEvent and this OpenCDS concept, that the value of this key is the same as concept code as that of the vaccine group's. 
-		// Furthermore, if there exists a vaccine component within this shot administered that has not been initialized in this series for this vaccine group, 
-		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
-		$person : EvaluatedPerson()
-		// Patient is >= 5 years of age at the time the shot was administered
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), ICELogicHelper.extractSingularDateValueFromIVLDate($saeAdminDate), "5y") >= 0)
-	then
-		String _RULENAME = drools.getRule().getName();
-		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
-		List<TargetDose> initializedTargetDoses = $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule);
-		for (TargetDose initializedTargetDose : initializedTargetDoses) {
-			insert(initializedTargetDose);
-		}
-		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");
-end
-
-
-// Specialized initalization rule for PPSV and PCV when CVX 109 is administered. When CVX 109 (Pneumococcal NOS) is recorded for a patient < 5 years old, 
-// ICE will evaluate the shot as part of the pneumococcal conjugate group. 
-rule "CandidateDosesIdentification: Initialize CVX109 Dose Into PCV Series if Patient <5yrs" ruleflow-group "CandidateDosesIdentification"
-	dialect "java"
-	agenda-group "customCandidateDosesIdentificationRule"
-	salience 60
-	no-loop true
-	when
-		// This is a PCV 109 shot
-		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() == "ICE109", $occ : getOpenCdsConceptCode())
-		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval())
-		// SeriesRules fact check: Because according to NYC rules, the Pneumococcal disease is associated with two vaccine groups, we can't simply check if the  
-		// vaccine targets a disease associated with the vaccine group because that would cotentially initialize this shot with series in both vaccine groups. 
-		// (A Pneumococcal shot is sometimes be according to the rules associated with a series in the PCV vaccine group and sometimes associated with another 
-		// a sries in a PPSV vaccine group. Thus, for PCV and PPSV vaccine groups, we simply check if the series supports one or more doses with the administered 
-		// vaccine, and if so -- in conjunction with other pneumococcal initialization rules (such as patient's age) -- allow initialization of the proper series 
-		// with the shot)		
-		// PCV Series
-		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.700", 
-			vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
-		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
-		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
-		// this SubstanceAdministrationEvent and this OpenCDS concept, that the value of this key is the same as concept code as that of the vaccine group's. 
-		// Furthermore, if there exists a vaccine component within this shot administered that has not been initialized in this series for this vaccine group, 
-		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
-		$person : EvaluatedPerson()
-		// Patient is >= 5 years of age at the time the shot was administered
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), ICELogicHelper.extractSingularDateValueFromIVLDate($saeAdminDate), "5y") < 0)	
-	then
-		String _RULENAME = drools.getRule().getName();
-		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
-		List<TargetDose> initializedTargetDoses = $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule);
-		for (TargetDose initializedTargetDose : initializedTargetDoses) {
-			insert(initializedTargetDose);
-		}
-		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");
-end

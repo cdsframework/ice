@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -720,10 +720,10 @@ public class PayloadHelper {
 			logger.warn(_METHODNAME + lErrStr);
 			return null;
 		}
-		else if ("EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE".equals(sv.getCdsListItemName())) {		// TODO: Deal with this hard-code issue
-			logger.warn(_METHODNAME + "Vaccine not permitted for this dose but we don't return this code, currently");
-			return null;
-		}
+		//else if ("EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE".equals(sv.getCdsListItemName())) {		// AI: Deal with this hard-code issue
+		//	logger.warn(_METHODNAME + "Vaccine not permitted for this dose but we don't return this code, currently");
+		//	return null;
+		//}
 		else {
 			return sv.getCdsListItemCD();
 		}

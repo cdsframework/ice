@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -612,10 +612,11 @@ rule "HistoryEvaluation.setNextTargetDoseInNonSeasonalSeriesForEvaluation" rulef
 		$ts : TargetSeries(targetSeason == null, containsTargetDose($td), areNoEarlierAdministeredShotsNotEvaluated($td))
 	then
 		String _RULENAME = kcontext.rule.name;
-		$tddosenumber = $ts.determineDoseNumberInSeries($td);
+		/////// $tddosenumber = $ts.determineDoseNumberInSeries($td);
+		int tddosenumber = $ts.determineDoseNumberInSeries();
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
-			setDoseNumberInSeries($tddosenumber);
+			setDoseNumberInSeries(tddosenumber);
 		}
 		$ts.setHistoryEvaluationInitiated(true);
 		update($ts);
@@ -635,10 +636,11 @@ rule "HistoryEvaluation.setNextTargetDoseInSeasonalSeriesForEvaluation" ruleflow
 			$vg : vaccineGroup, $tsid : targetSeriesIdentifier, $tseasonStartDate : targetSeason.fullySpecifiedSeasonStartDate)
 	then
 		String _RULENAME = kcontext.rule.name;
-		$tddosenumber = $ts.determineDoseNumberInSeries($td);
+		/////// $tddosenumber = $ts.determineDoseNumberInSeries($td);
+		int tddosenumber = $ts.determineDoseNumberInSeries();
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS), 
-			setDoseNumberInSeries($tddosenumber);
+			setDoseNumberInSeries(tddosenumber);
 		}
 		$ts.setHistoryEvaluationInitiated(true);
 		update($ts);
@@ -750,22 +752,65 @@ end
 
 ///////// ***
 // General Design rule... Do not Edit
-// If this shot is a duplicate shot/same day shot as another shot in the series, mark its dose number the same as the previous shot (only one of the duplicate shot can be a valid dose)
 ///////// ***
-rule "Duplicate Shots/Same Day: If this is a duplicate shot/same day, mark the dose number of the shot being evaluated as equal to prior shots administered on the same date; Invoke custom evaluation rules" ruleflow-group "HistoryEvaluation"
+rule "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		$td: TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
+		$td: TargetDose(isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
 			$doseNumber : doseNumberInSeries)
-		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries < $tdAdministeredShotNumber, $tdprevDoseNumber: doseNumberInSeries, 
-			$tdprevDoseNumber < $doseNumber)
+		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries == $tdAdministeredShotNumber-1, $tdprevDoseNumber: doseNumberInSeries, $tdprevDoseNumber <= $doseNumber)
 		$targetSeries : TargetSeries(containsTargetDose($td), containsTargetDose($tdprev))
 	then
 		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+// If this shot is a duplicate shot/same day shot as another shot in the series, mark its dose number the same as the previous shot (only one of the duplicate shot can be a valid dose)
+///////// ***
+rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the dose number of the shot being evaluated as equal to prior shots administered on the same date; Invoke custom evaluation rules" 
+	extends "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
+	no-loop true
+	when
+		eval($tdprev.isShotIgnoredForCompletionOfSeries() == false || ($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
+			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() != null &&
+			! $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS))))
+	then
+		String _RULENAME = kcontext.rule.name;
 		modify ($td) {
-			setDoseNumberInSeries($tdprevDoseNumber);
+			setDoseNumberInSeries($tdprevDoseNumber), 
+			setPreEvaluationCheckCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
+		setFocus("customEvaluationRule");
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+// If this shot is a duplicate shot/same day shot as another shot in the series, but interval is 0 days between them so latter shots' dose number is not set to same as previous shot
+///////// ***
+rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 days are not marked with the same dose number; Invoke custom evaluation rules" 
+	extends "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
+	no-loop true
+	when
+		eval($tdprev.isShotIgnoredForCompletionOfSeries() == true || $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) == null || 
+			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() == null ||
+			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify ($td) {
+			setPreEvaluationCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
 		setFocus("customEvaluationRule");
@@ -780,10 +825,14 @@ rule "Not Duplicate Shot/Same Day: No duplicate shots to shot being evaluated; I
 	dialect "mvel"
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	when
-		$td: TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, $tdAssociatedTargetSeries : associatedTargetSeries)
+		$td: TargetDose(isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
+			$tdAssociatedTargetSeries : associatedTargetSeries)
 		not TargetDose(this != $td, administrationDate == $administrationDate, administeredShotNumberInSeries < $tdAdministeredShotNumber, associatedTargetSeries == $tdAssociatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
+		modify ($td) {
+			setPreEvaluationCheckCompleted(true);
+		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $tdAssociatedTargetSeries);
 		setFocus("customEvaluationRule");
 end
@@ -911,8 +960,8 @@ rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "History
 	salience 100
 	activation-group "minimumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null)
-		$ts : TargetSeries(containsTargetDose($td))
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $vaccine : administeredVaccine, $doseNumber : doseNumberInSeries)
+		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries) // , seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
 	then
@@ -984,7 +1033,8 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval" ruleflow-group "His
 			isShotIgnoredForCompletionOfSeries() == false, $tdprevdate : administrationDate)
 		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate, isShotIgnoredForCompletionOfSeries() == false)
 		$ts : TargetSeries(containsTargetDose($td) && containsTargetDose($tdprev), seriesRules.numberOfDosesInSeries >= $doseNumber)
-		not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1)
+		not (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1) and
+			eval($admindose == 2))
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, $tdprev);
@@ -1513,6 +1563,9 @@ rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirus" ruleflow-group
 end 
 
 
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
 rule "RecommendationForecast.adjustRecommendedStatusForFinalRecommendationDateWithRespectToEvalTime" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "supplementalSeriesRule"
@@ -1533,24 +1586,24 @@ end
 
 
 ///////// ***
-// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
-// Per ICE SME group, if recommendation is conditional, do not display a recommendation date.
+// General Design rule... Do not Edit
+// Per ICE SME group, if recommendation is conditional, do not display a recommendation date. This can be overrided via TargetSeries.setDisplayForecastDateForConditionalRecommendations()
 ///////// ***
 rule "RecommendationForecast.doNotReturnForecastDateForConditionalRecommendations" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
+	dialect "java"
 	agenda-group "supplementalSeriesRule"
 	when
-		$ts : TargetSeries(recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null)
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null, isForecastDateDisplayedForConditionalRecommendations() == false)
 	then
-		String _RULENAME = kcontext.rule.name;
+		String _RULENAME = drools.getRule().getName();
 		$ts.setFinalRecommendationDate(null);
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.getSeriesName());
 end
 
 
 ///////// ***
-// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// General Design rule... Do not Edit
 // If the list of recommended vaccines are inconsistent (i.e. - different interim recommendation forecasts with different vaccines), and the patient is recommended 
 // for a forecast, then log the inconsistency and recommend at the vaccine group level
 ///////// ***
@@ -1569,7 +1622,7 @@ end
 
 	
 ///////// ***
-// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// General Design rule... Do not Edit
 // If the list of recommended vaccines are consistent and not all empty, and the patient is recommended for a forecast, then recommend at the vaccine level of the only specified vaccine
 ///////// ***
 rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsistent" ruleflow-group "RecommendationForecast"
@@ -1934,7 +1987,6 @@ rule "RecommendNotRecommendedIfImmuneToAllDiseasesInSeries" ruleflow-group "Reco
 		$targetSeries : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, $diseasesSupportedByThisSeries : diseasesSupportedByThisSeries)
 		do[invokeCustomRecommendationRules]
 		$diseaseImmunityList : List(size == $diseasesSupportedByThisSeries.size()) from 
-			// accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, $r : immunityReason, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 			accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 	then
 		String _RULENAME = drools.getRule().getName();

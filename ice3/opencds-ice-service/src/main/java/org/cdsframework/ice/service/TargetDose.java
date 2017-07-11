@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -51,6 +51,7 @@ public class TargetDose {
 	private boolean isValid;
 	private boolean isShotIgnored;
 	private boolean hasBeenEvaluated;
+	private boolean preEvaluationCheckCompleted;
 	private boolean postEvaluationCheckCompleted;
 	private DoseStatus status;
 	private HashSet<String> validReasons;
@@ -92,6 +93,7 @@ public class TargetDose {
 		isValid = false;
 		isShotIgnored = false;
 		hasBeenEvaluated = false;
+		preEvaluationCheckCompleted = false;
 		postEvaluationCheckCompleted = false;
 	}
 
@@ -180,7 +182,7 @@ public class TargetDose {
 		
 		return associatedTargetSeries;
 	}
-	
+
 	/**
 	 * Return ID of this TargetDose, which matches the ID of the associated SubstanceAdministrationEvent when this TargetDose was created
 	 */
@@ -263,6 +265,14 @@ public class TargetDose {
 	public void setHasBeenEvaluated(boolean hasBeenEvaluated) {
 		this.hasBeenEvaluated = hasBeenEvaluated;
 	}
+
+	public boolean isPreEvaluationCheckCompleted() {
+		return preEvaluationCheckCompleted;
+	}
+	
+	public void setPreEvaluationCheckCompleted(boolean truefalse) {
+		this.preEvaluationCheckCompleted = truefalse;
+	}
 	
 	public boolean isPostEvaluationCheckCompleted() {
 		return postEvaluationCheckCompleted;
@@ -301,6 +311,11 @@ public class TargetDose {
 			}
 			else {
 				setIsValid(false);
+			}
+			if (status == DoseStatus.NOT_EVALUATED || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS) {
+				setPostEvaluationCheckCompleted(false);
+				setPreEvaluationCheckCompleted(false);
+				removeAllEvaluationReasonsFromAllReasonSets();
 			}
 		}
 	}
@@ -370,7 +385,7 @@ public class TargetDose {
 		String s = "TargetDose [uniqueId=" + uniqueId + ", doseId=" + doseId + ", administeredShotNumber=" + administeredShotNumberInSeries + 
 				", doseNumber=" + doseNumberInSeries + ", vaccine=" + administeredVaccine.getCdsConceptName() + 
 				", vaccineComponent=" + vaccineComponent.getCdsConceptName() + ", administrationDate=" + administrationDate + ", status=" + status + 
-				", isValid=" + isValid;
+				", isValid=" + isValid + "; preEvaluationCheck=" + preEvaluationCheckCompleted;
 		int i=0;
 		for (String reason : validReasons) {
 			if (i == 0)

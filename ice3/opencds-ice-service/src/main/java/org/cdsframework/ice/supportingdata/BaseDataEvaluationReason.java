@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -43,6 +43,7 @@ public enum BaseDataEvaluationReason implements BaseData {
 	_OUTSIDE_FLU_SEASON_REASON("EVALUATION_REASON_CONCEPT.OUTSIDE_FLU_VAC_SEASON"),
 	_PRIOR_TO_DOB("EVALUATION_REASON_CONCEPT.PRIOR_TO_DOB"),
 	_TOO_EARLY_LIVE_VIRUS("EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS"),
+	_VACCINE_NOT_ALLOWED("EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED"),
 	_VACCINE_NOT_ALLOWED_FOR_THIS_DOSE("EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"),
 	_VACCINE_NOT_MEMBER_OF_SERIES("EVALUATION_REASON_CONCEPT.VACCINE_NOT_MEMBER_OF_SERIES"),
 	_VACCINE_NOT_SUPPORTED_REASON("EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED");
