@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -110,6 +110,28 @@ public class ICEPropertiesDataConfiguration {
 		}
 		
 		return baseRulesScopingEntityId;
+	}
+	
+	
+	public String getBaseRulesVersion() { 
+
+		String _METHODNAME = "getBaseRulesVersion(): ";
+		
+		// Get the version for the base ICE rules
+		String baseRulesVersion = iceProps.getProperty("ice_base_rules_version");
+		if (baseRulesVersion == null) {
+			String lErrStr = "ICE base rules version not specified in the properties file";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		else {
+			if (logger.isInfoEnabled()) {
+				String lErrStr = "ICE base rules version specified in properties file: " + baseRulesVersion;
+				logger.info(lErrStr);
+			}
+		}
+		
+		return baseRulesVersion;
 	}
 	
 	

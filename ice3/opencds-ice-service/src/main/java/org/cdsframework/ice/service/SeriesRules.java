@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -37,7 +37,7 @@ import org.cdsframework.cds.CdsConcept;
 public class SeriesRules {
 
 	private String seriesId;
-	private String seriesNameCode;
+	private String seriesName;
 	/////// private String vaccineGroup;
 	private CdsConcept vaccineGroupConcept;
 	private int numberOfDosesInSeries;
@@ -66,7 +66,7 @@ public class SeriesRules {
 		}
 		// seriesId = pSeriesName;
 		seriesId = ICELogicHelper.generateUniqueString();
-		seriesNameCode = pSeriesName;
+		seriesName = pSeriesName;
 		vaccineGroupConcept = pVaccineGroup;
 		seriesDoseRules = new ArrayList<DoseRule>();
 		applicableSeasons = new ArrayList<Season>();
@@ -104,7 +104,7 @@ public class SeriesRules {
 		
 		SeriesRules lSR = new SeriesRules(pSR.getSeriesName(), pSR.getVaccineGroupConcept());
 		lSR.seriesId = ICELogicHelper.generateUniqueString();
-		lSR.seriesNameCode = pSR.seriesNameCode;
+		lSR.seriesName = pSR.seriesName;
 		lSR.vaccineGroupConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(pSR.getVaccineGroupConcept());
 		lSR.recurringDosesAfterSeriesComplete = pSR.recurringDosesAfterSeriesComplete;
 		lSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = pSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
@@ -138,7 +138,7 @@ public class SeriesRules {
 
 	
 	public String getSeriesName() {
-		return seriesNameCode;
+		return seriesName;
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class SeriesRules {
 		if (seriesName == null) {
 			throw new IllegalArgumentException("seriesName cannot be null");
 		}
-		this.seriesNameCode = seriesName;
+		this.seriesName = seriesName;
 	}
 	
 	private CdsConcept getVaccineGroupConcept() {
@@ -398,7 +398,7 @@ public class SeriesRules {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((seriesNameCode == null) ? 0 : seriesNameCode.hashCode());
+		result = prime * result + ((seriesName == null) ? 0 : seriesName.hashCode());
 		result = prime * result + ((vaccineGroupConcept == null) ? 0 : vaccineGroupConcept.hashCode());
 		return result;
 	}
@@ -413,10 +413,10 @@ public class SeriesRules {
 		if (getClass() != obj.getClass())
 			return false;
 		SeriesRules other = (SeriesRules) obj;
-		if (seriesNameCode == null) {
-			if (other.seriesNameCode != null)
+		if (seriesName == null) {
+			if (other.seriesName != null)
 				return false;
-		} else if (!seriesNameCode.equals(other.seriesNameCode))
+		} else if (!seriesName.equals(other.seriesName))
 			return false;
 		if (vaccineGroupConcept == null) {
 			if (other.vaccineGroupConcept != null)
@@ -430,7 +430,7 @@ public class SeriesRules {
 	@Override
 	public String toString() {
 		
-		String toStr = "SeriesRules [seriesId = " + seriesId + "; Series Name = " + seriesNameCode + "; vaccineGroupConcept name = " + vaccineGroupConcept.getOpenCdsConceptCode()
+		String toStr = "SeriesRules [seriesId = " + seriesId + "; Series Name = " + seriesName + "; vaccineGroupConcept name = " + vaccineGroupConcept.getOpenCdsConceptCode()
 				+ "; Number of Doses In Series = " + numberOfDosesInSeries + "; Recurring Doses (After Series Complete)? = "
 				+ recurringDosesAfterSeriesComplete + "; Dose Number Calculated By Diseases Targeted By Each Vaccine = " 
 				+ doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered; 

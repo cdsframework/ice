@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -66,9 +66,6 @@ public class TargetSeries {
 	private boolean immunityToAllDiseasesRecorded;
 	private boolean historyEvaluationInitiated;
 	private boolean postForecastCheckCompleted;
-	
-	
-	// private boolean performForecastCheck;
 	private int manuallySetDoseNumberToRecommend;
 
 	private List<Recommendation> interimRecommendationsScheduleEarliest;
@@ -90,10 +87,11 @@ public class TargetSeries {
 	private Date finalLatestRecommendationDate;
 	private List<Recommendation> finalRecommendations;
 	private List<String> seriesRulesProcessed;
+	private boolean displayForecastDateForConditionalRecommendations;
 
 	private static Log logger = LogFactory.getLog(TargetSeries.class);
 
-	
+
 	/**
 	 * TargetSeries constructor
 	 * @param pSeriesRules SeriesRules parameter, must be provided
@@ -109,7 +107,7 @@ public class TargetSeries {
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		targetSeriesIdentifier = ICELogicHelper.generateUniqueString();
 		scheduleBackingSeries = pScheduleBackingSeries;
 		seriesRules = pSeriesRules;
@@ -140,6 +138,7 @@ public class TargetSeries {
 		finalEarliestDate = null;
 		finalRecommendationDate = null;
 		finalLatestRecommendationDate = null;
+		displayForecastDateForConditionalRecommendations = false;
 
 		interimEvaluationValidityCountByDisease = new HashMap<String, Integer>();
 		interimDosesToSkipByDisease = new HashMap<String, Map<Integer, Integer>>();
@@ -154,7 +153,7 @@ public class TargetSeries {
 		diseaseImmunityDate = new HashMap<String, Date>();
 	}
 
-	
+
 	/**
 	 * Constructs a TargetSeries for a single invocation. If the Season parameter is not valid (i.e. - is not supported by the underlying SeriesRules), 
 	 * an IllegalArgumentException is thrown
@@ -163,14 +162,14 @@ public class TargetSeries {
 	 * @param pTargetSeason
 	 */
 	public TargetSeries(SeriesRules pSeriesRules, Schedule pScheduleBackingSeries, Season pTargetSeason) {
-		
+
 		this(pSeriesRules, pScheduleBackingSeries);
 
 		String _METHODNAME = "TargetSeries(SeriesRules, Schedule, Season): ";
 		if (pTargetSeason == null || pTargetSeason.isDefaultSeason()) {
 			throw new IllegalArgumentException(_METHODNAME + "Season parameter not specified or specified as a default season (default seasons not permitted)");
 		}
-		
+
 		boolean foundApplicableSeason = false;
 		if (pTargetSeason != null) {
 			List<Season> seriesRulesSeasons = this.seriesRules.getSeasons();
@@ -193,7 +192,7 @@ public class TargetSeries {
 		}
 	}
 
-	
+
 	public String getTargetSeriesIdentifier() {
 		return targetSeriesIdentifier;
 	}
@@ -201,11 +200,11 @@ public class TargetSeries {
 	public Schedule getScheduleBackingSeries() {
 		return this.scheduleBackingSeries;
 	}
-	
+
 	public boolean isPostForecastCheckCompleted() {
 		return postForecastCheckCompleted;
 	}
-	
+
 	public void setPostForecastCheckCompleted(boolean postForecastCheckCompleted) {
 		this.postForecastCheckCompleted = postForecastCheckCompleted;
 	}
@@ -213,11 +212,11 @@ public class TargetSeries {
 	public boolean isHistoryEvaluationInitiated() {
 		return historyEvaluationInitiated;
 	}
-	
+
 	public void setHistoryEvaluationInitiated(boolean truefalse) {
 		this.historyEvaluationInitiated = truefalse;
 	}
-	
+
 	public Vaccine getRecommendationVaccine() {
 		return recommendationVaccine;
 	}
@@ -225,7 +224,7 @@ public class TargetSeries {
 	public void setRecommendationVaccine(Vaccine recommendationVaccine) {
 		this.recommendationVaccine = recommendationVaccine;
 	}
-	
+
 
 	/**
 	 * Switch the dose rules to follow in this TargetSeries to that of the specified series, starting from the specified dose number. May only
@@ -233,13 +232,18 @@ public class TargetSeries {
 	 * 
 	 * @param seriesToConvertTo
 	 * @param doseNumberFromWhichToBeginSwitch
-	 * @throws IllegalArgumentException
-	 *             If the series does not exist, or the dose number from which
-	 *             to switch to does not exist in the specified series
+	 * @throws IllegalArgumentException if the series does not exist, or the dose number from which to switch to does not exist in the specified series
 	 */
-	// public void convertToSpecifiedSeries(Schedule schedule, String seriesToConvertTo, int doseNumberFromWhichToBeginSwitch)
-	public void convertToSpecifiedSeries(String seriesToConvertTo, int doseNumberFromWhichToBeginSwitch, boolean useDoseIntervalOfPriorDoseFromSwitchToSeries)
-		throws InconsistentConfigurationException {
+	public void convertToSpecifiedSeries(String seriesToConvertTo, int doseNumberFromWhichToBeginSwitch, boolean useDoseIntervalOfPriorDoseFromSwitchToSeries) 
+			throws InconsistentConfigurationException {
+
+		convertToSpecifiedSeries(seriesToConvertTo, doseNumberFromWhichToBeginSwitch, doseNumberFromWhichToBeginSwitch, useDoseIntervalOfPriorDoseFromSwitchToSeries);
+	}
+
+
+	private void convertToSpecifiedSeries(String seriesToConvertTo, int doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch, int doseNumberOfSwitchToSeriesToWhichToSwitch, 
+			boolean useDoseIntervalOfPriorDoseFromSwitchToSeries) 
+					throws InconsistentConfigurationException {
 
 		String _METHODNAME = "switchSeries(): ";
 		if (seriesToConvertTo == null) {
@@ -248,6 +252,13 @@ public class TargetSeries {
 			throw new IllegalArgumentException(str);
 		}
 
+		if (doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch != doseNumberOfSwitchToSeriesToWhichToSwitch) {
+			// For now, mechanims are not in place permit/support moving from one dose number to a different dose number; additionally, it does not fit into
+			// the definition of converting to a series. (E.g. - doesn't make sense to go from dose 3 of "from" series to dose 2 of "to" series)
+			String lErrStr = "Dose number from series to switch from does not equal the dose number of the series being switched to";
+			logger.error(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
 		// Get the specified SeriesRules
 		SeriesRules srOfSwitchSeries = scheduleBackingSeries.getScheduleSeriesByName(this.seriesRules.getVaccineGroup(), seriesToConvertTo);
 		if (srOfSwitchSeries == null) {
@@ -255,7 +266,7 @@ public class TargetSeries {
 			logger.error(str);
 			throw new IllegalArgumentException(str);
 		}
-		if (srOfSwitchSeries.getNumberOfDosesInSeries() < doseNumberFromWhichToBeginSwitch) {
+		if (srOfSwitchSeries.getNumberOfDosesInSeries() < doseNumberOfSwitchToSeriesToWhichToSwitch) {
 			String str = _METHODNAME + "number of doses in specified series is less than the specified dose number from which to begin the switch";
 			logger.error(str);
 			throw new IllegalArgumentException(str);
@@ -266,8 +277,8 @@ public class TargetSeries {
 			logger.error(str);
 			throw new InconsistentConfigurationException(str);
 		}
-		int sizeNewSeries = srOfSwitchSeries.getNumberOfDosesInSeries();
-		if (doseRulesOfSwitchSeries.size() != sizeNewSeries) {
+		int sizeSwitchToSeries = srOfSwitchSeries.getNumberOfDosesInSeries();
+		if (doseRulesOfSwitchSeries.size() != sizeSwitchToSeries) {
 			String str = _METHODNAME + "Length of DoseRulesList in switch series does not equal reported size in switch series";
 			logger.error(str);
 			throw new InconsistentConfigurationException(str);
@@ -280,66 +291,75 @@ public class TargetSeries {
 			logger.error(str);
 			throw new InconsistentConfigurationException(str);
 		}
-		
+
 		// Remove existing DoseRules starting with the existing dose number.
 		int size = thisSeriesDoseRules.size();
-		thisSeriesDoseRules.subList(doseNumberFromWhichToBeginSwitch - 1, size).clear();
+		thisSeriesDoseRules.subList(doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch-1, size).clear();
 		if (logger.isDebugEnabled()) {
-			String debugStr = _METHODNAME + "After removing doseNumber-forward existing DoseRules from this Series, the following DoseRules remain: ";
+			String debugStr = _METHODNAME + "Series to switch to: " + seriesToConvertTo + "; doseNumberFromWhichToBeginSwitch: " + doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch + "; doseNumberToWhichToSwitch: " +
+					doseNumberOfSwitchToSeriesToWhichToSwitch + "; useDoseIntervalOfPriorDoseFromSwitchToSeries: " + useDoseIntervalOfPriorDoseFromSwitchToSeries;
+			logger.debug(debugStr);
+			debugStr = _METHODNAME + "After removing doseNumber-forward existing DoseRules from this Series, the following DoseRules remain: ";
 			for (DoseRule dr : this.seriesRules.getSeriesDoseRules()) {
 				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " + 
 						dr.getMinimumAge() + " absoluteMinimumInterval: " + dr.getAbsoluteMinimumInterval() + " minInterval: " + 
 						dr.getMinimumInterval() + " recommendedAge: " + dr.getEarliestRecommendedAge() + " recommendedInterval " + 
 						dr.getEarliestRecommendedAge() + "; ";
-				logger.debug(debugStr);
 			}
+			logger.debug(debugStr);
 		}
-		
+
 		// If the specified dose number is > 1, then modify the interval values from the series to switch to and change only those interval values leaving the remaining
-		if (useDoseIntervalOfPriorDoseFromSwitchToSeries && doseNumberFromWhichToBeginSwitch > 1) {
-			DoseRule thisSeriesLastDoseRuleFromPriorSeries = thisSeriesDoseRules.get(doseNumberFromWhichToBeginSwitch-2);
-			DoseRule newSeriesPriorDoseRuleForIntervalOnly = srOfSwitchSeries.getSeriesDoseRuleByDoseNumber(doseNumberFromWhichToBeginSwitch-1);
+		if (useDoseIntervalOfPriorDoseFromSwitchToSeries && doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch > 1) {
+			DoseRule thisSeriesLastDoseRuleFromPriorSeries = thisSeriesDoseRules.get(doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch-2);
+			DoseRule newSeriesPriorDoseRuleForIntervalOnly = srOfSwitchSeries.getSeriesDoseRuleByDoseNumber((doseNumberOfSwitchToSeriesToWhichToSwitch <= 1) ? 1 : doseNumberOfSwitchToSeriesToWhichToSwitch-1);
 			thisSeriesLastDoseRuleFromPriorSeries.setAbsoluteMinimumInterval(newSeriesPriorDoseRuleForIntervalOnly.getAbsoluteMinimumInterval());
 			thisSeriesLastDoseRuleFromPriorSeries.setMinimumInterval(newSeriesPriorDoseRuleForIntervalOnly.getMinimumInterval());
 			thisSeriesLastDoseRuleFromPriorSeries.setEarliestRecommendedInterval(newSeriesPriorDoseRuleForIntervalOnly.getEarliestRecommendedInterval());
 			thisSeriesLastDoseRuleFromPriorSeries.setLatestRecommendedInterval(newSeriesPriorDoseRuleForIntervalOnly.getLatestRecommendedInterval());
 		}
-		
-		// Add new DoseRules starting with the existing dose number
-		List<DoseRule> ssDoseRulesToAdd = srOfSwitchSeries.getSeriesDoseRules().subList(doseNumberFromWhichToBeginSwitch - 1, sizeNewSeries);
+
+		// Add new DoseRules starting with the existing dose number - properly set the dose number to ensure they are sequential
+		List<DoseRule> ssDoseRulesToAdd = srOfSwitchSeries.getSeriesDoseRules().subList(doseNumberOfSwitchToSeriesToWhichToSwitch-1, sizeSwitchToSeries);		
 		if (logger.isDebugEnabled()) {
 			String debugStr = _METHODNAME + "Switch series doses to add: ";
 			for (DoseRule dr : ssDoseRulesToAdd) {
 				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " + 
 						dr.getMinimumAge() + " absoluteMinimumInterval: " + dr.getAbsoluteMinimumInterval() + " minInterval: " + dr.getMinimumInterval() + 
 						" recommendedAge: "	+ dr.getEarliestRecommendedAge() + " recommendedInterval " + dr.getEarliestRecommendedAge() + "; ";
-				logger.debug(debugStr);
 			}
+			logger.debug(debugStr);
+		}
+		// Change each DoseRule's doseNumber (the dose rules to add) to the proper dose number
+		int lDoseNumberFromWhichToSwitchInd = doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch;
+		for (DoseRule dr : ssDoseRulesToAdd) {
+			dr.setDoseNumber(lDoseNumberFromWhichToSwitchInd);
+			lDoseNumberFromWhichToSwitchInd++;
 		}
 		thisSeriesDoseRules.addAll(ssDoseRulesToAdd);
-		this.seriesRules.setSeriesDoseRules(thisSeriesDoseRules);
 		if (logger.isDebugEnabled()) {
 			String debugStr = _METHODNAME + "Final set of DoseRules with switch series doses added: ";
 			for (DoseRule dr : this.seriesRules.getSeriesDoseRules()) {
-				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " + 
-						dr.getMinimumAge() + " absoluteMinimumInterval: " + dr.getAbsoluteMinimumInterval() + " minInterval: " + 
-						dr.getMinimumInterval() + " recommendedAge: " + dr.getEarliestRecommendedAge() + " recommendedInterval " + 
-						dr.getEarliestRecommendedAge() + "; ";
-				logger.debug(debugStr);
+				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " + dr.getMinimumAge() + " absoluteMinimumInterval: " + 
+						dr.getAbsoluteMinimumInterval() + " minInterval: " + dr.getMinimumInterval() + " recommendedAge: " + dr.getEarliestRecommendedAge() + 
+						" recommendedInterval " +	dr.getEarliestRecommendedAge() + "; ";
 			}
+			logger.debug(debugStr);
 		}
-		
+		this.seriesRules.setNumberOfDosesInSeries(thisSeriesDoseRules.size());
+		this.seriesRules.setSeriesDoseRules(thisSeriesDoseRules);
+
 		// Change the name of this series to the new series name
 		this.seriesRules.setSeriesName(seriesToConvertTo);
 	}
 
-	
+
 	public boolean containsRuleProcessed(String ruleName) {
 
 		return seriesRulesProcessed.contains(ruleName);
 	}
 
-	
+
 	/**
 	 * Check to see if any of the shots administered was a live virus vaccine
 	 * 
@@ -358,7 +378,7 @@ public class TargetSeries {
 		}
 		return false;
 	}
-	
+
 
 	/**
 	 * Check if next recommended shot is a live virus vaccine (and therefore recommendationStatus is either RECOMMENDED, RECOMMENDED_IN_FUTURE, or CONDITIONALLY_RECOMMENDED)
@@ -375,7 +395,7 @@ public class TargetSeries {
 			if (dr == null) {
 				return false;
 			}
-			
+
 			if (manuallySetAccountForLiveVirusIntervalsInRecommendation != null) {
 				return manuallySetAccountForLiveVirusIntervalsInRecommendation.booleanValue();
 			}
@@ -392,7 +412,7 @@ public class TargetSeries {
 		}
 	}
 
-	
+
 	public TargetDose getTargetDoseByAdministeredShotNumber(int shotNumber) {
 
 		if (targetDoses == null)
@@ -408,7 +428,7 @@ public class TargetSeries {
 	}
 
 	public Date getAdministrationDateOfTargetDoseByShotNumberNumber(int shotNumber) {
-		
+
 		TargetDose td = getTargetDoseByAdministeredShotNumber(shotNumber);
 		if (td != null) {
 			return td.getAdministrationDate();
@@ -416,10 +436,10 @@ public class TargetSeries {
 		else {
 			return null;
 		}
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Skip the specified number of doses for all diseases associated with the target dose
 	 * 
@@ -428,15 +448,15 @@ public class TargetSeries {
 	 * @throws IllegalArgumentException If doseNumberToSkipFrom and/or doseNumberToSkipTo is not possible for the series
 	 */
 	public void addSkipDoseEntryForDose(int doseNumberToSkipFrom, int doseNumberToSkipTo) {
-	
+
 		int lTargetDoseNumber = determineDoseNumberInSeries();
 		Collection<String> lDiseasesSupportedByThisSeries = getDiseasesSupportedByThisSeries();
 		for (String lSDC : lDiseasesSupportedByThisSeries) {
 			addSkipDoseEntryForSpecifiedDisease(doseNumberToSkipFrom, doseNumberToSkipTo, lSDC, lTargetDoseNumber);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Skip the specified number of doses
 	 * 
@@ -447,12 +467,12 @@ public class TargetSeries {
 	 * and the doseNumberToSkipFrom must equal the target dose number in this series. Also, if the supplied argument is not a known disease as available through the supporting data
 	 */
 	public void addSkipDoseEntryForSpecifiedDisease(int pDoseNumberToSkipFrom, int pDoseNumberToSkipTo, String pDisease) {
-		
+
 		int lTargetDoseNumber = determineDoseNumberInSeries();
 		addSkipDoseEntryForSpecifiedDisease(pDoseNumberToSkipFrom, pDoseNumberToSkipTo, pDisease, lTargetDoseNumber);
 	}
-	
-	
+
+
 	/**
 	 * Skip the specified number of doses
 	 * 
@@ -473,7 +493,7 @@ public class TargetSeries {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new IllegalArgumentException(lErrStr);
 		}
-		
+
 		// HERE - check that it is a valid disease
 		if (this.scheduleBackingSeries.getICESupportingDataConfiguration().getSupportedCdsConcepts().
 				getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.DISEASE, new CdsConcept(pDisease)) == null) {
@@ -481,12 +501,11 @@ public class TargetSeries {
 			logger.warn(_METHODNAME + lErrStr);
 			throw new IllegalArgumentException(lErrStr);
 		}
-		
+
 		int numberOfDosesInSeries = getSeriesRules().getNumberOfDosesInSeries();
-		if (pDoseNumberToSkipTo < 1 || pDoseNumberToSkipTo > numberOfDosesInSeries || pDoseNumberToSkipFrom < 1 || 
-				pDoseNumberToSkipFrom > numberOfDosesInSeries) {
+		if (pDoseNumberToSkipTo < 1 || pDoseNumberToSkipTo > numberOfDosesInSeries || pDoseNumberToSkipFrom < 1 || pDoseNumberToSkipFrom > numberOfDosesInSeries) {
 			String errStr = "number of doses in series " + seriesRules.getSeriesName() + " is " + numberOfDosesInSeries + "; " + "dose number to skip from (" + 
-				pDoseNumberToSkipFrom	+ ") or dose number to skip to (" + pDoseNumberToSkipTo + ") is not valid";
+					pDoseNumberToSkipFrom	+ ") or dose number to skip to (" + pDoseNumberToSkipTo + ") is not valid";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
@@ -495,11 +514,13 @@ public class TargetSeries {
 			logger.warn(errStr);
 			return;
 		}
+		/*
 		if (pDoseNumberToSkipTo < pDoseNumberToSkipFrom) {
 			String errStr = "dose number to skip from (" + pDoseNumberToSkipFrom + ") is greater than dose number to skip to (" + pDoseNumberToSkipTo + ")";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
+		 */
 
 		int lTargetDoseNumber = 0;
 		if (pTargetDoseNumber <= 0) {
@@ -511,26 +532,61 @@ public class TargetSeries {
 		if (pDoseNumberToSkipFrom != lTargetDoseNumber) {
 			String errStr = "dose number to skip from (" + pDoseNumberToSkipFrom + ") does not equal the target dose number of the series (" + lTargetDoseNumber + ")";
 			logger.warn(_METHODNAME + errStr);
-			throw new IllegalArgumentException(errStr);
+			// AI:
+			/////// throw new IllegalArgumentException(errStr);
+			return;
 		}
 
 		Map<Integer, Integer> skipDoseEntry = interimDosesToSkipByDisease.get(pDisease);
 		if (skipDoseEntry != null) {
 			skipDoseEntry.put(new Integer(pDoseNumberToSkipFrom), new Integer(pDoseNumberToSkipTo));
 		}
-		
-		Integer lInterimValidityCountForDisease = interimEvaluationValidityCountByDisease.get(pDisease);
-		if (lInterimValidityCountForDisease.intValue() == 0 && pDoseNumberToSkipFrom == 1) {
-			interimEvaluationValidityCountByDisease.put(pDisease, pDoseNumberToSkipTo-1);
-		}
-	}
 
-	public int determineDoseNumberInSeries() {
-		
-		return determineEffectiveNumberOfDosesInSeries() + 1;
+		Integer lInterimValidityCountForDisease = interimEvaluationValidityCountByDisease.get(pDisease);
+		/////// if (lInterimValidityCountForDisease.intValue() == 0 && pDoseNumberToSkipFrom == 1) {
+		interimEvaluationValidityCountByDisease.put(pDisease, pDoseNumberToSkipTo-1);
+		/////// }
 	}
 
 	
+	public int determineDoseNumberInSeries() {
+
+		int lEffectiveNumberOfDoses = determineEffectiveNumberOfDosesInSeries();
+		Integer lEffectiveDoseNumberPlus1Int = new Integer(lEffectiveNumberOfDoses+1);
+		
+		//////////////
+		// If dose number determined by disease count and there is a skip dose from the (next) target dose for all other diseases in this target series, take that into account
+		//////////////
+		if (this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered()) {
+			int lNumberOfDiseasesCoveredByThisTS = this.interimDosesToSkipByDisease.size();
+			int lNumberOfDiseasesWithSkipDoseAtNextTargetDose = 0;
+			int lLowestCount = lEffectiveNumberOfDoses;
+			Collection<Map<Integer, Integer>> lSkipDoseCollection = this.interimDosesToSkipByDisease.values();
+			for (Map<Integer, Integer> lSkipDose : lSkipDoseCollection) {
+				if (lSkipDose != null && lSkipDose.containsKey(lEffectiveDoseNumberPlus1Int)) {
+					int lSkipDoseTo = lSkipDose.get(lEffectiveDoseNumberPlus1Int);
+					if (lLowestCount == lEffectiveNumberOfDoses || lSkipDoseTo < lLowestCount) {
+						lLowestCount = lSkipDoseTo;
+					}
+					lNumberOfDiseasesWithSkipDoseAtNextTargetDose++;
+				}
+			}
+			if (lNumberOfDiseasesCoveredByThisTS == lNumberOfDiseasesWithSkipDoseAtNextTargetDose) {
+				return lLowestCount;
+			}
+			else {
+				return lEffectiveNumberOfDoses+1;
+			}
+		}
+		//////////////
+		// END taking skip dose into account
+		//////////////
+		else {
+			return lEffectiveNumberOfDoses+1;
+		}
+	}
+
+
 	public int determineDoseNumberInSeriesForDiseasesTargetedByThisDose(TargetDose pTD) {
 
 		if (pTD == null || pTD.getVaccineComponent() == null) {
@@ -540,7 +596,7 @@ public class TargetSeries {
 		return doseNumberDeterminationUpdateUtility(pTD, true, false, true, pTD.getVaccineComponent().getAllDiseasesTargetedForImmunity());
 	}
 
-	
+
 	/**
 	 * Determines the series dose number of the specified dose.
 	 * 
@@ -552,7 +608,7 @@ public class TargetSeries {
 		return doseNumberDeterminationUpdateUtility(pTD, true, false, true,	interimEvaluationValidityCountByDisease.keySet());
 	}
 
-	
+
 	/**
 	 * Update the dose validity count for the series and return the resulting series dose number (based on the supplied TargetDose). 
 	 * Should be called if the dose validity was just set to VALID. Updates the internal state of this object.
@@ -563,7 +619,7 @@ public class TargetSeries {
 	public int updateDoseValidityCountAndReturnActualDoseCountInSeries(TargetDose pTD) {
 
 		String _METHODNAME = "updateDoseValidityCountAndReturnActualDoseCountInSeries(): ";
-		
+
 		// Call below _does update_ the internal state of this object
 		int i = doseNumberDeterminationUpdateUtility(pTD, false, true, true, interimEvaluationValidityCountByDisease.keySet());
 		//if (i == 0) {
@@ -571,10 +627,10 @@ public class TargetSeries {
 		//}
 		//else {
 		logger.debug(_METHODNAME + "returning " + i);
-			return i;
+		return i;
 		//}
 	}
-	
+
 	/**
 	 * Update the dose validity count for the series and return the resulting series dose number (based on the supplied TargetDose). 
 	 * Should be called if the dose validity was just set to VALID
@@ -586,28 +642,41 @@ public class TargetSeries {
 
 		return doseNumberDeterminationUpdateUtility(pTD, true, true, true,	interimEvaluationValidityCountByDisease.keySet());
 	}
-	
-	
+
+
 	/**
 	 * Determines the dose number of the specified target dose. Updates the series dose number for the series
 	 * 
-	 * @param pTD TargetDose to determine dose number for
+	 * @param pTD TargetDose to determine dose number for; if null and the number of targetDoses in this series is 0, returns the target dose number assuming no shots
 	 * @param updateInternalSeriesDoseNumberCount if set to true, increment the validity counters for all of the diseases
 	 * @param antigensToIncludeInDetermination limit which diseases to look at in the determination of the dose number. Under usual circumstances, use
 	 *            interimDiseaseEvaluationValidityCount.keySet(), to take into account all diseases for which this series induces immunity
 	 * @param takeSkipDoseEntriesIntoAccount If set to true, take any skip dose entries into account when determining dose number
-	 * @return
+	 * @return the dose number or target dose number
+	 * @throws IllegalArgumentException if pTD is null and there are shots administered in this target series
 	 */
 	private int doseNumberDeterminationUpdateUtility(TargetDose pTD, boolean returnTargetDoseNumber, boolean updateInternalSeriesDoseNumberCount,
 			boolean takeSkipDoseEntriesIntoAccount,	Collection<String> antigensToIncludeInDetermination) {
 
 		String _METHODNAME = "doseNumberDeterminationUpdateUtility(): ";
-		if (pTD == null) {
+		
+		///////////////////////////////////
+		// If no shots administered, return dose number based solely on the count by diseases
+		///////////////////////////////////
+		if (pTD != null && (this.targetDoses == null || this.targetDoses.isEmpty())) {
+			String str = "Supplied TargetDose parameter is not null but there are no administered shots in this target series";
+			logger.warn(_METHODNAME + str);
+			throw new IllegalArgumentException(str);
+		}
+		else if (pTD == null) {
 			String str = "Supplied TargetDose parameter is null";
 			logger.warn(_METHODNAME + str);
 			throw new IllegalArgumentException(str);
 		}
-
+		///////////////////////////////////
+		// END if no shots administered
+		///////////////////////////////////
+		
 		int highestSkipDoseNumberToEntry = 0;
 		int highestNonSkipDoseNumberToEntry = 0;
 
@@ -616,7 +685,7 @@ public class TargetSeries {
 		/////// Map<SupportedDiseaseConcept, Integer> tallyOfRelevantDiseaseImmunity = new HashMap<SupportedDiseaseConcept, Integer>();
 		Map<String, Integer> tallyOfDoseNumberByDisease = new HashMap<String, Integer>();
 		Map<String, Integer> tallyOfRelevantDiseaseImmunity = new HashMap<String, Integer>();
-		
+
 		// Initialize tally for supported diseases
 		/////// Collection<SupportedDiseaseConcept> allSupportedDiseases = antigensToIncludeInDetermination;
 		Collection<String> allSupportedDiseases = antigensToIncludeInDetermination;
@@ -658,9 +727,9 @@ public class TargetSeries {
 				lDuplicateShotDiseases = new HashSet<String>();
 			}
 			if (lDuplicateShotSameDayValidDoseFoundDate != null && lPreviouslyProcessedTD != null && 
-				this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() == false && 
-				lPreviouslyProcessedTD.getAdministeredShotNumberInSeries() < td.getAdministeredShotNumberInSeries() &&
-				td.getAdministrationDate().equals(lPreviouslyProcessedTD.getAdministrationDate())) {
+					this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() == false && 
+					lPreviouslyProcessedTD.getAdministeredShotNumberInSeries() < td.getAdministeredShotNumberInSeries() &&
+					td.getAdministrationDate().equals(lPreviouslyProcessedTD.getAdministrationDate())) {
 				// Don't count prior duplicate shots if the disease immunity of the vaccines are not looked at from shot to shot
 				continue;
 			}
@@ -689,10 +758,12 @@ public class TargetSeries {
 							// If the diseases should be taken into account for this series in determining dose number, and this disease has already been accounted for 
 							// on this day, then we have a duplicate shot
 							if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == false) {
-								lIncrementDoseNumber = false;
+								/////// ORIG: lIncrementDoseNumber = false; ///////
+								lIncrementDoseNumber = true;
 							}
 							else if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == true && lDuplicateShotDiseases.contains(diseaseTargeted)) {
-								lIncrementDoseNumber = false;
+								/////// ORIG: lIncrementDoseNumber = false; ///////
+								lIncrementDoseNumber = true;
 							}
 							else {
 								if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == true) {
@@ -714,13 +785,15 @@ public class TargetSeries {
 										lInnerCountOfPriorValidShotsSameDay++;
 										lDuplicateShotDiseases.addAll(lInnerTd.getVaccineComponent().getAllDiseasesTargetedForImmunity());
 									}
-									}
+								}
 								if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == false && lInnerCountOfPriorValidShotsSameDay > 0) {
-									lIncrementDoseNumber = false;
+									/////// ORIG: lIncrementDoseNumber = false; ///////
+									lIncrementDoseNumber = true;
 								}
 								else if (lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered == true && lDuplicateShotDiseases.contains(diseaseTargeted)) {
 									// A duplicate shot is noted. Make note of the diseases 
-									lIncrementDoseNumber = false;
+									/////// ORIG: lIncrementDoseNumber = false; ///////
+									lIncrementDoseNumber = true;
 								}
 								else {		
 									// the lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered is true
@@ -857,7 +930,7 @@ public class TargetSeries {
 		}
 	}
 
-	
+
 	/**
 	 * Get the last shot administered, null if none have been administered
 	 */
@@ -900,10 +973,10 @@ public class TargetSeries {
 	 * @return last dose in the series, regardless of whether the series is complete or null is no doses have been administered
 	 */
 	private TargetDose determineIfSeriesCompleteAndReturnLastDose() {
-		
+
 		return determineIfSeriesCompleteAndReturnLastDose(false);
 	}
-	
+
 	/**
 	 * Determines if the series is complete, updates the seriesComplete instance variable, and returns the last target dose in this TargetSeries. If the
 	 * excludeIgnoredShots parameter is set to true, the shot will only be returned if it is not a shot marked to be ignored. 
@@ -1018,7 +1091,7 @@ public class TargetSeries {
 	public int determineEffectiveNumberOfDosesInSeriesByDate(Date pDate, boolean includeDate) {
 
 		String _METHODNAME = "determineEffectiveNumberOfDosesInSeriesByDate(): ";
-		
+
 		logger.trace(_METHODNAME + "parameters passed in: " + pDate + "; includeDate " + includeDate);
 
 		if (targetDoses == null || pDate == null) {
@@ -1055,7 +1128,7 @@ public class TargetSeries {
 		}
 	}
 
-	
+
 	/**
 	 * Return the number of effective valid (meaning VALID) doses in this TargetSeries. Note that the number reflects immunity and any skip doses in the series 
 	 * (e.g. - if there are 3 doses to complete a series and the patient has immunity and there are no other diseases in question, 3 is returned even if no shots were administered)
@@ -1067,7 +1140,28 @@ public class TargetSeries {
 		// String _METHODNAME = "determineEffectiveNumberOfDosesInSeries()";
 
 		if (this.targetDoses == null || this.targetDoses.isEmpty()) {
-			return 0;
+			if (this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered()) {
+				Collection<Integer> lDiseaseValidityCountList = this.interimEvaluationValidityCountByDisease.values();
+				int lLowestCount = 0;
+				for (Integer lValidityCountInt : lDiseaseValidityCountList) {
+					if (lValidityCountInt != null) {
+						int lValidityCount = lValidityCountInt.intValue();
+						if (lValidityCount <= 0) {
+							return 0;
+						}
+						else if (lLowestCount == 0) {
+							lLowestCount = lValidityCount;
+						}
+						else if (lLowestCount < lValidityCount) {
+							lLowestCount = lValidityCount;
+						}
+					}
+				}
+				return lLowestCount;
+			}
+			else {
+				return 0;
+			}
 		}
 		else {
 			TargetDose lastDose = this.targetDoses.last();
@@ -1082,6 +1176,7 @@ public class TargetSeries {
 			}
 		}
 	}
+
 
 	public void recommendNextShotBasedOnEarliestAgeRule(Date pEvalPersonBirthTime, Date pEvalDate)
 			throws ImproperUsageException, InconsistentConfigurationException {
@@ -1102,11 +1197,11 @@ public class TargetSeries {
 	}
 
 	public void recommendNextShotBasedOnEarliestRecommendedIntervalRule(Date pEvalDate)
-		throws ImproperUsageException, InconsistentConfigurationException {
+			throws ImproperUsageException, InconsistentConfigurationException {
 
 		recommendNextShotBasedOnSeriesIntervalRule(pEvalDate, RecommendationType.EARLIEST_RECOMMENDED);
 	}
-	
+
 	public void recommendNextShotBasedOnLatestRecommendedAgeRule(Date pEvalPersonBirthTime, Date pEvalDate)
 			throws ImproperUsageException, InconsistentConfigurationException {
 
@@ -1129,7 +1224,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	private void recommendNextShotBasedOnSeriesAgeRule(Date pEvalPersonBirthTime, Date pEvalDate, RecommendationType pRecommendationDateType)
-		throws ImproperUsageException, InconsistentConfigurationException {
+			throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "recommendNextShotBasedOnSeriesAgeRule(): ";
 
@@ -1187,7 +1282,7 @@ public class TargetSeries {
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Dose number in series for recommendation: " + doseNumberInSeriesToRecommend);
 		}
-		
+
 		// Obtain the right age and corresponding date
 		DoseRule vaccineGroupDoseRule = obtainDoseRuleForSeriesByDoseNumber(doseNumberInSeriesToRecommend);
 		if (vaccineGroupDoseRule == null) {
@@ -1201,7 +1296,7 @@ public class TargetSeries {
 				throw new InconsistentConfigurationException("Corresponding series vaccine group dose rule not found");
 			}
 		}
-		
+
 		TimePeriod rAge = null;
 		if (pRecommendationDateType == RecommendationType.EARLIEST) {
 			rAge = vaccineGroupDoseRule.getMinimumAge();
@@ -1280,7 +1375,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	private void recommendNextShotBasedOnSeriesIntervalRule(Date pEvalDate, RecommendationType pRecommendationDateType)
-		throws ImproperUsageException, InconsistentConfigurationException {
+			throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "recommendNextShotBasedOnSeriesIntervalRule(): ";
 
@@ -1290,7 +1385,7 @@ public class TargetSeries {
 			throw new ImproperUsageException(_METHODNAME + errStr);
 		}
 
-		TargetDose lastDoseAdministered = determineIfSeriesCompleteAndReturnLastDose(true);		// Recommendation interval based on last ignored shot
+		TargetDose lastDoseAdministered = determineIfSeriesCompleteAndReturnLastDose(true);		// Recommendation interval based on last shot that was not ignored
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Last dose # administered: " + ((lastDoseAdministered == null) ? "none" : lastDoseAdministered.getDoseNumberInSeries()));
 		}
@@ -1405,7 +1500,7 @@ public class TargetSeries {
 		if (pEvalDate == null) {
 			pEvalDate = new Date();
 		}
-		
+
 		if (pRecommendationDateType == RecommendationType.EARLIEST) {
 			Recommendation lEarliest = new Recommendation(this);
 			lEarliest.setRecommendationDate(rIntervalDate);
@@ -1553,7 +1648,7 @@ public class TargetSeries {
 			logger.warn(_METHODNAME + "One or more supplied parameters null");
 			return;
 		}
-		
+
 		BaseDataRecommendationReason lSRC = getGenericRecommendationReasonForRecommendationStatus(pRecommendationStatus);
 		if (pRecommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED) {
 			rec.setRecommendationStatus(RecommendationStatus.CONDITIONALLY_RECOMMENDED);
@@ -1597,14 +1692,14 @@ public class TargetSeries {
 			}			
 		}
 	}
-	
-	
+
+
 	private BaseDataRecommendationReason getGenericRecommendationReasonForRecommendationStatus(RecommendationStatus pRecommendationStatus) {
-		
+
 		if (pRecommendationStatus == null) {
 			return null;
 		}
-		
+
 		if (pRecommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED) {
 			return BaseDataRecommendationReason._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON;
 		} 
@@ -1643,7 +1738,7 @@ public class TargetSeries {
 		// if (recommendationDate == null) {			TODO:
 		//	return;
 		// }
-		
+
 		Recommendation rec = null;
 		try {
 			rec = new Recommendation(this);
@@ -1663,8 +1758,8 @@ public class TargetSeries {
 		}
 
 		if (recommendationDate == null || (recommendationStatus != null && (recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED || 
-			recommendationStatus == RecommendationStatus.NOT_RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED || 
-			recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE))) {
+				recommendationStatus == RecommendationStatus.NOT_RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED || 
+				recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE))) {
 			populateInterimRecommendationsAndRecordGenericReasonHelper(interimRecommendationsCustom, rec, rec.getRecommendationStatus());
 		} 
 		else if (recommendationDate != null && pEvalDate.before(recommendationDate)) {
@@ -1674,8 +1769,8 @@ public class TargetSeries {
 			populateInterimRecommendationsAndRecordGenericReasonHelper(interimRecommendationsCustom, rec, RecommendationStatus.RECOMMENDED);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Add a recommendation for consideration in this TargetSeries. Note that this method will record *generic* reasons for the 
 	 * recommendation as follows: 
@@ -1691,11 +1786,11 @@ public class TargetSeries {
 	 * @param pEvalDate Evaluation Date that this recommendation should be made against. If null, the current date is used.
 	 */
 	public void addInterimRecommendationForConsideration(Date recommendationDate, RecommendationStatus recommendationStatus, Date pEvalDate) {
-		
+
 		addInterimRecommendationForConsideration(recommendationDate, null, recommendationStatus, pEvalDate);
 	}
 
-	
+
 	/**
 	 * Add a recommendation for consideration in this TargetSeries. Note that this method will record *generic* reasons for the 
 	 * recommendation as follows: 
@@ -1743,7 +1838,7 @@ public class TargetSeries {
 
 		RecommendationStatus lRS = recommendation.getRecommendationStatus();
 		if (lRS == null || (lRS != RecommendationStatus.CONDITIONALLY_RECOMMENDED && lRS != RecommendationStatus.NOT_RECOMMENDED && 
-			lRS != RecommendationStatus.RECOMMENDED && lRS != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
+				lRS != RecommendationStatus.RECOMMENDED && lRS != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
 			addInterimRecommendationForConsideration(recommendation.getRecommendationDate(), recommendation.getRecommendedVaccine(), null, pEvalDate);
 		}
 		else if (recommendation.getRecommendationDate() == null || recommendation.getRecommendationStatus() != null) {
@@ -1766,7 +1861,7 @@ public class TargetSeries {
 	public void finalizeRecommendationsForForecasting() {
 
 		String _METHODNAME = "finalizeRecommendationsForForecasting(): ";
-		
+
 		/**
 		 * First, determine the recommendation
 		 */
@@ -1795,7 +1890,7 @@ public class TargetSeries {
 			}
 			logger.debug(_METHODNAME + lInterimRecommendedStr);
 		}
-		
+
 		// Number of interim recommendations > 0 ? If so, continue; otherwise set to null all around
 		int lInterimRecommendedSize = lInterimRecommended.size();
 		if (lInterimRecommendedSize == 0 && this.finalRecommendations.size() == 0) {
@@ -1960,7 +2055,7 @@ public class TargetSeries {
 		interimRecommendationsScheduleLatestRecommendedAge = new ArrayList<Recommendation>();
 		interimRecommendationsScheduleLatestRecommendedInterval = new ArrayList<Recommendation>();
 		interimRecommendationsCustom = new ArrayList<Recommendation>();
-		
+
 		// Debug logging
 		if (logger.isDebugEnabled()) {
 			String lInterimRecommendedStr ="Final Recommendations. ";
@@ -1971,7 +2066,7 @@ public class TargetSeries {
 			logger.debug(_METHODNAME + lInterimRecommendedStr);
 		}
 
-		
+
 		// TODO: recommendation has changed - post-forecast checks should be permitted
 		// setPostForecastCheckCompleted(false);
 	}
@@ -1987,7 +2082,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	public void evaluateVaccineGroupMinimumAgeandRecordReason(Date pEvalPersonBirthTime, TargetDose pTD)
-		throws ImproperUsageException, InconsistentConfigurationException {
+			throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "evaluateVaccineGroupMinimumAgeandRecordReason(): ";
 
@@ -2033,7 +2128,7 @@ public class TargetSeries {
 			logger.warn(_METHODNAME + msg);
 			return;
 		}
-		
+
 		int compareTo = TimePeriod.compareElapsedTimePeriodToDateRange(pEvalPersonBirthTime, administrationDate, minimumAge);
 		if (compareTo < 0) {
 			pTD.addInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_AGE_EVALUATION_REASON.getCdsListItemName());
@@ -2051,7 +2146,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	public void evaluateVaccineGroupMinimumIntervalAndRecordReason(TargetDose pTD, TargetDose pTDprev) 
-		throws ImproperUsageException, ICECoreError {
+			throws ImproperUsageException, ICECoreError {
 
 		String _METHODNAME = "checkIntervalAndRecordEvaluationReason(): ";
 
@@ -2093,7 +2188,7 @@ public class TargetSeries {
 			logger.error(errStr);
 			throw new ICECoreError(errStr);
 		}
-		
+
 		if (compareTo < 0 && ! elapsedTimePeriodBetweenDoses.getTimePeriodStringRepresentation().equals("0d")) {
 			// The elapsed time between administered doses is less than the minimum interval and the doses were not administered on the same day. Therefore, below minimum interval 
 			pTD.addInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_INTERVAL_EVALUATION_REASON.getCdsListItemName());
@@ -2104,7 +2199,7 @@ public class TargetSeries {
 	 * Obtain list of all permitted vaccines for the specified target dose
 	 */
 	public List<Vaccine> getAllPermittedVaccinesForTargetDose(int doseNumber) {
-		
+
 		if (doseNumber < 0 || doseNumber > seriesRules.getNumberOfDosesInSeries()) {
 			return null;
 		}
@@ -2122,7 +2217,7 @@ public class TargetSeries {
 	 * Obtain list of preferable vaccines for the specified target dose
 	 */
 	public List<Vaccine> getPreferableVaccinesForTargetDose(int doseNumber) {
-		
+
 		if (doseNumber < 0 || doseNumber > seriesRules.getNumberOfDosesInSeries()) {
 			return null;
 		}
@@ -2140,7 +2235,7 @@ public class TargetSeries {
 	 * Obtain list of allowable vaccines for the specified target dose
 	 */
 	public List<Vaccine> getAllowableVaccinesForTargetDose(int doseNumber) {
-		
+
 		if (doseNumber < 0 || doseNumber > seriesRules.getNumberOfDosesInSeries()) {
 			return null;
 		}
@@ -2153,7 +2248,7 @@ public class TargetSeries {
 			return lDR.getAllowableVaccines();
 		}
 	}
-	
+
 	/**
 	 * Obtain minimum interval in string format year, month, or day. e.g. -
 	 * "4y", "5m", "6d"
@@ -2186,7 +2281,7 @@ public class TargetSeries {
 	 * @throws ImproperUsageException
 	 */
 	public TimePeriod getAbsoluteMinimumIntervalForTargetDose(TargetDose pTD)
-		throws ImproperUsageException {
+			throws ImproperUsageException {
 
 		String _METHODNAME = "getAbsoluteMinimumIntervalForTargetDose(): ";
 		if (pTD == null) {
@@ -2237,7 +2332,7 @@ public class TargetSeries {
 	}
 
 	public TimePeriod getAbsoluteMinimumIntervalForTargetDose(int targetDoseNumber) 
-		throws ImproperUsageException {
+			throws ImproperUsageException {
 
 		String _METHODNAME = "getAbsoluteMinimumIntervalForTargetDose(): ";
 		if (targetDoseNumber <= 0) {
@@ -2573,7 +2668,7 @@ public class TargetSeries {
 		return recommendedAge;
 
 	}
-	
+
 	/**
 	 * 
 	 * @param int target dose number
@@ -2607,7 +2702,7 @@ public class TargetSeries {
 
 		return recommendedAge;
 	}
-	
+
 	/**
 	 * Obtain minimum interval in string format year, month, or day. e.g. -
 	 * "4y", "5m", "6d"
@@ -2625,7 +2720,7 @@ public class TargetSeries {
 		return t.getTimePeriodStringRepresentation();
 	}	
 
-	
+
 	/**
 	 * Return the recommended interval for the specified dose; null if there is
 	 * none
@@ -2635,7 +2730,7 @@ public class TargetSeries {
 	 * @throws ImproperUsageException
 	 */
 	public TimePeriod getRecommendedIntervalForTargetDose(TargetDose pTD)
-		throws ImproperUsageException {
+			throws ImproperUsageException {
 
 		String _METHODNAME = "getRecommendedIntervalForTargetDose(): ";
 		if (pTD == null) {
@@ -2659,7 +2754,7 @@ public class TargetSeries {
 		return recommendedInterval;
 	}
 
-	
+
 	/**
 	 * Return the recommended interval for the specified dose; null if there is none
 	 * 
@@ -2668,7 +2763,7 @@ public class TargetSeries {
 	 * @throws ImproperUsageException
 	 */
 	public TimePeriod getRecommendedIntervalForTargetDose(int targetDoseNumber)
-		throws ImproperUsageException {
+			throws ImproperUsageException {
 
 		String _METHODNAME = "getRecommendedIntervalForTargetDose(): ";
 		if (targetDoseNumber <= 0) {
@@ -2691,10 +2786,10 @@ public class TargetSeries {
 
 		return recommendedInterval;
 	}
-	
-	
+
+
 	public String getRecommendedIntervalForTargetDoseInStringFormat(int targetDoseNumber) 
-		throws ImproperUsageException {
+			throws ImproperUsageException {
 
 		TimePeriod t = getRecommendedIntervalForTargetDose(targetDoseNumber);
 		if (t == null) {
@@ -2704,7 +2799,7 @@ public class TargetSeries {
 		return t.getTimePeriodStringRepresentation();
 	}	
 
-	
+
 	/**
 	 * Return true if this TargetSeries contains the specified TargetDose; false
 	 * if not
@@ -2731,7 +2826,7 @@ public class TargetSeries {
 		if (pTD == null) {
 			return false;
 		}
-		
+
 		Date targetDoseDate = pTD.getAdministrationDate();
 		int administeredShotNumber = pTD.getAdministeredShotNumberInSeries();
 		if (targetDoseDate == null) {
@@ -2773,7 +2868,7 @@ public class TargetSeries {
 				}
 			}
 		}
-		
+
 		if (minAdminiteredShotNumberWithSameDate < administeredShotNumber) {
 			return false;
 		}
@@ -2810,7 +2905,7 @@ public class TargetSeries {
 
 		return null;
 	}
-	
+
 	/**
 	 * Return dose rule for the shot most recently administered prior to the date specified in this target series
 	 * @param date from which the most recently administered shot should be determined
@@ -2821,7 +2916,7 @@ public class TargetSeries {
 		if (seriesRules == null || pTD == null) {
 			return null;
 		}
-		
+
 		if (this.targetDoses.contains(pTD)) {
 			TargetDose lTDOfInterest = pTD;
 			boolean priorTargetDoseIdentified = false;
@@ -2853,7 +2948,7 @@ public class TargetSeries {
 		return null;
 	}
 
-	
+
 	/**
 	 * Return the series dose rule corresponding to the supplied TargetDose.
 	 * 
@@ -2881,62 +2976,62 @@ public class TargetSeries {
 
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * Add a new DoseRule to the Series witht the specified DoseRule.
 	 * @throws IllegalArgumentException if the DoseRule's dose number is not equal to the next dose number in this TargetSeries
 	 */
 	public void addVaccineGroupDoseRule(DoseRule pDR) {
-	
+
 		String _METHODNAME = "addVaccineGroupDoseRule(): ";
 		if (pDR == null) {
 			logger.warn(_METHODNAME + "DoseRule supplied is null; DoseRule was not added");
 			return;
 		}
-		
+
 		int lNextDoseNumber = seriesRules.getNumberOfDosesInSeries() + 1;
 		if (pDR.getDoseNumber() != lNextDoseNumber) {
 			String errStr = "Specified DoseRule's dose number is not the next dose number in this TargetSeries; addition cannot be made";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		// Make a copy of the SeriesRules object first... do not want to change default rules used by others
 		SeriesRules lSR = SeriesRules.constructDeepCopyOfSeriesRulesObject(this.seriesRules);
 		lSR.addSeriesDoseRule(pDR);
 		this.seriesRules = lSR;
 		isSeriesComplete();		// reset series complete flag
 	}
-	
-	
+
+
 	/**
 	 * Modify the existing DoseRule in the Series with the specified DoseRule. 
 	 * @throws IllegalArgumentException if the dose number of the specified DoseRule is not a valid dose number in this TargetSeries.
 	 */
 	public void modifyVaccineGroupDoseRule(DoseRule pDR) {
-		
+
 		String _METHODNAME = "modifyVaccineGroupDoseRule(): ";
 		if (pDR == null) {
 			logger.warn(_METHODNAME + "DoseRule supplied is null; existing DoseRule was not modified");
 			return;
 		}
-		
+
 		int lDoseNumber = pDR.getDoseNumber();
 		if (lDoseNumber <= 0 || lDoseNumber > seriesRules.getNumberOfDosesInSeries()) {
 			String errStr = "Specified DoseRule's dose number is not a dose number that exists in this TargetSeries; modification cannot be made";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		// Make a copy of the SeriesRules object first... do not want to change default rules used by others
 		SeriesRules lSR = SeriesRules.constructDeepCopyOfSeriesRulesObject(this.seriesRules);
 		lSR.modifySeriesDoseRule(pDR);
 		this.seriesRules = lSR;
 		isSeriesComplete();		// reset series complete flag
 	}
-	
-	
+
+
 	/**
 	 * Make note that the patient has immunity to the specified series. This
 	 * will affect evaluation of all remaining doses not yet evaluated in the
@@ -2957,7 +3052,7 @@ public class TargetSeries {
 		}
 	}
 
-	
+
 	/**
 	 * Calls addTargetDose(TargetDose, boolean) with overrideSeasonDateRestriction set to false
 	 * @param targetDose
@@ -2966,11 +3061,11 @@ public class TargetSeries {
 	 * added.
 	 */
 	protected boolean addTargetDoseToSeries(TargetDose targetDose) {
-		
+
 		return addTargetDoseToSeries(targetDose, false);
 	}
-	
-	
+
+
 	/**
 	 * Add TargetDose to the TargetSeries. Also, set the the administered shot number for all TargetDosees in this TargetSeries in increasing order,
 	 * based on the administered shot dates in this TargetSeries. If the current shot is not evaluated yet or invalid, this and other administered
@@ -3013,10 +3108,10 @@ public class TargetSeries {
 			i++;
 			td.setDoseNumberInSeries(determineDoseNumberInSeries(td));
 		}
-		
+
 		return targetDoseAdded;
 	}
-	
+
 
 	/**
 	 * Remove a target dose from TargetSeries. This method should be used to allow rule author says that the vaccine should not be evaluated as a part
@@ -3024,13 +3119,13 @@ public class TargetSeries {
 	 * @param targetDose
 	 */
 	public void removeTargetDoseFromSeries(TargetDose targetDose) {
-		
+
 		// String _METHODNAME = "removeTargetDoseFromSeries(): ";
-		
+
 		if (targetDose == null) {
 			return;
 		}
-		
+
 		// Iterate through doses in the TargetSeries, so that doseNumber can be renumbered properly
 		int i = 1;
 		boolean foundShotToRemove = false;
@@ -3056,9 +3151,9 @@ public class TargetSeries {
 			}
 		}
 	}
-	
+
 	public boolean targetSeasonExists() {
-	
+
 		if (targetSeason == null) {
 			return false;
 		}
@@ -3066,18 +3161,18 @@ public class TargetSeries {
 			return true;
 		}
 	}
-	
+
 	public Season getTargetSeason() {
-		
+
 		return targetSeason;
 	}
-	
+
 	/**
 	 * Get the start date of the season for this TargetSeries, if any- (if this is not a seasonal series, null is returned)
 	 * @return Date of the start date of the season, or null if none
 	 */
 	public Date getSeasonStartDate() {
-		
+
 		if (targetSeason == null) {
 			return null;
 		}
@@ -3091,7 +3186,7 @@ public class TargetSeries {
 	 * @return Date of the end date of the target season, or null if none
 	 */
 	public Date getSeasonEndDate() {
-		
+
 		if (targetSeason == null) {
 			return null;
 		}
@@ -3099,13 +3194,13 @@ public class TargetSeries {
 			return targetSeason.getFullySpecifiedSeasonEndDate().toDate();
 		}
 	}
-	
+
 	/**
 	 * Get the off-season start date of the season for this TargetSeries, if any - (if this is not a seasonal series, null is returned)
 	 * @return Date of the end date of the target season, or null if none
 	 */
 	public Date getOffSeasonStartDate() {
-		
+
 		if (targetSeason == null) {
 			return null;
 		}
@@ -3113,13 +3208,13 @@ public class TargetSeries {
 			return targetSeason.getFullySpecifiedSeasonOffSeasonStartDate().toDate();
 		}
 	}
-	
+
 	/**
 	 * Get the off-season start date of the season for this TargetSeries, if any- (if this is not a seasonal series, null is returned)
 	 * @return Date of the end date of the target season, or null if none
 	 */
 	public Date getOffSeasonEndDate() {
-		
+
 		if (targetSeason == null) {
 			return null;
 		}
@@ -3144,8 +3239,8 @@ public class TargetSeries {
 	public void setVaccineGroup(SupportedVaccineGroupConcept vaccineGroup) {
 		seriesRules.setVaccineGroup(vaccineGroup);
 	}
-	*/
-	
+	 */
+
 	/* 
 	 * Returns the Set of shots tracked by this class, in ascending order by date, or empty if there are none
 	 */
@@ -3158,7 +3253,7 @@ public class TargetSeries {
 	}
 
 	public void setSeriesRules(SeriesRules seriesRules) {
-		
+
 		String _METHODNAME = "setSeriesRules(): ";
 		if (seriesRules == null) {
 			String errStr = "SeriesRules parameter was not supplied";
@@ -3167,11 +3262,11 @@ public class TargetSeries {
 		}
 		this.seriesRules = seriesRules;
 	}
-	
+
 	public int getDoseAfterWhichSeriesWasMarkedComplete() {
 		return this.seriesCompleteAtDoseNumber;
 	}
-	
+
 	public boolean isSeriesComplete() {
 
 		if (seriesCompleteFlagManuallySet == false)
@@ -3213,14 +3308,14 @@ public class TargetSeries {
 	public void setManuallySetDoseNumberToRecommend(int doseNumberToRecommend) {
 		this.manuallySetDoseNumberToRecommend = doseNumberToRecommend;
 	}
-	
+
 	/**
 	 * Manually set the number of doses in the series to something other than autmoatically defined by the SeriesRules. Note that if the number of doses specified is 
 	 * greater than that of the SeriesRules, the caller should be careful to write rules to handle those additional doses. This method also resets the series complete
 	 * or not complete flag (unless previously manually set by the author).
 	 * @param numberOfDosesInSeries
 	public void setManuallySetNumberOfDosesInSeries(int numberOfDosesInSeries) {
-		
+
 		if (targetSeasonExists()) {
 			SeriesRules sr = new SeriesRules(this.seriesRules.getSeriesName(), this.seriesRules.getVaccineGroup(), this.seriesRules.getSeasons());
 			sr.setNumberOfDosesInSeries(numberOfDosesInSeries);
@@ -3231,13 +3326,13 @@ public class TargetSeries {
 			sr.setNumberOfDosesInSeries(numberOfDosesInSeries);
 			this.seriesRules = sr;
 		}
-	
+
 		// Reset the series completion flag
 		isSeriesComplete();
 	}
 	 */
 
-	
+
 	public List<String> getSeriesRulesProcessed() {
 		return seriesRulesProcessed;
 	}
@@ -3265,9 +3360,9 @@ public class TargetSeries {
 
 		return i.intValue();
 	}
-	
+
 	public void setManuallySetAccountForLiveVirusIntervalsInRecommendation(boolean yesno) {
-		
+
 		manuallySetAccountForLiveVirusIntervalsInRecommendation = new Boolean(yesno);
 	}
 
@@ -3283,8 +3378,8 @@ public class TargetSeries {
 	public void setRecommendationStatus(RecommendationStatus recommendationStatus) {
 		this.recommendationStatus = recommendationStatus;
 	}
-	
-	
+
+
 	/**
 	 * If recommendationStatus is RECOMMENDED or RECOMMENDED_IN_FUTURE, check to see if the recommendationStatus should be changed according to the
 	 * final recommendation date and evaluation time parameter; change it to the other if necessary
@@ -3295,12 +3390,12 @@ public class TargetSeries {
 	 * then this method has no effect.
 	 */
 	public void adjustRecommendationStatusByEvalTime(Date pEvalTime) {
-		
+
 		if (pEvalTime == null || this.finalRecommendationDate == null || 
-			(recommendationStatus != RecommendationStatus.RECOMMENDED && recommendationStatus != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
+				(recommendationStatus != RecommendationStatus.RECOMMENDED && recommendationStatus != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
 			return;
 		}
-		
+
 		RecommendationStatus lPriorRS = getRecommendationStatus();
 		int compareTo = pEvalTime.compareTo(this.finalRecommendationDate);
 		if (compareTo < 0) {
@@ -3309,7 +3404,7 @@ public class TargetSeries {
 		else {
 			setRecommendationStatus(RecommendationStatus.RECOMMENDED);
 		}
-		
+
 		if (lPriorRS != getRecommendationStatus()) {
 			BaseDataRecommendationReason lPriorRSReason = getGenericRecommendationReasonForRecommendationStatus(lPriorRS);
 			BaseDataRecommendationReason lCurrentRSReason = getGenericRecommendationReasonForRecommendationStatus(getRecommendationStatus());
@@ -3323,24 +3418,35 @@ public class TargetSeries {
 		}
 	}
 
-	
+
+	/**
+	 * Specify if forecast date should be displayed for conditional recommendations
+	 */
+	public void setForecastDateToBeDisplayedForConditionalRecommendations(boolean yesno) {
+		this.displayForecastDateForConditionalRecommendations = yesno;
+	}
+
+	public boolean isForecastDateDisplayedForConditionalRecommendations() {
+		return this.displayForecastDateForConditionalRecommendations;
+	}
+
 	/**
 	 * Clear any prior recommendations; typically will be used if one wishes to reprocess all recommendations
 	 */
 	public void clearRecommendations() {
-		
+
 		setRecommendationVaccine(null); 
 		setFinalEarliestDate(null);
 		setFinalRecommendationDate(null);
 		setFinalLatestRecommendationDate(null);
 		setFinalRecommendations(null);
 	}
-	
-	
+
+
 	public Date getFinalRecommendationDate() {
 		return finalRecommendationDate;
 	}
-	
+
 
 	/**
 	 * Set the final recommendation date. The final earliest and final latest recommendation dates are affected as follows:
@@ -3427,11 +3533,10 @@ public class TargetSeries {
 				this.finalRecommendations.add(r);
 			}
 		}
-		/////// this.finalRecommendations = recommendation;
 	}
-	
+
 	private void addFinalRecommendations(List<Recommendation> recommendations) {
-		
+
 		if (recommendations == null) {
 			return;
 		}
@@ -3443,23 +3548,23 @@ public class TargetSeries {
 	}
 
 	private void addFinalRecommendation(Recommendation recommendation) {
-		
+
 		if (recommendation != null) {
 			this.finalRecommendations.add(recommendation);
 		}
 	}
 
-	
+
 	public boolean isImmunityToAllDiseasesRecorded() {
 		return immunityToAllDiseasesRecorded;
 	}
 
-	
+
 	public void setImmunityToAllDiseasesRecorded(boolean immunityToAllDiseasesRecorded) {
 		this.immunityToAllDiseasesRecorded = immunityToAllDiseasesRecorded;
 	}
 
-	
+
 	/*
 	 * TargetSeriesComparator Note: this comparator imposes orderings that are inconsistent with equals.
 	 */
@@ -3506,8 +3611,8 @@ public class TargetSeries {
 	@Override
 	public String toString() {
 		return "TargetSeries [getSeriesName()=" + getSeriesName()
-				+ ", getVaccineGroup()=" + getVaccineGroup()
-				+ ", getTargetSeason()=" + getTargetSeason() + "]";
+		+ ", getVaccineGroup()=" + getVaccineGroup()
+		+ ", getTargetSeason()=" + getTargetSeason() + "]";
 	}
 
 
@@ -3536,5 +3641,5 @@ public class TargetSeries {
 			return false;
 		return true;
 	}
-	
+
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -149,7 +149,6 @@ rule "DTP: Recommend Tdap (CVX 115) at age 7yrs if series is not complete, if pa
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
-
 
 /*************************************************************************************************************************************************************************************
 General Vaccine Recommendation rules END
@@ -393,7 +392,6 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception C)- If the patient recei
 		Log that this series rule fired for the Series $targetSeries
 end
 
-
 /*************************************************************************************************************************************************************************************
 Adolescent 5-Dose Series Tdap rules END
 /************************************************************************************************************************************************************************************/
@@ -406,7 +404,6 @@ For patients who completed the 3-dose series (i.e., dose 1 at >=7  years):
     * Recommended Age = N/A
     * Recommended Interval = 0 days from dose 3
 /************************************************************************************************************************************************************************************/
-
 
 rule "DTP: If DTP 3-Dose Series is complete and Adolescent Tdap is required, recommend Tdap with age N/A and interval of 0 days from dose 3" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -429,11 +426,9 @@ rule "DTP: If DTP 3-Dose Series is complete and Adolescent Tdap is required, rec
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-
 /*************************************************************************************************************************************************************************************
 Adolescent 3-Dose Series Tdap rules END
 /************************************************************************************************************************************************************************************/
-
 
 
 /*************************************************************************************************************************************************************************************
@@ -480,123 +475,11 @@ Recurring Rules for Td END
 /*************************************************************************************************************************************************************************************
 5-Dose Series Special Rules 
 Rule for Recommending/Evaluating Next Dose From Invalid Tdap/TD Given Below Minimum Age for Vaccine
-If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is given as target dose 1, 2 or 3 to a patient <7 years - 4 days old, then the invalid shot should be ignored when determining the 
-recommended due date for the next target dose due
+If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is given as target dose 1, 2 or 3 to a patient < 7yrs-4days old (vaccine minimum age), then the invalid shot should be ignored 
+when determining the recommended due date for the next target dose due
 *************************************************************************************************************************************************************************************/
 
-// *AI*: Refactor this once general interval approach is refactored to get prior dose interval information
-rule "DTP: Recommend recommended interval from prior vaccine containing D,T,& P in 5-dose series for target doses 1-3 for patients <= 7y-4d" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	agenda-group "customRecommendationRule"
-	activation-group "recommendationIntervalCheck"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the Series is "DTP5DoseSeries"
-			- make note of the effective dose number in the Series as $nDoseNumber
-			- the numeric $nDoseNumber is <= 3
-			- the Series is Not Complete
-		// Get the most recent shot, only if it is a Td or Tdap that was invalid (and therefore has the same target dose number as the series)			
-		There is an administered shot $currentShot
-			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is == $nDoseNumber
-			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-			- make note of the administered shot number as $currentShotNumber
-			- make note of the minimum vaccine age for this Shot as $strValidMinimumAge
-		There does not exist an administered shot
-			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is == $nDoseNumber
-			- the administered shot number is > $currentShotNumber
-		// Determine the shot from which to obtain the minimum interval DoseRule criteria (which occurred before the Td or Tdap shot)
-		There is an Administered Shot $mostRecentShotForInterval
-			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is <= $nDoseNumber
-			- the vaccine administered not a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-			- make note of the Date this Shot was Administered as $administrationDate
-			- make note of the administered shot number as $nAdministeredShotNumberForInterval
-			- make note of the Earliest Recommended Interval from this dose to the next dose as $oTimePeriodRecommendationInterval
-		There does not exist an Administered Shot
-			- the shot belongs to the Series $targetSeries
-			- the administered shot number is > $nAdministeredShotNumberForInterval
-			- the vaccine administered not a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-		The Patient information $evaluatedPerson must be known to complete writing this rule
-			- make note of the Patient's birthdate as $birthdate
-		// Check that Td or Tdap was admininstered at 7y-4d of age
-		Confirm elapsed time between $birthdate and $administrationDate < $strValidMinimumAge
-	then
-		Add $oTimePeriodRecommendationInterval to $administrationDate and make note of the newly calculated date as $dtCalculated
-		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
-		Set the Recommendation Forecast Date for $oRecommendationInterval to $dtCalculated
-		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
-		Record that this dose rule was Processed for the TargetDose $mostRecentShotForInterval
-		Log that this dose rule fired for the dose $mostRecentShotForInterval in the Series $targetSeries
-end
-
-
-rule "DTP: Recommend earliest interval from prior vaccine containing D,T,& P in 5-dose series for target doses 1-3 for patients <= 7y-4d" extends "DTP: Recommend recommended interval from prior vaccine containing D,T,& P in 5-dose series for target doses 1-3 for patients <= 7y-4d"
-	ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	agenda-group "customRecommendationRule"
-	activation-group "earliestIntervalCheck"
-	when
-		// Same as ancestor rule - for now, just don't do anything
-	then
-		Record that this dose rule was Processed for the TargetDose $mostRecentShotForInterval
-		Log that this dose rule fired for the dose $mostRecentShotForInterval in the Series $targetSeries
-end
-
-
-// *AI*: Refactor this once general interval approach is refactored to get prior dose interval information
-rule "DTP: NO recommended interval if no prior vaccine containing D,T,& P in 5-dose series for target doses 1-3 for patients < 7y-4d" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	agenda-group "customRecommendationRule"
-	activation-group "recommendationIntervalCheck"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the Series is "DTP5DoseSeries"
-			- make note of the effective dose number in the Series as $nDoseNumber
-			- the numeric $nDoseNumber is <= 3
-			- the Series is Not Complete
-		// Get the most recent shot, only if it is a Td or Tdap that was invalid (and therefore has the same target dose number as the series)
-		There is an administered shot $currentShot
-			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is == $nDoseNumber
-			- make note of the administered shot number as $currentShotNumber
-			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")			
-			- make note of the minimum vaccine age for this Shot as $strValidMinimumAge
-			- make note of the date this shot was administered as $administrationDate
-		There does not exist an administered shot
-			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is == $nDoseNumber
-			- the administered shot number is > $currentShotNumber
-		// Check that there is no prior shot that is _not_ a Tdap or Td from which the interval can be based
-		There does not exist an Administered Shot
-			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is <= $nDoseNumber
-			- the vaccine administered not a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
-		The Patient information $evaluatedPerson must be known to complete writing this rule
-			- make note of the Patient's birthdate as $birthdate
-		// Check that Td or Tdap was admininstered at 7y-4d of age
-		Confirm elapsed time between $birthdate and $administrationDate < $strValidMinimumAge
-	then
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "DTP: NO Recommended earliest interval from prior vaccine containing D,T,& P in 5-dose series for target doses 1-3 for patients < 7y-4d" extends "DTP: NO recommended interval if no prior vaccine containing D,T,& P in 5-dose series for target doses 1-3 for patients < 7y-4d"
-	ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	agenda-group "customRecommendationRule"
-	activation-group "earliestIntervalCheck"
-	when
-		// Same as ancestor rule - for now, just don't do anything
-	then
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
+// Nothing to do. Shots marked ignored during evaluation stage will be ignored by base rules when calculating recommendation intervals.
 
 /*************************************************************************************************************************************************************************************
 5-Dose Series Special Rules  END

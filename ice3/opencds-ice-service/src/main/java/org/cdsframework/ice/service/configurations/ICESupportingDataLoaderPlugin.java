@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -46,8 +46,8 @@ import org.opencds.plugin.SupportingData;
 public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
     private static final Log logger = LogFactory.getLog(ICESupportingDataLoaderPlugin.class);
 
+    // AI: determine supportingData.identifier dynamically (fix upon OpenCDS upgrade)
     private static final String SD_ICE = "ice-supporting-data";
-
     
     public static boolean supportingDataAlreadyLoadedInContext(PreProcessPluginContext context) {
 
@@ -89,6 +89,9 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
     	Map<String, SupportingData> supportingData = context.getSupportingData();
         PluginDataCache cache = context.getCache();
         SupportingData sd = supportingData.get(SD_ICE);
+        if (sd == null) {
+        	sd = supportingData.get(SD_ICE);
+        }
     	String lKMId = sd.getKmId();
         Schedule schedule = cache.get(lKMId); 
         if (schedule == null) {
@@ -102,6 +105,26 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
         }
     }
     
+    public void execute(PreProcessPluginContext context, String pKMId) {
+    	
+    	String _METHODNAME = "execute(PreProcessPluginContext, String): ";
+    	if (context == null || pKMId == null) {
+    		String lErrStr = "PreProcessPluginContext or Knowledge Module ID not specified";
+    		logger.error(_METHODNAME + lErrStr);
+    		throw new IllegalArgumentException(lErrStr);
+    	}
+        PluginDataCache cache = context.getCache();
+        Schedule schedule = cache.get(pKMId); 
+        if (schedule == null) {
+        	// Schedule has not been stored in supporting data - load it - This should only happen once.
+        	logger.info("Loading immunization schedule for Knowledge Module: " + pKMId);
+        	loadImmunizationSchedule(pKMId, cache);
+        	logger.info(_METHODNAME + "Immunization schedule loaded for knowledge module: " + pKMId);
+        }
+        else if (logger.isDebugEnabled()) {
+        	logger.debug(_METHODNAME + "Immunization schedule previously loaded");
+        }
+    }
     
     /**
      * Given an ICE knowledge module identifier in the correct format, load its corresponding Schedule into the provided cache
@@ -136,7 +159,7 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
     	// Determine base rules KM ID in String format
     	ICEPropertiesDataConfiguration iceProps = new ICEPropertiesDataConfiguration();
     	String lBaseRulesScopingKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceProps.getBaseRulesScopingEntityId(), lRequestedKMIdObject.getBusinessId(), 
-    		lRequestedKMIdObject.getVersion());
+    		iceProps.getBaseRulesVersion());
     	
 		// Initialize schedule 
 		logger.info("Initializing Schedule");
