@@ -60,13 +60,11 @@ rule "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if neither sh
 	auto-focus true
 	salience 10
 	when
-		// $td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID || status == DoseStatus.ACCEPTED, $tdstatus : status, $tdAdministrationDate : administrationDate, 
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdstatus : status, $tdAdministrationDate : administrationDate, 
-			associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200",	vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
-		not TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200")
-		// $tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID || status == DoseStatus.ACCEPTED, 
-		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
-			associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", vaccineComponent.isUnspecifiedFormulation() == false, $tdOtherIsCombination : administeredVaccine.isCombinationVaccine())
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", hasBeenEvaluated == true, status == DoseStatus.VALID, $tdstatus : status, $tdAdministrationDate : administrationDate,
+			$tdTargetSeries : associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
+		not TargetDose(this != $td, associatedTargetSeries == $tdTargetSeries, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false)
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $tdTargetSeries, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
+			vaccineComponent.isUnspecifiedFormulation() == false, $tdOtherIsCombination : administeredVaccine.isCombinationVaccine())
 		eval($tdIsCombination == true && $tdOtherIsCombination == true || $tdIsCombination == false && $tdOtherIsCombination == false)
 	then
 		String _RULENAME = kcontext.rule.name;
