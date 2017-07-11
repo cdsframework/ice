@@ -760,7 +760,7 @@ rule "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day" 
 	when
 		$td: TargetDose(isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
 			$doseNumber : doseNumberInSeries)
-		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries == $tdAdministeredShotNumber-1, $tdprevDoseNumber: doseNumberInSeries, $tdprevDoseNumber < $doseNumber)
+		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries == $tdAdministeredShotNumber-1, $tdprevDoseNumber: doseNumberInSeries, $tdprevDoseNumber <= $doseNumber)
 		$targetSeries : TargetSeries(containsTargetDose($td), containsTargetDose($tdprev))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -795,7 +795,7 @@ end
 
 ///////// ***
 // General Design rule... Do not Edit
-// If this shot is a duplicate shot/same day shot as another shot in the series, mark its dose number the same as the previous shot (only one of the duplicate shot can be a valid dose)
+// If this shot is a duplicate shot/same day shot as another shot in the series, but interval is 0 days between them so latter shots' dose number is not set to same as previous shot
 ///////// ***
 rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 days are not marked with the same dose number; Invoke custom evaluation rules" 
 	extends "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
@@ -961,7 +961,7 @@ rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "History
 	activation-group "minimumAgeVaccineCheck"
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $vaccine : administeredVaccine, $doseNumber : doseNumberInSeries)
-		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries, seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
+		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries) // , seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
 	then

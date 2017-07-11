@@ -229,9 +229,12 @@ rule "Pneumococcal Adult Series: Evaluate PCV 7 shot (CVX 100) as Accepted with 
 	activation-group "allowableVaccineCheck"
 	salience 100
 	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
 		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the series $targetSeries
 			- the vaccine administered is "ICE100"
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
 			- the dose number in the Series is >= 6
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Allowed"
@@ -246,9 +249,12 @@ rule "Pneumococcal Adult Series: Note that the Absolute Minimum interval from PC
 	agenda-group "customEvaluationRule"
 	salience 101
 	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
 		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the series $targetSeries
 			- the vaccine administered is "ICE100"
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
 			- the dose number in the Series is >= 6
 	then
 		Mark the shot $currentShot as Ignored

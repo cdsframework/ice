@@ -77,7 +77,7 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule # (-1): If PCV and PPSV for tar
 end
 
 
-rule "Duplicate Shots/Same Day Pneumococcal Rule # (-2): If PCV and PCV NOS for target dose 1 of adult series on same day, evaluate the PCV" ruleflow-group "HistoryEvaluation"
+rule "Duplicate Shots/Same Day Pneumococcal Rule # (-2): If PCV and PCV NOS for target dose 1 of adult series on same day, evaluate the PCV first" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
 	auto-focus true
@@ -101,26 +101,6 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule # (-2): If PCV and PCV NOS for 
 end
 
 
-rule "Duplicate Shots/Same Day Pneumococcal Rule #1: If 2 pneumococcal shots evluated as valid are administered on the same day and neither are PCV7, then _do not_ mark either as Invalid/Duplicate" 
-	ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	agenda-group "duplicateShotSameDay"
-	activation-group "duplicateShotActivationGroup"
-	auto-focus true
-	salience 20
-	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", status == DoseStatus.VALID, hasBeenEvaluated == true, administeredVaccine.cdsConceptName != "ICE100", 
-			$tdAdministrationDate : administrationDate,	$tdAdministeredShotNumber : administeredShotNumberInSeries,	$tdAssociatedTargetSeries : associatedTargetSeries)
-		not TargetDose(this != $td, associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false)
-		$tdother : TargetDose(status == DoseStatus.VALID, this != $td, hasBeenEvaluated == true, associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate == $tdAdministrationDate, 
-			administeredVaccine.cdsConceptName != "ICE100", $tdOtherAdministeredShotNumber : administeredShotNumberInSeries)
-	then
-		String _RULENAME = kcontext.rule.name;
-		// Both shots are valid; do nothing
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
-end
-
-
 rule "Duplicate Shots/Same Day Pneumococcal Rule #2: If PCV13 and PCV7 and shot administered >= 6/1/2010, then evaluate PCV13 as Valid and PCV7 as Invalid/Duplicate" 
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -132,7 +112,7 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule #2: If PCV13 and PCV7 and shot 
 			administrationDate >= "01-Jun-2010", $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries,	$tdAssociatedTargetSeries : associatedTargetSeries)
 		not TargetDose(this != $td, associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false)
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, 
-			administeredVaccine.cdsConceptName == "ICE100", status == DoseStatus.VALID || status == DoseStatus.ACCEPTED)
+			administeredVaccine.cdsConceptName == "ICE100", status == DoseStatus.VALID)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
@@ -158,7 +138,7 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule #3: If PCV13 and PCV7 and shot 
 			administrationDate < "01-Jun-2010", $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries,	$tdAssociatedTargetSeries : associatedTargetSeries)
 		not TargetDose(this != $td, associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false)
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $tdAssociatedTargetSeries, hasBeenEvaluated == true, administeredVaccine.cdsConceptName == "ICE100", 
-			administrationDate == $tdAdministrationDate, status == DoseStatus.VALID || status == DoseStatus.ACCEPTED)
+			administrationDate == $tdAdministrationDate, status == DoseStatus.VALID)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
