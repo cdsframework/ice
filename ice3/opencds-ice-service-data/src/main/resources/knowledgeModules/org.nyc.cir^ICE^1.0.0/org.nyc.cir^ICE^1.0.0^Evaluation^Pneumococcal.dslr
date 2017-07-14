@@ -420,13 +420,13 @@ rule "Pneumococcal Child Series: Exception 1: Evaluate PCV Shot as Below Minimum
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "doseAgeCheck"
-	when
+	when		
+		There is an Administered Shot $currentDose that needs to be Evaluated
+			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
+			- the Dose Number in the Series is == 4
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dateOfInterest when the Patient is "7m" of age
-		There is an Administered Shot $currentDose that needs to be Evaluated
-			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
-			- the Dose Number in the Series is == 4			
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
@@ -465,9 +465,7 @@ rule "Pneumococcal Child Series: Exception 1: Skip Dose Number to 2 for Patient 
 	agenda-group "customEvaluationRule"
 	salience 200
 	no-loop true
-	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
+	when		
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the Dose Number in the Series is < 2
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
@@ -475,6 +473,8 @@ rule "Pneumococcal Child Series: Exception 1: Skip Dose Number to 2 for Patient 
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "7m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "12m"
 	then
 		Set Dose Number of $currentDose to 2
@@ -489,14 +489,14 @@ rule "Pneumococcal Child Series: Exception 2: Set Series Dose Number to 3 if No 
 	agenda-group "customEvaluationRule"
 	salience 200
 	no-loop true
-	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
+	when		
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
 			- the effective dose number in the series is < 3
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"	
 	then
 		// Pneumoccocal pneumonia
@@ -511,13 +511,13 @@ rule "Pneumococcal Child Series: Exception 2: Skip Dose Number to 3 if Patient B
 	salience 200
 	no-loop true
 	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dateOfInterest when the Patient is "12m" of age
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the Dose Number in the Series is < 3
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dateOfInterest when the Patient is "12m" of age
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
@@ -536,14 +536,14 @@ rule "Pneumococcal Child Series: Exception 2: Skip Dose Number to 4 if Patient B
 	agenda-group "customEvaluationRule"
 	salience 200
 	no-loop true
-	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dateOfInterest when the Patient is "12m" of age
+	when		
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the Dose Number in the Series is < 4
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dateOfInterest when the Patient is "12m" of age
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
@@ -562,14 +562,14 @@ rule "Pneumococcal Child Series: Exception 3: Set Series Dose Number to 4 if No 
 	agenda-group "customEvaluationRule"
 	salience 200
 	no-loop true
-	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
+	when		
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
 			- the effective dose number in the series is < 4
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "24m" && elapsed time between $dtBirthDate and evalTime < "5y"	
 	then
 		// Pneumoccocal pneumonia
@@ -583,9 +583,7 @@ rule "Pneumococcal Child Series: Exception 3: Skip Dose Number to 4 for Patient 
 	agenda-group "customEvaluationRule"
 	salience 200
 	no-loop true
-	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
+	when		
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the Dose Number in the Series is < 4
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
@@ -593,6 +591,8 @@ rule "Pneumococcal Child Series: Exception 3: Skip Dose Number to 4 for Patient 
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "24m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "5y"
 	then
 		Set Dose Number of $currentDose to 4
@@ -608,13 +608,13 @@ rule "Pneumococcal Adult Series: Exception 4: Set Series Dose Number to 6 (Adult
 	salience 200
 	no-loop true
 	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
 			- the effective dose number in the series is < 6
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
 		Skip Series Dose Number to 6 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
@@ -628,8 +628,6 @@ rule "Pneumococcal Child Series: Exception 4: Skip Dose Number to 6 (Adult Serie
 	salience 200
 	no-loop true
 	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the Dose Number in the Series is < 6
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
@@ -637,6 +635,8 @@ rule "Pneumococcal Child Series: Exception 4: Skip Dose Number to 6 (Adult Serie
 		There is a Series $targetSeries that contains the Dose $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "5y"
 	then
 		Set Dose Number of $currentDose to 6

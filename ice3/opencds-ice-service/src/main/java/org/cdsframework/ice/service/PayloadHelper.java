@@ -720,10 +720,10 @@ public class PayloadHelper {
 			logger.warn(_METHODNAME + lErrStr);
 			return null;
 		}
-		//else if ("EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE".equals(sv.getCdsListItemName())) {		// AI: Deal with this hard-code issue
-		//	logger.warn(_METHODNAME + "Vaccine not permitted for this dose but we don't return this code, currently");
-		//	return null;
-		//}
+		else if ("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON".equals(sv.getCdsListItemName())) {
+			logger.info(_METHODNAME + "Unspecified reason for this this shot; no reason for this evaluated shot will be returned");
+			return null;
+		}
 		else {
 			return sv.getCdsListItemCD();
 		}
