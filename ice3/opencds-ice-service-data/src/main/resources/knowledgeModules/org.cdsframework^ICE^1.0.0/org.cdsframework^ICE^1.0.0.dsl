@@ -224,7 +224,8 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Extra Dose"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.EXTRA_DOSE");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addAcceptedReason({oReason});
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addInvalidReason({oReason});
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Vv]alid for this [Ss]eries=
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {strReason:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({strReason});
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)]+} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({oReason});
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Nn]ot [Ii]gnored={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(false);
