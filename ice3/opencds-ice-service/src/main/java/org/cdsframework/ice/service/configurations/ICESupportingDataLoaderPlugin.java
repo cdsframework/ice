@@ -86,11 +86,18 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
     public void execute(PreProcessPluginContext context) {
     	
     	String _METHODNAME = "execute(): ";
+    	if (context == null) {
+    		String lErrStr = "PreProcessPluginContext not specified";
+    		logger.error(_METHODNAME + lErrStr);
+    		throw new IllegalArgumentException(lErrStr);
+    	}
     	Map<String, SupportingData> supportingData = context.getSupportingData();
         PluginDataCache cache = context.getCache();
         SupportingData sd = supportingData.get(SD_ICE);
         if (sd == null) {
-        	sd = supportingData.get(SD_ICE);
+        	String lErrStr = "SupportingData not found";
+    		logger.error(_METHODNAME + lErrStr);
+    		throw new RuntimeException(lErrStr);
         }
     	String lKMId = sd.getKmId();
         Schedule schedule = cache.get(lKMId); 

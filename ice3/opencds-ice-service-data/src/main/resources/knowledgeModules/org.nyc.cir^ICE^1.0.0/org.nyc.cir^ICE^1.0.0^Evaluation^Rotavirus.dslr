@@ -33,10 +33,13 @@ import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Vaccine
@@ -66,3 +69,22 @@ rule "Rotavirus: Mark Dose as Accepted if Patient Greater Than 8 Months of Age" 
 		Log that this Dose Rule fired for the Dose $currentDose in the Series $targetSeries
 end
 
+
+rule "Rotavirus: Mark Shot with Invalid Vaccine as Invalid but do _not_ indicate VACCINE_NOT_ALLOWED_FOR_DOSE reason (overrides base vaccine check rule)" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.820"
+			- make note of the administered vaccine as $administeredVaccine
+			- make note of the dose number as $doseNumber
+		There is a series $targetSeries that contains the shot $currentShot
+			- the vaccine $administeredVaccine is not permitted for dose number $doseNumber in this Series
+			- make note of the number of doses required to complete this series as $numberOfDosesInSeries
+			- the numeric $doseNumber is <= $numberOfDosesInSeries
+	then
+		Mark the shot $currentShot as Invalid for this Series
+		Record that this Dose Rule was Processed for the TargetDose $currentShot
+		Log that this Dose Rule fired for the Dose $currentShot in the Series $targetSeries
+end
