@@ -174,6 +174,7 @@ rule "Polio: Mark OPV shots administered >= 4/1/2016 as INVALID with reason MISS
 			- the vaccine administered is "ICE02"
 		There is a Series $targetSeries that contains the shot $currentShot
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series is Not Complete
 	then
 		Mark the Shot $currentShot as Invalid for this Series due to "Missing Antigen"
 		Record that this dose rule was Processed for the TargetDose $currentShot
