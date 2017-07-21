@@ -34,10 +34,12 @@ import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
 import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -57,8 +59,6 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >
 	dialect "mvel"
 	agenda-group "postEvaluationCheck"
 	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
 		There is an Administered Shot $dose3
 			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
 			- the dose number in the series is == 3
@@ -73,6 +73,8 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >
 			- the series also contains the dose $prevdose2
 			- the number of doses administered is == 3
 		// SupportedVaccineConcept._IPV
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Verify that the count of doses administered in Series $targetSeries with vaccine "ICE10" is == 3
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "4y" && elapsed time between $dtAdministrationDatePrev and $dtAdministrationDate >= "6m-4d"
 	then
@@ -140,44 +142,41 @@ rule "Polio: Modify DoseRule4 parameters for TargetDose 4 if administered before
 end
 
 
-// Series complete with 5 doses:
-// For those who received four doses before 8/7/2010 and before 4 years - 4 days of age, an additional dose (dose 5) is recommended 
-// at >= 4 years of age.  Recommended interval from dose 4 to dose 5 is 6 months; minimum interval (for evaluation) is 6 months minus 4 days.
-rule "Polio: Create a 5th dose for the series if 4 doses administered before 8/7/2010 and < 4y-4d age (and a 5th shot can be evaluated or recommended by separate rules)" ruleflow-group "HistoryEvaluation"
-	agenda-group "postEvaluationCheck"
-	no-loop true
+// For children who received target dose 4 at >= 8/7/2010 and before 4 years - 4 days of age, evaluate target dose 4 as Accepted/ BELOW_MINIMUM_AGE_FINAL_DOSE 
+// (if absolute minimum interval is met). (An additional dose will be recommended at >= 4 years of age).
+rule "Polio: Mark target dose 4 administered >= 8/7/2010 and before absolute minimum age as ACCEPTED with reason BELOW_MINIMUM_AGE_FINAL_DOSE" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "doseAgeCheck"
 	when
-		There is an Administered Shot $dose4
-			- that has already been evaluated and whose Shot Validity is VALID
+		There is an Administered Shot $targetDose4 that needs to be evaluated
 			- the dose number in the series is == 4
-			- the administration date of the shot is < "07-Aug-2010"
+			- the administration date of the shot is >= "07-Aug-2010"
 			- make note of the date this shot was administered as $dtAdministrationDate
-		There is a Series $targetSeries
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
-			- the number of doses required to complete this Series is != 5
-			- the series contains the dose $dose4
-			- the number of doses administered is == 4
-			 -make note of the Allowable Vaccines for Dose 4 in the Series as $assign_oAllowableVaccines4
-			- make note of the Preferable Vaccines for Dose 4 in the Series as $assign_oPreferableVaccines4
+		There is a Series $targetSeries that contains the shot $targetDose4
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- make note of the absolute minimum age for dose 4 in this series as $absoluteMinimumAge
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm Elapsed time between $dtBirthDate and $dtAdministrationDate < "4y-4d"
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate < $absoluteMinimumAge
 	then
-		// Create the Dose 5 Rule
-		Create the next DoseRule as $assign_oDoseRule5 which may be added to the SeriesRules for Series $targetSeries
-		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule5 to TimePeriod "4y-4d"
-		Set the Earliest Recommended Age for DoseRule $assign_oDoseRule5 to TimePeriod "4y"
-		Set the list of Preferable Vaccines for DoseRule $assign_oDoseRule5 to $assign_oPreferableVaccines4 
-		Set the list of Allowable Vaccines for DoseRule $assign_oDoseRule5 to $assign_oAllowableVaccines4 
-		Add the new DoseRule $assign_oDoseRule5 to the SeriesRules for Series $targetSeries
-		//// Now add the intervals to the existing Dose 4 rule  
-		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
-		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule4 to TimePeriod "6m-4d"
-		Set the Earliest Recommended Interval for DoseRule $assign_oDoseRule4 to TimePeriod "6m"
-		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule4
-		Refresh all Facts in the Series $targetSeries for Evaluation
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
+		Mark the Shot $targetDose4 as Accepted for this Series due to "Below Minimum Age for Final Dose"
+		Record that this dose rule was Processed for the TargetDose $targetDose4
+        Log that this dose rule fired for the dose $targetDose4 in the Series $targetSeries
 end
 
- 
+
+// If a patient receives shots of OPV administered >= 4/1/2016, these shots do not count towards the series. Evaluate these shots as Invalid with reason code MISSING_ANTIGEN
+rule "Polio: Mark OPV shots administered >= 4/1/2016 as INVALID with reason MISSING_ANTIGEN" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the administration date of the shot is >= "01-Apr-2016"
+			- the vaccine administered is "ICE02"
+		There is a Series $targetSeries that contains the shot $currentShot
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series is Not Complete
+	then
+		Mark the Shot $currentShot as Invalid for this Series due to "Missing Antigen"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
