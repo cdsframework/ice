@@ -85,7 +85,7 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >
 end
 
 
-// Series complete with 3 doses if all administered doses are IPVs (CVX 10) or all administered doses are OPVs (CVX 02), and dose 3 was administered when the 
+// Series complete with 3 doses if all administered doses are IPVs (CVX 10) or all administered doses are OPVs (CVX 02, CVX 182), and dose 3 was administered when the 
 // patient was >= 4 years and was administered at least 6 months - 4 days after the previous dose, then the series is complete with 3 doses.
 rule "Polio: Series is Complete if 3 prior doses, all 3 doses are OPV, patient >= 4yrs when dose 3 administered, and dose 3 >= 6m-4d after previous dose" ruleflow-group "HistoryEvaluation" 
 	dialect "mvel"
@@ -107,7 +107,7 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are OPV, patient >
 			- the series also contains the dose $prevdose2
 			- the number of doses administered is == 3
 		// SupportedVaccineConcept._OPV
-		Verify that the count of doses administered in Series $targetSeries with vaccine "ICE02" is == 3
+		Verify that the count of doses administered in Series $targetSeries with vaccine a member of ("ICE02","ICE182") is == 3
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "4y" && elapsed time between $dtAdministrationDatePrev and $dtAdministrationDate >= "6m-4d"
 	then
 		Mark the Series $targetSeries Complete
@@ -165,13 +165,30 @@ rule "Polio: Mark target dose 4 administered >= 8/7/2010 and before absolute min
 end
 
 
+// If a patient receives CVX 178 or CVX 179, evaluate these shots as Invalid with reason code MISSING_ANTIGEN
+rule "Polio: Mark OPV shots (CVX 178 or CVX 179) as INVALID with reason MISSING_ANTIGEN" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the vaccine administered a member of ("ICE178","ICE179")
+		There is a Series $targetSeries that contains the shot $currentShot
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series is Not Complete
+	then
+		Mark the Shot $currentShot as Invalid for this Series due to "Missing Antigen"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+
 // If a patient receives shots of OPV administered >= 4/1/2016, these shots do not count towards the series. Evaluate these shots as Invalid with reason code MISSING_ANTIGEN
 rule "Polio: Mark OPV shots administered >= 4/1/2016 as INVALID with reason MISSING_ANTIGEN" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the administration date of the shot is >= "01-Apr-2016"
-			- the vaccine administered is "ICE02"
+			- the vaccine administered a member of ("ICE02","ICE178","ICE179","ICE182")
 		There is a Series $targetSeries that contains the shot $currentShot
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the Series is Not Complete
