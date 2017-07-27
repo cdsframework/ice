@@ -1067,7 +1067,6 @@ rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasona
 		not TargetDose(associatedTargetSeries == $tsprev, isShotIgnoredForCompletionOfSeries() == false, administeredShotNumberInSeries > $shotNumber)
 	then
 		String _RULENAME = kcontext.rule.name;
-		// TargetDose lastFromPrev = $tsprev.getTargetDoses().last();
 		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, $lastFromPrev);
 		if ($td.containsInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_INTERVAL_EVALUATION_REASON.getCdsListItemName())) {
 			ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), $td);

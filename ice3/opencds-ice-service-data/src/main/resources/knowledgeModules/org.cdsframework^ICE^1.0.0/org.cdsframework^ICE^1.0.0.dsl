@@ -172,8 +172,8 @@
 //
 // TargetDose accumulates
 //
+[condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 [condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine {dd_oVaccineCdsListItem} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || $td.administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // EVAL Conditions
@@ -224,10 +224,11 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Vaccine Not Allowed"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED"); insert(new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Extra Dose"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.EXTRA_DOSE");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Below Minimum Age for Final Dose"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_FINAL_DOSE"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addAcceptedReason({oReason});
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addInvalidReason({oReason});
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "D_AND_T_INVALID/P_VALID"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.D_AND_T_INVALID/P_VALID");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
+/////// [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addAcceptedReason({oReason});
+/////// [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addInvalidReason({oReason});
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {strReason:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({strReason});
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)]+} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({oReason});
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Nn]ot [Ii]gnored={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(false);

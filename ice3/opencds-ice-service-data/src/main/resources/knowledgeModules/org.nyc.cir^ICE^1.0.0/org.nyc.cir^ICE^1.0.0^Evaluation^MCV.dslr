@@ -78,7 +78,7 @@ rule "Meningococcal: Mark the Series as Complete Before Evaluation of Shot if Pr
 end
 
 
-rule "Meningococcal: Evaluate shot as Accepted/Below Recommended Age, does not count towards series completion if given below the minimum age for the series and above the vaccine minimum age" ruleflow-group "HistoryEvaluation"
+rule "Meningococcal: Evaluate shot as Accepted/Below Recommended Age, and does not count towards series completion if given below the minimum age for the series and above the vaccine minimum age" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "minimumAgeVaccineCheck"
@@ -122,7 +122,7 @@ rule "Meningococcal: Skip Evaluation of the Shot if given below the minimum age 
 end
 
 
-rule "Evaluate Shot as Accepted & Above Recommended Age if age at administration >= 19yrs and has not completed series < 19yrs of age" ruleflow-group "HistoryEvaluation"
+rule "Evaluate Shot as Accepted & Above Recommended Age if age at administration >= 22yrs and has not completed series < 22yrs of age" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
     when
@@ -136,31 +136,9 @@ rule "Evaluate Shot as Accepted & Above Recommended Age if age at administration
 			- the Series is not Complete
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is < $assign_nNumberOfDosesRequired
-		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateCurrentDose >= "19y"
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateCurrentDose >= "22y"
     then
 		Mark the shot $currentShot as Accepted for this Series due to "Above Recommended Age"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
-
-
-/**
- *
- Rule is redundant. Shot >= 19yrs is marked as accepted, above.
-rule "Mark that the Shot Administered >= 19yrs of age does not count towards completion of the series" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	agenda-group "customEvaluationRule"
-	when
-		There is an Administered Shot $currentShot that needs to be evaluated
-			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		There is a Series $targetSeries that contains the Shot $currentShot
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
-		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateCurrentDose >= "19y"
-	then
-		Mark that the Shot $currentShot does not count towards Completion of the Series
-		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-*/
