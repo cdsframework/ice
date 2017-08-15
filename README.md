@@ -1,1 +1,1 @@
-More information about ICE is available at https://www.hln.com/services/open-source/ice/.
+More information about ICE is available at http://www.cdsframework.org/.
