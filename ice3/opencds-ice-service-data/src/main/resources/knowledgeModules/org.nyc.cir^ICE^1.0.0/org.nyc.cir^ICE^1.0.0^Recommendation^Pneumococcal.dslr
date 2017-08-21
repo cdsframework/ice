@@ -417,6 +417,7 @@ end
 // and < 65yrs. This rule will only fire if there is a recommendation date attached to the final recommendation (i.e. - if the recommendation status is RECOMMENDED or RECOMMENDED_IN_FUTURE)
 // and with the added conditional recommendation, ICE will override that recommendation with the conditionally recommended (as per general ICE rules)
 rule "Pneumococcal: if patient *will be* >= 5 years at the recommended due date and < 65 years, then recommend Conditional and HIGH_RISK" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
 	agenda-group "postRecommendationCheck"
 	when
 		There is a Series $targetSeries

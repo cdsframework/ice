@@ -52,6 +52,91 @@ global org.drools.runtime.KnowledgeContext kcontext
 
 
 /*************************************************************************************************************************************************************************************
+Recommending at the Vaccine vs. Vaccine Group Level; including additional reason codes where necessary
+*************************************************************************************************************************************************************************************/
+
+// When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
+rule "Mening B: Recommend CVX 163 for the next target dose in the MenB 4C 2-dose Series" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the series is "MenB4C2DoseSeries"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE163"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// For any of the Mening B series, if patient has at least one CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and at least one CVX 163 (Meningococcal B 4C, OMV (Bexsero)) on record, 
+// recommend CVX 163 and include the reason codes: DUE_NOW or DUE_IN_FUTURE and OTHER_VACCINE_PRODUCT_POSSIBLE.
+rule "Mening B: If a patient has at least one CVX 162 and at least one CVX 163 and a shot is recommended, include a recommendation with reason OTHER_VACCINE_PRODUCT_POSSIBLE" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a Forecast for the Series has been made and a shot is recommended
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- post processing on the Series forecast has not already been run
+		There exists an administered shot
+			- the shot belongs to the series $targetSeries
+			- the vaccine administered is "ICE162"
+		There exists another administered shot
+			- the shot belongs to the series $targetSeries
+			- the vaccine administered is "ICE163"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.OTHER_VACCINE_PRODUCT_POSSIBLE"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB FHbp 2-dose Series, recommend CVX 162 for the next target dose.
+rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-dose Series" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the series is "MenBFHbp3DoseSeries"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE162"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
+rule "Mening B: Recommend CVX 163 for the next target dose in the MenB FHbp 2-dose Series" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the series is "MenBFHbp3DoseSeries"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE162"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+/*************************************************************************************************************************************************************************************
+END Recommending at the Vaccine vs. Vaccine Group Level; including additional reason codes where necessary
+*************************************************************************************************************************************************************************************/
+
+
+/*************************************************************************************************************************************************************************************
 Recommendation Rules based on Patient Age
 If no doses are on record and
     + the patient is < 10 years old, then the Recommendation is Not Recommended and the reason code is BELOW_MINIMUM_AGE_HIGH_RISK_SERIES. (New recommendation code)
