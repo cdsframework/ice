@@ -892,7 +892,7 @@ end
 rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162 and target dose 2 (CVX 162) is valid in MenB FHbp 2-dose series" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
-	salience 10
+	salience 20
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
@@ -915,7 +915,7 @@ end
 rule "SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162 and target dose 2 (CVX 162) is Invalid for MenB FHbp 2-dose series but Valid for MenB FHbp 3-dose series" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
-	salience 10
+	salience 20
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
@@ -923,6 +923,7 @@ rule "SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162
 		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, $ts3doseSeriesId : targetSeriesIdentifier)
 		$td2dose1 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 		$td2dose2 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
+		not TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 2, isValid == true)
 		$td3dose1 : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 		$td3dose2 : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 2, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 	then
@@ -941,7 +942,7 @@ end
 rule "SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162 and target dose 2 (CVX 162) is Invalid in both MenB FHbp 2-dose series and MenB FHbp 3-dose series" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
-	salience 10
+	salience 20
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
@@ -949,8 +950,10 @@ rule "SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162
 		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, $ts3doseSeriesId : targetSeriesIdentifier)
 		$td2dose1 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 		$td2dose2 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
+		not TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 2, isValid == true)
 		$td3dose1 : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 		$td3dose2 : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
+		not TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 2, isValid == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
@@ -970,7 +973,27 @@ end
 //    * If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is the last shot administered on the patient record, then either the MenB FHbp 2-dose series applies or the MenB FHbp 3-dose series applies. 
 //      (See preceding Series Selection Rules to determine whether the MenB FHbp 2-dose series or MenB FHbp 3-dose series applies.)
 
-// AI:
+// Sub-bullet 1: If both CVX 162 and CVX 163 are on the patient record; CVX 163 is the last shot administered
+rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and last shot administered is CVX 163" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	agenda-group "customSeriesSelectionRules"
+	salience 30
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false, $tsid : targetSeriesIdentifier)
+		exists TargetDose(associatedTargetSeries == $tsid, vaccineComponent.cdsConceptName == "ICE162")
+		$tdlatest : TargetDose(associatedTargetSeries == $tsid, vaccineComponent.cdsConceptName == "ICE163", $shotNumberLatest : administeredShotNumberInSeries)
+		not TargetDose(associatedTargetSeries == $tsid, administeredShotNumberInSeries > $shotNumberLatest)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
 
 // END: If both CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and CVX 163 (Meningococcal B 4C, OMV (Bexsero)) are on the patient record...
 

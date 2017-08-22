@@ -36,7 +36,9 @@ import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
 import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.Schedule
 import org.cdsframework.ice.service.SeriesRules
 import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
 import org.cdsframework.ice.service.TargetDose
@@ -49,6 +51,7 @@ expander ../org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
 
 global java.util.Date evalTime
 global org.drools.runtime.KnowledgeContext kcontext
+global org.cdsframework.ice.service.Schedule schedule
 
 
 /*************************************************************************************************************************************************************************************
@@ -91,7 +94,7 @@ rule "Mening B: If a patient has at least one CVX 162 and at least one CVX 163 a
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.OTHER_VACCINE_PRODUCT_POSSIBLE"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Include the Recommendation $oRecommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -177,7 +180,7 @@ rule "Mening B: If the patient >= 10yrs and < 16yrs and no doses on record, reco
 		Confirm elapsed time between $birthdate and evalTime >= "10y"
 		Confirm elapsed time between $birthdate and evalTime < "16y"
 	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONAL for the Series $targetSeries
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -197,7 +200,7 @@ rule "Mening B: If the patient >= 16yrs and < 24yrs and no doses on record, reco
 		Confirm elapsed time between $birthdate and evalTime >= "16y"
 		Confirm elapsed time between $birthdate and evalTime < "24y"
 	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONAL for the Series $targetSeries
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -217,10 +220,9 @@ rule "Mening B: If the patient >= 24yrs and no doses on record, recommendation i
 		Confirm elapsed time between $birthdate and evalTime >= "10y"
 		Confirm elapsed time between $birthdate and evalTime < "16y"
 	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONAL for the Series $targetSeries
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.TOO_OLD_HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-S
