@@ -115,13 +115,13 @@ end
 
 
 // When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
-rule "Mening B: Recommend CVX 163 for the next target dose in the MenB FHbp 2-dose Series" ruleflow-group "RecommendationForecast"
+rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-dose Series" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the series is "MenBFHbp3DoseSeries"
+			- the name of the series is "MenBFHbp2DoseSeries"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE162"
