@@ -1616,7 +1616,7 @@ rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccines
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.setRecommendationVaccine(null);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
 end
 
 	
@@ -1638,7 +1638,23 @@ rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsi
 			Vaccine v = (Vaccine) iter.next();
 			$ts.setRecommendationVaccine(v);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+// Recommend at vaccine group level if recommendation status (forecast) is NOT_RECOMMENDED
+///////// ***
+rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfNotRecommendedForecast" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "supplementalSeriesRule"
+	when
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.NOT_RECOMMENDED, finalRecommendations != null, $tsFinalRecommendations : finalRecommendations)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setRecommendationVaccine(null);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
 end
 
 

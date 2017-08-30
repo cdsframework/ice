@@ -58,13 +58,30 @@ global org.cdsframework.ice.service.Schedule schedule
 Recommending at the Vaccine vs. Vaccine Group Level; including additional reason codes where necessary
 *************************************************************************************************************************************************************************************/
 
+// If no doses have been administered, then do not recommend a specific vaccine
+rule "Mening B: Do not recommend a specific vaccine if no (valid) doses have been administered" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a Specific Vaccine is Recommended
+			- the effective dose number in the Series is == 1
+	then
+		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
 // When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
-rule "Mening B: Recommend CVX 163 for the next target dose in the MenB 4C 2-dose Series" ruleflow-group "RecommendationForecast"
+rule "Mening B: Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose Series" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the name of the series is "MenB4C2DoseSeries"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
@@ -83,7 +100,7 @@ rule "Mening B: If a patient has at least one CVX 162 and at least one CVX 163 a
 	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a shot is recommended
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- post processing on the Series forecast has not already been run
 		There exists an administered shot
 			- the shot belongs to the series $targetSeries
@@ -106,7 +123,7 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-do
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the name of the series is "MenBFHbp3DoseSeries"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
@@ -123,7 +140,7 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-do
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the name of the series is "MenBFHbp2DoseSeries"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
@@ -154,7 +171,7 @@ rule "Mening B: If the patient < 10yrs and no doses on record, recommendation is
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the number of doses administered is == 0
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
@@ -173,7 +190,7 @@ rule "Mening B: If the patient >= 10yrs and < 16yrs and no doses on record, reco
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the number of doses administered is == 0
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
@@ -193,7 +210,7 @@ rule "Mening B: If the patient >= 16yrs and < 24yrs and no doses on record, reco
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the number of doses administered is == 0
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
@@ -213,12 +230,11 @@ rule "Mening B: If the patient >= 24yrs and no doses on record, recommendation i
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the number of doses administered is == 0
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
-		Confirm elapsed time between $birthdate and evalTime >= "10y"
-		Confirm elapsed time between $birthdate and evalTime < "16y"
+		Confirm elapsed time between $birthdate and evalTime >= "24y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.TOO_OLD_HIGH_RISK"

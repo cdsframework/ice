@@ -790,13 +790,13 @@ end
 ///////////////////////////////////////////////////////////// Meningococcal B Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
 // Default Mening B series if no shots administered - select MenB 4C 2-Dose Series if no shots administered
-rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series if no shots administered" ruleflow-group "SeriesSelection"
+rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series if no valid target doses" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false, numberOfShotsAdministeredInSeries == 0)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() == 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -813,10 +813,10 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series if dose 1 is CVX 163" 
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false, $associatedTargetSeries : targetSeriesIdentifier)
-		$td : TargetDose(associatedTargetSeries == $associatedTargetSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE163")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false)
+		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE163")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -837,14 +837,14 @@ rule "SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CV
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, 
-			determineNumberOfDosesAdministeredInSeries() == 0, $ts2doseSeriesId : targetSeriesIdentifier)
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, 
-			determineNumberOfDosesAdministeredInSeries() == 1, $ts3doseSeriesId : targetSeriesIdentifier)
-		$td2dose : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 1, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
-		$td3dose : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, 
+			determineNumberOfDosesAdministeredInSeries() == 0)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false,
+			determineNumberOfDosesAdministeredInSeries() == 1)
+		$td2dose : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 1, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
+		$td3dose : TargetDose(associatedTargetSeries == $ts3doseSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
@@ -861,14 +861,14 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CV
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, 
-			determineNumberOfDosesAdministeredInSeries() == 1, $ts2doseSeriesId : targetSeriesIdentifier)
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, 
-			determineNumberOfDosesAdministeredInSeries() == 1, $ts3doseSeriesId : targetSeriesIdentifier)
-		$td2dose : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
-		$td3dose : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, 
+			determineNumberOfDosesAdministeredInSeries() == 1)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, 
+			determineNumberOfDosesAdministeredInSeries() == 1)
+		$td2dose : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$td3dose : TargetDose(associatedTargetSeries == $ts3doseSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
@@ -894,11 +894,11 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162
 	agenda-group "customSeriesSelectionRules"
 	salience 20
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, $ts2doseSeriesId : targetSeriesIdentifier)
-		$td1 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
-		$td2 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 2, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false)
+		$td1 : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$td2 : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 2, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
@@ -917,15 +917,15 @@ rule "SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162
 	agenda-group "customSeriesSelectionRules"
 	salience 20
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, $ts2doseSeriesId : targetSeriesIdentifier)
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, $ts3doseSeriesId : targetSeriesIdentifier)
-		$td2dose1 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
-		$td2dose2 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
-		not TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 2, isValid == true)
-		$td3dose1 : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
-		$td3dose2 : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 2, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.83", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false)
+		$td2dose1 : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$td2dose2 : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
+		not TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 2, isValid == true)
+		$td3dose1 : TargetDose(associatedTargetSeries == $ts3doseSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$td3dose2 : TargetDose(associatedTargetSeries == $ts3doseSeries, doseNumberInSeries == 2, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
@@ -944,16 +944,16 @@ rule "SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162
 	agenda-group "customSeriesSelectionRules"
 	salience 20
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, $ts2doseSeriesId : targetSeriesIdentifier)
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, $ts3doseSeriesId : targetSeriesIdentifier)
-		$td2dose1 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
-		$td2dose2 : TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
-		not TargetDose(associatedTargetSeries == $ts2doseSeriesId, doseNumberInSeries == 2, isValid == true)
-		$td3dose1 : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
-		$td3dose2 : TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
-		not TargetDose(associatedTargetSeries == $ts3doseSeriesId, doseNumberInSeries == 2, isValid == true)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false)
+		$td2dose1 : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$td2dose2 : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
+		not TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 2, isValid == true)
+		$td3dose1 : TargetDose(associatedTargetSeries == $ts3doseSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
+		$td3dose2 : TargetDose(associatedTargetSeries == $ts3doseSeries, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
+		not TargetDose(associatedTargetSeries == $ts3doseSeries, doseNumberInSeries == 2, isValid == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
@@ -979,12 +979,12 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CV
 	agenda-group "customSeriesSelectionRules"
 	salience 30
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false, $tsid : targetSeriesIdentifier)
-		exists TargetDose(associatedTargetSeries == $tsid, vaccineComponent.cdsConceptName == "ICE162")
-		$tdlatest : TargetDose(associatedTargetSeries == $tsid, vaccineComponent.cdsConceptName == "ICE163", $shotNumberLatest : administeredShotNumberInSeries)
-		not TargetDose(associatedTargetSeries == $tsid, administeredShotNumberInSeries > $shotNumberLatest)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false)
+		exists TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE162")
+		$tdlatest : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE163", $shotNumberLatest : administeredShotNumberInSeries)
+		not TargetDose(associatedTargetSeries == $tss, administeredShotNumberInSeries > $shotNumberLatest)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);

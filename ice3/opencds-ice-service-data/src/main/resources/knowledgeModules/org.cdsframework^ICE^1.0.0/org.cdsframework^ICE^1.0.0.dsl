@@ -269,6 +269,7 @@
 [consequence][][Ss]et the [Rr]ecommendation [Ff]orecast [Dd]ate for {refer_oRecommendation} to {dtForecastDate}={refer_oRecommendation}.setRecommendationDate({dtForecastDate});
 [consequence][][Ss]et the [Rr]ecommendation [Rr]eason for {refer_oRecommendation} to {oCD}={refer_oRecommendation}.setRecommendationReason({oCD});
 [consequence][][Ss]et the [Rr]ecommendation [Vv]accine for {refer_oRecommendation} to {dd_strCdsConceptValue}={refer_oRecommendation}.setRecommendedVaccine(schedule.getVaccineByCdsConceptValue({dd_strCdsConceptValue}));
+[consequence][][Uu]nset the [Rr]ecommendation [Vv]accine for {refer_oRecommendation}={refer_oRecommendation}.setRecommendedVaccine(null);
 [consequence][][Ii]nclude a [Rr]ecommendation as {assign_oRecommendation} with [Ss]tatus {enum_RecommendationStatus} and [Ff]orecast [Dd]ate {dtForecastDate} for [Cc]onsideration in the final [Ff]orecast of the [Ss]eries {refer_oTargetSeries}=Recommendation {assign_oRecommendation} = new Recommendation({refer_oTargetSeries}); {assign_oRecommendation}.setRecommendationDate({dtForecastDate}); {assign_oRecommendation}.setRecommendationStatus({enum_RecommendationStatus}); insert({assign_oRecommendation});
 [consequence][][Ii]nclude a [Rr]ecommendation as {assign_oRecommendation} with [Ff]orecast [Dd]ate {dtForecastDate} for [Cc]onsideration in the final [Ff]orecast of the [Ss]eries {refer_oTargetSeries}=Recommendation {assign_oRecommendation} = new Recommendation({refer_oTargetSeries}); {assign_oRecommendation}.setRecommendationDate({dtForecastDate}); insert({assign_oRecommendation});
 [consequence][][Ii]nclude the [Rr]ecommendation {refer_oRecommendation} for [Cc]onsideration in the final [Ff]orecast of the [Ss]eries=insert({refer_oRecommendation});
@@ -317,6 +318,7 @@
 [consequence][][Ss]et the [Dd]ose [Nn]umber of [Rr]ecommendation [Ff]orecast to {nDoseNumberOfForecast} in [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.setManuallySetDoseNumberToRecommend({nDoseNumberOfForecast});
 [consequence][][Mm]ark that [Pp]ost [Pp]rocessing on the [Ff]orecast of the [Ss]eries {refer_oTargetSeries} has been [Rr]un={refer_oTargetSeries}.setPostForecastCheckCompleted(true);
 [consequence][][Ss]et the [Rr]ecommended [Vv]accine for the [Ff]orecast in the [Ss]eries {refer_oTargetSeries} to {dd_oSupportedVaccineConcept}={refer_oTargetSeries}.setRecommendationVaccine(schedule.getVaccineByCdsConceptValue({dd_oSupportedVaccineConcept}));
+[consequence][][Uu]nset the [Rr]ecommended [Vv]accine for the [Ff]orecast in the [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.setRecommendationVaccine(null);
 [consequence][][Ss]et [Dd]isplay [Ff]orecast [Dd]ate for [Cc]onditional [Rr]ecommendations in the [Ss]eries {refer_oTargetSeries} to [Tt]rue={refer_oTargetSeries}.setForecastDateToBeDisplayedForConditionalRecommendations(true);
 [consequence][][Ss]et [Dd]isplay [Ff]orecast [Dd]ate for [Cc]onditional [Rr]ecommendations in the [Ss]eries {refer_oTargetSeries} to [Ff]alse={refer_oTargetSeries}.setForecastDateToBeDisplayedForConditionalRecommendations(false);
 

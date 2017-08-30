@@ -70,7 +70,7 @@ rule "Mening B / FHbp 2-dose series: Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_CO
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"	and the Series with name "MenBFHbp2DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"	and the Series with name "MenBFHbp2DoseSeries"
 			- the vaccine administered is "ICE163"
 			- make note of the associated series as $targetSeries
 	then
@@ -95,17 +95,17 @@ rule "Mening B / FHbp 3-dose series: Evaluate the Absolute Minimum Interval in M
 	agenda-group "customEvaluationRule"
 	when  
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the dose number in the series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
 		There is an Administered Shot $previousDose
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the dose number in the series is == 1
 		- that has already been evaluated and whose shot validity is VALID
 			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
 		There is a Series $targetSeries that contains the Dose $currentShot
 			- the Series also contains the Dose $previousDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the name of the Series is "MenBFHbp3DoseSeries"
 		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentShot < "6m-4d"
 	then
@@ -116,13 +116,13 @@ end
 
 // If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is reported in Men B FHbp 3-dose series, evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN.
 // Ignore the reported CVX 163 when determining the recommended vaccine and calculating the recommended due date for the next target dose.
-rule "Mening B / FHbp 3-dose series : Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and ignore shot" ruleflow-group "HistoryEvaluation"
+rule "MeningB: FHbp 3-dose series : Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and ignore shot" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"	and the Series with name "MenBFHbp3DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"	and the Series with name "MenBFHbp3DoseSeries"
 			- the vaccine administered is "ICE163"
 			- make note of the associated series as $targetSeries
 	then
@@ -143,13 +143,13 @@ MenB 4C 2-dose Series specific rules
 
 // If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is reported, then evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
 // Ignore the reported CVX 162 when determining the recommended vaccine and calculating the recommended due date for the next target dose.
-rule "MeningB / MenB 4C 2-dose Series: Evaluate CVX 162 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and ignore shot" ruleflow-group "HistoryEvaluation"
+rule "MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and ignore shot" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"	and the Series with name "MenBFHbp3DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"	and the Series with name "MenB4C2DoseSeries"
 			- the vaccine administered is "ICE162"
 			- make note of the associated series as $targetSeries
 	then
