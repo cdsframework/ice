@@ -920,7 +920,7 @@ rule "SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false)
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.83", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false)
 		$td2dose1 : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 1, isValid == true, vaccineComponent.cdsConceptName == "ICE162")
 		$td2dose2 : TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 2, isValid == false, vaccineComponent.cdsConceptName == "ICE162")
 		not TargetDose(associatedTargetSeries == $ts2doseSeries, doseNumberInSeries == 2, isValid == true)
@@ -982,9 +982,9 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CV
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false)
-		exists TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE162")
-		$tdlatest : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE163", $shotNumberLatest : administeredShotNumberInSeries)
-		not TargetDose(associatedTargetSeries == $tss, administeredShotNumberInSeries > $shotNumberLatest)
+		TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE162", $shotNumberCVX162 : administeredShotNumberInSeries)
+		$tdlatest : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE163", administeredShotNumberInSeries > $shotNumberCVX162)
+		not TargetDose(uniqueId != $tdlatest, administeredShotNumberInSeries > $tdlatest.administeredShotNumberInSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
