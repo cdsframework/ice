@@ -950,7 +950,7 @@ public class TargetSeries {
 	 * @param doseNumber
 	 * @return TargetDose, or null if not found
 	 */
-	public TargetDose getValidOrAcceptedShotByDoseNumber(int doseNumber) {
+	public TargetDose getValidShotByDoseNumber(int doseNumber) {
 
 		if (targetDoses.isEmpty()) {
 			return null;
@@ -959,7 +959,7 @@ public class TargetSeries {
 		for (TargetDose td : targetDoses) {
 			if (td.getDoseNumberInSeries() == doseNumber) {
 				DoseStatus ds = td.getStatus();
-				if (ds == DoseStatus.VALID || ds == DoseStatus.ACCEPTED) {
+				if (ds == DoseStatus.VALID) {
 					return td;
 				}
 			}

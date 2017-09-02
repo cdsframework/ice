@@ -1351,11 +1351,11 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
 			$sss : seriesSelectionSeason)
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, 
-			$seriesComplete1 : isSeriesComplete(), $lastNecessaryShotAdministered1 : getValidOrAcceptedShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null, 
-			$lastNecessaryShotAdministered1Date : getValidOrAcceptedShotByDoseNumber(seriesRules.numberOfDosesInSeries).getAdministrationDate() != null)
+			$seriesComplete1 : isSeriesComplete(), $lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null, 
+			$lastNecessaryShotAdministered1Date : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries).getAdministrationDate() != null)
 		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id2 : targetSeriesIdentifier, $id2 != $id1, selectedSeries == false, targetSeason == $sss, 
 			$seriesComplete2 : isSeriesComplete(), $lastAdministeredShot2InSeries: lastShotAdministeredInSeries, 
-			$lastNecessaryShotAdministered2 : getValidOrAcceptedShotByDoseNumber(seriesRules.numberOfDosesInSeries))
+			$lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
 		eval($seriesComplete1 == true && $seriesComplete2 == true && ($lastAdministeredShot2InSeries == null || 
 				($lastNecessaryShotAdministered2.getAdministrationDate() != null && $lastNecessaryShotAdministered2.getAdministrationDate().before($lastNecessaryShotAdministered1Date))))
 	then

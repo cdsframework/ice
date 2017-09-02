@@ -72,10 +72,12 @@ rule "Mening B / FHbp 2-dose series: Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_CO
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"	and the Series with name "MenBFHbp2DoseSeries"
 			- the vaccine administered is "ICE163"
+			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
 		Mark the shot $currentShot as Ignored
+		Mark that Evaluation of Shot $currentShot is complete and therefore should not be reevaluated by any other rules
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -124,10 +126,12 @@ rule "MeningB: FHbp 3-dose series : Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COU
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"	and the Series with name "MenBFHbp3DoseSeries"
 			- the vaccine administered is "ICE163"
+			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
 		Mark the shot $currentShot as Ignored
+		Mark that Evaluation of Shot $currentShot is complete and therefore should not be reevaluated by any other rules
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -151,10 +155,12 @@ rule "MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 as ACCEPTED/VACCINE_NOT_C
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"	and the Series with name "MenB4C2DoseSeries"
 			- the vaccine administered is "ICE162"
+			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
 		Mark the shot $currentShot as Ignored
+		Mark that Evaluation of Shot $currentShot is complete and therefore should not be reevaluated by any other rules
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
