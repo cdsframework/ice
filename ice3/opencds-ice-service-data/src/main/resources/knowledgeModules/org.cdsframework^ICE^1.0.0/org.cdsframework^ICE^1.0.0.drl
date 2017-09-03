@@ -1185,7 +1185,8 @@ rule "SeriesSelection: Change Series Selection Status To Complete" ruleflow-grou
 	dialect "mvel"
 	salience 40
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS,
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS,
 			$sss : seriesSelectionSeason)
 		TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == true, targetSeason == $sss)
 		not (TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == false, targetSeason == $sss))
@@ -1207,7 +1208,8 @@ rule "SeriesSelection: Retract All Series Not Selected in Vaccine Group" ruleflo
 	salience 50
 	when
 		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, $sss : seriesSelectionSeason, 
-			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_COMPLETE)
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS || 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_COMPLETE)
 		$selected : TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == true, targetSeason == $sss)
 		$ts : TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == false, targetSeason == $sss)
 	then
@@ -1226,8 +1228,6 @@ end
 ///////// ***
 rule "SeriesSelection: Default Series Selection Preprocess rule: invoke custom rules" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	// activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS) 
 	then
@@ -1246,7 +1246,6 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	dialect "mvel"
 	salience 2000
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
@@ -1270,7 +1269,6 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	dialect "mvel"
 	salience 2000
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
@@ -1294,7 +1292,6 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	dialect "mvel"
 	salience 2500
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
@@ -1323,7 +1320,8 @@ rule "SeriesSelection: Select already completed series that has the fewest doses
 	dialect "mvel"
 	salience 60
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, 
 			$sss : seriesSelectionSeason)
 		not (TargetSeries(selectedSeries == true, seriesRules.vaccineGroup == $ssvg, targetSeason == $sss))
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, isSeriesComplete() == true, $id1 : targetSeriesIdentifier, 
@@ -1348,7 +1346,8 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 	salience 60
 	activation-group "SeriesSelectionFewestDoses"
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, 
 			$sss : seriesSelectionSeason)
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, 
 			$seriesComplete1 : isSeriesComplete(), $lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null, 
@@ -1374,7 +1373,8 @@ rule "SeriesSelection.SelectOnlySeriesRemainingInVaccineGroup" ruleflow-group "S
 	dialect "mvel"
 	salience 100
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == false)
 		accumulate($tsthis : TargetSeries(vaccineGroup == $ssvg); $countInVG : count($tsthis); $countInVG == 1)		

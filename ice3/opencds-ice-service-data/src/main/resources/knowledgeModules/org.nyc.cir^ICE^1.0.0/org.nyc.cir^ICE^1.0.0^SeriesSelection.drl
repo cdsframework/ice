@@ -827,9 +827,9 @@ rule "SeriesSelection(MenB): Select Complete Series" ruleflow-group "SeriesSelec
 end
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // START: If dose 1 is CVX 163 (Meningococcal B 4C, OMV (Bexsero)), then the MenB 4C 2-dose series applies.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1" ruleflow-group "SeriesSelection"
 	dialect "mvel"
@@ -882,17 +882,17 @@ rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 1
 		update($ts);
 end
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // END: If dose 1 is CVX 163 (Meningococcal B 4C, OMV (Bexsero)), then the MenB 4C 2-dose series applies.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // START: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and
 //     * Invalid for the MenB FHbp 2-dose Series, but valid for MenB FHbp 3-dose Series, the MenB FHbp 3-dose series applies.
 //     * Valid for the MenB FHbp 2-dose Series AND valid for MenB FHbp 3-dose Series, the MenB FHbp 2-dose series applies.
 //
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////
 // Sub-bullet 1: If target dose 1 is (CVX 162 [Meningococcal B FHbp, recombinant (Trumenba)]) and Invalid for the FHbp 2-dose Series, but valid for FHbp 3-dose Series, the FHbp 3-dose series applies.
@@ -932,7 +932,7 @@ rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX
 		update($ts3doseSeries);
 end
 
-rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162) is Invalid for FHbp 2-dose series, valid for FHb3 3-dose series; FHbp 3-dose series is _not_ complete" 
+rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162) is Invalid for FHbp 2-dose series, valid for FHb3 3-dose series; FHbp 3-dose series is _not_ complete" 
 		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
 	ruleflow-group "SeriesSelection"
 	dialect "mvel"
@@ -1015,17 +1015,20 @@ end
 ////////////////////////////
 // END Sub-bullet 2: If target dose 1 (CVX 162 [Meningococcal B FHbp, recombinant (Trumenba)]) is Valid for the MenB FHbp 2-dose Series AND Valid for MenB FHbp 3-dose Series, the MenB FHbp 2-dose series applies.
 ////////////////////////////
-//
-//
-// END: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and... 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END: If target dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and
+// 	* Invalid for the MenB FHbp 2-dose Series, but valid for MenB FHbp 3-dose Series, the MenB FHbp 3-dose series applies.
+// 	* Valid for the MenB FHbp 2-dose Series AND valid for MenB FHbp 3-dose Series, the MenB FHbp 2-dose series applies.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // START: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba) and
 //    * target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and valid for the MenB FHbp 2-dose series, the MenB FHbp 2-dose series applies.
 //    * target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and invalid for the MenB FHbp 2-dose series, but valid for MenB FHbp 3-dose series, the MenB FHbp 3-dose series applies.
 //    * target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and invalid for BOTH the MenB FHbp 2-dose series and MenB FHbp 3-dose series, the MenB FHbp 2-dose series applies.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////
 // Sub-bullet 1: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba) and target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and valid for the MenB FHbp 2-dose series, 
@@ -1042,7 +1045,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 i
 		not TargetDose(associatedTargetSeries == $ts2doseSeries, vaccineComponent.cdsConceptName != "ICE162", administeredShotNumberInSeries == $ts2doseSeries.numberOfShotsAdministeredInSeries) 
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts2doseSeries);
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162; target dose 2 (CVX 162) is Valid for FHbp 2-dose series; FHbp 2-dose series _is_ complete" 
@@ -1105,7 +1108,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 i
 		not TargetDose(associatedTargetSeries == $ts2doseSeries, vaccineComponent.cdsConceptName != "ICE162", administeredShotNumberInSeries == $ts3doseSeries.numberOfShotsAdministeredInSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts3doseSeries);
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162; target dose 2 (CVX 162) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHBp 3-dose series _is_ complete" 
@@ -1149,12 +1152,11 @@ end
 // END Sub-bullet 2
 ////////////////////////////
 
-
 ////////////////////////////
 // START Sub-bullet 3: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and invalid for BOTH the MenB FHbp 2-dose series 
 // and MenB FHbp 3-dose series, the MenB FHbp 2-dose series applies. Neither series will be complete
 ////////////////////////////
-rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both FHbp 2-dose series/3-dose series; 4C-2-dose series is not complete" ruleflow-group "SeriesSelection"
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both FHbp 2-dose series/3-dose series" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	salience 10
@@ -1166,12 +1168,12 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 i
 		not TargetDose(associatedTargetSeries == $ts2doseSeries, vaccineComponent.cdsConceptName != "ICE162", administeredShotNumberInSeries == $ts2doseSeries.numberOfShotsAdministeredInSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts2doseSeries);
 end
 
 // This should not happen based on current rules - 2-dose series is not complete until 2-doses have been administered
 rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both MenB FHbp 2-dose series/3-dose series but series is complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both FHbp 2-dose series/3-dose series; 4C-2-dose series is not complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both FHbp 2-dose series/3-dose series"
 	ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
@@ -1180,6 +1182,8 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162
 		// This should not happen based on current rules
 		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
 	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
 		$ts2doseSeries.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
@@ -1188,7 +1192,7 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162
 end
 
 rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both MenB FHbp 2-dose series/3-dose series, series is not complete, and there are no other series complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both FHbp 2-dose series/3-dose series; 4C-2-dose series is not complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both FHbp 2-dose series/3-dose series"
 	ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
@@ -1197,6 +1201,8 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162
 		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
 		not TargetSeries(this != $ts2doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
 	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);		
 		$ts2doseSeries.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
@@ -1208,17 +1214,21 @@ end
 // END sub-bullet 3
 ////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// END: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba) and Sub-bullets for target dose 2
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba) and
+// 	* target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and valid for the MenB FHbp 2-dose series, the MenB FHbp 2-dose series applies.
+//	* target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and invalid for the MenB FHbp 2-dose series, but valid for MenB FHbp 3-dose series, the MenB FHbp 3-dose series applies.
+// 	* target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and invalid for BOTH the MenB FHbp 2-dose series and MenB FHbp 3-dose series, the MenB FHbp 2-dose series applies. 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // START: If both CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and CVX 163 (Meningococcal B 4C, OMV (Bexsero)) are on the patient record, then the series in which the Meningococcal B vaccine last 
 // administered applies. Ignore the reported shot of the other Meningococcal B vaccine.
 //    * If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is the last shot administered on the patient record, then the MenB 4C 2-dose series applies.
 //    * If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is the last shot administered on the patient record, then either the MenB FHbp 2-dose series applies or the MenB FHbp 3-dose series applies. 
 //      (See preceding Series Selection Rules to determine whether the MenB FHbp 2-dose series or MenB FHbp 3-dose series applies.)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Sub-bullet 1: If both CVX 162 and CVX 163 are on the patient record; CVX 163 is the last shot administered
 rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and last shot administered is CVX 163" ruleflow-group "SeriesSelection"
@@ -1244,6 +1254,8 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CV
 	when
 		TargetSeries(this == $ts, isSeriesComplete() == true)
 	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
@@ -1260,6 +1272,8 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CV
 		TargetSeries(this == $ts, isSeriesComplete() == false)
 		not TargetSeries(this != $ts, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
 	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
@@ -1267,9 +1281,14 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CV
 		update($ts);
 end
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// END: If both CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and CVX 163 (Meningococcal B 4C, OMV (Bexsero)) are on the patient record and sub-bullets...
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END: If both CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and CVX 163 (Meningococcal B 4C, OMV (Bexsero)) are on the patient record, then the series in which the Meningococcal B vaccine last 
+// administered applies. Ignore the reported shot of the other Meningococcal B vaccine.
+//    * If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is the last shot administered on the patient record, then the MenB 4C 2-dose series applies.
+//    * If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is the last shot administered on the patient record, then either the MenB FHbp 2-dose series applies or the MenB FHbp 3-dose series applies. 
+//      (See preceding Series Selection Rules to determine whether the MenB FHbp 2-dose series or MenB FHbp 3-dose series applies.)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 ///////////////////////////////////////////////////////////// Hib-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
