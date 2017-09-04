@@ -64,7 +64,7 @@ MenB FHbp 2-dose Series specific rules
 
 // If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is reported in Men B FHbp 2-dose series, evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN.
 // Ignore the reported CVX 163 when determining the recommended vaccine and calculating the recommended due date for the next target dose.
-rule "Mening B / FHbp 2-dose series: Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and ignore shot" ruleflow-group "HistoryEvaluation"
+rule "Mening B / FHbp 2-dose series: Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -81,6 +81,26 @@ rule "Mening B / FHbp 2-dose series: Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_CO
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+
+rule "Mening B / FBhp 2-dose series: Do not invoke default Absolute Minimum Age check for CVX 163 administered >= 10yrs-4days of age" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "doseAgeCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"	and the Series with name "MenBFHbp2DoseSeries"
+			- the vaccine administered is "ICE163"
+			- make note of the date this shot was administered as $shotDate
+			- make note of the associated series as $targetSeries
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthdate
+		Confirm Elapsed time between $birthdate and $shotDate >= "10y-4d"	
+	then
+		// Do nothing - overrides default absolute minimum age check
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
 
 /*************************************************************************************************************************************************************************************
 MenB FHbp 2-dose Series specific rules END
@@ -118,7 +138,7 @@ end
 
 // If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is reported in Men B FHbp 3-dose series, evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN.
 // Ignore the reported CVX 163 when determining the recommended vaccine and calculating the recommended due date for the next target dose.
-rule "MeningB: FHbp 3-dose series : Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and ignore shot" ruleflow-group "HistoryEvaluation"
+rule "MeningB: FHbp 3-dose series : Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -147,7 +167,7 @@ MenB 4C 2-dose Series specific rules
 
 // If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is reported, then evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
 // Ignore the reported CVX 162 when determining the recommended vaccine and calculating the recommended due date for the next target dose.
-rule "MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and ignore shot" ruleflow-group "HistoryEvaluation"
+rule "MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
