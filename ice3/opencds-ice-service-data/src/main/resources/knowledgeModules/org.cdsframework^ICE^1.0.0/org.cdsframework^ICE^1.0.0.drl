@@ -779,7 +779,9 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.isShotIgnoredForCompletionOfSeries() == false || ($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
+		eval($tdprev.isShotIgnoredForCompletionOfSeries() == false || 
+			($doseNumber > $targetSeries.getSeriesRules().getNumberOfDosesInSeries() && $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false) || 
+			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() != null &&
 			! $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS))))
 	then
@@ -804,9 +806,11 @@ rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 d
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.isShotIgnoredForCompletionOfSeries() == true || $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) == null || 
+		eval($tdprev.isShotIgnoredForCompletionOfSeries() == true || 
+			(($doseNumber <= $targetSeries.getSeriesRules().getNumberOfDosesInSeries() || $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == true) &&
+			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) == null || 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() == null ||
-			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS)))
+			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS)))))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($td) {
@@ -923,7 +927,7 @@ rule "HistoryEvaluation.markExtraneousDosesAcceptedIfCompleteForAllDiseaseTarget
 	activation-group "extraDoseCheck"
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $doseNumber : doseNumberInSeries) 
-		$ts : TargetSeries(containsTargetDose($td), seriesRules.numberOfDosesInSeries < determineDoseNumberInSeriesForDiseasesTargetedByThisDose($td)) 
+		$ts : TargetSeries(containsTargetDose($td), seriesRules.numberOfDosesInSeries < $doseNumber, seriesRules.numberOfDosesInSeries < determineDoseNumberInSeriesForDiseasesTargetedByThisDose($td)) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		$td.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
@@ -933,7 +937,7 @@ end
 
 
 ///////// ***
-// Supplemental Series Table rule... modifying this rule not suggested
+// Series Table rule... Do not Edit
 ///////// ***
 rule "HistoryEvaluation.checkIsAllowableVaccine" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -953,7 +957,7 @@ end
 
 
 ///////// ***
-// Supplemental Series Table rule... modifying this rule not suggested
+// Series Table rule... Do not Edit
 ///////// ***
 rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -975,7 +979,7 @@ end
 
 
 ///////// ***
-// Supplemental Series Table rule... modifying this rule not suggested
+// Series Table rule... Do not Edit
 ///////// ***
 rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"

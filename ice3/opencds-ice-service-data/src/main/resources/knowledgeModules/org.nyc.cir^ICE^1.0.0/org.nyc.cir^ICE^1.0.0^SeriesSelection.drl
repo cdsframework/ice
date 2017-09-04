@@ -1228,10 +1228,13 @@ end
 //    * If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is the last shot administered on the patient record, then the MenB 4C 2-dose series applies.
 //    * If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is the last shot administered on the patient record, then either the MenB FHbp 2-dose series applies or the MenB FHbp 3-dose series applies. 
 //      (See preceding Series Selection Rules to determine whether the MenB FHbp 2-dose series or MenB FHbp 3-dose series applies.)
+//
+// In addition, if a CVX 162 and CV 163 were administered on the same day, the MenB4C2DoseSeries should be selected if both CVX 162 and CVX 163 were administered on the same day, unless a 
+// Trumenba series would have been completed by the Trumenba shot. Specifically:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Sub-bullet 1: If both CVX 162 and CVX 163 are on the patient record; CVX 163 is the last shot administered
-rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and last shot administered is CVX 163" ruleflow-group "SeriesSelection"
+rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and latest shot date administered is CVX 163" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	salience 30
@@ -1239,15 +1242,16 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 1
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false)
-		TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE162", $shotNumberCVX162 : administeredShotNumberInSeries)
-		TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE163", administeredShotNumberInSeries == $ts.numberOfShotsAdministeredInSeries)
+		TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE162")
+		TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE163", $tdLatestDateUniqueId : uniqueId, $tdLatestAdministrationDate : administrationDate)   // administeredShotNumberInSeries == $ts.numberOfShotsAdministeredInSeries)
+		not TargetDose(associatedTargetSeries == $ts, uniqueId != $tdLatestDateUniqueId, administrationDate > $tdLatestAdministrationDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts);		
 end
 
 rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, last shot administered is CVX 163, and series is complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and last shot administered is CVX 163" ruleflow-group "SeriesSelection"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and latest shot date administered is CVX 163" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	salience 30
@@ -1264,7 +1268,7 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CV
 end
 
 rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, last shot administered is CVX 163, series is not complete, and there are no other series complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and last shot administered is CVX 163" ruleflow-group "SeriesSelection"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and latest shot date administered is CVX 163" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	salience 30

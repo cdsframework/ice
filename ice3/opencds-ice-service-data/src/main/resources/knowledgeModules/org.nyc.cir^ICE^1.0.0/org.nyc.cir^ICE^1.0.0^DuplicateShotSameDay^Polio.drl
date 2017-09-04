@@ -53,7 +53,7 @@ global java.util.Date evalTime
 
 ///////////////////////////////////////////////////////////// Polio-Specific Duplicate Shot/Same Day Rules Start Here /////////////////////////////////////////////////////////////
 
-rule "Duplicate Shots/Same Day Polio Rule: If one of those shots is OPV (CVX 02) and the other is not, evaluate the OPV (CVX 02) as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other as Valid"
+rule "Duplicate Shots/Same Day Polio Rule: If one of those shots is OPV (CVX 02, 182) and the other is not, evaluate the OPV as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other as Valid"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"

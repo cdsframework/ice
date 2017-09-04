@@ -2096,9 +2096,10 @@ public class TargetSeries {
 			throw new ImproperUsageException(_METHODNAME + errStr);
 		}
 
-		if (isSeriesComplete()) {
-			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
-		}
+		// if (isSeriesComplete()) {
+		// if (isSeriesComplete() && pTD.getDoseNumberInSeries() > getSeriesRules().getNumberOfDosesInSeries()) {
+		// 	pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+		// }
 
 		DoseRule seriesDoseRule = obtainDoseRuleForSeriesByTargetDose(pTD);
 		if (seriesDoseRule == null) {
@@ -2156,9 +2157,10 @@ public class TargetSeries {
 			throw new ImproperUsageException(_METHODNAME + errStr);
 		}
 
-		if (isSeriesComplete()) {
-			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
-		}
+		// if (isSeriesComplete() {
+		// if (isSeriesComplete() && pTD.getDoseNumberInSeries() > getSeriesRules().getNumberOfDosesInSeries()) {
+		//	pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+		// }
 
 		Date previousDoseDate = pTDprev.getAdministrationDate();
 		Date currentDoseDate = pTD.getAdministrationDate();
