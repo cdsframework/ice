@@ -62,8 +62,7 @@ rule "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neithe
 	salience 10
 	when
 		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", hasBeenEvaluated == true, status == DoseStatus.VALID, $tdstatus : status, $tdAdministrationDate : administrationDate,
-			$tdTargetSeries : associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
-		// not TargetDose(this != $td, associatedTargetSeries == $tdTargetSeries, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false)
+			$tdTargetSeries : associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == false,	$tdIsCombination: administeredVaccine.isCombinationVaccine())
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $tdTargetSeries, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
 			vaccineComponent.isUnspecifiedFormulation() == false, $tdOtherIsCombination : administeredVaccine.isCombinationVaccine())
 		eval($tdIsCombination == true && $tdOtherIsCombination == true || $tdIsCombination == false && $tdOtherIsCombination == false)
@@ -84,10 +83,8 @@ rule "Duplicate Shots/Same Day Overview Rule #4-DTP-Pertussis: If both shots are
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, vaccineComponent.isUnspecifiedFormulation() == true,
 			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.033.9", associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200")
-		// not TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == false, associatedTargetSeries == $td.associatedTargetSeries)
-		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID || status == DoseStatus.ACCEPTED, 
-			associatedTargetSeries == $td.associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == true, 
-			vaccineComponent.allDiseasesTargetedForImmunity not contains "SUPPORTED_DISEASE_CONCEPT.033.9")
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $td.associatedTargetSeries, 
+			vaccineComponent.isUnspecifiedFormulation() == true, vaccineComponent.allDiseasesTargetedForImmunity not contains "SUPPORTED_DISEASE_CONCEPT.033.9")
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
@@ -108,8 +105,7 @@ rule "Duplicate Shots/Same Day DTP Rule 5a: If one DTP shot is pertussis-contain
 	auto-focus true
 	salience 10
 	when	
-		eval($td.getAssociatedTargetSeries().getVaccineGroup().equals("VACCINE_GROUP_CONCEPT.200") && 
-			$td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && 
+		eval($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && 
 			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9"))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -135,11 +131,10 @@ rule "Duplicate Shot/Same Day DTP Rule 5b: If neither shot contains pertussis or
 	auto-focus true
 	salience 10
 	when
-		eval($td.getAssociatedTargetSeries().getVaccineGroup().equals("VACCINE_GROUP_CONCEPT.200") && 
-			(($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && 
+		eval(($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && 
 			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9")) || 
 			(! $td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") &&
-			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9"))))
+			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9")))
 	then
 		String _RULENAME = drools.getRule().getName();
 		TargetDose tdToModifyInvalid = null;

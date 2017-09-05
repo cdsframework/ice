@@ -927,7 +927,7 @@ rule "HistoryEvaluation.markExtraneousDosesAcceptedIfCompleteForAllDiseaseTarget
 	activation-group "extraDoseCheck"
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $doseNumber : doseNumberInSeries) 
-		$ts : TargetSeries(containsTargetDose($td), seriesRules.numberOfDosesInSeries < $doseNumber, seriesRules.numberOfDosesInSeries < determineDoseNumberInSeriesForDiseasesTargetedByThisDose($td)) 
+		$ts : TargetSeries(containsTargetDose($td), seriesRules.numberOfDosesInSeries < determineDoseNumberInSeriesForDiseasesTargetedByThisDose($td)) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		$td.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
