@@ -635,13 +635,14 @@ end
 
 
 // If the HPV 2-dose series is complete, select the HPV 2-Dose Series applies
-rule "SeriesSelection.HPV: Select 2-dose Series if series is complete with the first dose adminstered < 15yrs of age" ruleflow-group "SeriesSelection" 
+rule "SeriesSelection.HPV: Select 2-dose Series if series is complete with the first dose adminstered < 15yrs of age but the 3-dose series is not complete" ruleflow-group "SeriesSelection" 
 	dialect "mvel"
 	salience 30
 	agenda-group "customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries", isSeriesComplete() == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries", isSeriesComplete() == true)
 		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, $tdAdministrationDate: administrationDate)
 		$person : EvaluatedPerson()
@@ -1262,7 +1263,7 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CV
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
 		update($tss);
 		update($ts);
 end
