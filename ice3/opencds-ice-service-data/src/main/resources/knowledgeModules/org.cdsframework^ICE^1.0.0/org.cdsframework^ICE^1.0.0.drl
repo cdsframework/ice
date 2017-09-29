@@ -1569,21 +1569,44 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "RecommendationForecast.adjustRecommendedStatusForFinalRecommendationDateWithRespectToEvalTime" ruleflow-group "RecommendationForecast"
+rule "RecommendationForecast.adjustTargetSeriesEnclosedRecommendationWithRespectToEvalTime" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "supplementalSeriesRule"
 	when
-		EvalTime($currentTime : evalTimeValue)
+		$targetSeries : TargetSeries(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+			recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, $recommendationDueDate : finalRecommendationDate)
+		$recommendationListToBeAdjusted : List(size > 0) from 
+			accumulate($recs : Recommendation((recommendationStatus == RecommendationStatus.NOT_FORECASTED && recommendationReason != null) || 
+				(recommendationStatus == RecommendationStatus.RECOMMENDED && $recommendationDueDate > evalTime) || 
+				(recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE && $recommendationDueDate <= evalTime)) from $targetSeries.finalRecommendations, collectList($recs))
+	then
+		String _RULENAME = kcontext.rule.name;
+		for (Recommendation r : $recommendationListToBeAdjusted) {
+			r.setRecommendationStatus($targetSeries.getRecommendationStatus);
+		}
+		$targetSeries.addSeriesRuleProcessed(_RULENAME);
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Enclosed Recommendation statuses adjusted in TargetSeries " + $targetSeries.getSeriesName());			
+		update($targetSeries);	
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "RecommendationForecast.adjustTargetSeriesRecommendedStatusAndEnclosedRecommendationsForFinalRecommendationDateWithRespectToEvalTime" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "supplementalSeriesRule"
+	when
 		$targetSeries : TargetSeries($recommendationDueDate : getFinalRecommendationDate() != null, 
 			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
 				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED),
-			$recommendationDueDate > $currentTime && recommendationStatus == RecommendationStatus.RECOMMENDED || 
-			$recommendationDueDate <= $currentTime && recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)  	
+			$recommendationDueDate > evalTime && recommendationStatus == RecommendationStatus.RECOMMENDED || 
+			$recommendationDueDate <= evalTime && recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
 	then
 		String _RULENAME = kcontext.rule.name;
 		$targetSeries.adjustRecommendationStatusByEvalTime(evalTime);
 		$targetSeries.addSeriesRuleProcessed(_RULENAME);
-      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Recommendation status adjusted for " + $recommendationDueDate + " in TargetSeries " + $targetSeries.getSeriesName());			
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Recommendation status and enclosed Recommendations adjusted for " + $recommendationDueDate + " in TargetSeries " + $targetSeries.getSeriesName());			
 		update($targetSeries);	
 end
 

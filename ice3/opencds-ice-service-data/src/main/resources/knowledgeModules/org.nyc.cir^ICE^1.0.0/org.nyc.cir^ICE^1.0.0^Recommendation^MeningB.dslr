@@ -110,9 +110,9 @@ rule "Mening B: If a patient has at least one CVX 162 and at least one CVX 163 a
 			- the shot belongs to the series $targetSeries
 			- the vaccine administered is "ICE163"
 	then
-		// Create a Recommendation as $oRecommendation for the Series $targetSeries
-		// Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.OTHER_VACCINE_PRODUCT_POSSIBLE"
-		// Include the Recommendation $oRecommendation for Consideration in the final Forecast of the Series
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.OTHER_VACCINE_PRODUCT_POSSIBLE"
+		Include the Recommendation $oRecommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
