@@ -548,12 +548,12 @@ public class TargetSeries {
 		/////// }
 	}
 
-	
+
 	public int determineDoseNumberInSeries() {
 
 		int lEffectiveNumberOfDoses = determineEffectiveNumberOfDosesInSeries();
 		Integer lEffectiveDoseNumberPlus1Int = new Integer(lEffectiveNumberOfDoses+1);
-		
+
 		//////////////
 		// If dose number determined by disease count and there is a skip dose from the (next) target dose for all other diseases in this target series, take that into account
 		//////////////
@@ -659,7 +659,7 @@ public class TargetSeries {
 			boolean takeSkipDoseEntriesIntoAccount,	Collection<String> antigensToIncludeInDetermination) {
 
 		String _METHODNAME = "doseNumberDeterminationUpdateUtility(): ";
-		
+
 		///////////////////////////////////
 		// If no shots administered, return dose number based solely on the count by diseases
 		///////////////////////////////////
@@ -676,7 +676,7 @@ public class TargetSeries {
 		///////////////////////////////////
 		// END if no shots administered
 		///////////////////////////////////
-		
+
 		int highestSkipDoseNumberToEntry = 0;
 		int highestNonSkipDoseNumberToEntry = 0;
 
@@ -3395,12 +3395,13 @@ public class TargetSeries {
 	 * 
 	 * If the supplied pEvalTime is null, finalRecommendationDate is null, or the current RecommendationStatus is not RECOMMENDED or RECOMMENDED_IN_FUTURE, 
 	 * then this method has no effect.
+	 * @return true if recommendation status (and reason if applicable) was updated, false if not
 	 */
-	public void adjustRecommendationStatusByEvalTime(Date pEvalTime) {
+	public boolean adjustRecommendationStatusAndReasonByEvalTime(Date pEvalTime) {
 
 		if (pEvalTime == null || this.finalRecommendationDate == null || 
 				(recommendationStatus != RecommendationStatus.RECOMMENDED && recommendationStatus != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
-			return;
+			return false;
 		}
 
 		RecommendationStatus lPriorRS = getRecommendationStatus();
@@ -3412,19 +3413,21 @@ public class TargetSeries {
 			setRecommendationStatus(RecommendationStatus.RECOMMENDED);
 		}
 
-		if (lPriorRS != getRecommendationStatus()) {
-			BaseDataRecommendationReason lPriorRSReason = getGenericRecommendationReasonForRecommendationStatus(lPriorRS);
-			BaseDataRecommendationReason lCurrentRSReason = getGenericRecommendationReasonForRecommendationStatus(getRecommendationStatus());
-			for (Recommendation lRec : this.finalRecommendations) {
-				// TODO: H/I
-				if (lRec.getRecommendationReason() == lPriorRSReason.getCdsListItemName()) {
+		BaseDataRecommendationReason lPriorRSReason = getGenericRecommendationReasonForRecommendationStatus(lPriorRS);
+		BaseDataRecommendationReason lCurrentRSReason = getGenericRecommendationReasonForRecommendationStatus(getRecommendationStatus());
+		boolean lRecommendationStatusChanged = lPriorRS.equals(getRecommendationStatus()) ? false : true;
+		for (Recommendation lRec : this.finalRecommendations) {
+			// TODO: H/I
+			if ((lRec.getRecommendationStatus() == lPriorRS && lRecommendationStatusChanged) || lRec.getRecommendationStatus() == RecommendationStatus.NOT_FORECASTED) {
+				if (lRec.getRecommendationReason() != null && lRec.getRecommendationReason().equals(lPriorRSReason.getCdsListItemName())) {
 					lRec.setRecommendationReason(lCurrentRSReason.getCdsListItemName());
-					lRec.setRecommendationStatus(getRecommendationStatus());
 				}
+				lRec.setRecommendationStatus(getRecommendationStatus());
 			}
 		}
-	}
 
+		return true;
+	}
 
 	/**
 	 * Specify if forecast date should be displayed for conditional recommendations
