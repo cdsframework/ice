@@ -63,9 +63,8 @@ rule "Duplicate Shots/Same Day Overview Rule #1: If both shots are of the same C
 		// All valid duplicate, valid shots on same day have the same CVX code
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
 			$tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
-		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 		
-			associatedTargetSeries == $tdAssociatedTargetSeries, administeredVaccine.cdsConceptName == $td.administeredVaccine.cdsConceptName, doseNumberInSeries == $tddosenumber,
-			administeredShotNumberInSeries > $tdAdministeredShotNumber)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $tdAssociatedTargetSeries, 
+			administeredVaccine.cdsConceptName == $td.administeredVaccine.cdsConceptName, doseNumberInSeries == $tddosenumber, administeredShotNumberInSeries > $tdAdministeredShotNumber)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
@@ -195,4 +194,25 @@ rule "Duplicate Shots/Same Day non-DTP Rule 5a: non-DTP shots; set the 2nd shot 
 end
 
 
+// If a shot is ACCEPTED/EXTRA_DOSE and has the same dose number as a valid shot, then evaluate ACCEPTED/EXTRA_DOSE as Invalid with a reason code of DUPLICATE_SAME_DAY. 
+rule "Duplicate Shots/Same Day: If a shot is ACCEPTED/EXTRA_DOSE and has the same dose number as a valid shot, then evaluate ACCEPTED/EXTRA_DOSE as Invalid with a reason code of DUPLICATE_SAME_DAY" 
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	when
+		// All valid duplicate, valid shots on same day have the same CVX code
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
+			$tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.ACCEPTED, associatedTargetSeries == $tdAssociatedTargetSeries, 
+			administeredVaccine.cdsConceptName == $td.administeredVaccine.cdsConceptName, doseNumberInSeries == $tddosenumber, administeredShotNumberInSeries > $tdAdministeredShotNumber,
+			containsAcceptedReason("EVALUATION_REASON_CONCEPT.EXTRA_DOSE"))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
 

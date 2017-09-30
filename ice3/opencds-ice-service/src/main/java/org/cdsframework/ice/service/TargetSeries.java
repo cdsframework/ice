@@ -548,12 +548,12 @@ public class TargetSeries {
 		/////// }
 	}
 
-	
+
 	public int determineDoseNumberInSeries() {
 
 		int lEffectiveNumberOfDoses = determineEffectiveNumberOfDosesInSeries();
 		Integer lEffectiveDoseNumberPlus1Int = new Integer(lEffectiveNumberOfDoses+1);
-		
+
 		//////////////
 		// If dose number determined by disease count and there is a skip dose from the (next) target dose for all other diseases in this target series, take that into account
 		//////////////
@@ -659,7 +659,7 @@ public class TargetSeries {
 			boolean takeSkipDoseEntriesIntoAccount,	Collection<String> antigensToIncludeInDetermination) {
 
 		String _METHODNAME = "doseNumberDeterminationUpdateUtility(): ";
-		
+
 		///////////////////////////////////
 		// If no shots administered, return dose number based solely on the count by diseases
 		///////////////////////////////////
@@ -676,7 +676,7 @@ public class TargetSeries {
 		///////////////////////////////////
 		// END if no shots administered
 		///////////////////////////////////
-		
+
 		int highestSkipDoseNumberToEntry = 0;
 		int highestNonSkipDoseNumberToEntry = 0;
 
@@ -950,7 +950,7 @@ public class TargetSeries {
 	 * @param doseNumber
 	 * @return TargetDose, or null if not found
 	 */
-	public TargetDose getValidOrAcceptedShotByDoseNumber(int doseNumber) {
+	public TargetDose getValidShotByDoseNumber(int doseNumber) {
 
 		if (targetDoses.isEmpty()) {
 			return null;
@@ -959,7 +959,7 @@ public class TargetSeries {
 		for (TargetDose td : targetDoses) {
 			if (td.getDoseNumberInSeries() == doseNumber) {
 				DoseStatus ds = td.getStatus();
-				if (ds == DoseStatus.VALID || ds == DoseStatus.ACCEPTED) {
+				if (ds == DoseStatus.VALID) {
 					return td;
 				}
 			}
@@ -1732,7 +1732,8 @@ public class TargetSeries {
 	 * be in the future or now based on date calculations with the supplied evaluation date of the next parameter
 	 * @param pEvalDate Evaluation Date that this recommendation should be made against. If null, the current date is used.
 	 */
-	public void addInterimRecommendationForConsideration(Date recommendationDate, Vaccine v, RecommendationStatus recommendationStatus, Date pEvalDate) {
+	// public void addInterimRecommendationForConsideration(Date recommendationDate, Vaccine v, RecommendationStatus recommendationStatus, Date pEvalDate) {
+	public void addInterimRecommendationForConsideration(Date recommendationDate, Vaccine v, RecommendationStatus recommendationStatus, String recommendationReason, Date pEvalDate) {
 
 		String _METHODNAME = "addInterimRecommendationForConsideration(Date, Vaccine, RecommendationStatus, Date): ";
 		// if (recommendationDate == null) {			TODO:
@@ -1753,6 +1754,7 @@ public class TargetSeries {
 		}
 		rec.setRecommendationDate(recommendationDate);
 		rec.setRecommendedVaccine(v);
+		rec.setRecommendationReason(recommendationReason);
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Recommendation: " + rec);
 		}
@@ -1787,7 +1789,7 @@ public class TargetSeries {
 	 */
 	public void addInterimRecommendationForConsideration(Date recommendationDate, RecommendationStatus recommendationStatus, Date pEvalDate) {
 
-		addInterimRecommendationForConsideration(recommendationDate, null, recommendationStatus, pEvalDate);
+		addInterimRecommendationForConsideration(recommendationDate, null, recommendationStatus, null, pEvalDate);
 	}
 
 
@@ -1839,7 +1841,7 @@ public class TargetSeries {
 		RecommendationStatus lRS = recommendation.getRecommendationStatus();
 		if (lRS == null || (lRS != RecommendationStatus.CONDITIONALLY_RECOMMENDED && lRS != RecommendationStatus.NOT_RECOMMENDED && 
 				lRS != RecommendationStatus.RECOMMENDED && lRS != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
-			addInterimRecommendationForConsideration(recommendation.getRecommendationDate(), recommendation.getRecommendedVaccine(), null, pEvalDate);
+			addInterimRecommendationForConsideration(recommendation.getRecommendationDate(), recommendation.getRecommendedVaccine(), null, recommendation.getRecommendationReason(), pEvalDate);
 		}
 		else if (recommendation.getRecommendationDate() == null || recommendation.getRecommendationStatus() != null) {
 			populateInterimRecommendationsAndRecordGenericReasonHelper(interimRecommendationsCustom, recommendation, recommendation.getRecommendationStatus());
@@ -1965,7 +1967,8 @@ public class TargetSeries {
 			if (lFinalRecommendationStatus == RecommendationStatus.NOT_RECOMMENDED) {
 				List<RecommendationStatus> lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
 				lRecStatusListOfInterest.add(RecommendationStatus.NOT_RECOMMENDED);
-				setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				/////// setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				addFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
 			}
 			else if (lFinalRecommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED) {
 				List<RecommendationStatus> lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
@@ -1973,7 +1976,8 @@ public class TargetSeries {
 				lRecStatusListOfInterest.add(RecommendationStatus.CONDITIONALLY_RECOMMENDED);
 				lRecStatusListOfInterest.add(RecommendationStatus.RECOMMENDED_IN_FUTURE);
 				lRecStatusListOfInterest.add(RecommendationStatus.RECOMMENDED);
-				setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				/////// setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				addFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
 				addFinalRecommendations(eliminatedOthersWithRecDate);
 			}
 			else if (lFinalRecommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE) {
@@ -1981,14 +1985,16 @@ public class TargetSeries {
 				lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
 				lRecStatusListOfInterest.add(RecommendationStatus.RECOMMENDED_IN_FUTURE);
 				lRecStatusListOfInterest.add(RecommendationStatus.RECOMMENDED);
-				setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				/////// setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				addFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
 				addFinalRecommendations(eliminatedOthersWithRecDate);
 			}
 			else if (lFinalRecommendationStatus == RecommendationStatus.RECOMMENDED) {
 				List<RecommendationStatus> lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
 				lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
 				lRecStatusListOfInterest.add(RecommendationStatus.RECOMMENDED);
-				setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				/////// setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				addFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
 				addFinalRecommendations(eliminatedOthersWithRecDate);
 			}
 			else {
@@ -1996,7 +2002,8 @@ public class TargetSeries {
 				List<RecommendationStatus> lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
 				lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
 				lRecStatusListOfInterest.add(RecommendationStatus.NOT_RECOMMENDED);
-				setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				/////// setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				addFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
 			}
 
 			/**
@@ -3388,12 +3395,13 @@ public class TargetSeries {
 	 * 
 	 * If the supplied pEvalTime is null, finalRecommendationDate is null, or the current RecommendationStatus is not RECOMMENDED or RECOMMENDED_IN_FUTURE, 
 	 * then this method has no effect.
+	 * @return true if recommendation status (and reason if applicable) was updated, false if not
 	 */
-	public void adjustRecommendationStatusByEvalTime(Date pEvalTime) {
+	public boolean adjustRecommendationStatusAndReasonByEvalTime(Date pEvalTime) {
 
 		if (pEvalTime == null || this.finalRecommendationDate == null || 
 				(recommendationStatus != RecommendationStatus.RECOMMENDED && recommendationStatus != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
-			return;
+			return false;
 		}
 
 		RecommendationStatus lPriorRS = getRecommendationStatus();
@@ -3405,19 +3413,21 @@ public class TargetSeries {
 			setRecommendationStatus(RecommendationStatus.RECOMMENDED);
 		}
 
-		if (lPriorRS != getRecommendationStatus()) {
-			BaseDataRecommendationReason lPriorRSReason = getGenericRecommendationReasonForRecommendationStatus(lPriorRS);
-			BaseDataRecommendationReason lCurrentRSReason = getGenericRecommendationReasonForRecommendationStatus(getRecommendationStatus());
-			for (Recommendation lRec : this.finalRecommendations) {
-				// TODO: H/I
-				if (lRec.getRecommendationReason() == lPriorRSReason.getCdsListItemName()) {
+		BaseDataRecommendationReason lPriorRSReason = getGenericRecommendationReasonForRecommendationStatus(lPriorRS);
+		BaseDataRecommendationReason lCurrentRSReason = getGenericRecommendationReasonForRecommendationStatus(getRecommendationStatus());
+		boolean lRecommendationStatusChanged = lPriorRS.equals(getRecommendationStatus()) ? false : true;
+		for (Recommendation lRec : this.finalRecommendations) {
+			// TODO: H/I
+			if ((lRec.getRecommendationStatus() == lPriorRS && lRecommendationStatusChanged) || lRec.getRecommendationStatus() == RecommendationStatus.NOT_FORECASTED) {
+				if (lRec.getRecommendationReason() != null && lRec.getRecommendationReason().equals(lPriorRSReason.getCdsListItemName())) {
 					lRec.setRecommendationReason(lCurrentRSReason.getCdsListItemName());
-					lRec.setRecommendationStatus(getRecommendationStatus());
 				}
+				lRec.setRecommendationStatus(getRecommendationStatus());
 			}
 		}
-	}
 
+		return true;
+	}
 
 	/**
 	 * Specify if forecast date should be displayed for conditional recommendations
