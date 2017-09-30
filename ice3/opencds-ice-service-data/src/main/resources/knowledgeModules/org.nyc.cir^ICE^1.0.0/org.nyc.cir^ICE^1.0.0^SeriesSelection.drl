@@ -610,53 +610,58 @@ rule "SeriesSelection.HPV: Select 2-Dose Series if 1-dose administered to a pati
 end
 
 
-// If there is only 1 dose which was administered and is CVX 165 and is given to a patient >= 9y-4d old and < 15 years old and target dose 2 is invalid or accepted for the 
-// HPV 2-dose series, but valid for HPV 3-dose series, the HPV 3-dose series applies. (In short, if 2 doses in the 3-dose series but only 1-dose in the 2-dose series)
-// (If 3-dose series has 2-doses and 2-dose series has 1-dose, the HPV 3-Dose Series applies)
-rule "SeriesSelection.HPV: Select 3-dose series if patient has 1 valid dose to a patient < 15yrs of age in the 2-dose series but >= 2 doses valid in 3-dose series"  
-		extends "SeriesSelection.HPV: Select 2-Dose Series if 1-dose administered to a patient < 15yrs of age"
-	ruleflow-group "SeriesSelection"
-	dialect "mvel"
-	salience 20
-	agenda-group "customSeriesSelectionRules"
-	when
-		$ts3dose: TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries", 
-			$numberOfDosesIn3Dose : determineNumberOfDosesAdministeredInSeries)
-		eval($numberOfDosesIn3Dose >= 2)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3dose);
-		$ts3dose.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts3dose.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
-		update($tss);
-		update($ts3dose);
-end
-
-
 // If the HPV 2-dose series is complete, select the HPV 2-Dose Series applies
-rule "SeriesSelection.HPV: Select 2-dose Series if series is complete with the first dose adminstered < 15yrs of age but the 3-dose series is not complete" ruleflow-group "SeriesSelection" 
+rule "SeriesSelection.HPV: Select 2-dose Series if first dose administered < 15yrs of age, Valid target dose 2 of 2-dose series, and no prior Valid target dose 2 earlier in 3-dose series" 
+	ruleflow-group "SeriesSelection" 
 	dialect "mvel"
 	salience 30
 	agenda-group "customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries", isSeriesComplete() == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries", isSeriesComplete() == true)
-		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, $tdAdministrationDate: administrationDate)
+		$ts2series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries")
+		$ts3series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries")
+		$td2dose : TargetDose(associatedTargetSeries == $ts2series, doseNumberInSeries == 2, isValid == true, $tdAdministrationDate: administrationDate)
+		not TargetDose(associatedTargetSeries == $ts3series, administrationDate < $tdAdministrationDate, doseNumberInSeries == 2, isValid == true)
+		TargetDose(associatedTargetSeries == $ts2series, doseNumberInSeries == 1, isValid == true, $tdAdministrationDateDose1 : administrationDate)
 		$person : EvaluatedPerson()
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $tdAdministrationDate, "15y") < 0)	
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $tdAdministrationDateDose1, "15y") < 0)	
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2series);
+		$ts2series.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2series.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($tss);
-		update($ts);	
+		update($ts2series);
 end
 
+
+rule "SeriesSelection.HPV: Select 3-dose Series if first dose administered < 15yrs of age, Valid target dose 2 of 3-dose series, and no prior Valid target dose 2 on same day or before in 2-dose series" 
+	ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 30
+	agenda-group "customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$ts2series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries")
+		$ts3series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries")
+		TargetDose(associatedTargetSeries == $ts3series, doseNumberInSeries == 2, isValid == true, $tdAdministrationDate: administrationDate)
+		not TargetDose(associatedTargetSeries == $ts2series, administrationDate <= $tdAdministrationDate, doseNumberInSeries == 2, isValid == true)
+		TargetDose(associatedTargetSeries == $ts3series, doseNumberInSeries == 1, isValid == true, $tdAdministrationDateDoseOne : administrationDate)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $tdAdministrationDateDoseOne, "15y") < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3series);
+		$ts3series.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3series.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts3series);	
+end
+ 
 
 ///////////////////////////////////////////////////////////// Zoster-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
