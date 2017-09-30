@@ -586,7 +586,8 @@ rule "SeriesSelection.HPV: Select 2-dose series if patient < 15yrs and no doses 
 end
 
 
-// If there is only 1 dose which was administered and is CVX 165 and is given to a patient >= 9y-4d old and < 15 years old, the HPV 2-Dose Series applies
+// If there is only 1 dose which was administered and is CVX 165 and is given to a patient >= 9y-4d old and < 15 years old, the HPV 2-Dose Series applies. 
+// This rule must have a lower salience than the rules which take into account that either the 2-dose series or 3-dose series might have 2 valid doses; those rules will be considered first. 
 rule "SeriesSelection.HPV: Select 2-Dose Series if 1-dose administered to a patient < 15yrs of age" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 10
@@ -610,9 +611,7 @@ rule "SeriesSelection.HPV: Select 2-Dose Series if 1-dose administered to a pati
 end
 
 
-// If the HPV 2-dose series is complete, select the HPV 2-Dose Series applies
-rule "SeriesSelection.HPV: Select 2-dose Series if first dose administered < 15yrs of age, Valid target dose 2 of 2-dose series, and no prior Valid target dose 2 earlier in 3-dose series" 
-	ruleflow-group "SeriesSelection" 
+rule "SeriesSelection.HPV: Select 2-dose series if first dose administered < 15yrs of age, Valid target dose 2 in 2-dose series, and no prior Valid target dose 2 earlier in 3-dose series" ruleflow-group "SeriesSelection" 
 	dialect "mvel"
 	salience 30
 	agenda-group "customSeriesSelectionRules"
@@ -637,8 +636,7 @@ rule "SeriesSelection.HPV: Select 2-dose Series if first dose administered < 15y
 end
 
 
-rule "SeriesSelection.HPV: Select 3-dose Series if first dose administered < 15yrs of age, Valid target dose 2 of 3-dose series, and no prior Valid target dose 2 on same day or before in 2-dose series" 
-	ruleflow-group "SeriesSelection"
+rule "SeriesSelection.HPV: Select 3-dose series if first dose administered < 15yrs of age, Valid target dose 2 in 3-dose series, and no prior Valid target dose 2 on same day or before in 2-dose series" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 30
 	agenda-group "customSeriesSelectionRules"
