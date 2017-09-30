@@ -612,7 +612,6 @@ rule "HistoryEvaluation.setNextTargetDoseInNonSeasonalSeriesForEvaluation" rulef
 		$ts : TargetSeries(targetSeason == null, containsTargetDose($td), areNoEarlierAdministeredShotsNotEvaluated($td))
 	then
 		String _RULENAME = kcontext.rule.name;
-		/////// $tddosenumber = $ts.determineDoseNumberInSeries($td);
 		int tddosenumber = $ts.determineDoseNumberInSeries();
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
@@ -636,7 +635,6 @@ rule "HistoryEvaluation.setNextTargetDoseInSeasonalSeriesForEvaluation" ruleflow
 			$vg : vaccineGroup, $tsid : targetSeriesIdentifier, $tseasonStartDate : targetSeason.fullySpecifiedSeasonStartDate)
 	then
 		String _RULENAME = kcontext.rule.name;
-		/////// $tddosenumber = $ts.determineDoseNumberInSeries($td);
 		int tddosenumber = $ts.determineDoseNumberInSeries();
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS), 
@@ -779,7 +777,9 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.isShotIgnoredForCompletionOfSeries() == false || ($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
+		eval($tdprev.isShotIgnoredForCompletionOfSeries() == false || 
+			($doseNumber > $targetSeries.getSeriesRules().getNumberOfDosesInSeries() && $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false) || 
+			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() != null &&
 			! $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS))))
 	then
@@ -804,9 +804,11 @@ rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 d
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.isShotIgnoredForCompletionOfSeries() == true || $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) == null || 
+		eval($tdprev.isShotIgnoredForCompletionOfSeries() == true || 
+			(($doseNumber <= $targetSeries.getSeriesRules().getNumberOfDosesInSeries() || $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == true) &&
+			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) == null || 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() == null ||
-			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS)))
+			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS)))))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($td) {
@@ -933,7 +935,7 @@ end
 
 
 ///////// ***
-// Supplemental Series Table rule... modifying this rule not suggested
+// Series Table rule... Do not Edit
 ///////// ***
 rule "HistoryEvaluation.checkIsAllowableVaccine" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -953,7 +955,7 @@ end
 
 
 ///////// ***
-// Supplemental Series Table rule... modifying this rule not suggested
+// Series Table rule... Do not Edit
 ///////// ***
 rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -975,7 +977,7 @@ end
 
 
 ///////// ***
-// Supplemental Series Table rule... modifying this rule not suggested
+// Series Table rule... Do not Edit
 ///////// ***
 rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1185,7 +1187,8 @@ rule "SeriesSelection: Change Series Selection Status To Complete" ruleflow-grou
 	dialect "mvel"
 	salience 40
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS,
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS,
 			$sss : seriesSelectionSeason)
 		TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == true, targetSeason == $sss)
 		not (TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == false, targetSeason == $sss))
@@ -1207,7 +1210,8 @@ rule "SeriesSelection: Retract All Series Not Selected in Vaccine Group" ruleflo
 	salience 50
 	when
 		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, $sss : seriesSelectionSeason, 
-			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_COMPLETE)
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS || 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_COMPLETE)
 		$selected : TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == true, targetSeason == $sss)
 		$ts : TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == false, targetSeason == $sss)
 	then
@@ -1226,8 +1230,6 @@ end
 ///////// ***
 rule "SeriesSelection: Default Series Selection Preprocess rule: invoke custom rules" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	// activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS) 
 	then
@@ -1246,7 +1248,6 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	dialect "mvel"
 	salience 2000
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
@@ -1270,7 +1271,6 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	dialect "mvel"
 	salience 2000
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
@@ -1294,7 +1294,6 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 	dialect "mvel"
 	salience 2500
 	activation-group "patientAgeTimeOfInterestForSeasonSeriesSelection"
-	// no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PREPROCESS, seriesSelectionSeason != null, $sss : seriesSelectionSeason, 
 			$tssvg : seriesSelectionVaccineGroup)
@@ -1323,7 +1322,8 @@ rule "SeriesSelection: Select already completed series that has the fewest doses
 	dialect "mvel"
 	salience 60
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, 
 			$sss : seriesSelectionSeason)
 		not (TargetSeries(selectedSeries == true, seriesRules.vaccineGroup == $ssvg, targetSeason == $sss))
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, isSeriesComplete() == true, $id1 : targetSeriesIdentifier, 
@@ -1348,14 +1348,15 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 	salience 60
 	activation-group "SeriesSelectionFewestDoses"
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, 
 			$sss : seriesSelectionSeason)
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, 
-			$seriesComplete1 : isSeriesComplete(), $lastNecessaryShotAdministered1 : getValidOrAcceptedShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null, 
-			$lastNecessaryShotAdministered1Date : getValidOrAcceptedShotByDoseNumber(seriesRules.numberOfDosesInSeries).getAdministrationDate() != null)
+			$seriesComplete1 : isSeriesComplete(), $lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null, 
+			$lastNecessaryShotAdministered1Date : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries).getAdministrationDate() != null)
 		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id2 : targetSeriesIdentifier, $id2 != $id1, selectedSeries == false, targetSeason == $sss, 
 			$seriesComplete2 : isSeriesComplete(), $lastAdministeredShot2InSeries: lastShotAdministeredInSeries, 
-			$lastNecessaryShotAdministered2 : getValidOrAcceptedShotByDoseNumber(seriesRules.numberOfDosesInSeries))
+			$lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
 		eval($seriesComplete1 == true && $seriesComplete2 == true && ($lastAdministeredShot2InSeries == null || 
 				($lastNecessaryShotAdministered2.getAdministrationDate() != null && $lastNecessaryShotAdministered2.getAdministrationDate().before($lastNecessaryShotAdministered1Date))))
 	then
@@ -1374,7 +1375,8 @@ rule "SeriesSelection.SelectOnlySeriesRemainingInVaccineGroup" ruleflow-group "S
 	dialect "mvel"
 	salience 100
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == false)
 		accumulate($tsthis : TargetSeries(vaccineGroup == $ssvg); $countInVG : count($tsthis); $countInVG == 1)		
@@ -1565,21 +1567,46 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "RecommendationForecast.adjustRecommendedStatusForFinalRecommendationDateWithRespectToEvalTime" ruleflow-group "RecommendationForecast"
+rule "RecommendationForecast.adjustTargetSeriesEnclosedRecommendationWithRespectToEvalTime" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "supplementalSeriesRule"
+	no-loop true
+	when
+		$targetSeries : TargetSeries($recommendationDueDate : finalRecommendationDate)
+		List(size > 0) from	accumulate($recs : Recommendation((recommendationStatus == RecommendationStatus.NOT_FORECASTED && recommendationReason != null) || 
+				(recommendationStatus == RecommendationStatus.RECOMMENDED && $recommendationDueDate > evalTime) || 
+				(recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE && $recommendationDueDate <= evalTime)) from $targetSeries.finalRecommendations, collectList($recs))
+	then
+		String _RULENAME = kcontext.rule.name;
+		// Update the recommendation status and reason; if they are not updated, then just update the recommendation status only of NOT_FORECASTED recommendation objects to target series' status
+		if ($targetSeries.adjustRecommendationStatusAndReasonByEvalTime(evalTime) == false) {
+			for (Recommendation r : $targetSeries.getFinalRecommendations()) {
+				if (r.getRecommendationStatus() == RecommendationStatus.NOT_FORECASTED) {
+					r.setRecommendationStatus($targetSeries.getRecommendationStatus);
+				}
+			}
+		}
+		$targetSeries.addSeriesRuleProcessed(_RULENAME);
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Enclosed Recommendation statuses adjusted in TargetSeries " + $targetSeries.getSeriesName());			
+		update($targetSeries);	
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "RecommendationForecast.adjustRecommendedStatusAndEnclosedRecommendationsWithRespectToEvalTime" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "supplementalSeriesRule"
 	when
-		EvalTime($currentTime : evalTimeValue)
 		$targetSeries : TargetSeries($recommendationDueDate : getFinalRecommendationDate() != null, 
-			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
-				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED),
-			$recommendationDueDate > $currentTime && recommendationStatus == RecommendationStatus.RECOMMENDED || 
-			$recommendationDueDate <= $currentTime && recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)  	
+			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED),
+			$recommendationDueDate > evalTime && recommendationStatus == RecommendationStatus.RECOMMENDED || $recommendationDueDate <= evalTime && recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
 	then
 		String _RULENAME = kcontext.rule.name;
-		$targetSeries.adjustRecommendationStatusByEvalTime(evalTime);
+		$targetSeries.adjustRecommendationStatusAndReasonByEvalTime(evalTime);
 		$targetSeries.addSeriesRuleProcessed(_RULENAME);
-      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Recommendation status adjusted for " + $recommendationDueDate + " in TargetSeries " + $targetSeries.getSeriesName());			
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Recommendation status and enclosed Recommendations adjusted for " + $recommendationDueDate + " in TargetSeries " + $targetSeries.getSeriesName());			
 		update($targetSeries);	
 end
 
@@ -1616,7 +1643,7 @@ rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccines
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.setRecommendationVaccine(null);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
 end
 
 	
@@ -1638,7 +1665,23 @@ rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsi
 			Vaccine v = (Vaccine) iter.next();
 			$ts.setRecommendationVaccine(v);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+// Recommend at vaccine group level if recommendation status (forecast) is NOT_RECOMMENDED
+///////// ***
+rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfNotRecommendedForecast" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "supplementalSeriesRule"
+	when
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.NOT_RECOMMENDED, finalRecommendations != null, $tsFinalRecommendations : finalRecommendations)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setRecommendationVaccine(null);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
 end
 
 

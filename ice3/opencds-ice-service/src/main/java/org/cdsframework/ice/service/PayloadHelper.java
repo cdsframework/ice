@@ -75,8 +75,7 @@ public class PayloadHelper {
 	}
 	
 	
-	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, SubstanceAdministrationEvent sae, 
-			String vg, TargetDose d) {
+	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, SubstanceAdministrationEvent sae, String vg, TargetDose d) {
 
 		String _METHODNAME = "OutputNestedImmEvaluationResult: ";
 		if (k == null || pNamedObjects == null || evalTime == null || sae == null || d == null) {
@@ -230,8 +229,7 @@ public class PayloadHelper {
 		pNamedObjects.put("rel" + nestedIdValue, relO);
 	}
 
-	public void OutputNestedImmEvaluationNotSupported(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, SubstanceAdministrationEvent sae, 
-			String vg) {
+	public void OutputNestedImmEvaluationNotSupported(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, SubstanceAdministrationEvent sae, String vg) {
 
 		String _METHODNAME = "OutputNestedImmEvaluationNotSupported: ";
 		if (k == null || pNamedObjects == null || evalTime == null || sae == null || vg == null) {
@@ -370,8 +368,7 @@ public class PayloadHelper {
 		       </relatedClinicalStatement>
 		   </substanceAdministrationProposal>
 	 */
-	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, 
-			TargetSeries ts) 
+	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, TargetSeries ts) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
@@ -558,8 +555,7 @@ public class PayloadHelper {
 	}
 	
 	
-	public void OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, 
-			String pDosesRemaining, SubstanceAdministrationProposal pSAP) 
+	public void OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String pDosesRemaining, SubstanceAdministrationProposal pSAP) 
 		throws ImproperUsageException {
 		
 		String _METHODNAME = "OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal: ";
