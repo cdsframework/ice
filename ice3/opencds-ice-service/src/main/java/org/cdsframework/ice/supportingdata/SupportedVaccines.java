@@ -300,7 +300,7 @@ public class SupportedVaccines implements SupportingData {
 		// Either the 
 		if (lVaccineComponentsCD == null || lVaccineComponentsCD.isEmpty()) {
 			String lErrStr = "vaccine components not specified; at least one vaccine component must be specified for a vaccine. Monovalent vaccines contain a vaccine " + 
-				"component code that is equal to the encompassing vaccine's code";
+				"component code that is in most cases equal to the encompassing vaccine's code, though exception to this is possible";
 			logger.error(_METHODNAME + lErrStr);
 			throw new InconsistentConfigurationException(lErrStr);
 		}
@@ -336,7 +336,7 @@ public class SupportedVaccines implements SupportingData {
 				logger.error(_METHODNAME + lErrStr);
 				throw new InconsistentConfigurationException(lErrStr);
 			}
-			else {
+			else if (lVaccineAndOnlyVaccineComponentNotEqual == false) {
 				///////
 				// Create the new VaccineComponent, and make note of this a vaccine component; record and will be a part of this Vaccine
 				VaccineComponent lVaccineComponent = new VaccineComponent(ic, lRelatedDiseasesCdsListItems);
@@ -351,9 +351,9 @@ public class SupportedVaccines implements SupportingData {
 				populatePreviouslyDefinedVaccinesAssociatedWithVaccineComponentWithSpecifiedVaccineComponentInfo(lVaccineComponentCD, lVaccineComponent);
 			}
 		}
-		// More than one vaccine component was specified; include the vaccine components that have already been specified previously. If not all of them have been specified
-		// before, then mark that the vaccine component specified in this combo vaccine has not been specified yet.
-		else {
+		// More than one vaccine component was specified, or vaccine component of monovalent vaccine does not equal the vaccine itself; include the vaccine components that have already 
+		// been specified previously. If not all of them have been specified before, then mark that the vaccine component specified in this combo vaccine has not been specified yet.
+		if (lVaccineComponentsCD.size() != 1 || lVaccineAndOnlyVaccineComponentNotEqual == true) {
 			lCombinationVaccine = true;
 			for (org.opencds.vmr.v1_0.schema.CD lVaccineComponentCDSchema : lVaccineComponentsCD) {
 				CD lVaccineComponentCD = ConceptUtils.toInternalCD(lVaccineComponentCDSchema);
