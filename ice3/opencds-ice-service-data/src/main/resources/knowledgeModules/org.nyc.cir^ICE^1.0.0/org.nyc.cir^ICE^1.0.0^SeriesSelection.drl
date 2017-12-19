@@ -109,14 +109,15 @@ end
 
 
 // If the patient is < 9 years of age and none of the 1-dose influenza series conditions are not met (via other rules), then 2-dose series applies
-rule "SeriesSelection: For the Influenza 2015-2016, 2014-2015, 2013-2014 or 2012-2013 season if the patient < 9yrs and all 2-dose series conditions met, then 2-dose series applies" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: For the Influenza 2017-2018, 2016-2017, 2015-2016, 2014-2015, 2013-2014 or 2012-2013 season if the patient < 9yrs and all 2-dose series conditions met, then 2-dose series applies" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 110
 	agenda-group "customSeriesSelectionRules"
 	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason" || 
+				seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || 
 				seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", 
 			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason != null && targetSeason == $sss)
@@ -209,7 +210,7 @@ end
 
 // For the Influenza 2013-2014 season, if the patient is < 9 years of age then the 1-dose series applies if the following condition is met:
 //    a) The patient received at least 2 doses of seasonal influenza vaccine during prior influenza seasons, with at least one dose since July 2010
-rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 season if the patient < 9yrs and 1st 1-dose series condition met, then 1-dose series applies" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015 season if the patient < 9yrs and 1st 1-dose series condition met, then 1-dose series applies" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 120
 	agenda-group "customSeriesSelectionRules"
@@ -246,14 +247,15 @@ end
 
 // For the Influenza 2015-2016 season, if the patient is < 9 years of age then the 1-dose series applies if the following condition is met:
 // The child received at least 2 doses of seasonal influenza vaccine during any prior influenza seasons.
-rule "SeriesSelection: For the Influenza 2015-2016 season if the patient < 9yrs and at least 2 doses of seasonal influenza vaccine during any prior influenza seasons, then 1-dose series applies" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: For the Influenza 2015-2016, 2016-2017 and 2017-2018 seasons if the patient < 9yrs and at least 2 doses of seasonal influenza vaccine during any prior influenza seasons, then 1-dose series applies" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 120
 	agenda-group "customSeriesSelectionRules"
 	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason", $sss : seriesSelectionSeason)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null, 
+			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason", 
+			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
 		// Determine which season we're looking at now for series selection
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
@@ -278,14 +280,15 @@ end
 
 
 // If the patient is >= 9 and < 10 years of age and 2-dose influenza series conditions are not met (see next rule), then 1-dose series applies
-rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015 or 2015-2016 season if patient >= 9yrs and < 10yrs and 1-dose series conditions are met, then 1-dose series applies" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015, 2015-2016, 2016-2017, or 2017-2018 season if patient >= 9yrs and < 10yrs and 1-dose series conditions are met, then 1-dose series applies" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 110
 	agenda-group "customSeriesSelectionRules"
 	activation-group "InfluenzaSeries9to10yrSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason" || 
+				seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || 
 				seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", 
 			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
@@ -368,14 +371,15 @@ end
 //	* The patient received a dose of influenza at < 9 years of age during the current influenza vaccine season 
 // 	* The patient DID NOT receive at least 2 doses of seasonal influenza vaccine during prior influenza seasons
 // Otherwise, the 1-dose series applies
-rule "SeriesSelection: For the Influenza 2015-2016 season if patient >= 9yrs and < 10yrs and all 2-dose series conditions met, then 2-dose series applies" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: For the Influenza 2015-2016, 2016-2017 and 2017-2018 season if patient >= 9yrs and < 10yrs and all 2-dose series conditions met, then 2-dose series applies" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 120
 	agenda-group "customSeriesSelectionRules"
 	activation-group "InfluenzaSeries9to10yrSelectionCheck"	
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason", $sss : seriesSelectionSeason)
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason" ||  
+			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
 		// Determine and make note of the 2-Dose TargetSeries for this season
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false, 
@@ -409,13 +413,14 @@ end
 
 
 // If the patient is >= 10 years of age then the 1-dose influenza series applies 
-rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015 and 2015-2016 seasons and patient >= 10yrs, 1-dose series applies" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015, 2015-2016, 2016-2017 and 2017-2018 seasons and patient >= 10yrs, 1-dose series applies" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 120
 	agenda-group "customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || 
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason" || 
+				seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || 
 				seriesSelectionSeason.seasonName == "20122013InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
