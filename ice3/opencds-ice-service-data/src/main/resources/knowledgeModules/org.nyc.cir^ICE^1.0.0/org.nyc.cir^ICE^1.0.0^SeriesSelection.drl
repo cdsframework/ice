@@ -116,8 +116,7 @@ rule "SeriesSelection: For the Influenza 2017-2018, 2016-2017, 2015-2016, 2014-2
 	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason" || 
-				seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || 
+			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || 
 				seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", 
 			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason != null && targetSeason == $sss)
@@ -254,8 +253,7 @@ rule "SeriesSelection: For the Influenza 2015-2016, 2016-2017 and 2017-2018 seas
 	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null, 
-			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason", 
-			$sss : seriesSelectionSeason)
+			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
 		// Determine which season we're looking at now for series selection
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
@@ -286,14 +284,11 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015, 2015-2
 	agenda-group "customSeriesSelectionRules"
 	activation-group "InfluenzaSeries9to10yrSelectionCheck"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason" || 
-				seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || 
-				seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", 
-			$sss : seriesSelectionSeason)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null, 
+			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || 
+			seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, 
-			targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, targetSeason == $sss)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") >= 0 && 
 			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0)						
@@ -319,9 +314,9 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
 	agenda-group "customSeriesSelectionRules"
 	activation-group "InfluenzaSeries9to10yrSelectionCheck"	
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, 
-			seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", $sss : seriesSelectionSeason)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null, 
+			seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", 
+			$sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
 		// Determine and make note of the 2-Dose TargetSeries for this season
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false, 
@@ -418,8 +413,7 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015, 2015-2
 	salience 120
 	agenda-group "customSeriesSelectionRules"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason" || 
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null, 
 				seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || 
 				seriesSelectionSeason.seasonName == "20122013InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)

@@ -31,8 +31,10 @@ import java.util.Iterator
 import java.util.List
 import java.util.Set
 import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.concepts.ImmunizationConcept
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent
 import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Season
@@ -49,9 +51,10 @@ global org.cdsframework.ice.service.Schedule schedule
 
 ///////////////////////////////////////////////////////////// Influenza TargetSeries Initialization Rules /////////////////////////////////////////////////
 
-rule "CandidateSeriesIdentification: Initialize TargetSeries for *Current* *Influenza* Season with Most Recent Prior Season Rules if Current Season Not Defined but Prior Season is Defined" ruleflow-group "CandidateSeriesIdentification"
+rule "CandidateSeriesIdentification (Influenza): Initialize TargetSeries for *CURRENT* *Influenza* Season with Most Recent Prior Season Rules if Current Season Not Defined but Prior Season is Defined" ruleflow-group "CandidateSeriesIdentification"
 	dialect "mvel"
 	agenda-group "customCandidateSeriesIdentificationRule"
+	salience 10
 	when
 		$s : SeriesRules($vg : vaccineGroup, $sseriesName : seriesName, vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seasons.size() > 0)
 		not Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $vg, dateIsApplicableToSeason(evalTime))
@@ -77,6 +80,40 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries for *Current* *Infl
 		insert(fullySpecified);
 		update($s);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Seasonal* TargetSeries initialized: " + ts.toString());
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Updated* TargetSeasons: " + $tseasons.toString());						
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Updated* TargetSeasons: " + $tseasons.toString());
+end
+
+
+rule "CandidateSeriesIdentification (Influenza): Initialize TargetSeries for *PAST* *Influenza* Season with Shots Administered with Most Recent Prior Season if No Applicable Season Defined at Time Shot Administered" ruleflow-group "CandidateSeriesIdentification"
+	dialect "mvel"
+	agenda-group "customCandidateSeriesIdentificationRule"
+	when
+		ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode)
+		SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
+		$s : SeriesRules($vg : vaccineGroup, $sseriesName : seriesName, vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seasons.size() > 0)
+		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $vg, $priorSeasonStart : fullySpecifiedSeasonStartDate, 
+			$priorSeasonStart.toDate() < $shotDate, $priorSeasonName : seasonName)
+		Number(intValue > 0) from accumulate($accseason : Season(this == $priorSeason) from $s.seasons, count($accseason))
+		not Season(vaccineGroup == $vg, isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, fullySpecifiedSeasonStartDate.isAfter($priorSeasonStart))
+		not (TargetSeries(seriesName == $s.seriesName, vaccineGroup == $vg, targetSeason != null, targetSeason == 
+			Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate(new Season($priorSeasonName, $vg, false, $priorSeason.seasonStartMonth, 
+				$priorSeason.seasonStartDay, $priorSeason.seasonEndMonth, $priorSeason.seasonEndDay), $shotDate)))
+		$tseasons : TargetSeasons()
+		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)		
+	then
+		String _RULENAME = kcontext.rule.name;
+		int startMonth = $priorSeason.getSeasonStartMonth();
+		int startDay = $priorSeason.getSeasonStartDay();
+		int endMonth = $priorSeason.getSeasonEndMonth();
+		int endDay = $priorSeason.getSeasonEndDay();
+		Season fullySpecified = Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate(new Season($priorSeason.seasonName, $vg, false, startMonth, startDay, endMonth, endDay), $shotDate);
+		$tseasons.addTargetSeason(fullySpecified);
+		TargetSeries ts = new TargetSeries($s, schedule, fullySpecified);
+		$s.addFullySpecifiedSeason(fullySpecified);
+		insert(ts);
+		insert(fullySpecified);
+		update($s);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Seasonal* TargetSeries initialized: " + ts.toString());
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Updated* TargetSeasons: " + $tseasons.toString());	
 end
 
