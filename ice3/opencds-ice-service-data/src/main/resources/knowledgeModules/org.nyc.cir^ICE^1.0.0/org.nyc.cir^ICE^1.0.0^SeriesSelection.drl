@@ -373,7 +373,6 @@ rule "SeriesSelection: For the Influenza 2015-2016, 2016-2017 and 2017-2018 seas
 	activation-group "InfluenzaSeries9to10yrSelectionCheck"	
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, 
-			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20162017InfluenzaSeason" || seriesSelectionSeason.seasonName == "20172018InfluenzaSeason" ||  
 			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason", $sss : seriesSelectionSeason)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
 		// Determine and make note of the 2-Dose TargetSeries for this season
