@@ -393,13 +393,35 @@ public class PayloadHelper {
 		subsAdmGeneralPurposeCD.setCode("384810002");
 		subsAdmGeneralPurposeCD.setDisplayName("Immunization/vaccination management (procedure)");
 		sap.setSubstanceAdministrationGeneralPurpose(subsAdmGeneralPurposeCD);
-		// Proposed Time Interval
+		// Earliest valid date, recommendation date, latest recommendation date, latest date
+		Date finalEarliestDate = ts.getFinalEarliestDate();
 		Date finalRecommendationDate = ts.getFinalRecommendationDate();
-		if (finalRecommendationDate != null) {
-			IVLDate obsTime = new IVLDate(); 
-			obsTime.setLow(finalRecommendationDate); 
-			obsTime.setHigh(finalRecommendationDate);
+		Date finalLatestRecommendationDate = ts.getFinalLatestRecommendationDate();
+		Date finalLatestDate = null;
+		if (finalRecommendationDate != null || finalLatestRecommendationDate != null) {
+			IVLDate obsTime = new IVLDate();
+			if (finalRecommendationDate != null) {
+				obsTime.setLow(finalRecommendationDate);
+			}
+			else {
+				// (This should not happen; however, since an earliest recommendation date, will just use the latest date. Log that this occurred.
+				String lWarnStr = "No earliest recommendation date was calculated but a latest recommendation date was calculated! This should not happen?";
+				logger.warn(_METHODNAME + lWarnStr);
+			}
+			if (finalLatestRecommendationDate != null) {
+				obsTime.setHigh(finalLatestRecommendationDate);
+			}
 			sap.setProposedAdministrationTimeInterval(obsTime);
+		}
+		if (finalEarliestDate != null || finalLatestDate != null) {
+			IVLDate obsTime = new IVLDate();
+			if (finalEarliestDate != null) {
+				obsTime.setLow(finalEarliestDate);
+			}
+			if (finalLatestDate != null) {
+				obsTime.setHigh(finalLatestDate);
+			}
+			sap.setValidAdministrationTimeInterval(obsTime);	
 		}
 		// Set the AdministrableSubstance - may be a vaccine or a vaccine group
 		CD vaccGroupCode = getLocalCodeConceptForRecommendationConcept(ts, true);

@@ -1778,6 +1778,48 @@ end
 
 
 ///////// ***
+// Series Table rule... Do not Edit
+// To follow CDC guidelines, could change this to only fire if a recommended age is available; then calculate earliest possible recommended date above
+// using minimal age, minimum interval, etc. This separates the catch up schedule from the short recommendation intervals used by NYC
+///////// ***
+rule "RecommendationForecast.recommendBasedOnLatestRecommendedAgeRule" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	salience 100
+	activation-group "latestRecommendedAgeCheck"
+	when
+		// To follow CDC guidelines, could change this to check that a recommended age is provided
+		$evalTime : EvalTime()
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
+		$person : EvaluatedPerson()
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.recommendNextShotBasedOnLatestRecommendedAgeRule($person.demographics.birthTime, $evalTime.getEvalTimeValue());
+		$ts.addSeriesRuleProcessed(_RULENAME);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end 
+
+
+///////// ***
+// Series Table rule... Do not edit
+// To follow CDC guidelines, could change this to only fire if a recommended age is not available
+///////// ***
+rule "RecommendationForecast.recommendBasedOnLatestRecommendedIntervalRule" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	salience 100
+	activation-group "latestRecommendedIntervalCheck"
+	when
+		$evalTime : EvalTime()
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
+		//
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.recommendNextShotBasedOnLatestRecommendedIntervalRule($evalTime.getEvalTimeValue());
+		$ts.addSeriesRuleProcessed(_RULENAME);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
 // Series table rule... Do not Edit
 // To follow CDC guidelines, could change this to only fire if a recommended age is available; then calculate earliest possible recommended date above
 // using minimal age, minimum interval, etc. This separates the catch up schedule from the short recommendation intervals used by NYC
