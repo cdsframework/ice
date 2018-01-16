@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -466,7 +466,7 @@ public class SupportedSeries implements SupportingData {
 			}
 			if (latestRecommendedAge != null) {
 				// Only if specified
-				dr.setMaximumAge(new TimePeriod(latestRecommendedAge));
+				dr.setLatestRecommendedAge(new TimePeriod(latestRecommendedAge));
 			}
 			if (absoluteMinimumInterval != null) {
 				// Only if specified
@@ -482,7 +482,7 @@ public class SupportedSeries implements SupportingData {
 			}
 			if (latestRecommendedInterval != null) {
 				// Only if specified
-				dr.setLatestRecommendedInterval(new TimePeriod(latestRecommendedAge));
+				dr.setLatestRecommendedInterval(new TimePeriod(latestRecommendedInterval));
 			}
 			
 			// Add the DoseRule to the list of DoseRules for this series

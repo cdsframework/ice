@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -74,7 +74,7 @@ public class TargetSeries {
 	private List<Recommendation> interimRecommendationsScheduleLatestRecommendedAge;
 	private List<Recommendation> interimRecommendationsScheduleLatestRecommendedInterval;
 	private List<Recommendation> interimRecommendationsCustom;
-	// private List<Recommendation> interimRecommendationsScheduleLatest;
+	/////// private List<Recommendation> interimRecommendationsScheduleLatest;
 	private Map<String, Integer> interimEvaluationValidityCountByDisease;					// Disease -> evaluation validity count for disease
 	private Map<String, Map<Integer, Integer>> interimDosesToSkipByDisease;					// Disease -> skip dose instructions for disease
 	private Map<String, Date> diseaseImmunityDate;											// Disease -> disease immunity date
@@ -1358,11 +1358,11 @@ public class TargetSeries {
 			}
 		}
 		else if (pRecommendationDateType == RecommendationType.LATEST_RECOMMENDED) {
-			// Past due date is the latest recommended date (calculated via age or interval) - 1
-			Date lOverdueDate = TimePeriod.addTimePeriod(ageDate, new TimePeriod(-1, DurationType.DAYS));
+			/////// Past due date is the latest recommended date (calculated via age or interval) + 1 day
+			/////// Date lOverdueDate = TimePeriod.addTimePeriod(ageDate, new TimePeriod(-1, DurationType.DAYS));
 			Recommendation lLatestRecommended = new Recommendation(this);
-			lLatestRecommended.setRecommendationDate(lOverdueDate);
-			populateInterimLatestRecommendedAgeRecommendation(lLatestRecommended, pEvalDate.before(lOverdueDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
+			lLatestRecommended.setRecommendationDate(ageDate);
+			populateInterimLatestRecommendedAgeRecommendation(lLatestRecommended, pEvalDate.before(ageDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		}
 	}
 
@@ -1507,10 +1507,10 @@ public class TargetSeries {
 			populateInterimEarliestRecommendation(lEarliest, pEvalDate.before(rIntervalDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		} 
 		else if (pRecommendationDateType == RecommendationType.LATEST_RECOMMENDED) {
-			// Past due date is the latest recommended date (calculated via age or interval) - 1
-			Date lOverdueDate = TimePeriod.addTimePeriod(rIntervalDate, new TimePeriod(-1, DurationType.DAYS));
+			/////// Past due date is the latest recommended date (calculated via age or interval) - 1
+			/////// Date lOverdueDate = TimePeriod.addTimePeriod(rIntervalDate, new TimePeriod(-1, DurationType.DAYS));
 			Recommendation lLatestRecommended = new Recommendation(this);
-			lLatestRecommended.setRecommendationDate(lOverdueDate);
+			lLatestRecommended.setRecommendationDate(rIntervalDate);
 			// populate this in interim structure.... if there are age rule recommendations, they will need to be removed later
 			populateInterimLatestRecommendedIntervalRecommendation(lLatestRecommended, pEvalDate.before(rIntervalDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		}
@@ -1991,7 +1991,6 @@ public class TargetSeries {
 			}
 			else if (lFinalRecommendationStatus == RecommendationStatus.RECOMMENDED) {
 				List<RecommendationStatus> lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
-				lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
 				lRecStatusListOfInterest.add(RecommendationStatus.RECOMMENDED);
 				/////// setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
 				addFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
@@ -2000,7 +1999,6 @@ public class TargetSeries {
 			else {
 				// Catch all - NOT_RECOMMENDED - should not happen but just in case
 				List<RecommendationStatus> lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
-				lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
 				lRecStatusListOfInterest.add(RecommendationStatus.NOT_RECOMMENDED);
 				/////// setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
 				addFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
