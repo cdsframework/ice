@@ -93,6 +93,7 @@ global java.util.HashMap<String,Object> namedObjects
 global java.util.Date patientAgeTimeOfInterest
 global org.cdsframework.ice.service.Schedule schedule
 global java.lang.Boolean outputNumberOfDosesRemaining
+global java.lang.Boolean outputEarliestOverdueDates
 
 // global org.drools.runtime.KnowledgeContext kcontext
 
@@ -2209,7 +2210,7 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series" ruleflow-gr
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts, outputEarliestOverdueDates);
 		insert(sap);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
@@ -2228,7 +2229,7 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts, outputEarliestOverdueDates);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
 

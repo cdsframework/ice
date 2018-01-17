@@ -353,7 +353,8 @@ public class PayloadHelper {
 		           <id root="051e605d-46a3-4f2b-8e4e-1901cf4eca9b"/>
 		           <substanceCode displayName="TBD - vaccine group: 810 - substance code: 104" codeSystem="2.16.840.1.113883.12.292" code="810"/>
 		       </substance>
-		       <proposedAdministrationTimeInterval low="20111201" high="20111201"/>
+		       <validAdministrationTimeInterval low="20101201"/>	<!-- earliest date a shot can be administered (only returned if option enabled) -->
+		       <proposedAdministrationTimeInterval low="20111201" high="20121201"/>		<!-- recommended forecast date and latest recommended forecast date (latest only if option enabled; otherwise it is set to same value as forecast date) -->
 		       <relatedClinicalStatement>
 		           <targetRelationshipToSource codeSystem="2.16.840.1.113883.5.1002" code="RSON" displayName="has reason"/>
 		           <observationResult>
@@ -368,7 +369,7 @@ public class PayloadHelper {
 		       </relatedClinicalStatement>
 		   </substanceAdministrationProposal>
 	 */
-	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, TargetSeries ts) 
+	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, TargetSeries ts, boolean outputEarliestOverdue) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
@@ -393,35 +394,50 @@ public class PayloadHelper {
 		subsAdmGeneralPurposeCD.setCode("384810002");
 		subsAdmGeneralPurposeCD.setDisplayName("Immunization/vaccination management (procedure)");
 		sap.setSubstanceAdministrationGeneralPurpose(subsAdmGeneralPurposeCD);
-		// Earliest valid date, recommendation date, latest recommendation date, latest date
+
+		//////////////
+		// Set Earliest valid date, recommendation date and/or latest recommendation date
+		//////////////
 		Date finalEarliestDate = ts.getFinalEarliestDate();
 		Date finalRecommendationDate = ts.getFinalRecommendationDate();
-		Date finalLatestRecommendationDate = ts.getFinalLatestRecommendationDate();
-		Date finalLatestDate = null;
-		if (finalRecommendationDate != null || finalLatestRecommendationDate != null) {
-			IVLDate obsTime = new IVLDate();
+		if (! outputEarliestOverdue) {
+			// Only recommended forecast date should be set
 			if (finalRecommendationDate != null) {
+				IVLDate obsTime = new IVLDate();
 				obsTime.setLow(finalRecommendationDate);
+				obsTime.setHigh(finalRecommendationDate);
+				sap.setProposedAdministrationTimeInterval(obsTime);
 			}
-			else {
-				// (This should not happen; however, since an earliest recommendation date, will just use the latest date. Log that this occurred.
-				String lWarnStr = "No earliest recommendation date was calculated but a latest recommendation date was calculated! This should not happen?";
-				logger.warn(_METHODNAME + lWarnStr);
-			}
-			if (finalLatestRecommendationDate != null) {
-				obsTime.setHigh(finalLatestRecommendationDate);
-			}
-			sap.setProposedAdministrationTimeInterval(obsTime);
 		}
-		if (finalEarliestDate != null || finalLatestDate != null) {
-			IVLDate obsTime = new IVLDate();
-			if (finalEarliestDate != null) {
-				obsTime.setLow(finalEarliestDate);
+		else {
+			// Earliest, recommended and latest recommended should be set
+			Date finalLatestRecommendationDate = ts.getFinalLatestRecommendationDate();
+			Date finalLatestDate = null;
+			if (finalRecommendationDate != null || finalLatestRecommendationDate != null) {
+				IVLDate obsTime = new IVLDate();
+				if (finalRecommendationDate != null) {
+					obsTime.setLow(finalRecommendationDate);
+				}
+				else {
+					// (This should not happen; however, since an earliest recommendation date, will just use the latest date. Log that this occurred.
+					String lWarnStr = "No earliest recommendation date was calculated but a latest recommendation date was calculated! This should not happen?";
+					logger.warn(_METHODNAME + lWarnStr);
+				}
+				if (finalLatestRecommendationDate != null) {
+					obsTime.setHigh(finalLatestRecommendationDate);
+				}
+				sap.setProposedAdministrationTimeInterval(obsTime);
 			}
-			if (finalLatestDate != null) {
-				obsTime.setHigh(finalLatestDate);
+			if (finalEarliestDate != null || finalLatestDate != null) {
+				IVLDate obsTime = new IVLDate();
+				if (finalEarliestDate != null) {
+					obsTime.setLow(finalEarliestDate);
+				}
+				if (finalLatestDate != null) {
+					obsTime.setHigh(finalLatestDate);
+				}
+				sap.setValidAdministrationTimeInterval(obsTime);	
 			}
-			sap.setValidAdministrationTimeInterval(obsTime);	
 		}
 		// Set the AdministrableSubstance - may be a vaccine or a vaccine group
 		CD vaccGroupCode = getLocalCodeConceptForRecommendationConcept(ts, true);
