@@ -60,7 +60,7 @@ rule "HepA: Recommend Conditional/High Risk when >= 18 years old and no shots" r
 		Confirm elapsed time between $dtBirthDate and evalTime >= 18 DurationType.YEARS
 	then
 		Add "2y" to $dtBirthDate and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end

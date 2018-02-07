@@ -1963,7 +1963,7 @@ rule "RecommendationForecast: Recommend Next Season Earliest Start Date if durin
 	then
 		String _RULENAME = kcontext.rule.name;
 		Recommendation recommendation = new Recommendation($ts);
-		recommendation.setRecommendationDate($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1).toDate());
+		recommendation.setEarliestDate($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1).toDate());
 		$ts.addInterimRecommendationForConsideration(recommendation, evalTime);
 		$ts.addSeriesRuleProcessed(_RULENAME);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts);	

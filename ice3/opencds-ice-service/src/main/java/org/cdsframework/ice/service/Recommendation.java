@@ -33,15 +33,23 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Interim recommendation class to store information that is used to determine a final recommendation. All information stored in instantiated Recommendation objects are utilized to determine 
+ * the recommended status, recommended vaccine, recommendation (i.e.- forecast) dates, and recommendation reasons. Note, however, that this class only stores one forecast date. If additional dates are
+ * to be considered for the forecast, it must be added to a separate instantiated object. Various forecast dates are taken into consideration by different rules (e.g. - age and interval rules) and by 
+ * the type of forecast (e.g. - earliest, recommended, and latest recommended). 
+ */
 public class Recommendation {
 	
-	public enum RecommendationType { EARLIEST, EARLIEST_RECOMMENDED, LATEST_RECOMMENDED }
+	public enum RecommendationDateType { EARLIEST, EARLIEST_RECOMMENDED, LATEST_RECOMMENDED }
 	
 	private String recommendationIdentifier;
 	private String targetSeriesIdentifier;
-	private RecommendationStatus recommendationStatus;
+	private RecommendationStatus recommendationStatus;	
 	private Vaccine recommendedVaccine;
+	private Date earliestDate;
 	private Date recommendationDate;
+	private Date latestRecommendationDate;
 	private String recommendationReason;
 
 	private static Log logger = LogFactory.getLog(Recommendation.class);
@@ -65,7 +73,9 @@ public class Recommendation {
 		recommendationIdentifier = ICELogicHelper.generateUniqueString();
 		targetSeriesIdentifier = pTS.getTargetSeriesIdentifier();
 		recommendedVaccine = null;
+		earliestDate = null;
 		recommendationDate = null;
+		latestRecommendationDate = null;
 		recommendationStatus = RecommendationStatus.NOT_FORECASTED;
 		recommendationReason = null;
 	}
@@ -108,7 +118,23 @@ public class Recommendation {
 	public void setRecommendationDate(Date recommendationDate) {
 		this.recommendationDate = recommendationDate;
 	}
-	
+
+	public Date getEarliestDate() {
+		return earliestDate;
+	}
+
+	public void setEarliestDate(Date earliestDate) {
+		this.earliestDate = earliestDate;
+	}
+
+	public Date getLatestRecommendationDate() {
+		return latestRecommendationDate;
+	}
+
+	public void setLatestRecommendationDate(Date latestRecommendationDate) {
+		this.latestRecommendationDate = latestRecommendationDate;
+	}
+
 	public String getRecommendationReason() {
 		return recommendationReason;
 	}

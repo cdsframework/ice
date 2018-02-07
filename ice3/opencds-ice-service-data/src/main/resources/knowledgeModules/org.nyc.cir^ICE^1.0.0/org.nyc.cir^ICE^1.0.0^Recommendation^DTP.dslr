@@ -118,7 +118,7 @@ rule "DTP: Recommend Td (CVX 09) at 7yrs of age if series is not complete, patie
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE09"
-		Set the Recommendation Forecast Date for $oRecommendation to $dtDateAtAge
+		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -144,7 +144,7 @@ rule "DTP: Recommend Tdap (CVX 115) at age 7yrs if series is not complete, if pa
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE115"
-		Set the Recommendation Forecast Date for $oRecommendation to $dtDateAtAge
+		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -199,13 +199,13 @@ rule "DTP: Recommend Tdap at 11yrs of age & 0 day interval from last dose for co
 	then
 		// Recommendation at age of 11yrs
 		Create a Recommendation as $oRecommendationAge for the Series $targetSeries
-		Set the Recommendation Forecast Date for $oRecommendationAge to $dtDateAtAge
+		Set the Recommendation Recommended Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Vaccine for $oRecommendationAge to "ICE115"
 		Include the Recommendation $oRecommendationAge for Consideration in the final forecast of the Series
 		// Recommendation at 0 days from the last shot in the series
 		Add 0 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
-		Set the Recommendation Forecast Date for $oRecommendationInterval to $dtCalculated
+		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtCalculated
 		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
 		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -232,7 +232,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- Recommend Tda
 	then
 		// Recommendation at age of 7yrs
 		Create a Recommendation as $oRecommendationAge for the Series $targetSeries
-		Set the Recommendation Forecast Date for $oRecommendationAge to $dtDateAtAge
+		Set the Recommendation Recommended Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Vaccine for $oRecommendationAge to "ICE115"
 		Include the Recommendation $oRecommendationAge for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -270,7 +270,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- Recommend Tda
 		// Recommendation at 6 months from the last shot in the series
 		Add 6 DurationType.MONTHS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
-		Set the Recommendation Forecast Date for $oRecommendationInterval to $dtCalculated
+		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtCalculated
 		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
 		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -306,7 +306,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- Recommend Tda
 		// Recommendation at 0 days from the last non-pertussis dose in the series
 		Add 0 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
-		Set the Recommendation Forecast Date for $oRecommendationInterval to $dtCalculated
+		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtCalculated
 		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
 		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -419,7 +419,7 @@ rule "DTP: If DTP 3-Dose Series is complete and Adolescent Tdap is required, rec
 	then
 		Add "0d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Forecast Date for $oRecommendation to $dtCalculated
+		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtCalculated
 		Set the Recommendation Vaccine for $oRecommendation to "ICE115"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -460,7 +460,7 @@ rule "DTP: Recommend Td (CVX 09) at interval of 10yrs if series is complete has 
 	then
 		Add "10y" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
-		Set the Recommendation Forecast Date for $oRecommendationInterval to $dtCalculated
+		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtCalculated
 		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE09"
 		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -555,7 +555,7 @@ rule "DTP: (Six by Seven Rule)- Recommend next dose at age 7yrs for 5-dose serie
 		Confirm elapsed time between $birthdate and evalTime < "7y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Forecast Date for $oRecommendation to $dtDateAtAge
+		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries

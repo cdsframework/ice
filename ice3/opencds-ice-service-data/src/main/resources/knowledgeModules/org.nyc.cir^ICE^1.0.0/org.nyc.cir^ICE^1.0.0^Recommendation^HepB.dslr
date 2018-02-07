@@ -60,7 +60,7 @@ rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 19 Years and No
         Confirm elapsed time between $dtBirthDate and evalTime >= 19 DurationType.YEARS
     then
         Add 19 DurationType.YEARS to $dtBirthDate and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -80,7 +80,7 @@ rule "HepB: Recommend an interval of at least 112 days between doses 1 & 3" rule
 			- the Series is not Complete
 	then
 		Add 112 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $r with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end

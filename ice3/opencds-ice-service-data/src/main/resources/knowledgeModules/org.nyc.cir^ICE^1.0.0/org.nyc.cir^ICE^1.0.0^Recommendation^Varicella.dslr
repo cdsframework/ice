@@ -79,7 +79,7 @@ rule "Varicella: 84 day Recommended Interval From Dose 1 to Dose 2 if < 13 Years
 		Confirm elapsed time between $dtBirthDate and evalTime < 13 DurationType.YEARS
 	then
 		Add 84 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $recommendation with Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end	
@@ -99,7 +99,7 @@ rule "Varicella: 28 day Recommended Interval From Dose 1 to Dose 2 if >= 13 Year
 		Confirm elapsed time between $dtBirthDate and evalTime >= "13y"
 	then
 		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $recommendation with Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -116,7 +116,7 @@ rule "Varicella: 28-day Recommended Interval for Valid Dose 1 When Previously Ad
 			- make note of the date that the most recent shot was administered as $dtAdministrationDate
 	then
 		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $recommendation with Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end

@@ -87,7 +87,7 @@ rule "Pneumococcal Adult Series: Recommended Interval of 1yr from accepted Adult
 		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < $absoluteMinimumAgeDose6
 	then
 		Add "1y" to $dateAdultPPSVAdministeredBelowAbsMinAge and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $r with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -117,7 +117,7 @@ rule "Pneumococcal Adult Series: Recommended Interval of 5yrs from accepted Adul
 		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < $absoluteMinimumAgeDose6
 	then
 		Add "5y" to $dateAdultPPSVAdministeredBelowAbsMinAge and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $r with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -186,7 +186,7 @@ rule "Pneumococcal: if the patient >= 2yrs and < 5 years, if a PPSV23 (CVX 33) s
 		Confirm elapsed time between $dtBirthDate and $dateLastAdministeredShot >= "2y" && elapsed time between $dtBirthDate and $dateLastAdministeredShot < "5y"
 	then
 		Add "56d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $r with Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -345,7 +345,7 @@ rule "Pneumococcal Child Series: Recommend dose if series complete if no prior V
 		Confirm elapsed time between $dtBirthDate and (calculate date from addition of $shotDate with TimePeriod "8w") < "5y"
 	then
 		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
-		Include a recommendation as $recommendation with forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
+		Include a recommendation as $recommendation with recommended forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
 		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
 		Mark forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -465,7 +465,7 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-D
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
 	then
 		Skip Series Dose Number to 2 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
-		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeSevenMonths for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeSevenMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -491,7 +491,7 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 12months and T
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
 	then
 		Skip Series Dose Number to 3 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
-		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 3 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -518,7 +518,7 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 12months and TargetD
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
 	then
 		Skip Series Dose Number to 4 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
-		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -545,7 +545,7 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 24months and TargetD
 		Confirm elapsed time between $dtBirthDate and evalTime >= "24m" && elapsed time between $dtBirthDate and evalTime < "5y"
 	then
 		Skip Series Dose Number to 4 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
-		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeTwentyFourMonths for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeTwentyFourMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -571,7 +571,7 @@ rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
 		Skip Series Dose Number to 6 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
-		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeSixtyFiveYears for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeSixtyFiveYears for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 6 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries

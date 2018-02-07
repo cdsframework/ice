@@ -412,7 +412,7 @@ public class PayloadHelper {
 		else {
 			// Earliest, recommended and latest recommended should be set
 			Date finalLatestRecommendationDate = ts.getFinalLatestRecommendationDate();
-			Date finalLatestDate = null;
+			Date finalLatestDate = null;		// We do not support returning "latest" possible date separately in payload, as of now
 			if (finalRecommendationDate != null || finalLatestRecommendationDate != null) {
 				IVLDate obsTime = new IVLDate();
 				if (finalRecommendationDate != null) {

@@ -86,7 +86,7 @@ rule "Hib: Include Recommendation with Date 7months in 4-Dose Hib Series and Tar
 			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
 	then
-		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeSevenMonths for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeSevenMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -107,7 +107,7 @@ rule "Hib: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose 
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is < 2
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "15m"
 	then
-		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 3 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -129,7 +129,7 @@ rule "Hib: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose Hib Se
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is == 2
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "15m"
 	then
-		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -151,7 +151,7 @@ rule "Hib: Set Recommendation Date to 15months and TargetDose 4 in 4-Dose Hib Se
 			- the Effective Number of Doses in the Series before $dtDateAtAgeFifteenMonths is < $assign_nNumberOfDosesRequired
 		Confirm elapsed time between $dtBirthDate and evalTime >= "15m" && elapsed time between $dtBirthDate and evalTime < "5y"
 	then
-		Include a Recommendation as $recommendation with Forecast Date $dtDateAtAgeFifteenMonths for Consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeFifteenMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
