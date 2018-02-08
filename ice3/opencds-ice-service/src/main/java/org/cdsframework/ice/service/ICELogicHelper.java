@@ -96,30 +96,6 @@ public class ICELogicHelper {
 	}
 
 
-
-	public static Date obtainLatestRecommendationDateFromRecommendationsList(List<Recommendation> recommendationsList) {
-
-		if (recommendationsList == null) {
-			return null;
-		}
-
-		Date latestDate = null;
-		for (Recommendation rec : recommendationsList) {
-			if (latestDate == null) {
-				latestDate = rec.getRecommendationDate();
-			}
-			else {
-				Date thisRecDate = rec.getRecommendationDate();
-				if (thisRecDate.after(latestDate)) {
-					latestDate = thisRecDate;
-				}
-			}
-		}
-
-		return latestDate;
-	}
-
-
 	/**
 	 * Given a vMR IVLDate datatype where the high and low values are expected to be the same => convert to a Date datatype. Therefore, if the
 	 * high and low values of the IVLDate are different, an exception is thrown

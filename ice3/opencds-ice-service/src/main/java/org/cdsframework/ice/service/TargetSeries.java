@@ -1349,7 +1349,7 @@ public class TargetSeries {
 
 		if (pRecommendationDateType == RecommendationDateType.EARLIEST) {
 			Recommendation lEarliest = new Recommendation(this);
-			lEarliest.setRecommendationDate(ageDate);
+			lEarliest.setEarliestDate(ageDate);
 			populateInterimEarliestAgeRecommendation(lEarliest, pEvalDate.before(ageDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		} 
 		else if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
@@ -1366,7 +1366,7 @@ public class TargetSeries {
 			// Past due date is the latest recommended date (calculated via age or interval) + 1 day
 			Date lLatestDate = TimePeriod.addTimePeriod(ageDate, new TimePeriod(-1, DurationType.DAYS));
 			Recommendation lLatestRecommended = new Recommendation(this);
-			lLatestRecommended.setRecommendationDate(lLatestDate);
+			lLatestRecommended.setLatestRecommendationDate(lLatestDate);
 			populateInterimLatestRecommendedAgeRecommendation(lLatestRecommended, pEvalDate.before(lLatestDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		}
 	}
@@ -1508,14 +1508,14 @@ public class TargetSeries {
 
 		if (pRecommendationDateType == RecommendationDateType.EARLIEST) {
 			Recommendation lEarliest = new Recommendation(this);
-			lEarliest.setRecommendationDate(rIntervalDate);
+			lEarliest.setEarliestDate(rIntervalDate);
 			populateInterimEarliestIntervalRecommendation(lEarliest, pEvalDate.before(rIntervalDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		} 
 		else if (pRecommendationDateType == RecommendationDateType.LATEST_RECOMMENDED) {
 			// Past due date is the latest recommended date (calculated via age or interval) + 1
 			Date lLatestDate = TimePeriod.addTimePeriod(rIntervalDate, new TimePeriod(-1, DurationType.DAYS));
 			Recommendation lLatestRecommended = new Recommendation(this);
-			lLatestRecommended.setRecommendationDate(lLatestDate);
+			lLatestRecommended.setLatestRecommendationDate(lLatestDate);
 			// populate this in interim structure.... if there are age rule recommendations, they will need to be removed later
 			populateInterimLatestRecommendedIntervalRecommendation(lLatestRecommended, pEvalDate.before(lLatestDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		}
@@ -1858,8 +1858,8 @@ public class TargetSeries {
 
 		// First, add "regular" interim recommendations, which may or may not include a forecast date
 		RecommendationStatus lRS = recommendation.getRecommendationStatus();
-		if (lRS == null || (lRS != RecommendationStatus.CONDITIONALLY_RECOMMENDED && lRS != RecommendationStatus.NOT_RECOMMENDED && 
-				lRS != RecommendationStatus.RECOMMENDED && lRS != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
+		if (lRS == null || (lRS != RecommendationStatus.CONDITIONALLY_RECOMMENDED && lRS != RecommendationStatus.NOT_RECOMMENDED && lRS != RecommendationStatus.RECOMMENDED && 
+				lRS != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
 			addInterimRecommendationForConsideration(recommendation.getRecommendationDate(), recommendation.getRecommendedVaccine(), null, recommendation.getRecommendationReason(), pEvalDate);
 		}
 		else if (recommendation.getRecommendationDate() == null || recommendation.getRecommendationStatus() != null) {
@@ -2081,6 +2081,7 @@ public class TargetSeries {
 				lInterimRecommendedLatest.addAll(interimRecommendationsScheduleLatestRecommendedAge);
 			}
 			else if (interimRecommendationsScheduleLatestRecommendedInterval.isEmpty() == false) {
+				// Latest recommended interval is only considered if there is no latest recommended age specified
 				lInterimRecommendedLatest.addAll(interimRecommendationsScheduleLatestRecommendedInterval);
 			}
 			if (interimRecommendationsCustomLatest.isEmpty() == false) {
@@ -2103,7 +2104,10 @@ public class TargetSeries {
 				setFinalLatestRecommendationDate(null);
 			}
 			else {
-				Date lObtainLatestEarliest = ICELogicHelper.obtainLatestRecommendationDateFromRecommendationsList(interimRecommendationsCustomEarliest);
+				//////////////
+				// Determine earliest age
+				//////////////
+				Date lObtainLatestEarliest = Recommendation.obtainMostRecentEarliestDateFromRecommendationsList(lInterimRecommendedEarliest);
 				Date lPrevFinalEarliestDate = getFinalEarliestDate();
 				if (lPrevFinalEarliestDate != null) {
 					if (lObtainLatestEarliest == null) {
@@ -2114,23 +2118,19 @@ public class TargetSeries {
 					}
 				}
 				if (lObtainLatestEarliest != null) {
-					if (lFinalRecommendationDate == null || lObtainLatestEarliest.before(lFinalRecommendationDate)) {
+					if (lFinalRecommendationDate == null || lObtainLatestEarliest.compareTo(lFinalRecommendationDate) <= 0) {
 						setFinalEarliestDate(lObtainLatestEarliest);
 					}
-					else {
-						setFinalEarliestDate(lFinalRecommendationDate);
+					if (lFinalRecommendationDate != null && lObtainLatestEarliest.after(lFinalRecommendationDate)) {
+						setFinalRecommendationDate(lObtainLatestEarliest);
 					}
 				}
-				///////if (lPrevFinalEarliestDate == null) {
-				///////	setFinalEarliestDate(lObtainLatestEarliest);
-				///////}
-				///////else if (lPrevFinalEarliestDate != null && lObtainLatestEarliest != null && lObtainLatestEarliest.before(lPrevFinalEarliestDate)) {
-				///////	setFinalEarliestDate(lObtainLatestEarliest);
-				//////}
 
+				//////////////
 				// Now set the latest recommended date, if and only if the latest recommended age or interval date has been set. In this case, choose the latter of the
 				// latest recommended age date and recommendation date if available, otherwise the latter of the latest recommended interval date and recommendation date
-				Date lObtainUnadjustedLatest = ICELogicHelper.obtainLatestRecommendationDateFromRecommendationsList(interimRecommendationsCustomLatest);
+				//////////////
+				Date lObtainUnadjustedLatest = Recommendation.obtainMostRecentLatestRecommendationDateFromRecommendationsList(lInterimRecommendedLatest);
 				Date lPrevFinalLatestDate = getFinalLatestRecommendationDate();
 				if (lPrevFinalLatestDate != null) {
 					if (lObtainUnadjustedLatest == null) {
@@ -2141,17 +2141,19 @@ public class TargetSeries {
 					}
 				}
 				if (lObtainUnadjustedLatest != null) {
-					if (lFinalRecommendationDate == null || lObtainUnadjustedLatest.after(lFinalRecommendationDate)) {
+					if (lFinalRecommendationDate == null || lObtainUnadjustedLatest.compareTo(lFinalRecommendationDate) >= 0) {
 						setFinalLatestRecommendationDate(lObtainUnadjustedLatest);
 					}
-					else {
+					if (lFinalRecommendationDate != null && lObtainUnadjustedLatest.before(lFinalRecommendationDate)) {
 						setFinalLatestRecommendationDate(lFinalRecommendationDate);
 					}
 				}
 			}		
 		}
 
+		//////////////
 		// Reset interim recommendation tracking
+		//////////////
 		this.recommendationStatusPrior = getRecommendationStatus(); 
 		interimRecommendationsScheduleEarliestAge = new ArrayList<Recommendation>();
 		interimRecommendationsScheduleEarliestInterval = new ArrayList<Recommendation>();
@@ -2163,7 +2165,7 @@ public class TargetSeries {
 		interimRecommendationsCustomEarliest = new ArrayList<Recommendation>();
 		interimRecommendationsCustomLatest = new ArrayList<Recommendation>();
 
-		// TODO: recommendation has changed - post-forecast checks should be permitted
+		// TODO? recommendation has changed - post-forecast checks should be permitted
 		// setPostForecastCheckCompleted(false);
 	}
 

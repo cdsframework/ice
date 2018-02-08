@@ -174,7 +174,73 @@ public class Recommendation {
 		
 		return lSubset;
 	}
+	
+	public static Date obtainMostRecentEarliestDateFromRecommendationsList(List<Recommendation> recommendationsList) {
 
+		if (recommendationsList == null) {
+			return null;
+		}
+
+		Date latestDate = null;
+		for (Recommendation rec : recommendationsList) {
+			if (latestDate == null) {
+				latestDate = rec.getEarliestDate();
+			}
+			else {
+				Date thisRecDate = rec.getEarliestDate();
+				if (thisRecDate != null && thisRecDate.after(latestDate)) {
+					latestDate = thisRecDate;
+				}
+			}
+		}
+
+		return latestDate;
+	}
+
+	public static Date obtainMostRecentRecommendationDateFromRecommendationsList(List<Recommendation> recommendationsList) {
+
+		if (recommendationsList == null) {
+			return null;
+		}
+
+		Date latestDate = null;
+		for (Recommendation rec : recommendationsList) {
+			if (latestDate == null) {
+				latestDate = rec.getRecommendationDate();
+			}
+			else {
+				Date thisRecDate = rec.getRecommendationDate();
+				if (thisRecDate != null && thisRecDate.after(latestDate)) {
+					latestDate = thisRecDate;
+				}
+			}
+		}
+
+		return latestDate;
+	}
+
+	public static Date obtainMostRecentLatestRecommendationDateFromRecommendationsList(List<Recommendation> recommendationsList) {
+
+		if (recommendationsList == null) {
+			return null;
+		}
+
+		Date latestDate = null;
+		for (Recommendation rec : recommendationsList) {
+			if (latestDate == null) {
+				latestDate = rec.getLatestRecommendationDate();
+			}
+			else {
+				Date thisRecDate = rec.getLatestRecommendationDate();
+				if (thisRecDate != null && thisRecDate.after(latestDate)) {
+					latestDate = thisRecDate;
+				}
+			}
+		}
+
+		return latestDate;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
