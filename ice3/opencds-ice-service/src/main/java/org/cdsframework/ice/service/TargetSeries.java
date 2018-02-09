@@ -2055,7 +2055,7 @@ public class TargetSeries {
 			if (interimRecommendationsScheduleEarliestAge.isEmpty() == false) {
 				lInterimRecommendedEarliest.addAll(interimRecommendationsScheduleEarliestAge);
 			}
-			else if (interimRecommendationsScheduleEarliestInterval.isEmpty() == false) {
+			if (interimRecommendationsScheduleEarliestInterval.isEmpty() == false) {
 				lInterimRecommendedEarliest.addAll(interimRecommendationsScheduleEarliestInterval);
 			}
 			if (interimRecommendationsCustomEarliest.isEmpty() == false) {
