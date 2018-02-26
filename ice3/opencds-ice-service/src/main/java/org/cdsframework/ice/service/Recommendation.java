@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -33,15 +33,23 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Interim recommendation class to store information that is used to determine a final recommendation. All information stored in instantiated Recommendation objects are utilized to determine 
+ * the recommended status, recommended vaccine, recommendation (i.e.- forecast) dates, and recommendation reasons. Note, however, that this class only stores one forecast date. If additional dates are
+ * to be considered for the forecast, it must be added to a separate instantiated object. Various forecast dates are taken into consideration by different rules (e.g. - age and interval rules) and by 
+ * the type of forecast (e.g. - earliest, recommended, and latest recommended). 
+ */
 public class Recommendation {
 	
-	public enum RecommendationType { EARLIEST, EARLIEST_RECOMMENDED, LATEST_RECOMMENDED }
+	public enum RecommendationDateType { EARLIEST, EARLIEST_RECOMMENDED, LATEST_RECOMMENDED }
 	
 	private String recommendationIdentifier;
 	private String targetSeriesIdentifier;
-	private RecommendationStatus recommendationStatus;
+	private RecommendationStatus recommendationStatus;	
 	private Vaccine recommendedVaccine;
+	private Date earliestDate;
 	private Date recommendationDate;
+	private Date latestRecommendationDate;
 	private String recommendationReason;
 
 	private static Log logger = LogFactory.getLog(Recommendation.class);
@@ -65,7 +73,9 @@ public class Recommendation {
 		recommendationIdentifier = ICELogicHelper.generateUniqueString();
 		targetSeriesIdentifier = pTS.getTargetSeriesIdentifier();
 		recommendedVaccine = null;
+		earliestDate = null;
 		recommendationDate = null;
+		latestRecommendationDate = null;
 		recommendationStatus = RecommendationStatus.NOT_FORECASTED;
 		recommendationReason = null;
 	}
@@ -108,7 +118,23 @@ public class Recommendation {
 	public void setRecommendationDate(Date recommendationDate) {
 		this.recommendationDate = recommendationDate;
 	}
-	
+
+	public Date getEarliestDate() {
+		return earliestDate;
+	}
+
+	public void setEarliestDate(Date earliestDate) {
+		this.earliestDate = earliestDate;
+	}
+
+	public Date getLatestRecommendationDate() {
+		return latestRecommendationDate;
+	}
+
+	public void setLatestRecommendationDate(Date latestRecommendationDate) {
+		this.latestRecommendationDate = latestRecommendationDate;
+	}
+
 	public String getRecommendationReason() {
 		return recommendationReason;
 	}
@@ -148,7 +174,73 @@ public class Recommendation {
 		
 		return lSubset;
 	}
+	
+	public static Date obtainMostRecentEarliestDateFromRecommendationsList(List<Recommendation> recommendationsList) {
 
+		if (recommendationsList == null) {
+			return null;
+		}
+
+		Date latestDate = null;
+		for (Recommendation rec : recommendationsList) {
+			if (latestDate == null) {
+				latestDate = rec.getEarliestDate();
+			}
+			else {
+				Date thisRecDate = rec.getEarliestDate();
+				if (thisRecDate != null && thisRecDate.after(latestDate)) {
+					latestDate = thisRecDate;
+				}
+			}
+		}
+
+		return latestDate;
+	}
+
+	public static Date obtainMostRecentRecommendationDateFromRecommendationsList(List<Recommendation> recommendationsList) {
+
+		if (recommendationsList == null) {
+			return null;
+		}
+
+		Date latestDate = null;
+		for (Recommendation rec : recommendationsList) {
+			if (latestDate == null) {
+				latestDate = rec.getRecommendationDate();
+			}
+			else {
+				Date thisRecDate = rec.getRecommendationDate();
+				if (thisRecDate != null && thisRecDate.after(latestDate)) {
+					latestDate = thisRecDate;
+				}
+			}
+		}
+
+		return latestDate;
+	}
+
+	public static Date obtainMostRecentLatestRecommendationDateFromRecommendationsList(List<Recommendation> recommendationsList) {
+
+		if (recommendationsList == null) {
+			return null;
+		}
+
+		Date latestDate = null;
+		for (Recommendation rec : recommendationsList) {
+			if (latestDate == null) {
+				latestDate = rec.getLatestRecommendationDate();
+			}
+			else {
+				Date thisRecDate = rec.getLatestRecommendationDate();
+				if (thisRecDate != null && thisRecDate.after(latestDate)) {
+					latestDate = thisRecDate;
+				}
+			}
+		}
+
+		return latestDate;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -91,7 +91,7 @@ rule "Meningococcal: Recommend Dose 1 at 16yrs of age if Patient >= 16yrs and < 
 			- the number of Doses Administered is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "16y" && elapsed time between $dtBirthDate and evalTime < "19y"
 	then
-		Include a Recommendation as $recommendation with forecast date $dtDateAtAge for consideration in the final forecast of the Series $targetSeries
+		Include a Recommendation as $recommendation with recommended forecast date $dtDateAtAge for consideration in the final forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end

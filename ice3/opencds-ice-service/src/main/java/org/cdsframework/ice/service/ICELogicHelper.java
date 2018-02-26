@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -93,30 +93,6 @@ public class ICELogicHelper {
 			logger.warn(_METHODNAME + "exception noted and thrown", pException);
 			throw pException;
 		}
-	}
-
-
-
-	public static Date obtainLatestRecommendationDateFromRecommendationsList(List<Recommendation> recommendationsList) {
-
-		if (recommendationsList == null) {
-			return null;
-		}
-
-		Date latestDate = null;
-		for (Recommendation rec : recommendationsList) {
-			if (latestDate == null) {
-				latestDate = rec.getRecommendationDate();
-			}
-			else {
-				Date thisRecDate = rec.getRecommendationDate();
-				if (thisRecDate.after(latestDate)) {
-					latestDate = thisRecDate;
-				}
-			}
-		}
-
-		return latestDate;
 	}
 
 
