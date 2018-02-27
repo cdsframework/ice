@@ -1036,8 +1036,8 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval" ruleflow-group "His
 			isShotIgnoredForCompletionOfSeries() == false, $tdprevdate : administrationDate)
 		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate, isShotIgnoredForCompletionOfSeries() == false)
 		$ts : TargetSeries(containsTargetDose($td) && containsTargetDose($tdprev), seriesRules.numberOfDosesInSeries >= $doseNumber)
-		not (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1) and
-			eval($admindose == 2))
+		not (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1)) // and
+			// eval($admindose == 2))
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, $tdprev);
