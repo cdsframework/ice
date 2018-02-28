@@ -1,17 +1,27 @@
 /**
- * Copyright 2011, 2012 OpenCDS.org
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
+ * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
  *
- *		http://www.apache.org/licenses/LICENSE-2.0
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- *	
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
  */
 
 package org.cdsframework.ice.service.configurations;
@@ -81,7 +91,6 @@ import org.opencds.plugin.PluginContext.PreProcessPluginContext;
 /**
  * DroolsAdapter.java
  * 
- * <p>
  * Adapter to use Drools to process the evaluate operation of the DSS web
  * service: This class is designed to use data input in standard Java classes,
  * to facilitate its use from various settings. Mapping of the input data to the
@@ -96,20 +105,13 @@ import org.opencds.plugin.PluginContext.PreProcessPluginContext;
  * 
  * Additional structures for the submitted data may be developed, possibly
  * including the CDA / CCD schema structure
- * <p/>
- * <p>
- * Copyright 2011 OpenCDS.org
- * </p>
- * <p>
- * Company: OpenCDS
- * </p>
  */
 
 public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
 	private String baseRulesScopingKmId = null;
 	private Boolean outputNumberOfDosesRemaining = null;
-	private Schedule schedule = null;
+	private Boolean outputEarliestOverdueDates = null;
 	
 	private static Log logger = LogFactory.getLog(ICEDecisionEngineDSS55EvaluationAdapter.class);
 
@@ -119,24 +121,10 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 	private static final String FOCAL_PERSON_ID = "focalPersonId";
 	private static final String ASSERTIONS = "assertions";
 	private static final String NAMED_OBJECTS = "namedObjects";
-
-	private static final Set<String> ALL_GLOBALS = new HashSet<>(Arrays.asList(EVAL_TIME, CLIENT_LANG,
-			CLIENT_TZ_OFFSET, FOCAL_PERSON_ID, ASSERTIONS, NAMED_OBJECTS));
+	private static final Set<String> ALL_GLOBALS = new HashSet<>(Arrays.asList(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID, ASSERTIONS, NAMED_OBJECTS));
 	private static final Set<String> FILTERED_GLOBALS = new HashSet<>(Arrays.asList(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID));
+	/////// private static final String ALL_FACT_LISTS = "allFactLists";
 
-	private static final String ALL_FACT_LISTS = "allFactLists";
-
-	/**
-	 * big picture pseudo code for following method:
-	 * 
-	 * for this requestedKmId { getResponse: create Drools session load KM into
-	 * session load globals into session load data from allFactLists into
-	 * session KBase.execute (calls Drools) unload result from KM to
-	 * outputString }
-	 * 
-	 * This means that we are considering the OMG-CDSS concept of
-	 * KnowledgeModule equivalent to the Drools concept of KnowledgeBase.
-	 */
 	
 	/*
 	 * Orig:
@@ -182,12 +170,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
     
     
     /**
-     * Inclusion filter by SupportingData by KMId, or SDs that have no
-     * associated KMId.
-     * 
-     * @param kmId
-     * @param sds
-     * @return
+     * Inclusion filter by SupportingData by KMId, or SDs that have no associated KMId.
      */
     private static List<SupportingData> filterByKM(KMId kmId, List<SupportingData> sds) {
         List<SupportingData> sdList = new ArrayList<>();
@@ -200,16 +183,18 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
     }
     
 
+	/**
+	 * big picture pseudo code for following method:
+	 * 
+	 * for this requestedKmId { getResponse: create Drools session load KM into session load globals into session load data from allFactLists into
+	 * session KBase.execute (calls Drools) unload result from KM to outputString }
+	 * 
+	 * This means that we are considering the OMG-CDSS concept of KnowledgeModule equivalent to the Drools concept of KnowledgeBase.
+	 */
 	@Override
 	public Map<String, List<?>> getOneResponse(KnowledgeRepository knowledgeRepository, EvaluationRequestKMItem evaluationRequestKMItem)
-			throws InvalidDriDataFormatExceptionFault,
-			RequiredDataNotProvidedExceptionFault,
-			EvaluationExceptionFault,
-			InvalidTimeZoneOffsetExceptionFault,
-			UnrecognizedScopedEntityExceptionFault,
-			UnrecognizedLanguageExceptionFault,
-			UnsupportedLanguageExceptionFault,
-			DSSRuntimeExceptionFault {
+		throws InvalidDriDataFormatExceptionFault, RequiredDataNotProvidedExceptionFault, EvaluationExceptionFault, InvalidTimeZoneOffsetExceptionFault,
+			UnrecognizedScopedEntityExceptionFault, UnrecognizedLanguageExceptionFault, UnsupportedLanguageExceptionFault, DSSRuntimeExceptionFault {
 
 		String _METHODNAME = "getOneResponse(): ";
 		
@@ -236,11 +221,9 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		}
 
 		/**
-		 * Load fact map from specific externalFactModels, as specified in
-		 * externalFactModel SSId...
+		 * Load fact map from specific externalFactModels, as specified in externalFactModel SSId...
 		 * 
-		 * Every separately identified SSId, by definition, specifies separate
-		 * input and output mappings. Input mappings are used here, and then
+		 * Every separately identified SSId, by definition, specifies separate input and output mappings. Input mappings are used here, and then
 		 * output mappings are used following the session.execute.
 		 */
 
@@ -253,19 +236,13 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		}
 
 		/**
-		 * Get the KMs and Load them into a stateless session
-		 * 
-		 * Currently, assumption is made that each requested knowledge module
-		 * will be run separately (i.e., as part of a separate distinct
-		 * knowledge base)
-		 * 
+		 * Get the KMs and Load them into a stateless session. Currently, assumption is made that each requested knowledge module will be run separately 
+		 * (i.e., as part of a separate distinct knowledge base)
 		 */
 
 		/**
-		 * to create a new Drools Working Memory log for in depth Drools
-		 * debugging - Use either the InMemorylog to record logs on all
-		 * input, or use the Filelog for debugging of one input at a time in
-		 * Drools and JBPM
+		 * to create a new Drools Working Memory log for in depth Drools debugging - Use either the InMemorylog to record logs on all
+		 * input, or use the Filelog for debugging of one input at a time in Drools and JBPM
 		 */
 
 		Map<String, Object> namedObjects = new HashMap<>();
@@ -398,6 +375,13 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("outputNumberOfDosesRemaining", outputNumberOfDosesRemaining));
+		
+		if (outputEarliestOverdueDates == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: output earliest/overdue flag not set; cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		cmds.add(CommandFactory.newSetGlobal("outputEarliestOverdueDates", outputEarliestOverdueDates));
 		
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -679,6 +663,15 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			outputNumberOfDosesRemaining = new Boolean(false);
 		}
 		
+		// Output doses remaining for each series recommendation?
+		String lOutputEarliestOverdueDates = lProps.getProperty("output_earliest_and_overdue_dates");
+		if (lOutputEarliestOverdueDates != null && lOutputEarliestOverdueDates.equals("Y")) {
+			outputEarliestOverdueDates = new Boolean(true);
+		}
+		else {
+			outputEarliestOverdueDates = new Boolean(false);
+		}
+
 		/////// Set up knowledge base
 		KnowledgeBase lKnowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
 

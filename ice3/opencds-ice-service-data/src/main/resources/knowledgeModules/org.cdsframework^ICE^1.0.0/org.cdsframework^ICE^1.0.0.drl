@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -93,6 +93,7 @@ global java.util.HashMap<String,Object> namedObjects
 global java.util.Date patientAgeTimeOfInterest
 global org.cdsframework.ice.service.Schedule schedule
 global java.lang.Boolean outputNumberOfDosesRemaining
+global java.lang.Boolean outputEarliestOverdueDates
 
 // global org.drools.runtime.KnowledgeContext kcontext
 
@@ -1035,8 +1036,8 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval" ruleflow-group "His
 			isShotIgnoredForCompletionOfSeries() == false, $tdprevdate : administrationDate)
 		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate, isShotIgnoredForCompletionOfSeries() == false)
 		$ts : TargetSeries(containsTargetDose($td) && containsTargetDose($tdprev), seriesRules.numberOfDosesInSeries >= $doseNumber)
-		not (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1) and
-			eval($admindose == 2))
+		not (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1, 
+			associatedTargetDose.administeredShotNumberInSeries == $admindose-1))
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, $tdprev);
@@ -1778,6 +1779,48 @@ end
 
 
 ///////// ***
+// Series Table rule... Do not Edit
+// To follow CDC guidelines, could change this to only fire if a recommended age is available; then calculate earliest possible recommended date above
+// using minimal age, minimum interval, etc. This separates the catch up schedule from the short recommendation intervals used by NYC
+///////// ***
+rule "RecommendationForecast.recommendBasedOnLatestRecommendedAgeRule" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	salience 100
+	activation-group "latestRecommendedAgeCheck"
+	when
+		// To follow CDC guidelines, could change this to check that a recommended age is provided
+		$evalTime : EvalTime()
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
+		$person : EvaluatedPerson()
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.recommendNextShotBasedOnLatestRecommendedAgeRule($person.demographics.birthTime, $evalTime.getEvalTimeValue());
+		$ts.addSeriesRuleProcessed(_RULENAME);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end 
+
+
+///////// ***
+// Series Table rule... Do not edit
+// To follow CDC guidelines, could change this to only fire if a recommended age is not available
+///////// ***
+rule "RecommendationForecast.recommendBasedOnLatestRecommendedIntervalRule" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	salience 100
+	activation-group "latestRecommendedIntervalCheck"
+	when
+		$evalTime : EvalTime()
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
+		//
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.recommendNextShotBasedOnLatestRecommendedIntervalRule($evalTime.getEvalTimeValue());
+		$ts.addSeriesRuleProcessed(_RULENAME);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
 // Series table rule... Do not Edit
 // To follow CDC guidelines, could change this to only fire if a recommended age is available; then calculate earliest possible recommended date above
 // using minimal age, minimum interval, etc. This separates the catch up schedule from the short recommendation intervals used by NYC
@@ -1920,7 +1963,7 @@ rule "RecommendationForecast: Recommend Next Season Earliest Start Date if durin
 	then
 		String _RULENAME = kcontext.rule.name;
 		Recommendation recommendation = new Recommendation($ts);
-		recommendation.setRecommendationDate($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1).toDate());
+		recommendation.setEarliestDate($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1).toDate());
 		$ts.addInterimRecommendationForConsideration(recommendation, evalTime);
 		$ts.addSeriesRuleProcessed(_RULENAME);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts);	
@@ -2167,7 +2210,7 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series" ruleflow-gr
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts, outputEarliestOverdueDates);
 		insert(sap);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
@@ -2186,7 +2229,7 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts);
+		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts, outputEarliestOverdueDates);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
 
