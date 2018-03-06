@@ -411,11 +411,12 @@ public class PayloadHelper {
 			}
 		}
 		else {
-			// AI : Temporarily restrict which vaccine groups we return earliest/overdue for, until rules and testing completed for remaining VGs 
+			// AI : Temporarily hardcode restriction which vaccine groups we return earliest/overdue for, until rules and testing completed for remaining VGs 
 			List<String> lCurrentlySupportedEarliestOverdueVGs = new ArrayList<>();
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.400");	// Polio
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.830");	// Mening ACWY
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.820");	// Rotavirus
+			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.600");	// Varicella
 			boolean lSupportedEarliestOverdueVgTmpFilter = lCurrentlySupportedEarliestOverdueVGs.contains(ts.getVaccineGroup());
 			
 			// Earliest, recommended and latest recommended should be set
