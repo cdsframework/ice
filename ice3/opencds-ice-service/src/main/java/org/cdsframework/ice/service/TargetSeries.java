@@ -2105,7 +2105,7 @@ public class TargetSeries {
 			}
 			else {
 				//////////////
-				// Determine earliest age
+				// Determine earliest age - If the recommendation date is before the earliest date, set the recommendation date to the earliest date
 				//////////////
 				Date lObtainLatestEarliest = Recommendation.obtainMostRecentEarliestDateFromRecommendationsList(lInterimRecommendedEarliest);
 				Date lPrevFinalEarliestDate = getFinalEarliestDate();
@@ -2118,17 +2118,14 @@ public class TargetSeries {
 					}
 				}
 				if (lObtainLatestEarliest != null) {
-					if (lFinalRecommendationDate == null || lObtainLatestEarliest.compareTo(lFinalRecommendationDate) <= 0) {
-						setFinalEarliestDate(lObtainLatestEarliest);
-					}
+					setFinalEarliestDate(lObtainLatestEarliest);
 					if (lFinalRecommendationDate != null && lObtainLatestEarliest.after(lFinalRecommendationDate)) {
 						setFinalRecommendationDate(lObtainLatestEarliest);
 					}
 				}
 
 				//////////////
-				// Now set the latest recommended date, if and only if the latest recommended age or interval date has been set. In this case, choose the latter of the
-				// latest recommended age date and recommendation date if available, otherwise the latter of the latest recommended interval date and recommendation date
+				// Now determine the latest recommended date. If the latest recommendation date is before the recommended date, set it to the recommended date
 				//////////////
 				Date lObtainUnadjustedLatest = Recommendation.obtainMostRecentLatestRecommendationDateFromRecommendationsList(lInterimRecommendedLatest);
 				Date lPrevFinalLatestDate = getFinalLatestRecommendationDate();
@@ -2141,12 +2138,19 @@ public class TargetSeries {
 					}
 				}
 				if (lObtainUnadjustedLatest != null) {
-					if (lFinalRecommendationDate == null || lObtainUnadjustedLatest.compareTo(lFinalRecommendationDate) >= 0) {
-						setFinalLatestRecommendationDate(lObtainUnadjustedLatest);
-					}
 					if (lFinalRecommendationDate != null && lObtainUnadjustedLatest.before(lFinalRecommendationDate)) {
 						setFinalLatestRecommendationDate(lFinalRecommendationDate);
 					}
+					else {
+						setFinalLatestRecommendationDate(lObtainUnadjustedLatest);
+					}
+					/////// Or alternatively, take the earliest date: 
+					//if (lObtainLatestEarliest != null && lObtainUnadjustedLatest.before(lObtainLatestEarliest)) {
+					//	setFinalLatestRecommendationDate(lObtainLatestEarliest);
+					//}
+					//else {
+					//	setFinalLatestRecommendationDate(lObtainUnadjustedLatest);
+					//}
 				}
 			}		
 		}
