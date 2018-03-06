@@ -41,7 +41,6 @@ import org.opencds.common.exceptions.ImproperUsageException;
 
 public class TimePeriod {
 	
-	///////private static final String TimePeriodStringFormat = "([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?";
 	private static final String TimePeriodStringFormat = "([-|+]?[ ]*[0-9]+[Yy])?([ ]*[-|+]?[ ]*[0-9]+[Mm])?([ ]*[-|+]?[ ]*[0-9]+[Ww])?([ ]*[-|+]?[ ]*[0-9]+[Dd])?";
 	private static Log logger = LogFactory.getLog(TimePeriod.class);
 

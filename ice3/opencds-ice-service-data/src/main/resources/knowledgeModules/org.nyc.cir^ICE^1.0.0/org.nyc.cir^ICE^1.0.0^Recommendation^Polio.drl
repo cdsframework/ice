@@ -43,30 +43,47 @@ import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Vaccine
+import org.joda.time.LocalDate
 
-expander ../org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
 
 //declare any global variables here
 global java.util.Date evalTime
 global org.drools.runtime.KnowledgeContext kcontext
 
 
-rule "Polio: If a patient is >= 18 years old and has NOT completed the series, then the Recommendation is Conditional and the reason code is HIGH_RISK" ruleflow-group "RecommendationForecast"
+rule "Polio: Earliest Age of 126d for Dose 4 if current date before 8/7/2010" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
+	activation-group "earliestAgeCheck"
     when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
-			- the Series is Not Complete
-		Confirm elapsed time between $dtBirthDate and evalTime >= "18y"
-    then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Mark Forecasting of the Series $targetSeries Complete		// to ensure that no other rules override this recommendation
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
+		$targetSeries : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.400", isSeriesComplete() == false, 
+			determineDoseNumberInSeries ==  4)
+		$oEvaluatedPerson : EvaluatedPerson($dtBirthDate : demographics.birthTime)
+		eval(evalTime.before(LocalDate.parse("2010-08-10").toDate()))
+	then
+		Date $dtCalculated = TimePeriod.addTimePeriod($dtBirthDate, new TimePeriod(126, DurationType.DAYS));
+		Recommendation $recommendation = new Recommendation($targetSeries); 
+		$recommendation.setEarliestDate($dtCalculated); 
+		insert($recommendation);
+		$targetSeries.addSeriesRuleProcessed(drools.getRule().getName());
+       	ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "in TargetSeries " + $targetSeries.getSeriesName());
+end
+
+
+rule "Polio: 28 day Earliest Interval of 28d From Dose 3 to Dose 4 if current date before 8/7/2010" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+    when
+		$targetSeries : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.400", isSeriesComplete() == false, 
+			determineDoseNumberInSeries ==  4, $dtAdministrationDate : lastShotAdministeredInSeries.administrationDate)
+		eval(evalTime.before(LocalDate.parse("2010-08-10").toDate()))
+	then
+		Date $dtCalculated = TimePeriod.addTimePeriod($dtAdministrationDate, new TimePeriod(28, DurationType.DAYS));
+		Recommendation $recommendation = new Recommendation($targetSeries); 
+		$recommendation.setEarliestDate($dtCalculated); 
+		insert($recommendation);
+		$targetSeries.addSeriesRuleProcessed(drools.getRule().getName());
+       	ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "in TargetSeries " + $targetSeries.getSeriesName());
 end
 
