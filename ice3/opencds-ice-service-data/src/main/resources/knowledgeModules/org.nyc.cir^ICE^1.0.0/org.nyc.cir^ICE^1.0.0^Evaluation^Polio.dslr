@@ -117,7 +117,7 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are OPV, patient >
 end
 
 
-rule "Polio: Modify DoseRule4 parameters for TargetDose 4 if administered before 8/7/2010" ruleflow-group "HistoryEvaluation"
+rule "Polio: Modify DoseRule4 Absolute minimum age and Absolute Minimum Interval parameters for target dose 4 if administered before 8/7/2010" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	no-loop true
 	when
@@ -127,14 +127,13 @@ rule "Polio: Modify DoseRule4 parameters for TargetDose 4 if administered before
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 		There is a Series $targetSeries that contains the shot $currentDose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the name of the Series is "Polio4DoseSeries"
 	then
 		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
 		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "122d"
-		Set the Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "126d"
 		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule4
 		Obtain the existing DoseRule for Dose Number 3 in the Series $targetSeries as $assign_oDoseRule3
 		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule3 to TimePeriod "24d"
-		Set the Minimum Interval for DoseRule $assign_oDoseRule3 to TimePeriod "28d"
 		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule3
 		Refresh all Facts in the Series $targetSeries for Evaluation
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -155,6 +154,7 @@ rule "Polio: Mark target dose 4 administered >= 8/7/2010 and before absolute min
 		There is a Series $targetSeries that contains the shot $targetDose4
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- make note of the absolute minimum age for dose 4 in this series as $absoluteMinimumAge
+			- the name of the Series is "Polio4DoseSeries"
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate < $absoluteMinimumAge

@@ -76,7 +76,7 @@ rule "Polio: 28 day Earliest Interval of 28d From Dose 3 to Dose 4 if current da
     when
 		$targetSeries : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.400", isSeriesComplete() == false, 
 			determineDoseNumberInSeries ==  4, $dtAdministrationDate : lastShotAdministeredInSeries.administrationDate)
-		eval(evalTime.before(LocalDate.parse("2010-08-10").toDate()))
+		eval(evalTime.before(LocalDate.parse("2010-08-07").toDate()))
 	then
 		String _RULENAME = kcontext.rule.name;
 		Date $dtCalculated = TimePeriod.addTimePeriod($dtAdministrationDate, new TimePeriod(28, DurationType.DAYS));
@@ -86,4 +86,3 @@ rule "Polio: 28 day Earliest Interval of 28d From Dose 3 to Dose 4 if current da
 		$targetSeries.addSeriesRuleProcessed(drools.getRule().getName());
        	ICELogicHelper.logDRLDebugMessage(_RULENAME, "in TargetSeries " + $targetSeries.getSeriesName());
 end
-

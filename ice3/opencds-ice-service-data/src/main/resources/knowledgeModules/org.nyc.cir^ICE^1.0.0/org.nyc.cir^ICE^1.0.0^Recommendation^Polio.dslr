@@ -33,6 +33,7 @@ import org.drools.spi.KnowledgeHelper
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
@@ -69,3 +70,47 @@ rule "Polio: If a patient is >= 18 years old and has NOT completed the series, t
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+rule "Polio: If the evaluation date is before 8/7/2010, modify the DoseRules for the Minimum Interval from Dose 3 to Dose 4 to 28 days and the Minimum Age of Dose 4 to 126 days" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the name of the Series is "Polio4DoseSeries"
+			- the Series is Not Complete
+			- the Number of Doses Administered is == 3
+		The date evalTime is before "07-Aug-2010"
+	then
+		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
+		Set the Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "126d"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule4
+		Obtain the existing DoseRule for Dose Number 3 in the Series $targetSeries as $assign_oDoseRule3
+		Set the Minimum Interval for DoseRule $assign_oDoseRule3 to TimePeriod "28d"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule3
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries	
+end
+
+/*
+rule "Polio: If the calculated Earliest Date for Dose 4 is after 8/7/2010 but the evaluation date is before 8/7/2010, then modify earliest interval to 6m and recalculate" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
+	when
+		$targetSeries: TargetSeries(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+			recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.400", isPostForecastCheckCompleted() == false,
+		There is a Series $targetSeries
+			- post processing on the Series forecast has not already been run
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the effective dose number in the series is == 4
+			- make note of the earliest recommendation Date as $earliestDate
+			- make note of the minimum interval for dose 3 in this series as $minimumInterval
+		the recommendation date is after 8/7/2010
+	then
+		Clear recommendations from consideration in series $targetSeries
+		Set the minimum interval to 6 months
+		
+end
+*/
