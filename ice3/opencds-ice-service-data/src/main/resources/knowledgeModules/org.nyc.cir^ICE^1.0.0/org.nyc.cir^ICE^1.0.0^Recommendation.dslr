@@ -54,7 +54,7 @@ rule "Recommend No Earliest Interval When Prior Dose Before DOB" ruleflow-group 
 		There is a Series $targetSeries that needs forecasting
 			- at least one shot has been administered
 			- make note of the date that the most recent shot was administered as $shotDate
-		The date $shotDate is before $dtBirthDate
+		Confirm the date $shotDate is before $dtBirthDate
     then
         //actions
        	Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -73,7 +73,7 @@ rule "Recommend No Recommended Interval When Prior Dose Before DOB" ruleflow-gro
 		There is a Series $targetSeries that needs forecasting
 			- at least one shot has been administered
 			- make note of the date that the most recent shot was administered as $shotDate
-		The date $shotDate is before $dtBirthDate
+		Confirm the date $shotDate is before $dtBirthDate
     then
         //actions
        	Record that this Series Rule was Processed for the TargetSeries $targetSeries

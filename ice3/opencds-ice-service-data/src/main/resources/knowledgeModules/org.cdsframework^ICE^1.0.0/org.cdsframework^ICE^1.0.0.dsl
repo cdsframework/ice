@@ -189,16 +189,16 @@
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp}  {nDuration:[0-9]+}  {enumTimePeriod_durationType:[a-zA-Z0-9\.]+}=(TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, new TimePeriod({nDuration}, {enumTimePeriod_durationType})) {aOp} 0)
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp:[\=\\<\\>]+}  {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}=(TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, {sDuration}) {aOp} 0)
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp}  {refer_Duration:([\\$]{1})[a-zA-Z0-9_]+}=(TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, {refer_Duration}) {aOp} 0)
-[condition][][Tt]he [Dd]ate {dtDateOne} is after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=eval({dtDateOne} != null && {dtDateOne}.after(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})))
-[condition][][Tt]he [Dd]ate {dtDateOne} is after {dtDateTwo}=eval({dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.after({dtDateTwo}))
-[condition][][Tt]he [Dd]ate {dtDateOne} is before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=eval({dtDateOne} != null && {dtDateOne}.before(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})))
-[condition][][Tt]he [Dd]ate {dtDateOne} is before {dtDateTwo}=eval({dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.before({dtDateTwo}))
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=eval({dtDateOne} != null {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))) <= 0)
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or before {dtDateTwo}=eval({dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) <= 0)
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=eval({dtDateOne} != null && {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))) >= 0)
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or after {dtDateTwo}=eval({dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) >= 0)
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same day as {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=eval({dtDateOne} != null && {dtDateOne}.equals(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})))
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same day as {dtDateTwo}=eval({dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.equals({dtDateTwo}))
+[condition][][Tt]he [Dd]ate {dtDateOne} is after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.after(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))
+[condition][][Tt]he [Dd]ate {dtDateOne} is after {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.after({dtDateTwo})
+[condition][][Tt]he [Dd]ate {dtDateOne} is before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.before(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))
+[condition][][Tt]he [Dd]ate {dtDateOne} is before {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.before({dtDateTwo})
+[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))) <= 0
+[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or before {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) <= 0
+[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))) >= 0
+[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or after {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) >= 0
+[condition][][Tt]he [Dd]ate {dtDateOne} is on the same day as {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.equals(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))
+[condition][][Tt]he [Dd]ate {dtDateOne} is on the same day as {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.equals({dtDateTwo})
 [condition][]\([Cc]alculate [Dd]ate from addition of {refer_dtDate} with TimePeriod {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}\)=TimePeriod.addTimePeriod({refer_dtDate}, {sDuration})
 [condition][]\([Cc]alculate [Dd]ate from addition of {refer_dtDate} with TimePeriod {refer_oDuration:([\\$]{1})(\w)+(\s){0}}\)=TimePeriod.addTimePeriod({refer_dtDate}, {refer_oDuration})
 
@@ -252,7 +252,7 @@
 // TargetSeries Actions
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-[consequence][][Cc]lear [Rr]ecommendations from [Cc]onsideration in [Ss]eries {refer_oTargetSeries}={refer_oTargetDose}.clearRecommendations();
+[consequence][][Cc]lear [Ff]orecasted [Rr]ecommendations from [Cc]onsideration in [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.clearRecommendations();
 [consequence][][Rr]emove the [Ss]hot {refer_oTargetDose} from [Ee]valuation as a part of the [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ removeTargetDoseFromSeries({refer_oTargetDose}); \};
 [consequence][][Mm]ark that [Ee]valuation of [Ss]hot {refer_oTargetDose} is complete and therefore should not be reevaluated by any other rules=modify ({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_COMPLETE) \}
 [consequence][][Ss]kip [Ss]eries [Dd]ose [Nn]umber to {nToDoseNumber} from {nFromDoseNumber} for [Dd]isease {dd_oSupportedDiseaseConcept} in [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ addSkipDoseEntryForSpecifiedDisease({nFromDoseNumber}, {nToDoseNumber}, {dd_oSupportedDiseaseConcept}); \}
