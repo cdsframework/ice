@@ -26,6 +26,7 @@
 
 package org.cdsframework.ice.util;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -674,9 +675,34 @@ public class TimePeriod {
 		return isGreaterThan(pTD, false);
 		
 	}
+
 	public boolean isGreaterThanEqualTo(TimePeriod pTD) {
 		
 		return isGreaterThan(pTD, true);
+	}
+	
+	/**
+	 * Return a Date from a string. String provided must be in format used by Drools: dd-MMM-yyyy. e.g. - "04-Jul-1999")
+	 * If no string is provided, null is returned;
+	 */
+	public static Date generateDateFromStringInDroolsDateFormat(String pDateAsString) {
+		
+        if (pDateAsString == null || pDateAsString.isEmpty()) {
+        	return null;
+        }
+
+        Date lDateToReturn = null;
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+            lDateToReturn = formatter.parse(pDateAsString);
+        }
+        catch (Exception e) {
+        	String lErrStr = "An error occurred generating a Date from the string representation provided: " + pDateAsString;
+        	logger.error("generateDateFromStringIn_dd-MMM-yyy_Format: " + lErrStr);
+        	throw new IllegalArgumentException(lErrStr);
+        }
+
+        return lDateToReturn;
 	}
 	
 	/**

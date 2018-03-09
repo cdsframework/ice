@@ -420,7 +420,7 @@ public class PayloadHelper {
 			boolean lSupportedEarliestOverdueVgTmpFilter = lCurrentlySupportedEarliestOverdueVGs.contains(ts.getVaccineGroup());
 			
 			// Earliest, recommended and latest recommended should be set
-			Date finalLatestRecommendationDate = ts.getFinalLatestRecommendationDate();
+			Date finalLatestRecommendationDate = ts.getFinalOverdueDate();
 			Date finalLatestDate = null;		// We do not support returning "latest" possible date separately in payload, as of now
 			if (finalRecommendationDate != null || finalLatestRecommendationDate != null) {
 				IVLDate obsTime = new IVLDate();

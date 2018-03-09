@@ -127,11 +127,11 @@ public class Recommendation {
 		this.earliestDate = earliestDate;
 	}
 
-	public Date getLatestRecommendationDate() {
+	public Date getOverdueDate() {
 		return latestRecommendationDate;
 	}
 
-	public void setLatestRecommendationDate(Date latestRecommendationDate) {
+	public void setOverdueDate(Date latestRecommendationDate) {
 		this.latestRecommendationDate = latestRecommendationDate;
 	}
 
@@ -228,10 +228,10 @@ public class Recommendation {
 		Date latestDate = null;
 		for (Recommendation rec : recommendationsList) {
 			if (latestDate == null) {
-				latestDate = rec.getLatestRecommendationDate();
+				latestDate = rec.getOverdueDate();
 			}
 			else {
-				Date thisRecDate = rec.getLatestRecommendationDate();
+				Date thisRecDate = rec.getOverdueDate();
 				if (thisRecDate != null && thisRecDate.after(latestDate)) {
 					latestDate = thisRecDate;
 				}

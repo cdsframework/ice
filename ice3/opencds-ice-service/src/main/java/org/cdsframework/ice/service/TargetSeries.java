@@ -87,7 +87,7 @@ public class TargetSeries {
 	private RecommendationStatus recommendationStatusPrior;
 	private Date finalEarliestDate;
 	private Date finalRecommendationDate;
-	private Date finalLatestRecommendationDate;
+	private Date finalOverdueDate;
 	private List<Recommendation> finalRecommendations;
 	private List<String> seriesRulesProcessed;
 	private boolean displayForecastDateForConditionalRecommendations;
@@ -142,7 +142,7 @@ public class TargetSeries {
 		finalRecommendations = new ArrayList<Recommendation>();
 		finalEarliestDate = null;
 		finalRecommendationDate = null;
-		finalLatestRecommendationDate = null;
+		finalOverdueDate = null;
 		displayForecastDateForConditionalRecommendations = false;
 
 		interimEvaluationValidityCountByDisease = new HashMap<String, Integer>();
@@ -1366,7 +1366,7 @@ public class TargetSeries {
 			// Past due date is the latest recommended date (calculated via age or interval) + 1 day
 			Date lLatestDate = TimePeriod.addTimePeriod(ageDate, new TimePeriod(-1, DurationType.DAYS));
 			Recommendation lLatestRecommended = new Recommendation(this);
-			lLatestRecommended.setLatestRecommendationDate(lLatestDate);
+			lLatestRecommended.setOverdueDate(lLatestDate);
 			populateInterimLatestRecommendedAgeRecommendation(lLatestRecommended, pEvalDate.before(lLatestDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		}
 	}
@@ -1515,7 +1515,7 @@ public class TargetSeries {
 			// Past due date is the latest recommended date (calculated via age or interval) + 1
 			Date lLatestDate = TimePeriod.addTimePeriod(rIntervalDate, new TimePeriod(-1, DurationType.DAYS));
 			Recommendation lLatestRecommended = new Recommendation(this);
-			lLatestRecommended.setLatestRecommendationDate(lLatestDate);
+			lLatestRecommended.setOverdueDate(lLatestDate);
 			// populate this in interim structure.... if there are age rule recommendations, they will need to be removed later
 			populateInterimLatestRecommendedIntervalRecommendation(lLatestRecommended, pEvalDate.before(lLatestDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		}
@@ -1878,7 +1878,7 @@ public class TargetSeries {
 				this.interimRecommendationsCustomEarliest.add(recommendation);
 			}
 		}
-		if (recommendation.getLatestRecommendationDate() != null) {
+		if (recommendation.getOverdueDate() != null) {
 			if (! this.interimRecommendationsCustomLatest.contains(recommendation)) {
 				this.interimRecommendationsCustomLatest.add(recommendation);
 			}
@@ -1930,7 +1930,7 @@ public class TargetSeries {
 			setFinalRecommendations(null);
 			setFinalRecommendationDate(null);
 			setFinalEarliestDate(null);
-			setFinalLatestRecommendationDate(null);
+			setFinalOverdueDate(null);
 		}
 		else if (lInterimRecommendedSize == 0 && this.recommendationStatusPrior != null) {
 			setRecommendationStatus(this.recommendationStatusPrior);
@@ -2101,11 +2101,11 @@ public class TargetSeries {
 			
 			if (lFinalRecommendationStatus == RecommendationStatus.NOT_RECOMMENDED) {
 				setFinalEarliestDate(null);
-				setFinalLatestRecommendationDate(null);
+				setFinalOverdueDate(null);
 			}
 			else {
 				//////////////
-				// Determine earliest age
+				// Determine earliest age - If the recommendation date is before the earliest date, set the recommendation date to the earliest date
 				//////////////
 				Date lObtainLatestEarliest = Recommendation.obtainMostRecentEarliestDateFromRecommendationsList(lInterimRecommendedEarliest);
 				Date lPrevFinalEarliestDate = getFinalEarliestDate();
@@ -2118,20 +2118,17 @@ public class TargetSeries {
 					}
 				}
 				if (lObtainLatestEarliest != null) {
-					if (lFinalRecommendationDate == null || lObtainLatestEarliest.compareTo(lFinalRecommendationDate) <= 0) {
-						setFinalEarliestDate(lObtainLatestEarliest);
-					}
+					setFinalEarliestDate(lObtainLatestEarliest);
 					if (lFinalRecommendationDate != null && lObtainLatestEarliest.after(lFinalRecommendationDate)) {
 						setFinalRecommendationDate(lObtainLatestEarliest);
 					}
 				}
 
 				//////////////
-				// Now set the latest recommended date, if and only if the latest recommended age or interval date has been set. In this case, choose the latter of the
-				// latest recommended age date and recommendation date if available, otherwise the latter of the latest recommended interval date and recommendation date
+				// Now determine the latest recommended date. If the latest recommendation date is before the recommended date, set it to the recommended date
 				//////////////
 				Date lObtainUnadjustedLatest = Recommendation.obtainMostRecentLatestRecommendationDateFromRecommendationsList(lInterimRecommendedLatest);
-				Date lPrevFinalLatestDate = getFinalLatestRecommendationDate();
+				Date lPrevFinalLatestDate = getFinalOverdueDate();
 				if (lPrevFinalLatestDate != null) {
 					if (lObtainUnadjustedLatest == null) {
 						lObtainUnadjustedLatest = lPrevFinalLatestDate;
@@ -2141,12 +2138,19 @@ public class TargetSeries {
 					}
 				}
 				if (lObtainUnadjustedLatest != null) {
-					if (lFinalRecommendationDate == null || lObtainUnadjustedLatest.compareTo(lFinalRecommendationDate) >= 0) {
-						setFinalLatestRecommendationDate(lObtainUnadjustedLatest);
-					}
 					if (lFinalRecommendationDate != null && lObtainUnadjustedLatest.before(lFinalRecommendationDate)) {
-						setFinalLatestRecommendationDate(lFinalRecommendationDate);
+						setFinalOverdueDate(lFinalRecommendationDate);
 					}
+					else {
+						setFinalOverdueDate(lObtainUnadjustedLatest);
+					}
+					/////// Or alternatively, take the earliest date: 
+					//if (lObtainLatestEarliest != null && lObtainUnadjustedLatest.before(lObtainLatestEarliest)) {
+					//	setFinalLatestRecommendationDate(lObtainLatestEarliest);
+					//}
+					//else {
+					//	setFinalLatestRecommendationDate(lObtainUnadjustedLatest);
+					//}
 				}
 			}		
 		}
@@ -3539,7 +3543,7 @@ public class TargetSeries {
 		setRecommendationVaccine(null); 
 		setFinalEarliestDate(null);
 		setFinalRecommendationDate(null);
-		setFinalLatestRecommendationDate(null);
+		setFinalOverdueDate(null);
 		setFinalRecommendations(null);
 	}
 
@@ -3567,14 +3571,14 @@ public class TargetSeries {
 				setFinalEarliestDate(pFinalRecommendationDate);
 			}
 			// Check to ensure consistency with the latest date
-			lDate = getFinalLatestRecommendationDate();
+			lDate = getFinalOverdueDate();
 			if (lDate != null && pFinalRecommendationDate.after(lDate)) {
-				setFinalLatestRecommendationDate(pFinalRecommendationDate);
+				setFinalOverdueDate(pFinalRecommendationDate);
 			}
 		}
 		else {
 			setFinalEarliestDate(null);
-			setFinalLatestRecommendationDate(null);
+			setFinalOverdueDate(null);
 		}
 	}
 
@@ -3599,9 +3603,9 @@ public class TargetSeries {
 				setFinalRecommendationDate(finalEarliestDate);
 			}
 			// Check to ensure consistency with latest recommendation date
-			lDate = getFinalLatestRecommendationDate();
+			lDate = getFinalOverdueDate();
 			if (lDate != null && finalEarliestDate.after(lDate)) {
-				setFinalLatestRecommendationDate(finalEarliestDate);
+				setFinalOverdueDate(finalEarliestDate);
 			}
 		}
 	}
@@ -3615,12 +3619,12 @@ public class TargetSeries {
 	 * final recommended dates regardless of what this value is set to.
 	 * @param finalLatestRecommendationDate
 	 */
-	public void setFinalLatestRecommendationDate(Date finalLatestRecommendationDate) {
-		this.finalLatestRecommendationDate = finalLatestRecommendationDate;
+	public void setFinalOverdueDate(Date finalLatestRecommendationDate) {
+		this.finalOverdueDate = finalLatestRecommendationDate;
 	}
 
-	public Date getFinalLatestRecommendationDate() {
-		return finalLatestRecommendationDate;
+	public Date getFinalOverdueDate() {
+		return finalOverdueDate;
 	}
 
 	private void setFinalRecommendations(List<Recommendation> recommendation) {
