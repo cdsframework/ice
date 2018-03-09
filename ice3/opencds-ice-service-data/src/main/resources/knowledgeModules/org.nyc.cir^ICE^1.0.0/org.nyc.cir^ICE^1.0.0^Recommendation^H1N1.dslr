@@ -63,7 +63,7 @@ rule "H1N1: Post Recommendation Check: Recommend Not Recommended and Vaccine Gro
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
 			- make note of the Season End Date as $seasonEndDate
-		The date $recommendationDate is after $seasonEndDate
+		Confirm the date $recommendationDate is after $seasonEndDate
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.VAC_GROUP_NO_LONGER_REC"
@@ -99,7 +99,7 @@ rule "H1N1: Recommend Not Recommended with reason of Vaccine Group No Longer Rec
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.890"
 			- the Series is Not Complete
 			- make note of the Season End Date as $seasonEndDate
-		The Date evalTime is after $seasonEndDate
+		Confirm the Date evalTime is after $seasonEndDate
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.VAC_GROUP_NO_LONGER_REC"

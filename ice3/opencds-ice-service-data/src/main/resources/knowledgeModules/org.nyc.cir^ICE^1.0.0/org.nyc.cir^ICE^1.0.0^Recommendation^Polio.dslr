@@ -33,6 +33,7 @@ import org.drools.spi.KnowledgeHelper
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
@@ -70,3 +71,52 @@ rule "Polio: If a patient is >= 18 years old and has NOT completed the series, t
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+
+rule "Polio: If the execution date is before 8/7/2010, modify the Minimum Age of DoseRule 4 to 126 days & the Minimum Interval of DoseRule3 to 28 days" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the name of the Series is "Polio4DoseSeries"
+			- Post Processing on the series forecast has not already been run
+			- the Series is Not Complete
+			- the Number of Doses Administered is == 3
+		Confirm the date evalTime is before "07-Aug-2010"
+	then
+		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
+		Set the Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "126d"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule4
+		Obtain the existing DoseRule for Dose Number 3 in the Series $targetSeries as $assign_oDoseRule3
+		Set the Minimum Interval for DoseRule $assign_oDoseRule3 to TimePeriod "28d"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule3
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Polio: If the execution date is before 8/7/2010 and the calculated Earliest Date for Dose 4 is after 8/7/2010, reset the Minimum Age & Minimum Interval back to their original values (4y & 6m, respectively) and recalculate" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- post processing on the Series forecast has not already been run
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the name of the Series is "Polio4DoseSeries"
+			- the effective dose number in the series is == 4
+			- make note of the Earliest Date as $earliestDate
+		Confirm the date evalTime is before "07-Aug-2010"
+		Confirm the date $earliestDate is after "07-Aug-2010"
+	then
+		Clear forecasted recommendations from consideration in series $targetSeries
+		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
+		Set the Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "4y"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule4
+		Obtain the existing DoseRule for Dose Number 3 in the Series $targetSeries as $assign_oDoseRule3
+		Set the Minimum Interval for DoseRule $assign_oDoseRule3 to TimePeriod "6m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule3
+		Refresh all Facts in the Series $targetSeries for Forecasting
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
