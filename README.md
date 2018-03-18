@@ -1,1 +1,1 @@
-More information about the Immunization Calculation Engine (ICE) is available at http://www.cdsframework.org/.
+More information about ICE is available at http://www.cdsframework.org/.
