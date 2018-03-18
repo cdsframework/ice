@@ -417,6 +417,8 @@ public class PayloadHelper {
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.830");	// Mening ACWY
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.820");	// Rotavirus
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.600");	// Varicella
+			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.500");	// MMR
+			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.810");	// Hep A
 			boolean lSupportedEarliestOverdueVgTmpFilter = lCurrentlySupportedEarliestOverdueVGs.contains(ts.getVaccineGroup());
 			
 			// Earliest, recommended and latest recommended should be set
