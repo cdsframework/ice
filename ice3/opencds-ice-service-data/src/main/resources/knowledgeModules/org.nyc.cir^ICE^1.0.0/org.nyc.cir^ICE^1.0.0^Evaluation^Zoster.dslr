@@ -53,7 +53,7 @@ global org.drools.runtime.KnowledgeContext kcontext
 
 // If a patient is administered CVX 187 < 52 days after a previously administered CVX 121 or CVX 188, evaluate the shot as Invalid/Below Minimum Interval
 // (Note that Recommended interval between CVX 121 or CVX 188 to CVX 187 is 56 days. This is the default as specified in the table rule, so no rule needs to be written.)
-rule "Zoster: Evaluate shot as Invalid/Below Minimum Interval if administered CVX 187 < 52 days after CVX 121 or CVX 188" ruleflow-group "HistoryEvaluation"
+rule "Zoster: Evaluate CVX 187 as Invalid/Below Minimum Interval if administered CVX 187 < 52 days after CVX 121 or CVX 188" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -78,6 +78,29 @@ rule "Zoster: Evaluate shot as Invalid/Below Minimum Interval if administered CV
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+rule "Zoster: Evaluate CVX 187 as Invalid/Below Minimum Interval if administered on same day as CVX 121 or CVX 188" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the vaccine administered is "ICE187"
+			- make note of the date this shot was administered as $currentShotDate
+		There is an administered shot $zoster121or188Shot
+			- the vaccine administered a member of ("ICE121","ICE188")
+			- the administration date of the shot is == $currentShotDate
+			- the shot has not been evaluated yet
+		There is a Series $targetSeries that contains the shot $currentShot
+			- the series also contains the shot $zoster121or188Shot
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
+			- the series is not complete
+	then
+		Mark the shot $currentShot as Invalid for this Series due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+
 // If a patient is administered CVX 121 or CVX 188, evaluate the shot as Accepted/ VACCINE_NOT_PART_OF_THIS_SERIES.
 rule "Zoster: Evaluate shot as Accepted/VACCINE_NOT_PART_OF_THIS_SERIES if administered CVX 121 or CVX 188" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -85,10 +108,9 @@ rule "Zoster: Evaluate shot as Accepted/VACCINE_NOT_PART_OF_THIS_SERIES if admin
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
 			- the vaccine administered a member of ("ICE121","ICE188")
-		There is a Series $targetSeries that contains the shot $currentShot
-			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
-			- the series is not complete
+			- make note of the associated series as $targetSeries
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Part of This Series"
 		Record that this dose rule was Processed for the TargetDose $currentShot

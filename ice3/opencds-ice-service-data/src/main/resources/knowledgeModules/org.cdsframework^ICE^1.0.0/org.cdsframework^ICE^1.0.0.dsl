@@ -44,7 +44,7 @@
 [condition][]- [Tt]he [Uu]nique [Ii]dentifier of the [Ss]hot is {aOp} {sUniqueId}={sUniqueId} {aOp} uniqueId 
 [condition][]- [Tt]hat is the [Ss]ame [Ss]hot as {refer_oTargetDose}=this == {refer_oTargetDose} 
 [condition][]- [Tt]hat is [Nn]ot the [Ss]ame [Ss]hot as {refer_oTargetDose}=this != {refer_oTargetDose} 
-[condition][]- [Tt]he [Ss]hot has [Nn]ot been [Ee]valuated yet=status == DoseStatus.EVALUATION_IN_PROCESS
+[condition][]- [Tt]he [Ss]hot has [Nn]ot been [Ee]valuated yet=status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.NOT_EVALUATED
 [condition][]- [Tt]he [Ss]hot belongs to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == true
 [condition][]- [Tt]he [Ss]hot does not belong to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == false
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
@@ -268,7 +268,6 @@
 [consequence][][Mm]ark the Series {refer_oTargetSeries} [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
 [consequence][][Aa]dd {nDuration}  {oDurationType} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, new TimePeriod({nDuration}, {oDurationType}));
 [consequence][][Aa]dd {oTimePeriod} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, {oTimePeriod});
-[consequence][][Ee]valuate {currentShot} as a part of the vaccine group "VACCINE_GROUP_CONCEPT.700"=
 [consequence][][Mm]ark that the [Rr]ecommendation for [Ss]eries {refer_oTargetSeries} must take [Ll]ive [Vv]irus [Ii]nterval into [Aa]ccount={refer_oTargetSeries}.setManuallySetAccountForLiveVirusIntervalsInRecommendation(true);
 [consequence][][Mm]ark that the [Rr]ecommendation for [Ss]eries {refer_oTargetSeries} must not take [Ll]ive [Vv]irus [Ii]nterval into [Aa]ccount={refer_oTargetSeries}.setManuallySetAccountForLiveVirusIntervalsInRecommendation(false);
 [consequence][][Mm]ake [Nn]ote of the [Aa]bsolute [Mm]inimum [Ii]nterval for [Dd]ose {nDoseNumber} in the [Ss]eries {refer_oTargetSeries} as {assign_strTimePeriod}=String {assign_strTimePeriod}={refer_oTargetSeries}.getAbsoluteMinimumIntervalForTargetDoseInStringFormat({nDoseNumber});
