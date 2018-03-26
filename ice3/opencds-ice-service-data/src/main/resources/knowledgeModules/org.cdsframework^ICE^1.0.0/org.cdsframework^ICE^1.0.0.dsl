@@ -44,7 +44,7 @@
 [condition][]- [Tt]he [Uu]nique [Ii]dentifier of the [Ss]hot is {aOp} {sUniqueId}={sUniqueId} {aOp} uniqueId 
 [condition][]- [Tt]hat is the [Ss]ame [Ss]hot as {refer_oTargetDose}=this == {refer_oTargetDose} 
 [condition][]- [Tt]hat is [Nn]ot the [Ss]ame [Ss]hot as {refer_oTargetDose}=this != {refer_oTargetDose} 
-[condition][]- [Tt]he [Ss]hot has [Nn]ot been [Ee]valuated yet=status == DoseStatus.EVALUATION_IN_PROCESS
+[condition][]- [Tt]he [Ss]hot has [Nn]ot been [Ee]valuated yet=status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.NOT_EVALUATED
 [condition][]- [Tt]he [Ss]hot belongs to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == true
 [condition][]- [Tt]he [Ss]hot does not belong to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == false
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
@@ -225,6 +225,7 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Below Minimum Interval \(PCV PPSV\)"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.BELOW_MIN_INTERVAL_PCV_PPSV"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Outside Flu Season"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.OUTSIDE_FLU_VAC_SEASON");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "Missing Antigen"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.MISSING_ANTIGEN");
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "D_AND_T_INVALID/P_VALID"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.D_AND_T_INVALID/P_VALID");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Proof of Immunity"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Above Recommended Age"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.ABOVE_REC_AGE_SERIES");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Below Recommended Age"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.BELOW_REC_AGE_SERIES"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
@@ -234,7 +235,7 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Extra Dose"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.EXTRA_DOSE");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Below Minimum Age for Final Dose"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_FINAL_DOSE"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Vaccine Not Counted Based on Most Recent Vaccine Given"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN");
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to "D_AND_T_INVALID/P_VALID"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.D_AND_T_INVALID/P_VALID");
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Vaccine Not Part of This Series"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_PART_OF_THIS_SERIES");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 ////////////// DO NOT USE [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addAcceptedReason({oReason});
@@ -267,7 +268,6 @@
 [consequence][][Mm]ark the Series {refer_oTargetSeries} [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
 [consequence][][Aa]dd {nDuration}  {oDurationType} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, new TimePeriod({nDuration}, {oDurationType}));
 [consequence][][Aa]dd {oTimePeriod} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, {oTimePeriod});
-[consequence][][Ee]valuate {currentShot} as a part of the vaccine group "VACCINE_GROUP_CONCEPT.700"=
 [consequence][][Mm]ark that the [Rr]ecommendation for [Ss]eries {refer_oTargetSeries} must take [Ll]ive [Vv]irus [Ii]nterval into [Aa]ccount={refer_oTargetSeries}.setManuallySetAccountForLiveVirusIntervalsInRecommendation(true);
 [consequence][][Mm]ark that the [Rr]ecommendation for [Ss]eries {refer_oTargetSeries} must not take [Ll]ive [Vv]irus [Ii]nterval into [Aa]ccount={refer_oTargetSeries}.setManuallySetAccountForLiveVirusIntervalsInRecommendation(false);
 [consequence][][Mm]ake [Nn]ote of the [Aa]bsolute [Mm]inimum [Ii]nterval for [Dd]ose {nDoseNumber} in the [Ss]eries {refer_oTargetSeries} as {assign_strTimePeriod}=String {assign_strTimePeriod}={refer_oTargetSeries}.getAbsoluteMinimumIntervalForTargetDoseInStringFormat({nDoseNumber});
