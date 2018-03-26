@@ -62,3 +62,22 @@ rule "MMR: Recommend conditional/high risk if born prior to 1/1/1957 and series 
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+// Once a patient completes the MMR 2-dose series the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK.  
+// (MMR should never have a recommendation of Not Recommended/Complete.)
+rule "MMR: If a patient completed the series, recommendation is Not Recommended / COMPLETE_HIGH_RISK" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
+			- the Series is Complete	
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete		// to ensure that no other rules override this recommendation
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
