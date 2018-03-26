@@ -252,7 +252,8 @@ rule "Pneumococcal Adult Series: If the patient is >= 65 years old, always recom
 		Confirm elapsed time between $birthDate and evalTime >= "65y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
+		/////// Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
+		Set the Recommendation Vaccine for $oRecommendation to "ICE133"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -280,7 +281,8 @@ rule "Pneumococcal Adult Series: If the patient is >= 65 years old, always recom
 		Confirm elapsed time between $dtBirthDate and evalTime >= "65y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE33"
+		/////// Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE33"
+		Set the Recommendation Vaccine for $oRecommendation to "ICE33"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -308,7 +310,8 @@ rule "Pneumococcal Adult Series: If the patient is >= 65 years old, always recom
 		Confirm elapsed time between $dtBirthDate and evalTime >= "65y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
+		/////// Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
+		Set the Recommendation Vaccine for $oRecommendation to "ICE133"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -346,7 +349,8 @@ rule "Pneumococcal Child Series: Recommend dose if series complete if no prior V
 	then
 		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
 		Include a recommendation as $recommendation with recommended forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
-		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
+		/////// Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
+		Set the Recommendation Vaccine for $recommendation to "ICE133"
 		Mark forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
