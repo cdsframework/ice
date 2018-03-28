@@ -517,6 +517,12 @@ public class TimePeriod {
 	
 	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, TimePeriod tp) {
 		
+		return compareElapsedTimePeriodToDateRange(pD1, pD2, tp, false);
+	}
+	
+	
+	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, TimePeriod tp, boolean absoluteValue) {
+		
 		String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, TimePeriod): ";
 		if (tp == null) {
 			String str = "TimePeriod supplied is null";
@@ -524,9 +530,14 @@ public class TimePeriod {
 			throw new IllegalArgumentException(str);
 		}
 
-		return compareElapsedTimePeriodToDateRange(pD1, pD2, tp.timePeriodRepresentation);
+		return compareElapsedTimePeriodToDateRange(pD1, pD2, tp.timePeriodRepresentation, absoluteValue);
 	}
 
+	
+	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, String pTimePeriodStr) {
+	
+		return compareElapsedTimePeriodToDateRange(pD1, pD2, pTimePeriodStr, false);
+	}
 	
 	/**
 	 * If the elapsed time between the supplied dates is greater than that specified by the TimePeriod string starting from the specified start date pD1,
@@ -534,10 +545,11 @@ public class TimePeriod {
 	 * @param pD1
 	 * @param pD2
 	 * @param pTimePeriodStr
+	 * @param absoluteValue
 	 * @throws IllegalArgumentException if either date or TimePeriod is not supplied
 	 * @return
 	 */
-	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, String pTimePeriodStr) {
+	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, String pTimePeriodStr, boolean absoluteValue) {
 		
 		String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, String): ";
 		if (pTimePeriodStr == null || pTimePeriodStr.length() == 0) {
@@ -553,7 +565,7 @@ public class TimePeriod {
 		
 		Date d1 = null;
 		Date d2 = null;
-		if (pD2.before(pD1)) {
+		if (absoluteValue == true && pD2.before(pD1)) {
 			d1 = pD2;
 			d2 = pD1;
 		}

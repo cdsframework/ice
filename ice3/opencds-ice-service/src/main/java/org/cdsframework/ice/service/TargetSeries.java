@@ -2220,7 +2220,7 @@ public class TargetSeries {
 		if (administrationDate.before(pEvalPersonBirthTime)) {
 			String str = "Vaccination date supplied before birth date";
 			logger.warn(_METHODNAME + str);
-			pTD.addInvalidReason(BaseDataEvaluationReason._INVALID_AGE_EVALUATION_REASON.getCdsListItemName());
+			pTD.addInvalidReason(BaseDataEvaluationReason._PRIOR_TO_DOB.getCdsListItemName());
 		}
 
 		TimePeriod minimumAge = seriesDoseRule.getAbsoluteMinimumAge();
