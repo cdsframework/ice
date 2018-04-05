@@ -539,6 +539,7 @@ public class TimePeriod {
 		return compareElapsedTimePeriodToDateRange(pD1, pD2, pTimePeriodStr, false);
 	}
 	
+	
 	/**
 	 * If the elapsed time between the supplied dates is greater than that specified by the TimePeriod string starting from the specified start date pD1,
 	 * return 1; -1 if elapsed time is less than that specified by the TimePeriod string, and 0 if they are the same
