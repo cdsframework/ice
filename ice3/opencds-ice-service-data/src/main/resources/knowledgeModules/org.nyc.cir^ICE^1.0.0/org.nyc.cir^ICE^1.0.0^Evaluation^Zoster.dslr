@@ -108,9 +108,10 @@ rule "Zoster: Evaluate shot as Accepted/VACCINE_NOT_PART_OF_THIS_SERIES if admin
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
 			- the vaccine administered a member of ("ICE121","ICE188")
-			- make note of the associated series as $targetSeries
+		There is a Series $targetSeries that contains the shot $currentShot
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
+			- the series is not complete
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Part of This Series"
 		Record that this dose rule was Processed for the TargetDose $currentShot

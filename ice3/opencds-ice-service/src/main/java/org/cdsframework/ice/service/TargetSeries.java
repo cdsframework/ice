@@ -1318,8 +1318,7 @@ public class TargetSeries {
 		}
 		if (rAge == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
-				String msg = "No routine age recommendation specified for dose " + vaccineGroupDoseRule.getDoseNumber() + 
-						" in Vaccine Group " + seriesRules.getVaccineGroup();
+				String msg = "No routine age recommendation specified for dose " + vaccineGroupDoseRule.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
 				logger.warn(_METHODNAME + msg);
 			}
 			return;
@@ -1481,7 +1480,7 @@ public class TargetSeries {
 		}
 		if (rInterval == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
-				String msg = "No routine intervalspecified for dose in Vaccine Group " + seriesRules.getVaccineGroup();
+				String msg = "No routine intervalspecified for dose " + doseRulePreviousDose.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
 				logger.warn(_METHODNAME + msg);
 			}
 			return;
@@ -2220,7 +2219,7 @@ public class TargetSeries {
 		if (administrationDate.before(pEvalPersonBirthTime)) {
 			String str = "Vaccination date supplied before birth date";
 			logger.warn(_METHODNAME + str);
-			pTD.addInvalidReason(BaseDataEvaluationReason._INVALID_AGE_EVALUATION_REASON.getCdsListItemName());
+			pTD.addInvalidReason(BaseDataEvaluationReason._PRIOR_TO_DOB.getCdsListItemName());
 		}
 
 		TimePeriod minimumAge = seriesDoseRule.getAbsoluteMinimumAge();
