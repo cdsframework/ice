@@ -44,7 +44,7 @@
 [condition][]- [Tt]he [Uu]nique [Ii]dentifier of the [Ss]hot is {aOp} {sUniqueId}={sUniqueId} {aOp} uniqueId 
 [condition][]- [Tt]hat is the [Ss]ame [Ss]hot as {refer_oTargetDose}=this == {refer_oTargetDose} 
 [condition][]- [Tt]hat is [Nn]ot the [Ss]ame [Ss]hot as {refer_oTargetDose}=this != {refer_oTargetDose} 
-[condition][]- [Tt]he [Ss]hot has [Nn]ot been [Ee]valuated yet=status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.NOT_EVALUATED
+[condition][]- [Tt]he [Ss]hot has [Nn]ot been [Ee]valuated yet=status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.EVALUATION_NOT_STARTED
 [condition][]- [Tt]he [Ss]hot belongs to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == true
 [condition][]- [Tt]he [Ss]hot does not belong to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == false
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
@@ -238,6 +238,7 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to "Vaccine Not Part of This Series"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_PART_OF_THIS_SERIES");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
+[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Nn]ot [Ee]valuated for this [Ss]eries due to "Vaccine Not Supported"={refer_oTargetDose}.addNotEvalatedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED");
 ////////////// DO NOT USE [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Aa]ccepted for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addAcceptedReason({oReason});
 ////////////// DO NOT USE [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]nvalid for this [Ss]eries due to {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)\\/\\"]+}={refer_oTargetDose}.addInvalidReason({oReason});
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {strReason:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({strReason});
@@ -246,7 +247,7 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Nn]ot [Ii]gnored={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(false);
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]gnored={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(true);
 [consequence][][Ss]et [Dd]ose [Nn]umber of {refer_oTargetDose} to {nDoseNumber}=modify({refer_oTargetDose}) \{ setDoseNumberInSeries({nDoseNumber}); \};
-[consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Nn]ot [Ee]valuated for this [Ss]eries=modify({refer_oTargetDose}) \{ setStatus(DoseStatus.NOT_EVALUATED), removeAllEvaluationReasonsFromAllReasonSets(); \};
+////////////// [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ee]valuation [Nn]ot [Ss]tarted for this [Ss]eries=modify({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_NOT_STARTED), removeAllEvaluationReasonsFromAllReasonSets(); \};
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

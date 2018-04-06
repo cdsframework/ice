@@ -609,7 +609,7 @@ rule "HistoryEvaluation.setNextTargetDoseInNonSeasonalSeriesForEvaluation" rulef
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.NOT_EVALUATED)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
 		$ts : TargetSeries(targetSeason == null, containsTargetDose($td), areNoEarlierAdministeredShotsNotEvaluated($td))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -631,7 +631,7 @@ rule "HistoryEvaluation.setNextTargetDoseInSeasonalSeriesForEvaluation" ruleflow
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.NOT_EVALUATED)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
 		$ts : TargetSeries(targetSeason != null, containsTargetDose($td), areNoEarlierAdministeredShotsNotEvaluated($td), 
 			$vg : vaccineGroup, $tsid : targetSeriesIdentifier, $tseasonStartDate : targetSeason.fullySpecifiedSeasonStartDate)
 	then
@@ -863,10 +863,29 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
+rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty == false) 
+		$ts : TargetSeries(containsTargetDose($td))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.NOT_EVALUATED),					// Also sets hasBeenEvaluated flag to true
+			addDoseRuleProcessed(_RULENAME);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		setFocus("postEvaluationCheck");
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
 rule "HistoryEvaluation.setDoseEvaluationStatusAccepted" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, acceptedReasons.empty == false)
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty, acceptedReasons.empty == false)
 		$ts : TargetSeries(containsTargetDose($td))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -886,7 +905,7 @@ end
 rule "HistoryEvaluation.setDoseEvaluationStatusValid" ruleflow-group "HistoryEvaluation"
 	dialect "java"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, acceptedReasons.empty)
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, acceptedReasons.empty, notEvaluatedReasons.empty)
 		$ts : TargetSeries(containsTargetDose($td))
 	then
 		String _RULENAME = drools.getRule().getName();
@@ -2241,7 +2260,7 @@ rule "ProcessResults: Return Recommendations for Vaccines Not Supported" ruleflo
 	dialect "mvel"
 	salience 10
 	when
-		exists ObservationResult(observationValue.concept == PayloadHelper.getLocalCodeForEvaluationStatus(DoseStatus.NOT_EVALUATED, schedule))
+		exists ObservationResult(observationValue.concept == PayloadHelper.getLocalCodeForEvaluationStatus(DoseStatus.EVALUATION_NOT_STARTED, schedule))
 		not SubstanceAdministrationProposal(substance.substanceCode == PayloadHelper.getLocalCodeForRecommendationStatus(RecommendationStatus.RECOMMENDATION_NOT_AVAILABLE, schedule))
 	then
 		String _RULENAME = kcontext.rule.name;
