@@ -193,6 +193,15 @@ public class PayloadHelper {
 			if (interpretations.size() > 0)
 				childObs.setInterpretation(interpretations);
 		}
+		else if (doseStatus == DoseStatus.NOT_EVALUATED) {
+			for (String interp : d.getNotEvaluatedReasons()) {
+				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
+				if (localCDInterp != null && ! interpretations.contains(localCDInterp))
+					interpretations.add(localCDInterp);
+			}
+			if (interpretations.size() > 0)
+				childObs.setInterpretation(interpretations);
+		}
 		else if (doseStatus == DoseStatus.ACCEPTED || doseStatus == DoseStatus.VALID) {
 			for (String interp : d.getAcceptedReasons()) {
 				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);

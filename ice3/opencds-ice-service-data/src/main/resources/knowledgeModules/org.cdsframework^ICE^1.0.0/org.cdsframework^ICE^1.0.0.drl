@@ -1653,7 +1653,7 @@ end
 // If the list of recommended vaccines are inconsistent (i.e. - different interim recommendation forecasts with different vaccines), and the patient is recommended 
 // for a forecast, then log the inconsistency and recommend at the vaccine group level
 ///////// ***
-rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccinesNotConsistent" ruleflow-group "RecommendationForecast"
+rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccinesNotConsistentWithRecommendationObjects" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "supplementalSeriesRule"
 	when
@@ -1666,24 +1666,51 @@ rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccines
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
 end
 
+
+///////// ***
+// General Design rule... Do not Edit
+// If the list of recommended vaccines are inconsistent (i.e. - different interim recommendation forecasts with different vaccines), and the patient is recommended 
+// for a forecast, then log the inconsistency and recommend at the vaccine group level
+///////// ***
+rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccinesNotConsistentWithTargetSeries" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "supplementalSeriesRule"
+	when
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+			recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendations != null, $tsFinalRecommendations : finalRecommendations, recommendationVaccine != null, 
+			$tsRecommendedVaccine: recommendationVaccine)
+		HashSet(size > 0) from accumulate(Recommendation(recommendedVaccine != null, recommendedVaccine != $tsRecommendedVaccine, $accRecommendedVaccine : recommendedVaccine) 
+			from $tsFinalRecommendations, collectSet($accRecommendedVaccine))
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setRecommendationVaccine(null);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end
+
 	
 ///////// ***
 // General Design rule... Do not Edit
 // If the list of recommended vaccines are consistent and not all empty, and the patient is recommended for a forecast, then recommend at the vaccine level of the only specified vaccine
 ///////// ***
-rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsistent" ruleflow-group "RecommendationForecast"
+rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsistentWithRecommendationObjects" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "supplementalSeriesRule"
 	when
 		$ts : TargetSeries(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE ||
 			recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendations != null, $tsFinalRecommendations : finalRecommendations)
 		$recommendationVaccineSet : Set(size == 1) from accumulate(Recommendation(recommendedVaccine != null, $accRecommendedVaccine : recommendedVaccine) from $tsFinalRecommendations, collectSet($accRecommendedVaccine))
+		$recommendationVaccineList : List() from accumulate($acc2Recommendation : Recommendation(recommendedVaccine != null) from $tsFinalRecommendations, collectList($acc2Recommendation))
 	then
 		String _RULENAME = kcontext.rule.name;
 		Iterator iter = $recommendationVaccineSet.iterator();
 		if (iter.hasNext()) {
 			Vaccine v = (Vaccine) iter.next();
 			$ts.setRecommendationVaccine(v);
+		}
+		Iterator iter2 = $recommendationVaccineList.iterator();
+		while (iter2.hasNext()) {
+			Recommendation r = (Recommendation) iter2.next();
+			r.setRecommendedVaccine(null);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
 end
