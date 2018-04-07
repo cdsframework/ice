@@ -609,7 +609,7 @@ rule "HistoryEvaluation.setNextTargetDoseInNonSeasonalSeriesForEvaluation" rulef
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.NOT_EVALUATED)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
 		$ts : TargetSeries(targetSeason == null, containsTargetDose($td), areNoEarlierAdministeredShotsNotEvaluated($td))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -631,7 +631,7 @@ rule "HistoryEvaluation.setNextTargetDoseInSeasonalSeriesForEvaluation" ruleflow
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.NOT_EVALUATED)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
 		$ts : TargetSeries(targetSeason != null, containsTargetDose($td), areNoEarlierAdministeredShotsNotEvaluated($td), 
 			$vg : vaccineGroup, $tsid : targetSeriesIdentifier, $tseasonStartDate : targetSeason.fullySpecifiedSeasonStartDate)
 	then
@@ -863,10 +863,29 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
+rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty == false) 
+		$ts : TargetSeries(containsTargetDose($td))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.NOT_EVALUATED),					// Also sets hasBeenEvaluated flag to true
+			addDoseRuleProcessed(_RULENAME);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		setFocus("postEvaluationCheck");
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
 rule "HistoryEvaluation.setDoseEvaluationStatusAccepted" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, acceptedReasons.empty == false)
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty, acceptedReasons.empty == false)
 		$ts : TargetSeries(containsTargetDose($td))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -886,7 +905,7 @@ end
 rule "HistoryEvaluation.setDoseEvaluationStatusValid" ruleflow-group "HistoryEvaluation"
 	dialect "java"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, acceptedReasons.empty)
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, acceptedReasons.empty, notEvaluatedReasons.empty)
 		$ts : TargetSeries(containsTargetDose($td))
 	then
 		String _RULENAME = drools.getRule().getName();
@@ -1634,7 +1653,7 @@ end
 // If the list of recommended vaccines are inconsistent (i.e. - different interim recommendation forecasts with different vaccines), and the patient is recommended 
 // for a forecast, then log the inconsistency and recommend at the vaccine group level
 ///////// ***
-rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccinesNotConsistent" ruleflow-group "RecommendationForecast"
+rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccinesNotConsistentWithRecommendationObjects" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "supplementalSeriesRule"
 	when
@@ -1647,24 +1666,53 @@ rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccines
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
 end
 
-	
+
 ///////// ***
 // General Design rule... Do not Edit
-// If the list of recommended vaccines are consistent and not all empty, and the patient is recommended for a forecast, then recommend at the vaccine level of the only specified vaccine
+// If the list of recommended vaccines are inconsistent (i.e. - different interim recommendation forecasts with different vaccines), and the patient is recommended 
+// for a forecast, then log the inconsistency and recommend at the vaccine group level
 ///////// ***
-rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsistent" ruleflow-group "RecommendationForecast"
+rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccinesNotConsistentWithTargetSeries" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "supplementalSeriesRule"
 	when
-		$ts : TargetSeries(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE ||
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+			recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendations != null, $tsFinalRecommendations : finalRecommendations, recommendationVaccine != null, 
+			$tsRecommendedVaccine: recommendationVaccine)
+		HashSet(size > 0) from accumulate(Recommendation(recommendedVaccine != null, recommendedVaccine != $tsRecommendedVaccine, $accRecommendedVaccine : recommendedVaccine) 
+			from $tsFinalRecommendations, collectSet($accRecommendedVaccine))
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setRecommendationVaccine(null);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end
+
+	
+///////// ***
+// General Design rule... Do not Edit
+// If the list of recommended vaccines are consistent and not all empty, and the patient is recommended for a forecast, then recommend at the vaccine level of the only specified vaccine.
+// Set each Recommendation Object's recommendedVaccine to null and set the TargetSeries recommendationVaccine to the 1 and only 1 vaccine
+///////// ***
+rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsistentWithRecommendationObjects" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "supplementalSeriesRule"
+	when
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
 			recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendations != null, $tsFinalRecommendations : finalRecommendations)
 		$recommendationVaccineSet : Set(size == 1) from accumulate(Recommendation(recommendedVaccine != null, $accRecommendedVaccine : recommendedVaccine) from $tsFinalRecommendations, collectSet($accRecommendedVaccine))
+		$tsSame : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, recommendationVaccine == null || recommendationVaccine != null && recommendationVaccine memberOf $recommendationVaccineSet)
+		$recommendationVaccineList : List() from accumulate($acc2Recommendation : Recommendation(recommendedVaccine != null) from $tsFinalRecommendations, collectList($acc2Recommendation))
 	then
 		String _RULENAME = kcontext.rule.name;
 		Iterator iter = $recommendationVaccineSet.iterator();
 		if (iter.hasNext()) {
 			Vaccine v = (Vaccine) iter.next();
 			$ts.setRecommendationVaccine(v);
+		}
+		Iterator iter2 = $recommendationVaccineList.iterator();
+		while (iter2.hasNext()) {
+			Recommendation r = (Recommendation) iter2.next();
+			r.setRecommendedVaccine(null);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
 end
@@ -2241,7 +2289,7 @@ rule "ProcessResults: Return Recommendations for Vaccines Not Supported" ruleflo
 	dialect "mvel"
 	salience 10
 	when
-		exists ObservationResult(observationValue.concept == PayloadHelper.getLocalCodeForEvaluationStatus(DoseStatus.NOT_EVALUATED, schedule))
+		exists ObservationResult(observationValue.concept == PayloadHelper.getLocalCodeForEvaluationStatus(DoseStatus.EVALUATION_NOT_STARTED, schedule))
 		not SubstanceAdministrationProposal(substance.substanceCode == PayloadHelper.getLocalCodeForRecommendationStatus(RecommendationStatus.RECOMMENDATION_NOT_AVAILABLE, schedule))
 	then
 		String _RULENAME = kcontext.rule.name;
