@@ -1318,8 +1318,7 @@ public class TargetSeries {
 		}
 		if (rAge == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
-				String msg = "No routine age recommendation specified for dose " + vaccineGroupDoseRule.getDoseNumber() + 
-						" in Vaccine Group " + seriesRules.getVaccineGroup();
+				String msg = "No routine age recommendation specified for dose " + vaccineGroupDoseRule.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
 				logger.warn(_METHODNAME + msg);
 			}
 			return;
@@ -1481,7 +1480,7 @@ public class TargetSeries {
 		}
 		if (rInterval == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
-				String msg = "No routine intervalspecified for dose in Vaccine Group " + seriesRules.getVaccineGroup();
+				String msg = "No routine intervalspecified for dose " + doseRulePreviousDose.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
 				logger.warn(_METHODNAME + msg);
 			}
 			return;
@@ -2220,7 +2219,7 @@ public class TargetSeries {
 		if (administrationDate.before(pEvalPersonBirthTime)) {
 			String str = "Vaccination date supplied before birth date";
 			logger.warn(_METHODNAME + str);
-			pTD.addInvalidReason(BaseDataEvaluationReason._INVALID_AGE_EVALUATION_REASON.getCdsListItemName());
+			pTD.addInvalidReason(BaseDataEvaluationReason._PRIOR_TO_DOB.getCdsListItemName());
 		}
 
 		TimePeriod minimumAge = seriesDoseRule.getAbsoluteMinimumAge();
@@ -2949,13 +2948,13 @@ public class TargetSeries {
 				throw new InconsistentConfigurationException(errStr);
 			}
 			int tdShotDateToTargetDoseDateComparison = tdShotDate.compareTo(targetDoseDate);
-			if (tdStatus == DoseStatus.NOT_EVALUATED && tdShotDateToTargetDoseDateComparison < 0) {
+			if (tdStatus == DoseStatus.EVALUATION_NOT_STARTED && tdShotDateToTargetDoseDateComparison < 0) {
 				return false;
 			}
-			if (tdStatus == DoseStatus.NOT_EVALUATED && tdShotDateToTargetDoseDateComparison > 0) {
+			if (tdStatus == DoseStatus.EVALUATION_NOT_STARTED && tdShotDateToTargetDoseDateComparison > 0) {
 				break;
 			}
-			if (tdStatus == DoseStatus.NOT_EVALUATED && tdShotDateToTargetDoseDateComparison == 0) {
+			if (tdStatus == DoseStatus.EVALUATION_NOT_STARTED && tdShotDateToTargetDoseDateComparison == 0) {
 				if (minAdminiteredShotNumberWithSameDate == 0) {
 					minAdminiteredShotNumberWithSameDate = tdAdministeredShotNumber;
 				}
@@ -3172,7 +3171,7 @@ public class TargetSeries {
 	 * Add TargetDose to the TargetSeries. Also, set the the administered shot number for all TargetDosees in this TargetSeries in increasing order,
 	 * based on the administered shot dates in this TargetSeries. If the current shot is not evaluated yet or invalid, this and other administered
 	 * unevaluated shots may be set to the same dose number-- they're next possible valid or accepted shots [i.e. - doses] amongst others in the
-	 * series. Upon initialization, all shots are set with doseNumber=1. Note that upon initialization, all shots are set to NOT_EVALUATED (they have
+	 * series. Upon initialization, all shots are set with doseNumber=1. Note that upon initialization, all shots are set to EVALUATION_NOT_STARTED (they have
 	 * not been evaluated yet), so all dose numbers will be set to 1 in this typical scenario for use of this method.
 	 * 
 	 * This version of the method allows the caller to override the check, for seasonal TargetSeries, which enforces the TargetDose fall between the  

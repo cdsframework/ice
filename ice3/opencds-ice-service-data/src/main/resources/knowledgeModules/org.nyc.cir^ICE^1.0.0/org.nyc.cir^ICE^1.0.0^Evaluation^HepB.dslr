@@ -100,7 +100,7 @@ rule "HepB: Evaluate the Minimum Interval Between Doses 1 and 3" ruleflow-group 
 	then
 		Mark the shot $currentDose as Invalid for this Series due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentDose
-		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries 
+		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end 
 
 
@@ -169,4 +169,22 @@ rule "HepB: Mark Series Complete if Two Adult Doses Given to Patient between >= 
 		Mark the Series $targetSeries complete
 		Record that this series rule was Processed for the TargetSeries $targetSeries
 		Log that this series rule fired for the Series $targetSeries
+end
+
+
+// If a patient is administered CVX 189, evaluate the shot as Not_Evaluated / Vaccine Not Supported
+rule "Hep B: Evaluate CVX 189 shot as NOT_EVALUATED/VACCINE_NOT_SUPPORTED" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the vaccine administered is "ICE189"
+		There is a Series $targetSeries that contains the shot $currentShot
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.100"
+	then
+		Mark the shot $currentShot as Not Evaluated for this Series due to "Vaccine Not Supported"
+		Mark the shot $currentShot as Ignored
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end

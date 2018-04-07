@@ -57,6 +57,7 @@ public class TargetDose {
 	private HashSet<String> validReasons;
 	private HashSet<String> acceptedReasons;
 	private HashSet<String> invalidReasons;
+	private HashSet<String> notEvaluatedReasons;
 	private HashSet<String> doseRulesProcessed;
 	
 	private static Log logger = LogFactory.getLog(TargetDose.class);
@@ -84,10 +85,11 @@ public class TargetDose {
 		administeredShotNumberInSeries = 0;
 		administrationDate = pAdministrationDate;
 		doseNumberInSeries = 1;
-		status = DoseStatus.NOT_EVALUATED;
+		status = DoseStatus.EVALUATION_NOT_STARTED;
 		validReasons = new HashSet<String>();
 		acceptedReasons = new HashSet<String>();
 		invalidReasons = new HashSet<String>();
+		notEvaluatedReasons = new HashSet<String>();
 		doseRulesProcessed = new HashSet<String>();
 		isPrimarySeriesShot = false;
 		isValid = false;
@@ -123,13 +125,18 @@ public class TargetDose {
 		return validReasons.contains(openCdsConceptCode);
 	}
 	
+	public boolean containsNotEvaluatedReason(String openCdsConceptCode) {
+
+		return notEvaluatedReasons.contains(openCdsConceptCode);
+	}
+	
 	public Collection<String> getAllEvaluationReasonsFromAllReasonSets() {
 	
 		List<String> allReasons = new ArrayList<String>();
 		allReasons.addAll(invalidReasons);
 		allReasons.addAll(acceptedReasons);
 		allReasons.addAll(validReasons);
-		
+		allReasons.addAll(notEvaluatedReasons);
 		return allReasons;
 	}
 	
@@ -145,6 +152,7 @@ public class TargetDose {
 			invalidReasons.remove(openCdsConceptCode);
 			acceptedReasons.remove(openCdsConceptCode);
 			validReasons.remove(openCdsConceptCode);
+			notEvaluatedReasons.remove(openCdsConceptCode);
 		}
 	}
 	
@@ -166,6 +174,13 @@ public class TargetDose {
 		
 		if (openCdsConceptCode != null) {
 			invalidReasons.remove(openCdsConceptCode);
+		}
+	}
+
+	public void removeNotEvaluatedReason(String openCdsConceptCode) {
+		
+		if (openCdsConceptCode != null) {
+			notEvaluatedReasons.remove(openCdsConceptCode);
 		}
 	}
 
@@ -312,7 +327,7 @@ public class TargetDose {
 			else {
 				setIsValid(false);
 			}
-			if (status == DoseStatus.NOT_EVALUATED || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS) {
+			if (status == DoseStatus.EVALUATION_NOT_STARTED || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS) {
 				setPostEvaluationCheckCompleted(false);
 				setPreEvaluationCheckCompleted(false);
 				removeAllEvaluationReasonsFromAllReasonSets();
@@ -379,6 +394,19 @@ public class TargetDose {
 			invalidReasons.add(reason);
 	}
 
+	public Collection<String> getNotEvaluatedReasons() {
+		return notEvaluatedReasons;
+	}
+	
+	/**
+	 * Adds the invalid reason, if not already present
+	 * @param reason
+	 */
+	public void addNotEvalatedReason(String reason) {
+		if (reason != null && ! notEvaluatedReasons.contains(reason))
+			notEvaluatedReasons.add(reason);
+	}
+	
 	@Override
 	public String toString() {
 		
@@ -419,7 +447,16 @@ public class TargetDose {
 		if (i > 0) {
 			s += "}";
 		}
-		
+		for (String reason : notEvaluatedReasons) {
+			if (i == 0)
+				s += ", notEvaluatedReasons={\"" + reason + "\"";
+			else
+				s += "\"" + reason + "\"";
+			i++;
+		}
+		if (i > 0) {
+			s += "}";
+		}
 		s+= "]";
 		
 		return s;

@@ -193,6 +193,15 @@ public class PayloadHelper {
 			if (interpretations.size() > 0)
 				childObs.setInterpretation(interpretations);
 		}
+		else if (doseStatus == DoseStatus.NOT_EVALUATED) {
+			for (String interp : d.getNotEvaluatedReasons()) {
+				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
+				if (localCDInterp != null && ! interpretations.contains(localCDInterp))
+					interpretations.add(localCDInterp);
+			}
+			if (interpretations.size() > 0)
+				childObs.setInterpretation(interpretations);
+		}
 		else if (doseStatus == DoseStatus.ACCEPTED || doseStatus == DoseStatus.VALID) {
 			for (String interp : d.getAcceptedReasons()) {
 				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
@@ -417,6 +426,9 @@ public class PayloadHelper {
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.830");	// Mening ACWY
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.820");	// Rotavirus
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.600");	// Varicella
+			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.500");	// MMR
+			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.810");	// Hep A
+			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.620");	// Zoster
 			boolean lSupportedEarliestOverdueVgTmpFilter = lCurrentlySupportedEarliestOverdueVGs.contains(ts.getVaccineGroup());
 			
 			// Earliest, recommended and latest recommended should be set
