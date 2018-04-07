@@ -1690,15 +1690,17 @@ end
 	
 ///////// ***
 // General Design rule... Do not Edit
-// If the list of recommended vaccines are consistent and not all empty, and the patient is recommended for a forecast, then recommend at the vaccine level of the only specified vaccine
+// If the list of recommended vaccines are consistent and not all empty, and the patient is recommended for a forecast, then recommend at the vaccine level of the only specified vaccine.
+// Set each Recommendation Object's recommendedVaccine to null and set the TargetSeries recommendationVaccine to the 1 and only 1 vaccine
 ///////// ***
 rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsistentWithRecommendationObjects" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "supplementalSeriesRule"
 	when
-		$ts : TargetSeries(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE ||
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
 			recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendations != null, $tsFinalRecommendations : finalRecommendations)
 		$recommendationVaccineSet : Set(size == 1) from accumulate(Recommendation(recommendedVaccine != null, $accRecommendedVaccine : recommendedVaccine) from $tsFinalRecommendations, collectSet($accRecommendedVaccine))
+		$tsSame : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, recommendationVaccine == null || recommendationVaccine != null && recommendationVaccine memberOf $recommendationVaccineSet)
 		$recommendationVaccineList : List() from accumulate($acc2Recommendation : Recommendation(recommendedVaccine != null) from $tsFinalRecommendations, collectList($acc2Recommendation))
 	then
 		String _RULENAME = kcontext.rule.name;
