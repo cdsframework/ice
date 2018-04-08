@@ -2289,7 +2289,10 @@ rule "ProcessResults: Return Recommendations for Vaccines Not Supported" ruleflo
 	dialect "mvel"
 	salience 10
 	when
-		exists ObservationResult(observationValue.concept == PayloadHelper.getLocalCodeForEvaluationStatus(DoseStatus.EVALUATION_NOT_STARTED, schedule))
+		///// exists ObservationResult(observationValue.concept == PayloadHelper.getLocalCodeForEvaluationStatus(DoseStatus.EVALUATION_NOT_STARTED, schedule))
+		ImmunizationConcept($ctid : conceptTargetId)
+		$sae : SubstanceAdministrationEvent(id == $ctid)
+		not TargetDose(doseId == $sae.id)
 		not SubstanceAdministrationProposal(substance.substanceCode == PayloadHelper.getLocalCodeForRecommendationStatus(RecommendationStatus.RECOMMENDATION_NOT_AVAILABLE, schedule))
 	then
 		String _RULENAME = kcontext.rule.name;
