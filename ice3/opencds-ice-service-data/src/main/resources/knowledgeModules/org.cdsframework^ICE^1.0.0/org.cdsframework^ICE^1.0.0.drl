@@ -2214,6 +2214,23 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
+rule "ProcessResults: Return Recommendations for Vaccines Not Supported" extends "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported" ruleflow-group "ProcessResults"
+	dialect "mvel"
+	salience 10
+	when
+		not ObservationResult(observationValue != null && observationValue.concept != null && 
+			observationValue.concept == PayloadHelper.getLocalCodeForRecommendationStatus(RecommendationStatus.RECOMMENDATION_NOT_AVAILABLE, schedule))
+	then
+		String _RULENAME = kcontext.rule.name;
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.outputOtherImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId); 
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");		
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
 rule "ProcessResults: Check Non-Seasonal Series Selection Consistency" ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 20
@@ -2279,26 +2296,6 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 		PayloadHelper p = new PayloadHelper(schedule);
 		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts, outputEarliestOverdueDates);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
-end
-
-
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "ProcessResults: Return Recommendations for Vaccines Not Supported" ruleflow-group "ProcessResults"
-	dialect "mvel"
-	salience 10
-	when
-		///// exists ObservationResult(observationValue.concept == PayloadHelper.getLocalCodeForEvaluationStatus(DoseStatus.EVALUATION_NOT_STARTED, schedule))
-		ImmunizationConcept($ctid : conceptTargetId)
-		$sae : SubstanceAdministrationEvent(id == $ctid)
-		not TargetDose(doseId == $sae.id)
-		not SubstanceAdministrationProposal(substance.substanceCode == PayloadHelper.getLocalCodeForRecommendationStatus(RecommendationStatus.RECOMMENDATION_NOT_AVAILABLE, schedule))
-	then
-		String _RULENAME = kcontext.rule.name;
-		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputOtherImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId); 
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");		
 end
 
 
