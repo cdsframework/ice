@@ -132,7 +132,8 @@ public abstract class AbstractVaccine {
 			return validMinimumAgeOfUse;
 		}
 		else {
-			return new TimePeriod("0d");
+			/////// return new TimePeriod("0d");
+			return null;
 		}
 	}
 
