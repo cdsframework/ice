@@ -1439,6 +1439,10 @@ public class TargetSeries {
 		}
 
 		if (doseRuleOfInterest == 0) {
+			if (pRecommendationDateType == RecommendationDateType.LATEST_RECOMMENDED) {
+				// Latest recommended interval to target dose 1 are not considered for determining overdue date
+				return;
+			}
 			doseRuleOfInterest = 1;
 			// Below doseRuleOfInterest REMOVED 10/9/2014 as per general rule: no interval from target dose 1 to dose 1 for inactivated vaccines. 
 			// Create a separate live virus vaccine interval if needed.
