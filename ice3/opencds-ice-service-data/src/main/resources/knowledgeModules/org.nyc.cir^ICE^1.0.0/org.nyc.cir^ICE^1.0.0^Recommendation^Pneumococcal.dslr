@@ -450,7 +450,7 @@ end
 Pneumococcal Child Series 4-dose Series Exception Rules
 /************************************************************************************************************************************************************************************/
 
-// Exception 1
+// Exception 1A
 rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-Dose PCV Series and TargetDose 2 if Patient is between 7and12months and Received No Doses before 7months of Age" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
@@ -471,6 +471,32 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-D
 		Skip Series Dose Number to 2 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeSevenMonths for Consideration in the final Forecast of the Series $targetSeries
 		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Exception 1B
+rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-Dose PCV Series and TargetDose 3 if Patient is between 7and12months and Received 1 Dose before 7months of Age" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	salience 500
+	no-loop true
+	when
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- the numeric $nEffectiveDoseNumber is <= 3
+			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 1
+		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
+	then
+		Skip Series Dose Number to 3 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeSevenMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 3 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
