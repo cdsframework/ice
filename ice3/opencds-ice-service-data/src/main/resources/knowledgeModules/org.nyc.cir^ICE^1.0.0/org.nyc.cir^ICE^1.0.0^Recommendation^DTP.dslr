@@ -171,7 +171,7 @@ If any one of the following exceptions apply, then:
 // For patients who completed the 5-dose series and no adolescent Tdap exceptions apply:
 // * Recommended Vaccine = Tdap (CVX 115) 
 // * Recommended Interval = 0 days (from dose 5 or an accepted/extra dose, if one exists) and Recommended Age = 11 years  
-rule "DTP: Recommend Tdap at 11yrs of age & 0 day interval from last dose for completed 5-dose series if Adolescent Tdap 5-dose series recommendation exception did _not_ occur" ruleflow-group "RecommendationForecast"
+rule "DTP: Recommend Tdap at earliest date & recommended date at 11yrs, overdue date at 13yrs+4w with 0 day interval from last dose for completed 5-dose series if Adolescent Tdap 5-dose series recommendation exception did _not_ occur" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
@@ -196,16 +196,19 @@ rule "DTP: Recommend Tdap at 11yrs of age & 0 day interval from last dose for co
 			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION.conceptCodeValue
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge when the patient is "11y" of age
+			- make note of the date as $dtLatestRecommendedDateAtAge when the patient is "13y+4w" of age
 	then
-		// Recommendation at age of 11yrs
+		// Create a Recommendation with earliest/recommended/latest ages of 7yrs/11yrs/13y+4w
 		Create a Recommendation as $oRecommendationAge for the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendationAge to $dtDateAtAge
+		Set the Recommendation Overdue Forecast Date for $oRecommendationAge to $dtLatestRecommendedDateAtAge
 		Set the Recommendation Vaccine for $oRecommendationAge to "ICE115"
 		Include the Recommendation $oRecommendationAge for Consideration in the final forecast of the Series
-		// Recommendation at 0 days from the last shot in the series
-		Add 0 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		// Create a Recommendation at 0 days from the last shot in the series
+		/////// Add 0 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
-		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtCalculated
+		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtAdministrationDate
 		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
 		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -232,7 +235,9 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- Recommend Tda
 	then
 		// Recommendation at age of 7yrs
 		Create a Recommendation as $oRecommendationAge for the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendationAge to $dtDateAtAge
+		Set the Recommendation Overdue Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Vaccine for $oRecommendationAge to "ICE115"
 		Include the Recommendation $oRecommendationAge for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
