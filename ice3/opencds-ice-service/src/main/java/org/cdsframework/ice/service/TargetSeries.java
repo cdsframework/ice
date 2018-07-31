@@ -1365,7 +1365,7 @@ public class TargetSeries {
 			// Past due date is the latest recommended date (calculated via age or interval) + 1 day
 			Date lLatestDate = TimePeriod.addTimePeriod(ageDate, new TimePeriod(-1, DurationType.DAYS));
 			Recommendation lLatestRecommended = new Recommendation(this);
-			lLatestRecommended.setOverdueDate(lLatestDate);
+			lLatestRecommended.setLatestRecommendationDate(lLatestDate);
 			populateInterimLatestRecommendedAgeRecommendation(lLatestRecommended, pEvalDate.before(lLatestDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		}
 	}
@@ -1518,7 +1518,7 @@ public class TargetSeries {
 			// Past due date is the latest recommended date (calculated via age or interval) + 1
 			Date lLatestDate = TimePeriod.addTimePeriod(rIntervalDate, new TimePeriod(-1, DurationType.DAYS));
 			Recommendation lLatestRecommended = new Recommendation(this);
-			lLatestRecommended.setOverdueDate(lLatestDate);
+			lLatestRecommended.setLatestRecommendationDate(lLatestDate);
 			// populate this in interim structure.... if there are age rule recommendations, they will need to be removed later
 			populateInterimLatestRecommendedIntervalRecommendation(lLatestRecommended, pEvalDate.before(lLatestDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
 		}
@@ -1881,7 +1881,7 @@ public class TargetSeries {
 				this.interimRecommendationsCustomEarliest.add(recommendation);
 			}
 		}
-		if (recommendation.getOverdueDate() != null) {
+		if (recommendation.getLatestRecommendationDate() != null) {
 			if (! this.interimRecommendationsCustomLatest.contains(recommendation)) {
 				this.interimRecommendationsCustomLatest.add(recommendation);
 			}

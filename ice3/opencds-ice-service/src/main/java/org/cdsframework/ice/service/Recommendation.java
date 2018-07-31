@@ -32,6 +32,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
 
 /**
  * Interim recommendation class to store information that is used to determine a final recommendation. All information stored in instantiated Recommendation objects are utilized to determine 
@@ -127,12 +129,25 @@ public class Recommendation {
 		this.earliestDate = earliestDate;
 	}
 
-	public Date getOverdueDate() {
+	public Date getLatestRecommendationDate() {
 		return latestRecommendationDate;
 	}
 
-	public void setOverdueDate(Date latestRecommendationDate) {
+	public void setLatestRecommendationDate(Date latestRecommendationDate) {
 		this.latestRecommendationDate = latestRecommendationDate;
+	}
+	
+	/**
+	 * Sets the latest recommendation date to the overdue date - 1 days
+	 */
+	public void setOverdueDate(Date overdueDate) {
+		if (overdueDate == null) {
+			this.latestRecommendationDate = null;
+		}
+		else {
+			Date lLatestRecommendedDate = TimePeriod.addTimePeriod(overdueDate, new TimePeriod(-1, DurationType.DAYS));
+			setLatestRecommendationDate(lLatestRecommendedDate);
+		}
 	}
 
 	public String getRecommendationReason() {
@@ -228,10 +243,10 @@ public class Recommendation {
 		Date latestDate = null;
 		for (Recommendation rec : recommendationsList) {
 			if (latestDate == null) {
-				latestDate = rec.getOverdueDate();
+				latestDate = rec.getLatestRecommendationDate();
 			}
 			else {
-				Date thisRecDate = rec.getOverdueDate();
+				Date thisRecDate = rec.getLatestRecommendationDate();
 				if (thisRecDate != null && thisRecDate.after(latestDate)) {
 					latestDate = thisRecDate;
 				}

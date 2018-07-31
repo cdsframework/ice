@@ -93,7 +93,7 @@ rule "DTP: Evaluate recurring Td as valid if Td (interval) evaluation criteria i
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck" // This activation-group prevents the default series interval rule from firing, which would mark this shop as ACCEPTED/EXTRA_DOSE instead of simply valid.
 	when
-		// Since the minimum interval is 0 days, no actual interval check performed.
+		// Since the absolute minimum interval is 0 days, no actual interval check performed.
 	then
 		Mark the shot $currentShot as Valid for this Series
 		Record that this dose rule was processed for the TargetDose $currentShot
@@ -107,7 +107,7 @@ rule "DTP: Override default series rule that evaluates extra Td shots in the ser
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck" // This activation-group prevents the default series interval rule from firing, which would mark this shop as ACCEPTED/EXTRA_DOSE instead of simply valid.
 	when
-		// Since the minimum interval is 0 days, no actual interval check performed.
+		// Since the absolute minimum interval is 0 days, no actual interval check performed.
 	then
 		Mark the shot $currentShot as Valid for this Series
 		Record that this dose rule was processed for the TargetDose $currentShot
