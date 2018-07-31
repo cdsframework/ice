@@ -457,14 +457,15 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-D
 	salience 500
 	no-loop true
 	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 2
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
+		There is a Series $sameTargetSeries identified by $targetSeries
 			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 0
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
 	then
@@ -483,14 +484,15 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-D
 	salience 500
 	no-loop true
 	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 3
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
+		There is a Series $sameTargetSeries identified by $targetSeries
 			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 1
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
 	then
@@ -509,14 +511,15 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 12months and T
 	salience 500
 	no-loop true
 	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age	
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 3
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age	
+		There is a Series $sameTargetSeries identified by $targetSeries
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is < 2
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
 	then
@@ -536,14 +539,15 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 12months and TargetD
 	activation-group "recommendationAgeCheck"
 	no-loop true
 	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 4
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age
+		There is a Series $sameTargetSeries identified by $targetSeries
 			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is == 2
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
 	then
@@ -562,15 +566,16 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 24months and TargetD
 	salience 500
 	no-loop true
 	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dtDateAtAgeTwentyFourMonths when the Patient is "24m" of age					
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 4
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeTwentyFourMonths when the Patient is "24m" of age					
+		There is a Series $sameTargetSeries identified by $targetSeries
 			- the Effective Number of Doses in the Series before $dtDateAtAgeTwentyFourMonths is < 4
 		Confirm elapsed time between $dtBirthDate and evalTime >= "24m" && elapsed time between $dtBirthDate and evalTime < "5y"
 	then
@@ -589,15 +594,15 @@ rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to
 	salience 500
 	no-loop true
 	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dtDateAtAgeSixtyFiveYears when the Patient is "65y" of age					
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 6
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeSixtyFiveYears when the Patient is "65y" of age					
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
 		Skip Series Dose Number to 6 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries

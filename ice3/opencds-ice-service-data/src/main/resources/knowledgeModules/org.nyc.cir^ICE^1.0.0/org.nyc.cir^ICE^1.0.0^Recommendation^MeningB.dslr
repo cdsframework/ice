@@ -129,7 +129,6 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-do
 			- the name of the series is "MenBFHbp3DoseSeries"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		/////// Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE162"
 		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -147,7 +146,6 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-do
 			- the name of the series is "MenBFHbp2DoseSeries"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		/////// Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE162"
 		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -256,16 +254,16 @@ MenB FHbp 3-dose Series specific rules
 rule "MeningB: Recommend an interval of at 6 months between doses 1 & 3 in FHbp 3-dose Series" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationRule"
 	when
-		There is an Administered Shot $dose1 
+		There is a Series $targetSeries that needs Forecasting
+			- the name of the Series is "MenBFHbp3DoseSeries"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries 
 			- the Dose Number in the Series is == 1
 			- that has already been Evaluated and whose Shot Validity is VALID
 			- Make note of the Date this Shot was Administered as $dtAdministrationDate
-		There is a Series $targetSeries that needs Forecasting
-			- the name of the Series is "MenBFHbp3DoseSeries"
-			- the Series contains the Dose $dose1
-			- the effective dose number in the Series is == 3
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
-			- the Series is not Complete
 	then
 		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries

@@ -101,8 +101,8 @@
 [condition][]There does not exist {entity:a |another |}[Ss]eries=not TargetSeries()
 [condition][]There is a [Ss]eries {assign_oTargetSeries} that needs [Ff]orecasting={assign_oTargetSeries} : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
 [condition][]There is a [Ss]eries {assign_oTargetSeries} that contains the {entity:[Ss]hot|[Dd]ose}  {refer_oTargetDose}={assign_oTargetSeries} : TargetSeries(containsTargetDose({refer_oTargetDose}))
-[condition][]There is a [Ss]eries {assign_oTargetSeries} distinct from {assign_oOtherTargetSeries}={assign_oOtherTargetSeries} : TargetSeries(targetSeriesIdentifier != {assign_oOtherTargetSeries}.targetSeriesIdentifier)
-[condition][]There is a [Ss]eries {assign_oTargetSeries} identified by {assign_oSameTargetSeries}={assign_oSameTargetSeries} : TargetSeries(targetSeriesIdentifier == {assign_oSameTargetSeries}.targetSeriesIdentifier)
+[condition][]There is a [Ss]eries {assign_oTargetSeries} distinct from {assign_oOtherTargetSeries}={assign_oTargetSeries} : TargetSeries(targetSeriesIdentifier != {assign_oOtherTargetSeries}.targetSeriesIdentifier)
+[condition][]There is a [Ss]eries {assign_oTargetSeries} identified by {assign_oSameTargetSeries}={assign_oTargetSeries} : TargetSeries(targetSeriesIdentifier == {assign_oSameTargetSeries}.targetSeriesIdentifier)
 [condition][]There is a [Ss]eries {assign_oTargetSeries}={assign_oTargetSeries} : TargetSeries()
 [condition][]- [Tt]he [Ss]eries does not {entity:also |}contain {entity:the [Dd]ose|the [Ss]hot|}  {refer_oTargetDose}=containsTargetDose({refer_oTargetDose}) == false
 [condition][]- [Tt]he [Ss]eries {entity:also |}contains {entity:the [Dd]ose|the [Ss]hot|}  {refer_oTargetDose}=containsTargetDose({refer_oTargetDose})

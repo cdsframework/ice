@@ -686,13 +686,10 @@ public class TargetSeries {
 		int highestNonSkipDoseNumberToEntry = 0;
 
 		// Tally up objects for each disease, that is-- how many valid doses for each disease
-		/////// Map<SupportedDiseaseConcept, Integer> tallyOfDoseNumberByDisease = new HashMap<SupportedDiseaseConcept, Integer>();
-		/////// Map<SupportedDiseaseConcept, Integer> tallyOfRelevantDiseaseImmunity = new HashMap<SupportedDiseaseConcept, Integer>();
-		Map<String, Integer> tallyOfDoseNumberByDisease = new HashMap<String, Integer>();
-		Map<String, Integer> tallyOfRelevantDiseaseImmunity = new HashMap<String, Integer>();
+		Map<String, Integer> tallyOfDoseNumberByDisease = new HashMap<String, Integer>();		// Disease -> dose number
+		Map<String, Integer> tallyOfRelevantDiseaseImmunity = new HashMap<String, Integer>();	// Disease -> disease immunity count
 
 		// Initialize tally for supported diseases
-		/////// Collection<SupportedDiseaseConcept> allSupportedDiseases = antigensToIncludeInDetermination;
 		Collection<String> allSupportedDiseases = antigensToIncludeInDetermination;
 		for (String disease : allSupportedDiseases) {
 			tallyOfDoseNumberByDisease.put(disease, new Integer(0));
@@ -720,7 +717,6 @@ public class TargetSeries {
 		String pTDUniqueIdentifier = pTD.getUniqueId();
 		TargetDose lPreviouslyProcessedTD = null;
 		Date lDuplicateShotSameDayValidDoseFoundDate = null;
-		/////// HashSet<SupportedDiseaseConcept> lDuplicateShotDiseases = new HashSet<SupportedDiseaseConcept>();
 		HashSet<String> lDuplicateShotDiseases = new HashSet<String>();
 		for (TargetDose td : targetDoses) {
 			if (updateInternalSeriesDoseNumberCount == false && lPreviouslyProcessedTD != null && lPreviouslyProcessedTD.getUniqueId().equals(pTDUniqueIdentifier)) {
@@ -728,7 +724,6 @@ public class TargetSeries {
 			}
 			if (lDuplicateShotSameDayValidDoseFoundDate != null && ! td.getAdministrationDate().equals(lDuplicateShotSameDayValidDoseFoundDate)) {
 				lDuplicateShotSameDayValidDoseFoundDate = null;
-				/////// lDuplicateShotDiseases = new HashSet<SupportedDiseaseConcept>();
 				lDuplicateShotDiseases = new HashSet<String>();
 			}
 			if (lDuplicateShotSameDayValidDoseFoundDate != null && lPreviouslyProcessedTD != null && 
@@ -739,14 +734,12 @@ public class TargetSeries {
 				continue;
 			}
 			DoseStatus statusThisTD = td.getStatus();
-			/////// Collection<SupportedDiseaseConcept> diseasesTargetedByThisDose = td.getVaccineComponent().getAllDiseasesTargetedForImmunity();
 			Collection<String> diseasesTargetedByThisDose = td.getVaccineComponent().getAllDiseasesTargetedForImmunity();
 			if (Collections.disjoint(diseasesTargetedByThisDose, antigensToIncludeInDetermination)) {
 				// There is no overlap in diseases between this dose and the antigens we're checking.
 				lPreviouslyProcessedTD = td;
 				continue;
 			}
-			/////// for (SupportedDiseaseConcept diseaseTargeted : diseasesTargetedByThisDose) {
 			for (String diseaseTargeted : diseasesTargetedByThisDose) {
 				Integer numberOfValidDosesForDiseaseInt = tallyOfDoseNumberByDisease.get(diseaseTargeted);
 				if (numberOfValidDosesForDiseaseInt != null) { 
@@ -2147,13 +2140,6 @@ public class TargetSeries {
 					else {
 						setFinalOverdueDate(lObtainUnadjustedLatest);
 					}
-					/////// Or alternatively, take the earliest date: 
-					//if (lObtainLatestEarliest != null && lObtainUnadjustedLatest.before(lObtainLatestEarliest)) {
-					//	setFinalLatestRecommendationDate(lObtainLatestEarliest);
-					//}
-					//else {
-					//	setFinalLatestRecommendationDate(lObtainUnadjustedLatest);
-					//}
 				}
 			}		
 		}
@@ -2172,8 +2158,8 @@ public class TargetSeries {
 		interimRecommendationsCustomEarliest = new ArrayList<Recommendation>();
 		interimRecommendationsCustomLatest = new ArrayList<Recommendation>();
 
-		// TODO? recommendation has changed - post-forecast checks should be permitted
-		// setPostForecastCheckCompleted(false);
+		/////// TODO? recommendation has changed - post-forecast checks should be permitted
+		/////// setPostForecastCheckCompleted(false);
 	}
 
 
