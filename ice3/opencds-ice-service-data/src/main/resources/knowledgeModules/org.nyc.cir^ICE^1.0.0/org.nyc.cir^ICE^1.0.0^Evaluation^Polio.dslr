@@ -60,19 +60,19 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >
 	agenda-group "postEvaluationCheck"
 	when
 		There is an Administered Shot $dose3
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
 			- the dose number in the series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDate
+			- make note of the Associated Series as $associatedTargetSeries
 		There is an Administered Shot $prevdose2
+			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
 			- the dose number in the series is == 2
 			- make note of the date this shot was administered as $dtAdministrationDatePrev
-		There is a Series $targetSeries that contains the shot $dose3
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is not complete
-			- the series also contains the dose $prevdose2
 			- the number of doses administered is == 3
-		// SupportedVaccineConcept._IPV
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Verify that the count of doses administered in Series $targetSeries with vaccine "ICE10" is == 3
@@ -91,22 +91,23 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are OPV, patient >
 	dialect "mvel"
 	agenda-group "postEvaluationCheck"
 	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
 		There is an Administered Shot $dose3
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
 			- the dose number in the series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDate
+			- make note of the Associated Series as $associatedTargetSeries
 		There is an Administered Shot $prevdose2
+			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
 			- the dose number in the series is == 2
 			- make note of the date this shot was administered as $dtAdministrationDatePrev
-		There is a Series $targetSeries that contains the shot $dose3
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is not complete
-			- the series also contains the dose $prevdose2
 			- the number of doses administered is == 3
 		// SupportedVaccineConcept._OPV
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Verify that the count of doses administered in Series $targetSeries with vaccine a member of ("ICE02","ICE182") is == 3
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "4y" && elapsed time between $dtAdministrationDatePrev and $dtAdministrationDate >= "6m-4d"
 	then
@@ -122,22 +123,21 @@ rule "Polio: Modify DoseRule4 Absolute minimum age and Absolute Minimum Interval
 	no-loop true
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400" and the Series with name "Polio4DoseSeries"
 			- the dose number in the series is == 4
 			- the administration date of the shot is < "07-Aug-2010"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
-		There is a Series $targetSeries that contains the shot $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
-			- the name of the Series is "Polio4DoseSeries"
+			- make note of the Associated Series as $associatedTargetSeries
 	then
-		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
+		Obtain the existing DoseRule for Dose Number 4 in the Series $associatedTargetSeries as $assign_oDoseRule4
 		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "122d"
-		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule4
-		Obtain the existing DoseRule for Dose Number 3 in the Series $targetSeries as $assign_oDoseRule3
+		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule4
+		Obtain the existing DoseRule for Dose Number 3 in the Series $associatedTargetSeries as $assign_oDoseRule3
 		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule3 to TimePeriod "24d"
-		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule3
-		Refresh all Facts in the Series $targetSeries for Evaluation
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries	
+		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule3
+		Refresh all Facts in the Series $associatedTargetSeries for Evaluation
+		Record that this Series Rule was Processed for the TargetSeries $associatedTargetSeries
+		Log that this Series Rule fired for the Series $associatedTargetSeries	
 end
 
 
@@ -148,13 +148,13 @@ rule "Polio: Mark target dose 4 administered >= 8/7/2010 and before absolute min
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $targetDose4 that needs to be evaluated
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400" and the Series with name "Polio4DoseSeries"
 			- the dose number in the series is == 4
 			- the administration date of the shot is >= "07-Aug-2010"
 			- make note of the date this shot was administered as $dtAdministrationDate
-		There is a Series $targetSeries that contains the shot $targetDose4
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- make note of the absolute minimum age for dose 4 in this series as $absoluteMinimumAge
-			- the name of the Series is "Polio4DoseSeries"
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate < $absoluteMinimumAge
@@ -171,9 +171,10 @@ rule "Polio: Mark OPV shots (CVX 178 or CVX 179) as INVALID with reason MISSING_
 	activation-group "allowableVaccineCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the vaccine administered a member of ("ICE178","ICE179")
-		There is a Series $targetSeries that contains the shot $currentShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series is Not Complete
 	then
 		Mark the Shot $currentShot as Invalid for this Series due to "Missing Antigen"
@@ -187,10 +188,11 @@ rule "Polio: Mark OPV shots administered >= 4/1/2016 as INVALID with reason MISS
 	agenda-group "customEvaluationRule"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the administration date of the shot is >= "01-Apr-2016"
 			- the vaccine administered a member of ("ICE02","ICE178","ICE179","ICE182")
-		There is a Series $targetSeries that contains the shot $currentShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series is Not Complete
 	then
 		Mark the Shot $currentShot as Invalid for this Series due to "Missing Antigen"

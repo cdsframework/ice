@@ -56,16 +56,16 @@ rule "Meningococcal: Mark the Series as Complete Before Evaluation of Shot if Pr
 	dialect "mvel"
 	agenda-group "postEvaluationCheck"
 	when
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dtDateAtAge when the patient is "16y" of age				
 		There is an Administered Shot $dose1
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830" and the Series with name "MCV42DoseSeries"
 			- the Dose Number in the Series is == 1
 			- that has already been evaluated and whose Shot Validity is VALID
 			- make note of the date this shot was administered as $dtAdministrationDateOne
-		There is a Series $targetSeries that contains the Shot $dose1
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
-			- the name of the Series is "MCV42DoseSeries"
+			- make note of the Associated Series as $associatedTargetSeries
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAge when the patient is "16y" of age				
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series is Not Complete
 			- the number of Doses Administered is == 1
 			- the number of Doses Administered before $dtDateAtAge is == 0
@@ -85,11 +85,12 @@ rule "Meningococcal: Evaluate shot as Accepted/Below Recommended Age, and does n
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
 			- the dose number in the series is == 1
 			- make note of the date this shot was administered as $shotDate
 			- make note of the minimum vaccine age for this shot as $validMinAgeVaccine
-		There is a Series $targetSeries that contains the Shot $currentShot
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- make note of the Absolute Minimum Age for Dose 1 in this Series as $minAgeDoseOne
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -109,16 +110,16 @@ rule "Meningococcal: Skip Evaluation of the Shot if given below the minimum age 
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
 			- make note of the date this shot was administered as $shotDate
 			- make note of the minimum vaccine age for this shot as $validMinAgeVaccine
-		There is a Series $targetSeries that contains the Shot $currentShot
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
+			- make note of the Associated Series as $associatedTargetSeries
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $shotDate < $validMinAgeVaccine 
 	then
 		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
 
@@ -127,12 +128,13 @@ rule "Evaluate Shot as Accepted & Above Recommended Age if age at administration
 	agenda-group "customEvaluationRule"
     when
 		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+			- make note of the Associated Series as $associatedTargetSeries
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the Date as $assign_dtDateAtAge when the Patient is "19y" of age
-		There is a Series $targetSeries that contains the Shot $currentShot
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series is not Complete
 			- make note of the Number of Doses Required to Complete this Series as $assign_nNumberOfDosesRequired
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is < $assign_nNumberOfDosesRequired

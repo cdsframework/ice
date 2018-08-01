@@ -56,9 +56,9 @@ rule "Rotavirus: Mark Dose as Accepted if Patient Greater Than 8 Months of Age" 
 	activation-group "doseAgeCheck"
     when
 		There is an administered shot $currentDose that needs to be evaluated
+		 	- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.820"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
-		There is a series $targetSeries that contains the dose $currentDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.820"	
+			- make note of the Associated Series as $associatedTargetSeries
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateCurrentDose > "8m"
@@ -66,7 +66,7 @@ rule "Rotavirus: Mark Dose as Accepted if Patient Greater Than 8 Months of Age" 
         Mark the shot $currentDose as accepted for this series due to "Above Recommended Age"
         Mark that evaluation of shot $currentDose is complete and therefore should not be reevaluated by any other rules
 		Record that this Dose Rule was Processed for the TargetDose $currentDose
-		Log that this Dose Rule fired for the Dose $currentDose in the Series $targetSeries
+		Log that this Dose Rule fired for the Dose $currentDose in the Series $associatedTargetSeries
 end
 
 
@@ -79,7 +79,8 @@ rule "Rotavirus: Mark Shot with Invalid Vaccine as Invalid but do _not_ indicate
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.820"
 			- make note of the administered vaccine as $administeredVaccine
 			- make note of the dose number as $doseNumber
-		There is a series $targetSeries that contains the shot $currentShot
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a series $targetSeries identified by $associatedTargetSeries
 			- the vaccine $administeredVaccine is not permitted for dose number $doseNumber in this Series
 			- make note of the number of doses required to complete this series as $numberOfDosesInSeries
 			- the numeric $doseNumber is <= $numberOfDosesInSeries
