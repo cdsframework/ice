@@ -33,6 +33,7 @@ import org.drools.spi.KnowledgeHelper
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.Recommendation
@@ -54,7 +55,7 @@ global org.drools.runtime.KnowledgeContext kcontext
 
 // If patient is male, >= 22 yrs and < 27 yrs and has no doses on record, series is conditionally recommended, reason = HIGH RISK
 rule "HPV: If patient is male, >= 22 yrs and < 27 yrs and has no doses on record, series is conditionally recommended, reason = HIGH RISK" ruleflow-group "RecommendationForecast"
-	salience 200
+	// salience 200
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -73,9 +74,9 @@ rule "HPV: If patient is male, >= 22 yrs and < 27 yrs and has no doses on record
 end
 
 
-// The interval between dose 1 & 3 of HepB needs to be at least 112 days for Recommendation. Routine interval rule still runs
-rule "HPV: Set the recommended interval of 6m between doses 1 & 3 for the HPV 3-Dose Series" ruleflow-group "RecommendationForecast"
-	salience 200
+// The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
+rule "HPV: Set the recommended interval of 6m between doses 1 & 3 for the HPV 3-Dose Series if patei" ruleflow-group "RecommendationForecast"
+	// salience 200
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -96,9 +97,9 @@ rule "HPV: Set the recommended interval of 6m between doses 1 & 3 for the HPV 3-
 end
 
 
-// The interval between dose 1 & 3 of HepB needs to be at least 112 days for Recommendation. Routine interval rule still runs
-rule "HPV: Set the earliest forecast interval of 5m between doses 1 & 3 for the HPV 3-Dose Series" ruleflow-group "RecommendationForecast"
-	salience 200
+// The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
+rule "HPV: Set the earliest interval of 5m between doses 1 & 3 for the HPV 3-Dose Series" ruleflow-group "RecommendationForecast"
+	// salience 200
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -114,6 +115,58 @@ rule "HPV: Set the earliest forecast interval of 5m between doses 1 & 3 for the 
 	then
 		Add 5 DurationType.MONTHS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $recommendation with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
+rule "HPV: Set the latest recommended interval of 7m+4w between doses 1 & 3 for the HPV 3-Dose Series if patient >= 15 yrs" ruleflow-group "RecommendationForecast"
+	// salience 200
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs Forecasting
+			- the name of the Series is "HPV3DoseSeries"
+			- the effective dose number in the Series is == 3
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series is not Complete
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "15y"
+	then
+		Add "7m+4w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Overdue Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
+rule "HPV: Set the latest recommended interval of 13m+4w between doses 1 & 3 for the HPV 3-Dose Series if patient < 15 yrs" ruleflow-group "RecommendationForecast"
+	// salience 200
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs Forecasting
+			- the name of the Series is "HPV3DoseSeries"
+			- the effective dose number in the Series is == 3
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series is not Complete
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime < "15y"
+	then
+		Add "13m+4w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Overdue Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -141,6 +194,7 @@ rule "HPV: Recommend NOT_RECOMMENDED TOO_OLD If Patient >=27 yrs and does not ha
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+
 rule "HPV: Recommend Conditionally ABOVE_AGE_MAY_COMPLETE if Series Not Complete, Patient >=27 yrs and has one or more doses <27 yrs" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
@@ -154,7 +208,7 @@ rule "HPV: Recommend Conditionally ABOVE_AGE_MAY_COMPLETE if Series Not Complete
 			- make note of the Date as $assign_dtDateAtAge when the Patient is "27y" of age
 		There is a Series $sameTargetSeries identified by $targetSeries
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is > 0		
-		Confirm elapsed time between $dtBirthDate and evalTime >= "27y"	
+		Confirm elapsed time between $dtBirthDate and evalTime >= "27y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ABOVE_AGE_MAY_COMPLETE"
@@ -163,3 +217,26 @@ rule "HPV: Recommend Conditionally ABOVE_AGE_MAY_COMPLETE if Series Not Complete
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+
+// As defined in the XML, the default dose 1 latest recommended age is 13y+4w, and the default latest recommended interval is 13m+4w. If the patient is >= 15y, change the latest recommended age
+// to 15y and the latest recommended interval to 16w.  
+rule "HPV: If Patient >= 15 yrs and number of doses administered <= 1, modify HPV 3-Dose Series DoseRule 1 Latest Recommended Age to 15 yrs and Latest Recommended Interval to 16 weeks" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the name of the Series is "HPV3DoseSeries"
+			- the effective dose number in the Series is <= 2
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "15y"	
+	then
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		Set the Latest Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "15y"
+		Set the Latest Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "16w"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
+		Refresh all Facts in the Series $targetSeries for Forecasting
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
