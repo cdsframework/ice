@@ -71,9 +71,11 @@ rule "DTP: Evaluate recurring Td as valid if Td (age) evaluation criteria is met
 	activation-group "doseAgeCheck"	// Prevent default series interval rule from firing, which would mark this shop as ACCEPTED/EXTRA_DOSE instead of simply valid.
 	when
 		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- make note of the administered shot number as $currentShotNumber
-		There is a Series $targetSeries that contains the shot $currentShot
-			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
 		The Patient information $evaluatedPerson must be known to complete writing this rule
 			 - make note of the date as $dtDateAtAge when the patient is "7y" of age
@@ -128,11 +130,13 @@ rule "DTP: Evaluate Adolescent Tdap shot as valid if Tdap (age) evaluation crite
 		The patient information $patientInformation must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge when the patient is "7y" of age
 		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the administration date of the shot is >= $dtDateAtAge
 			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedByThisShot
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
-		There is a Series $targetSeries that contains the shot $currentShot
-			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
 	then
 		Mark the shot $currentShot as Valid for this Series
@@ -228,10 +232,12 @@ rule "DTP(3): A primary dose of pertussis exists if a (valid) dose for adolescen
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.032.9"
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.037"
 			- the administration date of the shot is >= $dtDateAtAge
+			- make note of the Associated Series as $associatedTargetSeries
 		There is not an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- that has associated administered shot $currentShot
-		There is a Series $targetSeries that contains the Dose $currentShot
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
 	then
 		Insert an IceFact SupportedFactConcept._DOSE_OF_PERTUSSIS.getConceptCodeValue() with TargetDose $currentShot into working memory
@@ -251,20 +257,19 @@ rule "DTP: Absolute Minimum Age for Tdap/Td applies for target doses 1-3 of the 
 	activation-group "minimumAgeVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200" and the Series with name "DTP5DoseSeries"
 			- the dose number in the series is <= 3
 			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
 			- make note of the minimum vaccine age for this shot as $strValidMinimumAge
 			- make note of the Date this Shot was Administered as $administrationDate
-		There is a Series $targetSeries that contains the shot $currentShot
-			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the series is "DTP5DoseSeries"
+			- make note of the Associated Series as $associatedTargetSeries
 		The Patient information $evaluationPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and $administrationDate < $strValidMinimumAge
 	then
 		Mark the shot $currentShot as Invalid for this Series due to "Insufficient Antigen"
 		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
 
@@ -275,15 +280,14 @@ rule "DTP: Absolute Minimum Age for Tdap/Td check for target doses 4 or 5 of the
 	agenda-group "customEvaluationRule"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200" and the Series with name "DTP5DoseSeries"
 			- the dose number in the series is one of (4,5)
-			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")	
-		There is a Series $targetSeries that contains the shot $currentShot
-			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the series is "DTP5DoseSeries"
+			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
+			- make note of the Associated Series as $associatedTargetSeries
 	then
 		// Simply log that this occurred
 		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 			
 			
@@ -298,7 +302,7 @@ rule "DTP: Absolute Minimum Age for Tdap/Td does not apply for true target dose 
 	then
 		// Minimum age for vaccine is waived - Simply log that this occurred
 		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 		
 		
@@ -313,7 +317,7 @@ rule "DTP: Absolute Minimum Age for Tdap/Td does not apply for true target dose 
 	then
 		// Minimum age for vaccine is waived - Simply log that this occurred
 		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
 
@@ -373,14 +377,12 @@ rule "DTP(HistoryEvaluation): If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is
 	when
 		// The shot being evaluated
 		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200" and the Series with name "DTP5DoseSeries"
 			- the dose number in the series is <= 3
 			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the minimum vaccine age for this Shot as $validMinimumAgeVaccine
-		// The Series
-		There is a Series $targetSeries that contains the Shot $currentShot
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the series is "DTP5DoseSeries"
+			- make note of the associated series as $associatedTargetSeries
 		The Patient information $evaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
 		// Check that Td or Tdap was admininstered < 7y-4d of age
@@ -388,7 +390,7 @@ rule "DTP(HistoryEvaluation): If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is
 	then
 		Mark the shot $currentShot as Ignored
 		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
 /*************************************************************************************************************************************************************************************

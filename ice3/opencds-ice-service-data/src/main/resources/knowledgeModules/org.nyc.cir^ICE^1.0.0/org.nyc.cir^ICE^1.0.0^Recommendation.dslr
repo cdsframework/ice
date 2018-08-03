@@ -49,11 +49,11 @@ rule "Recommend No Earliest Interval When Prior Dose Before DOB" ruleflow-group 
 	agenda-group "customRecommendationRule"
 	activation-group "earliestIntervalCheck"
     when
-        The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
 		There is a Series $targetSeries that needs forecasting
 			- at least one shot has been administered
 			- make note of the date that the most recent shot was administered as $shotDate
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm the date $shotDate is before $dtBirthDate
     then
         //actions
@@ -68,11 +68,11 @@ rule "Recommend No Recommended Interval When Prior Dose Before DOB" ruleflow-gro
 	agenda-group "customRecommendationRule"
 	activation-group "recommendationIntervalCheck"
     when
-        The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
 		There is a Series $targetSeries that needs forecasting
 			- at least one shot has been administered
 			- make note of the date that the most recent shot was administered as $shotDate
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm the date $shotDate is before $dtBirthDate
     then
         //actions

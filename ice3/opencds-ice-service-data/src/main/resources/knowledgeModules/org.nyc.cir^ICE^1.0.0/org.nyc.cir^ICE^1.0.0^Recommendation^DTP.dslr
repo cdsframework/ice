@@ -453,13 +453,13 @@ rule "DTP: Recommend Td (CVX 09) at earliest interval of 5y, recommended interva
 	agenda-group "customRecommendationRule"
 	activation-group "recommendationIntervalCheck"
 	when
-		The Patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthdate
-			- make note of the date as $dtDateAtAge when the patient is "7y" of age			
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the Series is complete
 			- make note of the date that the most recent shot was administered as $dtAdministrationDate
+		The Patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthdate
+			- make note of the date as $dtDateAtAge when the patient is "7y" of age			
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- there is an associated administered shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge

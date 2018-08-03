@@ -48,8 +48,8 @@
 [condition][]- [Tt]he [Ss]hot belongs to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == true
 [condition][]- [Tt]he [Ss]hot does not belong to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == false
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
-[condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem} and the [Ss]eries with [Nn]ame {sSeriesName}=associatedTargetSeries.seriesRules.vaccineGroup == {dd_oVaccineGroupCdsListItem}, associatedTargetSeries.seriesName == {sSeriesName}
-[condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=associatedTargetSeries.seriesRules.vaccineGroup == {dd_oVaccineGroupCdsListItem}
+[condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem} and the [Ss]eries with [Nn]ame {sSeriesName}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}, associatedSeriesName == {sSeriesName}
+[condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}
 [condition][]- [Tt]he [Ss]eries that the [Ss]hot belongs to is [Cc]omplete=associatedTargetSeries.isSeriesComplete() == true
 [condition][]- [Tt]he [Ss]eries that the [Ss]hot belongs to is [Nn]ot [Cc]omplete=associatedTargetSeries.isSeriesComplete() == false
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is a [Ll]ive [Vv]irus [Vv]accine=vaccineComponent.isLiveVirusVaccine == true
@@ -83,7 +83,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Aa]bsolute [Mm]inimum [Ii]nterval from [Tt]his [Dd]ose to the [Nn]ext [Dd]ose as {assign_oTimePeriod}=getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()) != null, {assign_oTimePeriod} : getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()).getAbsoluteMinimumInterval(), {assign_oTimePeriod} != null
 [condition][]- [Mm]ake [Nn]ote of the [Ee]arliest [Rr]ecommended [Aa]ge of [Tt]his [Dd]ose as {assign_oTimePeriod}=getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()) != null, {assign_oTimePeriod} : getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()).getEarliestRecommendedAge(), {assign_oTimePeriod} != null
 [condition][]- [Mm]ake [Nn]ote of the [Ee]arliest [Rr]ecommended [Ii]nterval from [Tt]his [Dd]ose to the [Nn]ext [Dd]ose as {assign_oTimePeriod}=getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()) != null, {assign_oTimePeriod} : getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()).getEarliestRecommendedInterval(), {assign_oTimePeriod} != null
-[condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Ss]eries as {assign_oTargetSeries}={assign_oTargetSeries} : associatedTargetSeries, associatedTargetSeries != null
+[condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Ss]eries as {assign_oTargetSeries}={assign_oTargetSeries} : associatedTargetSeries, {assign_oTargetSeries} != null
 [condition][]- [Mm]ake [Nn]ote of [Aa]ll [Ee]valuation [Rr]easons for this [Ss]hot as {assign_oCollectionOfReasons}={assign_oCollectionOfReasons} : allEvaluationReasonsFromAllReasonSets
 [condition][]- [Mm]ake [Nn]ote of the [Aa]dministered [Vv]accine as {assign_oVaccineAdministered}={assign_oVaccineAdministered} : administeredVaccine 
 [condition][]- [Tt]he [Cc]ollection {oCollection} contains {oCollectionElement}={oCollection} contains {oCollectionElement}
@@ -101,8 +101,8 @@
 [condition][]There does not exist {entity:a |another |}[Ss]eries=not TargetSeries()
 [condition][]There is a [Ss]eries {assign_oTargetSeries} that needs [Ff]orecasting={assign_oTargetSeries} : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
 [condition][]There is a [Ss]eries {assign_oTargetSeries} that contains the {entity:[Ss]hot|[Dd]ose}  {refer_oTargetDose}={assign_oTargetSeries} : TargetSeries(containsTargetDose({refer_oTargetDose}))
-[condition][]There is a [Ss]eries {assign_oTargetSeries} distinct from {assign_oOtherTargetSeries}={assign_oTargetSeries} : TargetSeries(targetSeriesIdentifier != {assign_oOtherTargetSeries}.targetSeriesIdentifier)
-[condition][]There is a [Ss]eries {assign_oTargetSeries} identified by {assign_oSameTargetSeries}={assign_oTargetSeries} : TargetSeries(targetSeriesIdentifier == {assign_oSameTargetSeries}.targetSeriesIdentifier)
+[condition][]There is a [Ss]eries {assign_oTargetSeries} distinct from {assign_oOtherTargetSeries}={assign_oTargetSeries} : TargetSeries(this != {assign_oOtherTargetSeries})
+[condition][]There is a [Ss]eries {assign_oTargetSeries} identified by {assign_oSameTargetSeries}={assign_oTargetSeries} : TargetSeries(this == {assign_oSameTargetSeries})
 [condition][]There is a [Ss]eries {assign_oTargetSeries}={assign_oTargetSeries} : TargetSeries()
 [condition][]- [Tt]he [Ss]eries does not {entity:also |}contain {entity:the [Dd]ose|the [Ss]hot|}  {refer_oTargetDose}=containsTargetDose({refer_oTargetDose}) == false
 [condition][]- [Tt]he [Ss]eries {entity:also |}contains {entity:the [Dd]ose|the [Ss]hot|}  {refer_oTargetDose}=containsTargetDose({refer_oTargetDose})

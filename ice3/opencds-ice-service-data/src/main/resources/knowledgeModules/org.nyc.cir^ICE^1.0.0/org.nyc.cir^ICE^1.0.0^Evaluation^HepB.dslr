@@ -51,12 +51,13 @@ rule "HepB: Verify Adherece to the Maximum Valid Age for the Vaccine if HepB Hig
 	agenda-group "customEvaluationRule"
 	activation-group "maximumAgeVaccineCheck"
 	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
         There is an Administered Shot $oTargetDose that needs to be evaluated
-        	// SupportedVaccineConcept._HEPB_HIGHRISK_INFANT
+        	- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
         	- the vaccine administered is "ICE42"
         	- the vaccine administered has a maximum valid age
-        There is a Series $oTargetSeries that contains the Dose $oTargetDose
+        	- make note of the Associated Series as $oTargetSeries
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+        	- make note of the patient's birthdate as $dtBirthDate
         Confirm the age of the patient $oEvaluatedPerson at the time the vaccine was administered for dose $oTargetDose is greater than the maximum allowable age for the vaccine
 	then
 		Mark the shot $oTargetDose as Invalid for this Series due to "Insufficient Antigen"
@@ -69,12 +70,13 @@ rule "HepB: Verify Adherence to the Maximum Valid Age for the Vaccine if HepB Pe
 	agenda-group "customEvaluationRule"
 	activation-group "maximumAgeVaccineCheck"
     when
-    	The patient information $oEvaluatedPerson must be known to complete writing this rule
     	There is an Administered Shot $oTargetDose that needs to be evaluated
-    		// SupportedVaccineConcept._HEPB_LESSTHAN_20
+    		- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
        		- the vaccine administered is "ICE08"
        		- the vaccine administered has a maximum valid age
-		There is a Series $oTargetSeries that contains the Dose $oTargetDose
+       		- make note of the Associated Series as $oTargetSeries
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+        	- make note of the patient's birthdate as $dtBirthDate
 		Confirm the age of the patient $oEvaluatedPerson at the time the vaccine was administered for dose $oTargetDose is greater than the maximum allowable age for the vaccine
     then
         Mark the shot $oTargetDose as Invalid for this Series due to "Insufficient Antigen"
@@ -87,20 +89,20 @@ rule "HepB: Evaluate the Minimum Interval Between Doses 1 and 3" ruleflow-group 
 	agenda-group "customEvaluationRule"
 	when  
 		There is an Administered Shot $currentDose that needs to be evaluated
-			- the dose number in the series is == 3
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the Dose Number in the Series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+			- make note of the Associated Series as $associatedTargetSeries
 		There is an Administered Shot $previousDose
+			- the Shot belongs to the Series $associatedTargetSeries
 			- the dose number in the series is == 1
 			- that has already been evaluated and whose shot validity is VALID
 			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
-		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series also contains the Dose $previousDose
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
 		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "108d"
 	then
 		Mark the shot $currentDose as Invalid for this Series due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentDose
-		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
 end 
 
 
@@ -111,28 +113,30 @@ end
 rule "HepB: Enough is Enough Rule" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck"	// This rule says the dose is VALID ... so we override other checks that might mark it as INVALID or even ACCEPTED
-	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
+	when		
 		There is an Administered Shot $currentDose that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
 			- the dose number in the series is == 3
 			- the administered shot number is >= 4
 			- make note of the administered shot number as $nAdministeredShotNumber
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+			- make note of the Associated Series as $associatedTargetSeries
 		There is an Administered Shot $doseTwo
+			- the shot belongs to the Series $associatedTargetSeries
 			- the dose number in the series is == 2
 			- that has already been evaluated and whose shot validity is VALID
 			- make note of the date this shot was administered as $dtAdministrationDateDoseTwo
 		There is an Administered Shot $targetDose3
+			- the shot belongs to the Series $associatedTargetSeries
 			- the dose number in the series is == 3
 			- that is not the same shot as $currentDose
 			- that has already been evaluated and whose shot validity is INVALID
-		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series also contains the Dose $doseTwo
-			- the Series also contains the Dose $targetDose3 
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
 			- the number of doses required to complete this series is >= 3
 			- make note of the absolute minimum interval for dose 2 in this series as $minIntervalDoseTwo
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtAdministrationDateDoseTwo and $dtAdministrationDateCurrentDose >= $minIntervalDoseTwo
 	then
 		Record that this dose rule was Processed for the TargetDose $currentDose
@@ -143,32 +147,30 @@ end
 rule "HepB: Mark Series Complete if Two Adult Doses Given to Patient between >= 11 and < 16 Years of Age" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
 		There is an Administered Shot $doseTwo
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
 			- the dose number in the series is == 2
 			- that has already been evaluated and whose shot validity is VALID
-			// SupportedVaccineConcept._HEPB_GREATEREQUAL_20
 			- the vaccine administered is "ICE43"
 			- make note of the date this shot was administered as $dtAdministrationDateDoseTwo
+			- make note of the Associated Series as $associatedTargetSeries
 		There is an Administered Shot $doseOne
+			- the shot belongs to the Series $associatedTargetSeries
 			- the dose number in the series is == 1
 			- that has already been evaluated and whose shot validity is VALID
-			// SupportedVaccineConcept._HEPB_GREATEREQUAL_20
 			- the vaccine administered is "ICE43"
 			- make note of the date this shot was administered as $dtAdministrationDateDoseOne
-		There is a Series $targetSeries that contains the Dose $doseTwo
-			- the Series also contains the Dose $doseOne
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate		
 		Confirm elapsed time between $dtAdministrationDateDoseOne and $dtAdministrationDateDoseTwo >= "4m-4d"
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateDoseOne >= 11 DurationType.YEARS
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateDoseOne < 16 DurationType.YEARS
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateDoseTwo >= 11 DurationType.YEARS
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateDoseTwo < 16 DurationType.YEARS
 	then
-		Mark the Series $targetSeries complete
-		Record that this series rule was Processed for the TargetSeries $targetSeries
-		Log that this series rule fired for the Series $targetSeries
+		Mark the Series $associatedTargetSeries complete
+		Record that this series rule was Processed for the TargetSeries $associatedTargetSeries
+		Log that this series rule fired for the Series $associatedTargetSeries
 end
 
 
@@ -180,11 +182,11 @@ rule "Hep B: Evaluate CVX 189 shot as NOT_EVALUATED/VACCINE_NOT_SUPPORTED" rulef
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the vaccine administered is "ICE189"
-		There is a Series $targetSeries that contains the shot $currentShot
-			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.100"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- make note of the Associated Series as $associatedTargetSeries
 	then
 		Mark the shot $currentShot as Not Evaluated for this Series due to "Vaccine Not Supported"
 		Mark the shot $currentShot as Ignored
 		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end

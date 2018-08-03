@@ -59,13 +59,13 @@ rule "Influenza: No minimum interval between first shot in seasonal series and m
 	activation-group "doseIntervalCheckFromPreviousSeason"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
 			- the administered shot number is == 1
-		There is a Series $targetSeries that contains the Dose $currentShot
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
+			- make note of the Associated Series as $associatedTargetSeries
 	then
 		// Don't do anything... overrides activation-group "doseIntervalCheckFromPreviousSeason" interval check from base set of rules
 		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
 
@@ -74,14 +74,16 @@ rule "Influenza: Evaluate the Influenza Shot as Outside Flu Season if it does no
 	activation-group "doseInSeasonCheck"
 	when  
 		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
-		There is a Series $targetSeries that contains the Dose $currentShot
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.800"
 			- the Shot $currentShot does not fall within the Season start and stop dates of the Series
 	then
 		Mark the shot $currentShot as Invalid for this Series due to "Outside Flu Season"
 		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries 
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries 
 end 
 
 
@@ -89,14 +91,15 @@ rule "Influenza: Change invalid >= maximum age reason to Insufficient Antigen fo
 	agenda-group "customEvaluationRule"
 	activation-group "maximumAgeVaccineCheck"
     when
-    	The patient information $oEvaluatedPerson must be known to complete writing this rule
     	There is an Administered Shot $oTargetDose that needs to be evaluated
+    		- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
        		- the vaccine administered is "ICE161"
        		- the vaccine administered has a maximum valid age
-		There is a Series $oTargetSeries that contains the Dose $oTargetDose
+       		- make note of the Associated Series as $associatedTargetSeries
+    	The patient information $oEvaluatedPerson must be known to complete writing this rule
 		Confirm the age of the patient $oEvaluatedPerson at the time the vaccine was administered for dose $oTargetDose is greater than the maximum allowable age for the vaccine
     then
         Mark the shot $oTargetDose as Invalid for this Series due to "Insufficient Antigen"
         Record that this dose rule was Processed for the TargetDose $oTargetDose
-        Log that this dose rule fired for the dose $oTargetDose in the Series $oTargetSeries
+        Log that this dose rule fired for the dose $oTargetDose in the Series $associatedTargetSeries
 end
