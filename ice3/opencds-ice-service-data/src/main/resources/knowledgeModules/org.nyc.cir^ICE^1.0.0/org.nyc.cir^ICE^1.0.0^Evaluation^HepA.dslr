@@ -104,21 +104,22 @@ rule "Switch from 2-Dose HepA series to 3-Dose HepA series if Dose 2 is given >=
 	activation-group "SwitchFromHepA2DoseTo3Dose"
 	salience 10
 	when
-		There is a Series $targetSeries
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810"
-			- the series is not complete
-			- the name of the series is "HepA2DoseChildAdultSeries"
 		There is an Administered Shot $currentDose that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810" and the Series with Name "HepA2DoseChildAdultSeries"
 			- the dose number in the series is == 2
-			- the shot belongs to the Series $targetSeries
 			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
 			- make note of the date this shot was administered as $dtAdministrationDateTwo
+			- make note of the Associated Series as $associatedTargetSeries
 		There is an Administered Shot $previousShot
-			- the shot belongs to the Series $targetSeries
+			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated and whose Shot Validity is VALID
 			- the Dose Number in the series is == 1
 			- the administered shot number is == $assign_nAdministeredShotNumber-1
 			- make note of the date this shot was administered as $dtAdministrationDateOne
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810"
+			- the name of the Series is "HepA2DoseChildAdultSeries"
+			- the series is not complete
 		There is a Series $seriesToSwitchTo
 			- the name of the Series is "HepAAdult3DoseSeries"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule

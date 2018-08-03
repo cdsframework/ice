@@ -66,6 +66,7 @@ rule "Zoster: Evaluate CVX 187 as Invalid/Below Minimum Interval if administered
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.620"
 			- the series is not complete
 		There is an administered shot $priorShot
 			- the shot belongs to the Series $associatedTargetSeries
@@ -95,6 +96,7 @@ rule "Zoster: Evaluate CVX 187 as Invalid/Below Minimum Interval if administered
 			- the administration date of the shot is == $currentShotDate
 			- the shot has not been evaluated yet
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.620"
 			- the series is not complete
 	then
 		Mark the shot $currentShot as Invalid for this Series due to "Below Minimum Interval"
@@ -114,6 +116,7 @@ rule "Zoster: Evaluate shot as Accepted/VACCINE_NOT_PART_OF_THIS_SERIES if admin
 			- the vaccine administered a member of ("ICE121","ICE188")
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.620"
 			- the series is not complete
 	then
 		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Part of This Series"

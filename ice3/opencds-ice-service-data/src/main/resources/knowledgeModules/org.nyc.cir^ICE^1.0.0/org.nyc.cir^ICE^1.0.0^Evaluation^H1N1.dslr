@@ -60,6 +60,7 @@ rule "Influenza: Evaluate the H1N1 Shot as Outside Flu Season if it does not fal
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.890"
 			- the Shot $currentShot does not fall within the Season start and stop dates of the Series
 	then
 		Mark the shot $currentShot as Invalid for this Series due to "Outside Flu Season"

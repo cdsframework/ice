@@ -75,6 +75,7 @@ rule "DTP: Evaluate recurring Td as valid if Td (age) evaluation criteria is met
 			- make note of the administered shot number as $currentShotNumber
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
 		The Patient information $evaluatedPerson must be known to complete writing this rule
 			 - make note of the date as $dtDateAtAge when the patient is "7y" of age
@@ -135,6 +136,7 @@ rule "DTP: Evaluate Adolescent Tdap shot as valid if Tdap (age) evaluation crite
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
 	then
 		Mark the shot $currentShot as Valid for this Series
@@ -235,6 +237,7 @@ rule "DTP(3): A primary dose of pertussis exists if a (valid) dose for adolescen
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- that has associated administered shot $currentShot
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
 	then
 		Insert an IceFact SupportedFactConcept._DOSE_OF_PERTUSSIS.getConceptCodeValue() with TargetDose $currentShot into working memory

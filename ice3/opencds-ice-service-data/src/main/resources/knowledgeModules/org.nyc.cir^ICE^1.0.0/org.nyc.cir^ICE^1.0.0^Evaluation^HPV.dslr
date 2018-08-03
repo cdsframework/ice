@@ -88,6 +88,7 @@ rule "Evaluate HPV Shot As Accepted If Patient >=27 yrs and does not have one or
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the Date as $assign_dtDateAtAge when the Patient is "27y" of age
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is == 0
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "27y"
 	then

@@ -71,6 +71,7 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >
 			- the dose number in the series is == 2
 			- make note of the date this shot was administered as $dtAdministrationDatePrev
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the series is not complete
 			- the number of doses administered is == 3
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -103,6 +104,7 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are OPV, patient >
 			- the dose number in the series is == 2
 			- make note of the date this shot was administered as $dtAdministrationDatePrev
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the series is not complete
 			- the number of doses administered is == 3
 		// SupportedVaccineConcept._OPV
@@ -154,6 +156,8 @@ rule "Polio: Mark target dose 4 administered >= 8/7/2010 and before absolute min
 			- make note of the date this shot was administered as $dtAdministrationDate
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the name of the Series is "Polio4DoseSeries"
 			- make note of the absolute minimum age for dose 4 in this series as $absoluteMinimumAge
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -175,6 +179,7 @@ rule "Polio: Mark OPV shots (CVX 178 or CVX 179) as INVALID with reason MISSING_
 			- the vaccine administered a member of ("ICE178","ICE179")
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the Series is Not Complete
 	then
 		Mark the Shot $currentShot as Invalid for this Series due to "Missing Antigen"
@@ -193,6 +198,7 @@ rule "Polio: Mark OPV shots administered >= 4/1/2016 as INVALID with reason MISS
 			- the vaccine administered a member of ("ICE02","ICE178","ICE179","ICE182")
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
 			- the Series is Not Complete
 	then
 		Mark the Shot $currentShot as Invalid for this Series due to "Missing Antigen"

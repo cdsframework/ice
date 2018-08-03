@@ -2383,7 +2383,7 @@ public class TargetSeries {
 
 		DoseRule seriesDoseRulePrev = obtainDoseRuleForSeriesByTargetDose(pTD);
 		if (seriesDoseRulePrev == null) {
-			String str = "Corresponding series dose not found";
+			String str = "Corresponding series dose not found: " + getVaccineGroup() + "; " + getSeriesName() + "; " + getTargetSeriesIdentifier();
 			logger.error(_METHODNAME + str);
 			throw new ImproperUsageException(str);
 		}
@@ -2434,7 +2434,7 @@ public class TargetSeries {
 
 		DoseRule seriesDoseRulePrev = obtainDoseRuleForSeriesByDoseNumber(targetDoseNumber);
 		if (seriesDoseRulePrev == null) {
-			String str = "Corresponding series dose not found";
+			String str = "Corresponding series dose not found: " + getVaccineGroup() + "; " + getSeriesName() + "; " + getTargetSeriesIdentifier();
 			logger.error(_METHODNAME + str);
 			throw new ImproperUsageException(str);
 		}
@@ -2466,7 +2466,7 @@ public class TargetSeries {
 
 		DoseRule seriesDoseRule = obtainDoseRuleForSeriesByDoseNumber(targetDoseNumber);
 		if (seriesDoseRule == null) {
-			String str = "Corresponding series dose not found";
+			String str = "Corresponding series dose not found: " + getVaccineGroup() + "; " + getSeriesName() + "; " + getTargetSeriesIdentifier();
 			logger.info(_METHODNAME + str);
 			return null;
 		}
