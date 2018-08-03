@@ -432,6 +432,7 @@ public class PayloadHelper {
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.750");	// Pneumococcal
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.300");	// Hib
 			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.200");	// DTP
+			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.100");	// Hep B
 			boolean lSupportedEarliestOverdueVgTmpFilter = lCurrentlySupportedEarliestOverdueVGs.contains(ts.getVaccineGroup());
 			
 			// Earliest, recommended and latest recommended should be set

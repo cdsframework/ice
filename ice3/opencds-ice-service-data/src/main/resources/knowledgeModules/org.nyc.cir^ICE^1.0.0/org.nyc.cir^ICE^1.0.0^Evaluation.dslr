@@ -108,7 +108,8 @@ rule "Evalaluate the Age when the Shot Administered is Before the Birthdate" rul
 		There is an Administered Shot $currentDose that needs to be evaluated
 			- the Administration Date of the shot is < $dtBirthDate
 			- make note of the target dose number for this shot as $nDoseNumber
-		There is a Series $targetSeries that contains the Dose $currentDose
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Number of Doses Required to Complete this Series is >= $nDoseNumber
 	then
 		Mark the shot $currentDose as Invalid for this Series due to "Prior to DOB"
@@ -121,17 +122,18 @@ rule "Evaluate the Interval when the Shot Administered is Before the Birth Date"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck"
 	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
 		There is an Administered Shot $currentDose that needs to be evaluated
 			- the administered shot number is >= 2
 			- make note of the administered shot number as $nAdministeredShotNumber
 			- make note of the target dose number for this shot as $nDoseNumber
+			- make note of the Associated Series as $associatedTargetSeries
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		There is an Administered Shot $previousDose
+			- the shot belongs to the Series $associatedTargetSeries
 			- the administered shot number is == ($nAdministeredShotNumber-1)
 			- the administration date of the shot is < $dtBirthDate
-		There is a Series $targetSeries that contains the Dose $currentDose
-			- the Series also contains the Dose $previousDose
+		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Number of Doses Required to Complete this Series is >= $nDoseNumber
 	then
 		// There is no minimum interval according, so don't do an interval check and thereby override the standard interval check
@@ -151,7 +153,7 @@ rule "Check if the Dose is Too Early Due to Live Virus Conflict" ruleflow-group 
 			- the Vaccine Administered is a Live Virus Vaccine
 			- the Shot has not already been marked as a Live Virus Conflict (as we do not want this rule executing more than necessary)
 			- make note of the Date this Shot was Administered as $administrationDate
-		There is a Series $targetSeries that contains the Dose $targetDose
+			- make note of the Associated Series as $associatedTargetSeries
 		There is an Administered Shot $otherShot
 			- the Vaccine Administered is a Live Virus Vaccine
 			- the Administration Date of the shot is < $administrationDate
@@ -159,5 +161,5 @@ rule "Check if the Dose is Too Early Due to Live Virus Conflict" ruleflow-group 
 		Confirm elapsed time between $previousShotDate and $administrationDate < "28d"
 	then
 		Mark the shot $targetDose as Invalid for this Series due to "Too Early Live Virus"
-		Log that this dose rule fired for the dose $targetDose in the Series $targetSeries
+		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
 end
