@@ -1238,11 +1238,6 @@ public class TargetSeries {
 			throw new ImproperUsageException(_METHODNAME + errStr);
 		}
 
-		//TargetDose lastDoseAdministered = determineIfSeriesCompleteAndReturnLastDose();
-		//if (logger.isDebugEnabled()) {
-		//	logger.debug(_METHODNAME + "Last dose # administered: " + ((lastDoseAdministered == null) ? "none" : lastDoseAdministered.getDoseNumberInSeries()));
-		//}
-
 		// Series is Complete if latest dose # is > # valid/accepted doses required, or if latest dose # == # valid/accepted doses required in
 		// series and that latest dose is accepted/valid
 		boolean lIsSeriesComplete = isSeriesComplete();
@@ -1312,7 +1307,7 @@ public class TargetSeries {
 		if (rAge == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
 				String msg = "No routine age recommendation specified for dose " + vaccineGroupDoseRule.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
-				logger.warn(_METHODNAME + msg);
+				logger.info(_METHODNAME + msg);
 			}
 			return;
 		}
@@ -1478,7 +1473,7 @@ public class TargetSeries {
 		if (rInterval == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
 				String msg = "No routine intervalspecified for dose " + doseRulePreviousDose.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
-				logger.warn(_METHODNAME + msg);
+				logger.info(_METHODNAME + msg);
 			}
 			return;
 		}
@@ -2196,7 +2191,7 @@ public class TargetSeries {
 			// logger.error(_METHODNAME + "Corresponding series dose not found");
 			// throw new ImproperUsageException("Corresponding series dose not found");
 			String msg = "No series dose rule specified for requested dose number " + pTD.getDoseNumberInSeries();
-			logger.warn(_METHODNAME + msg);
+			logger.info(_METHODNAME + msg);
 			return;
 		}
 
@@ -2208,7 +2203,7 @@ public class TargetSeries {
 		}
 		if (administrationDate.before(pEvalPersonBirthTime)) {
 			String str = "Vaccination date supplied before birth date";
-			logger.warn(_METHODNAME + str);
+			logger.info(_METHODNAME + str);
 			pTD.addInvalidReason(BaseDataEvaluationReason._PRIOR_TO_DOB.getCdsListItemName());
 		}
 
@@ -2216,7 +2211,7 @@ public class TargetSeries {
 		if (minimumAge == null) {
 			// There is no required age for this dose.
 			String msg = "No minimum age specified for dose: " + pTD;
-			logger.warn(_METHODNAME + msg);
+			logger.info(_METHODNAME + msg);
 			return;
 		}
 
@@ -2265,7 +2260,7 @@ public class TargetSeries {
 		TimePeriod minimumInterval = doseRulePreviousDose.getAbsoluteMinimumInterval();
 		if (minimumInterval == null) {
 			String msg = "No minimum interval specified for dose: " + pTDprev;
-			logger.warn(_METHODNAME + msg);
+			logger.info(_METHODNAME + msg);
 			return;
 		}
 
