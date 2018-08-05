@@ -91,7 +91,7 @@ public class TargetSeries {
 	private List<Recommendation> finalRecommendations;
 	private List<String> seriesRulesProcessed;
 	private boolean displayForecastDateForConditionalRecommendations;
-
+	/////// private Date evalTime
 	private static Log logger = LogFactory.getLog(TargetSeries.class);
 
 
@@ -101,12 +101,14 @@ public class TargetSeries {
 	 * @param pScheduleBackingSeries Schedule parameter, must be provided
 	 * @throws IllegalArgumentException If SeriesRules or Schedule parameter not populated or improperly populated
 	 */
+	/////// public TargetSeries(SeriesRules pSeriesRules, Schedule pScheduleBackingSeries, Date pEvalTime) {
 	public TargetSeries(SeriesRules pSeriesRules, Schedule pScheduleBackingSeries) {
 
 		String _METHODNAME = "TargetSeries(SeriesRules, Schedule): ";
 
+		/////// if (pSeriesRules == null || pScheduleBackingSeries == null || pEvalTime == null) {
 		if (pSeriesRules == null || pScheduleBackingSeries == null) {
-			String errStr = "SeriesRules and/or Schedule parameter was not supplied";
+			String errStr = "SeriesRules, EvalTime and/or Schedule parameter was not supplied";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
@@ -144,6 +146,7 @@ public class TargetSeries {
 		finalRecommendationDate = null;
 		finalOverdueDate = null;
 		displayForecastDateForConditionalRecommendations = false;
+		/////// evalTime = pEvalTime;
 
 		interimEvaluationValidityCountByDisease = new HashMap<String, Integer>();
 		interimDosesToSkipByDisease = new HashMap<String, Map<Integer, Integer>>();
@@ -166,8 +169,10 @@ public class TargetSeries {
 	 * @param pScheduleBackingSeries
 	 * @param pTargetSeason
 	 */
+	/////// public TargetSeries(SeriesRules pSeriesRules, Schedule pScheduleBackingSeries, Season pTargetSeason, Date pEvalTime) {
 	public TargetSeries(SeriesRules pSeriesRules, Schedule pScheduleBackingSeries, Season pTargetSeason) {
 
+		/////// this(pSeriesRules, pScheduleBackingSeries, pEvalTime);
 		this(pSeriesRules, pScheduleBackingSeries);
 
 		String _METHODNAME = "TargetSeries(SeriesRules, Schedule, Season): ";
@@ -1307,7 +1312,7 @@ public class TargetSeries {
 		if (rAge == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
 				String msg = "No routine age recommendation specified for dose " + vaccineGroupDoseRule.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
-				logger.info(_METHODNAME + msg);
+				logger.warn(_METHODNAME + msg);
 			}
 			return;
 		}
@@ -1473,7 +1478,7 @@ public class TargetSeries {
 		if (rInterval == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
 				String msg = "No routine intervalspecified for dose " + doseRulePreviousDose.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
-				logger.info(_METHODNAME + msg);
+				logger.warn(_METHODNAME + msg);
 			}
 			return;
 		}
@@ -1969,6 +1974,20 @@ public class TargetSeries {
 				}
 			}
 
+			/*
+			/////// Adjust final recommendation date to be the same as the last shot administered in series if the final recommended date is before the last shot date. Adjust the  
+			/////// recommended status too, if necessary
+			/////// if (lFinalRecommendationDate != null && getLastShotAdministeredInSeries() != null && getLastShotAdministeredInSeries().getAdministrationDate() != null && 
+				/////// lFinalRecommendationDate.before(getLastShotAdministeredInSeries().getAdministrationDate())) {
+				/////// lFinalRecommendationDate = getLastShotAdministeredInSeries().getAdministrationDate();
+				/////// if (lFinalRecommendationStatus == RecommendationStatus.RECOMMENDED) {
+					/////// if (lFinalRecommendationDate.after(this.evalTime)) {
+						/////// lFinalRecommendationStatus = RecommendationStatus.RECOMMENDED_IN_FUTURE;
+					/////// }
+				/////// }
+			/////// }
+			*/
+			
 			// Now set the final recommendation (final recommendation date, recommendation status and Recommendation object list) for this TargetSeries instance
 			setFinalRecommendationDate(lFinalRecommendationDate);
 			setRecommendationStatus(lFinalRecommendationStatus);
@@ -2191,7 +2210,7 @@ public class TargetSeries {
 			// logger.error(_METHODNAME + "Corresponding series dose not found");
 			// throw new ImproperUsageException("Corresponding series dose not found");
 			String msg = "No series dose rule specified for requested dose number " + pTD.getDoseNumberInSeries();
-			logger.info(_METHODNAME + msg);
+			logger.warn(_METHODNAME + msg);
 			return;
 		}
 
@@ -2203,7 +2222,7 @@ public class TargetSeries {
 		}
 		if (administrationDate.before(pEvalPersonBirthTime)) {
 			String str = "Vaccination date supplied before birth date";
-			logger.info(_METHODNAME + str);
+			logger.warn(_METHODNAME + str);
 			pTD.addInvalidReason(BaseDataEvaluationReason._PRIOR_TO_DOB.getCdsListItemName());
 		}
 
@@ -2211,7 +2230,7 @@ public class TargetSeries {
 		if (minimumAge == null) {
 			// There is no required age for this dose.
 			String msg = "No minimum age specified for dose: " + pTD;
-			logger.info(_METHODNAME + msg);
+			logger.warn(_METHODNAME + msg);
 			return;
 		}
 
@@ -2260,7 +2279,7 @@ public class TargetSeries {
 		TimePeriod minimumInterval = doseRulePreviousDose.getAbsoluteMinimumInterval();
 		if (minimumInterval == null) {
 			String msg = "No minimum interval specified for dose: " + pTDprev;
-			logger.info(_METHODNAME + msg);
+			logger.warn(_METHODNAME + msg);
 			return;
 		}
 
