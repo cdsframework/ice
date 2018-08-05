@@ -55,7 +55,7 @@ global org.drools.runtime.KnowledgeContext kcontext
 
 // If patient is male, >= 22 yrs and < 27 yrs and has no doses on record, series is conditionally recommended, reason = HIGH RISK
 rule "HPV: If patient is male, >= 22 yrs and < 27 yrs and has no doses on record, series is conditionally recommended, reason = HIGH RISK" ruleflow-group "RecommendationForecast"
-	// salience 200
+	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -76,7 +76,7 @@ end
 
 // The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
 rule "HPV: Set the recommended interval of 6m between doses 1 & 3 for the HPV 3-Dose Series if patei" ruleflow-group "RecommendationForecast"
-	// salience 200
+	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -99,7 +99,7 @@ end
 
 // The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
 rule "HPV: Set the earliest interval of 5m between doses 1 & 3 for the HPV 3-Dose Series" ruleflow-group "RecommendationForecast"
-	// salience 200
+	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -122,7 +122,7 @@ end
 
 // The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
 rule "HPV: Set the latest recommended interval of 7m+4w between doses 1 & 3 for the HPV 3-Dose Series if patient >= 15 yrs" ruleflow-group "RecommendationForecast"
-	// salience 200
+	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -148,7 +148,7 @@ end
 
 // The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
 rule "HPV: Set the latest recommended interval of 13m+4w between doses 1 & 3 for the HPV 3-Dose Series if patient < 15 yrs" ruleflow-group "RecommendationForecast"
-	// salience 200
+	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -223,6 +223,7 @@ end
 rule "HPV: If Patient >= 15 yrs and number of doses administered <= 1, modify HPV 3-Dose Series DoseRule 1 Latest Recommended Age to 15 yrs and Latest Recommended Interval to 16 weeks" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
+	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
