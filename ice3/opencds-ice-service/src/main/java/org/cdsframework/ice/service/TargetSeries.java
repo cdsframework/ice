@@ -1238,11 +1238,6 @@ public class TargetSeries {
 			throw new ImproperUsageException(_METHODNAME + errStr);
 		}
 
-		//TargetDose lastDoseAdministered = determineIfSeriesCompleteAndReturnLastDose();
-		//if (logger.isDebugEnabled()) {
-		//	logger.debug(_METHODNAME + "Last dose # administered: " + ((lastDoseAdministered == null) ? "none" : lastDoseAdministered.getDoseNumberInSeries()));
-		//}
-
 		// Series is Complete if latest dose # is > # valid/accepted doses required, or if latest dose # == # valid/accepted doses required in
 		// series and that latest dose is accepted/valid
 		boolean lIsSeriesComplete = isSeriesComplete();
