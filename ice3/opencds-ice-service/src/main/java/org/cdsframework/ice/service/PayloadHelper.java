@@ -409,7 +409,6 @@ public class PayloadHelper {
 		//////////////
 		Date finalEarliestDate = ts.getFinalEarliestDate();
 		Date finalRecommendationDate = ts.getFinalRecommendationDate();
-		
 		if (! outputEarliestOverdue) {
 			// Only recommended forecast date should be set
 			if (finalRecommendationDate != null) {
@@ -419,21 +418,7 @@ public class PayloadHelper {
 				sap.setProposedAdministrationTimeInterval(obsTime);
 			}
 		}
-		else {
-			// AI : Temporarily hardcode restriction which vaccine groups we return earliest/overdue for, until rules and testing completed for remaining VGs 
-			List<String> lCurrentlySupportedEarliestOverdueVGs = new ArrayList<>();
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.400");	// Polio
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.830");	// Mening ACWY
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.820");	// Rotavirus
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.600");	// Varicella
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.500");	// MMR
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.810");	// Hep A
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.620");	// Zoster
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.750");	// Pneumococcal
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.300");	// Hib
-			lCurrentlySupportedEarliestOverdueVGs.add("VACCINE_GROUP_CONCEPT.200");	// DTP
-			boolean lSupportedEarliestOverdueVgTmpFilter = lCurrentlySupportedEarliestOverdueVGs.contains(ts.getVaccineGroup());
-			
+		else {		
 			// Earliest, recommended and latest recommended should be set
 			Date finalLatestRecommendationDate = ts.getFinalOverdueDate();
 			Date finalLatestDate = null;		// We do not support returning "latest" possible date separately in payload, as of now
@@ -444,15 +429,15 @@ public class PayloadHelper {
 				}
 				else {
 					// (This should not happen; however, since an earliest recommendation date, will just use the latest date. Log that this occurred.
-					String lWarnStr = "No earliest recommendation date was calculated but a latest recommendation date was calculated! This should not happen?";
+					String lWarnStr = "No earliest recommendation date was calculated but a latest recommendation date was calculated! This should not happen";
 					logger.warn(_METHODNAME + lWarnStr);
 				}
-				if (lSupportedEarliestOverdueVgTmpFilter == true && finalLatestRecommendationDate != null) {
+				if (finalLatestRecommendationDate != null) {
 					obsTime.setHigh(finalLatestRecommendationDate);
 				}
 				sap.setProposedAdministrationTimeInterval(obsTime);
 			}
-			if (lSupportedEarliestOverdueVgTmpFilter == true && (finalEarliestDate != null || finalLatestDate != null)) {
+			if (finalEarliestDate != null || finalLatestDate != null) {
 				IVLDate obsTime = new IVLDate();
 				if (finalEarliestDate != null) {
 					obsTime.setLow(finalEarliestDate);

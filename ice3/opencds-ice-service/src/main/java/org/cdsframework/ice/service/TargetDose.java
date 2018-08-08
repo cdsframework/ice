@@ -198,6 +198,14 @@ public class TargetDose {
 		return associatedTargetSeries;
 	}
 
+	public String getAssociatedVaccineGroup() {
+		return getAssociatedTargetSeries().getVaccineGroup();
+	}
+
+	public String getAssociatedSeriesName() {
+		return getAssociatedTargetSeries().getSeriesName();
+	}
+		
 	/**
 	 * Return ID of this TargetDose, which matches the ID of the associated SubstanceAdministrationEvent when this TargetDose was created
 	 */
@@ -308,7 +316,7 @@ public class TargetDose {
 	public void setVaccineComponent(VaccineComponent vaccine) {
 		this.vaccineComponent = vaccine;
 	}
-
+	
 	public DoseStatus getStatus() {
 		return status;
 	}
