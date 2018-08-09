@@ -459,6 +459,9 @@ public class TargetSeries {
 	 */
 	public void addSkipDoseEntryForDose(int doseNumberToSkipFrom, int doseNumberToSkipTo) {
 
+		if (doseNumberToSkipFrom == doseNumberToSkipTo) {
+			return;
+		}
 		int lTargetDoseNumber = determineDoseNumberInSeries();
 		Collection<String> lDiseasesSupportedByThisSeries = getDiseasesSupportedByThisSeries();
 		for (String lSDC : lDiseasesSupportedByThisSeries) {
@@ -478,6 +481,9 @@ public class TargetSeries {
 	 */
 	public void addSkipDoseEntryForSpecifiedDisease(int pDoseNumberToSkipFrom, int pDoseNumberToSkipTo, String pDisease) {
 
+		if (pDoseNumberToSkipFrom == pDoseNumberToSkipTo) {
+			return;
+		}
 		int lTargetDoseNumber = determineDoseNumberInSeries();
 		addSkipDoseEntryForSpecifiedDisease(pDoseNumberToSkipFrom, pDoseNumberToSkipTo, pDisease, lTargetDoseNumber);
 	}
