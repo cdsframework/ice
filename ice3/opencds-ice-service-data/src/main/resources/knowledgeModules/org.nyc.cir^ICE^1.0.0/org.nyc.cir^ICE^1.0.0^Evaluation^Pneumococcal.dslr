@@ -57,7 +57,7 @@ rule "Pneumococcal Adult Series: Evaluate PSV Shot >= 5yrs and < 19yrs as Accept
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"	and the Series with name "PneumococcalSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
 			- the dose number in the Series is >= 6
 			- the vaccine administered a member of ("ICE133", "ICE152")
 			- make note of the date this shot was Administered as $administrationDate
@@ -78,7 +78,7 @@ rule "Pneumococcal Adult Series: (Abstract) PPSV Shot (CVX 33, 109) >= 5yrs and 
 	agenda-group "customEvaluationRule"
 	when
 		There is an Administered Shot $adultPPSVShot1BelowMinAge
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"	and the Series with name "PneumococcalSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
 			- the dose number in the Series is == 6
 			- the vaccine administered a member of ("ICE33", "ICE109")
 			- make note of the date this shot was Administered as $adultPPSVShot1Date
