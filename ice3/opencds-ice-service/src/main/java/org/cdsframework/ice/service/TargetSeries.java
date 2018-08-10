@@ -1096,12 +1096,15 @@ public class TargetSeries {
 	/**
 	 * Return a effective number of valid or accepted shots administered in this series before the specified date. If includeDate parameter   
 	 * is true, the count also includes shots administered on the specified date. If the supplied date is null, this methods returns 0.
+	 * If no shots were administered, returns 0, which may not be the same as the number of effective doses for the series.
 	 */
 	public int determineEffectiveNumberOfDosesInSeriesByDate(Date pDate, boolean includeDate) {
 
 		String _METHODNAME = "determineEffectiveNumberOfDosesInSeriesByDate(): ";
 
-		logger.trace(_METHODNAME + "parameters passed in: " + pDate + "; includeDate " + includeDate);
+		if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + "parameters passed in: " + pDate + "; includeDate " + includeDate);
+		}
 
 		if (targetDoses == null || pDate == null) {
 			return 0;
@@ -1125,14 +1128,20 @@ public class TargetSeries {
 			}
 		}
 
-		logger.trace(_METHODNAME + ((lTargetDoseOfInterest == null) ? "lTargetDoseOfInterest is null" : lTargetDoseOfInterest.toString()));
+		if (logger.isDebugEnabled()) {
+			logger.debug(_METHODNAME + ((lTargetDoseOfInterest == null) ? "lTargetDoseOfInterest is null" : lTargetDoseOfInterest.toString()));
+		}
 		if (lTargetDoseOfInterest != null) {
 			int doseNumber = doseNumberDeterminationUpdateUtility(lTargetDoseOfInterest, false, false, true, interimEvaluationValidityCountByDisease.keySet());
-			logger.trace(_METHODNAME + "dose number returned for lTargetDoseOfInterest " + doseNumber);
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "dose number returned for lTargetDoseOfInterest " + doseNumber);
+			}
 			return doseNumber;
 		}
 		else {
-			logger.trace(_METHODNAME + "Returning dose number 0");
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "Returning dose number 0");
+			}
 			return 0;
 		}
 	}
