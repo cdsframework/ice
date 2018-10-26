@@ -251,7 +251,7 @@ MenB FHbp 3-dose Series specific rules
 *************************************************************************************************************************************************************************************/
 
 // Recommended interval between Dose 1 and Dose 3 in Men B FHbp 3-dose series is 6 months
-rule "MeningB: Recommend an interval of at 6 months between doses 1 & 3 in FHbp 3-dose Series" ruleflow-group "RecommendationForecast"
+rule "MeningB: Recommend an earliest interval and recommended interval of at 6 months between doses 1 & 3 in FHbp 3-dose Series" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -267,6 +267,29 @@ rule "MeningB: Recommend an interval of at 6 months between doses 1 & 3 in FHbp 
 	then
 		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $r to $dtCalculated
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+// The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
+rule "HPV: Set the earliest interval of 5m between doses 1 & 3 for the HPV 3-Dose Series" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs Forecasting
+			- the name of the Series is "HPV3DoseSeries"
+			- the effective dose number in the Series is == 3
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series is not Complete
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Add 5 DurationType.MONTHS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
