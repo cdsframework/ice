@@ -231,17 +231,17 @@ rule "Hib: Set Dose Number to 2 in 4-Dose Hib Series if No Shots Administered an
 	salience 200
 	no-loop true
 	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $assign_dtDateAtAge when the patient is "7m" of age
 		There is a Series $targetSeries
-			- the Number of Administered Shots is == 0
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.300" 
 			- the name of the Series is "Hib4DoseSeries"
-			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is == 0
+			- the Number of Administered Shots is == 0
+			- make note of the Effective Dose Number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 2
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
 	then
-		Skip Series Dose Number to 2 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.482.2" in Series $targetSeries
+		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.482.2" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
@@ -256,11 +256,13 @@ rule "Hib: Set Dose Number to 3 in 4-Dose Hib Series if No Shots Administered an
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.300"
 			- the name of the Series is "Hib4DoseSeries"
 			- the Number of Administered Shots is == 0
+			- make note of the Effective Dose Number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 3
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "15m"	
 	then
-		Skip Series Dose Number to 3 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.482.2" in Series $targetSeries
+		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.482.2" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
@@ -275,12 +277,13 @@ rule "Hib: Set Dose Number to 4 in 4-Dose Hib Series if No Shots Administered an
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.300"
 			- the name of the Series is "Hib4DoseSeries"
 			- the Number of Administered Shots is == 0
-			- the Effective Dose Number in the Series is == 1
+			- make note of the Effective Dose Number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 4
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "15m" && elapsed time between $dtBirthDate and evalTime < "5y"	
 	then
-		Skip Series Dose Number to 4 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.482.2" in Series $targetSeries
+		Skip Series Dose Number to 4 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.482.2" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
 

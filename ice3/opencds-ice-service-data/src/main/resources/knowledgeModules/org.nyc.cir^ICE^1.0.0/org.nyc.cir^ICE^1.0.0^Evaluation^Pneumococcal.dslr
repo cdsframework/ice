@@ -57,7 +57,7 @@ rule "Pneumococcal Adult Series: Evaluate PSV Shot >= 5yrs and < 19yrs as Accept
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"	and the Series with name "PneumococcalSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
 			- the dose number in the Series is >= 6
 			- the vaccine administered a member of ("ICE133", "ICE152")
 			- make note of the date this shot was Administered as $administrationDate
@@ -78,7 +78,7 @@ rule "Pneumococcal Adult Series: (Abstract) PPSV Shot (CVX 33, 109) >= 5yrs and 
 	agenda-group "customEvaluationRule"
 	when
 		There is an Administered Shot $adultPPSVShot1BelowMinAge
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"	and the Series with name "PneumococcalSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
 			- the dose number in the Series is == 6
 			- the vaccine administered a member of ("ICE33", "ICE109")
 			- make note of the date this shot was Administered as $adultPPSVShot1Date
@@ -435,18 +435,17 @@ rule "Pneumococcal Child Series: Exception 1A: Set Series Dose Number to 2 if No
 	salience 200
 	no-loop true
 	when
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $assign_dtDateAtAge when the patient is "7m" of age
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
-			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is == 0
-			- the effective dose number in the series is < 2
+			- make note of the effective dose number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 2
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
 	then
-		Skip Series Dose Number to 2 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
@@ -467,7 +466,6 @@ rule "Pneumococcal Child Series: Exception 1A: Skip Dose Number to 2 for Shot Ad
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "7m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "12m"
 	then
 		Set Dose Number of $currentDose to 2
-		// Pneumoccocal pneumonia
 		Skip Series Dose Number to 2 from $assign_nDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $associatedTargetSeries
 		Log that this Series Rule fired for the Series $associatedTargetSeries
 end
@@ -495,7 +493,6 @@ rule "Pneumococcal Child Series: Exception 1B: Skip Dose Number to 3 if received
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDatePrior < "7m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "7m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "12m"
 	then
 		Set Dose Number of $currentDose to 3
-		// Pneumoccocal pneumonia
 		Skip Series Dose Number to 3 from 2 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $associatedTargetSeries
 		Log that this Series Rule fired for the Series $associatedTargetSeries
 end
@@ -511,13 +508,13 @@ rule "Pneumococcal Child Series: Exception 2: Set Series Dose Number to 3 if No 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
-			- the effective dose number in the series is < 3
+			- make note of the effective dose number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 3
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"	
 	then
-		// Pneumoccocal pneumonia
-		Skip Series Dose Number to 3 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
@@ -572,7 +569,6 @@ rule "Pneumococcal Child Series: Exception 2: Skip Dose Number to 4 if Patient B
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "12m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "24m"
 	then
 		Set Dose Number of $currentDose to 4
-		// Pneumoccocal pneumonia
 		Skip Series Dose Number to 4 from $assign_nDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
@@ -588,13 +584,13 @@ rule "Pneumococcal Child Series: Exception 3: Set Series Dose Number to 4 if No 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
-			- the effective dose number in the series is < 4
+			- make note of the effective dose number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 4
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "24m" && elapsed time between $dtBirthDate and evalTime < "5y"	
 	then
-		// Pneumoccocal pneumonia
-		Skip Series Dose Number to 4 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Skip Series Dose Number to 4 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
@@ -616,7 +612,6 @@ rule "Pneumococcal Child Series: Exception 3: Skip Dose Number to 4 for Patient 
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "24m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "5y"
 	then
 		Set Dose Number of $currentDose to 4
-		// Pneumococcal pneumonia
 		Skip Series Dose Number to 4 from $assign_nDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $associatedTargetSeries
 		Log that this Series Rule fired for the Series $associatedTargetSeries
 end
@@ -632,12 +627,13 @@ rule "Pneumococcal Adult Series: Exception 4: Set Series Dose Number to 6 (Adult
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Administered Shots is == 0
-			- the effective dose number in the series is < 6
+			- make note of the effective dose number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 6
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
 	then
-		Skip Series Dose Number to 6 from 1 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Skip Series Dose Number to 6 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
