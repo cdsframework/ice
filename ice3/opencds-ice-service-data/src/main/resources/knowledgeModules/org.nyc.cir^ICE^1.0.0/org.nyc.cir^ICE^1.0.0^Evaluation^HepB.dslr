@@ -34,6 +34,7 @@ import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.Schedule
 import org.cdsframework.ice.service.SeriesRules
 import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
@@ -48,6 +49,7 @@ global java.util.Date evalTime
 
 
 rule "HepB: Verify Adherece to the Maximum Valid Age for the Vaccine if HepB High Risk Infant Vaccine is Administered" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "maximumAgeVaccineCheck"
 	when
@@ -67,6 +69,7 @@ end
 
 
 rule "HepB: Verify Adherence to the Maximum Valid Age for the Vaccine if HepB Peds Less than 20 Vaccine is Administered" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "maximumAgeVaccineCheck"
     when
@@ -86,6 +89,7 @@ end
 
 
 rule "HepB: Evaluate the Minimum Interval Between Doses 1 and 3" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	when  
 		There is an Administered Shot $currentDose that needs to be evaluated
@@ -111,6 +115,7 @@ end
 // and c.) meet the minimum interval between dose 1 and dose 3 of 16 weeks.
 // (Note that sub-rules (a), (b), and (c) are handled by other rules.)
 rule "HepB: Enough is Enough Rule" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck"	// This rule says the dose is VALID ... so we override other checks that might mark it as INVALID or even ACCEPTED
 	when		
@@ -140,11 +145,12 @@ rule "HepB: Enough is Enough Rule" ruleflow-group "HistoryEvaluation"
 		Confirm elapsed time between $dtAdministrationDateDoseTwo and $dtAdministrationDateCurrentDose >= $minIntervalDoseTwo
 	then
 		Record that this dose rule was Processed for the TargetDose $currentDose
-		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries 
+		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end
 
 
 rule "HepB: Mark Series Complete if Two Adult Doses Given to Patient between >= 11 and < 16 Years of Age" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	when
 		There is an Administered Shot $doseTwo
@@ -174,19 +180,31 @@ rule "HepB: Mark Series Complete if Two Adult Doses Given to Patient between >= 
 end
 
 
-// If a patient is administered CVX 189, evaluate the shot as Not_Evaluated / Vaccine Not Supported
-rule "Hep B: Evaluate CVX 189 shot as NOT_EVALUATED/VACCINE_NOT_SUPPORTED" ruleflow-group "HistoryEvaluation"
+/********************************************************************************************************************************************************************************************
+ HEPLISAV-B (CVX 189) Exception Rule
+ A series containing 2 doses of HEPLISAV-B (CVX 189) administered at least minimum interval 4 weeks (absolute minimum interval = 24 days) apart is complete, regardless of any other 
+ Hep B shots administered (before, in between, and after). For the non-CVX 189 shots, evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN.
+ For the purpose of evaluation of the non-CVX 189 administered vaccines, ignore the non-CVX 189 shots.
+********************************************************************************************************************************************************************************************/
+rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete (regardless of any other prior Hep B shots administered" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
-	agenda-group "customEvaluationRule"
-	activation-group "allowableVaccineCheck"
+	agenda-group "postEvaluationCheck"
 	when
-		There is an administered shot $currentShot that needs to be evaluated
+		There is a Series $targetSeries
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the series is not complete
+		There is an administered shot $doseCVX189
+			- the shot belongs to the Series $targetSeries
 			- the vaccine administered is "ICE189"
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
-			- make note of the Associated Series as $associatedTargetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+		There is an administered shot $doseCVX189Other
+			- that is not the same shot as $doseCVX189
+			- the vaccine administered is "ICE189"
+			- that has already been evaluated and whose Shot Validity is VALID
 	then
-		Mark the shot $currentShot as Not Evaluated for this Series due to "Vaccine Not Supported"
-		Mark the shot $currentShot as Ignored
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+		Mark the Series $targetSeries Complete
+		Refresh all Facts in the Series $targetSeries for Evaluation
+		Record that this series rule was Processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the Series $targetSeries
 end
+
