@@ -1323,8 +1323,7 @@ rule "SeriesSelection.SelectHibOMPSeriesIfFirstDoseHibOMPBefore7MonthsAndOnlyOne
 	//Hib OMP Series
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", selectedSeries == true)
-		$td : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate, 
-			vaccineComponent.cdsConceptName == "ICE49", $td1UniqueId : uniqueId)
+		$td : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate, vaccineComponent.cdsConceptName == "ICE49", $td1UniqueId : uniqueId)
 		$ts: TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", $sn : seriesRules.seriesName == "HibOMPSeries", selectedSeries == false, 
 			containsTargetDose($td), $effectiveDoses : determineEffectiveNumberOfDosesInSeries, numberOfShotsAdministeredInSeries == 1)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesRules.seriesName != $sn, 
@@ -1349,12 +1348,10 @@ rule "SeriesSelection.SelectHibOMPSeriesIfTwoDosesHibOMPOneBefore7MonthsOtherBef
 	//Hib OMP Series
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", selectedSeries == true)
-		$td1 : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate1 : administrationDate, 
-			vaccineComponent.cdsConceptName == "ICE49")
-		$td2 : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate2 : administrationDate, 
-			vaccineComponent.cdsConceptName == "ICE49", $td2UniqueId : uniqueId)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", $sn : seriesRules.seriesName == "HibOMPSeries", 
-			selectedSeries == false, containsTargetDose($td1), containsTargetDose($td2))
+		$td1 : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate1 : administrationDate, vaccineComponent.cdsConceptName == "ICE49")
+		$td2 : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate2 : administrationDate, vaccineComponent.cdsConceptName == "ICE49", $td2UniqueId : uniqueId)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", $sn : seriesRules.seriesName == "HibOMPSeries",	selectedSeries == false, 
+			containsTargetDose($td1), containsTargetDose($td2))
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesRules.seriesName != $sn, 
 			getValidShotByDoseNumber(2) != null && getValidShotByDoseNumber(2).getAdministrationDate() < $administrationDate2)
 		$person : EvaluatedPerson($birthDate : demographics.birthTime)
@@ -1412,16 +1409,14 @@ end
 
 rule "SeriesSelection.SelectHepBNewbornSeriesAtLeastOneShot" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	salience 100
 	agenda-group "customSeriesSelectionRules"
 	activation-group "HepBSeriesSelectionCheck"
 	when	
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true))
-		$person : EvaluatedPerson()
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
 		$td : TargetDose(administeredShotNumberInSeries == 1)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBNewbornSeries", 
-			selectedSeries == false, containsTargetDose($td))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBNewbornSeries", selectedSeries == false, containsTargetDose($td))
+		$person : EvaluatedPerson()
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isLessThan(new TimePeriod(28, DurationType.DAYS)))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1434,17 +1429,15 @@ end
 
 rule "SeriesSelection.SelectHepBNewBornSeriesNoShot" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	salience 100
 	agenda-group "customSeriesSelectionRules"
 	activation-group "HepBSeriesSelectionCheck"
 	no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true))	
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)	
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBNewbornSeries", selectedSeries == false, targetDoses.empty)
 		$person : EvaluatedPerson()
 		$evalTime: EvalTime()
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBNewbornSeries", 
-			selectedSeries == false, targetDoses.empty)
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue,	DurationType.DAYS).isLessThan(new TimePeriod(28, DurationType.DAYS)))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1457,17 +1450,15 @@ end
 
 rule "SeriesSelection.SelectHepBChildAdultSeriesAtLeastOneShot" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	salience 100
 	agenda-group "customSeriesSelectionRules"
 	activation-group "HepBSeriesSelectionCheck"
 	no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true))
-		$person : EvaluatedPerson()
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
 		$td : TargetDose(administeredShotNumberInSeries == 1)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBChildAdultSeries", 
-			selectedSeries == false, containsTargetDose($td))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBChildAdultSeries", selectedSeries == false, containsTargetDose($td))
+		$person : EvaluatedPerson()
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isGreaterThanEqualTo(new TimePeriod(28, DurationType.DAYS)))	
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1480,16 +1471,15 @@ end
 
 rule "SeriesSelection.SelectHepBChildAdultSeriesNoShot" ruleflow-group "SeriesSelection"
 	dialect "mvel"
-	salience 100
 	agenda-group "customSeriesSelectionRules"
 	activation-group "HepBSeriesSelectionCheck"
 	no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true))	
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)	
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBChildAdultSeries", selectedSeries == false, targetDoses.empty)
 		$person : EvaluatedPerson()
 		$evalTime: EvalTime()
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBChildAdultSeries", selectedSeries == false, targetDoses.empty)
 		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue, DurationType.DAYS).isGreaterThanEqualTo(new TimePeriod(28, DurationType.DAYS)))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1500,11 +1490,83 @@ rule "SeriesSelection.SelectHepBChildAdultSeriesNoShot" ruleflow-group "SeriesSe
 end
 
 
+rule "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	agenda-group "customSeriesSelectionRules"
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)	
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBAdult2DoseSeries", selectedSeries == false)
+		TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "18y") >= 0)	
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts);
+end
+
+
+rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y, 1 dose, and no additional shots on record" 
+		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	agenda-group "customSeriesSelectionRules"
+	when
+		TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries == 1)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+
+rule "SeriesSelection(Hep B): For patient >= 18y and >= 1 dose and additional shots on record, select the Child/Adult Series if it has more doses than the Adult Series" 
+		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	agenda-group "customSeriesSelectionRules"
+	when
+		$tsAdult : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1, $numberAdultDoses : determineNumberOfDosesAdministeredInSeries())
+		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepBChildAdultSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, 
+			determineNumberOfDosesAdministeredInSeries() > $numberAdultDoses)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsChildAdult);
+		$tsChildAdult.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsChildAdult.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+
+rule "SeriesSelection(Hep B): For patient >= 18y and >= 1 dose and additional shots on record, select the Adult Series if it has greater than or equal the number of doses as the Adult Series" 
+		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	agenda-group "customSeriesSelectionRules"
+	when
+		$tsAdult : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1, $numberAdultDoses : determineNumberOfDosesAdministeredInSeries())
+		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepBChildAdultSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, 
+			determineNumberOfDosesAdministeredInSeries() <= $numberAdultDoses)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsAdult);
+		$tsAdult.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsAdult.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+
 ///////////////////////////////////////////////////////////// DTP-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
-//
+///////
 // If the patient is >= 7 years of age and has zero doses on record prior to age 7 years, then the 3-dose series applies; otherwise the 5-dose series applies.
-//
+///////
 
 rule "SeriesSelection.SelectDTP5DoseSeriesIf3DoseSeriesNotSelected" ruleflow-group "SeriesSelection"
 	dialect "mvel"

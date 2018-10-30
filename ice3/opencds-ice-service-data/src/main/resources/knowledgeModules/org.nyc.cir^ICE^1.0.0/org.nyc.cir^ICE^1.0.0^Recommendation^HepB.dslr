@@ -43,6 +43,7 @@ import org.cdsframework.ice.util.TimePeriod.DurationType
 
 global java.util.Date evalTime
 global org.drools.runtime.KnowledgeContext kcontext
+global org.cdsframework.ice.service.Schedule schedule
 
 expander ../org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
  
@@ -69,7 +70,7 @@ end
 rule "HepB: Recommend an interval of at least 112 days between doses 1 & 3" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationRule"
 	when
-		There is a Series $targetSeries that needs Forecasting			
+		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
@@ -84,3 +85,20 @@ rule "HepB: Recommend an interval of at least 112 days between doses 1 & 3" rule
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+// Recommend at the vaccine level, CVX 189 (Hep B adjuvanted) vaccine, when recommending for the Hep B 2-dose Adult Series
+rule "Hep B: Recommend CVX 189 (Hep B adjuvanted) for the Hep B 2-dose Adult Series" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the Name of the Series is "HepBAdult2DoseSeries"
+			- the Series is Not Complete
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE189"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+   
