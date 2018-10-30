@@ -198,6 +198,7 @@ rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete (regardless of any oth
 			- the vaccine administered is "ICE189"
 			- that has already been evaluated and whose Shot Validity is VALID
 		There is an administered shot $doseCVX189Other
+		      	- the shot belongs to the Series $targetSeries
 			- that is not the same shot as $doseCVX189
 			- the vaccine administered is "ICE189"
 			- that has already been evaluated and whose Shot Validity is VALID
@@ -207,4 +208,3 @@ rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete (regardless of any oth
 		Record that this series rule was Processed for the TargetSeries $targetSeries
 		Log that this series rule fired for the Series $targetSeries
 end
-
