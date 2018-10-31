@@ -258,9 +258,6 @@ public class SupportedVaccines implements SupportingData {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
-		// Live virus vaccine?
-		boolean lLiveVirusVaccine = pIceVaccineSpecificationFile.isLiveVirusVaccine();
-
 		// Combination vaccine?
 		boolean lCombinationVaccine = false;
 
@@ -407,7 +404,8 @@ public class SupportedVaccines implements SupportingData {
 			}
 			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
 		}
-		lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
+		lVaccine.setLiveVirusVaccine(pIceVaccineSpecificationFile.isLiveVirusVaccine());
+		lVaccine.setSelectAdjuvantProduct(pIceVaccineSpecificationFile.isSelectAdjuvantProduct());
 		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), new LocallyCodedVaccineItem(llccli.getCdsListItemName(), ic, lIntersectionOfSupportedCdsVersions, lVaccine));
 		
 		///////
