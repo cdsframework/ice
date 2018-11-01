@@ -392,8 +392,8 @@ public class TargetSeries {
 
 	/**
 	 * Check if next recommended shot is a live virus vaccine (and therefore recommendationStatus is either RECOMMENDED, RECOMMENDED_IN_FUTURE, or CONDITIONALLY_RECOMMENDED)
-	 * @return true if recommended shot is a live virus vaccine or any vaccine that is in the vaccine group is a live virus vaccine, 
-	 * false if recommended shot is not a live virus vaccine, or if not recommendation has been made yet
+	 * @return true if recommended shot is a live virus vaccine or any vaccine that is in the vaccine group contains a live virus vaccine, false if recommended shot is 
+	 * not a live virus vaccine, or if not recommendation has been made yet
 	 */
 	public boolean isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccine() {
 
@@ -412,6 +412,39 @@ public class TargetSeries {
 			List<Vaccine> allPermittedVaccinesForThisDose = dr.getAllPermittedVaccines();
 			for (Vaccine v : allPermittedVaccinesForThisDose) {
 				if (v.isLiveVirusVaccine()) {
+					return true;
+				}
+			}
+			return false;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	
+	/**
+	 * Check if next recommended shot is a live virus vaccine (and therefore recommendationStatus is either RECOMMENDED, RECOMMENDED_IN_FUTURE, or CONDITIONALLY_RECOMMENDED)
+	 * @return true if recommended shot is a select adjuvant product vaccine or any vaccine that is in the vaccine group contains a select adjuvant product, false if 
+	 * recommended shot is not a select adjuvant product, or if not recommendation has been made yet
+	 */
+	public boolean isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedSelectAdjuvantProduct() {
+
+		if (this.recommendationStatus != null && (this.recommendationStatus == RecommendationStatus.RECOMMENDED || 
+				this.recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || this.recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)) {
+
+			int lTargetDoseNumber = determineEffectiveNumberOfDosesInSeries() + 1;
+			DoseRule dr = getSeriesRules().getSeriesDoseRuleByDoseNumber(lTargetDoseNumber);
+			if (dr == null) {
+				return false;
+			}
+
+			if (manuallySetAccountForLiveVirusIntervalsInRecommendation != null) {
+				return manuallySetAccountForLiveVirusIntervalsInRecommendation.booleanValue();
+			}
+			List<Vaccine> allPermittedVaccinesForThisDose = dr.getAllPermittedVaccines();
+			for (Vaccine v : allPermittedVaccinesForThisDose) {
+				if (v.isSelectAdjuvantProduct()) {
 					return true;
 				}
 			}
