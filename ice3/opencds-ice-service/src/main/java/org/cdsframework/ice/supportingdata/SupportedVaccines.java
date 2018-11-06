@@ -404,8 +404,20 @@ public class SupportedVaccines implements SupportingData {
 			}
 			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
 		}
-		lVaccine.setLiveVirusVaccine(pIceVaccineSpecificationFile.isLiveVirusVaccine());
-		lVaccine.setSelectAdjuvantProduct(pIceVaccineSpecificationFile.isSelectAdjuvantProduct());
+		// Set live virus vaccine boolean
+		if (pIceVaccineSpecificationFile.isLiveVirusVaccine() != null) {
+			lVaccine.setLiveVirusVaccine(pIceVaccineSpecificationFile.isLiveVirusVaccine());
+		}
+		else {
+			lVaccine.setLiveVirusVaccine(false);
+		}
+		// Set select adjuvant product boolean 
+		if (pIceVaccineSpecificationFile.isSelectAdjuvantProduct() != null) {
+			lVaccine.setSelectAdjuvantProduct(pIceVaccineSpecificationFile.isSelectAdjuvantProduct());
+		}
+		else {
+			lVaccine.setSelectAdjuvantProduct(false);
+		}
 		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), new LocallyCodedVaccineItem(llccli.getCdsListItemName(), ic, lIntersectionOfSupportedCdsVersions, lVaccine));
 		
 		///////
