@@ -83,7 +83,7 @@ rule "DTP: Evaluate recurring Td as valid if Td (age) evaluation criteria is met
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- there is an associated administered shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge
 	then
-		Mark the shot $currentShot as Valid for this Series
+		Include the reason for shot $currentShotValid Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
 end
@@ -97,7 +97,7 @@ rule "DTP: Evaluate recurring Td as valid if Td (interval) evaluation criteria i
 	when
 		// Since the absolute minimum interval is 0 days, no actual interval check performed.
 	then
-		Mark the shot $currentShot as Valid for this Series
+		Include the reason for shot $currentShotValid Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
 end
@@ -111,7 +111,7 @@ rule "DTP: Override default series rule that evaluates extra Td shots in the ser
 	when
 		// Since the absolute minimum interval is 0 days, no actual interval check performed.
 	then
-		Mark the shot $currentShot as Valid for this Series
+		Include the reason for shot $currentShotValid Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
 end
@@ -139,7 +139,7 @@ rule "DTP: Evaluate Adolescent Tdap shot as valid if Tdap (age) evaluation crite
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
 	then
-		Mark the shot $currentShot as Valid for this Series
+		Include the reason for shot $currentShotValid Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -151,7 +151,7 @@ rule "DTP: Evaluate Adolescent Tdap shot as valid if Tdap (interval) evaluation 
 	when
 		// Extension of Age rule to prevent default series inteval rule from firing
 	then
-		Mark the shot $currentShot as Valid for this Series
+		Include the reason for shot $currentShotValid Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -161,9 +161,9 @@ rule "DTP: Override default series rule that evaluates extra Tdap shots in the s
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck"
 	when
-		// Extension of Age rule to prevent default series inteval rule from firing
+		// Extension of Age rule to prevent default series interval rule from firing
 	then
-		Mark the shot $currentShot as Valid for this Series
+		Include the reason for shot $currentShotValid Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -267,7 +267,7 @@ rule "DTP: Absolute Minimum Age for Tdap/Td applies for target doses 1-3 of the 
 			- make note of the Patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and $administrationDate < $strValidMinimumAge
 	then
-		Mark the shot $currentShot as Invalid for this Series due to "Insufficient Antigen"
+		Include the reason for shot $currentShot Invalid due to "Insufficient Antigen"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -357,7 +357,7 @@ rule "DTP: Enforce Minimum Interval between Tdap/DTaP and Td/DT if the shot meet
 			- that has finding SupportedFactConcept._BELOW_MINIMUM_INTERVAL.conceptCodeValue
 	then
 		Remove Evaluation Reason "EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_INTERVAL" from Shot $currentShot
-		Mark the shot $currentShot as Invalid for this Series due to "D_AND_T_INVALID/P_VALID"
+		Include the reason for shot $currentShot Invalid due to "D_AND_T_INVALID/P_VALID"
 		Refresh all Facts in the Series $targetSeries for Evaluation
 		Refresh all Facts in the Shot $currentShot
 		Record that this dose rule was processed for the TargetDose $currentShot

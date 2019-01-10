@@ -75,7 +75,7 @@ rule "Zoster: Evaluate CVX 187 as Invalid/Below Minimum Interval if administered
 			- make note of the date this shot was administered as $priorShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "52d"
 	then
-		Mark the shot $currentShot as Invalid for this Series due to "Below Minimum Interval"
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -99,7 +99,7 @@ rule "Zoster: Evaluate CVX 187 as Invalid/Below Minimum Interval if administered
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.620"
 			- the series is not complete
 	then
-		Mark the shot $currentShot as Invalid for this Series due to "Below Minimum Interval"
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -119,7 +119,7 @@ rule "Zoster: Evaluate shot as Accepted/VACCINE_NOT_PART_OF_THIS_SERIES if admin
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.620"
 			- the series is not complete
 	then
-		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Part of This Series"
+		Include the reason for shot $currentShot Accepted due to "Vaccine Not Part of This Series"
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end

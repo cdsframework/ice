@@ -67,7 +67,7 @@ rule "Pneumococcal Adult Series: Evaluate PSV Shot >= 5yrs and < 19yrs as Accept
 		Confirm elapsed time between $dtBirthDate and $administrationDate >= "5y"
 		Confirm elapsed time between $dtBirthDate and $administrationDate < "19y"
 	then
-		Mark the shot $currentDose as Accepted for this Series due to "Below Recommended Age"
+		Include the reason for shot $currentDose Accepted due to "Below Recommended Age"
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
 end
@@ -102,7 +102,7 @@ rule "Pneumococcal Adult Series: Evaluate target dose 1 PPSV Shot as Accepted wi
 		There is an Administered Shot $currentShotForAgeCheck that needs to be evaluated
 			- that is the same shot as $adultPPSVShot1BelowMinAge
 	then
-		Mark the shot $currentShotForAgeCheck as Accepted for this Series due to "Below Recommended Age"
+		Include the reason for shot $currentShotForAgeCheck Accepted due to "Below Recommended Age"
 		Record that this dose rule was processed for the TargetDose $currentShotForAgeCheck
 		Log that this dose rule fired for the dose $currentShotForAgeCheck in the Series $targetSeriesForAgeCheck
 end
@@ -126,7 +126,7 @@ rule "Pneumococcal Adult Series: Minimum interval from the accepted dose 1 of PP
 			- the administered shot number is == $nShotNumber-1
 		Confirm Elapsed time between $adultPPSVShot1Date and $adultPPSVShot2Date < "5y"
 	then
-		Mark the shot $currentShotForIntervalCheck as Invalid for this Series due to "Below Minimum Interval"
+		Include the reason for shot $currentShotForIntervalCheck Invalid due to "Below Minimum Interval"
 		Record that this dose rule was processed for the TargetDose $currentShotForIntervalCheck
 		Log that this dose rule fired for the dose $currentShotForIntervalCheck in the Series $targetSeriesForAgeCheck
 end
@@ -182,7 +182,7 @@ rule "Pneumococcal Adult Series: If PCV (CVX 133, 152) administered for Adult Se
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE133", "ICE152")
 	then
-		Mark the Shot $currentShot as Invalid for this Series due to "Vaccine not Permitted for this Dose"
+		Include the reason for shot $currentShot Invalid due to "Vaccine not Permitted for this Dose"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -206,7 +206,7 @@ rule "Pneumococcal Adult Series: If PPSV (CVX 33, 109) administered for Adult Se
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE109", "ICE33")
 	then
-		Mark the Shot $currentShot as Invalid for this Series due to "Vaccine not Permitted for this Dose"
+		Include the reason for shot $currentShot Invalid due to "Vaccine not Permitted for this Dose"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -230,7 +230,7 @@ rule "Pneumococcal Adult Series: Evaluate PCV 7 shot (CVX 100) as Accepted with 
 			- the vaccine administered is "ICE100"
 			- the dose number in the Series is >= 6
 	then
-		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Allowed"
+		Include the reason for shot $currentShot Accepted due to "Vaccine Not Allowed"
 		Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
 		Record that this dose rule was processed for the TargetDose $currentShot
 end
@@ -272,7 +272,7 @@ rule "Pneumococcal Child Series: Evaluate shot administered with an invalid vacc
 			- the effective dose number in the series is <= 5
 			- the vaccine $vaccineAdministered is not permitted for dose number $doseNumber in this series
 	then
-		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Part of This Series"
+		Include the reason for shot $currentShot Accepted due to "Vaccine Not Part of This Series"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -325,7 +325,7 @@ rule "Pneumococcal Child Series: Evaluate extra shots before 5 yrs of age as ACC
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $administrationDate < "5y"
 	then
-		Mark the shot $currentShot as Accepted for this Series due to "Extra Dose"
+		Include the reason for shot $currentShot Accepted due to "Extra Dose"
 		Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
 		Record that this dose rule was processed for the TargetDose $currentShot
 end
@@ -377,7 +377,7 @@ rule "Pneumococcal Child Series: Evaluate PCV Shot as Valid if Patient < 5yrs, i
 	when
 		Confirm elapsed time between $previousAdministrationDate and $administrationDate >= "52d"
 	then
-		Mark the shot $currentShot as Valid for this Series
+		Include the reason for shot $currentShotValid Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -394,7 +394,7 @@ rule "Pneumococcal Child Series: Evaluate PCV Shot as Invalid if Patient < 5yrs,
 	when
 		Confirm elapsed time between $previousAdministrationDate and $administrationDate < "52d"
 	then
-		Mark the shot $currentShot as Invalid for this Series due to "Below Minimum Interval"
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -423,7 +423,7 @@ rule "Pneumococcal Child Series: Exception 1: Evaluate PCV Shot as Below Minimum
 			- the Number of Doses Administered before $dateOfInterest is == 0			
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "361d"	
 	then
-		Mark the shot $currentDose as Invalid for this Series due to "Below Minimum Age for Final Dose"
+		Include the reason for shot $currentDose Invalid due to "Below Minimum Age for Final Dose"
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end

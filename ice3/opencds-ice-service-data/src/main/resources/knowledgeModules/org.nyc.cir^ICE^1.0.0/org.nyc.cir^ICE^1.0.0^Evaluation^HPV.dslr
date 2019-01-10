@@ -69,7 +69,7 @@ rule "HPV: Evaluate CVX 118 administered to male patient as Accepted with reason
 			- the patient is male
 	then
 		Mark the shot $currentShot as Ignored
-		Mark the shot $currentShot as Accepted for this Series due to "Vaccine Not Licensed For Males"
+		Include the reason for shot $currentShot Accepted due to "Vaccine Not Licensed For Males"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -92,7 +92,7 @@ rule "Evaluate HPV Shot As Accepted If Patient >=27 yrs and does not have one or
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is == 0
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "27y"
 	then
-		Mark the shot $currentDose as Accepted for this Series due to "Above Recommended Age"
+		Include the reason for shot $currentDose Accepted due to "Above Recommended Age"
 		Mark that evaluation of shot $currentDose is complete and therefore should not be reevaluated by any other rules
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
@@ -115,7 +115,7 @@ rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses
 			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
 		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "112d"
 	then
-		Mark the shot $currentDose as Invalid for this Series due to "Below Minimum Interval"
+		Include the reason for shot $currentDose Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
 end

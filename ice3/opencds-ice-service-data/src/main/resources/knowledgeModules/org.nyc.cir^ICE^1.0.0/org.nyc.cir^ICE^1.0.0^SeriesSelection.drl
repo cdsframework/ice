@@ -1490,6 +1490,28 @@ rule "SeriesSelection.SelectHepBChildAdultSeriesNoShot" ruleflow-group "SeriesSe
 end
 
 
+rule "SeriesSelection.SelectHepBAdultSeriesNoShot" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	agenda-group "customSeriesSelectionRules"
+	activation-group "HepBSeriesSelectionCheck"
+	no-loop true
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)	
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBChildAdultSeries", selectedSeries == false, targetDoses.empty)
+		$person : EvaluatedPerson()
+		$evalTime: EvalTime()
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue, DurationType.DAYS).isGreaterThanEqualTo(new TimePeriod(18, DurationType.YEARS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+
 rule "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
@@ -1498,9 +1520,10 @@ rule "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is C
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)	
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBAdult2DoseSeries", selectedSeries == false)
-		TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true)
-		$person : EvaluatedPerson()
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "18y") >= 0)	
+		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, getIsValid() == true)
+		$person : EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y"))
+		not TargetDose(associatedTargetSeries != $td, getIsValid() == true, administrationDate < $dtDateAtAge)  
+		/////// eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $td.administrationDate, "18y") >= 0)	
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts);
@@ -1539,11 +1562,11 @@ rule "SeriesSelection(Hep B): For patient >= 18y and >= 1 dose and additional sh
 		$tss.setSelectedSeriesName($tsChildAdult.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($tss);
-		update($ts);
+		update($tsChildAdult);
 end
 
 
-rule "SeriesSelection(Hep B): For patient >= 18y and >= 1 dose and additional shots on record, select the Adult Series if it has greater than or equal the number of doses as the Adult Series" 
+rule "SeriesSelection(Hep B): For patient >= 18y and >= 1 dose and additional shots on record, select the Adult Series if it has greater than or equal the number of doses as the Child/Adult Series" 
 		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
@@ -1558,7 +1581,25 @@ rule "SeriesSelection(Hep B): For patient >= 18y and >= 1 dose and additional sh
 		$tss.setSelectedSeriesName($tsAdult.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($tss);
-		update($ts);
+		update($tsAdult);
+end
+
+// Select the Adult 2-dose series if it is complete ; then leave it to the general series selection rules to pick which complete series to use if there are other series that are complete as well
+rule "SeriesSelection(Hep B): Select Hep B Adult 2-dose Series is complete" 
+		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	agenda-group "customSeriesSelectionRules"
+	salience 110
+	when
+		TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, isSeriesComplete() == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);	
 end
 
 

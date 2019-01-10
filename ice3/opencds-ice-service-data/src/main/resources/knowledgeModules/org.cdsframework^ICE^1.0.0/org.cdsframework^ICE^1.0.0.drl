@@ -1354,7 +1354,7 @@ end
 // For all vaccine groups, if a series has not been selected by one of the custom rules and there are one or more series that have been completed, 
 // select the series with the fewest doses necessary required to complete the series. 
 ///////// ***
-rule "SeriesSelection: Select already completed series that has the fewest doses defined if exists and no other series selected" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: Select already completed series that has the fewest doses defined if exists and no series was previously selected" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 60
 	when
@@ -1394,7 +1394,8 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 			$seriesComplete2 : isSeriesComplete(), $lastAdministeredShot2InSeries: lastShotAdministeredInSeries, 
 			$lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
 		eval($seriesComplete1 == true && $seriesComplete2 == true && ($lastAdministeredShot2InSeries == null || 
-				($lastNecessaryShotAdministered2.getAdministrationDate() != null && $lastNecessaryShotAdministered2.getAdministrationDate().before($lastNecessaryShotAdministered1Date))))
+			($lastNecessaryShotAdministered2 != null && $lastNecessaryShotAdministered2.getAdministrationDate() != null && 
+				$lastNecessaryShotAdministered2.getAdministrationDate().before($lastNecessaryShotAdministered1Date))))
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts1.setSelectedSeries(false);
@@ -1402,7 +1403,36 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 		$tss.setSelectedSeriesName($ts2.seriesName);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Retracted for Already Complete Series: " + $ts2);
 		update($ts1);
-		update($ts2);	
+		update($ts2);
+end
+
+
+///////// ***
+// Supplemental Series Selection rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// If more than one series is complete but one of them has already been selected which completed after one of the other series, change the series
+// selected to the one that was completed the soonest.
+///////// ***
+rule "SeriesSelection: Select already completed series that was completed on the same date and with the most doses if different completed series was previously selected" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	salience 60
+	when
+		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, 
+			$seriesComplete1 : isSeriesComplete(), $lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null, 
+			$ts1numberOfDosesInSeries : seriesRules.numberOfDosesInSeries, $lastNecessaryShotAdministered1Date : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries).getAdministrationDate() != null)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, targetSeriesIdentifier != $id1, selectedSeries == false, targetSeason == $sss, 
+			$seriesComplete2 : isSeriesComplete(), $lastAdministeredShot2InSeries: lastShotAdministeredInSeries, $ts2numberOfDosesInSeries : seriesRules.numberOfDosesInSeries,
+			$ts2numberOfDosesInSeries > $ts1numberOfDosesInSeries, $lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null)
+		eval($seriesComplete1 == true && $seriesComplete2 == true && $lastNecessaryShotAdministered2 != null && $lastNecessaryShotAdministered2.getAdministrationDate().equals($lastNecessaryShotAdministered1Date))		
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts1.setSelectedSeries(false);
+		$ts2.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Retracted for Already Complete Series: " + $ts2);
+		update($ts1);
+		update($ts2);
 end
 
 

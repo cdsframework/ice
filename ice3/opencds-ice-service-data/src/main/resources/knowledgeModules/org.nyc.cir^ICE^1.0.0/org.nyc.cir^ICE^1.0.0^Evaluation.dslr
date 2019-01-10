@@ -112,7 +112,7 @@ rule "Evalaluate the Age when the Shot Administered is Before the Birthdate" rul
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Number of Doses Required to Complete this Series is >= $nDoseNumber
 	then
-		Mark the shot $currentDose as Invalid for this Series due to "Prior to DOB"
+		Include the reason for shot $currentDose Invalid due to "Prior to DOB"
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries 
 end
@@ -160,7 +160,7 @@ rule "Check if the Shot is Too Early Due to Live Virus Conflict" ruleflow-group 
 			- make note of the Date this Shot was Administered as $previousShotDate
 		Confirm elapsed time between $previousShotDate and $administrationDate < "28d"
 	then
-		Mark the shot $targetDose as Invalid for this Series due to "Too Early Live Virus"
+		Include the reason for shot $targetDose Invalid due to "Too Early Live Virus"
 		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
 end
 
@@ -182,6 +182,6 @@ rule "Check if the Shot is Too Early Due to Select Adjuvant Product Interval" ru
 			- make note of the Date this Shot was Administered as $previousShotDate
 		Confirm elapsed time between $previousShotDate and $administrationDate < "24d"
 	then
-		Mark the shot $targetDose as Invalid for this Series due to "Select Adjuvant Product Interval"
+		Include the reason for shot $targetDose Invalid due to "Select Adjuvant Product Interval"
 		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
 end

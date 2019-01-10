@@ -81,7 +81,7 @@ rule "Influenza: Evaluate the Influenza Shot as Outside Flu Season if it does no
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.800"
 			- the Shot $currentShot does not fall within the Season start and stop dates of the Series
 	then
-		Mark the shot $currentShot as Invalid for this Series due to "Outside Flu Season"
+		Include the reason for shot $currentShot Invalid due to "Outside Flu Season"
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries 
 end 
@@ -99,7 +99,7 @@ rule "Influenza: Change invalid >= maximum age reason to Insufficient Antigen fo
     	The patient information $oEvaluatedPerson must be known to complete writing this rule
 		Confirm the age of the patient $oEvaluatedPerson at the time the vaccine was administered for dose $oTargetDose is greater than the maximum allowable age for the vaccine
     then
-        Mark the shot $oTargetDose as Invalid for this Series due to "Insufficient Antigen"
+        Include the reason for shot $oTargetDose Invalid due to "Insufficient Antigen"
         Record that this dose rule was Processed for the TargetDose $oTargetDose
         Log that this dose rule fired for the dose $oTargetDose in the Series $associatedTargetSeries
 end
