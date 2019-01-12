@@ -1520,10 +1520,9 @@ rule "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is C
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)	
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBAdult2DoseSeries", selectedSeries == false)
-		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, getIsValid() == true)
+		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true)
 		$person : EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y"))
-		not TargetDose(associatedTargetSeries != $ts, getIsValid() == true, administrationDate < $dtDateAtAge)  
-		/////// eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $td.administrationDate, "18y") >= 0)	
+		not TargetDose(associatedTargetSeries != $ts, isValid == true, administrationDate < $dtDateAtAge)  
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts);

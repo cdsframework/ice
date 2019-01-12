@@ -1359,8 +1359,7 @@ rule "SeriesSelection: Select already completed series that has the fewest doses
 	salience 60
 	when
 		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
-			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, 
-			$sss : seriesSelectionSeason)
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
 		not (TargetSeries(selectedSeries == true, seriesRules.vaccineGroup == $ssvg, targetSeason == $sss))
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, isSeriesComplete() == true, $id1 : targetSeriesIdentifier, 
 			$numberOfDosesInSeries1 : seriesRules.numberOfDosesInSeries, targetSeason == $sss)
@@ -1385,17 +1384,14 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 	activation-group "SeriesSelectionFewestDoses"
 	when
 		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
-			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, 
-			$sss : seriesSelectionSeason)
-		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, 
-			$seriesComplete1 : isSeriesComplete(), $lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null, 
-			$lastNecessaryShotAdministered1Date : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries).getAdministrationDate() != null)
-		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id2 : targetSeriesIdentifier, $id2 != $id1, selectedSeries == false, targetSeason == $sss, 
-			$seriesComplete2 : isSeriesComplete(), $lastAdministeredShot2InSeries: lastShotAdministeredInSeries, 
-			$lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, $seriesComplete1 : isSeriesComplete(), 
+			$lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id2 : targetSeriesIdentifier, $id2 != $id1, selectedSeries == false, targetSeason == $sss, $seriesComplete2 : isSeriesComplete(), 
+			$lastAdministeredShot2InSeries: lastShotAdministeredInSeries, $lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
 		eval($seriesComplete1 == true && $seriesComplete2 == true && ($lastAdministeredShot2InSeries == null || 
-			($lastNecessaryShotAdministered2 != null && $lastNecessaryShotAdministered2.getAdministrationDate() != null && 
-				$lastNecessaryShotAdministered2.getAdministrationDate().before($lastNecessaryShotAdministered1Date))))
+			($lastNecessaryShotAdministered1 != null && $lastNecessaryShotAdministered2 != null && $lastNecessaryShotAdministered2.getAdministrationDate() != null && 
+				$lastNecessaryShotAdministered2.getAdministrationDate().before($lastNecessaryShotAdministered1.getAdministrationDate()))))
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts1.setSelectedSeries(false);
@@ -1418,13 +1414,12 @@ rule "SeriesSelection: Select already completed series that was completed on the
 	when
 		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
 			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
-		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, 
-			$seriesComplete1 : isSeriesComplete(), $lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null, 
-			$ts1numberOfDosesInSeries : seriesRules.numberOfDosesInSeries, $lastNecessaryShotAdministered1Date : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries).getAdministrationDate() != null)
-		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, targetSeriesIdentifier != $id1, selectedSeries == false, targetSeason == $sss, 
-			$seriesComplete2 : isSeriesComplete(), $lastAdministeredShot2InSeries: lastShotAdministeredInSeries, $ts2numberOfDosesInSeries : seriesRules.numberOfDosesInSeries,
-			$ts2numberOfDosesInSeries > $ts1numberOfDosesInSeries, $lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null)
-		eval($seriesComplete1 == true && $seriesComplete2 == true && $lastNecessaryShotAdministered2 != null && $lastNecessaryShotAdministered2.getAdministrationDate().equals($lastNecessaryShotAdministered1Date))		
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, $seriesComplete1 : isSeriesComplete(), 
+			$lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries), $ts1numberOfDosesInSeries : seriesRules.numberOfDosesInSeries)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, targetSeriesIdentifier != $id1, selectedSeries == false, targetSeason == $sss, $seriesComplete2 : isSeriesComplete(), 
+			$ts2numberOfDosesInSeries : seriesRules.numberOfDosesInSeries, $ts2numberOfDosesInSeries > $ts1numberOfDosesInSeries, $lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
+		eval($seriesComplete1 == true && $seriesComplete2 == true && $lastNecessaryShotAdministered1 != null && $lastNecessaryShotAdministered2 != null && $lastNecessaryShotAdministered2.getAdministrationDate() != null &&
+			$lastNecessaryShotAdministered2.getAdministrationDate().equals($lastNecessaryShotAdministered1.getAdministrationDate()))		
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts1.setSelectedSeries(false);
