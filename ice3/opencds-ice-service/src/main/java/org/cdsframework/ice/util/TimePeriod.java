@@ -27,7 +27,9 @@
 package org.cdsframework.ice.util;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -233,7 +235,7 @@ public class TimePeriod {
 		Days d = Days.daysBetween(dtStart, dtEnd);
 		return d.getDays();	
 	}
-
+	
 	public static int differenceInMonths(Date startDate, Date endDate) {
 
 		if (startDate == null || endDate == null) {
@@ -552,7 +554,7 @@ public class TimePeriod {
 	 */
 	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, String pTimePeriodStr, boolean absoluteValue) {
 		
-		String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, String): ";
+		String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, String, boolean): ";
 		if (pTimePeriodStr == null || pTimePeriodStr.length() == 0) {
 			String str = "TimePeriod string supplied not supplied";
 			logger.warn(_METHODNAME + str);
