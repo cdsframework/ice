@@ -1407,7 +1407,7 @@ end
 
 ///////////////////////////////////////////////////////////// Hep B-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
-rule "SeriesSelection.SelectHepBNewbornSeriesAtLeastOneShotAdministered" ruleflow-group "SeriesSelection"
+rule "SeriesSelection(Hep B).SelectHepBNewbornSeriesAtLeastOneShotAdministered" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	activation-group "HepBSeriesSelectionCheck"
@@ -1427,7 +1427,7 @@ rule "SeriesSelection.SelectHepBNewbornSeriesAtLeastOneShotAdministered" ruleflo
 end
 
 
-rule "SeriesSelection.SelectHepBNewBornSeriesNoShot" ruleflow-group "SeriesSelection"
+rule "SeriesSelection(Hep B).SelectHepBNewBornSeriesNoShot" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	activation-group "HepBSeriesSelectionCheck"
@@ -1448,7 +1448,7 @@ rule "SeriesSelection.SelectHepBNewBornSeriesNoShot" ruleflow-group "SeriesSelec
 end
 
 
-rule "SeriesSelection.SelectHepBChildAdultSeriesAtLeastOneShotAdministered" ruleflow-group "SeriesSelection"
+rule "SeriesSelection(Hep B).SelectHepBChildAdultSeriesAtLeastOneShotAdministered" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	activation-group "HepBSeriesSelectionCheck"
@@ -1469,7 +1469,7 @@ rule "SeriesSelection.SelectHepBChildAdultSeriesAtLeastOneShotAdministered" rule
 end
 
 
-rule "SeriesSelection.SelectHepBChildAdultSeriesNoShot" ruleflow-group "SeriesSelection"
+rule "SeriesSelection(Hep B).SelectHepBChildAdultSeriesNoShot" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	activation-group "HepBSeriesSelectionCheck"
@@ -1490,7 +1490,7 @@ rule "SeriesSelection.SelectHepBChildAdultSeriesNoShot" ruleflow-group "SeriesSe
 end
 
 
-rule "SeriesSelection.SelectHepBAdultSeriesNoShot" ruleflow-group "SeriesSelection"
+rule "SeriesSelection(Hep B).SelectHepBAdultSeriesNoShot" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	activation-group "HepBSeriesSelectionCheck"
@@ -1512,7 +1512,7 @@ rule "SeriesSelection.SelectHepBAdultSeriesNoShot" ruleflow-group "SeriesSelecti
 end
 
 
-rule "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+rule "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y-4d and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	salience 100
@@ -1521,7 +1521,7 @@ rule "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is C
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)	
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBAdult2DoseSeries", selectedSeries == false)
 		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true)
-		$person : EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y"))
+		$person : EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y-4d"))
 		not TargetDose(associatedTargetSeries != $ts, isValid == true, administrationDate < $dtDateAtAge)  
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1529,8 +1529,8 @@ rule "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is C
 end
 
 
-rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y, 1 dose, and no additional shots on record" 
-		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y-4d, 1 dose, and no additional shots on record" 
+		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y-4d and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	when
@@ -1546,8 +1546,8 @@ rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y, 1 do
 end
 
 
-rule "SeriesSelection(Hep B): For patient >= 18y and >= 1 dose and additional shots on record, select the Child/Adult Series if it has more doses than the Adult Series" 
-		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+rule "SeriesSelection(Hep B): For patient >= 18y-4d and >= 1 dose and additional shots on record, select the Child/Adult Series if it has more doses than the Adult Series" 
+		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y-4d and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	when
@@ -1565,8 +1565,8 @@ rule "SeriesSelection(Hep B): For patient >= 18y and >= 1 dose and additional sh
 end
 
 
-rule "SeriesSelection(Hep B): For patient >= 18y and >= 1 dose and additional shots on record, select the Adult Series if it has greater than or equal the number of doses as the Child/Adult Series" 
-		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+rule "SeriesSelection(Hep B): For patient >= 18y-4d and >= 1 dose and additional shots on record, select the Adult Series if it has greater than or equal the number of doses as the Child/Adult Series" 
+		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y-4d and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	when
@@ -1585,7 +1585,7 @@ end
 
 // Select the Adult 2-dose series if it is complete ; then leave it to the general series selection rules to pick which complete series to use if there are other series that are complete as well
 rule "SeriesSelection(Hep B): Select Hep B Adult 2-dose Series is complete" 
-		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
+		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y-4d and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	salience 110

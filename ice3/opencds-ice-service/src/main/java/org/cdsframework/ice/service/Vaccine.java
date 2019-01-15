@@ -224,7 +224,6 @@ public class Vaccine extends AbstractVaccine {
 	/**
 	 * Get all VaccineComponent member objects of this vaccine that targets the specified list of diseases
 	 * @param pTargetedDiseases Collection of diseases from which to ascertain targeting VaccineComponents
-	 * @return
 	 */
 	public Collection<VaccineComponent> getVaccineComponentsTargetingSpecifiedDiseases(Collection<String> pTargetedDiseases) {
 		
@@ -249,7 +248,6 @@ public class Vaccine extends AbstractVaccine {
 	
 	/**
 	 * Return vaccine components associated with this vaccine. There will always be at least one.
-	 * @return
 	 */
 	public List<VaccineComponent> getVaccineComponents() {
 		return vaccineComponents;
@@ -267,8 +265,9 @@ public class Vaccine extends AbstractVaccine {
 			+ getManufacturerCode() + ", getLicensedMinimumAgeForUse()="
 			+ getLicensedMinimumAgeForUse()
 			+ ", getLicensedMaximumAgeForUse()=" + getLicensedMaximumAgeForUse()
-			+ ", isUnspecifiedFormulation()=" + isUnspecifiedFormulation() 
+			+ ", isUnspecifiedFormulation()=" + isUnspecifiedFormulation()
 			+ ", isCombinationVaccine()=" + isCombinationVaccine()
+			+ ", isSelectAdjuvantProduct()=" + isSelectAdjuvantProduct()
 			+ ", VaccineComponent [[ ";
 		
 		int i=1;

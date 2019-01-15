@@ -421,7 +421,9 @@ public class TargetDose {
 		String s = "TargetDose [uniqueId=" + uniqueId + ", doseId=" + doseId + ", administeredShotNumber=" + administeredShotNumberInSeries + 
 				", doseNumber=" + doseNumberInSeries + ", vaccine=" + administeredVaccine.getCdsConceptName() + 
 				", vaccineComponent=" + vaccineComponent.getCdsConceptName() + ", administrationDate=" + administrationDate + ", status=" + status + 
-				", isValid=" + isValid + "; preEvaluationCheck=" + preEvaluationCheckCompleted;
+				", isValid=" + isValid + "; preEvaluationCheck=" + preEvaluationCheckCompleted + "; isLiveVirus: " + this.getAdministeredVaccine().isLiveVirusVaccine() + 
+				", componentIsLiveVirus: " + this.getVaccineComponent().isLiveVirusVaccine() + "; isAdjuvant: " + this.getAdministeredVaccine().isSelectAdjuvantProduct() + 
+				"; componentIsAdjuvant: " + this.getVaccineComponent().isSelectAdjuvantProduct();
 		int i=0;
 		for (String reason : validReasons) {
 			if (i == 0)

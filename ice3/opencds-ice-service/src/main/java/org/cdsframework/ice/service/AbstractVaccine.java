@@ -76,7 +76,6 @@ public abstract class AbstractVaccine {
 		this.licensedForUseMinimumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getLicensedMinimumAgeForUse());
 		this.licensedForUseMaximumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getLicensedMaximumAgeForUse());
 	}
-
 	
 	/**
 	 * Constructor for AbstractVaccine object
@@ -102,7 +101,6 @@ public abstract class AbstractVaccine {
 		this.licensedForUseMinimumAge = null;
 		this.licensedForUseMaximumAge = null;
 	}
-
 
 	/*
 	public String getCdsListItemName() {

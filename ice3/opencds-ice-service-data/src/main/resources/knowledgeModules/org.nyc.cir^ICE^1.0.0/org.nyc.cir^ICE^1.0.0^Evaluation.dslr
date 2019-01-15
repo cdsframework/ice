@@ -147,7 +147,8 @@ end
 // vaccine groups. We'll have this rule override the generic interval check since there's no point in checking that interval if this one 
 // does not pass
 rule "Check if the Shot is Too Early Due to Live Virus Conflict" ruleflow-group "HistoryEvaluation"
-	agenda-group "customEvaluationRule"	
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
 	when
 		There is an Administered Shot $targetDose that needs to be evaluated
 			- the Vaccine Administered is a Live Virus Vaccine
@@ -169,7 +170,8 @@ end
 // minimum interval is evaluated as Invalid with a reason code of SELECT_ADJUVANT_PRODUCT_INTERVAL.
 rule "Check if the Shot is Too Early Due to Select Adjuvant Product Interval" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
-	agenda-group "customEvaluationRule"	
+	agenda-group "customEvaluationRule"
+	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $targetDose that needs to be evaluated
 			- the Vaccine Administered is a Select Adjuvant Product

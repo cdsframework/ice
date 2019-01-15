@@ -237,7 +237,7 @@ rule "Hep B: When evaluating a CVX 189, if there is a prior VALID CVX 189, mark 
 end
 
 // When evaluating a CVX 189, ignore intervals to any intervening non-CVX 189 shots if there is a prior CVX 189 (valid) dose at least 24 days prior to this shot
-rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots are ignored if there is a prior CVX 189 dose at least 24 days apart" ruleflow-group "HistoryEvaluation"
+rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots are ignored if there is a prior valid CVX 189 dose at least 24 days apart" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -250,7 +250,7 @@ rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots
 		There is an Administered Shot $priorCVX189dose
 			- the shot belongs to the Series $associatedTargetSeries
 			- the vaccine administered is "ICE189"
-			- that has already been evaluated
+			- that has already been evaluated and whose shot validity status is VALID
 			- make note of the date this shot was administered as $dtAdministrationDatePriorCVXdose
 		Confirm Elapsed time between $dtAdministrationDatePriorCVXdose and $dtAdministrationDateCurrentShot >= "24d"
 	then
