@@ -171,7 +171,6 @@ end
 rule "Check if the Shot is Too Early Due to Select Adjuvant Product Interval" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
-	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $targetDose that needs to be evaluated
 			- the Vaccine Administered is a Select Adjuvant Product

@@ -1583,22 +1583,23 @@ rule "SeriesSelection(Hep B): For patient >= 18y-4d and >= 1 dose and additional
 		update($tsAdult);
 end
 
-// Select the Adult 2-dose series if it is complete ; then leave it to the general series selection rules to pick which complete series to use if there are other series that are complete as well
-rule "SeriesSelection(Hep B): Select Hep B Adult 2-dose Series is complete" 
+
+// Select the Child/Adult 3-dose series if it and it is complete - 2-dose series will be re-selected by general selection rules if it completed first
+rule "SeriesSelection(Hep B): Select Child/Adult Series if it is complete" 
 		extends "ABSTRACT SeriesSelection(Hep B): Patient is >= 18y-4d and (valid) Dose 1 is CVX 189" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	salience 110
 	when
-		TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, isSeriesComplete() == true)
+		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepBChildAdultSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", isSeriesComplete() == true)
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsChildAdult);
+		$tsChildAdult.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsChildAdult.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
 		update($tss);
-		update($ts);	
+		update($tsChildAdult);	
 end
 
 
