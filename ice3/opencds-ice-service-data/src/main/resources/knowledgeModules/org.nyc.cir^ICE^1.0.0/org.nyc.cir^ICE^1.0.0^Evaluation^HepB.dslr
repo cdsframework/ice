@@ -215,17 +215,21 @@ rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete (regardless of any oth
 end
 
 // If a CVX 189 has been administered and there is a previous, VALID CVX 189 administered beforehand, mark any intervening non-CVX 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
-rule "Hep B: When evaluating a CVX 189, if there is a prior VALID CVX 189, mark all intervening non-CVX 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN" 
+rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a prior VALID CVX 189, mark all intervening non-CVX 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN" 
 		extends "Hep B: Mark Series with 2 Doses of CVX 189 Complete (regardless of any other prior Hep B shots administered" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "postEvaluationCheck"
 	when
+		There is a Series $targetSeriesSame
+			- that is the same series as $targetSeries
+			- the series is complete
 		There is an administered shot $interveningShot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.100"
 			- the shot belongs to the series $targetSeries			
 			- the vaccine administered is not "ICE189"
-			- that has already been evaluated and whose shot validity status is not VALID
-			- the administration date of the shot is >= $priorDoseDate
+			// - that has already been evaluated and whose shot validity status is not VALID
+			// - the administration date of the shot is >= $priorDoseDate
+			- that has already been evaluated
 			- the administration date of the shot is <= $targetDoseDate
 	then
 		Remove all evaluation reasons from shot $interveningShot
