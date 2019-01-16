@@ -2226,8 +2226,7 @@ public class TargetSeries {
 
 
 	/**
-	 * Check age for the supplied dose and record evaluation reason in supplied
-	 * TargetDose's validReasons, acceptedReasons and/or invalidReasons list.
+	 * Check age for the supplied dose and record evaluation reason in supplied TargetDose's validReasons, acceptedReasons and/or invalidReasons list.
 	 * 
 	 * @param pEvalPersonBirthTime
 	 * @param pTD
@@ -2235,7 +2234,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	public void evaluateVaccineGroupMinimumAgeandRecordReason(Date pEvalPersonBirthTime, TargetDose pTD)
-			throws ImproperUsageException, InconsistentConfigurationException {
+		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "evaluateVaccineGroupMinimumAgeandRecordReason(): ";
 
@@ -2251,6 +2250,7 @@ public class TargetSeries {
 
 		if (isSeriesComplete()) {
 			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+			return;
 		}
 
 		DoseRule seriesDoseRule = obtainDoseRuleForSeriesByTargetDose(pTD);
@@ -2290,8 +2290,7 @@ public class TargetSeries {
 	}
 
 	/**
-	 * Check interval and record evaluation reason in more recent TargetDose's
-	 * validReasons, acceptedReasons and/or invalidReasons list.
+	 * Check interval and record evaluation reason in more recent TargetDose's validReasons, acceptedReasons and/or invalidReasons list.
 	 * 
 	 * @param pTD
 	 * @param pTDprev
@@ -2299,7 +2298,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	public void evaluateVaccineGroupMinimumIntervalAndRecordReason(TargetDose pTD, TargetDose pTDprev) 
-			throws ImproperUsageException, ICECoreError {
+		throws ImproperUsageException, ICECoreError {
 
 		String _METHODNAME = "checkIntervalAndRecordEvaluationReason(): ";
 
@@ -2311,6 +2310,7 @@ public class TargetSeries {
 
 		if (isSeriesComplete()) {
 			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+			return;
 		}
 
 		Date previousDoseDate = pTDprev.getAdministrationDate();

@@ -72,7 +72,7 @@ rule "Polio: If a patient is >= 18 years old and has NOT completed the series, t
 end
 
 
-rule "Polio: If the execution date is before 8/7/2010, modify the Minimum Age of DoseRule 4 to 126 days & the Minimum Interval of DoseRule3 to 28 days" ruleflow-group "RecommendationForecast"
+rule "Polio: If the execution date is before 8/7/2009, modify the Minimum Age of DoseRule 4 to 126 days & the Minimum Interval of DoseRule3 to 28 days" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationRule"
 	no-loop true
 	when
@@ -82,7 +82,7 @@ rule "Polio: If the execution date is before 8/7/2010, modify the Minimum Age of
 			- Post Processing on the series forecast has not already been run
 			- the Series is Not Complete
 			- the Number of Doses Administered is == 3
-		Confirm the date evalTime is before "07-Aug-2010"
+		Confirm the date evalTime is before "07-Aug-2009"
 	then
 		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
 		Set the Minimum Age for DoseRule $assign_oDoseRule4 to TimePeriod "126d"
@@ -95,7 +95,7 @@ rule "Polio: If the execution date is before 8/7/2010, modify the Minimum Age of
 end
 
 
-rule "Polio: If the execution date is before 8/7/2010 and the calculated Earliest Date for Dose 4 is after 8/7/2010, reset the Minimum Age & Minimum Interval back to their original values (4y & 6m, respectively) and recalculate" ruleflow-group "RecommendationForecast"
+rule "Polio: If the execution date is before 8/7/2009 and the calculated Earliest Date for Dose 4 is after 8/7/2009, reset the Minimum Age & Minimum Interval back to their original values (4y & 6m, respectively) and recalculate" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "postRecommendationCheck"
 	when
@@ -106,8 +106,8 @@ rule "Polio: If the execution date is before 8/7/2010 and the calculated Earlies
 			- the name of the Series is "Polio4DoseSeries"
 			- the effective dose number in the series is == 4
 			- make note of the Earliest Date as $earliestDate
-		Confirm the date evalTime is before "07-Aug-2010"
-		Confirm the date $earliestDate is after "07-Aug-2010"
+		Confirm the date evalTime is before "07-Aug-2009"
+		Confirm the date $earliestDate is after "07-Aug-2009"
 	then
 		Clear forecasted recommendations from consideration in series $targetSeries
 		Obtain the existing DoseRule for Dose Number 4 in the Series $targetSeries as $assign_oDoseRule4
@@ -119,4 +119,37 @@ rule "Polio: If the execution date is before 8/7/2010 and the calculated Earlies
 		Refresh all Facts in the Series $targetSeries for Forecasting
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Series complete with 3 doses: If patient is >= 4 years old (or will be >= 4 years old at the dose 3 recommended due date), recommend target dose 3 (and final dose) at 4 years old; 
+// recommended interval = 6 months.
+rule "Polio: If patient >= 4 yrs (or will be >= 4 yrs for target dose 3 recommendation date), include recommendation at 4yrs of age & recommended interval of 6m from prior administered shot for target dose 3" ruleflow-group "RecommendationForecast"
+	agenda-group "postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- post processing on the series forecast has not already been run
+			- a forecast for the series has been made and a recommendation date has been determined
+			- the series is not complete
+			- the number of doses administered is == 2
+			- make note of the recommendation date as $recommendationDate
+			- make note of the last shot administered in the series as $lastShotAdministered
+		There is an administered shot $shotAdministered
+			- that is the same shot as $lastShotAdministered
+			- the dose number in the series is == 2
+			- make note of the date this shot was administered as $dtAdministrationDate
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and evalTime >= "4y" || elapsed time between $birthDate and $recommendationDate >= "4y"
+	then
+		Add "4y" to $birthDate and make note of the newly calculated date as $dtCalculatedAge
+		Include a Recommendation as $rAge with recommended forecast date $dtCalculatedAge for consideration in the final forecast of the series $targetSeries
+		Include the Recommendation $rAge for consideration in the final forecast of the series
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculatedInterval
+		Include a Recommendation as $rInterval with recommended forecast date $dtCalculatedInterval for consideration in the final forecast of the series $targetSeries
+		Include the Recommendation $rInterval for consideration in the final forecast of the series
+		Refresh all facts in the series $targetSeries for forecasting
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
 end

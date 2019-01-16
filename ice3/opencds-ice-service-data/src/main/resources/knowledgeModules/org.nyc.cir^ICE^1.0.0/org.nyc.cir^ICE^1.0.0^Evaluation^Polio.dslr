@@ -53,21 +53,20 @@ global java.util.Date evalTime
 global org.drools.runtime.KnowledgeContext kcontext
 
 
-// Series complete with 3 doses if all administered doses are IPVs (CVX 10) or all administered doses are OPVs (CVX 02), and dose 3 was administered when the 
-// patient was >= 4 years and was administered at least 6 months - 4 days after the previous dose, then the series is complete with 3 doses.
-rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >= 4yrs when dose 3 administered, and dose 3 >= 6m-4d after previous dose" ruleflow-group "HistoryEvaluation" 
+// Series complete with 3 doses if dose 3 was administered when the patient was >= 4 years and was administered at least 6 months - 4 days after the previous dose, then the series is complete with 3 doses.
+rule "Polio: Series is Complete if 3 prior doses, patient >= 4yrs when dose 3 administered, and dose 3 >= 6m-4d after previous dose" ruleflow-group "HistoryEvaluation" 
 	dialect "mvel"
 	agenda-group "postEvaluationCheck"
 	when
 		There is an Administered Shot $dose3
 			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
-			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
+			- that has already been evaluated and whose Shot Validity is VALID
 			- the dose number in the series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDate
 			- make note of the Associated Series as $associatedTargetSeries
 		There is an Administered Shot $prevdose2
 			- the shot belongs to the Series $associatedTargetSeries
-			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
+			- that has already been evaluated and whose Shot Validity is VALID
 			- the dose number in the series is == 2
 			- make note of the date this shot was administered as $dtAdministrationDatePrev
 		There is a Series $targetSeries identified by $associatedTargetSeries
@@ -76,7 +75,6 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >
 			- the number of doses administered is == 3
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Verify that the count of doses administered in Series $targetSeries with vaccine "ICE10" is == 3
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "4y" && elapsed time between $dtAdministrationDatePrev and $dtAdministrationDate >= "6m-4d"
 	then
 		Mark the Series $targetSeries Complete
@@ -86,48 +84,14 @@ rule "Polio: Series is Complete if 3 prior doses, all 3 doses are IPV, patient >
 end
 
 
-// Series complete with 3 doses if all administered doses are IPVs (CVX 10) or all administered doses are OPVs (CVX 02, CVX 182), and dose 3 was administered when the 
-// patient was >= 4 years and was administered at least 6 months - 4 days after the previous dose, then the series is complete with 3 doses.
-rule "Polio: Series is Complete if 3 prior doses, all 3 doses are OPV, patient >= 4yrs when dose 3 administered, and dose 3 >= 6m-4d after previous dose" ruleflow-group "HistoryEvaluation" 
-	dialect "mvel"
-	agenda-group "postEvaluationCheck"
-	when
-		There is an Administered Shot $dose3
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
-			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
-			- the dose number in the series is == 3
-			- make note of the date this shot was administered as $dtAdministrationDate
-			- make note of the Associated Series as $associatedTargetSeries
-		There is an Administered Shot $prevdose2
-			- the shot belongs to the Series $associatedTargetSeries
-			- that has already been evaluated and whose Shot Validity is VALID or ACCEPTED
-			- the dose number in the series is == 2
-			- make note of the date this shot was administered as $dtAdministrationDatePrev
-		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
-			- the series is not complete
-			- the number of doses administered is == 3
-		// SupportedVaccineConcept._OPV
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		Verify that the count of doses administered in Series $targetSeries with vaccine a member of ("ICE02","ICE182") is == 3
-		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "4y" && elapsed time between $dtAdministrationDatePrev and $dtAdministrationDate >= "6m-4d"
-	then
-		Mark the Series $targetSeries Complete
-		Refresh all Facts in the Series $targetSeries for Evaluation
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "Polio: Modify DoseRule4 Absolute minimum age and Absolute Minimum Interval parameters for target dose 4 if administered before 8/7/2010" ruleflow-group "HistoryEvaluation"
+rule "Polio: Modify DoseRule4 Absolute minimum age and Absolute Minimum Interval parameters for target dose 4 if administered before 8/7/2009" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	no-loop true
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
 			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400" and the Series with name "Polio4DoseSeries"
 			- the dose number in the series is == 4
-			- the administration date of the shot is < "07-Aug-2010"
+			- the administration date of the shot is < "07-Aug-2009"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries
 	then
@@ -143,16 +107,16 @@ rule "Polio: Modify DoseRule4 Absolute minimum age and Absolute Minimum Interval
 end
 
 
-// For children who received target dose 4 at >= 8/7/2010 and before 4 years - 4 days of age, evaluate target dose 4 as Accepted/ BELOW_MINIMUM_AGE_FINAL_DOSE 
+// For children who received target dose 4 at >= 8/7/2009 and before 4 years - 4 days of age, evaluate target dose 4 as Accepted/ BELOW_MINIMUM_AGE_FINAL_DOSE 
 // (if absolute minimum interval is met). (An additional dose will be recommended at >= 4 years of age).
-rule "Polio: Mark target dose 4 administered >= 8/7/2010 and before absolute minimum age as ACCEPTED with reason BELOW_MINIMUM_AGE_FINAL_DOSE" ruleflow-group "HistoryEvaluation"
+rule "Polio: Mark target dose 4 administered >= 8/7/2009 and before absolute minimum age as ACCEPTED with reason BELOW_MINIMUM_AGE_FINAL_DOSE" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $targetDose4 that needs to be evaluated
 			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400" and the Series with name "Polio4DoseSeries"
 			- the dose number in the series is == 4
-			- the administration date of the shot is >= "07-Aug-2010"
+			- the administration date of the shot is >= "07-Aug-2009"
 			- make note of the date this shot was administered as $dtAdministrationDate
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
