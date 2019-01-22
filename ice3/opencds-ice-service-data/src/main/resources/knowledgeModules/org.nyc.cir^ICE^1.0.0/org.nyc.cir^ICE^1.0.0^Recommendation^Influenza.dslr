@@ -63,3 +63,25 @@ rule "Influenza: Manually Set Not To Take Live Virus Intervals into Consideratio
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+
+// There is a 4 week recommended interval between the last shot administered during the prior influenza vaccine season and any shots this influenza vaccine season
+rule "Influenza(post-recommendation check): If the recommended date is after the season end date, recommend an interval of 4 weeks from the last shot administered" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a forecast for the Series has been made and a recommendation date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.800"
+			- make note of the recommendation date as $recommendationDate
+			- post processing on the Series forecast has not already been run	
+			- make note of the date that the most recent shot was administered as $dtAdministrationDate
+			- make note of the season end date as $dtSeasonEndDate
+			- the date $recommendationDate > $dtSeasonEndDate
+	then
+		Add "4w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with recommended forecast date $dtCalculated for consideration in the final forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+

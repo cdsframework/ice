@@ -1420,7 +1420,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	private void recommendNextShotBasedOnSeriesIntervalRule(Date pEvalDate, RecommendationDateType pRecommendationDateType)
-			throws ImproperUsageException, InconsistentConfigurationException {
+		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "recommendNextShotBasedOnSeriesIntervalRule(): ";
 
@@ -1485,13 +1485,13 @@ public class TargetSeries {
 				return;
 			}
 			doseRuleOfInterest = 1;
-			// Below doseRuleOfInterest REMOVED 10/9/2014 as per general rule: no interval from target dose 1 to dose 1 for inactivated vaccines. 
-			// Create a separate live virus vaccine interval if needed.
-			// TODO:this is temporary... more generic interval declarations forthcoming; however, currently there are no dose 1->1 settings
-			// doseRuleOfInterest = 1;
-			//
-			// RATHER: change the above to the below return statement if it is decided that an interval _by default_ should be applied in this situation
-			// return;							// ADDED as per above 10/9/2014
+			/////// Below doseRuleOfInterest REMOVED 10/9/2014 as per general rule: no interval from target dose 1 to dose 1 for inactivated vaccines. 
+			/////// Create a separate live virus vaccine interval if needed.
+			/////// TODO:this is temporary... more generic interval declarations forthcoming; however, currently there are no dose 1->1 settings
+			/////// doseRuleOfInterest = 1;
+			///////
+			/////// RATHER: change the above to the below return statement if it is decided that an interval _by default_ should be applied in this situation
+			/////// return;							// ADDED as per above 10/9/2014
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Dose number from which to calculate interval: " + doseRuleOfInterest);
@@ -1538,18 +1538,16 @@ public class TargetSeries {
 		// Now calculate the date that the next shot should be administered according to internal rule
 		Date rIntervalDate = TimePeriod.addTimePeriod(lastDoseAdministered.getAdministrationDate(), rInterval);
 
-		// If this is a Seasonal TargetSeries and the rIntervalDate is after the season end date and this season does not have an off-season, then do not make a recommendation
-		// if (lTargetSeasonExists == true) {
-		//	Date lSeasonEndDate = targetSeason.getFullySpecifiedSeasonEndDate().toDate();
-		//	if (lSeasonEndDate != null && rIntervalDate.after(lSeasonEndDate) && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate() == null) {
-		//		return;
-		//	}
-		//}
+		// AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
+		// If this is a Seasonal TargetSeries and the rIntervalDate is after the off-season end date, then set the recommendation to the beginning of the next season
+		if (this.targetSeason != null && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate() != null && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().toDate().compareTo(rIntervalDate) < 0) {
+			rIntervalDate = targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1).toDate();
+		}
 
+		// Otherwise, store the interval recommendation
 		if (pEvalDate == null) {
 			pEvalDate = new Date();
 		}
-
 		if (pRecommendationDateType == RecommendationDateType.EARLIEST) {
 			Recommendation lEarliest = new Recommendation(this);
 			lEarliest.setEarliestDate(rIntervalDate);
@@ -2313,6 +2311,11 @@ public class TargetSeries {
 			return;
 		}
 
+		/////// If the prior dose was from a different TargetSeries than the current dose being evaluated, return. Rules(s) for evaluation of shots between different series 
+		/////// must be created elsewhere, if desired by the author.
+		/////// if (pTD.getAssociatedTargetSeries().equals(pTDprev.getTargetSeries()) == false) {
+		///////	return;
+		/////// }
 		Date previousDoseDate = pTDprev.getAdministrationDate();
 		Date currentDoseDate = pTD.getAdministrationDate();
 		int doseNumberForWhichToObtainRule = pTD.getDoseNumberInSeries();
