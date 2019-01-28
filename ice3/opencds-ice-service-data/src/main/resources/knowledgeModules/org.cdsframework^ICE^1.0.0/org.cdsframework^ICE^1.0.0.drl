@@ -998,7 +998,7 @@ rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "History
 	salience 100
 	activation-group "minimumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $vaccine : administeredVaccine, $doseNumber : doseNumberInSeries)
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $doseNumber : doseNumberInSeries)
 		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries) // , seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
@@ -1020,15 +1020,15 @@ rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "History
 	salience 100
 	activation-group "maximumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null)
-		$ts : TargetSeries(containsTargetDose($td))
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null, $doseNumber : doseNumberInSeries)
+		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) > 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
 		insert(hef)		
-		$td.addInvalidReason(BaseDataEvaluationReason._INVALID_AGE_EVALUATION_REASON.getCdsListItemName());
+		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAX_AGE_VACCINE.getCdsListItemName());
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
