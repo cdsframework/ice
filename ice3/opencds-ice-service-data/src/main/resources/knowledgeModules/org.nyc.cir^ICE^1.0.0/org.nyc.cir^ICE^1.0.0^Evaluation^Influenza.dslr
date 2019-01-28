@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -53,17 +53,33 @@ global java.util.Date evalTime
 // global org.drools.runtime.KnowledgeContext kcontext
 
 
-rule "Influenza: No minimum interval between first shot in seasonal series and most recent shot from a prior season" ruleflow-group "HistoryEvaluation"
+rule "Influenza: 24 day absolute minimum interval between target dose 1 in current seasonal series and most recent shot from a prior season" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheckFromPreviousSeason"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
-			- the administered shot number is == 1
+			- the dose number in the series is == 1
 			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the date this shot was administered as $dtAdministrationDate
+		There is a series $targetSeries identified by $associatedTargetSeries
+			- the series is a seasonal series
+			- make note of the season start date as $dtSeasonStartDate
+		There is an administered shot $priorAdministeredShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
+			- the shot does not belong to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administration date of the shot is < $dtSeasonStartDate
+			- make note of the date this shot was administered as $priorAdministrationDate
+		There does not exist an administered shot
+			 - the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
+			 - the shot does not belong to the series $associatedTargetSeries
+			 - that has already been evaluated
+			 - the administration date of the shot is > $priorAdministrationDate
+		Confirm Elapsed time between $priorAdministrationDate and $dtAdministrationDate < "24d"
 	then
-		// Don't do anything... overrides activation-group "doseIntervalCheckFromPreviousSeason" interval check from base set of rules
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end

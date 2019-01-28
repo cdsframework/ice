@@ -47,6 +47,7 @@
 [condition][]- [Tt]he [Ss]hot belongs to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == true
 [condition][]- [Tt]he [Ss]hot does not belong to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == false
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
+[condition][]- [Tt]he [Ss]hot does not belong to the [Ss]eries {oTargetSeries}=associatedTargetSeries != {oTargetSeries}
 [condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem} and the [Ss]eries with [Nn]ame {sSeriesName}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}, associatedSeriesName == {sSeriesName}
 [condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}
 [condition][]- [Tt]he [Ss]eries that the [Ss]hot belongs to is [Cc]omplete=associatedTargetSeries.isSeriesComplete() == true
@@ -174,6 +175,7 @@
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:([0-9]+)([\\.][0-9]+)?}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Ss]tring {strObject} {aOp}  {strValue}={strObject} != null && {strObject} {aOp} {strValue} || {strObject} == null && {strValue} == null
+[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo} 
 //
 // TargetDose accumulates
 //
@@ -186,7 +188,7 @@
 
 [keyword][][Cc]onfirm {conditions}=eval( {conditions} )
 [condition][][Tt]he [Vv]ariable {refer_oVariable} is {aOp}  {oValue}={refer_oVariable}  {aOp}  {oValue}
-[condition][][Tt]he [Aa]ge of the [Pp]atient {refer_oEvaluatedPerson} at the [Tt]ime the [Vv]accine was [Aa]dministered for [Dd]ose {refer_oTargetDose} is [Gg]reater [Tt]han the [Mm]aximum [Aa]llowable [Aa]ge for the [Vv]accine=(TimePeriod.compareElapsedTimePeriodToDateRange({refer_oEvaluatedPerson}.getDemographics().getBirthTime(), {refer_oTargetDose}.getAdministrationDate(), {refer_oTargetDose}.getVaccineComponent().getValidMaximumAgeForUse()) >= 0)
+[condition][][Tt]he [Aa]ge of the [Pp]atient {refer_oEvaluatedPerson} at the [Tt]ime the [Vv]accine was [Aa]dministered for [Dd]ose {refer_oTargetDose} is [Gg]reater [Tt]han the [Mm]aximum [Aa]llowable [Aa]ge for the [Vv]accine=(TimePeriod.compareElapsedTimePeriodToDateRange({refer_oEvaluatedPerson}.getDemographics().getBirthTime(), {refer_oTargetDose}.getAdministrationDate(), {refer_oTargetDose}.getVaccineComponent().getValidMaximumAgeForUse()) > 0)
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp}  {nDuration:[0-9]+}  {enumTimePeriod_durationType:[a-zA-Z0-9\.]+}=(TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, new TimePeriod({nDuration}, {enumTimePeriod_durationType})) {aOp} 0)
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp:[\=\\<\\>]+}  {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}=(TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, {sDuration}) {aOp} 0)
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp}  {refer_Duration:([\\$]{1})[a-zA-Z0-9_]+}=(TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, {refer_Duration}) {aOp} 0)

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -29,6 +29,7 @@ package org.cdsframework.ice.supportingdata;
 public enum BaseDataEvaluationReason implements BaseData {
 
 	_ABOVE_REC_AGE_SERIES("EVALUATION_REASON_CONCEPT.ABOVE_REC_AGE_SERIES"),
+	_ABOVE_MAX_AGE_VACCINE("EVALUATION_REASON_CONCEPT.ABOVE_MAX_AGE_VACCINE"),
 	_BELOW_MINIMUM_AGE_EVALUATION_REASON("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_SERIES"),
 	_BELOW_MINIMUM_INTERVAL_EVALUATION_REASON("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_INTERVAL"),
 	_BELOW_MINIMUM_AGE_FINAL_DOSE_REASON("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_FINAL_DOSE"),
