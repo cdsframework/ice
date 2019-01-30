@@ -1407,10 +1407,34 @@ end
 
 ///////////////////////////////////////////////////////////// Hep B-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
+rule "SeriesSelection: Select already completed series that was completed on the same date and with the most doses if different completed series was previously selected" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	agenda-group "customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", $ssvg : seriesSelectionVaccineGroup,
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == null || targetSeason == $sss, $seriesComplete1 : isSeriesComplete(), 
+			$lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries), $ts1numberOfDosesInSeries : seriesRules.numberOfDosesInSeries)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, targetSeriesIdentifier != $id1, selectedSeries == false, targetSeason == null || targetSeason == $sss, $seriesComplete2 : isSeriesComplete(), 
+			$ts2numberOfDosesInSeries : seriesRules.numberOfDosesInSeries, $ts2numberOfDosesInSeries > $ts1numberOfDosesInSeries, $lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
+		eval($seriesComplete1 == true && $seriesComplete2 == true && $lastNecessaryShotAdministered1 != null && $lastNecessaryShotAdministered2 != null && 
+			TimePeriod.differenceInDays($lastNecessaryShotAdministered1.getAdministrationDate(), $lastNecessaryShotAdministered2.getAdministrationDate()) == 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts1.setSelectedSeries(false);
+		$ts2.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($ts1);
+		update($ts2);
+		update($tss);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Retracted for Already Complete Series: " + $ts2 + "; " + $lastNecessaryShotAdministered1 + "; " + $lastNecessaryShotAdministered2);
+end
+
+
 rule "SeriesSelection(Hep B).SelectHepBNewbornSeriesAtLeastOneShotAdministered" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
-	activation-group "HepBSeriesSelectionCheck"
 	when	
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
@@ -1430,7 +1454,6 @@ end
 rule "SeriesSelection(Hep B).SelectHepBNewBornSeriesNoShot" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
-	activation-group "HepBSeriesSelectionCheck"
 	no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
@@ -1451,7 +1474,6 @@ end
 rule "SeriesSelection(Hep B).SelectHepBChildAdultSeriesAtLeastOneShotAdministered" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
-	activation-group "HepBSeriesSelectionCheck"
 	no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
@@ -1472,7 +1494,6 @@ end
 rule "SeriesSelection(Hep B).SelectHepBChildAdultSeriesNoShot" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
-	activation-group "HepBSeriesSelectionCheck"
 	no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)

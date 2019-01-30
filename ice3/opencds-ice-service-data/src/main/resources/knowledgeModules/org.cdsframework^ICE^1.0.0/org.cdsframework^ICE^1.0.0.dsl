@@ -122,6 +122,7 @@
 [condition][]- [Tt]he [Ee]ffective [Dd]ose [Nn]umber in the [Ss]eries is {aOp}  {nEffectiveDoseNumberInSeries}=determineDoseNumberInSeries {aOp} {nEffectiveDoseNumberInSeries}
 [condition][]- [Tt]he [Ee]ffective [Nn]umber of [Dd]oses in the [Ss]eries before {dtDate} is {aOp}  {nNumberOfValidAcceptedDoses}=determineEffectiveNumberOfDosesInSeriesByDate({dtDate}, false) {aOp}  {nNumberOfValidAcceptedDoses}
 [condition][]- [Tt]he [Ee]ffective [Nn]umber of [Dd]oses in the [Ss]eries on or before {dtDate} is {aOp}  {nNumberOfValidAcceptedDoses}=determineEffectiveNumberOfDosesInSeriesByDate({dtDate}, true) {aOp}  {nNumberOfValidAcceptedDoses}
+[condition][]- [Tt]he [Ee]ffective [Nn]umber of [Dd]oses [Aa]dministered in the [Ss]eries is {aOp}  {nEffectiveNumberOfDosesInSeries}=determineEffectiveNumberOfDosesInSeries {aOp} {nEffectiveNumberOfDosesInSeries}
 [condition][]- [Tt]he [Nn]umber of [Dd]oses [Aa]dministered is {aOp}  {nNumberOfDoses}=determineNumberOfDosesAdministeredInSeries() {aOp}  {nNumberOfDoses}
 [condition][]- [Tt]he [Nn]umber of [Dd]oses [Aa]dministered before {dtDate} is {aOp}  {nNumberOfDoses}=determineNumberOfDosesAdministeredInSeriesByDate({dtDate}, false) {aOp}  {nNumberOfDoses}
 [condition][]- [Tt]he [Nn]umber of [Dd]oses [Aa]dministered on or before {dtDate} is {nNumberOfDoses}=determineNumberofDosesAdministeredInSeriesByDate({dtDate}, true) ==  {nNumberOfDoses}

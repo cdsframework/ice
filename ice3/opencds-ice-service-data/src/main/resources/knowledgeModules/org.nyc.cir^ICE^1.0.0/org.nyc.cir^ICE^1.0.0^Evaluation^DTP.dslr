@@ -408,7 +408,7 @@ Exception 1: Series Complete with 3 Doses
 Exception 2: Series Complete with 4 Doses
     * If 4 doses have been administered and the 4th dose is administered at >= 4 years of age, then the series is complete with 4 doses; the 5th (booster) dose is not needed.
  *************************************************************************************************************************************************************************************/
-rule "DTP: (5-Dose Series Exception Rule 1)- Skip Dose Number to 4 if Patient >= 7 yrs if 3 doses have been administered, with first dose at >= 12m and at least 1 dose at >= 4yrs" 
+rule "DTP: (5-Dose Series Exception Rule 1)- Skip Dose Number to 4 if Patient >= 7 yrs when 3rd shot is being administered, with first dose at >= 12m and at least 1 dose at >= 4yrs" 
 	ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	when

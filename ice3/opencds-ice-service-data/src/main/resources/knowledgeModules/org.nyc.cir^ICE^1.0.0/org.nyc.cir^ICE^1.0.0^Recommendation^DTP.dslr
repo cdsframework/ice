@@ -501,11 +501,11 @@ when determining the recommended due date for the next target dose due
 The 5-dose series above applies unless:
 
 Exception 1: Series Complete with 3 Doses
-    * If the patient is >=7 or will be >=7 as of the next due date, received the first dose at >= 12 months of age, and received at least one dose at >= 4 years1 of age, then the 
+    * If the patient is >=7 or will be >=7 as of the next due date, received the first dose at >= 12 months of age, and received at least one dose at >= 4 years of age, then the 
       series is complete with 3 doses (doses 2, 3 and 4).
 *************************************************************************************************************************************************************************************/
 
-rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for Patient who will be >= 7yrs as of the next due date, if 3 Doses have been Administered with the first dose at >= 12m and at least 1 dose at >= 4yrs" 
+rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for Patient who will be >= 7yrs as of the next due date, if 3 doses have been administered with the first dose at >= 12m and at least 1 dose at >= 4yrs" 
  	ruleflow-group "RecommendationForecast"
  	agenda-group "postRecommendationCheck"
  	dialect "mvel"
@@ -538,6 +538,40 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+rule "DTP: (5-Dose Series Exception Rule 1)- Skip to Dose 4 if patient has had 2 doses with the first dose at >= 12m and one dose at >= 4 yrs" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the name of the Series is "DTP5DoseSeries"
+			- the number of doses administered is == 2
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- the numeric $nEffectiveDoseNumber is == 3
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAge4y when the patient is "4y" of age
+			- make note of the date as $dtDateAtAge12m when the Patient is "12m" of age
+		There exists an Administered Shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the Administration Date of the shot is >= $dtDateAtAge12m
+			- the Dose Number in the series is == 1
+		There exists an Administered Shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the Administration Date of the shot is >= $dtDateAtAge4y
+			- the Dose Number in the series is >= 2
+		Confirm elapsed time between $dtBirthDate and evalTime >= "7y"
+	then
+		Skip Series Dose Number to 4 from $nEffectiveDoseNumber for all diseases in the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end 
 
 /*************************************************************************************************************************************************************************************
 5-Dose Series Exception Rules  END
