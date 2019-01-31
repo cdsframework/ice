@@ -701,8 +701,7 @@ public class TargetSeries {
 	 * @param antigensToIncludeInDetermination limit which diseases to look at in the determination of the dose number. Under usual circumstances, use
 	 *            interimDiseaseEvaluationValidityCount.keySet(), to take into account all diseases for which this series induces immunity
 	 * @param takeSkipDoseEntriesIntoAccount If set to true, take any skip dose entries into account when determining dose number
-	 * @return the dose number or target dose number
-	 * @throws IllegalArgumentException if pTD is null and there are shots administered in this target series
+	 * @return the dose number or target dose number; or -1 if pTD is null or if it is not null but there are shots administered in this target series
 	 */
 	private int doseNumberDeterminationUpdateUtility(TargetDose pTD, boolean returnTargetDoseNumber, boolean updateInternalSeriesDoseNumberCount,
 			boolean takeSkipDoseEntriesIntoAccount,	Collection<String> antigensToIncludeInDetermination) {
@@ -715,12 +714,14 @@ public class TargetSeries {
 		if (pTD != null && (this.targetDoses == null || this.targetDoses.isEmpty())) {
 			String str = "Supplied TargetDose parameter is not null but there are no administered shots in this target series";
 			logger.warn(_METHODNAME + str);
-			throw new IllegalArgumentException(str);
+			/////// throw new IllegalArgumentException(str);
+			return -1;
 		}
 		else if (pTD == null) {
 			String str = "Supplied TargetDose parameter is null";
 			logger.warn(_METHODNAME + str);
-			throw new IllegalArgumentException(str);
+			/////// throw new IllegalArgumentException(str);
+			return -1;
 		}
 		///////////////////////////////////
 		// END if no shots administered
