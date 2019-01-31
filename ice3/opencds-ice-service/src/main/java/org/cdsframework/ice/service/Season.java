@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -394,7 +394,19 @@ public class Season {
 			return null;
 		}
 		
-		return seasonEndDate.plusDays(1);
+		if (offSeasonEndDate != null) {
+			if (offSeasonEndDate.isAfter(seasonEndDate)) {
+				return seasonEndDate.plusDays(1);
+			}
+			else if (offSeasonEndDate.equals(seasonEndDate)) {
+				// Season off-season start and off-season end dates are on the same date as the end date. Effectively, no off-season but tracked/recorded
+				// this way for internal calculations
+				return seasonEndDate;
+			}
+		}
+
+		// There is no season start date - return null
+		return null;
 	}
 	
 	
@@ -589,6 +601,39 @@ public class Season {
 		}
 	}
 	
+	/**
+	 * Date falls within the off-season
+	 */
+	public boolean dateIsApplicableToOffSeason(Date pDate) {
+		
+		if (pDate == null) {
+			return false;
+		}
+		
+		LocalDate lDate = LocalDate.fromDateFields(pDate);
+		if (isDefaultSeason()) {
+			return ! monthAndDayFallsWithinRange(lDate.getMonthOfYear(), lDate.getDayOfMonth(), this.getDefaultSeasonStartMonthAndDay(), this.getDefaultSeasonEndMonthAndDay());
+		}
+		else {
+			LocalDate lOffSeasonStartDate = getFullySpecifiedSeasonOffSeasonStartDate();
+			if (this.offSeasonPermitted && this.offSeasonEndDate != null && lOffSeasonStartDate != null) {
+				if (this.offSeasonEndDate.equals(lOffSeasonStartDate)) {
+					return false;
+				}
+				else {
+					if (lDate.compareTo(this.offSeasonEndDate) <= 0 && lDate.compareTo(lOffSeasonStartDate) >= 0) {
+						return true;
+					}
+					else {
+						return false;
+					}
+				}
+			}
+			else {
+				return false;
+			}
+		}
+	}
 
 	/**
 	 * Overload to dateIsApplicableToSeason(Date, boolean), with the 2nd parameter set to true.

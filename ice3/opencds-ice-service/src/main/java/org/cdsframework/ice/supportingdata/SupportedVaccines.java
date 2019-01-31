@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -258,9 +258,6 @@ public class SupportedVaccines implements SupportingData {
 			throw new InconsistentConfigurationException(lErrStr);
 		}
 		
-		// Live virus vaccine?
-		boolean lLiveVirusVaccine = pIceVaccineSpecificationFile.isLiveVirusVaccine();
-
 		// Combination vaccine?
 		boolean lCombinationVaccine = false;
 
@@ -407,7 +404,20 @@ public class SupportedVaccines implements SupportingData {
 			}
 			lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
 		}
-		lVaccine.setLiveVirusVaccine(lLiveVirusVaccine);
+		// Set live virus vaccine boolean
+		if (pIceVaccineSpecificationFile.isLiveVirusVaccine() != null) {
+			lVaccine.setLiveVirusVaccine(pIceVaccineSpecificationFile.isLiveVirusVaccine());
+		}
+		else {
+			lVaccine.setLiveVirusVaccine(false);
+		}
+		// Set select adjuvant product boolean 
+		if (pIceVaccineSpecificationFile.isSelectAdjuvantProduct() != null) {
+			lVaccine.setSelectAdjuvantProduct(pIceVaccineSpecificationFile.isSelectAdjuvantProduct());
+		}
+		else {
+			lVaccine.setSelectAdjuvantProduct(false);
+		}
 		this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(), new LocallyCodedVaccineItem(llccli.getCdsListItemName(), ic, lIntersectionOfSupportedCdsVersions, lVaccine));
 		
 		///////
@@ -493,6 +503,11 @@ public class SupportedVaccines implements SupportingData {
 		Boolean lBL = pIVSF.isLiveVirusVaccine();
 		if (lBL != null) {
 			pVaccineComponent.setLiveVirusVaccine(lBL.booleanValue());
+		}
+		// Select Adjuvant Product
+		Boolean lBLSA = pIVSF.isSelectAdjuvantProduct();
+		if (lBLSA != null) {
+			pVaccineComponent.setSelectAdjuvantProduct(lBLSA.booleanValue());
 		}
 		// Unspecified Formulation
 		lBL = pIVSF.isUnspecifiedFormulation();

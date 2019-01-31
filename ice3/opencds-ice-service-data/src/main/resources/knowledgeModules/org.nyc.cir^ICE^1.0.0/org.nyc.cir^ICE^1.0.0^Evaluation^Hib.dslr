@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -66,7 +66,7 @@ rule "Hib: Mark Shot with Invalid Vaccine as Invalid but do _not_ indicate VACCI
 			- make note of the number of doses required to complete this series as $numberOfDosesInSeries
 			- the numeric $doseNumber is <= $numberOfDosesInSeries
 	then
-		Mark the shot $currentShot as Invalid for this Series
+		Include the reason for shot $currentShot Invalid for this Series
 		Record that this Dose Rule was Processed for the TargetDose $currentShot
 		Log that this Dose Rule fired for the Dose $currentShot in the Series $targetSeries
 end
@@ -92,7 +92,7 @@ rule "Evaluate Hib Shot As Accepted If Patient >=5 Yrs and Series Not Complete b
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is < $assign_nNumberOfDosesRequired
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "5y"
 	then
-		Mark the shot $currentDose as Accepted for this Series due to "Above Recommended Age"
+		Include the reason for shot $currentDose Accepted due to "Above Recommended Age"
 		Mark the Series $targetSeries Not Complete
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
@@ -144,7 +144,7 @@ rule "Hib:Evaluate Hib Shot as Below Minimum Age for Final Dose of 4-Dose Hib Se
 			- the Number of Doses Administered before $dateOfInterest is == 0			
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "361d"	
 	then
-		Mark the shot $currentDose as Invalid for this Series due to "Below Minimum Age for Final Dose"
+		Include the reason for shot $currentDose Invalid due to "Below Minimum Age for Final Dose"
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end
@@ -219,7 +219,7 @@ rule "Hib: Booster Vaccine Not Allowed (Booster only) for patients less than 5y 
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is < $assign_nNumberOfDosesRequired
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "5y"
 	then
-		Mark the shot $currentDose as Invalid for this Series due to "Vaccine not Permitted for this Dose (Booster Only)"
+		Include the reason for shot $currentDose Invalid due to "Vaccine not Permitted for this Dose (Booster Only)"
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end

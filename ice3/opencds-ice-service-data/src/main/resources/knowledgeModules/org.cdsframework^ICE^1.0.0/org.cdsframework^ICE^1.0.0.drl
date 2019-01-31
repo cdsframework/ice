@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -53,6 +53,7 @@ import org.opencds.vmr.v1_0.internal.datatypes.BL
 import org.opencds.vmr.v1_0.internal.datatypes.CD
 import org.opencds.vmr.v1_0.internal.datatypes.INT
 import org.opencds.vmr.v1_0.internal.datatypes.IVLDate
+import org.cdsframework.ice.service.DateFactType
 import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
@@ -147,6 +148,21 @@ rule "ImmunizationReferenceData: Initialize Live Virus Fact Object" ruleflow-gro
 		LiveVirusFact lvd = new LiveVirusFact();
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Live Virus Fact Object Initialized");
 		insert(lvd);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "ImmunizationReferenceData: Initialize Select Adjuvant Product Fact Object" ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+	when
+		not DateFactType(factName == "SELECT_ADJUVANT_PRODUCT_INTERVAL")
+	then
+		String _RULENAME = kcontext.rule.name;		
+		DateFactType dft = new DateFactType("SELECT_ADJUVANT_PRODUCT_INTERVAL");
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Select Adjuvant Product Interval Fact Object Initialized");
+		insert(dft);
 end
 
 
@@ -982,7 +998,7 @@ rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "History
 	salience 100
 	activation-group "minimumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $vaccine : administeredVaccine, $doseNumber : doseNumberInSeries)
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $doseNumber : doseNumberInSeries)
 		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries) // , seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
@@ -1004,15 +1020,15 @@ rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "History
 	salience 100
 	activation-group "maximumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null)
-		$ts : TargetSeries(containsTargetDose($td))
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null, $doseNumber : doseNumberInSeries)
+		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) > 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
 		insert(hef)		
-		$td.addInvalidReason(BaseDataEvaluationReason._INVALID_AGE_EVALUATION_REASON.getCdsListItemName());
+		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAX_AGE_VACCINE.getCdsListItemName());
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
@@ -1338,23 +1354,25 @@ end
 // For all vaccine groups, if a series has not been selected by one of the custom rules and there are one or more series that have been completed, 
 // select the series with the fewest doses necessary required to complete the series. 
 ///////// ***
-rule "SeriesSelection: Select already completed series that has the fewest doses defined if exists and no other series selected" ruleflow-group "SeriesSelection"
+rule "SeriesSelection: Select already completed series that has the fewest doses defined if exists and no series was previously selected" ruleflow-group "SeriesSelection"
 	dialect "mvel"
+	activation-group "SeriesSelectionFewestDoses"
 	salience 60
 	when
 		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
-			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, 
-			$sss : seriesSelectionSeason)
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
 		not (TargetSeries(selectedSeries == true, seriesRules.vaccineGroup == $ssvg, targetSeason == $sss))
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, isSeriesComplete() == true, $id1 : targetSeriesIdentifier, 
 			$numberOfDosesInSeries1 : seriesRules.numberOfDosesInSeries, targetSeason == $sss)
 		not (TargetSeries(seriesRules.vaccineGroup == $ssvg, isSeriesComplete() == true, $numberOfDosesInSeries1 > seriesRules.numberOfDosesInSeries, targetSeason == $sss))
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts1);
 		$ts1.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts1.seriesName);
-		update($ts1);	
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts1);
+		update($ts1);
+		update($tss);	
 end
 
 
@@ -1369,24 +1387,23 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 	activation-group "SeriesSelectionFewestDoses"
 	when
 		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
-			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, 
-			$sss : seriesSelectionSeason)
-		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, 
-			$seriesComplete1 : isSeriesComplete(), $lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries) != null, 
-			$lastNecessaryShotAdministered1Date : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries).getAdministrationDate() != null)
-		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id2 : targetSeriesIdentifier, $id2 != $id1, selectedSeries == false, targetSeason == $sss, 
-			$seriesComplete2 : isSeriesComplete(), $lastAdministeredShot2InSeries: lastShotAdministeredInSeries, 
-			$lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, $seriesComplete1 : isSeriesComplete(), 
+			$lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id2 : targetSeriesIdentifier, $id2 != $id1, selectedSeries == false, targetSeason == $sss, $seriesComplete2 : isSeriesComplete(), 
+			$lastAdministeredShot2InSeries: lastShotAdministeredInSeries, $lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
 		eval($seriesComplete1 == true && $seriesComplete2 == true && ($lastAdministeredShot2InSeries == null || 
-				($lastNecessaryShotAdministered2.getAdministrationDate() != null && $lastNecessaryShotAdministered2.getAdministrationDate().before($lastNecessaryShotAdministered1Date))))
+			($lastNecessaryShotAdministered1 != null && $lastNecessaryShotAdministered2 != null && $lastNecessaryShotAdministered2.getAdministrationDate() != null && 
+				$lastNecessaryShotAdministered2.getAdministrationDate().before($lastNecessaryShotAdministered1.getAdministrationDate()))))
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts1.setSelectedSeries(false);
 		$ts2.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts2.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Retracted for Already Complete Series: " + $ts2);
 		update($ts1);
-		update($ts2);	
+		update($ts2);
 end
 
 
@@ -1431,6 +1448,25 @@ rule "RecommendationForecast.findMostRecentAdministeredLiveVirusVaccineDate" rul
 		$lvd.setLiveVirusDateSet(true);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Found most recent live virus vaccine administered on " + $lvd.getLiveVirusDate());
 		update($lvd);
+end
+
+
+///////// ***	
+// General Design rule... Do not Edit
+///////// ***
+rule "RecommendationForecast.findMostRecentAdministeredSelectAdjuvantProductVaccineDate" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	salience 10
+	when
+		$dft : DateFactType(factName == "SELECT_ADJUVANT_PRODUCT_INTERVAL", factDateSet == false)
+		exists (TargetSeries(recommendationStatus == RecommendationStatus.NOT_FORECASTED))
+		exists (TargetDose(vaccineComponent.isSelectAdjuvantProduct == true))
+		$maxdate : Date() from accumulate(TargetDose(vaccineComponent.isSelectAdjuvantProduct == true, $date : administrationDate), maxDate($date))
+	then
+		String _RULENAME = kcontext.rule.name;
+		$dft.setFactDate($maxdate);		
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Found most recent adjuvant product vaccine administered on " + $dft.getFactDate());
+		update($dft);
 end
 
 
@@ -1537,8 +1573,7 @@ rule "RecommendationForecast.adjustEarliestRecommendedDateDueToLiveVirus" rulefl
 		$lvd : LiveVirusFact($lvdDate : liveVirusDate, liveVirusDate != null, liveVirusDateSet == true)
 		$targetSeries : TargetSeries($earliestDate : getFinalEarliestDate() != null, 
 			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
-				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), 
-			isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccine() == true)  
+				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccine() == true)  
 		eval((TimePeriod.differenceInDays($lvdDate, evalTime) != 0 &&
 			TimePeriod.calculateElapsedTimePeriod($lvdDate, $earliestDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
 			(TimePeriod.differenceInDays($lvdDate, evalTime) == 0 &&
@@ -1550,7 +1585,7 @@ rule "RecommendationForecast.adjustEarliestRecommendedDateDueToLiveVirus" rulefl
 		Date $newRecommendationDate = TimePeriod.addTimePeriod($lvdDate, new TimePeriod(28, DurationType.DAYS));
 		$targetSeries.setFinalEarliestDate($newRecommendationDate);
 		$targetSeries.addSeriesRuleProcessed(_RULENAME);
-      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Earliest date adjustment from " + $earliestDate + " to " + $newRecommendationDate + " due to live virus vaccine administered on : " + $lvd.getLiveVirusDate() + " in TargetSeries " + $targetSeries.getSeriesName());			
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Earliest date adjustment from " + $earliestDate + " to " + $newRecommendationDate + " due to live virus vaccine administered on : " + $lvdDate + " in TargetSeries " + $targetSeries.getSeriesName());
 		update($targetSeries);
 end 
 
@@ -1579,7 +1614,65 @@ rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirus" ruleflow-group
 		Date $newRecommendationDate = TimePeriod.addTimePeriod($lvdDate, new TimePeriod(28, DurationType.DAYS));
 		$targetSeries.setFinalRecommendationDate($newRecommendationDate);
 		$targetSeries.addSeriesRuleProcessed(_RULENAME);
-      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Recommendation date adjustment from " + $recommendationDueDate + " to " + $newRecommendationDate + " due to live virus vaccine administered on : " + $lvd.getLiveVirusDate() + " in TargetSeries " + $targetSeries.getSeriesName());			
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Recommendation date adjustment from " + $recommendationDueDate + " to " + $newRecommendationDate + " due to live virus vaccine administered on : " + $lvdDate + " in TargetSeries " + $targetSeries.getSeriesName());			
+		update($targetSeries);	
+end
+
+
+///////// ***
+// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// If a recommended, conditionally recommended, or future recommendation for a select adjuvant product and other select adjuvant product shots been administered less than 28 days
+// from the recommendation date, then adjust the earliest recommendation date to be 28 days later than the most recent select adjuvant product
+///////// ***
+rule "RecommendationForecast.adjustEarliestRecommendedDateDueToSelectAdjuvantProduct" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "supplementalSeriesRule"
+	when
+		$dft : DateFactType(factName == "SELECT_ADJUVANT_PRODUCT_INTERVAL", factDate != null, factDateSet == true, $dftDate : factDate)
+		$targetSeries : TargetSeries($earliestDate : getFinalEarliestDate() != null, 
+			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedSelectAdjuvantProduct() == true)  
+		eval((TimePeriod.differenceInDays($dftDate, evalTime) != 0 &&
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
+			(TimePeriod.differenceInDays($dftDate, evalTime) == 0 &&
+			(TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS))) || 
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS))))
+	then
+		String _RULENAME = kcontext.rule.name;
+		Date $newRecommendationDate = TimePeriod.addTimePeriod($dftDate, new TimePeriod(28, DurationType.DAYS));
+		$targetSeries.setFinalEarliestDate($newRecommendationDate);
+		$targetSeries.addSeriesRuleProcessed(_RULENAME);
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Earliest date adjustment from " + $earliestDate + " to " + $newRecommendationDate + " due to select adjuvant product administered on : " + $dftDate + " in TargetSeries " + $targetSeries.getSeriesName());			
+		update($targetSeries);
+end
+
+
+///////// ***
+// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// If a recommended, conditionally recommended, or future recommendation for a select adjuvant product and other select adjuvant product shots have been administered less than 28 days
+// from the recommendation date, then adjust the recommendation date to be 28 days later than the most recent select adjuvant product
+///////// ***
+rule "RecommendationForecast.adjustRecommendedDateDueToSelectAdjuvantProduct" ruleflow-group "RecommendationForecast"
+	dialect "java"
+	agenda-group "supplementalSeriesRule"
+	when
+		$dft : DateFactType(factName == "SELECT_ADJUVANT_PRODUCT_INTERVAL", factDate != null, factDateSet == true, $dftDate : factDate)
+		$targetSeries : TargetSeries($recommendationDueDate : getFinalRecommendationDate() != null,
+			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedSelectAdjuvantProduct() == true)  
+		eval((TimePeriod.differenceInDays($dftDate, evalTime) != 0 &&
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
+			(TimePeriod.differenceInDays($dftDate, evalTime) == 0 &&
+			(TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS))) || 
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS))))
+	then
+		String _RULENAME = drools.getRule().getName();
+		Date $newRecommendationDate = TimePeriod.addTimePeriod($dftDate, new TimePeriod(28, DurationType.DAYS));
+		$targetSeries.setFinalRecommendationDate($newRecommendationDate);
+		$targetSeries.addSeriesRuleProcessed(_RULENAME);
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Recommendation date adjustment from " + $recommendationDueDate + " to " + $newRecommendationDate + " due to select adjuvant product administered on : " + $dftDate + " in TargetSeries " + $targetSeries.getSeriesName());			
 		update($targetSeries);	
 end 
 
@@ -1914,7 +2007,7 @@ rule "RecommendationForecast.Do Not Apply Earliest Interval for Dose 1 if Prior 
 	when
 		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, isSeriesComplete() == false, determineDoseNumberInSeries() == 1,
 			$lastShotAdministered : lastShotAdministeredInSeries, $lastShotAdministered != null, $lastShotAdministered.doseNumberInSeries == 1,	
-			$lastShotAdministered.getAdministeredVaccine().isLiveVirusVaccine() == false) 
+			$lastShotAdministered.getAdministeredVaccine().isLiveVirusVaccine() == false, $lastShotAdministered.getAdministeredVaccine().isSelectAdjuvantProduct() == false) 
 		exists ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $lastShotAdministered)
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1929,7 +2022,7 @@ rule "RecommendationForecast.Do Not Apply Recommended Interval for Dose 1 if Pri
 	when
 		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, isSeriesComplete() == false, determineDoseNumberInSeries() == 1,
 			$lastShotAdministered : lastShotAdministeredInSeries, $lastShotAdministered != null, $lastShotAdministered.doseNumberInSeries == 1,
-			$lastShotAdministered.getAdministeredVaccine().isLiveVirusVaccine() == false) 
+			$lastShotAdministered.getAdministeredVaccine().isLiveVirusVaccine() == false, $lastShotAdministered.getAdministeredVaccine().isSelectAdjuvantProduct() == false) 
 		exists ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $lastShotAdministered)
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1947,9 +2040,8 @@ rule "RecommendationForecast: Recommend Earliest Recommended Age Date in Next Se
 	salience 110
 	activation-group "recommendationAgeCheck"
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, $vg : vaccineGroup,
-			$offSeasonStartDate : targetSeason.fullySpecifiedSeasonOffSeasonStartDate != null, $offSeasonStartDate.toDate() <= evalTime,  
-			$offSeasonEndDate : targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null, $offSeasonEndDate.toDate() >= evalTime) 
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, $vg : vaccineGroup, targetSeason.dateIsApplicableToOffSeason(evalTime),
+			$offSeasonEndDate : targetSeason.fullySpecifiedSeasonOffSeasonEndDate)
 		not Season(isDefaultSeason() == false, vaccineGroup == $vg, fullySpecifiedSeasonStartDate.toDate() == $offSeasonEndDate.plusDays(1).toDate())
 		$defaultSeason : Season(isDefaultSeason() == true, vaccineGroup == $vg)
 		$s : SeriesRules(vaccineGroup == $vg, $defaultSeason memberOf seasons, getSeriesDoseRuleByDoseNumber(1) != null,
@@ -1971,16 +2063,16 @@ end
 // Series Table SEASONS rule... Do not Edit
 // Recommend earliest recommended age date in the next series for each series rules that have a recommended age and for which there is an associated fully-specified season
 ///////// ***
+// AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
 rule "RecommendationForecast: Recommend at Earliest Recommended Age Date in Next Series Season as Specified by TargetSeries if Fully-Specified Season Defined and if during the Off-Season of Current Seasonal Series" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	salience 110
 	activation-group "recommendationAgeCheck"
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, $vg : vaccineGroup,
-			$offSeasonStartDate : targetSeason.fullySpecifiedSeasonOffSeasonStartDate != null, $offSeasonStartDate.toDate() <= evalTime,  
-			$offSeasonEndDate : targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null, $offSeasonEndDate.toDate() >= evalTime) 
-		$fullySpecifiedNextseason : Season(isDefaultSeason() == false, vaccineGroup == $vg, fullySpecifiedSeasonStartDate.toDate() == $offSeasonEndDate.plusDays(1).toDate())
-		$sr : SeriesRules(vaccineGroup == $vg, $fullySpecifiedNextseason memberOf seasons, getSeriesDoseRuleByDoseNumber(1) != null,
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, targetSeason.dateIsApplicableToOffSeason(evalTime), 
+			$offSeasonEndDate : targetSeason.fullySpecifiedSeasonOffSeasonEndDate, $offSeasonEndDate != null)
+		$fullySpecifiedNextseason : Season(isDefaultSeason() == false, vaccineGroup == $ts.vaccineGroup, fullySpecifiedSeasonStartDate.toDate() == $offSeasonEndDate.plusDays(1).toDate())
+		$sr : SeriesRules(vaccineGroup == $ts.vaccineGroup, $fullySpecifiedNextseason memberOf seasons, getSeriesDoseRuleByDoseNumber(1) != null,
 			$recommendedAge : getSeriesDoseRuleByDoseNumber(1).getEarliestRecommendedAge() != null)
 		$person : EvaluatedPerson($birthDate : demographics.birthTime)
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $offSeasonEndDate.plusDays(1).toDate(), $recommendedAge) > 0)		
@@ -2000,14 +2092,13 @@ end
 // For seasonal series, patients should receive a shot on the first date of the next season if evaluation time is *after* the season ended in current series
 // Overrides interval check.
 ///////// ***
+// AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
 rule "RecommendationForecast: Recommend Next Season Earliest Start Date if during the Off-Season of Current Seasonal Series" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	salience 110
 	activation-group "earliestIntervalCheck"	
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, 
-			targetSeason.fullySpecifiedSeasonOffSeasonStartDate != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null,
-			targetSeason.getFullySpecifiedSeasonOffSeasonStartDate().toDate() <= evalTime, targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().toDate() >= evalTime)
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, targetSeason.dateIsApplicableToOffSeason(evalTime))
 	then
 		String _RULENAME = kcontext.rule.name;
 		Recommendation recommendation = new Recommendation($ts);
@@ -2023,14 +2114,13 @@ end
 // For seasonal series, patients should receive a shot on the first date of the next season if evaluation time is *after* the season ended in current series
 // Overrides interval check.
 ///////// ***
+// AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
 rule "RecommendationForecast: Recommend Next Season Recommended Start Date if during the Off-Season of Current Seasonal Series" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	salience 110
 	activation-group "recommendationIntervalCheck"	
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, 
-			targetSeason.fullySpecifiedSeasonOffSeasonStartDate != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null,
-			targetSeason.getFullySpecifiedSeasonOffSeasonStartDate().toDate() <= evalTime, targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().toDate() >= evalTime)
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, targetSeason.dateIsApplicableToOffSeason(evalTime)) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		Recommendation recommendation = new Recommendation($ts);
@@ -2045,6 +2135,7 @@ end
 // Series Table rule... Do not Edit
 // For seasonal series, if the series is complete, recommend that the patient receive a shot on the season start date of the next season
 ///////// ***
+// AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
 rule "RecommendationForecast: Recommend Next Season Start Date if Current Seasonal Series is Complete" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	salience 100
@@ -2066,13 +2157,14 @@ end
 // For seasonal series, if the final recommendation date falls between the off-season start and end dates, modify the recommendation date to the
 // beginning of the next season 
 ///////// ***
+// AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
 rule "RecommendationForecast/Post Recommendation Check: Recommend Next Season Start Date if Final Recommendation Date during Off-Season" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "postRecommendationCheck"
 	when
 		$ts : TargetSeries(isPostForecastCheckCompleted() == false, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null, $pcvRecommendationDate : finalRecommendationDate, 
 			targetSeason != null, finalRecommendationDate != null, targetSeason.fullySpecifiedSeasonOffSeasonStartDate != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null) 
-		eval($ts.getFinalRecommendationDate().compareTo($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonStartDate().toDate()) >= 0 && 
+		eval($ts.getFinalRecommendationDate().compareTo($ts.getTargetSeason().getFullySpecifiedSeasonEndDate().toDate()) > 0 && 
 			$ts.getFinalRecommendationDate().compareTo($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate().toDate()) <= 0)
 	then
 		String _RULENAME = kcontext.rule.name;

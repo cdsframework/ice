@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -112,7 +112,7 @@ rule "Evalaluate the Age when the Shot Administered is Before the Birthdate" rul
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Number of Doses Required to Complete this Series is >= $nDoseNumber
 	then
-		Mark the shot $currentDose as Invalid for this Series due to "Prior to DOB"
+		Include the reason for shot $currentDose Invalid due to "Prior to DOB"
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries 
 end
@@ -142,12 +142,13 @@ rule "Evaluate the Interval when the Shot Administered is Before the Birth Date"
 end
 
 
-// A live virus vaccine must be administered on the same day or with a minimum interval of 24 days; otherwise the vaccine that does not
+// A live virus vaccine must be administered on the same day or with a minimum interval of 28 days; otherwise the vaccine that does not
 // meet the minimum interval will be considered invalid with a reason of Too Early Live Virus. This spans across all series and 
 // vaccine groups. We'll have this rule override the generic interval check since there's no point in checking that interval if this one 
 // does not pass
-rule "Check if the Dose is Too Early Due to Live Virus Conflict" ruleflow-group "HistoryEvaluation"
-	agenda-group "customEvaluationRule"	
+rule "Check if the Shot is Too Early Due to Live Virus Conflict" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
 	when
 		There is an Administered Shot $targetDose that needs to be evaluated
 			- the Vaccine Administered is a Live Virus Vaccine
@@ -160,6 +161,28 @@ rule "Check if the Dose is Too Early Due to Live Virus Conflict" ruleflow-group 
 			- make note of the Date this Shot was Administered as $previousShotDate
 		Confirm elapsed time between $previousShotDate and $administrationDate < "28d"
 	then
-		Mark the shot $targetDose as Invalid for this Series due to "Too Early Live Virus"
+		Include the reason for shot $targetDose Invalid due to "Too Early Live Virus"
+		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
+end
+
+
+// Adjuvant products must be administered with an absolute minimum interval of 24 days; otherwise the vaccine that does not meet the absolute 
+// minimum interval is evaluated as Invalid with a reason code of SELECT_ADJUVANT_PRODUCT_INTERVAL.
+rule "Check if the Shot is Too Early Due to Select Adjuvant Product Interval" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	when
+		There is an Administered Shot $targetDose that needs to be evaluated
+			- the Vaccine Administered is a Select Adjuvant Product
+			- the Shot has not already been marked as a Select Adjuvant Product Interval Conflict (as we do not want this rule executing more than necessary)
+			- make note of the Date this Shot was Administered as $administrationDate
+			- make note of the Associated Series as $associatedTargetSeries
+		There is an Administered Shot $otherShot
+			- the Vaccine Administered is a Select Adjuvant Product
+			- the Administration Date of the shot is < $administrationDate
+			- make note of the Date this Shot was Administered as $previousShotDate
+		Confirm elapsed time between $previousShotDate and $administrationDate < "24d"
+	then
+		Include the reason for shot $targetDose Invalid due to "Select Adjuvant Product Interval"
 		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
 end

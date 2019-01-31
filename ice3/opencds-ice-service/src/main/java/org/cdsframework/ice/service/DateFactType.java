@@ -24,25 +24,54 @@
  * correspondence to ice@hln.com.
  */
 
-package org.cdsframework.ice.supportingdata;
+package org.cdsframework.ice.service;
 
-public enum BaseDataPerson implements BaseData {
+import java.util.Date;
 
-	_GENDER_FEMALE("SUPPORTED_PERSON_CONCEPT.F"),
-	_GENDER_MALE("SUPPORTED_PERSON_CONCEPT.M");
+public class DateFactType {
+	private String factName;
+	private Date factDate;
+	private boolean factDateSet;
 	
-	private String cdsListItemName;
-	
-	private BaseDataPerson() {
-		this.cdsListItemName = null;
+	/**
+	 * LiveVirusDate's date is set to null, and isLiveVirusDateSet() to false
+	 */
+	public DateFactType(String pFactName) {
+		this.factName = pFactName;
+		factDate = null;
+		factDateSet = false;
 	}
 	
-	private BaseDataPerson(String pCdsListItem) {
-		this.cdsListItemName = pCdsListItem;
+	/**
+	 * Sets LiveVirusDate's date and isLiveVirusDateSet() to true
+	 * @param pLiveVirusDate
+	 */
+	public DateFactType(String pFactName, Date pFactDate) {
+		factName = pFactName;
+		factDate = pFactDate;
+		factDateSet = true;
+	}
+
+	public String getFactName() {
+		return factName;
 	}
 	
-	public String getCdsListItemName() {
-		return this.cdsListItemName;
+	public Date getFactDate() {
+		return factDate;
+	}
+
+	public void setFactDate(Date pFactDate) {
+		this.factDate = pFactDate;
+		if (this.factDate != null) {
+			this.factDateSet = true;
+		}
+		else {
+			this.factDateSet = false;
+		}
+	}
+
+	public boolean isFactDateSet() {
+		return factDateSet;
 	}
 	
 }

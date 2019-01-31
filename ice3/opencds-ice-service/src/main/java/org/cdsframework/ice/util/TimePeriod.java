@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -233,7 +233,7 @@ public class TimePeriod {
 		Days d = Days.daysBetween(dtStart, dtEnd);
 		return d.getDays();	
 	}
-
+	
 	public static int differenceInMonths(Date startDate, Date endDate) {
 
 		if (startDate == null || endDate == null) {
@@ -552,7 +552,7 @@ public class TimePeriod {
 	 */
 	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, String pTimePeriodStr, boolean absoluteValue) {
 		
-		String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, String): ";
+		String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, String, boolean): ";
 		if (pTimePeriodStr == null || pTimePeriodStr.length() == 0) {
 			String str = "TimePeriod string supplied not supplied";
 			logger.warn(_METHODNAME + str);

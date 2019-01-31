@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -392,8 +392,8 @@ public class TargetSeries {
 
 	/**
 	 * Check if next recommended shot is a live virus vaccine (and therefore recommendationStatus is either RECOMMENDED, RECOMMENDED_IN_FUTURE, or CONDITIONALLY_RECOMMENDED)
-	 * @return true if recommended shot is a live virus vaccine or any vaccine that is in the vaccine group is a live virus vaccine, 
-	 * false if recommended shot is not a live virus vaccine, or if not recommendation has been made yet
+	 * @return true if recommended shot is a live virus vaccine or any vaccine that is in the vaccine group contains a live virus vaccine, false if recommended shot is 
+	 * not a live virus vaccine, or if not recommendation has been made yet
 	 */
 	public boolean isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccine() {
 
@@ -412,6 +412,39 @@ public class TargetSeries {
 			List<Vaccine> allPermittedVaccinesForThisDose = dr.getAllPermittedVaccines();
 			for (Vaccine v : allPermittedVaccinesForThisDose) {
 				if (v.isLiveVirusVaccine()) {
+					return true;
+				}
+			}
+			return false;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	
+	/**
+	 * Check if next recommended shot is a live virus vaccine (and therefore recommendationStatus is either RECOMMENDED, RECOMMENDED_IN_FUTURE, or CONDITIONALLY_RECOMMENDED)
+	 * @return true if recommended shot is a select adjuvant product vaccine or any vaccine that is in the vaccine group contains a select adjuvant product, false if 
+	 * recommended shot is not a select adjuvant product, or if not recommendation has been made yet
+	 */
+	public boolean isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedSelectAdjuvantProduct() {
+
+		if (this.recommendationStatus != null && (this.recommendationStatus == RecommendationStatus.RECOMMENDED || 
+				this.recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || this.recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)) {
+
+			int lTargetDoseNumber = determineEffectiveNumberOfDosesInSeries() + 1;
+			DoseRule dr = getSeriesRules().getSeriesDoseRuleByDoseNumber(lTargetDoseNumber);
+			if (dr == null) {
+				return false;
+			}
+
+			if (manuallySetAccountForLiveVirusIntervalsInRecommendation != null) {
+				return manuallySetAccountForLiveVirusIntervalsInRecommendation.booleanValue();
+			}
+			List<Vaccine> allPermittedVaccinesForThisDose = dr.getAllPermittedVaccines();
+			for (Vaccine v : allPermittedVaccinesForThisDose) {
+				if (v.isSelectAdjuvantProduct()) {
 					return true;
 				}
 			}
@@ -668,8 +701,7 @@ public class TargetSeries {
 	 * @param antigensToIncludeInDetermination limit which diseases to look at in the determination of the dose number. Under usual circumstances, use
 	 *            interimDiseaseEvaluationValidityCount.keySet(), to take into account all diseases for which this series induces immunity
 	 * @param takeSkipDoseEntriesIntoAccount If set to true, take any skip dose entries into account when determining dose number
-	 * @return the dose number or target dose number
-	 * @throws IllegalArgumentException if pTD is null and there are shots administered in this target series
+	 * @return the dose number or target dose number; or -1 if pTD is null or if it is not null but there are shots administered in this target series
 	 */
 	private int doseNumberDeterminationUpdateUtility(TargetDose pTD, boolean returnTargetDoseNumber, boolean updateInternalSeriesDoseNumberCount,
 			boolean takeSkipDoseEntriesIntoAccount,	Collection<String> antigensToIncludeInDetermination) {
@@ -682,12 +714,14 @@ public class TargetSeries {
 		if (pTD != null && (this.targetDoses == null || this.targetDoses.isEmpty())) {
 			String str = "Supplied TargetDose parameter is not null but there are no administered shots in this target series";
 			logger.warn(_METHODNAME + str);
-			throw new IllegalArgumentException(str);
+			/////// throw new IllegalArgumentException(str);
+			return -1;
 		}
 		else if (pTD == null) {
 			String str = "Supplied TargetDose parameter is null";
 			logger.warn(_METHODNAME + str);
-			throw new IllegalArgumentException(str);
+			/////// throw new IllegalArgumentException(str);
+			return -1;
 		}
 		///////////////////////////////////
 		// END if no shots administered
@@ -1387,7 +1421,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	private void recommendNextShotBasedOnSeriesIntervalRule(Date pEvalDate, RecommendationDateType pRecommendationDateType)
-			throws ImproperUsageException, InconsistentConfigurationException {
+		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "recommendNextShotBasedOnSeriesIntervalRule(): ";
 
@@ -1452,13 +1486,13 @@ public class TargetSeries {
 				return;
 			}
 			doseRuleOfInterest = 1;
-			// Below doseRuleOfInterest REMOVED 10/9/2014 as per general rule: no interval from target dose 1 to dose 1 for inactivated vaccines. 
-			// Create a separate live virus vaccine interval if needed.
-			// TODO:this is temporary... more generic interval declarations forthcoming; however, currently there are no dose 1->1 settings
-			// doseRuleOfInterest = 1;
-			//
-			// RATHER: change the above to the below return statement if it is decided that an interval _by default_ should be applied in this situation
-			// return;							// ADDED as per above 10/9/2014
+			/////// Below doseRuleOfInterest REMOVED 10/9/2014 as per general rule: no interval from target dose 1 to dose 1 for inactivated vaccines. 
+			/////// Create a separate live virus vaccine interval if needed.
+			/////// TODO:this is temporary... more generic interval declarations forthcoming; however, currently there are no dose 1->1 settings
+			/////// doseRuleOfInterest = 1;
+			///////
+			/////// RATHER: change the above to the below return statement if it is decided that an interval _by default_ should be applied in this situation
+			/////// return;							// ADDED as per above 10/9/2014
 		}
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Dose number from which to calculate interval: " + doseRuleOfInterest);
@@ -1492,7 +1526,7 @@ public class TargetSeries {
 		}
 		if (rInterval == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
-				String msg = "No routine intervalspecified for dose " + doseRulePreviousDose.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
+				String msg = "No routine interval specified for dose " + doseRulePreviousDose.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup() + "; Series Name: " + seriesRules.getSeriesName();
 				logger.warn(_METHODNAME + msg);
 			}
 			return;
@@ -1505,18 +1539,16 @@ public class TargetSeries {
 		// Now calculate the date that the next shot should be administered according to internal rule
 		Date rIntervalDate = TimePeriod.addTimePeriod(lastDoseAdministered.getAdministrationDate(), rInterval);
 
-		// If this is a Seasonal TargetSeries and the rIntervalDate is after the season end date and this season does not have an off-season, then do not make a recommendation
-		// if (lTargetSeasonExists == true) {
-		//	Date lSeasonEndDate = targetSeason.getFullySpecifiedSeasonEndDate().toDate();
-		//	if (lSeasonEndDate != null && rIntervalDate.after(lSeasonEndDate) && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate() == null) {
-		//		return;
-		//	}
-		//}
+		// AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
+		// If this is a Seasonal TargetSeries and the rIntervalDate is after the off-season end date, then set the recommendation to the beginning of the next season
+		if (this.targetSeason != null && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate() != null && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().toDate().compareTo(rIntervalDate) < 0) {
+			rIntervalDate = targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1).toDate();
+		}
 
+		// Otherwise, store the interval recommendation
 		if (pEvalDate == null) {
 			pEvalDate = new Date();
 		}
-
 		if (pRecommendationDateType == RecommendationDateType.EARLIEST) {
 			Recommendation lEarliest = new Recommendation(this);
 			lEarliest.setEarliestDate(rIntervalDate);
@@ -2193,8 +2225,7 @@ public class TargetSeries {
 
 
 	/**
-	 * Check age for the supplied dose and record evaluation reason in supplied
-	 * TargetDose's validReasons, acceptedReasons and/or invalidReasons list.
+	 * Check age for the supplied dose and record evaluation reason in supplied TargetDose's validReasons, acceptedReasons and/or invalidReasons list.
 	 * 
 	 * @param pEvalPersonBirthTime
 	 * @param pTD
@@ -2202,7 +2233,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	public void evaluateVaccineGroupMinimumAgeandRecordReason(Date pEvalPersonBirthTime, TargetDose pTD)
-			throws ImproperUsageException, InconsistentConfigurationException {
+		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "evaluateVaccineGroupMinimumAgeandRecordReason(): ";
 
@@ -2218,6 +2249,7 @@ public class TargetSeries {
 
 		if (isSeriesComplete()) {
 			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+			return;
 		}
 
 		DoseRule seriesDoseRule = obtainDoseRuleForSeriesByTargetDose(pTD);
@@ -2257,8 +2289,7 @@ public class TargetSeries {
 	}
 
 	/**
-	 * Check interval and record evaluation reason in more recent TargetDose's
-	 * validReasons, acceptedReasons and/or invalidReasons list.
+	 * Check interval and record evaluation reason in more recent TargetDose's validReasons, acceptedReasons and/or invalidReasons list.
 	 * 
 	 * @param pTD
 	 * @param pTDprev
@@ -2266,7 +2297,7 @@ public class TargetSeries {
 	 * @throws InconsistentConfigurationException
 	 */
 	public void evaluateVaccineGroupMinimumIntervalAndRecordReason(TargetDose pTD, TargetDose pTDprev) 
-			throws ImproperUsageException, ICECoreError {
+		throws ImproperUsageException, ICECoreError {
 
 		String _METHODNAME = "checkIntervalAndRecordEvaluationReason(): ";
 
@@ -2278,8 +2309,14 @@ public class TargetSeries {
 
 		if (isSeriesComplete()) {
 			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+			return;
 		}
 
+		/////// If the prior dose was from a different TargetSeries than the current dose being evaluated, return. Rules(s) for evaluation of shots between different series 
+		/////// must be created elsewhere, if desired by the author.
+		/////// if (pTD.getAssociatedTargetSeries().equals(pTDprev.getTargetSeries()) == false) {
+		///////	return;
+		/////// }
 		Date previousDoseDate = pTDprev.getAdministrationDate();
 		Date currentDoseDate = pTD.getAdministrationDate();
 		int doseNumberForWhichToObtainRule = pTD.getDoseNumberInSeries();

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -54,7 +54,6 @@ public class VaccineComponent extends AbstractVaccine {
 	 * @throws IllegalArgumentException If either parameter is not supplied
 	 */
 	public VaccineComponent(CdsConcept pVaccineConcept, List<String> pDiseaseImmunityList) {
-	// public VaccineComponent(String pCdsListItemName, List<String> pDiseaseImmunityList) {
 		
 		super(pVaccineConcept);
 		
@@ -131,6 +130,7 @@ public class VaccineComponent extends AbstractVaccine {
 		return "VaccineComponent [diseaseImmunityList=" + diseaseImmunityList
 				+ ", getCdsListItemName()=" + getCdsConceptName()
 				+ ", isLiveVirusVaccine()=" + isLiveVirusVaccine()
+				+ ", isSelectAdjuvantProduct()=" + isSelectAdjuvantProduct()
 				+ ", getValidMinimumAgeForUse()=" + getValidMinimumAgeForUse()
 				+ ", getValidMaximumAgeForUse()=" + getValidMaximumAgeForUse()
 				+ ", getTradeName()=" + getTradeName()

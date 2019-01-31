@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -40,6 +40,7 @@ public abstract class AbstractVaccine {
 	private String manufacturerCode;
 	private boolean unspecifiedFormulation;
 	private boolean liveVirusVaccine;
+	private boolean selectAdjuvantProduct;
 	private TimePeriod validMinimumAgeOfUse;
 	private TimePeriod validMaximumAgeOfUse;
 	private TimePeriod licensedForUseMinimumAge;
@@ -58,23 +59,23 @@ public abstract class AbstractVaccine {
 		}
 		
 		// String lCdsListItemName = pAbstractVaccine.getCdsListItemName();
-		//if (lCdsListItemName == null) {
-		//	String errStr = "cdsListItem code not supplied in Vaccine instance";
-		//	logger.warn(_METHODNAME + errStr);
-		//	throw new IllegalArgumentException(errStr);
-		//}
-		//this.cdsListItemName = lCdsListItemName;
+		// if (lCdsListItemName == null) {
+		// 	String errStr = "cdsListItem code not supplied in Vaccine instance";
+		// 	logger.warn(_METHODNAME + errStr);
+		// 	throw new IllegalArgumentException(errStr);
+		// }
+		// this.cdsListItemName = lCdsListItemName;
 		this.cdsConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(pAbstractVaccine.getCdsConcept());
 		this.tradeName = pAbstractVaccine.getTradeName();
 		this.manufacturerCode = pAbstractVaccine.getManufacturerCode();
 		this.liveVirusVaccine = pAbstractVaccine.isLiveVirusVaccine();
+		this.selectAdjuvantProduct = pAbstractVaccine.isSelectAdjuvantProduct();
 		this.unspecifiedFormulation = pAbstractVaccine.isUnspecifiedFormulation();
 		this.validMinimumAgeOfUse = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getValidMinimumAgeForUse());
 		this.validMaximumAgeOfUse = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getValidMaximumAgeForUse());
 		this.licensedForUseMinimumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getLicensedMinimumAgeForUse());
 		this.licensedForUseMaximumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getLicensedMaximumAgeForUse());
 	}
-
 	
 	/**
 	 * Constructor for AbstractVaccine object
@@ -88,18 +89,18 @@ public abstract class AbstractVaccine {
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		// this.cdsListItemName = pCdsListItemName;
+		/////// this.cdsListItemName = pCdsListItemName;
 		this.cdsConcept = pCC;
 		this.tradeName = null;
 		this.manufacturerCode = null;
 		this.liveVirusVaccine = false;
 		this.unspecifiedFormulation = false;
+		this.selectAdjuvantProduct = false;
 		this.validMinimumAgeOfUse = null;
 		this.validMaximumAgeOfUse = null;
 		this.licensedForUseMinimumAge = null;
 		this.licensedForUseMaximumAge = null;
 	}
-
 
 	/*
 	public String getCdsListItemName() {
@@ -124,17 +125,11 @@ public abstract class AbstractVaccine {
 	}
 
 	/**
-	 * Return the minimum age for the vaccine. If not specified previously, 0 days is returned
-	 * @return
+	 * Return the minimum age for the vaccine. If not specified previously, null is returned
+	 * @return TimePeriod representing the minimum age for the vaccine
 	 */
 	public TimePeriod getValidMinimumAgeForUse() {
-		if (validMinimumAgeOfUse != null) {
-			return validMinimumAgeOfUse;
-		}
-		else {
-			/////// return new TimePeriod("0d");
-			return null;
-		}
+		return validMinimumAgeOfUse;
 	}
 
 	public void setValidMinimumAgeForUse(TimePeriod validMinimumAgeForUse) {
@@ -166,7 +161,6 @@ public abstract class AbstractVaccine {
 		return unspecifiedFormulation;
 	}
 
-
 	/**
 	 * Sets the unspecified formulation flag to whatever is specified by the parameter, overriding any previous (including calculated) unspecified formulation 
 	 * @param unspecifiedFormulation
@@ -175,6 +169,13 @@ public abstract class AbstractVaccine {
 		this.unspecifiedFormulation = unspecifiedFormulation;
 	}
 
+	public boolean isSelectAdjuvantProduct() {
+		return selectAdjuvantProduct;
+	}
+	
+	public void setSelectAdjuvantProduct(boolean selectAdjuvantProduct) {
+		this.selectAdjuvantProduct = selectAdjuvantProduct;
+	}
 
 	public String getTradeName() {
 		return tradeName;

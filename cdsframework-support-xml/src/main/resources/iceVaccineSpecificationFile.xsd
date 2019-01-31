@@ -2,7 +2,7 @@
 <!--
 
     /**
-     * Copyright (C) 2016 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
      * Contributions by HLN Consulting, LLC
      *
      * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -37,6 +37,7 @@
                schemaLocation="http://cds.hln.com/cdsframework/schema/datatypes.xsd"/>
     <xs:element name="liveVirusVaccine" type="xs:boolean" default="false" />
     <xs:element name="unspecifiedFormulation" type="xs:boolean" default="false"/>
+    <xs:element name="selectAdjuvantProduct" type="xs:boolean" default="false"/>
     <xs:element name="vaccineActive" type="xs:boolean" default="true" />
     <xs:element name="tradeName" type="xs:string" />
     <xs:element name="manufacturerCode" type="dt:CD" />
@@ -51,8 +52,9 @@
             <xs:element name="vaccine" type="dt:CD" minOccurs="1" maxOccurs="1"/>
             <xs:element name="vaccineGroup" type="dt:CD" minOccurs="0" maxOccurs="unbounded"/>		<!--  TODO: ?Remove?: This is not currently used in any way though could be useful override -->
             <xs:element name="cdsVersion" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
-            <xs:element ref="iv:unspecifiedFormulation" minOccurs="0" maxOccurs="1"/>
             <xs:element ref="iv:liveVirusVaccine" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:unspecifiedFormulation" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="iv:selectAdjuvantProduct" minOccurs="0" maxOccurs="1"/>
             <xs:element ref="iv:vaccineActive" minOccurs="0" maxOccurs="1"/>
             <xs:element ref="iv:tradeName" minOccurs="0" maxOccurs="1"/>
             <xs:element ref="iv:manufacturerCode" minOccurs="0" maxOccurs="1"/>
