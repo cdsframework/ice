@@ -337,7 +337,7 @@ then a dose of PCV 13 (CVX 133) is recommended. Recommended interval is 8 weeks
 /************************************************************************************************************************************************************************************/
 
 // Abstract rule for PCV13 rule: patient < 5yrs of age, series is complete and no prior PCV shots until the current shot under evaluation
-rule "Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, Child Series is Complete and no prior PCV shots" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs where Child Series is otherwise complete but there are no prior PCV doses" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	when
@@ -368,8 +368,7 @@ end
 // If a child is already complete for the series, has not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old in the Child Series, then this PCV 13 shot 
 // is evaluated to VALID as long as an interval of 52 days has elapsed since last shot.
 rule "Pneumococcal Child Series: Evaluate PCV Shot as Valid if Patient < 5yrs, interval is >= 52 days and Series is Complete" extends 
-		"Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, Child Series is Complete and no prior PCV shots" 
-	ruleflow-group "HistoryEvaluation"
+		"Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs where Child Series is otherwise complete but there are no prior PCV doses" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -386,7 +385,7 @@ end
 // If a child is already complete for the series, and this shot is PCV 13 (CVX 133), is currently < 5 yrs old, then this PCV 13 shot is evaluated to INVALID if an interval 
 // of 52 days has not elapsed since last shot.
 rule "Pneumococcal Child Series: Evaluate PCV Shot as Invalid if Patient < 5yrs, interval is < 52 days and Series is Complete" extends 
-	"Pneumococcal Child Series (Abstract Rule): Evaluate PCV Shot for patient < 5yrs, Child Series is Complete and no prior PCV shots" ruleflow-group "HistoryEvaluation"
+		"Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs where Child Series is otherwise complete but there are no prior PCV doses" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -399,6 +398,37 @@ rule "Pneumococcal Child Series: Evaluate PCV Shot as Invalid if Patient < 5yrs,
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+
+// If the child series is completed, make note of this via an IceFact
+rule "Pneumococcal: Note completion of child series if the patient has received 4 or 5 effective doses prior to 5 years of age" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "postEvaluationCheck"
+	when
+		There is an administered shot $doseThatCompletesChildSeries
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
+			- the dose number in the series is one of (4,5)
+			- that has already been evaluated and whose Shot Validity is VALID
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $targetSeries
+		There is not an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $targetSeries
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dateAt5yOfAge when the patient is "5y" of age
+		There is an administered shot $matchingDose
+			- that is the same shot as $doseThatCompletesChildSeries
+			- the administration date of the shot is < $dateAt5yOfAge
+		There is an administered shot $childhoodPCV13Dose
+			- the shot belongs to the Series $targetSeries
+			- the vaccine administered is "ICE133"
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the administration date of the shot is < $dateAt5yOfAge
+	then
+ 		Insert an IceFact SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.getConceptCodeValue() with TargetSeries $targetSeries into working memory
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+	
 /*************************************************************************************************************************************************************************************
  END PCV 13 Rule
 /************************************************************************************************************************************************************************************/
