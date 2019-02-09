@@ -329,7 +329,7 @@ then a dose of PCV 13 (CVX 133) is recommended. Recommended interval is 8 weeks
 
 // If a child is complete for the series, has had one or more doses but not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old and will be < 5 years old at the recommended due date, 
 // then a dose of PCV 13 (CVX 133) is recommended. Recommended interval = 8 weeks from the previous shot.
-rule "Pneumococcal Child Series: Recommend dose if series complete if no prior VALID PCV13 doses, is <5 yrs old and will be less than 5yrs old upon recommendation date" ruleflow-group "RecommendationForecast"
+rule "Pneumococcal Child Series: Recommend PCV13 dose if series complete if no prior VALID PCV13 doses, is <5 yrs old and will be less than 5yrs old upon recommendation date" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	salience 450
@@ -350,21 +350,8 @@ rule "Pneumococcal Child Series: Recommend dose if series complete if no prior V
 		Include a recommendation as $recommendation with recommended forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
 		Set the Recommendation Vaccine for $recommendation to "ICE133"
 		Mark forecasting of the Series $targetSeries Complete
+		Insert an IceFact SupportedFactConcept._PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE.getConceptCodeValue() with TargetSeries $targetSeries into working memory
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "Remove IceFact _PNEUMOCOCCAL_CHILD_SERIES_COMPLETE if present" extends 
-		"Pneumococcal Child Series: Recommend dose if series complete if no prior VALID PCV13 doses, is <5 yrs old and will be less than 5yrs old upon recommendation date" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	agenda-group "customRecommendationRule"
-	when
-		There is an IceFact $iceFactChildSeriesComplete
-			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
-			- that has associated series $targetSeries
-	then
-		Retract IceFact $iceFactChildSeriesComplete from Working Memory
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
@@ -504,6 +491,9 @@ rule "Pneumococcal: if patient *will be* >= 5 years at the recommended due date 
 			- post processing on the Series forecast has not already been run
 		There exists an IceFact
 			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $targetSeries
+		There is not an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE.conceptCodeValue
 			- that has associated series $targetSeries
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
