@@ -205,12 +205,30 @@ rule "Duplicate Shots/Same Day: If a shot is ACCEPTED/EXTRA_DOSE and has the sam
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
 			$tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
 		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.ACCEPTED, associatedTargetSeries == $tdAssociatedTargetSeries, 
-			doseNumberInSeries == $tddosenumber, administeredShotNumberInSeries > $tdAdministeredShotNumber, containsAcceptedReason("EVALUATION_REASON_CONCEPT.EXTRA_DOSE"))
+			doseNumberInSeries == $tddosenumber, administeredShotNumberInSeries > $tdAdministeredShotNumber, containsAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.cdsListItemName))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
 			setStatus(DoseStatus.INVALID),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
 		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
+
+
+// If a shot is INVALID and has no other reason code, but there is another shot administered on the same day that is VALID, add the reason DUPLICATE_SHOT_SAME_DAY to the invalid shot
+rule "Duplicate Shots/Same Day: If a shot is INVALID with no reason code and there is a VALID dose on the same day, add the reason DUPLICATE_SHOT_SAME_DAY to the Invalid shot"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $tdAssociatedTargetSeries, hasBeenEvaluated == true, doseNumberInSeries == $tddosenumber, status == DoseStatus.INVALID, 
+			administrationDate == $tdAdministrationDate, allEvaluationReasonsFromAllReasonSets.empty == true || 
+			allEvaluationReasonsFromAllReasonSets.size == 1 && allEvaluationReasonsFromAllReasonSets.contains(BaseDataEvaluationReason._UNSPECIFIED_REASON.getCdsListItemName)) 
+	then
+		String _RULENAME = drools.getRule().getName();
+		$tdother.addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
 end
