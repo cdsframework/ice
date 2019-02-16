@@ -130,6 +130,11 @@ public class TargetDose {
 		return notEvaluatedReasons.contains(openCdsConceptCode);
 	}
 	
+	public boolean containsReason(String openCdsConceptCode) {
+		
+		return getAllEvaluationReasonsFromAllReasonSets().contains(openCdsConceptCode);
+	}
+	
 	public Collection<String> getAllEvaluationReasonsFromAllReasonSets() {
 	
 		List<String> allReasons = new ArrayList<String>();

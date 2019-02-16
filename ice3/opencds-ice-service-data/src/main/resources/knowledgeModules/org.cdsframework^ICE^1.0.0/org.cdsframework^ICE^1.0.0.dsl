@@ -118,6 +118,7 @@
 [condition][]- [Tt]he [Ss]hot {refer_oTargetDose} [Ff]alls within the [Ss]eason [Ss]tart and [Ss]top [Dd]ates of the [Ss]eries=targetSeason == null || targetSeason.dateIsApplicableToSeason({refer_oTargetDose}.getAdministrationDate(), false) == true
 [condition][]- [Tt]he [Ss]hot {refer_oTargetDose} does not [Ff]all within the [Ss]eason [Ss]tart and [Ss]top [Dd]ates of the [Ss]eries=targetSeason != null && targetSeason.dateIsApplicableToSeason({refer_oTargetDose}.getAdministrationDate(), false) == false
 [condition][]- [Tt]he [Nn]umber of [Dd]oses [Rr]equired to [Cc]omplete this [Ss]eries is {aOp}  {nDoseNumber}=seriesRules.numberOfDosesInSeries {aOp}  {nDoseNumber}
+[condition][]- [Tt]he [Nn]umber of [Aa]dministered [Ss]hots excluding [Dd]uplicate [Ss]hots on the [Ss]ame [Dd]ay is {aOp}  {nNumberOfShots}=numberOfShotsAdministeredInSeriesExcludingDuplicateShotsOnTheSameDay {aOp}  {nNumberOfShots}
 [condition][]- [Tt]he [Nn]umber of [Aa]dministered [Ss]hots is {aOp}  {nNumberOfShots}=numberOfShotsAdministeredInSeries {aOp}  {nNumberOfShots}
 [condition][]- [Tt]he [Ee]ffective [Dd]ose [Nn]umber in the [Ss]eries is {aOp}  {nEffectiveDoseNumberInSeries}=determineDoseNumberInSeries {aOp} {nEffectiveDoseNumberInSeries}
 [condition][]- [Tt]he [Ee]ffective [Nn]umber of [Dd]oses in the [Ss]eries before {dtDate} is {aOp}  {nNumberOfValidAcceptedDoses}=determineEffectiveNumberOfDosesInSeriesByDate({dtDate}, false) {aOp}  {nNumberOfValidAcceptedDoses}
@@ -182,6 +183,8 @@
 //
 [condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 [condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine {dd_oVaccineCdsListItem} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || $td.administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
+[condition][]Verify that the [Uu]nique [Cc]ount of [Ss]hots [Aa]dministered in Series {refer_oTargetSeries} by [Dd]ate is {aOp_num}  {nNumberOfShots}=Set(size {aOp_num} {nNumberOfShots}) from accumulate(TargetDose($shotDate : administrationDate) from {refer_oTargetSeries}.targetDoses, collectSet($shotDate))
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // EVAL Conditions
