@@ -53,8 +53,13 @@ global java.util.Date evalTime
 global org.drools.runtime.KnowledgeContext kcontext
 
 
+/*************************************************************************************************************************************************************************************
+Series complete with 3 doses: If patient is >= 4 years old (or will be >= 4 years old at the dose 3 recommended due date), recommend target dose 3 (and final dose) at 4 years old; 
+minimum interval = 6 months (for earliest date); recommended interval = 6 months.
+*************************************************************************************************************************************************************************************/
+
 // Series complete with 3 doses if dose 3 was administered when the patient was >= 4 years and was administered at least 6 months - 4 days after the previous dose, then the series is complete with 3 doses.
-rule "Polio: Series is Complete if 3 prior doses, patient >= 4yrs when dose 3 administered, and dose 3 >= 6m-4d after previous dose" ruleflow-group "HistoryEvaluation" 
+rule "Polio: (Series Complete with 3 Doses Rule 2)- Series is Complete if 3 prior doses, patient >= 4yrs when dose 3 administered, and dose 3 >= 6m-4d after previous dose" ruleflow-group "HistoryEvaluation" 
 	dialect "mvel"
 	agenda-group "postEvaluationCheck"
 	when
@@ -83,6 +88,9 @@ rule "Polio: Series is Complete if 3 prior doses, patient >= 4yrs when dose 3 ad
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/*************************************************************************************************************************************************************************************
+Series complete with 3 doses END
+*************************************************************************************************************************************************************************************/
 
 rule "Polio: Modify DoseRule4 Absolute minimum age and Absolute Minimum Interval parameters for target dose 4 if administered before 8/7/2009" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"

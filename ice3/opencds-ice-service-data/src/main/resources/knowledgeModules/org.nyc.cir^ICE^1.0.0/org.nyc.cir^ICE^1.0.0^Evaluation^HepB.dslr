@@ -211,6 +211,7 @@ rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete (regardless of any oth
 			- the administered shot number is < $doseCVX189ShotNumber 
 			- make note of the date this shot was administered as $priorDoseDate
 	then
+		Mark the Series $targetSeries Complete
 		Record that this series rule was Processed for the TargetSeries $targetSeries
 		Log that this series rule fired for the Series $targetSeries
 end
@@ -228,15 +229,14 @@ rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.100"
 			- the shot belongs to the series $targetSeries			
 			- the vaccine administered is not "ICE189"
-			// - that has already been evaluated and whose shot validity status is not VALID
-			// - the administration date of the shot is >= $priorDoseDate
 			- that has already been evaluated
+			/////// - that has already been evaluated and whose shot validity status is not VALID
+			/////// - the administration date of the shot is >= $priorDoseDate
 			- the administration date of the shot is <= $targetDoseDate
 	then
 		Remove all evaluation reasons from shot $interveningShot
 		Set the shot status of $interveningShot to Accepted
 		Include the reason for shot $interveningShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Mark the Series $targetSeries Complete
 		Record that this dose rule was Processed for the TargetDose $interveningShot
 		Log that this dose rule fired for the dose $interveningShot in the Series $targetSeries
 end
