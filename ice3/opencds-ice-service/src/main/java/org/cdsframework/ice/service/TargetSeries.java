@@ -3041,6 +3041,23 @@ public class TargetSeries {
 			return 0;
 		}
 	}
+	
+	public int getNumberOfShotsAdministeredInSeriesExcludingDuplicateShotsOnTheSameDay() {
+		
+		if (targetDoses == null) { 
+			return 0;
+		}
+		else {
+			int lCount = 0;
+			String lDuplicateShotReason = BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName();
+			for (TargetDose td : this.targetDoses) {
+				if (! td.containsReason(lDuplicateShotReason)) {
+					lCount++;
+				}
+			}
+			return lCount;
+		}
+	}
 
 	/**
 	 * Return the dose rule for the dose number in question in this target series 

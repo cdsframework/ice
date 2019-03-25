@@ -121,14 +121,19 @@ rule "Polio: If the execution date is before 8/7/2009 and the calculated Earlies
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/*************************************************************************************************************************************************************************************
+Series complete with 3 doses: If patient is >= 4 years old (or will be >= 4 years old at the dose 3 recommended due date), recommend target dose 3 (and final dose) at 4 years old; 
+minimum interval = 6 months (for earliest date); recommended interval = 6 months.
+*************************************************************************************************************************************************************************************/
 
-// Series complete with 3 doses: If patient is >= 4 years old (or will be >= 4 years old at the dose 3 recommended due date), recommend target dose 3 (and final dose) at 4 years old; 
-// recommended interval = 6 months.
-rule "Polio: If patient >= 4 yrs (or will be >= 4 yrs for target dose 3 recommendation date), include recommendation at 4yrs of age & recommended interval of 6m from prior administered shot for target dose 3" ruleflow-group "RecommendationForecast"
+rule "Polio: If patient >= 4 yrs (or will be >= 4 yrs for target dose 3 recommendation date), include recommendation at 4yrs of age; minimum & recommended interval of 6m from prior administered shot for target dose 3" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
 	agenda-group "postRecommendationCheck"
+	no-loop true
 	when
 		There is a Series $targetSeries
 			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the name of the series is "Polio4DoseSeries"
 			- post processing on the series forecast has not already been run
 			- a forecast for the series has been made and a recommendation date has been determined
 			- the series is not complete
@@ -143,13 +148,20 @@ rule "Polio: If patient >= 4 yrs (or will be >= 4 yrs for target dose 3 recommen
 			- make note of the Patient's birthdate as $birthDate
 		Confirm elapsed time between $birthDate and evalTime >= "4y" || elapsed time between $birthDate and $recommendationDate >= "4y"
 	then
+		Create a Recommendation as $rInterval for the Series $targetSeries
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $rInterval to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $rInterval to $dtCalculated
+		Include the Recommendation $rInterval for Consideration in the final forecast of the Series	
+		Create a Recommendation as $rAge for the Series $targetSeries
 		Add "4y" to $birthDate and make note of the newly calculated date as $dtCalculatedAge
-		Include a Recommendation as $rAge with recommended forecast date $dtCalculatedAge for consideration in the final forecast of the series $targetSeries
-		Include the Recommendation $rAge for consideration in the final forecast of the series
-		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculatedInterval
-		Include a Recommendation as $rInterval with recommended forecast date $dtCalculatedInterval for consideration in the final forecast of the series $targetSeries
-		Include the Recommendation $rInterval for consideration in the final forecast of the series
+		Set the recommendation Recommended Forecast Date for $rAge to $dtCalculatedAge
+		Include the Recommendation $rAge for Consideration in the final forecast of the Series
 		Refresh all facts in the series $targetSeries for forecasting
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+/*************************************************************************************************************************************************************************************
+Series complete with 3 doses END
+*************************************************************************************************************************************************************************************/

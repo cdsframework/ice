@@ -71,7 +71,7 @@ public class TestEvaluationAtSpecifiedTimeImpl {
 		def responsePayload = OpencdsClient.sendEvaluateAtSpecifiedTimeMessage(params, input)
 		 */
 
-		String filePath = "/usr/local/projects/ice3dev-resources/testing/ongoing-testing.xml";
+		String filePath = "/usr/local/projects/ice3dev-resources/testing/ongoing-testin-2.xml";
 		File lF = new File(filePath);
 		String lRequestPayload = getFileContentsAsString(lF);
 		

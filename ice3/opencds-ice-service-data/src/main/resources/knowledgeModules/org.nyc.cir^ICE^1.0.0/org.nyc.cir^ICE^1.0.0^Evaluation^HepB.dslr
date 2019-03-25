@@ -230,6 +230,8 @@ rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a
 			- the shot belongs to the series $targetSeries			
 			- the vaccine administered is not "ICE189"
 			- that has already been evaluated
+			/////// - that has already been evaluated and whose shot validity status is not VALID
+			/////// - the administration date of the shot is >= $priorDoseDate
 			- the administration date of the shot is <= $targetDoseDate
 	then
 		Remove all evaluation reasons from shot $interveningShot
