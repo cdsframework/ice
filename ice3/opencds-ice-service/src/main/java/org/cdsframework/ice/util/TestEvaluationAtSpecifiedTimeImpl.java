@@ -76,7 +76,7 @@ public class TestEvaluationAtSpecifiedTimeImpl {
 		String lRequestPayload = getFileContentsAsString(lF);
 		
 		String responsePayload="";
-		responsePayload = IceClient.sendEvaluateAtSpecifiedTimeMessage(lRequestPayload);
+		// responsePayload = IceClient.sendEvaluateAtSpecifiedTimeMessage(lRequestPayload);
 		System.out.print(responsePayload);
 	}
 
