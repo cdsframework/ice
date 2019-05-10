@@ -75,7 +75,6 @@ rule "Pneumococcal Adult Series: Recommended Interval of 1yr from accepted Adult
 			- the name of the Series is "PneumococcalSeries"
 			- the effective dose number in the series is >= 6
 			- there is an absolute minimum age for dose 6 in this Series
-			- make note of the absolute minimum age for dose 6 in this Series as $absoluteMinimumAgeDose6
 			- make note of the recommended vaccine as $recommendedVaccine
 			- the string $recommendedVaccine == "ICE133"
 		There is an administered shot $shot
@@ -86,7 +85,7 @@ rule "Pneumococcal Adult Series: Recommended Interval of 1yr from accepted Adult
 			- make note of the date this Shot was administered as $dateAdultPPSVAdministeredBelowAbsMinAge
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < $absoluteMinimumAgeDose6
+		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < "65y-4d"
 	then
 		Add "1y" to $dateAdultPPSVAdministeredBelowAbsMinAge and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
@@ -105,7 +104,6 @@ rule "Pneumococcal Adult Series: Recommended Interval of 5yrs from accepted Adul
 			- the name of the Series is "PneumococcalSeries"
 			- the effective dose number in the series is >= 6
 			- there is an absolute minimum age for dose 6 in this Series
-			- make note of the absolute minimum age for dose 6 in this Series as $absoluteMinimumAgeDose6
 			- make note of the recommended vaccine as $recommendedVaccine
 			- the string $recommendedVaccine == "ICE33"
 		There is an administered shot $shot
@@ -116,7 +114,7 @@ rule "Pneumococcal Adult Series: Recommended Interval of 5yrs from accepted Adul
 			- make note of the date this Shot was administered as $dateAdultPPSVAdministeredBelowAbsMinAge
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < $absoluteMinimumAgeDose6
+		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < "65y-4d"
 	then
 		Add "5y" to $dateAdultPPSVAdministeredBelowAbsMinAge and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries

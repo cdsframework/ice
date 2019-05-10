@@ -123,7 +123,7 @@ rule "Pneumococcal Adult Series: Minimum interval from the accepted dose 1 of PP
 			- make note of the date this shot was Administered as $adultPPSVShot2Date
 		There is an Administered Shot $previousShot
 			- that is the same shot as $adultPPSVShot1BelowMinAge
-			- the administered shot number is == $nShotNumber-1
+			- the administered shot number is < $nShotNumber
 		Confirm Elapsed time between $adultPPSVShot1Date and $adultPPSVShot2Date < "5y"
 	then
 		Include the reason for shot $currentShotForIntervalCheck Invalid due to "Below Minimum Interval"
