@@ -110,7 +110,7 @@ rule "Duplicate Shots/Same Day Overview Rule #2: Evaluate any non-NOS duplicate 
 		int tdShotNumber = $td.getAdministeredShotNumberInSeries();
 		int tdotherShotNumber = $tdother.getAdministeredShotNumberInSeries();
 		modify($td) {
-			setAdministeredShotNumberInSeries(tdotherShotNumber),// Lower administered shot number will be selected first for evaluation in next go-around
+			setAdministeredShotNumberInSeries(tdotherShotNumber),	// Lower administered shot number will be selected first for evaluation in next go-around
 			setStatus(DoseStatus.EVALUATION_NOT_STARTED);
 		}
 		modify($tdother) {
