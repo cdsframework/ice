@@ -75,10 +75,12 @@ end
 rule "Duplicate Shots/Same Day Pneumococcal Rule # (-1): If PCV and PPSV for target dose 1 of adult series on same day, evaluate the PCV first" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
 	auto-focus true
+	salience 5
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName in ("ICE33","ICE109"), 
-			doseNumberInSeries == 6, $tdAdministeredShotNumber : administeredShotNumberInSeries)
+			doseNumberInSeries >= 6, $tdAdministeredShotNumber : administeredShotNumberInSeries)
 		$tdother : 	TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName in ("ICE133","ICE152"),
 			administrationDate == $td.administrationDate, $tdotherAdministeredShotNumber : administeredShotNumberInSeries)
 	then
@@ -96,10 +98,32 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule # (-1): If PCV and PPSV for tar
 end
 
 
+// Duplicate Shot/Same Day Overview Rule #2: cont'd
+// If the shot being evaluated is an NOS CVX, evaluate any non-NOS CVXs first to ensure that any VALID non-NOS doses are recorded first
+rule "Duplicate Shots/Same Day Pneumococcal Rule # (-1.5): If PCV and PPSV for target dose 1 of adult series on same day, evaluate the PCV first" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
+	auto-focus true
+	salience 5
+	when
+		$td : TargetDose(hasBeenEvaluated == false, status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName in ("ICE152", "ICE133"), 
+			doseNumberInSeries >= 6, $tdAssociatedTargetSeries : associatedTargetSeries)
+		$tdother : 	TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName in ("ICE33","ICE109"),
+			administrationDate == $td.administrationDate, $tdotherAdministeredShotNumber : administeredShotNumberInSeries)			
+	then
+		String _RULENAME = kcontext.rule.name;
+		// Don't do anything
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td + "; " + $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);		
+end
+
+
 rule "Duplicate Shots/Same Day Pneumococcal Rule # (-2): If PCV and PCV NOS for adult series on same day, evaluate the non-NOS PCV first" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
 	auto-focus true
+	salience 5
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName == "ICE152", 
 			$tdAdministeredShotNumber : administeredShotNumberInSeries, doseNumberInSeries >= 6)
@@ -123,7 +147,9 @@ end
 rule "Duplicate Shots/Same Day Pneumococcal Rule # (-3): If PPSV and PPSV NOS for adult series on same day, evaluate the non-NOS PPSV first" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
 	auto-focus true
+	salience 5
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName == "ICE109", 
 			$tdAdministeredShotNumber : administeredShotNumberInSeries, doseNumberInSeries >= 6)

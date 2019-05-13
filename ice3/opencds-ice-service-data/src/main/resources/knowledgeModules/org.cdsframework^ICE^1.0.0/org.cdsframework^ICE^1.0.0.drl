@@ -1520,6 +1520,7 @@ rule "RecommendationForecast.applyPostRecommendationCheck" ruleflow-group "Recom
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Post recommendation check for TargetSeries " + $targetSeries.getSeriesName());
+		update($targetSeries);
 		setFocus("postRecommendationCheck");
 end
 
