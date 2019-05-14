@@ -28,6 +28,7 @@ package org.cdsframework.ice.v1_1_0
 
 import java.util.List
 import java.util.Set
+import java.util.Date
 import org.drools.spi.KnowledgeHelper
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
@@ -67,3 +68,25 @@ rule "Zoster: Always recommend Zoster recombinant (CVX 187)" ruleflow-group "Rec
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
+
+// If patient is administered adult varicella (CVX 21) doses, the minimum interval and recommended interval between the adult varicella (CVX 21) doses to Zoster is 8 weeks. Example:
+rule "Zoster: If patient is administered adult varicella (CVX 21) doses, the minimum interval and recommended interval between the adult varicella (CVX 21) doses to Zoster is 8 weeks" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs Forecasting
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
+			- the Series is not Complete
+		There is an administered shot $varicellaShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.600"
+			- make note of the date this shot was administered as $dtAdministrationDate
+		There does not exist another administered shot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.600"
+			- the administration date of the shot is > $dtAdministrationDate
+	then
+		Add "8w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Include a Recommendation as $earliest with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
