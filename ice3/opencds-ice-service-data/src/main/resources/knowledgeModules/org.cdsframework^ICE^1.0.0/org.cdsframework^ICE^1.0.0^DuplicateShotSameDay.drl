@@ -232,7 +232,7 @@ rule "Duplicate Shots/Same Day: If a shot is ACCEPTED/EXTRA_DOSE and has the sam
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
 			$tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
 		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.ACCEPTED, associatedTargetSeries == $tdAssociatedTargetSeries, 
-			doseNumberInSeries == $tddosenumber, administeredShotNumberInSeries > $tdAdministeredShotNumber, containsAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.cdsListItemName))
+			doseNumberInSeries == $tddosenumber, containsAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.cdsListItemName))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
