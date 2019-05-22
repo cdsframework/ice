@@ -55,7 +55,7 @@ global java.util.Date evalTime
 // and evaluate the other Hib CVX as Valid. NOTE that this rule, unlike the default duplicate shot/same day rules, works _across_ series of the vaccine group. CVX 49 should never be marked valid if 
 // there is another non-CVX 49 shot in _any_ series that _is_ valid. This will prevent the OMP series from being selected in circumstances where the CVX 49 is a duplicate to a non-CVX 49 dose.
 // (In this case, the other shot may either be a combination or monovalent vaccine, but must not be an NOS.)
-rule "Duplicate Shots/Same Day Hib: If one of the shots is a non-combination vaccine with component CVX 49, then evaluate the CVX 49 as Invalid / DUPLICATE_SAME_DAY and evaluate the other specified Hib CVX as Valid"
+rule "Duplicate Shots/Same Day Hib: If one of the shots is a non-combination vaccine with component CVX 49 and the other shot is _not_ an NOS vaccine, then evaluate the CVX 49 as Invalid / DUPLICATE_SAME_DAY and evaluate the other specified Hib CVX as Valid"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
@@ -76,11 +76,11 @@ rule "Duplicate Shots/Same Day Hib: If one of the shots is a non-combination vac
 end
 
 
-// If one of the duplicate shots is a *combination* CVX 49 (Hib OMP) and the other shot is also a (non-CVX 49) combination vaccine: evaluate the CVX 49 as Invalid with a reason code of DUPLICATE_SAME_DAY 
+// If one of the duplicate shots is a *combination* CVX 49 (Hib OMP) and the other shot is *also* a (non-CVX 49) *combination* vaccine: evaluate the CVX 49 as Invalid with a reason code of DUPLICATE_SAME_DAY 
 // and evaluate the other Hib CVX as Valid. NOTE that this rule, unlike the default duplicate shot/same day rules, works _across_ series of the vaccine group. CVX 49 should never be marked valid if 
 // there is another non-CVX 49 shot in _any_ series that _is_ valid. This will prevent the OMP series from being selected in circumstances where the CVX 49 is a duplicate to a non-CVX 49 dose.
 // (In this case, both shots are combination vaccines and the other vaccine must not be an NOS.)
-rule "Duplicate Shots/Same Day Hib: If one of the shots is a combination vaccine with component CVX 49 and the other is also a combination vaccine, evaluate the CVX 49 as Invalid / DUPLICATE_SAME_DAY and other Hib as Valid"
+rule "Duplicate Shots/Same Day Hib: If one of the shots is a combination vaccine with component CVX 49 and the other is also a combination vaccine, non-NOS vaccine, evaluate the CVX 49 as Invalid / DUPLICATE_SAME_DAY and other Hib as Valid"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
