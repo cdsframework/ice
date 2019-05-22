@@ -96,35 +96,6 @@ rule "Duplicate Shots/Same Day Overview Rule #2: If one of those shots is an NOS
 end
 
 
-// Duplicate Shot/Same Day Overview Rule #2: cont'd
-// If the shot being evaluated is an NOS CVX, evaluate any non-NOS CVXs first to ensure that any VALID non-NOS doses are recorded first
-rule "Duplicate Shots/Same Day Overview Rule #2: Evaluate any non-NOS duplicate shots before NOS duplicate shots if either the non-NOS vaccine is a combination vaccine or both vaccines are not a combination vaccine" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	agenda-group "duplicateShotSameDay"
-	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
-	auto-focus true
-	when
-		$td : TargetDose(hasBeenEvaluated == false, status == DoseStatus.EVALUATION_IN_PROCESS, vaccineComponent.isUnspecifiedFormulation() == true, $tdAssociatedTargetSeries : associatedTargetSeries)
-		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate == $td.administrationDate, 
-			vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.isCombinationVaccine() == true || administeredVaccine.isCombinationVaccine() == false && $td.administeredVaccine.isCombinationVaccine() == false)
-	then
-		String _RULENAME = kcontext.rule.name;
-		int tdShotNumber = $td.getAdministeredShotNumberInSeries();
-		int tdotherShotNumber = $tdother.getAdministeredShotNumberInSeries();
-		modify($td) {
-			setAdministeredShotNumberInSeries(tdotherShotNumber),	// Lower administered shot number will be selected first for evaluation in next go-around
-			setStatus(DoseStatus.EVALUATION_NOT_STARTED);
-		}
-		modify($tdother) {
-			setAdministeredShotNumberInSeries(tdShotNumber),	// Lower administered shot number will be selected first for evaluation in next go-around
-			setStatus(DoseStatus.EVALUATION_NOT_STARTED);
-		}
-		// Update the target series, as the method areNoEarlierAdministeredShotsNotEvaluated(TargetDose pTD) is used in part to determine which shot to evaluate next
-		update($tdAssociatedTargetSeries);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td + "; " + $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);		
-end
-
-
 // Duplicate Shots/Same Day Overview Rule #3: If no shot is an NOS CVX, if one is a combination vaccine and the others are not a combination vaccine, then evaluate the combination 
 // CVX as Valid and evaluate the non-combination CVXs as Invalid with a reason code of DUPLICATE_SAME_DAY
 rule "Duplicate Shots/Same Day Overview Rule #3: If neither shot is an NOS CVX, if one is a combination vaccine and the other is not a combination vaccine, then evaluate the combination CVX as Valid and evaluate the non-combination CVX as Invalid with a reason code of DUPLICATE_SAME_DAY"

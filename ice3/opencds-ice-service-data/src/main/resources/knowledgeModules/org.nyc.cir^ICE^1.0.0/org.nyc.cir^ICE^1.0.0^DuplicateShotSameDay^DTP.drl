@@ -57,6 +57,7 @@ global java.util.Date evalTime
 rule "Duplicate Shots/Same Day DTP: If one of the shots is pertussis-containing and another is not pertussis-containing, evaluate the pertussis-containing shot first" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"	
 	auto-focus true
 	when
 		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", 
