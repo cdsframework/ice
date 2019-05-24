@@ -60,7 +60,7 @@ global java.util.Date evalTime
 //     + evaluate the CVX 52 as Invalid with a reason code of DUPLICATE_SAME_DAY
 //     + evaluate the other Hep A CVX (pediatric formulation) as Valid
 
-rule "Duplicate Shot/Same Day Abstract Hep A: Make note if the adult vaccine (CVX 52) and pediatric vaccine (CVX  83 or CVX 84) duplicate shots" ruleflow-group "HistoryEvaluation"
+rule "Duplicate Shot/Same Day (Abstract Hep A): Make note if the adult vaccine (CVX 52) and pediatric vaccine (CVX  83 or CVX 84) duplicate shots" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
 	auto-focus true
@@ -75,7 +75,7 @@ end
 
 
 rule "Duplicate Shot/Same Day (Hep A): If shot administered at >= 19 years, evalute the adult vaccine (CVX 52) Valid and pediatric vaccine (CVX 83 and/or CVX 84) Invalid / DUPLICATE_SAME_DAY" 
-		extends "Duplicate Shot/Same Day Abstract Hep A: Make note if the adult vaccine (CVX 52) and pediatric vaccine (CVX  83 or CVX 84) duplicate shots" ruleflow-group "HistoryEvaluation"
+		extends "Duplicate Shot/Same Day (Abstract Hep A): Make note if the adult vaccine (CVX 52) and pediatric vaccine (CVX  83 or CVX 84) duplicate shots" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
 	auto-focus true
@@ -94,7 +94,7 @@ end
 
 
 rule "Duplicate Shot/Same Day (Hep A): If shot administered at < 19 years, evalute the pediatric vaccine (CVX 83 or CVX 84) Valid and the adult vaccine (CVX 52) as Invalid / DUPLICATE_SAME_DAY"
-		extends "Duplicate Shot/Same Day Abstract Hep A: Make note if the adult vaccine (CVX 52) and pediatric vaccine (CVX  83 or CVX 84) duplicate shots" ruleflow-group "HistoryEvaluation"
+		extends "Duplicate Shot/Same Day (Abstract Hep A): Make note if the adult vaccine (CVX 52) and pediatric vaccine (CVX  83 or CVX 84) duplicate shots" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
 	auto-focus true
