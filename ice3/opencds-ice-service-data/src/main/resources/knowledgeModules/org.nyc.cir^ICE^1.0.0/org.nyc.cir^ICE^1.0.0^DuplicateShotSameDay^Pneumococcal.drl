@@ -94,14 +94,13 @@ end
 
 // Duplicate Shot/Same Day Overview Rule #2: cont'd
 // If the shot being evaluated is an NOS CVX, evaluate any non-NOS CVXs first to ensure that any VALID non-NOS doses are recorded first
-rule "Duplicate Shots/Same Day Pneumococcal Rule # (-1.5): If PCV and PPSV for target dose 1 of adult series on same day, evaluate the PPSV first" ruleflow-group "HistoryEvaluation"
+rule "Duplicate Shots/Same Day Pneumococcal Rule # (-1.5): If PCV and PPSV for target dose 1 of *Adult* series on same day, evaluate the PPSV first" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
-	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
 	auto-focus true
 	salience 5
 	when
-		$td : TargetDose(hasBeenEvaluated == false, status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName in ("ICE33", "ICE109"), doseNumberInSeries >= 6)
+		$td : TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName in ("ICE33", "ICE109"), doseNumberInSeries >= 6)
 		$tdother : 	TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administeredVaccine.cdsConceptName in ("ICE133","ICE152"), administrationDate == $td.administrationDate)			
 	then
 		String _RULENAME = kcontext.rule.name;
