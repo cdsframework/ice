@@ -319,9 +319,9 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If 5-dose ser
 end
 
 
-// Exception A) The patient DOES NOT have a dose of pertussis at >= 4 years.
+// Exception A) The patient DOES NOT have a dose of pertussis at >= 4 years minus 4 days.
 // Excepion A - higher activation priority than the general adolescent tdap recommendation rule above for 5-dose series 
-rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not have a dose of pertussis >= 4yrs in the 5-Dose Series(Exception A), make note that the Adolescent Tdap Recommendation Exception criteria was met" ruleflow-group "RecommendationForecast"
+rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not have a dose of pertussis >= 4y-4d in the 5-Dose Series(Exception A), make note that the Adolescent Tdap Recommendation Exception criteria was met" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationRule"
 	dialect "mvel"
 	salience 10
@@ -334,7 +334,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not 
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge when the patient is "4y" of age
+			- make note of the date as $dtDateAtAge when the patient is "4y-4d" of age
 		There is not an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- there is an associated administered shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge

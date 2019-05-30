@@ -54,8 +54,7 @@ global java.util.Date evalTime
 // Duplicate Shot/Same Day Overview Rule #1: 
 // If all shots are the same CVX code, then evaluate the 1st CVX processed as Valid and evaluate the others as Invalid with a reason code of DUPLICATE_SAME_DAY. 
 // (This scenario shouldn't happen with most registries.)
-rule "Duplicate Shots/Same Day Overview Rule #1: If both shots are of the same CVX code, then evaluate the 1st CVX processed as Valid and evaluate the 2nd CVS processed as Invalid/Duplicate" 
-	ruleflow-group "HistoryEvaluation"
+rule "Duplicate Shots/Same Day Overview Rule #1: If both shots are of the same CVX code, then evaluate the 1st CVX processed as Valid and evaluate the 2nd CVS processed as Invalid/Duplicate" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
 	auto-focus true
@@ -77,14 +76,14 @@ end
 
 // Duplicate Shot/Same Day Overview Rule #2: 
 // If all but one of those shots is an NOS CVX, then evaluate the NOSs as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other (non-NOS) CVX as Valid.
-rule "Duplicate Shots/Same Day Overview Rule #2: If one of those shots is an NOS CVX, then evaluate the NOS as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other (non-NOS) CVX as Valid"
-	ruleflow-group "HistoryEvaluation"
+rule "Duplicate Shots/Same Day Overview Rule #2: If one of those shots is an NOS CVX, then evaluate the NOS as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other (non-NOS) CVX as Valid" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, 
-			vaccineComponent.isUnspecifiedFormulation() == false, $tddosenumber : doseNumberInSeries)
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == false, 
+			$tddosenumber : doseNumberInSeries)
 		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $tdAssociatedTargetSeries, 
 			doseNumberInSeries == $tddosenumber, vaccineComponent.isUnspecifiedFormulation() == true)
 	then
@@ -103,6 +102,7 @@ rule "Duplicate Shots/Same Day Overview Rule #3: If neither shot is an NOS CVX, 
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
 	auto-focus true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, 
@@ -121,10 +121,10 @@ end
 
 // Duplicate Shots/Same Day Overview Rule #4: If all shots are an NOS CVX, then evaluate the 1st CVX processed as Valid and evaluate the other CVXs processed as Invalid with a 
 // reason code of DUPLICATE_SAME_DAY
-rule "Duplicate Shots/Same Day Overview Rule #4: If both shots are an NOS CVX, then evaluate the 1st CVX processed as Valid and evaluate the 2nd CVX processed as Invalid with a reason code of DUPLICATE_SAME_DAY"
-	ruleflow-group "HistoryEvaluation"
+rule "Duplicate Shots/Same Day Overview Rule #4: If both shots are an NOS CVX, then evaluate the 1st CVX processed as Valid and evaluate the 2nd CVX processed as Invalid with a reason code of DUPLICATE_SAME_DAY"	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
 	auto-focus true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
@@ -160,8 +160,7 @@ end
 
 
 rule "Duplicate Shots/Same Day non-DTP Rule 5a: non-DTP shots; set the 2nd shot as Invalid w/ DUPLICATE_SHOT_SAME_DAY"
-		extends "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if vaccines different, neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
-	ruleflow-group "HistoryEvaluation"
+		extends "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if vaccines different, neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination" ruleflow-group "HistoryEvaluation"
 	dialect "java"
 	agenda-group "duplicateShotSameDay"
 	activation-group "duplicateShotAbstractRule5"
@@ -195,8 +194,7 @@ end
 
 
 // If a shot is ACCEPTED/EXTRA_DOSE and has the same dose number as a valid shot, then evaluate ACCEPTED/EXTRA_DOSE as Invalid with a reason code of DUPLICATE_SAME_DAY. 
-rule "Duplicate Shots/Same Day: If a shot is ACCEPTED/EXTRA_DOSE and has the same dose number as a valid shot, then evaluate ACCEPTED/EXTRA_DOSE as Invalid with a reason code of DUPLICATE_SAME_DAY" 
-	ruleflow-group "HistoryEvaluation"
+rule "Duplicate Shots/Same Day: If a shot is ACCEPTED/EXTRA_DOSE and has the same dose number as a valid shot, then evaluate ACCEPTED/EXTRA_DOSE as Invalid with a reason code of DUPLICATE_SAME_DAY" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
 	auto-focus true
@@ -205,7 +203,7 @@ rule "Duplicate Shots/Same Day: If a shot is ACCEPTED/EXTRA_DOSE and has the sam
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
 			$tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
 		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.ACCEPTED, associatedTargetSeries == $tdAssociatedTargetSeries, 
-			doseNumberInSeries == $tddosenumber, administeredShotNumberInSeries > $tdAdministeredShotNumber, containsAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.cdsListItemName))
+			doseNumberInSeries == $tddosenumber, containsAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.cdsListItemName))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
@@ -217,8 +215,7 @@ end
 
 
 // If a shot is INVALID and has no other reason code, but there is another shot administered on the same day that is VALID, add the reason DUPLICATE_SHOT_SAME_DAY to the invalid shot
-rule "Duplicate Shots/Same Day: If a shot is INVALID with no reason code and there is a VALID dose on the same day, add the reason DUPLICATE_SHOT_SAME_DAY to the Invalid shot"
-	ruleflow-group "HistoryEvaluation"
+rule "Duplicate Shots/Same Day: If a shot is INVALID with no reason code and there is a VALID dose on the same day, add the reason DUPLICATE_SHOT_SAME_DAY to the Invalid shot" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
 	auto-focus true

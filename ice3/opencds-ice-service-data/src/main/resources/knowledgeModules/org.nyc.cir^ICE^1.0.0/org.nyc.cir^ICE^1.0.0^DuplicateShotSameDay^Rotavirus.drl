@@ -1,0 +1,155 @@
+/**
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package org.cdsframework.ice.v1_1_0
+
+import java.util.Date
+import java.util.Iterator
+import java.util.List
+import java.util.Set
+import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+global java.util.Date evalTime
+
+
+///////////////////////////////////////////////////////////// Rotavirus-Specific Duplicate Shot/Same Day Rules Start Here /////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// If the date of administration is >= 1/1/2000, then: 
+//     + If one of the shots is CVX 74 (rotavirus, tetravalent), then:
+//         = evaluate CVX 74 as Invalid with a reason code of DUPLICATE_SAME_DAY
+//         = evaluate the other rotavirus CVX as Valid
+//     + If neither shot is CVX 74 and one of the shots is CVX 119 (rotavirus, monovalent), then:
+//         = evaluate the CVX 119 as Invalid with a reason code of DUPLICATE_SAME_DAY
+//         = evaluate the other rotavirus CVX as Valid
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "Duplicate Shots/Same Day Rotavirus Rule #1a: If shot administered >= 1/1/2000 and one of the doses is CVX 74, evaluate CVX 74 as Invalid / DUPLICATE_SAME_DAY and other Rotavirus CVX as Valid" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE74", administrationDate >= "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName != "ICE74", vaccineComponent.isUnspecifiedFormulation() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
+rule "Duplicate Shots/Same Day Rotavirus Rule #1b: If shot administered >= 1/1/2000, neither of the doses is CVX 74 and one of the doses is CVX 119, evaluate CVX 119 as Invalid / DUPLICATE_SAME_DAY and other Rotavirus CVX as Valid" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE119", administrationDate >= "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE74")
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END Duplicate Shots >= 1/1/2000
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// If the date of administration is < 1/1/2000, then: 
+//     + If one of the of the shots is CVX 74, then:
+//         = evaluate CVX 74 as Valid
+//         = evaluate the other rotavirus CVX as Invalid with a reason code of DUPLICATE_SAME_DAY
+//     + If neither shot is CVX 74 and one of the shots is CVX 119, then:
+//         = evaluate the CVX 119 as Invalid with a reason code of DUPLICATE_SAME_DAY
+//         = evaluate the other rotavirus CVX as Valid
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "Duplicate Shots/Same Day Rotavirus Rule #2a: If shot administered < 1/1/2000 and one of the doses is CVX 74, evaluate CVX 74 as Valid and other Rotavirus CVX as Invalid / DUPLICATE_SAME_DAY" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE74", administrationDate < "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName != "ICE74", vaccineComponent.isUnspecifiedFormulation() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
+rule "Duplicate Shots/Same Day Rotavirus Rule #2b: If shot administered < 1/1/2000, neither of the doses is CVX 74 and one of the doses is CVX 119, evaluate CVX 119 as Invalid / DUPLICATE_SAME_DAY and other Rotavirus CVX as Valid" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE119", administrationDate < "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE74")
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END Duplicate Shots < 1/1/2000
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+

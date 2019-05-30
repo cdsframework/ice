@@ -1361,7 +1361,7 @@ public class TargetSeries {
 		if (rAge == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
 				String msg = "No routine age recommendation specified for dose " + vaccineGroupDoseRule.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
-				logger.warn(_METHODNAME + msg);
+				logger.info(_METHODNAME + msg);
 			}
 			return;
 		}
@@ -1527,7 +1527,7 @@ public class TargetSeries {
 		if (rInterval == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
 				String msg = "No routine interval specified for dose " + doseRulePreviousDose.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup() + "; Series Name: " + seriesRules.getSeriesName();
-				logger.warn(_METHODNAME + msg);
+				logger.info(_METHODNAME + msg);
 			}
 			return;
 		}
@@ -1658,7 +1658,6 @@ public class TargetSeries {
 	private void populateInterimLatestRecommendedAgeRecommendation(Recommendation rec, RecommendationStatus recommendationStatus) {
 
 		String _METHODNAME = "populateInterimLatestRecommendedAgeRecommendation(): ";
-		/////// if (rec == null || recommendationStatus == null) {
 		if (rec == null) {
 			logger.warn(_METHODNAME + "One or more supplied parameters null");
 			return;
@@ -1677,7 +1676,6 @@ public class TargetSeries {
 	private void populateInterimLatestRecommendedIntervalRecommendation(Recommendation rec, RecommendationStatus recommendationStatus) {
 
 		String _METHODNAME = "populateInterimLatestRecommendedIntervalRecommendation(): ";
-		/////// if (rec == null || recommendationStatus == null) {
 		if (rec == null) {
 			logger.warn(_METHODNAME + "One or more supplied parameters null");
 			return;
@@ -1705,7 +1703,6 @@ public class TargetSeries {
 	private void populateInterimRecommendationsAndRecordGenericReasonHelper(List<Recommendation> interimRecommendationsListInstanceToUpdate, Recommendation rec, RecommendationStatus pRecommendationStatus) {
 
 		String _METHODNAME = "populateInterimRecommendationsAndRecordGenericReasonHelper(): ";
-		/////// if (rec == null || pRecommendationStatus == null || interimRecommendationsListInstanceToUpdate == null) {
 		if (rec == null || interimRecommendationsListInstanceToUpdate == null) {
 			logger.warn(_METHODNAME + "One or more supplied parameters null");
 			return;
@@ -2277,7 +2274,7 @@ public class TargetSeries {
 		if (minimumAge == null) {
 			// There is no required age for this dose.
 			String msg = "No minimum age specified for dose: " + pTD;
-			logger.warn(_METHODNAME + msg);
+			logger.info(_METHODNAME + msg);
 			return;
 		}
 
@@ -2331,7 +2328,7 @@ public class TargetSeries {
 		TimePeriod minimumInterval = doseRulePreviousDose.getAbsoluteMinimumInterval();
 		if (minimumInterval == null) {
 			String msg = "No minimum interval specified for dose: " + pTDprev;
-			logger.warn(_METHODNAME + msg);
+			logger.info(_METHODNAME + msg);
 			return;
 		}
 
@@ -2976,6 +2973,9 @@ public class TargetSeries {
 		return false;
 	}
 
+	/**
+	 * @deprecated This routine will be retired
+	 */
 	public boolean areNoEarlierAdministeredShotsNotEvaluated(TargetDose pTD) {
 
 		String _METHODNAME = "noEarlierAdministeredShotNotEvaluated() ";

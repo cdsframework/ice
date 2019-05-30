@@ -621,18 +621,17 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.setNextTargetDoseInNonSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.setNextTargetDoseNonNOSInNonSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
-		$ts : TargetSeries(targetSeason == null, containsTargetDose($td), areNoEarlierAdministeredShotsNotEvaluated($td))
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)	
+		$ts : TargetSeries(targetSeason == null, this == $td.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
-		int tddosenumber = $ts.determineDoseNumberInSeries();
 		modify($td) {
-			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
-			setDoseNumberInSeries(tddosenumber);
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
 		}
 		$ts.setHistoryEvaluationInitiated(true);
 		update($ts);
@@ -643,24 +642,67 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.setNextTargetDoseInSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.setNextTargetDoseNonNOSInSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
-		$ts : TargetSeries(targetSeason != null, containsTargetDose($td), areNoEarlierAdministeredShotsNotEvaluated($td), 
-			$vg : vaccineGroup, $tsid : targetSeriesIdentifier, $tseasonStartDate : targetSeason.fullySpecifiedSeasonStartDate)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		$ts : TargetSeries(targetSeason != null, this == $td.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
-		int tddosenumber = $ts.determineDoseNumberInSeries();
 		modify($td) {
-			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS), 
-			setDoseNumberInSeries(tddosenumber);
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
 		}
 		$ts.setHistoryEvaluationInitiated(true);
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 end
+
+
+///////// ***
+// General Design rule... Do not Edit - for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
+///////// ***
+rule "HistoryEvaluation.setNextTargetDoseNOSInNonSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
+		$ts : TargetSeries(targetSeason == null, this == $td.associatedTargetSeries)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
+		}
+		$ts.setHistoryEvaluationInitiated(true);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit - for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
+///////// ***
+rule "HistoryEvaluation.setNextTargetDoseNOSInSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
+		$ts : TargetSeries(targetSeason != null, this == $td.associatedTargetSeries)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
+		}
+		$ts.setHistoryEvaluationInitiated(true);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+end
+
 
 
 ///////// ***
@@ -670,12 +712,17 @@ rule "HistoryEvaluation.setIsPrimarySeriesShotToTrueIfSeriesIsNotComplete" rulef
 	dialect "mvel"
 	when
 		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, isPrimarySeriesShot() == false)
-		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == false)	
+		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == false)
+		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))	
 	then
 		String _RULENAME = kcontext.rule.name;
+		int tddosenumber = $ts.determineDoseNumberInSeries();
+		int tdshotnumber = $tdsEvaluated.size()+1;
 		modify($td) {
 			setStatus(DoseStatus.EVALUATION_IN_PROCESS),
-			setIsPrimarySeriesShot(true);
+			setIsPrimarySeriesShot(true),
+			setDoseNumberInSeries(tddosenumber),
+			setAdministeredShotNumberInSeries(tdshotnumber);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		setFocus("preEvaluationValidation");
@@ -689,12 +736,17 @@ rule "HistoryEvaluation.setIsPrimarySeriesShotToFalseIfSeriesIsComplete" ruleflo
 	dialect "mvel"
 	when
 		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, isPrimarySeriesShot() == true)
-		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == true)	
+		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == true)
+		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
 	then
 		String _RULENAME = kcontext.rule.name;
+		int tddosenumber = $ts.determineDoseNumberInSeries();
+		int tdshotnumber = $tdsEvaluated.size()+1;
 		modify($td) {
 			setStatus(DoseStatus.EVALUATION_IN_PROCESS),
-			setIsPrimarySeriesShot(false);
+			setIsPrimarySeriesShot(false),
+			setDoseNumberInSeries(tddosenumber),
+			setAdministeredShotNumberInSeries(tdshotnumber);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		setFocus("preEvaluationValidation");
@@ -708,11 +760,16 @@ rule "HistoryEvaluation.primarySeriesShotAlreadyFalseAndSeriesIsComplete" rulefl
 	dialect "mvel"
 	when
 		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, isPrimarySeriesShot() == false)
-		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == true)	
+		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == true)
+		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
 	then
 		String _RULENAME = kcontext.rule.name;
+		int tddosenumber = $ts.determineDoseNumberInSeries();
+		int tdshotnumber = $tdsEvaluated.size()+1;
 		modify($td) {
-			setStatus(DoseStatus.EVALUATION_IN_PROCESS);
+			setStatus(DoseStatus.EVALUATION_IN_PROCESS),
+			setDoseNumberInSeries(tddosenumber),
+			setAdministeredShotNumberInSeries(tdshotnumber);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		setFocus("preEvaluationValidation");
@@ -726,11 +783,16 @@ rule "HistoryEvaluation.primarySeriesShotAlreadyTrueAndSeriesNotComplete" rulefl
 	dialect "mvel"
 	when
 		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, isPrimarySeriesShot() == true)
-		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == false)	
+		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == false)
+		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
 	then
 		String _RULENAME = kcontext.rule.name;
+		int tddosenumber = $ts.determineDoseNumberInSeries();
+		int tdshotnumber = $tdsEvaluated.size()+1;
 		modify($td) {
-			setStatus(DoseStatus.EVALUATION_IN_PROCESS);
+			setStatus(DoseStatus.EVALUATION_IN_PROCESS),
+			setDoseNumberInSeries(tddosenumber),
+			setAdministeredShotNumberInSeries(tdshotnumber);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		setFocus("preEvaluationValidation");
@@ -1520,6 +1582,7 @@ rule "RecommendationForecast.applyPostRecommendationCheck" ruleflow-group "Recom
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Post recommendation check for TargetSeries " + $targetSeries.getSeriesName());
+		update($targetSeries);
 		setFocus("postRecommendationCheck");
 end
 

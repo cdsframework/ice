@@ -53,7 +53,30 @@ global java.util.Date evalTime
 
 ///////////////////////////////////////////////////////////// DTP-Specific Duplicate Shot/Same Day Rules Start Here /////////////////////////////////////////////////////////////
 
-//  If neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination then:
+// Duplicate Shots/Same Day Evaluation Order: If one of the shots is pertussis-containing and the other is not, evaluate the pertussis-containing shot first
+rule "Duplicate Shots/Same Day DTP: If one of the shots is pertussis-containing and another is not pertussis-containing, evaluate the pertussis-containing shot first" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"	
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", 
+			vaccineComponent.allDiseasesTargetedForImmunity not contains "SUPPORTED_DISEASE_CONCEPT.033.9")
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, 
+			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.033.9") 
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.EVALUATION_NOT_STARTED);
+		}
+		modify($tdother) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + "will be evaluted before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+ 
+// If neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination then:
 rule "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
@@ -61,10 +84,9 @@ rule "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neithe
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", hasBeenEvaluated == true, status == DoseStatus.VALID, $tdstatus : status, $tdAdministrationDate : administrationDate,
-			$tdTargetSeries : associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == false,	$tdIsCombination: administeredVaccine.isCombinationVaccine())
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $tdTargetSeries, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
-			vaccineComponent.isUnspecifiedFormulation() == false, $tdOtherIsCombination : administeredVaccine.isCombinationVaccine())
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false, 
+			$tdOtherIsCombination : administeredVaccine.isCombinationVaccine())
 		eval($tdIsCombination == true && $tdOtherIsCombination == true || $tdIsCombination == false && $tdOtherIsCombination == false)
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -95,18 +117,16 @@ rule "Duplicate Shots/Same Day Overview Rule #4-DTP-Pertussis: If both shots are
 end
 
 
-// Duplicate Shots/Same Day DTP Rule 5a: If one DTP shot is pertussis-containing vaccine andother is not pertussis-containing, evaluate the non-pertussis containing vaccine as 
+// Duplicate Shots/Same Day DTP Rule 5a: If one DTP shot is pertussis-containing vaccine another is not pertussis-containing, evaluate the non-pertussis containing vaccine as 
 // Invalid w/ DUPLICATE_SHOT_SAME_DAY"
 rule "Duplicate Shots/Same Day DTP Rule 5a: If one DTP shot is pertussis-containing vaccine and other is not pertussis-containing, evaluate the non-pertussis containing vaccine as Invalid w/ DUPLICATE_SHOT_SAME_DAY"
-		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
-	ruleflow-group "HistoryEvaluation"
+		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
 	auto-focus true
 	salience 10
-	when	
-		eval($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && 
-			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9"))
+	when
+		eval($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && ! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9"))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
@@ -124,8 +144,7 @@ end
 // Duplicate Shot/Same Day DTP Rule 5b: If neither shot contains pertussis or both shots contain pertussis, then evaluate the 1st shot processed as Valid and evaluate the 2nd  
 // shot processed as Invalid with a reason code of DUPLICATE_SAME_DAY
 rule "Duplicate Shot/Same Day DTP Rule 5b: If neither shot contains pertussis or both shots contain pertussis, then evaluate the 1st shot processed as Valid and evaluate the 2nd shot processed as Invalid with a reason code of DUPLICATE_SAME_DAY"
-		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
-	ruleflow-group "HistoryEvaluation"
+		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination" ruleflow-group "HistoryEvaluation"
 	dialect "java"
 	agenda-group "duplicateShotSameDay"
 	auto-focus true

@@ -68,14 +68,14 @@ Rules for Adult Recommending Intervals from Dose 5 to Dose 6 (Adult Dose 1 to Do
 // to all such accepted shots (not just the most recent administered shot)
 rule "Pneumococcal Adult Series: Recommended Interval of 1yr from accepted Adult Series PPSV target dose 1, administered before the absolute minimum age, to the next target dose of PCV" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
-	agenda-group "customRecommendationRule"
+	agenda-group "postRecommendationCheck"
 	when
-		There is a Series $targetSeries that needs forecasting
+		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-			- the effective dose number in the series is >= 6
-			- there is an absolute minimum age for dose 6 in this Series
-			- make note of the absolute minimum age for dose 6 in this Series as $absoluteMinimumAgeDose6
+			- a Forecast for the Series has been made and a Recommendation Date has been determined		
+			- a Forecast for the Series has been made and a Specific vaccine is recommended
+			- post processing on the Series forecast has not already been run
 			- make note of the recommended vaccine as $recommendedVaccine
 			- the string $recommendedVaccine == "ICE133"
 		There is an administered shot $shot
@@ -86,7 +86,7 @@ rule "Pneumococcal Adult Series: Recommended Interval of 1yr from accepted Adult
 			- make note of the date this Shot was administered as $dateAdultPPSVAdministeredBelowAbsMinAge
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < $absoluteMinimumAgeDose6
+		/////// Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < "65y-4d"
 	then
 		Add "1y" to $dateAdultPPSVAdministeredBelowAbsMinAge and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
@@ -94,18 +94,18 @@ rule "Pneumococcal Adult Series: Recommended Interval of 1yr from accepted Adult
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-
+			
 // Pneumococcal Adult Series: Set Recommended Interval of 5yrs from accepted PPSV dose 5 shot administered before the absolute minimum age to recommended PPSV vaccine
 rule "Pneumococcal Adult Series: Recommended Interval of 5yrs from accepted Adult Series PPSV target dose 1, administered before the absolute minimum age, to the next target dose of PPSV" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
-	agenda-group "customRecommendationRule"
+	agenda-group "postRecommendationCheck"
 	when
-		There is a Series $targetSeries that needs forecasting
+		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-			- the effective dose number in the series is >= 6
-			- there is an absolute minimum age for dose 6 in this Series
-			- make note of the absolute minimum age for dose 6 in this Series as $absoluteMinimumAgeDose6
+			- a Forecast for the Series has been made and a Recommendation Date has been determined					
+			- a Forecast for the Series has been made and a Specific vaccine is recommended
+			- post processing on the Series forecast has not already been run
 			- make note of the recommended vaccine as $recommendedVaccine
 			- the string $recommendedVaccine == "ICE33"
 		There is an administered shot $shot
@@ -116,7 +116,7 @@ rule "Pneumococcal Adult Series: Recommended Interval of 5yrs from accepted Adul
 			- make note of the date this Shot was administered as $dateAdultPPSVAdministeredBelowAbsMinAge
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < $absoluteMinimumAgeDose6
+		/////// Confirm elapsed time between $birthDate and $dateAdultPPSVAdministeredBelowAbsMinAge < "65y-4d"
 	then
 		Add "5y" to $dateAdultPPSVAdministeredBelowAbsMinAge and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries

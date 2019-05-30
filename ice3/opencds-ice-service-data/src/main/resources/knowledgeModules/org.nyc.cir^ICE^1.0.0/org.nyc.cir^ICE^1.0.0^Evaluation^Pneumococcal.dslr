@@ -109,7 +109,7 @@ end
 
 
 // Adult Series: Minimum interval from the accepted PPSV to PPSV (target dose in the adult series) = 5 years
-rule "Pneumococcal Adult Series: Minimum interval from the accepted dose 1 of PPSV to PPSV target dose 1 in the adult series = 5 years" extends 
+rule "Pneumococcal Adult Series: Absolute minimum interval from the accepted dose 1 of PPSV to PPSV target dose 1 in the adult series = 5 years" extends 
 		"Pneumococcal Adult Series: (Abstract) PPSV Shot (CVX 33, 109) >= 5yrs and < 65y-4d (below minimum age)" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"		
@@ -117,13 +117,13 @@ rule "Pneumococcal Adult Series: Minimum interval from the accepted dose 1 of PP
 	when
 		There is an Administered Shot $currentShotForIntervalCheck that needs to be evaluated
 			- the shot belongs to the Series $targetSeriesForAgeCheck
-			- the dose number in the Series is == 6
+			/////// - the dose number in the Series is == 6
 			- the vaccine administered a member of ("ICE33", "ICE109")
 			- make note of the administered shot number as $nShotNumber
 			- make note of the date this shot was Administered as $adultPPSVShot2Date
 		There is an Administered Shot $previousShot
 			- that is the same shot as $adultPPSVShot1BelowMinAge
-			- the administered shot number is == $nShotNumber-1
+			- the administered shot number is < $nShotNumber
 		Confirm Elapsed time between $adultPPSVShot1Date and $adultPPSVShot2Date < "5y"
 	then
 		Include the reason for shot $currentShotForIntervalCheck Invalid due to "Below Minimum Interval"

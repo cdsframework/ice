@@ -120,7 +120,6 @@ rule "HPV: Set the earliest interval of 5m between doses 1 & 3 for the HPV 3-Dos
 end
 
 
-// The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
 rule "HPV: Set the latest recommended interval of 7m+4w between doses 1 & 3 for the HPV 3-Dose Series if patient >= 15 yrs" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
@@ -146,7 +145,6 @@ rule "HPV: Set the latest recommended interval of 7m+4w between doses 1 & 3 for 
 end
 
 
-// The interval between dose 1 & 3 of HPV needs to be at least 112 days for Recommendation. Routine interval rule still runs
 rule "HPV: Set the latest recommended interval of 13m+4w between doses 1 & 3 for the HPV 3-Dose Series if patient < 15 yrs" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"

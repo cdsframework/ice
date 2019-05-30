@@ -99,7 +99,7 @@ rule "Evaluate HPV Shot As Accepted If Patient >=27 yrs and does not have one or
 end
 
 
-rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 - 112 days required" ruleflow-group "HistoryEvaluation"
+rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 - 5m-4 days required" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	when  
@@ -113,7 +113,7 @@ rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses
 			- the dose number in the series is == 1
 			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
 			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
-		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "112d"
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "5m-4d"
 	then
 		Include the reason for shot $currentDose Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentDose
