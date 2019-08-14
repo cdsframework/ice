@@ -1,12 +1,10 @@
-// [keyword][]AND=&&
-// [keyword][]OR=||
+/////// [keyword][]AND=&&
+/////// [keyword][]OR=||
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Patient
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// [condition][]The [Ii]mmunization [Ss]chedule information {assign_oSchedule} must be known to complete writing this rule={assign_oSchedule} : Schedule()
 
 [condition][]The [Pp]atient [Ii]nformation {assign_oEvaluatedPerson} must be known to complete writing this rule={assign_oEvaluatedPerson} : EvaluatedPerson()
 [condition][]- [Tt]he [Pp]atient's birthdate is {aOp}  {dtDate}=demographics.birthTime {aOp} {dtDate}
@@ -262,6 +260,7 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Nn]ot [Ii]gnored={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(false);
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]gnored={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(true);
 [consequence][][Ss]et [Dd]ose [Nn]umber of {refer_oTargetDose} to {nDoseNumber}=modify({refer_oTargetDose}) \{ setDoseNumberInSeries({nDoseNumber}); \};
+[consequence][][Mm]ark that [Ee]valuation of [Ss]hot {refer_oTargetDose} is complete and therefore should not be reevaluated by any other rules=modify ({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_COMPLETE) \}
 ////////////// [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ee]valuation [Nn]ot [Ss]tarted for this [Ss]eries=modify({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_NOT_STARTED), removeAllEvaluationReasonsFromAllReasonSets(); \};
 
 
@@ -271,17 +270,16 @@
 
 [consequence][][Cc]lear [Ff]orecasted [Rr]ecommendations from [Cc]onsideration in [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.clearRecommendations();
 [consequence][][Rr]emove the [Ss]hot {refer_oTargetDose} from [Ee]valuation as a part of the [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ removeTargetDoseFromSeries({refer_oTargetDose}); \};
-[consequence][][Mm]ark that [Ee]valuation of [Ss]hot {refer_oTargetDose} is complete and therefore should not be reevaluated by any other rules=modify ({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_COMPLETE) \}
 [consequence][][Ss]kip [Ss]eries [Dd]ose [Nn]umber to {nToDoseNumber} from {nFromDoseNumber} for [Dd]isease {dd_oSupportedDiseaseConcept} in [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ addSkipDoseEntryForSpecifiedDisease({nFromDoseNumber}, {nToDoseNumber}, {dd_oSupportedDiseaseConcept}); \}
 [consequence][][Ss]kip [Ss]eries [Dd]ose [Nn]umber to {nToDoseNumber} from {nFromDoseNumber} for all [Dd]iseases in the [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ addSkipDoseEntryForDose({nFromDoseNumber}, {nToDoseNumber}); \}
 [consequence][][Cc]onvert from [Ss]eries {refer_oTargetSeries_SeriesToSwitchFrom} to {refer_oTargetSeries_SeriesToSwitchTo} starting with [Dd]ose [Nn]umber {nDoseNumber} and [Ee]valuate [Uu]sing [Ii]nterval for [Pp]rior [Dd]ose to this [Dd]ose from [Ss]witchedTo [Ss]eries={refer_oTargetSeries_SeriesToSwitchFrom}.convertToSpecifiedSeries({refer_oTargetSeries_SeriesToSwitchTo}.seriesName, {nDoseNumber}, true); for (TargetDose d : {refer_oTargetSeries_SeriesToSwitchTo}.targetDoses) \{ retract(d); \} retract({refer_oTargetSeries_SeriesToSwitchTo}); update({refer_oTargetSeries_SeriesToSwitchFrom});
 [consequence][][Cc]onvert from [Ss]eries {refer_oTargetSeries_SeriesToSwitchFrom} to {refer_oTargetSeries_SeriesToSwitchTo} starting with [Dd]ose [Nn]umber {nDoseNumber} and [Ee]valuate [Uu]sing [Ii]nterval for [Pp]rior [Dd]ose to this [Dd]ose from [Ss]witchedFrom [Ss]eries={refer_oTargetSeries_SeriesToSwitchFrom}.convertToSpecifiedSeries({refer_oTargetSeries_SeriesToSwitchTo}.seriesName, {nDoseNumber}, false); for (TargetDose d : {refer_oTargetSeries_SeriesToSwitchTo}.targetDoses) \{ retract(d); \} retract({refer_oTargetSeries_SeriesToSwitchTo}); update({refer_oTargetSeries_SeriesToSwitchFrom});
 [consequence][][Rr]efresh all [Ff]acts in the [Ss]eries {refer_oTargetSeries} for [Ee]valuation=modify ({refer_oTargetSeries}) \{ setRecommendationStatus(RecommendationStatus.NOT_FORECASTED); \}
 [consequence][][Rr]efresh all [Ff]acts in the [Ss]hot {refer_oTargetDose}=update({refer_oTargetDose});
-[consequence][][Mm]ark that the [Ss]eries {refer_oTargetSeries} cannot be forecasted as [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(false);
-[consequence][][Mm]ark that the [Ss]eries {refer_oTargetSeries} can be forecasted as [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
-[consequence][][Mm]ark the Series {refer_oTargetSeries} [Nn]ot [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(false);
-[consequence][][Mm]ark the Series {refer_oTargetSeries} [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
+/////// [consequence][][Mm]ark that the [Ss]eries {refer_oTargetSeries} cannot be forecasted as [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(false);
+/////// [consequence][][Mm]ark that the [Ss]eries {refer_oTargetSeries} as [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
+[consequence][][Mm]anually [Mm]ark the [Ss]eries {refer_oTargetSeries} [Nn]ot [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(false);
+[consequence][][Mm]ark the [Ss]eries {refer_oTargetSeries} [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
 [consequence][][Aa]dd {nDuration}  {oDurationType} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, new TimePeriod({nDuration}, {oDurationType}));
 [consequence][][Aa]dd {oTimePeriod} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, {oTimePeriod});
 [consequence][][Mm]ark that the [Rr]ecommendation for [Ss]eries {refer_oTargetSeries} must take [Ll]ive [Vv]irus [Ii]nterval into [Aa]ccount={refer_oTargetSeries}.setManuallySetAccountForLiveVirusIntervalsInRecommendation(true);

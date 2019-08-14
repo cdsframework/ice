@@ -281,7 +281,7 @@ rule "DTP: If the 5-dose series is complete and a Tdap 5-dose series recommendat
 end
 
 
-// If an Adolescent Tdap needed and Adolescent Tdap exception occurred, recommend an Adolescent Tdap at 7 years of age
+// If an Adolescent Tdap needed and ANY Adolescent Tdap exception occurred, recommend an Adolescent Tdap at 7 years of age
 rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If the 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Adolescent Tdap at Earliest, Recommended & Overdue Date of 7yrs" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"	
@@ -618,3 +618,41 @@ rule "DTP: (Six by Seven Rule)- Recommend next dose at age 7yrs for 5-dose serie
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
+
+/*************************************************************************************************************************************************************************************
+3-dose Series Exception Rules START:
+    + THE FOLLOWING RULES ARE IMPLEMENTED in Evaluation^DTP: If the patient has received 3 doses and none of the doses are pertussis-containing vaccines, the DTP 3-dose series is NOT complete. 
+    + RECOMMENDATION RULE TO IMPLEMENT HER: Recommend Tdap (CVX 115) at recommended interval = 0 days. 
+Example: Patient age = 10 years. CVX 09 (Td) given at 7 years, 8 years, and 10 years. Recommend final dose Tdap (CVX 115) at 10 years. 
+/************************************************************************************************************************************************************************************/
+
+rule "DTP: (3-Dose Series Exception Rule[Recommendation])- If none of the 3 or more doses administered in 3-dose Series contains pertussis, recommend Tdap in 0 days following the most recent dose" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	dialect "mvel"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the name of the Series is "DTP3DoseSeries"
+			- the Series is not complete
+			- the number of Doses administered is >= 3
+		There is not an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+		There is an Administered Shot $latestAdministeredShotIn3DoseSeries
+			- the shot belongs to the Series $targetSeries
+			- make note of the administered shot number as $administeredShotNumber
+			- make note of the date this shot was administered as $dateLastShotAdministered
+		There does not exist an Administered Shot
+			- the shot belongs to the Series $targetSeries
+			- the administered shot number is > $administeredShotNumber
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dateLastShotAdministered
+		/////// Vaccine-specific forecast rules determine that a Tdap should be recommended; so specific recommendation of Tdap vaccine does not need to be specified here 
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+/*************************************************************************************************************************************************************************************
+3-Dose Series Exception Rules END
+/************************************************************************************************************************************************************************************/

@@ -3484,7 +3484,7 @@ public class TargetSeries {
 	}
 
 	/**
-	 * Manually set the number of doses in the series to something other than autmoatically defined by the SeriesRules. Note that if the number of doses specified is 
+	 * Manually set the number of doses in the series to something other than automatically defined by the SeriesRules. Note that if the number of doses specified is 
 	 * greater than that of the SeriesRules, the caller should be careful to write rules to handle those additional doses. This method also resets the series complete
 	 * or not complete flag (unless previously manually set by the author).
 	 * @param numberOfDosesInSeries

@@ -86,7 +86,7 @@ rule "DTP(Any): Note that an Adolescent Tdap is needed if primary series complet
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 			- that has associated series $targetSeries
 	then
-		Insert an IceFact SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.getConceptCodeValue() with TargetSeries $targetSeries into Working Memory
+		Logically Insert an IceFact SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.getConceptCodeValue() with TargetSeries $targetSeries into Working Memory
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
