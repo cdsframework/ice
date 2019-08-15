@@ -82,6 +82,7 @@ rule "DTP(Any): Note that an Adolescent Tdap is needed if primary series complet
 			- the series is complete
 		There is not an IceFact
 			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_COMPLETED.conceptCodeValue
+			- that has associated series $targetSeries
 		There is not an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 			- that has associated series $targetSeries
@@ -100,6 +101,7 @@ rule "DTP(Any): Retract Tdap needed if patient has received his/her Adolescent T
 			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
 		There exists an IceFact
 			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_COMPLETED.conceptCodeValue
+			- that has associated series $targetSeries
 		There is an IceFact $iceTdapFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 			- that has associated series $targetSeries
