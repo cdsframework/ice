@@ -421,18 +421,16 @@ rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent T
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 			- that has Associated Series $targetSeries
+		There is an IceFact $pertussisDoseFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has associated series $targetSeries
+			- make note of the associated administered shot as $pertussisDose
 		There is an administered shot $administeredShotContainsPertussis
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
+			- that is the same shot as $pertussisDose
 			- make note of the date this shot was administered as $dtAdministrationDate
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
-			- the collection $diseasesTargeted contains "SUPPORTED_DISEASE_CONCEPT.033.9"
-		There does not exist an administered shot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedOther
-			- the collection $diseasesTargetedOther contains "SUPPORTED_DISEASE_CONCEPT.033.9"
-			- the administration date of the shot is > $dtAdministrationDate
+		There is not an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has Associated Series $targetSeries as well as IceResult Administration Date > $dtAdministrationDate
 	then
 		// Recommendation at 6 months from the last shot in the series
 		Add 6 DurationType.MONTHS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated

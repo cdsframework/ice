@@ -727,12 +727,15 @@ rule "DTP: (3-Dose Series Exception Rule[Series Not Complete])- If the patient h
 			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the name of the series is "DTP3DoseSeries"
 			- the series is complete
-		There does not exist an Administered Shot
-			- the shot belongs to the Series $targetSeries
-			- the shot belongs to the Primary Series
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedByPriorShot
-			- the collection $diseasesTargetedByPriorShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
-			- that has already been evaluated and whose Shot Validity is VALID
+		There is not an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has associated series $targetSeries
+		//There does not exist an Administered Shot
+		//	- the shot belongs to the Series $targetSeries
+		//	- the shot belongs to the Primary Series
+		//	- make note of the diseases targeted by the vaccine administered as $diseasesTargetedByPriorShot
+		//	- the collection $diseasesTargetedByPriorShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+		//	- that has already been evaluated and whose Shot Validity is VALID
 	then
 		Manually Mark the Series $targetSeries Not Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
