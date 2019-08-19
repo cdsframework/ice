@@ -130,7 +130,7 @@ rule "DTP: Recommend Tdap (CVX 115) at age 7yrs if series is not complete, if pa
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthdate
 			- make note of the date as $dtDateAtAge when the patient is "7y" of age
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- there is an associated administered shot in the series $targetSeries as well as IceResult administration date >= $dtDateAtAge
 		Confirm elapsed time between $dtBirthdate and evalTime >= "7y"
@@ -175,7 +175,7 @@ rule "DTP: If the 5-Dose Series is Complete and the patient has NOT received a p
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge7y when the patient is "7y" of age
 			- make note of the date as $dtDateAtAge10y when the Patient is "10y" of age
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- that has Associated Series $targetSeries
 			- make note of the date the Associated Shot was Administered as $pertussisDoseDate
@@ -263,7 +263,7 @@ rule "DTP: If the 5-dose series is complete and a Tdap 5-dose series recommendat
 			- the name of the series is "DTP5DoseSeries"
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION.conceptCodeValue
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge when the patient is "11y" of age
@@ -325,7 +325,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not 
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge when the patient is "4y-4d" of age
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- there is an associated administered shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge
 	then
@@ -428,7 +428,7 @@ rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent T
 		There is an administered shot $administeredShotContainsPertussis
 			- that is the same shot as $pertussisDose
 			- make note of the date this shot was administered as $dtAdministrationDate
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- that has Associated Series $targetSeries as well as IceResult Administration Date > $dtAdministrationDate
 	then
@@ -629,7 +629,7 @@ rule "DTP: (3-Dose Series Exception Rule[Recommendation])- If none of the 3 or m
 			- the name of the Series is "DTP3DoseSeries"
 			- the Series is not complete
 			- the number of Doses administered is >= 3
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- that has Associated Series $targetSeries
 		There is an Administered Shot $latestAdministeredShotIn3DoseSeries
@@ -642,6 +642,7 @@ rule "DTP: (3-Dose Series Exception Rule[Recommendation])- If none of the 3 or m
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dateLastShotAdministered
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		/////// Vaccine-specific forecast rules determine that a Tdap should be recommended; so specific recommendation of Tdap vaccine does not need to be specified here 
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries

@@ -80,10 +80,10 @@ rule "DTP(Any): Note that an Adolescent Tdap is needed if primary series complet
 		There is a Series $targetSeries
 			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_COMPLETED.conceptCodeValue
 			- that has associated series $targetSeries
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 			- that has associated series $targetSeries
 	then

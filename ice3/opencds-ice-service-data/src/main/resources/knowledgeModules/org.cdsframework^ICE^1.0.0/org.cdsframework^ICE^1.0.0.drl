@@ -820,7 +820,7 @@ rule "HistoryEvaluation: Check if Shot should be marked Accepted and Series Comp
 			$targetDose.addAcceptedReason(diConsequence.getEvaluationReasonResult());				
 		}
 		modify ($targetDose) { setStatus(DoseStatus.EVALUATION_COMPLETE) } ///// Note for docs: marking this dose valid, so we mark evaluation complete override all other "negative check" rules
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $targetDose.toString() + " in TargetSeries " + $targetSeries .getSeriesName());
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Marking Evaluation Complete for TargetDose " + $targetDose.toString() + " in TargetSeries " + $targetSeries .getSeriesName());
 	then[invokeCustomEvaluationRules]
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Check complete.");
 		drools.setFocus("makeNoteOfDuplicateShotSameDayIfAny");

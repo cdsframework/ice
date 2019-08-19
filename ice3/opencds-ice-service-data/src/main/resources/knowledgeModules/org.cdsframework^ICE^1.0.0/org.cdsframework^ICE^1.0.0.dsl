@@ -395,7 +395,7 @@
 ///////// ***
 // Primary IceResult Fact Object conditions and sub-conditions
 [condition][]There exists {entity:an |another |}IceFact=exists ICEFactTypeFinding()
-[condition][]There is not {entity:an |another |}IceFact=not ICEFactTypeFinding() 
+[condition][]There does not exist {entity:an | another |}IceFact=not ICEFactTypeFinding()
 [condition][]There is {entity:an |another |}IceFact {oICEFactTypeFinding}={oICEFactTypeFinding} : ICEFactTypeFinding()
 [condition][]- [Tt]hat has [Ff]inding {sIceResultFinding}=iceResultFinding == {sIceResultFinding}
 [condition][]- [Tt]hat has [Aa]ssociated [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
