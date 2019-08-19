@@ -175,13 +175,12 @@ rule "DTP: If the 5-Dose Series is Complete and the patient has NOT received a p
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge7y when the patient is "7y" of age
 			- make note of the date as $dtDateAtAge10y when the Patient is "10y" of age
-		There does not exist an Administered Shot
-			- the shot belongs to the Series $targetSeries
-			- that has already been evaluated and whose Shot Validity is VALID
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
-			- the collection $diseasesTargeted contains "SUPPORTED_DISEASE_CONCEPT.033.9"
-			- the Administration Date of the shot is >= $dtDateAtAge7y
-			- the Administration Date of the shot is < $dtDateAtAge10y
+		There is not an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has Associated Series $targetSeries
+			- make note of the date the Associated Shot was Administered as $pertussisDoseDate
+			- the date $pertussisDoseDate >= $dtDateAtAge7y
+			- the date $pertussisDoseDate < $dtDateAtAge10y
 	then
 		Set the Agenda Group Focus to "customRecommendationAdolescentTdapExceptionRule"
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -206,11 +205,12 @@ rule "DTP: If the primary series is complete and the patient has received a pert
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge7y when the patient is "7y" of age
 			- make note of the date as $dtDateAtAge10y when the Patient is "10y" of age
-		There exists an Administered Shot
-			- the shot belongs to the Series $targetSeries
-			- that has already been evaluated and whose Shot Validity is VALID
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
-			- the collection $diseasesTargeted contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+		There is an IceFact $pertussisFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has Associated Series $targetSeries
+			- make note of the Associated Administered Shot as $pertussisDose
+		There is an Administered Shot $targetPertussisDose
+			- that is the same Shot as $pertussisDose
 			- the Administration Date of the shot is >= $dtDateAtAge7y
 			- the Administration Date of the shot is < $dtDateAtAge10y
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule

@@ -404,6 +404,7 @@
 [condition][]- [Tt]here is an [Aa]ssociated [Aa]dministered [Ss]hot in the [Ss]eries {refer_oTargetSeries}=associatedTargetSeries == {refer_oTargetSeries}, targetDose != null 
 [condition][]- [Mm]ake [Nn]ote of the IceResult [Ff]inding as {assign_sIceResultFinding}={assign_sIceResultFinding} : iceResultFinding
 [condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Aa]dministered [Ss]hot as {assign_oTargetDose}=targetDose != null, {assign_oTargetDose} : targetDose
+[condition][]- [Mm]ake [Nn]ote of the [Dd]ate the [Aa]ssociated [Ss]hot was [Aa]dministered as {assign_oTargetDoseDate}=targetDose != null, {assign_oTargetDoseDate} : targetDose.administrationDate
 [condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Ss]eries as {assign_oTargetSeries}={assign_oTargetSeries} : associatedTargetSeries, associatedTargetSeries != null
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 ///////// ***
