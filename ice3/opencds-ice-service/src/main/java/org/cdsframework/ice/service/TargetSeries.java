@@ -2245,7 +2245,7 @@ public class TargetSeries {
 		}
 
 		if (isSeriesComplete()) {
-			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+			/////// pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
 			return;
 		}
 
@@ -2305,7 +2305,7 @@ public class TargetSeries {
 		}
 
 		if (isSeriesComplete()) {
-			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+			/////// pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
 			return;
 		}
 
@@ -3789,7 +3789,9 @@ public class TargetSeries {
 	public String toString() {
 		return "TargetSeries [getSeriesName()=" + getSeriesName()
 		+ ", getVaccineGroup()=" + getVaccineGroup()
-		+ ", getTargetSeason()=" + getTargetSeason() + "]";
+		+ ", getTargetSeason()=" + getTargetSeason() 
+		+ ", isSeriesComplete()=" + isSeriesComplete()
+		+ "]";
 	}
 
 

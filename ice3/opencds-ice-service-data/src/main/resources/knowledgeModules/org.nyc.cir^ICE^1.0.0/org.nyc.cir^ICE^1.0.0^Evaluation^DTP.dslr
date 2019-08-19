@@ -344,7 +344,8 @@ end
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 rule "DTP: If Patient received a Tdap Dose >= 10yrs, make note of this via IceFact of ADOLESCENT_TDAP_COMPLETED" ruleflow-group "HistoryEvaluation"
- 	agenda-group "postEvaluationCheck"
+ 	agenda-group "customEvaluationRule"
+ 	auto-focus true
  	dialect "mvel"
  	when
 		There is a Series $targetSeries
@@ -364,6 +365,7 @@ rule "DTP: If Patient received a Tdap Dose >= 10yrs, make note of this via IceFa
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.037"
  	then
 		Insert an IceFact SupportedFactConcept._ADOLESCENT_TDAP_COMPLETED.getConceptCodeValue() with TargetSeries $targetSeries into working memory
+		Record that this dose rule was processed for the TargetDose $pertussisDose
 		Log that this dose rule fired for the dose $pertussisDose in the Series $targetSeries
 end
 
@@ -424,7 +426,7 @@ rule "DTP(2): A primary series dose of pertussis exists if a shot that was evalu
 end
 
 
-rule "DTP(3): A primary dose of pertussis exists if a (valid) dose for Adolescent Tdap was administered" ruleflow-group "HistoryEvaluation"
+rule "DTP(3): A dose of pertussis exists if a (valid) dose for Adolescent Tdap was administered" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	auto-focus true
 	dialect "mvel"

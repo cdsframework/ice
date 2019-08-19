@@ -933,7 +933,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalid" ruleflow-group "HistoryE
 			setStatus(DoseStatus.INVALID),					// Also sets hasBeenEvaluated flag to true
 			addDoseRuleProcessed(_RULENAME);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		setFocus("postEvaluationCheck");
 end
 
@@ -952,7 +952,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "His
 			setStatus(DoseStatus.NOT_EVALUATED),					// Also sets hasBeenEvaluated flag to true
 			addDoseRuleProcessed(_RULENAME);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		setFocus("postEvaluationCheck");
 end
 
@@ -972,7 +972,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusAccepted" ruleflow-group "History
 			addDoseRuleProcessed(_RULENAME);
 		}
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		setFocus("postEvaluationCheck");
 end
 
@@ -992,7 +992,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusValid" ruleflow-group "HistoryEva
 			setStatus(DoseStatus.VALID);					// Also sets hasBeenEvaluated flag to true
 		}
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.getSeriesName());
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		drools.setFocus("postEvaluationCheck");
 end
 
@@ -1023,7 +1023,7 @@ rule "HistoryEvaluation.markExtraneousDosesAcceptedIfCompleteForAllDiseaseTarget
 	activation-group "extraDoseCheck"
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $doseNumber : doseNumberInSeries) 
-		$ts : TargetSeries(containsTargetDose($td), seriesRules.numberOfDosesInSeries < determineDoseNumberInSeriesForDiseasesTargetedByThisDose($td)) 
+		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == true || seriesRules.numberOfDosesInSeries < determineDoseNumberInSeriesForDiseasesTargetedByThisDose($td)) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		$td.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
