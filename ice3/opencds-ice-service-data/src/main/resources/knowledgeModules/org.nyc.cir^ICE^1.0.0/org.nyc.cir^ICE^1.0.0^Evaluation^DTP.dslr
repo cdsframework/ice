@@ -189,7 +189,7 @@ rule "DTP: Evaluate First Adolescent Tdap Shot based on Age >= 7yrs and < 10yrs"
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-rule "DTP: Evaluate First Adolescent Tdap Shot as Invalid if Interval of 24 days between Pertussis shots is not met" extends "DTP: Evaluate First Adolescent Tdap Shot based on Age >= 7yrs and < 10yrs" ruleflow-group "HistoryEvaluation"
+rule "DTP: Evaluate First Adolescent Tdap Shot as Invalid if Interval of 4 weeks between Pertussis shots is not met" extends "DTP: Evaluate First Adolescent Tdap Shot based on Age >= 7yrs and < 10yrs" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck"
 	dialect "mvel"
@@ -201,7 +201,7 @@ rule "DTP: Evaluate First Adolescent Tdap Shot as Invalid if Interval of 24 days
 			- make note of the Diseases Targeted by the Vaccine Administered as $diseasesTargetedByThisPriorShot
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
 			- make note of the Date this Shot was Administered as $dtAdministrationDatePrior
-		Confirm Elapsed Time between $dtAdministrationDatePrior and $dtAdministrationDateOfShotBeingEvaluated < "24d"
+		Confirm Elapsed Time between $dtAdministrationDatePrior and $dtAdministrationDateOfShotBeingEvaluated < "28d"
 	then
 		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
 		Record that this dose rule was processed for the TargetDose $currentShot
@@ -309,7 +309,7 @@ rule "DTP: Evaluate Adolescent Tdap Shot based on Age >= 10yrs" ruleflow-group "
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-rule "DTP: Evaluate First Adolescent Tdap Shot >= 10yrs as Invalid if Interval of 24 days between Pertussis Shots is not met" extends "DTP: Evaluate Adolescent Tdap Shot based on Age >= 10yrs" ruleflow-group "HistoryEvaluation"
+rule "DTP: Evaluate First Adolescent Tdap Shot >= 10yrs as Invalid if Interval of 4 weeks between Pertussis Shots is not met" extends "DTP: Evaluate Adolescent Tdap Shot based on Age >= 10yrs" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck"
 	dialect "mvel"
@@ -321,7 +321,7 @@ rule "DTP: Evaluate First Adolescent Tdap Shot >= 10yrs as Invalid if Interval o
 			- make note of the Diseases Targeted by the Vaccine Administered as $diseasesTargetedByThisPriorShot
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
 			- make note of the Date this Shot was Administered as $dtAdministrationDatePrior
-		Confirm Elapsed Time between $dtAdministrationDatePrior and $dtAdministrationDateOfShotBeingEvaluated < "24d"
+		Confirm Elapsed Time between $dtAdministrationDatePrior and $dtAdministrationDateOfShotBeingEvaluated < "28d"
 	then
 		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
 		Record that this dose rule was processed for the TargetDose $currentShot
@@ -344,7 +344,7 @@ end
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 rule "DTP: If Patient received a Tdap Dose >= 10yrs, make note of this via IceFact of ADOLESCENT_TDAP_COMPLETED" ruleflow-group "HistoryEvaluation"
- 	agenda-group "customEvaluationRule"
+ 	agenda-group "customEvaluationRule,,"
  	auto-focus true
  	dialect "mvel"
  	when
@@ -742,7 +742,7 @@ end
  Example: Patient age = 10 years. CVX 09 (Td) given at 7 years, 8 years, and 10 years. Recommend final dose Tdap (CVX 115) at 10 years. 
 /************************************************************************************************************************************************************************************/
 
-rule "DTP: (3-Dose Series Exception Rule[Series Not Complete])- If the patient has completed the series but none of the doses are pertussis-containing vaccines, mark the 3-dose series Not Complete" ruleflow-group "HistoryEvaluation"
+rule "DTP: (3-Dose Series Exception Rule[Series Not Complete])- If the Patient has Completed the Series but none of the Doses are pertussis-containing Vaccines, mark the 3-dose Series Not Complete" ruleflow-group "HistoryEvaluation"
 	auto-focus true
 	dialect "mvel"
 	when
@@ -759,7 +759,7 @@ rule "DTP: (3-Dose Series Exception Rule[Series Not Complete])- If the patient h
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "DTP: (3-Dose Series Exception Rule[Evaluation])- If none of the prior 3 or more doses administered in 3-dose Series contains pertussis but this shot contains pertussis, evaluate it as Valid and mark the series Complete" ruleflow-group "HistoryEvaluation"
+rule "DTP: (3-Dose Series Exception Rule[Evaluation])- If none of the prior 3 or more Doses administered in 3-dose Series contains pertussis but this Shot does contain pertussis, evaluate it as Valid and mark the Series Complete" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck" // This activation-group prevents the default series interval rule from firing, which would mark this shop as ACCEPTED/EXTRA_DOSE instead of simply valid.
 	dialect "mvel"
