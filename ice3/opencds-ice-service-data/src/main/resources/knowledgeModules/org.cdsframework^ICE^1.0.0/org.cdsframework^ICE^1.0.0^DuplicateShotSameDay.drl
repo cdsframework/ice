@@ -57,6 +57,7 @@ global java.util.Date evalTime
 rule "Duplicate Shots/Same Day Overview Rule #1: If both shots are of the same CVX code, then evaluate the 1st CVX processed as Valid and evaluate the 2nd CVS processed as Invalid/Duplicate" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
+	lock-on-active true
 	auto-focus true
 	when
 		// All valid duplicate, valid shots on same day have the same CVX code
@@ -79,7 +80,8 @@ end
 rule "Duplicate Shots/Same Day Overview Rule #2: If one of those shots is an NOS CVX, then evaluate the NOS as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other (non-NOS) CVX as Valid" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
-	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
+	activation-group "duplicateShotGeneralNOSActivationGroup"
+	lock-on-active true
 	auto-focus true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, vaccineComponent.isUnspecifiedFormulation() == false, 
@@ -102,7 +104,8 @@ rule "Duplicate Shots/Same Day Overview Rule #3: If neither shot is an NOS CVX, 
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
-	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
+	activation-group "duplicateShotComboAndOrNOSActivationGroup"
+	lock-on-active true
 	auto-focus true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, 
@@ -124,7 +127,8 @@ end
 rule "Duplicate Shots/Same Day Overview Rule #4: If both shots are an NOS CVX, then evaluate the 1st CVX processed as Valid and evaluate the 2nd CVX processed as Invalid with a reason code of DUPLICATE_SAME_DAY"	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
-	activation-group "duplicateShotGeneralNOSRuleActivationGroup"
+	activation-group "duplicateShotComboAndOrNOSActivationGroup"
+	lock-on-active true
 	auto-focus true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
@@ -146,6 +150,7 @@ rule "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if vaccines d
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
 	activation-group "duplicateShotAbstractRule5"
+	lock-on-active true
 	auto-focus true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdstatus : status, $tdAdministrationDate : administrationDate,
@@ -164,6 +169,7 @@ rule "Duplicate Shots/Same Day non-DTP Rule 5a: non-DTP shots; set the 2nd shot 
 	dialect "java"
 	agenda-group "duplicateShotSameDay"
 	activation-group "duplicateShotAbstractRule5"
+	lock-on-active true
 	auto-focus true
 	when	
 		eval($td.getAssociatedTargetSeries().getSeriesRules().isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() == true && 

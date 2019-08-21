@@ -175,8 +175,7 @@ rule "DTP: Evaluate First Adolescent Tdap Shot based on Age >= 7yrs and < 10yrs"
 	when
 		There does not exist an Administered Shot
 			- the Shot belongs to the Series $targetSeries
-			/////// - the Shot does not belong to the Primary Series
-			- that has already been Evaluated and whose Shot Validity is VALID
+			- that has already been evaluated and whose Shot Validity is VALID
 			- the Administration Date of the Shot is >= $dtDateAtAge7
 			- the Administration Date of the Shot is <= $dtAdministrationDateOfShotBeingEvaluated
 			- make note of the Diseases Targeted by the Vaccine Administered as $diseasesTargetedByThisPriorShot
