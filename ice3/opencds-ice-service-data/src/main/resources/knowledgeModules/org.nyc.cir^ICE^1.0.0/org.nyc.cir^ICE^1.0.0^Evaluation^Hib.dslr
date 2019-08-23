@@ -93,7 +93,7 @@ rule "Evaluate Hib Shot As Accepted If Patient >=5 Yrs and Series Not Complete b
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "5y"
 	then
 		Include the reason for shot $currentDose Accepted due to "Above Recommended Age"
-		Mark the Series $targetSeries Not Complete
+		Manually Mark the Series $targetSeries Not Complete
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end

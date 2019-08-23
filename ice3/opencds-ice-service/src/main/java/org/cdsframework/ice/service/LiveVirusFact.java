@@ -37,7 +37,7 @@ public class LiveVirusFact {
 	 * LiveVirusDate's date is set to null, and isLiveVirusDateSet() to false
 	 */
 	public LiveVirusFact() {
-		
+
 	}
 	
 	/**
@@ -64,5 +64,5 @@ public class LiveVirusFact {
 	public void setLiveVirusDateSet(boolean liveVirusDateSet) {
 		this.liveVirusDateSet = liveVirusDateSet;
 	}
-	
+
 }

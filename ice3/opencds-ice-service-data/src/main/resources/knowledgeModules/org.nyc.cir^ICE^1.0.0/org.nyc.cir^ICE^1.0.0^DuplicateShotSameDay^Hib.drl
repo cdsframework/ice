@@ -65,12 +65,16 @@ rule "Duplicate Shots/Same Day Hib: If one of the shots is a non-combination vac
 		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.cdsConceptName == "ICE49", 
 			administeredVaccine.isCombinationVaccine() == false)
 		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID, 
-			vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "ICE49")
+			vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "ICE49", isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
 			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries with Duplicate CVX 49 Shot: " + $td.associatedTargetSeries + "; TargetSeries with VALID shot: " + $tdother.associatedTargetSeries);
 end
@@ -90,12 +94,17 @@ rule "Duplicate Shots/Same Day Hib: If one of the shots is a combination vaccine
 		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.cdsConceptName == "ICE49", 
 			administeredVaccine.isCombinationVaccine() == true)
 		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID, 
-			administeredVaccine.isCombinationVaccine() == true, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "ICE49")
+			administeredVaccine.isCombinationVaccine() == true, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "ICE49", 
+			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
 			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries with Duplicate CVX 49 Shot: " + $td.associatedTargetSeries + "; TargetSeries with VALID shot: " + $tdother.associatedTargetSeries);
 end

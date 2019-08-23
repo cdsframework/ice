@@ -72,7 +72,7 @@ rule "DTP(Any): Mark that dose of pertussis has not been administered for a shot
 end
 
 
-rule "DTP(Any): Note that Tdap needed if primary series complete and patient has _not_ received a dose of pertussis >= 7 years of age"
+rule "DTP(Any): Note that an Adolescent Tdap is needed if primary series complete and patient has _not_ received the necessary adolescent Tdap doses"
 	agenda-group "customAnyRuleflowGroupRule"
 	auto-focus true
 	dialect "mvel"
@@ -80,12 +80,10 @@ rule "DTP(Any): Note that Tdap needed if primary series complete and patient has
 		There is a Series $targetSeries
 			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
-		The Patient information $evaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge when the patient is "7y" of age
-		There is not an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
-			- there is an associated Administered Shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge
-		There is not an IceFact
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_COMPLETED.conceptCodeValue
+			- that has associated series $targetSeries
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 			- that has associated series $targetSeries
 	then
@@ -94,18 +92,16 @@ rule "DTP(Any): Note that Tdap needed if primary series complete and patient has
 end
 
 
-rule "DTP(Any): Retract Tdap needed if patient _has_ received a dose of pertussis >= 7 years of age"
+rule "DTP(Any): Retract Tdap needed if patient has received his/her Adolescent Tdap dose(s)"
 	agenda-group "customAnyRuleflowGroupRule"
 	auto-focus true
 	dialect "mvel"
 	when
 		There is a Series $targetSeries
 			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
-		The Patient information $evaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge when the patient is "7y" of age
 		There exists an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
-			- there is an associated Administered Shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge
+			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_COMPLETED.conceptCodeValue
+			- that has associated series $targetSeries
 		There is an IceFact $iceTdapFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 			- that has associated series $targetSeries
@@ -135,5 +131,4 @@ end
 /*************************************************************************************************************************************************************************************
 An adolescent Tdap (CVX 115) is needed END
 /************************************************************************************************************************************************************************************/
-
 

@@ -67,7 +67,8 @@ rule "Duplicate Shot/Same Day (Abstract Hep A): Make note if the adult vaccine (
 	salience 10
 	when
 		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", status == DoseStatus.VALID, vaccineComponent.cdsConceptName == "ICE52")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, vaccineComponent.cdsConceptName in ("ICE83","ICE84"))
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, vaccineComponent.cdsConceptName in ("ICE83","ICE84"),
+			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td + " in TargetSeries VACCINE_GROUP_CONCEPT.810 (Hep A)");	
@@ -87,7 +88,11 @@ rule "Duplicate Shot/Same Day (Hep A): If shot administered at >= 19 years, eval
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
 			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td + " in TargetSeries " + $td.associatedTargetSeries);
 end
@@ -106,7 +111,11 @@ rule "Duplicate Shot/Same Day (Hep A): If shot administered at < 19 years, evalu
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
 			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
 end

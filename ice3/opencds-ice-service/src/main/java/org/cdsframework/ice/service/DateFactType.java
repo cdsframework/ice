@@ -34,7 +34,7 @@ public class DateFactType {
 	private boolean factDateSet;
 	
 	/**
-	 * LiveVirusDate's date is set to null, and isLiveVirusDateSet() to false
+	 * DateFactType date is set to null, and isLiveVirusDateSet() to false
 	 */
 	public DateFactType(String pFactName) {
 		this.factName = pFactName;

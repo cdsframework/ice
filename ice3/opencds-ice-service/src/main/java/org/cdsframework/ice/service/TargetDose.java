@@ -53,6 +53,7 @@ public class TargetDose {
 	private boolean hasBeenEvaluated;
 	private boolean preEvaluationCheckCompleted;
 	private boolean postEvaluationCheckCompleted;
+	private boolean duplicateShotSameDayCheckCompleted;
 	private DoseStatus status;
 	private HashSet<String> validReasons;
 	private HashSet<String> acceptedReasons;
@@ -97,6 +98,7 @@ public class TargetDose {
 		hasBeenEvaluated = false;
 		preEvaluationCheckCompleted = false;
 		postEvaluationCheckCompleted = false;
+		duplicateShotSameDayCheckCompleted = false;
 	}
 
 	public void addDoseRuleProcessed(String ruleName) {
@@ -309,6 +311,14 @@ public class TargetDose {
 	public void setPostEvaluationCheckCompleted(boolean truefalse) {
 		this.postEvaluationCheckCompleted = truefalse;
 	}
+	
+	public boolean isDuplicateShotSameDayCheckCompleted() {
+		return duplicateShotSameDayCheckCompleted;
+	}
+	
+	public void setDuplicateShotSameDayCheckCompleted(boolean truefalse) {
+		this.duplicateShotSameDayCheckCompleted = truefalse;
+	}
 
 	public Vaccine getAdministeredVaccine() {
 		return administeredVaccine;
@@ -424,11 +434,12 @@ public class TargetDose {
 	public String toString() {
 		
 		String s = "TargetDose [uniqueId=" + uniqueId + ", doseId=" + doseId + ", administeredShotNumber=" + administeredShotNumberInSeries + 
-				"; doseNumber=" + doseNumberInSeries + ", vaccine=" + administeredVaccine.getCdsConceptName() + 
+				"; doseNumber=" + doseNumberInSeries + ", vaccine=" + administeredVaccine.getCdsConceptName() + ", isPrimarySeriesShot=" + isPrimarySeriesShot() + 
 				"; vaccineComponent=" + vaccineComponent.getCdsConceptName() + ", administrationDate=" + administrationDate + ", status=" + status + 
 				"; isValid=" + isValid + "; preEvaluationCheck=" + preEvaluationCheckCompleted + "; isLiveVirus: " + this.getAdministeredVaccine().isLiveVirusVaccine() + 
 				"; isCombinationVaccine: " + this.getAdministeredVaccine().isCombinationVaccine() + "; componentIsLiveVirus: " + this.getVaccineComponent().isLiveVirusVaccine() + 
-				"; isAdjuvant: " + this.getAdministeredVaccine().isSelectAdjuvantProduct() + "; componentIsAdjuvant: " + this.getVaccineComponent().isSelectAdjuvantProduct();
+				"; isAdjuvant: " + this.getAdministeredVaccine().isSelectAdjuvantProduct() + "; componentIsAdjuvant: " + this.getVaccineComponent().isSelectAdjuvantProduct() +
+				"; isDuplicateShotSameDayCheckCompleted: " + this.isDuplicateShotSameDayCheckCompleted() + ", isUnspecifiedFormulation(): " + this.getVaccineComponent().isUnspecifiedFormulation();
 		int i=0;
 		for (String reason : validReasons) {
 			if (i == 0)

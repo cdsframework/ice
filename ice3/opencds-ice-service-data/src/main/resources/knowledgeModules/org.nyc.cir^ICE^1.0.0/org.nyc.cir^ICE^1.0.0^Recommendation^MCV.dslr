@@ -126,7 +126,7 @@ rule "Meningococcal: If a patient is >= 19 years and did NOT complete the series
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "19y"
     then
-        Mark that the Series $targetSeries cannot be forecasted as Complete
+        Manually Mark the Series $targetSeries Not Complete
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series

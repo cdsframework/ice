@@ -63,12 +63,16 @@ rule "Duplicate Shots/Same Day Polio Rule: If one of those shots is OPV (CVX 02,
 			$tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
 		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $tdAssociatedTargetSeries, 
 			doseNumberInSeries == $tddosenumber, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.400", vaccineComponent.isUnspecifiedFormulation() == false, 
-			vaccineComponent.cdsConceptName != $td.vaccineComponent.cdsConceptName)
+			vaccineComponent.cdsConceptName != $td.vaccineComponent.cdsConceptName, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
 			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
 end
