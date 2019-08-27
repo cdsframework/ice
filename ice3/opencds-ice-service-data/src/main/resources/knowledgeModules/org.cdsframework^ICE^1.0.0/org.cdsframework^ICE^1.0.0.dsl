@@ -69,6 +69,7 @@
 [condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity is VALID=status == DoseStatus.VALID
 [condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity is INVALID=status == DoseStatus.INVALID
 [condition][]- [Tt]hat has already been [Ee]valuated=status == DoseStatus.INVALID || status == DoseStatus.VALID || status == DoseStatus.ACCEPTED
+[condition][]- [Tt]hat has not already been [Ee]valuated=status == DoseStatus.EVALUATION_NOT_STARTED
 [condition][]- [Tt]he [Aa]dministration [Dd]ate of the [Ss]hot is {aOp:[\=\\<\\>]+}  {dtOtherDate}=administrationDate {aOp} {dtOtherDate}
 [condition][]- [Tt]he [Ss]hot has not already been marked as a [Ll]ive [Vv]irus [Cc]onflict \(as we do not want this [Rr]ule executing more than necessary\)=containsInvalidReason(BaseDataEvaluationReason._TOO_EARLY_LIVE_VIRUS.getCdsListItemName()) == false
 [condition][]- [Tt]he [Ss]hot has not already been marked as a [Ss]elect [Aa]djuvant [Pp]roduct [Ii]nterval [Cc]onflict \(as we do not want this [Rr]ule executing more than necessary\)=containsInvalidReason(BaseDataEvaluationReason._SELECT_ADJUVANT_PRODUCT_INTERVAL.getCdsListItemName()) == false

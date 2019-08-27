@@ -682,6 +682,7 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete if 
 			- make note of the Patient's birthdate as $birthdate
 			- make note of the Date as $dtDateAtAge4y when the Patient is "4y" of age
 			- make note of the Date as $dtDateAtAge12m when the Patient is "12m" of age
+			- make note of the Date as $dtDateAtAge7y when the Patient is "7y" of age
 		There exists an Administered Shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose Shot Validity is VALID
@@ -694,11 +695,15 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete if 
 			- the Dose Number in the Series is >= 2
 		There is an Administered Shot $thirdDose
 			- the Shot belongs to the Series $targetSeries
-			- the Dose Number in the Series is >= 3
+			- the Dose Number in the Series is == 3
 			- that has already been Evaluated and whose Shot Validity is VALID
-			/////// - make note of the Date this Shot was Administered as $dtDateThirdDose
-		/////// Confirm Elapsed Time between $birthdate and $dtDateThirdDose >= "7y"
-		Confirm Elapsed Time between $birthdate and evalTime >= "7y"
+			- make note of the Date this Shot was Administered as $dtDateThirdDose
+		There does not exist an Administered Shot
+			- the Shot belongs to the Series $targetSeries
+			- that has not already been Evaluated
+			- the Administration Date of the Shot is >= $dtDateThirdDose
+			- the Administration Date of the Shot is < $dtDateAtAge7y
+		Confirm the Date evalTime is on the same date or after $dtDateAtAge7y
  	then
  		Mark the Series $targetSeries Complete
 		Refresh all Facts in the Series $targetSeries for Evaluation
