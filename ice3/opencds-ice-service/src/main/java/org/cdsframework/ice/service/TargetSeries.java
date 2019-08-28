@@ -82,6 +82,10 @@ public class TargetSeries {
 	private Map<String, Map<Integer, Integer>> interimDosesToSkipByDisease;					// Disease -> skip dose instructions for disease
 	private Map<String, Date> diseaseImmunityDate;											// Disease -> disease immunity date
 	private Boolean manuallySetAccountForLiveVirusIntervalsInRecommendation;
+	private List<Date> liveVirusDatesAccountedForInRecommendedFinalEarliestDate;
+	private List<Date> liveVirusDatesAccountedForInRecommendedFinalDate;
+	private List<Date> adjuvantDatesAccountedForInRecommendedFinalEarliestDate;
+	private List<Date> adjuvantDatesAccountedForInRecommendedFinalDate;
 	private Vaccine recommendationVaccine;
 	private RecommendationStatus recommendationStatus;
 	private RecommendationStatus recommendationStatusPrior;
@@ -138,6 +142,10 @@ public class TargetSeries {
 		interimRecommendationsCustomLatest = new ArrayList<Recommendation>();
 
 		manuallySetAccountForLiveVirusIntervalsInRecommendation = null;
+		liveVirusDatesAccountedForInRecommendedFinalEarliestDate = new ArrayList<Date>();
+		liveVirusDatesAccountedForInRecommendedFinalDate = new ArrayList<Date>();
+		adjuvantDatesAccountedForInRecommendedFinalEarliestDate = new ArrayList<Date>();
+		adjuvantDatesAccountedForInRecommendedFinalDate = new ArrayList<Date>();
 		recommendationVaccine = null;
 		recommendationStatus = RecommendationStatus.NOT_FORECASTED;
 		recommendationStatusPrior = null;
@@ -2245,7 +2253,7 @@ public class TargetSeries {
 		}
 
 		if (isSeriesComplete()) {
-			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+			/////// pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
 			return;
 		}
 
@@ -2305,7 +2313,7 @@ public class TargetSeries {
 		}
 
 		if (isSeriesComplete()) {
-			pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
+			/////// pTD.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
 			return;
 		}
 
@@ -3483,8 +3491,61 @@ public class TargetSeries {
 		this.manuallySetDoseNumberToRecommend = doseNumberToRecommend;
 	}
 
+	public List<Date> getLiveVirusDatesAccountedForInRecommendedFinalEarliestDate() {
+		return this.liveVirusDatesAccountedForInRecommendedFinalEarliestDate;
+	}
+	
+	public List<Date> getLiveVirusDatesAccountedForInRecommendedFinalDate() {
+		return this.liveVirusDatesAccountedForInRecommendedFinalDate;
+	}
+	
+	public List<Date> getAdjuvantDatesAccountedForInRecommendedFinalEarliestDate() {
+		return this.adjuvantDatesAccountedForInRecommendedFinalEarliestDate;
+	}
+	
+	public List<Date> getAdjuvantDatesAccountedForInRecommendedFinalDate() {
+		return this.adjuvantDatesAccountedForInRecommendedFinalDate;
+	}
+	
+	public void addLiveVirusDateAccountedForInRecommendedFinalEarliestDate(Date pLiveVirusDate) {
+		if (pLiveVirusDate == null) {
+			return;
+		}
+		if (! this.liveVirusDatesAccountedForInRecommendedFinalEarliestDate.contains(pLiveVirusDate)) {
+			this.liveVirusDatesAccountedForInRecommendedFinalEarliestDate.add(pLiveVirusDate);
+		}
+	}
+	
+	public void addLiveVirusDateAccountedForInRecommendedFinalDate(Date pLiveVirusDate) {
+		if (pLiveVirusDate == null) {
+			return;
+		}
+		if (! this.liveVirusDatesAccountedForInRecommendedFinalDate.contains(pLiveVirusDate)) {
+			this.liveVirusDatesAccountedForInRecommendedFinalDate.add(pLiveVirusDate);
+		}
+	}
+
+	public void addAdjuvantDateAccountedForInRecommendedFinalEarliestDate(Date pAdjuvantDate) {
+		if (pAdjuvantDate == null) {
+			return;
+		}
+		if (! this.adjuvantDatesAccountedForInRecommendedFinalEarliestDate.contains(pAdjuvantDate)) {
+			this.adjuvantDatesAccountedForInRecommendedFinalEarliestDate.add(pAdjuvantDate);
+		}
+	}
+	
+	public void addAdjuvantDateAccountedForInRecommendedFinalDate(Date pAdjuvantDate) {
+		if (pAdjuvantDate == null) {
+			return;
+		}
+		if (! this.adjuvantDatesAccountedForInRecommendedFinalDate.contains(pAdjuvantDate)) {
+			this.adjuvantDatesAccountedForInRecommendedFinalDate.add(pAdjuvantDate);
+		}
+	}	
+	
+	
 	/**
-	 * Manually set the number of doses in the series to something other than autmoatically defined by the SeriesRules. Note that if the number of doses specified is 
+	 * Manually set the number of doses in the series to something other than automatically defined by the SeriesRules. Note that if the number of doses specified is 
 	 * greater than that of the SeriesRules, the caller should be careful to write rules to handle those additional doses. This method also resets the series complete
 	 * or not complete flag (unless previously manually set by the author).
 	 * @param numberOfDosesInSeries
@@ -3635,7 +3696,9 @@ public class TargetSeries {
 	public void setFinalRecommendationDate(Date pFinalRecommendationDate) {
 
 		this.finalRecommendationDate = pFinalRecommendationDate;
-
+		this.liveVirusDatesAccountedForInRecommendedFinalDate.clear();
+		this.adjuvantDatesAccountedForInRecommendedFinalDate.clear();
+		
 		if (pFinalRecommendationDate != null) {
 			// Check to ensure consistency with the earliest date
 			Date lDate = getFinalEarliestDate();
@@ -3666,8 +3729,11 @@ public class TargetSeries {
 	 * @param finalEarliestDate
 	 */
 	public void setFinalEarliestDate(Date finalEarliestDate) {
+		
 		this.finalEarliestDate = finalEarliestDate;
-
+		this.liveVirusDatesAccountedForInRecommendedFinalEarliestDate.clear();
+		this.adjuvantDatesAccountedForInRecommendedFinalEarliestDate.clear();
+		
 		if (finalEarliestDate != null) {
 			// Check to ensure consistency with recommendation date
 			Date lDate = getFinalRecommendationDate();
@@ -3789,7 +3855,9 @@ public class TargetSeries {
 	public String toString() {
 		return "TargetSeries [getSeriesName()=" + getSeriesName()
 		+ ", getVaccineGroup()=" + getVaccineGroup()
-		+ ", getTargetSeason()=" + getTargetSeason() + "]";
+		+ ", getTargetSeason()=" + getTargetSeason() 
+		+ ", isSeriesComplete()=" + isSeriesComplete()
+		+ "]";
 	}
 
 

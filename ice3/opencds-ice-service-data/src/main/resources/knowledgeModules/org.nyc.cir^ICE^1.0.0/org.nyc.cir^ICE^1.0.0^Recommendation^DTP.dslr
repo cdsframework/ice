@@ -55,6 +55,8 @@ global org.cdsframework.ice.service.Schedule schedule
 
 
 /*************************************************************************************************************************************************************************************
+General Vaccine Recommendation rules START
+
 // Generally, ICE recommends at the group level rather than a specific CVX code; however, DTP vaccine group recommendations are at the CVX level.
 // When recommending DTP as part of the 3-dose or 5-dose series, the rules below state which CVX code to recommend. For patients >=7 years of age, 
 // the rules below also include an override to the series routine recommended age.
@@ -69,15 +71,6 @@ global org.cdsframework.ice.service.Schedule schedule
 //         + Recommended Age = 7 years
 //         + Recommended interval follows table rules
 *************************************************************************************************************************************************************************************/
-
-// SupportedVaccineConcept._DTAP_UNSPECIFIED = ICE107
-// SupportedVaccineConcept._TD_ABSORBED = ICE09
-// SupportedVaccineConcept._TDAP = ICE115
-// SupportedVaccineConcept._TD_PRESERVATIVEFREE = ICE113
-// SupportedVaccineConcept._TD_NOTABSORBED = ICE138
-// SupportedVaccineConcept._TD_NOS= ICE139
-// SupportedDiseaseConcept.Pertussis = SUPPORTED_DISEASE_CONCEPT.033.9
-
 
 // If the patient is < 7 years, always recommend DTaP NOS (CVX 107).
 rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs and series is not complete, always recommend DTaP NOS (CVX 107)" ruleflow-group "RecommendationForecast"
@@ -137,7 +130,7 @@ rule "DTP: Recommend Tdap (CVX 115) at age 7yrs if series is not complete, if pa
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthdate
 			- make note of the date as $dtDateAtAge when the patient is "7y" of age
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- there is an associated administered shot in the series $targetSeries as well as IceResult administration date >= $dtDateAtAge
 		Confirm elapsed time between $dtBirthdate and evalTime >= "7y"
@@ -154,44 +147,72 @@ end
 General Vaccine Recommendation rules END
 /************************************************************************************************************************************************************************************/
 
+/**************************************************************************************************************************************************************************************************************************************
+Recommendation Rules for Adolescent Tdap START
 
-/*************************************************************************************************************************************************************************************
-For patients who completed the 5-dose series:
-* Recommended Vaccine = Tdap (CVX 115) 
-* Recommended Interval = 0 days (from dose 5 or an accepted/extra dose, if one exists) and Recommended Age = 11 years unless an exception applies.  
+For patients who completed the primary DTP series (3-dose or 5-dose):
+1) If the patient has NOT received a pertussis-containing dose at >= 7 years and <10 years and
+    + any one of the below exception rules apply (for 5-dose series only), then recommend Tdap (CVX 115) at 7 years old (or apply recommended interval, if applicable). 
+    + none of the below exception rules apply (for 5-dose series only), then recommend Tdap (CVX 115) at 11 years old (or apply recommended interval, if applicable).
+2) If the patient has received a pertussis-containing dose at >= 7 years and <10 years, then recommend another Tdap (CVX 115) at 11 years old.
+3) If the patient has received a pertussis-containing dose at >= 10 years, then recommend the recurring Td (CVX 09) every 10 years. 
+/*************************************************************************************************************************************************************************************************************************************/
 
-If any one of the following exceptions apply, then: 
-    * Recommended Age = 7 years
-    * Recommended Interval = 6 months from the last dose of pertussis; 0 days from the last non-pertussis dose. 
-        + Exception A) The patient DOES NOT have a dose of pertussis at >= 4 years. 
-        + Exception B) The patient received dose 1 of the 5-dose series at < 12 months and DOES NOT have at least 4 doses of pertussis given at < 7 years
-        + Exception C) The patient received dose 1 of the 5-dose series at >=12 months and DOES NOT have at least 3 doses of pertussis given at < 7 years
-/************************************************************************************************************************************************************************************/
+//////////////
+// #1: For patients who completed the primary DTP series (5-dose), if the patient has NOT received a pertussis-containing dose at >= 7 years and <10 years and...:
+//////////////
 
-// For patients who completed the 5-dose series and no adolescent Tdap exceptions apply:
-// * Recommended Vaccine = Tdap (CVX 115) 
-// * Recommended Interval = 0 days (from dose 5 or an accepted/extra dose, if one exists) and Recommended Age = 11 years  
-rule "DTP: Recommend Tdap at earliest date & recommended date at 11yrs, overdue date at 13yrs+4w with 0 day interval from last dose for completed 5-dose series if Adolescent Tdap 5-dose series recommendation exception did _not_ occur" ruleflow-group "RecommendationForecast"
+rule "DTP: If the 5-Dose Series is Complete and the patient has NOT received a pertussis containing dose at >= 7 years and <10 years, then invoke 5-Dose Series Adolescent Tdap Exception Rules" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when
-		// Get the most recent shot in the series
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the Series is complete
 			- the name of the series is "DTP5DoseSeries"
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
-		There is not an IceFact
-			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION.conceptCodeValue
-		There is an administered shot $administeredShot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- make note of the date this shot was administered as $dtAdministrationDate
-		There does not exist another administered shot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- the administration date of the shot is > $dtAdministrationDate
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge7y when the patient is "7y" of age
+			- make note of the date as $dtDateAtAge10y when the Patient is "10y" of age
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has Associated Series $targetSeries
+			- make note of the date the Associated Shot was Administered as $pertussisDoseDate
+			- the date $pertussisDoseDate >= $dtDateAtAge7y
+			- the date $pertussisDoseDate < $dtDateAtAge10y
+	then
+		Set the Agenda Group Focus to "customRecommendationAdolescentTdapExceptionRule"
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+//////////////
+// #2: For patients who completed the primary DTP series (3-dose or 5-dose): if the patient has received a pertussis-containing dose at >= 7 years and <10 years, then recommend
+// another Tdap (CVX 115) at 11 years old. This is an adolescent Tdap dose.
+//////////////
+
+rule "DTP: If the primary series is complete and the patient has received a pertussis containing dose at >= 7 years and <10 years, then recommend another Tdap at at earliest date & recommended date of 11yrs, overdue date of 13yrs+4w" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series is complete
+		There exists an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge7y when the patient is "7y" of age
+			- make note of the date as $dtDateAtAge10y when the Patient is "10y" of age
+		There is an IceFact $pertussisFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has Associated Series $targetSeries
+			- make note of the Associated Administered Shot as $pertussisDose
+		There is an Administered Shot $targetPertussisDose
+			- that is the same Shot as $pertussisDose
+			- the Administration Date of the shot is >= $dtDateAtAge7y
+			- the Administration Date of the shot is < $dtDateAtAge10y
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge when the patient is "11y" of age
 			- make note of the date as $dtOverdueDateAtAge when the patient is "13y+4w" of age
@@ -203,21 +224,66 @@ rule "DTP: Recommend Tdap at earliest date & recommended date at 11yrs, overdue 
 		Set the Recommendation Overdue Forecast Date for $oRecommendationAge to $dtOverdueDateAtAge
 		Set the Recommendation Vaccine for $oRecommendationAge to "ICE115"
 		Include the Recommendation $oRecommendationAge for Consideration in the final forecast of the Series
-		// Create a Recommendation at 0 days from the last shot in the series
-		/////// Add 0 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
-		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtAdministrationDate
-		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
-		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+//////////////
+// If the patient has received a pertussis-containing dose at >= 10 years, then recommend the recurring Td (CVX 09) every 10 years. 
+// Above rule encompasses this.
+//////////////
+
+
+/*************************************************************************************************************************************************************************************
+Adolescent 5-Dose Series Tdap EXCEPTION RULES - START
+
+For patients who completed the 5-dose series:
+* Recommended Vaccine = Tdap (CVX 115) 
+* Recommended Interval = 0 days (from dose 5 or an accepted/extra dose, if one exists) and Recommended Age = 11 years unless an exception applies.  
+
+If any one of the following exceptions apply, then: 
+    * Recommended Age = 7 years
+    * Recommended Interval = 6 months from the last dose of pertussis; 0 days from the last non-pertussis dose. 
+        + Exception A) The patient DOES NOT have a dose of pertussis at >= 4 years. 
+        + Exception B) The patient DOES NOT have at least 4 doses of pertussis given at < 7 years
+/************************************************************************************************************************************************************************************/
+
+// For patients who completed the 5-dose series and NONE of the Tdap Adolescent Exceptions apply:
+// * Recommended Vaccine = Tdap (CVX 115) 
+// * Recommended Age = 11 years  
+// * Recommended Interval = 6 months from the last dose of pertussis; 0 days from the last non-pertussis dose.
+// * NOTE: No need to include a rule for the recommended interval in this section, as it is taken care of by the same recommendation interval rule below which encompasses all series (not just the 5-dose series) 
+rule "DTP: If the 5-dose series is complete and a Tdap 5-dose series recommendation exception did _not_ occur, recommend Tdap at earliest date & recommended date of 11yrs, overdue date of 13yrs+4w" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationAdolescentTdapExceptionRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series is complete
+			- the name of the series is "DTP5DoseSeries"
+		There exists an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION.conceptCodeValue
+		The Patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge when the patient is "11y" of age
+			- make note of the date as $dtOverdueDateAtAge when the patient is "13y+4w" of age
+	then
+		// Create a Recommendation with earliest/recommended/latest ages of 11yrs/11yrs/13y+4w
+		Create a Recommendation as $oRecommendationAge for the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $oRecommendationAge to $dtDateAtAge
+		Set the Recommendation Recommended Forecast Date for $oRecommendationAge to $dtDateAtAge
+		Set the Recommendation Overdue Forecast Date for $oRecommendationAge to $dtOverdueDateAtAge
+		Set the Recommendation Vaccine for $oRecommendationAge to "ICE115"
+		Include the Recommendation $oRecommendationAge for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
 
-// If an Adolescent Tdap needed and Adolescent Tdap exception occurred, then: 
-//    * Recommended Age = 7 years
-rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If 5-dose series complete, recommend Tdap at earliest & recommended date of 7yrs if Adolescent Tdap needed and an Adolescent Tdap 5-dose series recommendation exception occurred" ruleflow-group "RecommendationForecast"
-	agenda-group "customRecommendationRule"
+// If an Adolescent Tdap needed and ANY Adolescent Tdap exception occurred, recommend an Adolescent Tdap at 7 years of age
+rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If the 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Adolescent Tdap at Earliest, Recommended & Overdue Date of 7yrs" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"	
 	when
 		There is a Series $targetSeries that needs forecasting
@@ -243,86 +309,10 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If 5-dose ser
 end
 
 
-// If any one of the following exceptions apply, then: 
-//    * Recommended Interval = 6 months from the last dose of pertussis; 0 days from the last non-pertussis dose. 
-rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If 5-dose series complete, recommend Tdap at earliest & recommended interval of 6 months from last pertussis dose if an Adolescent Tdap needed and an Adolescent Tdap 5-dose series recommendation exception occurred" ruleflow-group "RecommendationForecast"
-	agenda-group "customRecommendationRule"
-	dialect "mvel"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the series is "DTP5DoseSeries"
-			- the Series is complete
-		There exists an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
-		There exists an IceFact
-			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION.conceptCodeValue
-		There is an administered shot $administeredShotContainsPertussis
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- make note of the date this shot was administered as $dtAdministrationDate
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
-			- the collection $diseasesTargeted contains "SUPPORTED_DISEASE_CONCEPT.033.9"
-		There does not exist an administered shot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedOther
-			- the collection $diseasesTargetedOther contains "SUPPORTED_DISEASE_CONCEPT.033.9"
-			- the administration date of the shot is > $dtAdministrationDate
-	then
-		// Recommendation at 6 months from the last shot in the series
-		Add 6 DurationType.MONTHS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
-		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtCalculated
-		Set the Recommendation Earliest Forecast Date for $oRecommendationInterval to $dtCalculated
-		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
-		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If 5-dose series is complete, recommend Tdap earliest & recommended interval of 0 days from last non-pertussis dose if Adolescent Tdap is needed and an Adolescent Tdap 5-dose series recommendation exception occurred" ruleflow-group "RecommendationForecast"
-	agenda-group "customRecommendationRule"
-	dialect "mvel"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the series is "DTP5DoseSeries"
-			- the Series is complete
-		There exists an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
-		There exists an IceFact
-			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION.conceptCodeValue
-		There is an administered shot $administeredShotContainsNonPertussis
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
-			- the collection $diseasesTargeted does not contain "SUPPORTED_DISEASE_CONCEPT.033.9"
-			- make note of the date this shot was administered as $dtAdministrationDate
-		There does not exist an administered shot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedOther
-			- the collection $diseasesTargetedOther does not contain "SUPPORTED_DISEASE_CONCEPT.033.9"
-			- the administration date of the shot is > $dtAdministrationDate
-	then
-		// Recommendation at 0 days from the last non-pertussis dose in the series
-		/////// Add 0 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
-		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtAdministrationDate
-		Set the Recommendation Earliest Forecast Date for $oRecommendationInterval to $dtAdministrationDate
-		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
-		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
 // Exception A) The patient DOES NOT have a dose of pertussis at >= 4 years minus 4 days.
 // Excepion A - higher activation priority than the general adolescent tdap recommendation rule above for 5-dose series 
 rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not have a dose of pertussis >= 4y-4d in the 5-Dose Series(Exception A), make note that the Adolescent Tdap Recommendation Exception criteria was met" ruleflow-group "RecommendationForecast"
-	agenda-group "customRecommendationRule"
+	agenda-group "customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"
 	salience 10
 	when
@@ -335,7 +325,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not 
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge when the patient is "4y-4d" of age
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- there is an associated administered shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge
 	then
@@ -344,10 +334,10 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not 
 end
 
 
-// Exception B)
-// Exception B) The patient received dose 1 of the 5-dose series at < 12 months and DOES NOT have at least 4 doses of pertussis given at < 7 years
-rule "DTP: (Tdap 5-Dose Series Recommendation Exception B)- If the patient received dose 1 of the 5-dose series at < 12 months and DOES NOT have at least 4 doses of pertussis given at < 7 years, make note that the Adolescent Tdap Recommendation Exception criteria was met" ruleflow-group "RecommendationForecast"
-	agenda-group "customRecommendationRule"
+// Exception B) The patient DOES NOT have at least 4 doses of pertussis-containing vaccine given at < 7 years
+// Excepion B - As with Exception A, higher activation priority than the general adolescent tdap recommendation rule above for 5-dose series 
+rule "DTP: (Tdap 5-Dose Series Recommendation Exception B)- If the patient DOES NOT have at least 4 doses of pertussis given at < 7 years, make note that the Adolescent Tdap Recommendation Exception criteria was met" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"
 	salience 10
 	when
@@ -359,39 +349,8 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception B)- If the patient recei
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge12Months when the patient is "12m" of age
 			- make note of the date as $dtDateAtAge7Years when the patient is "7y" of age
-		There exists an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
-			- there is an associated administered shot in the Series $targetSeries as well as IceResult administration date < $dtDateAtAge12Months
 		Verify that the count of IceFacts (where IceResult finding == SupportedFactConcept._DOSE_OF_PERTUSSIS.getConceptCodeValue() as well as IceResult administration date < $dtDateAtAge7Years) is < 4
-	then
-		Logically Insert an IceFact SupportedFactConcept._ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION.getConceptCodeValue() into working memory
-		Log that this series rule fired for the Series $targetSeries
-end
-
-	
-// Exception C)
-// Exception C) The patient received dose 1 of the 5-dose series at >=12 months and DOES NOT have at least 3 doses of pertussis given at < 7 years
-rule "DTP: (Tdap 5-Dose Series Recommendation Exception C)- If the patient received dose 1 of the 5-dose series at >= 12 months and DOES NOT have at least 3 doses of pertussis given at < 7 years, make note that the Adolescent Tdap Recommendation Exception criteria was met" ruleflow-group "RecommendationForecast"
-	agenda-group "customRecommendationRule"
-	dialect "mvel"
-	salience 10
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the Series is complete
-			- the name of the series is "DTP5DoseSeries"
-			- make note of the date that the most recent shot was administered as $dtAdministrationDate
-		There exists an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
-		The Patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge12Months when the patient is "12m" of age
-			- make note of the date as $dtDateAtAge7Years when the patient is "7y" of age
-		There exists an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
-			- there is an associated administered shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge12Months
-		Verify that the count of IceFacts (where IceResult finding == SupportedFactConcept._DOSE_OF_PERTUSSIS.getConceptCodeValue() as well as IceResult administration date < $dtDateAtAge7Years) is < 3
 	then
 		Logically Insert an IceFact SupportedFactConcept._ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION.getConceptCodeValue() into working memory
 		Log that this series rule fired for the Series $targetSeries
@@ -401,40 +360,92 @@ end
 Adolescent 5-Dose Series Tdap rules END
 /************************************************************************************************************************************************************************************/
 
-
 /*************************************************************************************************************************************************************************************
 If the patient has completed the primary DTP series (3-dose or 5-dose) but has not received a dose of pertussis at >= 7 years, then an adolescent Tdap (CVX 115) is needed.
 
-For patients who completed the 3-dose series (i.e., dose 1 at >=7  years):
+For patients who completed the 3-dose series (i.e., dose 1 at >= 7 years):
     * Recommended Age = N/A
-    * Recommended Interval = 0 days from dose 3
+    * Recommended Interval = 6 months from the last dose of pertussis; 0 days from the last non-pertussis dose.
 /************************************************************************************************************************************************************************************/
 
-rule "DTP: If DTP 3-Dose Series is complete and Adolescent Tdap is required, recommend Tdap with earliest & recommended age N/A and earliest & recommended interval of 0 days from dose 3" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
+//////////////
+// See non-series specific rules below
+//////////////
+
+/*************************************************************************************************************************************************************************************
+ Adolescent 3-Dose Series Tdap rules END
+/************************************************************************************************************************************************************************************/
+
+// If one or more of the Adolescent Tdap Exception Rules A or B apply, recommend an Adolescent Tdap 0 days from the last non-pertussis shot  
+rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Tdap at earliest & recommended interval of 0 days from last non-pertussis dose" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationRule"
+	dialect "mvel"
 	when
-		There is a series $targetSeries that needs forecasting
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the series is "DTP3DoseSeries"
-			- the series is complete
-			- make note of the date that the most recent shot was administered as $dtAdministrationDate
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series is complete
 		There exists an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue			
+			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
+			- that has Associated Series $targetSeries
+		There is an administered shot $administeredShotContainsNonPertussis
+			- the shot belongs to the series $targetSeries
+			/////// - that has already been evaluated and whose shot validity is VALID or ACCEPTED
+			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
+			- the collection $diseasesTargeted does not contain "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- make note of the date this shot was administered as $dtAdministrationDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			/////// - that has already been evaluated and whose shot validity is VALID or ACCEPTED
+			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedOther
+			- the collection $diseasesTargetedOther does not contain "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the administration date of the shot is > $dtAdministrationDate
 	then
-		/////// Add "0d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtAdministrationDate
-		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtAdministrationDate
-		Set the Recommendation Vaccine for $oRecommendation to "ICE115"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		// Recommendation at 0 days from the last non-pertussis dose in the series
+		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
+		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtAdministrationDate
+		Set the Recommendation Earliest Forecast Date for $oRecommendationInterval to $dtAdministrationDate
+		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
+		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-/*************************************************************************************************************************************************************************************
-Adolescent 3-Dose Series Tdap rules END
-/************************************************************************************************************************************************************************************/
+
+rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Tdap at earliest & recommended interval of 6 months from last pertussis dose" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	dialect "mvel"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series is complete
+		There exists an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
+			- that has Associated Series $targetSeries
+		There is an administered shot $administeredShotContainsPertussis
+			- the shot belongs to the Series $targetSeries
+			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
+			- the collection $diseasesTargeted contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- make note of the date this shot was administered as $dtAdministrationDate
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedOther
+			- the collection $diseasesTargetedOther contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the administration date of the shot is > $dtAdministrationDate			
+	then
+		// Recommendation at 6 months from the last shot in the series
+		Add 6 DurationType.MONTHS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
+		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtCalculated
+		Set the Recommendation Earliest Forecast Date for $oRecommendationInterval to $dtCalculated
+		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
+		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**************************************************************************************************************************************************************************************************************************************
+ Recommendation Rules for Adolescent Tdap END
+/*************************************************************************************************************************************************************************************************************************************/
 
 
 /*************************************************************************************************************************************************************************************
@@ -447,7 +458,7 @@ Evaluation Rules for Recurring Td
     + Once the primary series is complete and the patient has a dose of pertussis at >=7, any DTP shot is evaluated as VALID for the recurring Td.
 *************************************************************************************************************************************************************************************/
 
-// If a patient is >=7 years; has _not_ completed the series and has received a dose of pertussis at >=7 years of age, then the next dose in the series should be recommended as Td (CVX 09).
+// If a patient has completed the Adolescent Tdap requirements, then the next dose in the series should be recommended as Td (CVX 09).
 rule "DTP: Recommend Td (CVX 09) at earliest interval of 5y, recommended interval of 10yrs, and latest recommended interval of 10y+4w if series is complete has received a pertussis dose >= 7yrs" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
@@ -457,12 +468,9 @@ rule "DTP: Recommend Td (CVX 09) at earliest interval of 5y, recommended interva
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the Series is complete
 			- make note of the date that the most recent shot was administered as $dtAdministrationDate
-		The Patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthdate
-			- make note of the date as $dtDateAtAge when the patient is "7y" of age			
 		There exists an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
-			- there is an associated administered shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge
+			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_COMPLETED.conceptCodeValue
+			- that has Associated Series $targetSeries
 	then
 		Add "5y" to $dtAdministrationDate and make note of the newly calculated date as $dtEarliestRecommendedCalculated
 		Add "10y" to $dtAdministrationDate and make note of the newly calculated date as $dtRecommendedCalculated
@@ -539,7 +547,6 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-
 rule "DTP: (5-Dose Series Exception Rule 1)- Skip to Dose 4 if patient >= 7yrs and has had 2 doses with the first dose at >= 12m and one dose at >= 4 yrs" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
@@ -579,8 +586,8 @@ end
 
 
 /*************************************************************************************************************************************************************************************
-Six by Seven Rule: If a child is < 7 years of age has received 6 shots from the DTP vaccine group, but has not yet completed the series, then the next dose is recommended at age 
-7 years; follow table rules for to determine the recommended interval.
+ Six by Seven Rule: If a child is < 7 years of age has received 6 shots from the DTP vaccine group, but has not yet completed the series, then the next dose is recommended at age 
+ 7 years; follow table rules for to determine the recommended interval.
 *************************************************************************************************************************************************************************************/
 
 rule "DTP: (Six by Seven Rule)- Recommend next dose at age 7yrs for 5-dose series if patient < 7yrs, series is not complete and has received 6 shots" ruleflow-group "RecommendationForecast"
@@ -605,3 +612,43 @@ rule "DTP: (Six by Seven Rule)- Recommend next dose at age 7yrs for 5-dose serie
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
+
+/*************************************************************************************************************************************************************************************
+ 3-dose Series Exception Rules START:
+    + THE FOLLOWING RULES ARE IMPLEMENTED in Evaluation^DTP: If the patient has received 3 doses and none of the doses are pertussis-containing vaccines, the DTP 3-dose series is NOT complete. 
+    + RECOMMENDATION RULE TO IMPLEMENT HER: Recommend Tdap (CVX 115) at recommended interval = 0 days. 
+ Example: Patient age = 10 years. CVX 09 (Td) given at 7 years, 8 years, and 10 years. Recommend final dose Tdap (CVX 115) at 10 years. 
+/************************************************************************************************************************************************************************************/
+
+rule "DTP: (3-Dose Series Exception Rule[Recommendation])- If none of the 3 or more doses administered in 3-dose Series contains pertussis, recommend Tdap in 0 days following the most recent dose" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	dialect "mvel"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the name of the Series is "DTP3DoseSeries"
+			- the Series is not complete
+			- the number of Doses administered is >= 3
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has Associated Series $targetSeries
+		There is an Administered Shot $latestAdministeredShotIn3DoseSeries
+			- the Shot belongs to the Series $targetSeries
+			- make note of the Administered Shot Number as $administeredShotNumber
+			- make note of the date this Shot was Administered as $dateLastShotAdministered
+		There does not exist an Administered Shot
+			- the Shot belongs to the Series $targetSeries
+			- the Administered Shot Number is > $administeredShotNumber
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dateLastShotAdministered
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		/////// Vaccine-specific forecast rules determine that a Tdap should be recommended; so specific recommendation of Tdap vaccine does not need to be specified here 
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+/*************************************************************************************************************************************************************************************
+ 3-Dose Series Exception Rules END
+/************************************************************************************************************************************************************************************/

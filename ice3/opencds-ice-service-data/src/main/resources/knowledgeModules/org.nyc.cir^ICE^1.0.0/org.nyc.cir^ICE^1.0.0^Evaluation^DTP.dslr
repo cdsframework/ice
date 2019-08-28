@@ -69,116 +69,322 @@ Evaluation Rules for Recurring Td
 rule "DTP: Evaluate recurring Td as valid if Td (age) evaluation criteria is met" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "doseAgeCheck"	// Prevent default series interval rule from firing, which would mark this shop as ACCEPTED/EXTRA_DOSE instead of simply valid.
+	dialect "mvel"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- make note of the administered shot number as $currentShotNumber
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
-		The Patient information $evaluatedPerson must be known to complete writing this rule
-			 - make note of the date as $dtDateAtAge when the patient is "7y" of age
 		There exists an IceFact
-			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
-			- there is an associated administered shot in the Series $targetSeries as well as IceResult administration date >= $dtDateAtAge
+			- that has finding SupportedFactConcept._ADOLESCENT_TDAP_COMPLETED.conceptCodeValue
+			- that has Associated Series $targetSeries
 	then
-		Include the reason for shot $currentShotValid Valid
+		Include the reason for shot $currentShot Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
 
 // Interval check for recurring Td. Minimum interval = 0 days 
-rule "DTP: Evaluate recurring Td as valid if Td (interval) evaluation criteria is met" extends "DTP: Evaluate recurring Td as valid if Td (age) evaluation criteria is met"
-	ruleflow-group "HistoryEvaluation"
+rule "DTP: Evaluate recurring Td as valid if Td (interval) evaluation criteria is met" extends "DTP: Evaluate recurring Td as valid if Td (age) evaluation criteria is met" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck" // This activation-group prevents the default series interval rule from firing, which would mark this shop as ACCEPTED/EXTRA_DOSE instead of simply valid.
+	dialect "mvel"
 	when
 		// Since the absolute minimum interval is 0 days, no actual interval check performed.
 	then
-		Include the reason for shot $currentShotValid Valid
+		Include the reason for shot $currentShot Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
 
 // Interval check for recurring Td. Minimum interval = 0 days 
-rule "DTP: Override default series rule that evaluates extra Td shots in the series as accepted" extends "DTP: Evaluate recurring Td as valid if Td (age) evaluation criteria is met"
-	ruleflow-group "HistoryEvaluation"
+rule "DTP: Override default series rule that evaluates extra Td shots in the series as accepted" extends "DTP: Evaluate recurring Td as valid if Td (age) evaluation criteria is met" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck" // This activation-group prevents the default series interval rule from firing, which would mark this shop as ACCEPTED/EXTRA_DOSE instead of simply valid.
+	dialect "mvel"
 	when
 		// Since the absolute minimum interval is 0 days, no actual interval check performed.
 	then
-		Include the reason for shot $currentShotValid Valid
+		Include the reason for shot $currentShot Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
 /*************************************************************************************************************************************************************************************
-Rules for Recurring Td (CVX 09) END
+ Rules for Recurring Td (CVX 09) END
 *************************************************************************************************************************************************************************************/
 
 
-rule "DTP: Evaluate Adolescent Tdap shot as valid if Tdap (age) evaluation critera is met" ruleflow-group "HistoryEvaluation"
+/*************************************************************************************************************************************************************************************
+ Evaluation of Adolescent Tdap Shot START
+ All pertussis-containing vaccines in the DTP vaccine group are allowed as the Adolescent Tdap. 
+ Absolute Minimum Age = 7 years
+ Absolute Minimum Interval:
+     + If final dose in the primary series (or accepted/extra dose, if an extra dose exists) is a pertussis-containing dose, then absolute minimum interval = 4 weeks 
+     + If final dose in the primary series (or accepted/extra dose, if an extra dose exists) is a non-pertussis-containing dose, then absolute minimum interval = 0 days
+ When the target dose is the Adolescent Tdap, if the shot is administered after the primary series is complete but does not meet the criteria for the Adolescent Tdap dose, then the Evaluation is Accepted and the reason code is EXTRA_DOSE. 
+ If the shot meets the criteria for the Adolescent Tdap dose, then the Evaluation is Valid. 
+ If the patient has received an Adolescent Tdap dose at >= 7 years and < 10 years, then the absolute minimum age for the second Adolescent Tdap dose = 10 years. 
+ If the patient has received their first Adolescent Tdap dose at >= 7 years and < 10 years, evaluate subsequent shots >= 7 years and < 10 years as Accepted/Extra Dose. 
+*************************************************************************************************************************************************************************************/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Adolescent Tdap Shot >= 7yrs and < 10yrs START
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "DTP(Abstract): Evaluate Adolescent Tdap Shot >= 7yrs and < 10yrs" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
-	activation-group "doseAgeCheck"
+	dialect "mvel"
 	when
 		There is an IceFact $iceResultFinding
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
-		The patient information $patientInformation must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge when the patient is "7y" of age
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the administration date of the shot is >= $dtDateAtAge
-			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedByThisShot
-			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
-			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
 			- the series is complete
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge7 when the patient is "7y" of age
+			- make note of the date as $dtDateAtAge10 when the patient is "10y" of age
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Series $targetSeries
+			- the administration date of the shot is >= $dtDateAtAge7
+			- the administration date of the shot is < $dtDateAtAge10
+			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedByThisShot
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.032.9"
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.037"			
+			- make note of the date this shot was administered as $dtAdministrationDateOfShotBeingEvaluated
 	then
-		Include the reason for shot $currentShotValid Valid
+		// Abstract Rule- just record it was processed 
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
 
-rule "DTP: Evaluate Adolescent Tdap shot as valid if Tdap (interval) evaluation critera is met" extends "DTP: Evaluate Adolescent Tdap shot as valid if Tdap (age) evaluation critera is met" ruleflow-group "HistoryEvaluation"
+//////////////////////////////////////////////////////////////////
+// First Adolescent Tdap Shot >= 7yrs and < 10yrs START
+//////////////////////////////////////////////////////////////////
+
+rule "DTP: Evaluate First Adolescent Tdap Shot based on Age >= 7yrs and < 10yrs" extends "DTP(Abstract): Evaluate Adolescent Tdap Shot >= 7yrs and < 10yrs" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "doseAgeCheck"
+	dialect "mvel"
+	when
+		There does not exist an Administered Shot
+			- the Shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the Administration Date of the Shot is >= $dtDateAtAge7
+			- the Administration Date of the Shot is <= $dtAdministrationDateOfShotBeingEvaluated
+			- make note of the Diseases Targeted by the Vaccine Administered as $diseasesTargetedByThisPriorShot
+			- the collection $diseasesTargetedByThisPriorShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the collection $diseasesTargetedByThisPriorShot contains "SUPPORTED_DISEASE_CONCEPT.032.9"
+			- the collection $diseasesTargetedByThisPriorShot contains "SUPPORTED_DISEASE_CONCEPT.037"
+	then
+		Include the Reason for Shot $currentShot Valid
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+rule "DTP: Evaluate First Adolescent Tdap Shot as Accepted / Extra_Dose if Interval of 4 weeks between Pertussis shots is not met" extends "DTP: Evaluate First Adolescent Tdap Shot based on Age >= 7yrs and < 10yrs" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "doseIntervalCheck"
+	dialect "mvel"
 	when
-		// Extension of Age rule to prevent default series inteval rule from firing
+		There is an Administered Shot $previousShot
+			- the Shot belongs to the Series $targetSeries
+			- that has already been evaluated
+			- the Administration Date of the Shot is <= $dtAdministrationDateOfShotBeingEvaluated
+			- make note of the Diseases Targeted by the Vaccine Administered as $diseasesTargetedByThisPriorShot
+			- the collection $diseasesTargetedByThisPriorShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- make note of the Date this Shot was Administered as $dtAdministrationDatePrior
+		Confirm Elapsed Time between $dtAdministrationDatePrior and $dtAdministrationDateOfShotBeingEvaluated < "28d"
 	then
-		Include the reason for shot $currentShotValid Valid
+		Include the reason for shot $currentShot Accepted due to "Extra Dose"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-
-rule "DTP: Override default series rule that evaluates extra Tdap shots in the series as accepted" extends "DTP: Evaluate Adolescent Tdap shot as valid if Tdap (age) evaluation critera is met" ruleflow-group "HistoryEvaluation"
+rule "DTP: Do not run the default Extra_Dose series rule, which would mark this First Adolescent Tdap Shot as an Extra Dose" extends "DTP: Evaluate First Adolescent Tdap Shot based on Age >= 7yrs and < 10yrs" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "extraDoseCheck"
+	dialect "mvel"
 	when
-		// Extension of Age rule to prevent default series interval rule from firing
+		// Override default extra dose check for first adolescent Tdap so that it is not marked as an Extra Dose
 	then
-		Include the reason for shot $currentShotValid Valid
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+
+//////////////////////////////////////////////////////////////////
+// First Adolescent Tdap Shot >= 7yrs and < 10yrs END
+//////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////
+// Remaining Adolescent Tdap Shot >= 7yrs and < 10yrs START
+//////////////////////////////////////////////////////////////////
+
+rule "DTP: Evaluate Remaining Adolescent Tdap Shots >= 7yrs and < 10yrs as Accepted / Extra Dose" extends "DTP(Abstract): Evaluate Adolescent Tdap Shot >= 7yrs and < 10yrs" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "doseAgeCheck"
+	dialect "mvel"
+	when
+		There exists an administered shot
+			- the shot belongs to the Series $associatedTargetSeries
+			- the shot does not belong to the primary series
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the administration date of the shot is >= $dtDateAtAge7
+			- the administration date of the shot is <= $dtAdministrationDateOfShotBeingEvaluated
+			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedByThisPriorShot
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.032.9"
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.037"
+	then
+		Include the reason for shot $currentShot Accepted due to "Extra Dose"
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+rule "DTP: Do not run the default Interval series rule" extends "DTP: Evaluate Remaining Adolescent Tdap Shots >= 7yrs and < 10yrs as Accepted / Extra Dose" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	dialect "mvel"
+	when
+		// No need to run default series extra dose rule, as the rule this extends already marks it as an Extra Dose
+	then
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+rule "DTP: Do not run the default Extra_Dose series rule, which would mark this Remaining Adolescent Tdap shot as an Extra Dose" extends "DTP: Evaluate Remaining Adolescent Tdap Shots >= 7yrs and < 10yrs as Accepted / Extra Dose" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "extraDoseCheck"
+	dialect "mvel"
+	when
+		// No need to run default series extra dose rule, as the rule this extends already marks it as an Extra Dose
+	then
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+//////////////////////////////////////////////////////////////////
+// Remaining Adolescent Tdap Shot >= 7yrs and < 10yrs END
+//////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Adolescent Tdap Shot >= 7yrs and < 10yrs END
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Adolescent Tdap Shot >= 10yrs START
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "DTP: Evaluate Adolescent Tdap Shot based on Age >= 10yrs" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "doseAgeCheck"
+	dialect "mvel"
+	when
+		There is an IceFact $iceResultFinding
+			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
+			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series is Complete
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge10 when the patient is "10y" of age
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Series $targetSeries
+			- the administration date of the shot is >= $dtDateAtAge10
+			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedByThisShot
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.032.9"
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.037"
+			- make note of the date this shot was administered as $dtAdministrationDateOfShotBeingEvaluated
+	then
+		Include the Reason for Shot $currentShot Valid
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+rule "DTP: Evaluate First Adolescent Tdap Shot >= 10yrs as Accepted / Extra_Dose if Interval of 4 weeks between Pertussis Shots is not met" extends "DTP: Evaluate Adolescent Tdap Shot based on Age >= 10yrs" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	dialect "mvel"
+	when
+		There is an Administered Shot $previousShot
+			- the Shot belongs to the Series $targetSeries
+			- that has already been Evaluated
+			- the Administration Date of the Shot is <= $dtAdministrationDateOfShotBeingEvaluated
+			- make note of the Diseases Targeted by the Vaccine Administered as $diseasesTargetedByThisPriorShot
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- make note of the Date this Shot was Administered as $dtAdministrationDatePrior
+		Confirm Elapsed Time between $dtAdministrationDatePrior and $dtAdministrationDateOfShotBeingEvaluated < "28d"
+	then
+		Include the reason for shot $currentShot Accepted due to "Extra Dose"
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+rule "DTP: Do not run the default Extra_Dose series rule, which would mark this Adolescent Tdap Shot >= 10 yrs as an Extra Dose" extends "DTP: Evaluate Adolescent Tdap Shot based on Age >= 10yrs" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "extraDoseCheck"
+	dialect "mvel"
+	when
+		// Override default extra dose check for first adolescent Tdap so that it is not marked as an Extra Dose
+	then
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Adolescent Tdap Shot >= 10yrs START
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "DTP: If Patient received a Tdap Dose >= 10yrs, make note of this via IceFact of ADOLESCENT_TDAP_COMPLETED" ruleflow-group "HistoryEvaluation"
+ 	agenda-group "customEvaluationRule,,"
+ 	auto-focus true
+ 	dialect "mvel"
+ 	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+		There is an IceFact $pertussisDoseFact
+			- that has Finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has associated Series $targetSeries
+			- make note of the associated Administered Shot as $pertussisDose			
+		The Patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge when the patient is "10y" of age
+		There is an Administered Shot $samePertussisDose
+			- that is the same Shot as $pertussisDose
+			- the Administration Date of the Shot is >= $dtDateAtAge
+			- make note of the Diseases targeted by the Vaccine Administered as $diseasesTargetedByThisShot
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.032.9"
+			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.037"
+ 	then
+		Insert an IceFact SupportedFactConcept._ADOLESCENT_TDAP_COMPLETED.getConceptCodeValue() with TargetSeries $targetSeries into working memory
+		Record that this dose rule was processed for the TargetDose $pertussisDose
+		Log that this dose rule fired for the dose $pertussisDose in the Series $targetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ Evaluation of Adolescent Tdap Shot END
+*************************************************************************************************************************************************************************************/
 
 
 /*************************************************************************************************************************************************************************************
-// A dose of pertussis is defined as one of the following:
-//     * A primary series (3-dose series or 5-dose series) dose of CVX 01, 20, 106, 107, or 115
-//     * A primary series shot of CVX 01, 20, 106, 107, or 115 where the shot is evaluated as Invalid with a reason code of D_AND_T_INVALID/P_VALID 
-//     * An Adolescent Tdap dose of CVX 01, 20, 106, 107, or 115    (adolescent Tdap series is if series is complete and patient >= 7yrs)
+ Definition of "A dose of pertussis" START
+ A dose of pertussis is defined as one of the following:
+     * A primary series (3-dose series or 5-dose series) dose of CVX 01, 20, 106, 107, or 115
+     * A primary series shot of CVX 01, 20, 106, 107, or 115 where the shot is evaluated as Invalid with a reason code of D_AND_T_INVALID/P_VALID 
+     * An Adolescent Tdap dose of CVX 01, 20, 106, 107, or 115    (adolescent Tdap series is if series is complete and patient >= 7yrs)
 *************************************************************************************************************************************************************************************/
 
 rule "DTP(1): A primary series dose of pertussis exists if a (valid) dose of Pertussis was administered" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	auto-focus true
+	dialect "mvel"
 	when
 		There is an administered shot $currentShot
 			- that has already been evaluated and whose shot validity is VALID
@@ -188,7 +394,7 @@ rule "DTP(1): A primary series dose of pertussis exists if a (valid) dose of Per
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.032.9"
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.037"
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- that has associated administered shot $currentShot
 	then
@@ -201,6 +407,7 @@ end
 rule "DTP(2): A primary series dose of pertussis exists if a shot that was evaluated as Invalid with a reason code of D_AND_T_INVALID/P_VALID" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	auto-focus true
+	dialect "mvel"
 	when
 		There is an administered shot $currentShot
 			- that has already been evaluated and whose shot validity is INVALID
@@ -208,7 +415,7 @@ rule "DTP(2): A primary series dose of pertussis exists if a shot that was evalu
 			- the shot belongs to the primary series
 			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.D_AND_T_INVALID/P_VALID"
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- that has associated administered shot $currentShot
 	then
@@ -218,9 +425,10 @@ rule "DTP(2): A primary series dose of pertussis exists if a shot that was evalu
 end
 
 
-rule "DTP(3): A primary dose of pertussis exists if a (valid) dose for adolescent Tdap was administered" ruleflow-group "HistoryEvaluation"
+rule "DTP(3): A dose of pertussis exists if a (valid) dose for Adolescent Tdap was administered" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	auto-focus true
+	dialect "mvel"
 	when
 		The Patient information $evaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge when the patient is "7y" of age	
@@ -233,7 +441,7 @@ rule "DTP(3): A primary dose of pertussis exists if a (valid) dose for adolescen
 			- the collection $diseasesTargetedByThisShot contains "SUPPORTED_DISEASE_CONCEPT.037"
 			- the administration date of the shot is >= $dtDateAtAge
 			- make note of the Associated Series as $associatedTargetSeries
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- that has associated administered shot $currentShot
 		There is a Series $targetSeries identified by $associatedTargetSeries
@@ -246,15 +454,20 @@ rule "DTP(3): A primary dose of pertussis exists if a (valid) dose for adolescen
 end
 
 /*************************************************************************************************************************************************************************************
-Definition of "A dose of pertussis" END
+ Definition of "A dose of pertussis" END
 /************************************************************************************************************************************************************************************/
 
 
-// The absolute minimum age1 for Tdap (CVX 115) and Td (CVX 09, 113, 138, 139) applies when Tdap/Td is given as target dose 1, 2, or 3 in the 5-dose series.
+/*************************************************************************************************************************************************************************************
+ Absolute Minimum Vaccine Age for Doses 1-3 & 4-5 in the 5-dose Series (including associated 5-dose series exception rules) START
+/************************************************************************************************************************************************************************************/
+
+// The absolute vaccine minimum age for Tdap (CVX 115) and Td (CVX 09, 113, 138, 139) applies when Tdap/Td is given as target dose 1, 2, or 3 in the 5-dose series.
 //     * If Tdap/Td is administered below the CVX code absolute minimum age, then the Evaluation is Invalid and the reason code is INSUFFICIENT_ANTIGEN.
-rule "DTP: Absolute Minimum Age for Tdap/Td applies for target doses 1-3 of the 5-dose series when certain conditions are true" ruleflow-group "HistoryEvaluation"
+rule "DTP: Absolute Minimum Vaccine Age for Tdap/Td applies for target doses 1-3 of the 5-dose series when certain conditions are true" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "minimumAgeVaccineCheck"
+	dialect "mvel"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200" and the Series with name "DTP5DoseSeries"
@@ -273,13 +486,15 @@ rule "DTP: Absolute Minimum Age for Tdap/Td applies for target doses 1-3 of the 
 end
 
 
-// The absolute minimum age1 does not apply when Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is administered as target dose 4 or 5 in the 5-dose series. 
+// The absolute vaccine minimum age does not apply when Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is administered as target dose 4 or 5 in the 5-dose series. 
 //     * The absolute minimum age is only waived when the target dose is a true dose 4 or 5; the waiver does not apply when dose 1 was skipped. 
-rule "DTP(Abstract): Absolute Minimum Age for Tdap/Td check for target doses 4 or 5 of the 5-dose series" ruleflow-group "HistoryEvaluation"
+rule "DTP(Abstract): Absolute Minimum Vaccine Age for Tdap/Td check for target doses 4 or 5 of the 5-dose series" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
+	dialect "mvel"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200" and the Series with name "DTP5DoseSeries"
+			- the series that the shot belongs to is not complete
 			- the dose number in the series is one of (4,5)
 			- the vaccine administered a member of ("ICE115", "ICE09", "ICE113", "ICE138", "ICE139")
 			- make note of the Associated Series as $associatedTargetSeries
@@ -290,12 +505,13 @@ rule "DTP(Abstract): Absolute Minimum Age for Tdap/Td check for target doses 4 o
 end
 			
 			
-rule "DTP: Absolute Minimum Age for Tdap/Td does not apply for true target dose 4 or 5 of the 5-dose for 5-dose series if 5-dose Exception #1 did not occur" extends "DTP(Abstract): Absolute Minimum Age for Tdap/Td check for target doses 4 or 5 of the 5-dose series"
-	ruleflow-group "HistoryEvaluation"
+rule "DTP: Absolute Minimum Vaccine Age for Tdap/Td does not apply for true target dose 4 or 5 of the 5-dose for 5-dose series if 5-dose Exception #1 did not occur" 
+		extends "DTP(Abstract): Absolute Minimum Vaccine Age for Tdap/Td check for target doses 4 or 5 of the 5-dose series" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "minimumAgeVaccineCheck"
+	dialect "mvel"
 	when
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has associated administered shot $currentShot
 			- that has finding SupportedFactConcept._DTP_5_DOSE_SERIES_EXCEPTION1.conceptCodeValue
 	then
@@ -305,12 +521,13 @@ rule "DTP: Absolute Minimum Age for Tdap/Td does not apply for true target dose 
 end
 		
 		
-rule "DTP: Absolute Minimum Age for Tdap/Td does not apply for true target dose 4 or 5 of the 5-dose for 5-dose series if 5-dose Exception #2 did not occur" extends "DTP(Abstract): Absolute Minimum Age for Tdap/Td check for target doses 4 or 5 of the 5-dose series"
-	ruleflow-group "HistoryEvaluation"
+rule "DTP: Absolute Minimum Vaccine Age for Tdap/Td does not apply for true target dose 4 or 5 of the 5-dose for 5-dose series if 5-dose Exception #2 did not occur" 
+		extends "DTP(Abstract): Absolute Minimum Vaccine Age for Tdap/Td check for target doses 4 or 5 of the 5-dose series" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "minimumAgeVaccineCheck"
+	dialect "mvel"
 	when
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has associated administered shot $currentShot
 			- that has finding SupportedFactConcept._DTP_5_DOSE_SERIES_EXCEPTION2.conceptCodeValue
 	then
@@ -319,6 +536,14 @@ rule "DTP: Absolute Minimum Age for Tdap/Td does not apply for true target dose 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/*************************************************************************************************************************************************************************************
+ Absolute Minimum Vaccine Age for Doses 1-3 & 4-5 in the 5-dose Series (including associated 5-dose series exception rules) END
+/************************************************************************************************************************************************************************************/
+
+
+/*************************************************************************************************************************************************************************************
+ CVX Code Minimum Interval Between Tdap/DTaP and Td/DT START
+/************************************************************************************************************************************************************************************/
 
 // CVX Code Minimum Interval Between Tdap/DTaP and Td/DT
 // If Tdap (CVX 115), DTaP (CVX 20, 106, or 107), or DTP (CVX 01) is given below the minimum interval from a Td (CVX 09, 113, 138, 139) or DT (CVX 28), but the shot meets the 
@@ -345,10 +570,10 @@ rule "DTP: Enforce Minimum Interval between Tdap/DTaP and Td/DT if the shot meet
 			- the collection $diseasesTargetedByPriorShot contains "SUPPORTED_DISEASE_CONCEPT.032.9"
 			- the collection $diseasesTargetedByPriorShot contains "SUPPORTED_DISEASE_CONCEPT.037"
 			- the collection $diseasesTargetedByPriorShot does not contain "SUPPORTED_DISEASE_CONCEPT.033.9"
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has associated administered shot $currentShot
 			- that has finding SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has associated administered shot $currentShot
 			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue
 		There is an IceFact $ICEFactTypeFinding
@@ -363,16 +588,21 @@ rule "DTP: Enforce Minimum Interval between Tdap/DTaP and Td/DT if the shot meet
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+/*************************************************************************************************************************************************************************************
+ CVX Code Specific Rules END
+/************************************************************************************************************************************************************************************/
+
 
 /*************************************************************************************************************************************************************************************
-5-Dose Series Special Rules 
-Rule for Recommending/Evaluating Next Dose From Invalid Tdap/TD Given Below Minimum Age for Vaccine
-If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is given as target dose 1, 2 or 3 to a patient <7 years - 4 days old, then the invalid shot should be ignored when determining 
-the next target dose due and when evaluating the next shot based on the minimum interval for that target dose.
+ 5-Dose Series Special Rules 
+ Rule for Recommending/Evaluating Next Dose From Invalid Tdap/TD Given Below Minimum Age for Vaccine
+ If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is given as target dose 1, 2 or 3 to a patient <7 years - 4 days old, then the invalid shot should be ignored when determining 
+ the next target dose due and when evaluating the next shot based on the minimum interval for that target dose.
 *************************************************************************************************************************************************************************************/
 
 rule "DTP(HistoryEvaluation): If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is administered as target dose 1, 2 or 3 to a patient < 7yrs-4days, shot should be ignored when calculating intervals" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
+	dialect "mvel"
 	when
 		// The shot being evaluated
 		There is an Administered Shot $currentShot that needs to be evaluated
@@ -393,7 +623,7 @@ rule "DTP(HistoryEvaluation): If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is
 end
 
 /*************************************************************************************************************************************************************************************
-5-Dose Series Special Rules END
+ 5-Dose Series Special Rules END
 /************************************************************************************************************************************************************************************/
 
 
@@ -408,9 +638,9 @@ Exception 1: Series Complete with 3 Doses
 Exception 2: Series Complete with 4 Doses
     * If 4 doses have been administered and the 4th dose is administered at >= 4 years of age, then the series is complete with 4 doses; the 5th (booster) dose is not needed.
  *************************************************************************************************************************************************************************************/
-rule "DTP: (5-Dose Series Exception Rule 1)- Skip Dose Number to 4 if Patient >= 7 yrs when 3rd target dose is being administered, with first dose at >= 12m and at least 1 dose at >= 4yrs" 
-	ruleflow-group "HistoryEvaluation"
+rule "DTP: (5-Dose Series Exception Rule 1)- Skip Dose Number to 4 if Patient >= 7 yrs when 3rd target dose is being administered, with first dose at >= 12m and at least 1 dose at >= 4yrs" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
+	dialect "mvel"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200" and the Series with name "DTP5DoseSeries"
@@ -439,36 +669,41 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Skip Dose Number to 4 if Patient >=
 end
 
 
-rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete if 3rd dose administered >=7 yrs, with the first dose at >= 12m and at least 1 dose at >= 4yrs" 
- 	ruleflow-group "HistoryEvaluation"
+rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete if age >=7 yrs, with the first dose at >= 12m and at least 1 dose at >= 4yrs" ruleflow-group "HistoryEvaluation"
  	agenda-group "postEvaluationCheck"
  	dialect "mvel"
  	when
 		There is a Series $targetSeries
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the name of the series is "DTP5DoseSeries"
-			- the series is not complete
-			- the number of doses administered is == 3
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the name of the Series is "DTP5DoseSeries"
+			- the Series is not Complete
+			- the number of Doses Administered is == 3
 		The Patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
-			- make note of the date as $dtDateAtAge4y when the patient is "4y" of age
-			- make note of the date as $dtDateAtAge12m when the patient is "12m" of age
+			- make note of the Date as $dtDateAtAge4y when the Patient is "4y" of age
+			- make note of the Date as $dtDateAtAge12m when the Patient is "12m" of age
+			- make note of the Date as $dtDateAtAge7y when the Patient is "7y" of age
 		There exists an Administered Shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose Shot Validity is VALID
-			- the Administration Date of the shot is >= $dtDateAtAge12m
+			- the Administration Date of the Shot is >= $dtDateAtAge12m
 			- the Dose Number in the Series is == 1
 		There exists an Administered Shot
-			- the shot belongs to the Series $targetSeries
+			- the Shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose Shot Validity is VALID
 			- the Administration Date of the shot is >= $dtDateAtAge4y
 			- the Dose Number in the Series is >= 2
 		There is an Administered Shot $thirdDose
-			- the shot belongs to the Series $targetSeries
-			- the Dose Number in the Series is >= 3
-			- that has already been evaluated and whose Shot Validity is VALID
-			- make note of the date this shot was administered as $dtDateThirdDose
-		Confirm elapsed time between $birthdate and $dtDateThirdDose >= "7y"
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 3
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- make note of the Date this Shot was Administered as $dtDateThirdDose
+		There does not exist an Administered Shot
+			- the Shot belongs to the Series $targetSeries
+			- that has not already been Evaluated
+			- the Administration Date of the Shot is >= $dtDateThirdDose
+			- the Administration Date of the Shot is < $dtDateAtAge7y
+		Confirm the Date evalTime is on the same date or after $dtDateAtAge7y
  	then
  		Mark the Series $targetSeries Complete
 		Refresh all Facts in the Series $targetSeries for Evaluation
@@ -478,21 +713,20 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete if 
 end
  
  
-rule "DTP: (5-Dose Series Exception Rule 2)- Mark the 5-Dose Series Complete if 4 Doses have been Administered and the 4th Dose is Administered at >= 4 yrs of age" 
- 	ruleflow-group "HistoryEvaluation"
+rule "DTP: (5-Dose Series Exception Rule 2)- Mark the 5-Dose Series Complete if 4 Doses have been Administered and the 4th Dose is Administered at >= 4 yrs of age" ruleflow-group "HistoryEvaluation"
  	agenda-group "postEvaluationCheck"
  	dialect "mvel"
  	when
 		There is a Series $targetSeries
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
-			- the series is not complete
-			- the name of the series is "DTP5DoseSeries"
-			- the number of doses administered is == 4
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the name of the Series is "DTP5DoseSeries"
+			- the Series is not Complete
+			- the number of Doses Administered is == 4
 		The Patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge when the patient is "4y" of age
+			- make note of the Date as $dtDateAtAge when the patient is "4y" of age
 		There is an Administered Shot $dose4
-			- the shot belongs to the Series $targetSeries
-			- the dose number in the series is == 4
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the series is == 4
 			- the Administration Date of the shot is >= $dtDateAtAge
  	then
  		Mark the Series $targetSeries Complete
@@ -503,5 +737,56 @@ rule "DTP: (5-Dose Series Exception Rule 2)- Mark the 5-Dose Series Complete if 
 end
  
 /*************************************************************************************************************************************************************************************
-5-Dose Series Exception Rules END
+ 5-Dose Series Exception Rules END
+/************************************************************************************************************************************************************************************/
+
+
+/*************************************************************************************************************************************************************************************
+ 3-dose Series Exception Rules START:
+    + If the patient has received 3 doses and none of the doses are pertussis-containing vaccines, the DTP 3-dose series is NOT complete. 
+    + Recommend Tdap (CVX 115) at recommended interval = 0 days.  (*Note*: not implemented here; see Recommendation^DTP file for this rule.) 
+ Example: Patient age = 10 years. CVX 09 (Td) given at 7 years, 8 years, and 10 years. Recommend final dose Tdap (CVX 115) at 10 years. 
+/************************************************************************************************************************************************************************************/
+
+rule "DTP: (3-Dose Series Exception Rule[Series Not Complete])- If the Patient has Completed the Series but none of the Doses are pertussis-containing Vaccines, mark the 3-dose Series Not Complete" ruleflow-group "HistoryEvaluation"
+	auto-focus true
+	dialect "mvel"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the name of the Series is "DTP3DoseSeries"
+			- the Series is Complete
+		There does not exist an IceFact
+			- that has Finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has Associated Series $targetSeries
+	then
+		Manually Mark the Series $targetSeries Not Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "DTP: (3-Dose Series Exception Rule[Evaluation])- If none of the prior 3 or more Doses administered in 3-dose Series contains pertussis but this Shot does contain pertussis, evaluate it as Valid and mark the Series Complete" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "extraDoseCheck" // This activation-group prevents the default series interval rule from firing, which would mark this shop as ACCEPTED/EXTRA_DOSE instead of simply valid.
+	dialect "mvel"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200" and the Series with name "DTP3DoseSeries"
+			- the Dose Number in the Series is > 3
+			- the Shot belongs to the Primary Series
+			- make note of the Diseases targeted by the Vaccine Administered as $diseasesTargeted
+			- the collection $diseasesTargeted contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- make note of the Associated Series as $targetSeries
+		There does not exist an IceFact
+			- that has Finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- that has Associated Series $targetSeries
+	then
+		Set the Shot Status of $currentShot to Valid
+		Mark the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ 3-Dose Series Exception Rules END
 /************************************************************************************************************************************************************************************/

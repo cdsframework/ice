@@ -407,7 +407,7 @@ rule "Pneumococcal Series: if patient *is* >= 5yrs and < 65yrs of age and the se
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
 			- that has associated series $targetSeries
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -460,7 +460,7 @@ rule "Pneumococcal: if patient *will be* >= 5 years at the recommended due date 
 			- the name of the Series is "PneumococcalSeries"
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
 			- that has associated series $targetSeries
 		The Patient information $patientInfo must be known to complete writing this rule
@@ -492,7 +492,7 @@ rule "Pneumococcal: if patient *will be* >= 5 years at the recommended due date 
 		There exists an IceFact
 			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
 			- that has associated series $targetSeries
-		There is not an IceFact
+		There does not exist an IceFact
 			- that has finding SupportedFactConcept._PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE.conceptCodeValue
 			- that has associated series $targetSeries
 		The Patient information $patientInfo must be known to complete writing this rule

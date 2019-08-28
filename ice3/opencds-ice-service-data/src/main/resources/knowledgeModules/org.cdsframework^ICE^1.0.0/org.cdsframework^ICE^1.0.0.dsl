@@ -1,12 +1,10 @@
-// [keyword][]AND=&&
-// [keyword][]OR=||
+/////// [keyword][]AND=&&
+/////// [keyword][]OR=||
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Patient
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// [condition][]The [Ii]mmunization [Ss]chedule information {assign_oSchedule} must be known to complete writing this rule={assign_oSchedule} : Schedule()
 
 [condition][]The [Pp]atient [Ii]nformation {assign_oEvaluatedPerson} must be known to complete writing this rule={assign_oEvaluatedPerson} : EvaluatedPerson()
 [condition][]- [Tt]he [Pp]atient's birthdate is {aOp}  {dtDate}=demographics.birthTime {aOp} {dtDate}
@@ -71,6 +69,7 @@
 [condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity is VALID=status == DoseStatus.VALID
 [condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity is INVALID=status == DoseStatus.INVALID
 [condition][]- [Tt]hat has already been [Ee]valuated=status == DoseStatus.INVALID || status == DoseStatus.VALID || status == DoseStatus.ACCEPTED
+[condition][]- [Tt]hat has not already been [Ee]valuated=status == DoseStatus.EVALUATION_NOT_STARTED
 [condition][]- [Tt]he [Aa]dministration [Dd]ate of the [Ss]hot is {aOp:[\=\\<\\>]+}  {dtOtherDate}=administrationDate {aOp} {dtOtherDate}
 [condition][]- [Tt]he [Ss]hot has not already been marked as a [Ll]ive [Vv]irus [Cc]onflict \(as we do not want this [Rr]ule executing more than necessary\)=containsInvalidReason(BaseDataEvaluationReason._TOO_EARLY_LIVE_VIRUS.getCdsListItemName()) == false
 [condition][]- [Tt]he [Ss]hot has not already been marked as a [Ss]elect [Aa]djuvant [Pp]roduct [Ii]nterval [Cc]onflict \(as we do not want this [Rr]ule executing more than necessary\)=containsInvalidReason(BaseDataEvaluationReason._SELECT_ADJUVANT_PRODUCT_INTERVAL.getCdsListItemName()) == false
@@ -262,6 +261,7 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Nn]ot [Ii]gnored={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(false);
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]gnored={refer_oTargetDose}.setIsShotIgnoredForCompletionOfSeries(true);
 [consequence][][Ss]et [Dd]ose [Nn]umber of {refer_oTargetDose} to {nDoseNumber}=modify({refer_oTargetDose}) \{ setDoseNumberInSeries({nDoseNumber}); \};
+[consequence][][Mm]ark that [Ee]valuation of [Ss]hot {refer_oTargetDose} is complete and therefore should not be reevaluated by any other rules=modify ({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_COMPLETE) \}
 ////////////// [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ee]valuation [Nn]ot [Ss]tarted for this [Ss]eries=modify({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_NOT_STARTED), removeAllEvaluationReasonsFromAllReasonSets(); \};
 
 
@@ -271,17 +271,16 @@
 
 [consequence][][Cc]lear [Ff]orecasted [Rr]ecommendations from [Cc]onsideration in [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.clearRecommendations();
 [consequence][][Rr]emove the [Ss]hot {refer_oTargetDose} from [Ee]valuation as a part of the [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ removeTargetDoseFromSeries({refer_oTargetDose}); \};
-[consequence][][Mm]ark that [Ee]valuation of [Ss]hot {refer_oTargetDose} is complete and therefore should not be reevaluated by any other rules=modify ({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_COMPLETE) \}
 [consequence][][Ss]kip [Ss]eries [Dd]ose [Nn]umber to {nToDoseNumber} from {nFromDoseNumber} for [Dd]isease {dd_oSupportedDiseaseConcept} in [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ addSkipDoseEntryForSpecifiedDisease({nFromDoseNumber}, {nToDoseNumber}, {dd_oSupportedDiseaseConcept}); \}
 [consequence][][Ss]kip [Ss]eries [Dd]ose [Nn]umber to {nToDoseNumber} from {nFromDoseNumber} for all [Dd]iseases in the [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ addSkipDoseEntryForDose({nFromDoseNumber}, {nToDoseNumber}); \}
 [consequence][][Cc]onvert from [Ss]eries {refer_oTargetSeries_SeriesToSwitchFrom} to {refer_oTargetSeries_SeriesToSwitchTo} starting with [Dd]ose [Nn]umber {nDoseNumber} and [Ee]valuate [Uu]sing [Ii]nterval for [Pp]rior [Dd]ose to this [Dd]ose from [Ss]witchedTo [Ss]eries={refer_oTargetSeries_SeriesToSwitchFrom}.convertToSpecifiedSeries({refer_oTargetSeries_SeriesToSwitchTo}.seriesName, {nDoseNumber}, true); for (TargetDose d : {refer_oTargetSeries_SeriesToSwitchTo}.targetDoses) \{ retract(d); \} retract({refer_oTargetSeries_SeriesToSwitchTo}); update({refer_oTargetSeries_SeriesToSwitchFrom});
 [consequence][][Cc]onvert from [Ss]eries {refer_oTargetSeries_SeriesToSwitchFrom} to {refer_oTargetSeries_SeriesToSwitchTo} starting with [Dd]ose [Nn]umber {nDoseNumber} and [Ee]valuate [Uu]sing [Ii]nterval for [Pp]rior [Dd]ose to this [Dd]ose from [Ss]witchedFrom [Ss]eries={refer_oTargetSeries_SeriesToSwitchFrom}.convertToSpecifiedSeries({refer_oTargetSeries_SeriesToSwitchTo}.seriesName, {nDoseNumber}, false); for (TargetDose d : {refer_oTargetSeries_SeriesToSwitchTo}.targetDoses) \{ retract(d); \} retract({refer_oTargetSeries_SeriesToSwitchTo}); update({refer_oTargetSeries_SeriesToSwitchFrom});
 [consequence][][Rr]efresh all [Ff]acts in the [Ss]eries {refer_oTargetSeries} for [Ee]valuation=modify ({refer_oTargetSeries}) \{ setRecommendationStatus(RecommendationStatus.NOT_FORECASTED); \}
 [consequence][][Rr]efresh all [Ff]acts in the [Ss]hot {refer_oTargetDose}=update({refer_oTargetDose});
-[consequence][][Mm]ark that the [Ss]eries {refer_oTargetSeries} cannot be forecasted as [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(false);
-[consequence][][Mm]ark that the [Ss]eries {refer_oTargetSeries} can be forecasted as [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
-[consequence][][Mm]ark the Series {refer_oTargetSeries} [Nn]ot [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(false);
-[consequence][][Mm]ark the Series {refer_oTargetSeries} [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
+/////// [consequence][][Mm]ark that the [Ss]eries {refer_oTargetSeries} cannot be forecasted as [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(false);
+/////// [consequence][][Mm]ark that the [Ss]eries {refer_oTargetSeries} as [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
+[consequence][][Mm]anually [Mm]ark the [Ss]eries {refer_oTargetSeries} [Nn]ot [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(false);
+[consequence][][Mm]ark the [Ss]eries {refer_oTargetSeries} [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
 [consequence][][Aa]dd {nDuration}  {oDurationType} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, new TimePeriod({nDuration}, {oDurationType}));
 [consequence][][Aa]dd {oTimePeriod} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, {oTimePeriod});
 [consequence][][Mm]ark that the [Rr]ecommendation for [Ss]eries {refer_oTargetSeries} must take [Ll]ive [Vv]irus [Ii]nterval into [Aa]ccount={refer_oTargetSeries}.setManuallySetAccountForLiveVirusIntervalsInRecommendation(true);
@@ -357,6 +356,7 @@
 [consequence][][Uu]nset the [Rr]ecommended [Vv]accine for the [Ff]orecast in the [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.setRecommendationVaccine(null);
 [consequence][][Ss]et [Dd]isplay [Ff]orecast [Dd]ate for [Cc]onditional [Rr]ecommendations in the [Ss]eries {refer_oTargetSeries} to [Tt]rue={refer_oTargetSeries}.setForecastDateToBeDisplayedForConditionalRecommendations(true);
 [consequence][][Ss]et [Dd]isplay [Ff]orecast [Dd]ate for [Cc]onditional [Rr]ecommendations in the [Ss]eries {refer_oTargetSeries} to [Ff]alse={refer_oTargetSeries}.setForecastDateToBeDisplayedForConditionalRecommendations(false);
+[consequence][][Ss]et the [Aa]genda [Gg]roup [Ff]ocus to {sAgendaGroupFocus:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}}=drools.setFocus({sAgendaGroupFocus}); 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Logging actions
@@ -383,7 +383,7 @@
 ///////// ***
 // IceResult Fact Object condition WHERE clauses START
 [condition][]IceResult [Ff]inding=iceResultFinding
-[condition][]IceResult [Aa]dministration [Dd]ate=targetDose.administrationDate
+[condition][]IceResult [Aa]dministration [Dd]ate=targetDose != null, targetDose.administrationDate
 [condition][]IceResult [Dd]iseases [Tt]argeted=targetDose.administeredVaccine.allDiseasesTargetedForImmunity
 [condition][]where {attr:[A-Za-z0-9\\.\\(\\)\\ ]+} {aOp}  {value}={attr} {aOp}  {value} 
 [condition][]as well as {attr} {aOp}  {value}=, {attr} {aOp}  {value}
@@ -396,16 +396,18 @@
 ///////// ***
 // Primary IceResult Fact Object conditions and sub-conditions
 [condition][]There exists {entity:an |another |}IceFact=exists ICEFactTypeFinding()
-[condition][]There is not {entity:an |another |}IceFact=not ICEFactTypeFinding() 
+[condition][]There does not exist {entity:an | another |}IceFact=not ICEFactTypeFinding()
 [condition][]There is {entity:an |another |}IceFact {oICEFactTypeFinding}={oICEFactTypeFinding} : ICEFactTypeFinding()
 [condition][]- [Tt]hat has [Ff]inding {sIceResultFinding}=iceResultFinding == {sIceResultFinding}
 [condition][]- [Tt]hat has [Aa]ssociated [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
 [condition][]- [Tt]hat has [Aa]ssociated [Aa]dministered [Ss]hot {oTargetDose} {attr}=targetDose == {oTargetDose} {attr}
 [condition][]- [Tt]hat has [Aa]ssociated [Aa]dministered [Ss]hot {oTargetDose}=targetDose == {oTargetDose}
-[condition][]- [Tt]here is an [Aa]ssociated [Aa]dministered [Ss]hot in the [Ss]eries {refer_oTargetSeries}=associatedTargetSeries == {refer_oTargetSeries} 
+[condition][]- [Tt]here is an [Aa]ssociated [Aa]dministered [Ss]hot in the [Ss]eries {refer_oTargetSeries}=associatedTargetSeries == {refer_oTargetSeries}, targetDose != null 
 [condition][]- [Mm]ake [Nn]ote of the IceResult [Ff]inding as {assign_sIceResultFinding}={assign_sIceResultFinding} : iceResultFinding
-[condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Aa]dministered [Ss]hot as {assign_oTargetDose}={assign_oTargetDose} : targetDose, targetDose != null
+[condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Aa]dministered [Ss]hot as {assign_oTargetDose}=targetDose != null, {assign_oTargetDose} : targetDose
+[condition][]- [Mm]ake [Nn]ote of the [Dd]ate the [Aa]ssociated [Ss]hot was [Aa]dministered as {assign_oTargetDoseDate}=targetDose != null, {assign_oTargetDoseDate} : targetDose.administrationDate
 [condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Ss]eries as {assign_oTargetSeries}={assign_oTargetSeries} : associatedTargetSeries, associatedTargetSeries != null
+[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 ///////// ***
 
 
