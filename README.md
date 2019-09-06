@@ -4,5 +4,5 @@ If you are interested in receiving periodic e-mails pertinent to ICE, you may ei
 
 For information about commercial support options available through HLN Consulting, please see https://www.hln.com/services/open-source/ice/ice-services.
 
-If you have any questions, comments or suggestions, we would very much like to hear from you. Please feel free to e-mail us anytime at ice@hln.com.
+If you have any questions, comments or suggestions, we would like to hear from you. Please feel free to e-mail us at ice@hln.com.
 
