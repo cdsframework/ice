@@ -53,27 +53,6 @@ global org.cdsframework.ice.service.Schedule schedule
 global org.drools.runtime.KnowledgeContext kcontext
 
 
-// If patient is male, >= 22 yrs and < 27 yrs and has no doses on record, series is conditionally recommended, reason = HIGH RISK
-rule "HPV: If patient is male, >= 22 yrs and < 27 yrs and has no doses on record, series is conditionally recommended, reason = HIGH RISK" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	agenda-group "customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs Forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
-			- the effective dose number in the Series is == 1
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- the Patient is Male
-		Confirm elapsed time between $dtBirthDate and evalTime >= "22y" && elapsed time between $dtBirthDate and evalTime < "27y"
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-
 // The recommended interval between dose 1 & 3 of HPV 3-dose series is 6 months. Routine interval rule still runs
 rule "HPV: Set the recommended interval of 6m between doses 1 & 3 for the HPV 3-Dose Series" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -170,7 +149,7 @@ rule "HPV: Set the latest recommended interval of 13m+4w between doses 1 & 3 for
 end
 
 
-rule "HPV: Recommend NOT_RECOMMENDED TOO_OLD If Patient >=27 yrs and does not have one or more Doses <27 yrs" ruleflow-group "RecommendationForecast"
+rule "HPV: Recommend NOT_RECOMMENDED / TOO_OLD If Patient >=46 yrs" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	activation-group "recommendationAgeCheck"
@@ -179,10 +158,7 @@ rule "HPV: Recommend NOT_RECOMMENDED TOO_OLD If Patient >=27 yrs and does not ha
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the Date as $assign_dtDateAtAge when the Patient is "27y" of age
-		There is a Series $sameTargetSeries identified by $targetSeries
-			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is == 0		
-		Confirm elapsed time between $dtBirthDate and evalTime >= "27y"
+		Confirm elapsed time between $dtBirthDate and evalTime >= "46y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.TOO_OLD"
@@ -193,7 +169,7 @@ rule "HPV: Recommend NOT_RECOMMENDED TOO_OLD If Patient >=27 yrs and does not ha
 end
 
 
-rule "HPV: Recommend Conditionally ABOVE_AGE_MAY_COMPLETE if Series Not Complete, Patient >=27 yrs and has one or more doses <27 yrs" ruleflow-group "RecommendationForecast"
+rule "HPV: Recommend CONDITIONAL / CLINICAL_PATIENT_DISCRETION if Series is Not Complete, Patient >=27 yrs with one or more doses < 46 yrs" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	activation-group "recommendationAgeCheck"
@@ -201,15 +177,13 @@ rule "HPV: Recommend Conditionally ABOVE_AGE_MAY_COMPLETE if Series Not Complete
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
 			- the Series is Not Complete
+			- the Number of Doses Administered is == 0
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the Date as $assign_dtDateAtAge when the Patient is "27y" of age
-		There is a Series $sameTargetSeries identified by $targetSeries
-			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is > 0		
-		Confirm elapsed time between $dtBirthDate and evalTime >= "27y"
+		Confirm elapsed time between $dtBirthDate and evalTime >= "27y" && elapsed time between $dtBirthDate and evalTime < "46y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ABOVE_AGE_MAY_COMPLETE"
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
