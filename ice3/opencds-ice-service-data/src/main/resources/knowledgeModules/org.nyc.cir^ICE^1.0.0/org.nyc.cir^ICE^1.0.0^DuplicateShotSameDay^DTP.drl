@@ -63,14 +63,16 @@ rule "Duplicate Shots/Same Day DTP: If one of the shots is pertussis-containing 
 		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", 
 			vaccineComponent.allDiseasesTargetedForImmunity not contains "SUPPORTED_DISEASE_CONCEPT.033.9")
 		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, 
-			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.033.9") 
+			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.033.9", isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
-			setStatus(DoseStatus.EVALUATION_NOT_STARTED);
+			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
 		}
 		modify($tdother) {
-			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + "will be evaluted before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
 end

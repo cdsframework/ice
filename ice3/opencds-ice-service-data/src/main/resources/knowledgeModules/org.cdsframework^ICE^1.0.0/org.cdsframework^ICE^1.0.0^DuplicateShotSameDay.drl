@@ -130,6 +130,35 @@ rule "Duplicate Shots/Same Day Overview Rule #3: If neither shot is an NOS CVX, 
 end
 
 
+// Evaluation Order for Duplicate Shot/Same Day Overview Rule #3: If no shot is an NOS CVX, if one is a combination vaccine and the other is not a combination vaccine, and the combination vaccine
+// targets the same or a superset of the diseases as the non-combination vaccine, then evaluate the combination vaccine first 
+rule "Duplicate Shots/Same Day Overview Rule #3 (Evaluation Order): If neither shot is an NOS CVX, if one is a combination vaccine and the other is not a combination vaccine, then evaluate the combination CVX as Valid and evaluate the non-combination CVX as Invalid with a reason code of DUPLICATE_SAME_DAY" 
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"	
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, vaccineComponent.isUnspecifiedFormulation() == false)
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, 			
+			administeredVaccine.isCombinationVaccine() == true, vaccineComponent.isUnspecifiedFormulation() == false, 
+			isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false,
+			vaccineComponent.allDiseasesTargetedForImmunity.size >= $td.vaccineComponent.allDiseasesTargetedForImmunity.size && vaccineComponent.allDiseasesTargetedForImmunity.containsAll($td.vaccineComponent.allDiseasesTargetedForImmunity))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
+		}
+		modify($tdother) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + "will be evaluted before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
+
 // Duplicate Shots/Same Day Overview Rule #4: If all shots are an NOS CVX, then evaluate the 1st CVX processed as Valid and evaluate the other CVXs processed as Invalid with a 
 // reason code of DUPLICATE_SAME_DAY
 rule "Duplicate Shots/Same Day Overview Rule #4: If both shots are an NOS CVX, then evaluate the 1st CVX processed as Valid and evaluate the 2nd CVX processed as Invalid with a reason code of DUPLICATE_SAME_DAY"	ruleflow-group "HistoryEvaluation"

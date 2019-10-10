@@ -53,6 +53,7 @@ public class TargetDose {
 	private boolean hasBeenEvaluated;
 	private boolean preEvaluationCheckCompleted;
 	private boolean postEvaluationCheckCompleted;
+	private boolean duplicateShotSameDayEvaluationOrderCompleted;
 	private boolean duplicateShotSameDayCheckCompleted;
 	private DoseStatus status;
 	private HashSet<String> validReasons;
@@ -98,6 +99,7 @@ public class TargetDose {
 		hasBeenEvaluated = false;
 		preEvaluationCheckCompleted = false;
 		postEvaluationCheckCompleted = false;
+		duplicateShotSameDayEvaluationOrderCompleted = false;
 		duplicateShotSameDayCheckCompleted = false;
 	}
 
@@ -310,6 +312,14 @@ public class TargetDose {
 	
 	public void setPostEvaluationCheckCompleted(boolean truefalse) {
 		this.postEvaluationCheckCompleted = truefalse;
+	}
+	
+	public boolean isDuplicateShotSameDayEvaluationOrderCompleted() {
+		return duplicateShotSameDayEvaluationOrderCompleted;
+	}
+	
+	public void setDuplicateShotSameDayEvaluationOrderCompleted(boolean truefalse) {
+		this.duplicateShotSameDayEvaluationOrderCompleted = truefalse;
 	}
 	
 	public boolean isDuplicateShotSameDayCheckCompleted() {
