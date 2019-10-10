@@ -144,7 +144,7 @@ rule "Evaluate Shot as Accepted & Above Recommended Age if age at administration
 			- the Effective Number of Doses in the Series before $assign_dtDateAtAge is < $assign_nNumberOfDosesRequired
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateCurrentDose >= "22y"
     then
-		Include the reason for shot $currentShot Accepted due to "Above Recommended Age"
+		Include the reason for shot $currentShot Accepted due to "Above Recommended Age for Series"
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end

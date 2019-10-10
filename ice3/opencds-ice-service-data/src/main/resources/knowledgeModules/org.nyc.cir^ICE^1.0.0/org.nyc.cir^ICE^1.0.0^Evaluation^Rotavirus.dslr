@@ -63,7 +63,7 @@ rule "Rotavirus: Mark Dose as Accepted if Patient Greater Than 8 Months of Age" 
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateCurrentDose > "8m"
 	then
-        Include the reason for shot $currentDose Accepted due to "Above Recommended Age"
+        Include the reason for shot $currentDose Accepted due to "Above Recommended Age for Series"
         Mark that evaluation of shot $currentDose is complete and therefore should not be reevaluated by any other rules
 		Record that this Dose Rule was Processed for the TargetDose $currentDose
 		Log that this Dose Rule fired for the Dose $currentDose in the Series $targetSeries

@@ -1803,7 +1803,8 @@ rule "RecommendationForecast.doNotReturnForecastDateForConditionalRecommendation
 	dialect "java"
 	agenda-group "supplementalSeriesRule"
 	when
-		$ts : TargetSeries(recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null, isForecastDateDisplayedForConditionalRecommendations() == false)
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, isForecastDateDisplayedForConditionalRecommendations() == false, 
+			finalRecommendationDate != null || finalEarliestDate != null || finalOverdueDate != null)
 	then
 		String _RULENAME = drools.getRule().getName();
 		$ts.setFinalRecommendationDate(null);
