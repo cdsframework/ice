@@ -132,7 +132,7 @@ end
 
 // Evaluation Order for Duplicate Shot/Same Day Overview Rule #3: If no shot is an NOS CVX, if one is a combination vaccine and the other is not a combination vaccine, and the combination vaccine
 // targets the same or a superset of the diseases as the non-combination vaccine, then evaluate the combination vaccine first 
-rule "Duplicate Shots/Same Day Overview Rule #3 (Evaluation Order): If neither shot is an NOS CVX, if one is a combination vaccine and the other is not a combination vaccine, then evaluate the combination CVX as Valid and evaluate the non-combination CVX as Invalid with a reason code of DUPLICATE_SAME_DAY" 
+rule "Duplicate Shots/Same Day Overview Rule #3 (Evaluation Order): If neither shot is an NOS CVX and is a combination vaccine that targets as many or more diseases than the other, then evaluate the combination CVX as Valid and evaluate the non-combination CVX as Invalid with a reason code of DUPLICATE_SAME_DAY" 
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "duplicateShotSameDay"
@@ -141,9 +141,12 @@ rule "Duplicate Shots/Same Day Overview Rule #3 (Evaluation Order): If neither s
 	when
 		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, vaccineComponent.isUnspecifiedFormulation() == false)
 		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, 			
-			administeredVaccine.isCombinationVaccine() == true, vaccineComponent.isUnspecifiedFormulation() == false, 
-			isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false,
-			vaccineComponent.allDiseasesTargetedForImmunity.size >= $td.vaccineComponent.allDiseasesTargetedForImmunity.size && vaccineComponent.allDiseasesTargetedForImmunity.containsAll($td.vaccineComponent.allDiseasesTargetedForImmunity))
+			administeredVaccine.isCombinationVaccine() == true, vaccineComponent.isUnspecifiedFormulation() == false, isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false,
+			vaccineComponent.allDiseasesTargetedForImmunity.containsAll($td.vaccineComponent.allDiseasesTargetedForImmunity), 
+			// Don't swap one combination vaccine for another combination vaccine
+			$td.administeredVaccine.isCombinationVaccine() == true && vaccineComponent.allDiseasesTargetedForImmunity.size > $td.vaccineComponent.allDiseasesTargetedForImmunity.size ||
+			// But do swap combination vaccine for monovalent vaccine
+			$td.administeredVaccine.isCombinationVaccine() == false && vaccineComponent.allDiseasesTargetedForImmunity.size >= $td.vaccineComponent.allDiseasesTargetedForImmunity.size)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
