@@ -47,6 +47,7 @@ public class TargetDose {
 	private int administeredShotNumberInSeries;
 	private Date administrationDate;
 	private int doseNumberInSeries;
+	private int doseNumberCount;
 	private boolean isPrimarySeriesShot;
 	private boolean isValid;
 	private boolean isShotIgnored;
@@ -87,6 +88,7 @@ public class TargetDose {
 		administeredShotNumberInSeries = 0;
 		administrationDate = pAdministrationDate;
 		doseNumberInSeries = 1;
+		doseNumberCount = 1;
 		status = DoseStatus.EVALUATION_NOT_STARTED;
 		validReasons = new HashSet<String>();
 		acceptedReasons = new HashSet<String>();
@@ -255,6 +257,22 @@ public class TargetDose {
 		this.doseNumberInSeries = pDoseNumber;
 	}
 
+	/**
+	 * Returns the valid shot number in the series (relative to all other valid shots). 
+	 * @return valid dose number in series
+	 */
+	public int getDoseNumberCount() {
+		return doseNumberCount;
+	}
+	
+	/**
+	 * Likely to only be called by the TargetSeries that contains this administered dose
+	 * @param pDoseNumber
+	 */
+	public void setDoseNumberCount(int pDoseNumber) {
+		this.doseNumberCount = pDoseNumber;
+	}
+	
 	/**
 	 * Returns whether or not this shot is a part of the primary series
 	 */
@@ -444,7 +462,7 @@ public class TargetDose {
 	public String toString() {
 		
 		String s = "TargetDose [uniqueId=" + uniqueId + ", doseId=" + doseId + ", administeredShotNumber=" + administeredShotNumberInSeries + 
-				"; doseNumber=" + doseNumberInSeries + ", vaccine=" + administeredVaccine.getCdsConceptName() + ", isPrimarySeriesShot=" + isPrimarySeriesShot() + 
+				"; doseNumber=" + doseNumberInSeries + ", doseNumberCount=" + doseNumberCount + "vaccine=" + administeredVaccine.getCdsConceptName() + ", isPrimarySeriesShot=" + isPrimarySeriesShot() + 
 				"; vaccineComponent=" + vaccineComponent.getCdsConceptName() + ", administrationDate=" + administrationDate + ", status=" + status + 
 				"; isValid=" + isValid + "; preEvaluationCheck=" + preEvaluationCheckCompleted + "; isLiveVirus: " + this.getAdministeredVaccine().isLiveVirusVaccine() + 
 				"; isCombinationVaccine: " + this.getAdministeredVaccine().isCombinationVaccine() + "; componentIsLiveVirus: " + this.getVaccineComponent().isLiveVirusVaccine() + 
