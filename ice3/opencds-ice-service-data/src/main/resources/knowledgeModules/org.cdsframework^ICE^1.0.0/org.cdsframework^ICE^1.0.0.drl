@@ -930,6 +930,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalid" ruleflow-group "HistoryE
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
+			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
 			setStatus(DoseStatus.INVALID),					// Also sets hasBeenEvaluated flag to true
 			addDoseRuleProcessed(_RULENAME);
 		}
@@ -949,6 +950,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "His
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
+			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
 			setStatus(DoseStatus.NOT_EVALUATED),					// Also sets hasBeenEvaluated flag to true
 			addDoseRuleProcessed(_RULENAME);
 		}
@@ -968,6 +970,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusAccepted" ruleflow-group "History
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
+			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
 			setStatus(DoseStatus.ACCEPTED),					// Also sets hasBeenEvaluated flag to true
 			addDoseRuleProcessed(_RULENAME);
 		}
@@ -988,6 +991,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusValid" ruleflow-group "HistoryEva
 	then
 		String _RULENAME = drools.getRule().getName();
 		modify($td) {
+			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
 			addDoseRuleProcessed(_RULENAME),
 			setStatus(DoseStatus.VALID);					// Also sets hasBeenEvaluated flag to true
 		}
@@ -1803,7 +1807,8 @@ rule "RecommendationForecast.doNotReturnForecastDateForConditionalRecommendation
 	dialect "java"
 	agenda-group "supplementalSeriesRule"
 	when
-		$ts : TargetSeries(recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null, isForecastDateDisplayedForConditionalRecommendations() == false)
+		$ts : TargetSeries(recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, isForecastDateDisplayedForConditionalRecommendations() == false, 
+			finalRecommendationDate != null || finalEarliestDate != null || finalOverdueDate != null)
 	then
 		String _RULENAME = drools.getRule().getName();
 		$ts.setFinalRecommendationDate(null);
