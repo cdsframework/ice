@@ -1296,8 +1296,8 @@ end
 
 ///////////////////////////////////////////////////////////// Hib-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
-// Select the Child/Adult 3-dose series if it and it is complete - 2-dose series will be re-selected by general selection rules if it completed first
-rule "SeriesSelection(Hib): If the Series that has been selected is Not Complete but the other Series is Complete, select the other Series instead" ruleflow-group "SeriesSelection"
+// Hib: If the Series that was selected is Not Complete but the other Series is Complete, select the other (completed) Series instead
+rule "SeriesSelection(Hib): If the Series that was selected is Not Complete but the other Series is Complete, select the other (completed) Series instead" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	agenda-group "customSeriesSelectionRules"
 	when
