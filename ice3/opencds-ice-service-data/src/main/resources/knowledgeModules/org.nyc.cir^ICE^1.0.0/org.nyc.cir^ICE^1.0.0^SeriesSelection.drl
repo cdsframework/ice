@@ -1296,6 +1296,27 @@ end
 
 ///////////////////////////////////////////////////////////// Hib-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
+// Hib: If the Series that was selected is Not Complete but the other Series is Complete, select the other (completed) Series instead
+rule "SeriesSelection(Hib): If the Series that was selected is Not Complete but the other Series is Complete, select the other (completed) Series instead" ruleflow-group "SeriesSelection"
+	dialect "mvel"
+	agenda-group "customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		$tsNotSelected : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", selectedSeries == false, isSeriesComplete() == true)		
+		$tsSelected : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", targetSeriesIdentifier != $tsNotSelected.targetSeriesIdentifier, selectedSeries == true, isSeriesComplete() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection(Hib) change to *completed* TargetSeries " + $tsNotSelected);
+		$tsSelected.setSelectedSeries(false);		
+		$tsNotSelected.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsNotSelected.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tsNotSelected);
+		update($tsSelected);
+		update($tss);
+end
+
+
 rule "SeriesSelection.SelectByDefaultHib4DoseSeries" ruleflow-group "SeriesSelection"
 	dialect "mvel"
 	salience 100
@@ -1366,7 +1387,8 @@ rule "SeriesSelection.SelectHibOMPSeriesIfTwoDosesHibOMPOneBefore7MonthsOtherBef
 end
 
 
-///////////////////////////////////////////////////////////// Hep A-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////// Hep A-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
 
 // Override general rule which picks the doses with the least number to complete the series
