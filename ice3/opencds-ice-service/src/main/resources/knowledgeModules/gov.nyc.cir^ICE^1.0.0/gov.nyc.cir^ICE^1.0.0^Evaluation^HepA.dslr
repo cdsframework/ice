@@ -1,0 +1,134 @@
+/**
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ * 
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package org.cdsframework.ice.v1_1_0
+
+import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Schedule
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.service.Vaccine
+
+expander ../../knowledgeCommon/org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl 
+
+global java.util.Date evalTime
+global org.drools.runtime.KnowledgeContext kcontext
+
+
+rule "HepA: Shot 2 Valid if administered >= 6 months from Dose 1, even if there have been invalid shots administered" ruleflow-group "HistoryEvaluation"
+	agenda-group "customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when  
+		There is an Administered Shot $currentDose that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810" and the Series with Name "HepA2DoseChildAdultSeries"
+			- the dose number in the series is == 2
+			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+			- make note of the Associated Series as $associatedTargetSeries
+		There is an Administered Shot $previousDose
+			- the shot belongs to the Series $associatedTargetSeries
+			- the dose number in the series is == 1
+			- that has already been evaluated and whose shot validity is VALID
+			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose >= "6m"
+	then
+		// Shot is validMark the shot regardless of interval (thus the activation-group "doseIntervalCheck")
+		Record that this dose rule was Processed for the TargetDose $currentDose
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries 
+end 
+
+
+rule "Switch from 2-Dose HepA series to 3-Dose HepA series if CVX 83 (Hep A, ped/adol, 2 dose) or CVX 84 (Hep A, ped/adol, 3 dose) or CVX 31 (Hep A, pediatric, unspecified formulation) is given to a patient >= 19 years old as dose 1 or dose 2 " ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "postEvaluationCheck"
+	when
+		There is a Series $targetSeries
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810"
+			- the name of the Series is "HepA2DoseChildAdultSeries"
+		The Patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAge19y when the patient is "19y" of age
+		There is an Administered Shot $shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the Dose Number in the series is <= 2
+			- the Administration Date of the shot is >= $dtDateAtAge19y
+			- the vaccine administered a member of ("ICE83", "ICE84", "ICE31")
+			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
+			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
+			- make note of the Dose Number as $assign_nDoseNumber
+		There is a Series $seriesToSwitchTo
+			- the name of the Series is "HepAAdult3DoseSeries"
+		Confirm Elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y"
+	then
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $assign_nDoseNumber and evaluate using Interval for prior dose to this dose from SwitchedTo Series
+		Refresh all facts in the Series $targetSeries for Evaluation
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Switch from 2-Dose HepA series to 3-Dose HepA series if Dose 2 is given >= 24d and < 6m-4d from dose 1 and dose 2 is given to a patient >= 18yrs old" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "SwitchFromHepA2DoseTo3Dose"
+	salience 10
+	when
+		There is an Administered Shot $currentDose that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810" and the Series with Name "HepA2DoseChildAdultSeries"
+			- the dose number in the series is == 2
+			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
+			- make note of the date this shot was administered as $dtAdministrationDateTwo
+			- make note of the Associated Series as $associatedTargetSeries
+		There is an Administered Shot $previousShot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the Dose Number in the series is == 1
+			- the administered shot number is == $assign_nAdministeredShotNumber-1
+			- make note of the date this shot was administered as $dtAdministrationDateOne
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810"
+			- the name of the Series is "HepA2DoseChildAdultSeries"
+			- the series is not complete
+		There is a Series $seriesToSwitchTo
+			- the name of the Series is "HepAAdult3DoseSeries"
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateTwo >= "18y"
+		Confirm elapsed time between $dtAdministrationDateOne and $dtAdministrationDateTwo < "6m-4d"
+		Confirm elapsed time between $dtAdministrationDateOne and $dtAdministrationDateTwo >= "24d"
+	then
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number 2 and evaluate using Interval for prior dose to this dose from SwitchedTo Series
+		Refresh all facts in the Series $targetSeries for Evaluation
+		Log that this Series Rule fired for the Series $targetSeries
+end

@@ -1,0 +1,141 @@
+/**
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package org.cdsframework.ice.v1_1_0
+
+import java.util.Date
+import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.datatypes.CD
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+
+global java.util.Date evalTime
+global org.drools.runtime.KnowledgeContext kcontext
+
+expander ../../knowledgeCommon/org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
+
+
+// For persons born prior to 01-01-1980, if the series is not complete, recommendation should be conditional/recommended for high-risk groups.
+// Overrides routine recommendationAgeCheck
+rule "Varicella: Recommend conditional/high risk if born prior to 1/1/1980 and series not complete" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+    when       
+        There is a Series $targetSeries that needs forecasting
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+        	- the Series is not complete
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+        	- the patient's birthdate is < "01-Jan-1980"
+    then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Overrides generic earliest interval check, as per the value defined in the series XML configuration
+rule "Varicella: 28 day Earliest Interval From Dose 1 to Dose 2 if >= 13 Years of Age" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+    when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+        	- the Series is not Complete
+        	- the effective dose number in the Series is == 2
+        	- make note of the date that the most recent shot was administered as $dtAdministrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "13y"
+	then
+		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Overrides generic interval check, as per the value defined in the series XML configuration
+rule "Varicella: 28 day Recommended Interval From Dose 1 to Dose 2 if >= 13 Years of Age" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	activation-group "recommendationIntervalCheck"
+    when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+        	- the Series is not Complete
+        	- the effective dose number in the Series is == 2
+        	- make note of the date that the most recent shot was administered as $dtAdministrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "13y"
+	then
+		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Varicella: 28-day Earliest Interval for Valid Dose 1 When Previously Administered Shots are Invalid" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600" 
+        	- the Series is not Complete
+        	- the effective dose number in the Series is == 1
+			- the Number of Administered Shots is > 0
+			- make note of the date that the most recent shot was administered as $dtAdministrationDate
+	then
+		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Varicella: 28-day Recommended Interval for Valid Dose 1 When Previously Administered Shots are Invalid" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	activation-group "recommendationIntervalCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600" 
+        	- the Series is not Complete
+        	- the effective dose number in the Series is == 1
+			- the Number of Administered Shots is > 0
+			- make note of the date that the most recent shot was administered as $dtAdministrationDate
+	then
+		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end

@@ -1,0 +1,282 @@
+/**
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+
+package org.cdsframework.ice.v1_1_0
+
+import java.util.List
+import java.util.Set
+import java.util.Date
+import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.Schedule
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+expander ../../knowledgeCommon/org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
+
+global java.util.Date evalTime
+global org.drools.runtime.KnowledgeContext kcontext
+global org.cdsframework.ice.service.Schedule schedule
+
+
+/*************************************************************************************************************************************************************************************
+Recommending at the Vaccine vs. Vaccine Group Level; including additional reason codes where necessary
+*************************************************************************************************************************************************************************************/
+
+// If no doses have been administered, then do not recommend a specific vaccine
+rule "Mening B: Do not recommend a specific vaccine if no (valid) doses have been administered" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a Specific Vaccine is Recommended
+			- the effective dose number in the Series is == 1
+	then
+		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
+rule "Mening B: Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose Series" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the series is "MenB4C2DoseSeries"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		/////// Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE163"
+		Set the Recommendation Vaccine for $oRecommendation to "ICE163"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// For any of the Mening B series, if patient has at least one CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and at least one CVX 163 (Meningococcal B 4C, OMV (Bexsero)) on record, 
+// recommend CVX 163 and include the reason codes: DUE_NOW or DUE_IN_FUTURE and OTHER_VACCINE_PRODUCT_POSSIBLE.
+rule "Mening B: If a patient has at least one CVX 162 and at least one CVX 163 and a shot is recommended, include a recommendation with reason OTHER_VACCINE_PRODUCT_POSSIBLE" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a Forecast for the Series has been made and a shot is recommended
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- post processing on the Series forecast has not already been run
+		There exists an administered shot
+			- the shot belongs to the series $targetSeries
+			- the vaccine administered is "ICE162"
+		There exists another administered shot
+			- the shot belongs to the series $targetSeries
+			- the vaccine administered is "ICE163"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.OTHER_VACCINE_PRODUCT_POSSIBLE"
+		Include the Recommendation $oRecommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB FHbp 2-dose Series, recommend CVX 162 for the next target dose.
+rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-dose Series" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the series is "MenBFHbp3DoseSeries"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
+rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-dose Series" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the series is "MenBFHbp2DoseSeries"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+/*************************************************************************************************************************************************************************************
+END Recommending at the Vaccine vs. Vaccine Group Level; including additional reason codes where necessary
+*************************************************************************************************************************************************************************************/
+
+
+/*************************************************************************************************************************************************************************************
+Recommendation Rules based on Patient Age
+If no doses are on record and
+    + the patient is < 10 years old, then the Recommendation is Not Recommended and the reason code is BELOW_MINIMUM_AGE_HIGH_RISK_SERIES. (New recommendation code)
+    + the patient is >= 10 years old and < 16 years old, then the Recommendation is Conditional and the reason code is HIGH_RISK.
+    + the patient is >= 16 years old and < 24 years old, then the Recommendation is Conditional and the reason code is CLINICAL_PATIENT_DISCRETION.(New recommendation code)
+    + the patient is >= 24 years old, then the Recommendation is Conditional and the reason code is TOO_OLD_HIGH_RISK.
+*************************************************************************************************************************************************************************************/
+
+// If no doses are on record and the patient is < 10 years old, then the Recommendation is Not Recommended and the reason code is BELOW_MINIMUM_AGE_HIGH_RISK_SERIES.
+rule "Mening B: If the patient < 10yrs and no doses on record, recommendation is NOT_RECOMMENDED/BELOW_MINIMUM_AGE_HIGH_RISK_SERIES" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the number of doses administered is == 0
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthdate
+		Confirm elapsed time between $birthdate and evalTime < "10y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Mening B: If the patient >= 10yrs and < 16yrs and no doses on record, recommendation is CONDITIONAL/HIGH_RISK" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the number of doses administered is == 0
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthdate
+		Confirm elapsed time between $birthdate and evalTime >= "10y"
+		Confirm elapsed time between $birthdate and evalTime < "16y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Mening B: If the patient >= 16yrs and < 24yrs and no doses on record, recommendation is CONDITIONAL/CLINICAL_PATIENT_DISCRETION" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the number of doses administered is == 0
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthdate
+		Confirm elapsed time between $birthdate and evalTime >= "16y"
+		Confirm elapsed time between $birthdate and evalTime < "24y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Mening B: If the patient >= 24yrs and no doses on record, recommendation is CONDITIONAL/HIGH_RISK" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the number of doses administered is == 0
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthdate
+		Confirm elapsed time between $birthdate and evalTime >= "24y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+/*************************************************************************************************************************************************************************************
+MenB FHbp 3-dose Series specific rules
+*************************************************************************************************************************************************************************************/
+
+// Recommended interval between Dose 1 and Dose 3 in Men B FHbp 3-dose series is 6 months
+rule "MeningB: Recommend an recommended interval of at 6 months between doses 1 & 3 in FHbp 3-dose Series" ruleflow-group "RecommendationForecast"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs Forecasting
+			- the name of the Series is "MenBFHbp3DoseSeries"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries 
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $r to $dtCalculated
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Recommend earliest inverval of 6 months between Dose 1 and Dose 3 in Men B FHbp 3-dose series
+// Nothing to do - since minimum interval and recommended interval is the same (6m); handled by above rule
+
+
+/*************************************************************************************************************************************************************************************
+END MenB FHbp 3-dose Series specific rules
+*************************************************************************************************************************************************************************************/

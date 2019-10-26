@@ -1,0 +1,92 @@
+/**
+ * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package org.cdsframework.ice.v1_1_0
+
+import java.util.List
+import java.util.Set
+import org.drools.spi.KnowledgeHelper
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+expander ../../knowledgeCommon/org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
+
+global java.util.Date evalTime
+global org.drools.runtime.KnowledgeContext kcontext
+
+
+rule "Rotavirus: Mark Dose as Accepted if Patient Greater Than 8 Months of Age" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "doseAgeCheck"
+    when
+		There is an administered shot $currentDose that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.820"
+			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+			- make note of the Associated Series as $targetSeries
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateCurrentDose > "8m"
+	then
+        Include the reason for shot $currentDose Accepted due to "Above Recommended Age for Series"
+        Mark that evaluation of shot $currentDose is complete and therefore should not be reevaluated by any other rules
+		Record that this Dose Rule was Processed for the TargetDose $currentDose
+		Log that this Dose Rule fired for the Dose $currentDose in the Series $targetSeries
+end
+
+
+rule "Rotavirus: Mark Shot with Invalid Vaccine as Invalid but do _not_ indicate VACCINE_NOT_ALLOWED_FOR_DOSE reason (overrides base vaccine check rule)" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.820"
+			- make note of the administered vaccine as $administeredVaccine
+			- make note of the dose number as $doseNumber
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.820"
+			- the vaccine $administeredVaccine is not permitted for dose number $doseNumber in this Series
+			- make note of the number of doses required to complete this series as $numberOfDosesInSeries
+			- the numeric $doseNumber is <= $numberOfDosesInSeries
+	then
+		Include the reason for shot $currentShot Invalid for this series
+		Record that this Dose Rule was Processed for the TargetDose $currentShot
+		Log that this Dose Rule fired for the Dose $currentShot in the Series $targetSeries
+end
