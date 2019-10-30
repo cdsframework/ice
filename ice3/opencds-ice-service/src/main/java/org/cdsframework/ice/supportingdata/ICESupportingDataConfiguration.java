@@ -93,24 +93,25 @@ public class ICESupportingDataConfiguration {
 	/**
 	 * Initialize all of the supporting data. Note that order matters: first CdsLists (i.e. - code systems and value sets) must be initialized; then vaccine groups;
 	 * vaccines; seasons; finally, series 
-	 * @param pSupportedCdsVersions
-	 * @param pBaseKnowledgeRepositoryLocation
+	 * @param pSupportedKnowledgeModules
+	 * @param pKnowledgeModuleRepositoryLocation
 	 * @throws ImproperUsageException
 	 */
-	public ICESupportingDataConfiguration(List<String> pSupportedCdsVersions, File pBaseKnowledgeRepositoryLocation) 
+	public ICESupportingDataConfiguration(String pCommonLogicModule, File pCommonLogicModuleLocation, List<String> pSupportedKnowledgeModules, File pKnowledgeModuleRepositoryLocation) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "ICESupportingDataConfiguration(): ";
 		
-		if (pSupportedCdsVersions == null || pSupportedCdsVersions.isEmpty()) {
+		if (pCommonLogicModule == null || pCommonLogicModule.isEmpty() || pSupportedKnowledgeModules == null || pSupportedKnowledgeModules.isEmpty()) {
 			String lErrStr = "Applicable CDS versions for this set of supporting data not specified; cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
 		else if (logger.isDebugEnabled()) {
-			logger.debug(_METHODNAME + "Base Knowledge Repository Location: " + pBaseKnowledgeRepositoryLocation.getAbsolutePath());
+			logger.debug(_METHODNAME + "Knowledge Common Location: " + pCommonLogicModuleLocation.getAbsolutePath() + "; Knowledge Module Repository Location: " + pKnowledgeModuleRepositoryLocation.getAbsolutePath());
 			int i=1;
-			for (String lCdsVersion : pSupportedCdsVersions) {
+			logger.debug(_METHODNAME + "Common Knowledge: " + pCommonLogicModule);
+			for (String lCdsVersion : pSupportedKnowledgeModules) {
 				logger.debug(_METHODNAME + "CDS version #" + i + ": " + lCdsVersion);
 				i++;
 			}
@@ -123,9 +124,28 @@ public class ICESupportingDataConfiguration {
 		StringBuffer lSbCdsVersion = new StringBuffer(160);
 		lSbSDlocation.append("Supporting Data Directories: ");
 		lSbCdsVersion.append("CDS versions: ");
-		int i=1;
-		for (String lCdsVersion : pSupportedCdsVersions) {
-			File lKnowledgeModuleDirectory = new File(pBaseKnowledgeRepositoryLocation, lCdsVersion); 
+
+		// First the common logic
+		File lKnowledgeCommonDirectory = new File(pCommonLogicModuleLocation, pCommonLogicModule); 
+		File lCommonSupportingDataDirectory = new File(lKnowledgeCommonDirectory, supportingDataDirectory);
+		if (lCommonSupportingDataDirectory.isDirectory() == false) {
+			String lErrStr = "Supporting data directory location \"" + lCommonSupportingDataDirectory + "\" does not exist";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
+		else {
+			this.supportingDataDirectoryLocations.add(lCommonSupportingDataDirectory);
+			lSbCdsVersion.append(pCommonLogicModule); 
+			lSbSDlocation.append(lCommonSupportingDataDirectory.getAbsolutePath());
+		}
+		this.supportedCdsVersions.add(pCommonLogicModule);
+		if (logger.isDebugEnabled()) {
+			logger.info(_METHODNAME + "Added supporting data directory: " + lCommonSupportingDataDirectory.getAbsolutePath());
+		}
+		
+		// Then the knowledge module logic
+		for (String lCdsVersion : pSupportedKnowledgeModules) {
+			File lKnowledgeModuleDirectory = new File(pKnowledgeModuleRepositoryLocation, lCdsVersion); 
 			File lSupportingDataDirectory = new File(lKnowledgeModuleDirectory, supportingDataDirectory);
 			if (lSupportingDataDirectory.isDirectory() == false) {
 				String lErrStr = "Supporting data directory location \"" + lSupportingDataDirectory + "\" does not exist";
@@ -134,13 +154,10 @@ public class ICESupportingDataConfiguration {
 			}
 			else {
 				this.supportingDataDirectoryLocations.add(lSupportingDataDirectory);
-				if (i > 1) {
-					lSbSDlocation.append("; ");
-					lSbCdsVersion.append("; ");
-				}
+				lSbSDlocation.append("; ");
+				lSbCdsVersion.append("; ");
 				lSbCdsVersion.append(lCdsVersion); 
 				lSbSDlocation.append(lSupportingDataDirectory.getAbsolutePath());
-				i++;
 			}
 			this.supportedCdsVersions.add(lCdsVersion);
 			if (logger.isDebugEnabled()) {
@@ -952,7 +969,7 @@ public class ICESupportingDataConfiguration {
 		}
 	}
 
-	
+	/*
 	public static void main(String[] args) {
 			
 		List<String> lCdsVersions = new ArrayList<String>();
@@ -967,6 +984,7 @@ public class ICESupportingDataConfiguration {
 
 		System.out.println("\n\nmain(): END.\n\n");
 	}
+	*/
 	
 }
 

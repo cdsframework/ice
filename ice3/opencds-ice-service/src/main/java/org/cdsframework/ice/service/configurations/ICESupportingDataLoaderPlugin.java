@@ -171,10 +171,10 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
 		// Initialize schedule 
 		logger.info("Initializing Schedule");
 		List<String> cdsVersions = new ArrayList<String>();
-		cdsVersions.add(lBaseRulesScopingKmId);
-		cdsVersions.add(pRequestedKMIdStr);
+		String lRequestedKmIdStr = (pRequestedKMIdStr != null && pRequestedKMIdStr.equals("org.nyc.cir^ICE^1.0.0")) ? "gov.nyc.cir^ICE^1.0.0" : pRequestedKMIdStr;
+		cdsVersions.add(lRequestedKmIdStr);
 		try {
-			s = new Schedule("requestedKmId", cdsVersions, iceProps.getBaseKnowledgeModulesDirectory());
+			s = new Schedule("requestedKmId", lBaseRulesScopingKmId, iceProps.getKnowledgeCommonDirectory(), cdsVersions, iceProps.getKnowledgeModulesDirectory());
 		}
 		catch (ImproperUsageException | InconsistentConfigurationException ii) {
 			String lErrStr = "Failed to initialize immunization schedule";

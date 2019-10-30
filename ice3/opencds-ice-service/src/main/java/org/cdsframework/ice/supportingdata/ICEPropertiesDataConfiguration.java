@@ -135,9 +135,47 @@ public class ICEPropertiesDataConfiguration {
 	}
 	
 	
-	public File getBaseKnowledgeModulesDirectory() { 
+	public File getKnowledgeCommonDirectory() { 
 
-		String _METHODNAME = "getKnowledgeModulesDirectoryAsFile(): ";
+		String _METHODNAME = "getKnowledgeCommonDirectory(): ";
+		
+		// Get the ICE knowledge repository directory location
+		String baseConfigurationLocation = iceProps.getProperty("ice_knowledge_repository_location");
+		if (baseConfigurationLocation == null) {
+			String lErrStr = "ICE knowledge repository data location not specified in properties file";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		else {
+			if (logger.isInfoEnabled()) {
+				String lErrStr = "ICE knowledge repository data location specified in properties file: " + baseConfigurationLocation;
+				logger.info(lErrStr);
+			}
+		}
+		
+		// Get the ICE knowledge modules subdirectory location
+		String knowledgeCommonSubDirectory = iceProps.getProperty("ice_knowledge_common_subdirectory");
+		if (knowledgeCommonSubDirectory == null) {
+			String lErrStr = "ICE knowledge common subdirectory location not specified in properties file";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				String lInfoStr = "ICE knowledge common data location specified in properties file: " + knowledgeCommonSubDirectory;
+				logger.info(lInfoStr);
+			}
+		}
+
+		File lKnowledgeCommonDirectory = new File(baseConfigurationLocation, knowledgeCommonSubDirectory);
+		
+		return lKnowledgeCommonDirectory;
+	}
+	
+	
+	public File getKnowledgeModulesDirectory() { 
+
+		String _METHODNAME = "getKnowledgeModulesDirectory(): ";
 		
 		// Get the ICE knowledge repository directory location
 		String baseConfigurationLocation = iceProps.getProperty("ice_knowledge_repository_location");
