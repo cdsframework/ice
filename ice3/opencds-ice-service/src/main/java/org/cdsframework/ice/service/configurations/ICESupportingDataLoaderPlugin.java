@@ -174,7 +174,7 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
 		cdsVersions.add(lBaseRulesScopingKmId);
 		cdsVersions.add(pRequestedKMIdStr);
 		try {
-			s = new Schedule("requestedKmId", cdsVersions, iceProps.getBaseKnowledgeModulesDirectory());
+			s = new Schedule("requestedKmId", cdsVersions, iceProps.getKnowledgeModulesDirectory());
 		}
 		catch (ImproperUsageException | InconsistentConfigurationException ii) {
 			String lErrStr = "Failed to initialize immunization schedule";

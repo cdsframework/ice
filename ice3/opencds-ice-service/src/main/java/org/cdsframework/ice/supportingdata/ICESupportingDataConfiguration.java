@@ -93,24 +93,24 @@ public class ICESupportingDataConfiguration {
 	/**
 	 * Initialize all of the supporting data. Note that order matters: first CdsLists (i.e. - code systems and value sets) must be initialized; then vaccine groups;
 	 * vaccines; seasons; finally, series 
-	 * @param pSupportedCdsVersions
-	 * @param pBaseKnowledgeRepositoryLocation
+	 * @param pSupportedKnowledgeModules
+	 * @param pKnowledgeModuleRepositoryLocation
 	 * @throws ImproperUsageException
 	 */
-	public ICESupportingDataConfiguration(List<String> pSupportedCdsVersions, File pBaseKnowledgeRepositoryLocation) 
+	public ICESupportingDataConfiguration(String pCommonLogicModule, File pCommonLogicModuleLocation, List<String> pSupportedKnowledgeModules, File pKnowledgeModuleRepositoryLocation) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "ICESupportingDataConfiguration(): ";
 		
-		if (pSupportedCdsVersions == null || pSupportedCdsVersions.isEmpty()) {
+		if (pSupportedKnowledgeModules == null || pSupportedKnowledgeModules.isEmpty()) {
 			String lErrStr = "Applicable CDS versions for this set of supporting data not specified; cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
 		else if (logger.isDebugEnabled()) {
-			logger.debug(_METHODNAME + "Base Knowledge Repository Location: " + pBaseKnowledgeRepositoryLocation.getAbsolutePath());
+			logger.debug(_METHODNAME + "Base Knowledge Repository Location: " + pKnowledgeModuleRepositoryLocation.getAbsolutePath());
 			int i=1;
-			for (String lCdsVersion : pSupportedCdsVersions) {
+			for (String lCdsVersion : pSupportedKnowledgeModules) {
 				logger.debug(_METHODNAME + "CDS version #" + i + ": " + lCdsVersion);
 				i++;
 			}
@@ -124,8 +124,8 @@ public class ICESupportingDataConfiguration {
 		lSbSDlocation.append("Supporting Data Directories: ");
 		lSbCdsVersion.append("CDS versions: ");
 		int i=1;
-		for (String lCdsVersion : pSupportedCdsVersions) {
-			File lKnowledgeModuleDirectory = new File(pBaseKnowledgeRepositoryLocation, lCdsVersion); 
+		for (String lCdsVersion : pSupportedKnowledgeModules) {
+			File lKnowledgeModuleDirectory = new File(pKnowledgeModuleRepositoryLocation, lCdsVersion); 
 			File lSupportingDataDirectory = new File(lKnowledgeModuleDirectory, supportingDataDirectory);
 			if (lSupportingDataDirectory.isDirectory() == false) {
 				String lErrStr = "Supporting data directory location \"" + lSupportingDataDirectory + "\" does not exist";
@@ -952,7 +952,7 @@ public class ICESupportingDataConfiguration {
 		}
 	}
 
-	
+	/*
 	public static void main(String[] args) {
 			
 		List<String> lCdsVersions = new ArrayList<String>();
@@ -967,6 +967,7 @@ public class ICESupportingDataConfiguration {
 
 		System.out.println("\n\nmain(): END.\n\n");
 	}
+	*/
 	
 }
 

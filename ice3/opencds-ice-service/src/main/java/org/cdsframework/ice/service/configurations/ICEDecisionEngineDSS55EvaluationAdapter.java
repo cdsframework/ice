@@ -110,7 +110,6 @@ import org.opencds.plugin.PluginContext.PreProcessPluginContext;
 public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
 	private String baseRulesScopingKmId = null;
-	private Boolean outputNumberOfDosesRemaining = null;
 	private Boolean outputEarliestOverdueDates = null;
 	
 	private static Log logger = LogFactory.getLog(ICEDecisionEngineDSS55EvaluationAdapter.class);
@@ -369,13 +368,6 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		}
 		cmds.add(CommandFactory.newSetGlobal("schedule", lSchedule));
 		
-		if (outputNumberOfDosesRemaining == null) {
-			String lErrStr = "An error occurred: knowledge module not properly initialized: output number of doses remaining flag not set; cannot continue";
-			logger.error(_METHODNAME + lErrStr);
-			throw new RuntimeException(lErrStr);
-		}
-		cmds.add(CommandFactory.newSetGlobal("outputNumberOfDosesRemaining", outputNumberOfDosesRemaining));
-		
 		if (outputEarliestOverdueDates == null) {
 			String lErrStr = "An error occurred: knowledge module not properly initialized: output earliest/overdue flag not set; cannot continue";
 			logger.error(_METHODNAME + lErrStr);
@@ -568,6 +560,9 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
 		///////String lRequestedKmId = lKMId.getScopingEntityId() + "^" + lKMId.getBusinessId() + "^" + lKMId.getVersion();
 		String lRequestedKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(lKMId.getScopingEntityId(), lKMId.getBusinessId(), lKMId.getVersion());
+		if (lRequestedKmId != null && lRequestedKmId.equals("org.nyc.cir^ICE^1.0.0")) {
+			lRequestedKmId = "gov.nyc.cir^ICE^1.0.0";
+		}
 		logger.info("Initializing ICE3 Drools 5.5 KnowledgeBase");
 		KnowledgeBuilderConfiguration config = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration();
 		config.setProperty("drools.accumulate.function.maxDate", "org.cdsframework.ice.service.MaximumDateAccumulateFunction");
@@ -597,7 +592,9 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			}
 		}
 		
-		/////// Get the ICE knowledge modules subdirectory location
+		////////////////////////////////////////////////////////////////////////////////////
+		// START - Get the ICE knowledge modules subdirectory location
+		////////////////////////////////////////////////////////////////////////////////////		
 		String knowledgeModulesSubDirectory = lProps.getProperty("ice_knowledge_modules_subdirectory");
 		if (knowledgeModulesSubDirectory == null) {
 			String lErrStr = "ICE knowledge modules subdirectory location not specified in properties file";
@@ -609,10 +606,9 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 				String lInfoStr = "ICE knowledge modules data location specified in properties file: " + knowledgeModulesSubDirectory;
 				logger.info(lInfoStr);
 			}
-		}
-		
+		}		
 		/////// 
-		// Determine Base Knowledge Modules Directory Location
+		// Determine Knowledge Modules Directory Location
 		///////
 		File lKnowledgeModulesDirectory = new File(baseConfigurationLocation, knowledgeModulesSubDirectory);
 		if (! new File(lKnowledgeModulesDirectory, lRequestedKmId).exists()) {
@@ -623,21 +619,39 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		else if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Requested ICE knowledge module directory: " + lKnowledgeModulesDirectory.getAbsolutePath() + "; knowledge module " + lRequestedKmId);
 		}
-		
-		///////
-		// Get the default scoping ID for the base ICE rules
-		///////
-		///////String lBaseRulesScopingKmId = iceconfig.getBaseRulesScopingEntityId() + "^" + lKMId.getBusinessId() + "^" + lKMId.getVersion();
-		String lBaseRulesScopingKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceconfig.getBaseRulesScopingEntityId(), lKMId.getBusinessId(), iceconfig.getBaseRulesVersion());
-		if (! new File(lKnowledgeModulesDirectory, lBaseRulesScopingKmId).exists()) {
-			String lErrStr = "Base ICE knowledge module does not exist" + lKnowledgeModulesDirectory.getAbsolutePath() + "; knowledge module " + lBaseRulesScopingKmId;;
+		////////////////////////////////////////////////////////////////////////////////////
+		// END - Get the ICE knowledge modules subdirectory location
+		////////////////////////////////////////////////////////////////////////////////////		
+
+		////////////////////////////////////////////////////////////////////////////////////
+		// START - Get the ICE Common rules subdirectory location
+		////////////////////////////////////////////////////////////////////////////////////		
+		String knowledgeCommonSubDirectory = lProps.getProperty("ice_knowledge_common_subdirectory");
+		if (knowledgeCommonSubDirectory == null) {
+			String lErrStr = "ICE common knowledge subdirectory location not specified in properties file";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				String lInfoStr = "ICE common knowledge data location specified in properties file: " + knowledgeCommonSubDirectory;
+				logger.info(lInfoStr);
+			}
+		}
+
+		String lBaseRulesScopingKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceconfig.getBaseRulesScopingEntityId(), lKMId.getBusinessId(), iceconfig.getBaseRulesVersion());		
+		File lKnowledgeCommonDirectory = new File(baseConfigurationLocation, knowledgeCommonSubDirectory);
+		if (! new File(lKnowledgeCommonDirectory, lBaseRulesScopingKmId).exists()) {
+			String lErrStr = "Base ICE knowledge module does not exist" + lKnowledgeCommonDirectory.getAbsolutePath() + "; knowledge module " + lBaseRulesScopingKmId;;
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
 		else if (logger.isDebugEnabled()) {
-			logger.debug(_METHODNAME + "Base knowledge modules directory: " + lKnowledgeModulesDirectory.getAbsolutePath()+ "; knowledge module " + lBaseRulesScopingKmId);
+			logger.debug(_METHODNAME + "Base knowledge modules directory: " + lKnowledgeCommonDirectory.getAbsolutePath()+ "; knowledge module " + lBaseRulesScopingKmId);
 		}
-		///////
+		////////////////////////////////////////////////////////////////////////////////////
+		// END - Get the ICE Common rules subdirectory location
+		////////////////////////////////////////////////////////////////////////////////////		
 		
 		///////
 		// Load knowledge from pkg file?
@@ -653,17 +667,8 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			String lInfoStr = "ICE rules will be _not_ be loaded from pkg file, as per properties file setting";
 			logger.info(_METHODNAME + lInfoStr);
 		}
-		
-		// Output doses remaining for each series recommendation?
-		String lOutputDosesRemaining = lProps.getProperty("output_number_of_doses_remaining");
-		if (lOutputDosesRemaining != null && lOutputDosesRemaining.equals("Y")) {
-			outputNumberOfDosesRemaining = new Boolean(true);
-		}
-		else {
-			outputNumberOfDosesRemaining = new Boolean(false);
-		}
-		
-		// Output doses remaining for each series recommendation?
+				
+		// Output earliest and overdue dates for each series recommendation?
 		String lOutputEarliestOverdueDates = lProps.getProperty("output_earliest_and_overdue_dates");
 		if (lOutputEarliestOverdueDates != null && lOutputEarliestOverdueDates.equals("Y")) {
 			outputEarliestOverdueDates = new Boolean(true);
@@ -698,10 +703,10 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			//////////////////////////////////////////////////////////////////////
 			// Base rules and DSL
 			// DSL and Base rules
-			dslFile = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".dsl");
-			drlFile = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".drl");
-			drlFileDuplicateShotSameDay = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + "^DuplicateShotSameDay.drl");
-			bpmnFile = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".bpmn");
+			dslFile = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".dsl");
+			drlFile = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".drl");
+			drlFileDuplicateShotSameDay = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + "^DuplicateShotSameDay.drl");
+			bpmnFile = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".bpmn");
 
 			if (! dslFile.exists() ||  ! drlFile.exists() || ! drlFileDuplicateShotSameDay.exists() || ! bpmnFile.exists()) {
 				// Try in the knowledge module directory
@@ -738,7 +743,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			// lFilesToExcludeFromKB.add(drlFileDuplicateShotSameDay);
 
 			// Add base rules to knowledge base
-			File dslrBaseFileDirectory = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lBaseRulesScopingKmId);
+			File dslrBaseFileDirectory = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId);
 			List<File> lBaseFilesToLoad = retrieveCollectionOfDSLRsToAddToKnowledgeBase(lBaseRulesScopingKmId, dslrBaseFileDirectory, lFilesToExcludeFromKB);
 			if (lBaseFilesToLoad.isEmpty()) {
 				String lErrStr = "No base ICE rules found; cannot continue";
