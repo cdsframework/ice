@@ -102,14 +102,15 @@ public class ICESupportingDataConfiguration {
 		
 		String _METHODNAME = "ICESupportingDataConfiguration(): ";
 		
-		if (pSupportedKnowledgeModules == null || pSupportedKnowledgeModules.isEmpty()) {
+		if (pCommonLogicModule == null || pCommonLogicModule.isEmpty() || pSupportedKnowledgeModules == null || pSupportedKnowledgeModules.isEmpty()) {
 			String lErrStr = "Applicable CDS versions for this set of supporting data not specified; cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
 		else if (logger.isDebugEnabled()) {
-			logger.debug(_METHODNAME + "Base Knowledge Repository Location: " + pKnowledgeModuleRepositoryLocation.getAbsolutePath());
+			logger.debug(_METHODNAME + "Knowledge Common Location: " + pCommonLogicModuleLocation.getAbsolutePath() + "; Knowledge Module Repository Location: " + pKnowledgeModuleRepositoryLocation.getAbsolutePath());
 			int i=1;
+			logger.debug(_METHODNAME + "Common Knowledge: " + pCommonLogicModule);
 			for (String lCdsVersion : pSupportedKnowledgeModules) {
 				logger.debug(_METHODNAME + "CDS version #" + i + ": " + lCdsVersion);
 				i++;
@@ -123,7 +124,26 @@ public class ICESupportingDataConfiguration {
 		StringBuffer lSbCdsVersion = new StringBuffer(160);
 		lSbSDlocation.append("Supporting Data Directories: ");
 		lSbCdsVersion.append("CDS versions: ");
-		int i=1;
+
+		// First the common logic
+		File lKnowledgeCommonDirectory = new File(pCommonLogicModuleLocation, pCommonLogicModule); 
+		File lCommonSupportingDataDirectory = new File(lKnowledgeCommonDirectory, supportingDataDirectory);
+		if (lCommonSupportingDataDirectory.isDirectory() == false) {
+			String lErrStr = "Supporting data directory location \"" + lCommonSupportingDataDirectory + "\" does not exist";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
+		else {
+			this.supportingDataDirectoryLocations.add(lCommonSupportingDataDirectory);
+			lSbCdsVersion.append(pCommonLogicModule); 
+			lSbSDlocation.append(lCommonSupportingDataDirectory.getAbsolutePath());
+		}
+		this.supportedCdsVersions.add(pCommonLogicModule);
+		if (logger.isDebugEnabled()) {
+			logger.info(_METHODNAME + "Added supporting data directory: " + lCommonSupportingDataDirectory.getAbsolutePath());
+		}
+		
+		// Then the knowledge module logic
 		for (String lCdsVersion : pSupportedKnowledgeModules) {
 			File lKnowledgeModuleDirectory = new File(pKnowledgeModuleRepositoryLocation, lCdsVersion); 
 			File lSupportingDataDirectory = new File(lKnowledgeModuleDirectory, supportingDataDirectory);
@@ -134,13 +154,10 @@ public class ICESupportingDataConfiguration {
 			}
 			else {
 				this.supportingDataDirectoryLocations.add(lSupportingDataDirectory);
-				if (i > 1) {
-					lSbSDlocation.append("; ");
-					lSbCdsVersion.append("; ");
-				}
+				lSbSDlocation.append("; ");
+				lSbCdsVersion.append("; ");
 				lSbCdsVersion.append(lCdsVersion); 
 				lSbSDlocation.append(lSupportingDataDirectory.getAbsolutePath());
-				i++;
 			}
 			this.supportedCdsVersions.add(lCdsVersion);
 			if (logger.isDebugEnabled()) {

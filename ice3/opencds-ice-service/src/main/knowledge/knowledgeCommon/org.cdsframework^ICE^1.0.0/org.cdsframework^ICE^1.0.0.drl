@@ -2450,42 +2450,6 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 end
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Set flag to be returned for all Entities and ClinicalStatements number of doses remaining START
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "BounceAllEntities" ruleflow-group "ProcessResults"
-	dialect "mvel"
-	when
-		$entityBase : EntityBase( toBeReturned == false )
-	then
-		String _RULENAME = kcontext.rule.name;
-		$entityBase.setToBeReturned( true );
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
-end
-
-
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "BounceAllClinicalStatements" ruleflow-group "ProcessResults"
-	dialect "mvel"
-	when
-		$cs : ClinicalStatement( toBeReturned == false )
-	then
-		String _RULENAME = kcontext.rule.name;
-		$cs.setToBeReturned( true );
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
-end
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Set flag to be returned for all Entities and ClinicalStatements number of doses remaining END
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 //NOTE:  all demographics about the Patient are always returned in the result 
 //			when the result is an outputVMR.

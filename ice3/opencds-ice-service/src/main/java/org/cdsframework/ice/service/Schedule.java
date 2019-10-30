@@ -48,7 +48,6 @@ import org.opencds.common.exceptions.ImproperUsageException;
 public class Schedule {
 
 	private String scheduleId;
-	private List<String> cdsVersions;
 	private ICESupportingDataConfiguration iceSupportingDataConfiguration;
 	private boolean scheduleHasBeenInitialized;
 	
@@ -59,27 +58,26 @@ public class Schedule {
 	 * Initialize the Immunization Schedule. Throws an ImproperUsageException if any data (including supporting data) is improperly specified. Throws an 
 	 * InconsistentConfigurationException if the supporting data is "inconsistent" in some manner
 	 * @param pScheduleId The ID of the schedule
-	 * @param pCdsVersions The CDS versions supported by this schedule
-	 * @param pBaseKnowledgeRepositoryLocation the knowledge base directory location; where all of the knowledge modules are
+	 * @param pKnowledgeModules The CDS versions supported by this schedule
+	 * @param pKnowledgeRepositoryLocation the knowledge base directory location; where all of the knowledge modules are
 	 * @throws ImproperUsageException
 	 * @throws InconsistentConfigurationException If supporting data is inconsistent
 	 */
-	public Schedule(String pScheduleId, List<String> pCdsVersions, File pBaseKnowledgeRepositoryLocation) 
+	public Schedule(String pScheduleId, String pCommonLogicModule, File pCommonLogicModuleLocation, List<String> pKnowledgeModules, File pKnowledgeRepositoryLocation) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 		
 		String _METHODNAME = "ScheduleImpl(): ";
 
 		this.scheduleHasBeenInitialized = false;
-		if (pScheduleId == null || pBaseKnowledgeRepositoryLocation == null) {
+		if (pScheduleId == null || pCommonLogicModule == null|| pCommonLogicModuleLocation == null || pKnowledgeRepositoryLocation == null) {
 			String lErrStr = "Schedule not properly initialized: one or more parameters null";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
 		}
 		this.scheduleId = pScheduleId;
-		this.cdsVersions = pCdsVersions;
 
-		// Initialize the supporting data for all of the CDS versions specified and available from this base knowledge repository location
-		this.iceSupportingDataConfiguration = new ICESupportingDataConfiguration(cdsVersions, pBaseKnowledgeRepositoryLocation);
+		// Initialize the supporting data for the common logic and knowledge modules specified and available
+		this.iceSupportingDataConfiguration = new ICESupportingDataConfiguration(pCommonLogicModule, pCommonLogicModuleLocation, pKnowledgeModules, pKnowledgeRepositoryLocation);
 
 		// Log initialization of Schedule
 		StringBuilder lSbScheduleInfo = new StringBuilder(80);
