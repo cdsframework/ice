@@ -298,13 +298,21 @@ public class TimePeriod {
 			startLD = startLD.plusDays(duration);
 		}
 		else if (tpType == DurationType.MONTHS) {
+			int dayOfMonthBeforeCalculation = startLD.getDayOfMonth();
 			startLD = startLD.plusMonths(duration);
+			if (startLD.getDayOfMonth() < dayOfMonthBeforeCalculation && startLD.isEqual(startLD.dayOfMonth().withMaximumValue())) {
+				startLD = startLD.plusDays(1);
+			}
 		}
 		else if (tpType == DurationType.WEEKS) {
 			startLD = startLD.plusWeeks(duration);
 		}
 		else if (tpType == DurationType.YEARS) {
+			int dayOfMonthBeforeCalculation = startLD.getDayOfMonth();
 			startLD = startLD.plusYears(duration);
+			if (startLD.getDayOfMonth() < dayOfMonthBeforeCalculation && startLD.isEqual(startLD.dayOfMonth().withMaximumValue())) {
+				startLD = startLD.plusDays(1);
+			}
 		}
 		else {
 			String str = "Invalid TimePeriod.DurationType supplied";
