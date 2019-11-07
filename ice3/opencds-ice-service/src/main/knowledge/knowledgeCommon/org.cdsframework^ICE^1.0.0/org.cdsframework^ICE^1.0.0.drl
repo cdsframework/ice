@@ -94,6 +94,7 @@ global java.util.HashMap<String,Object> namedObjects
 global java.util.Date patientAgeTimeOfInterest
 global org.cdsframework.ice.service.Schedule schedule
 global java.lang.Boolean outputEarliestOverdueDates
+global java.lang.Boolean doseOverrideFeatureEnabled
 
 // global org.drools.runtime.KnowledgeContext kcontext
 
@@ -793,7 +794,7 @@ rule "HistoryEvaluation: Check if Shot should be marked Accepted and Series Comp
 	when
 		$targetDose : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $diseasesTargetedByThisDose : vaccineComponent.allDiseasesTargetedForImmunity, $doseAdministrationDate : administrationDate)
 		$targetSeries : TargetSeries(containsTargetDose($targetDose))
-		do[invokeCustomEvaluationRules]
+		do[invokeDuplicateShotRules]
 		$diseaseImmunityList : List(size == $diseasesTargetedByThisDose.size()) from 
 			accumulate($di : DiseaseImmunity($d : disease, dateOfImmunity <= $doseAdministrationDate, $r : immunityReason, disease memberOf $diseasesTargetedByThisDose), collectList($di))
 	then
@@ -804,7 +805,7 @@ rule "HistoryEvaluation: Check if Shot should be marked Accepted and Series Comp
 		}
 		modify ($targetDose) { setStatus(DoseStatus.EVALUATION_COMPLETE) } ///// Note for docs: marking this dose valid, so we mark evaluation complete override all other "negative check" rules
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Marking Evaluation Complete for TargetDose " + $targetDose.toString() + " in TargetSeries " + $targetSeries .getSeriesName());
-	then[invokeCustomEvaluationRules]
+	then[invokeDuplicateShotRules]
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Check complete.");
 		drools.setFocus("makeNoteOfDuplicateShotSameDayIfAny");
 end
@@ -851,7 +852,7 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 			setPreEvaluationCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
-		setFocus("customEvaluationRule");
+		setFocus("doseOverrideEvaluationRule");
 end
 
 
@@ -877,7 +878,7 @@ rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 d
 			setPreEvaluationCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
-		setFocus("customEvaluationRule");
+		setFocus("doseOverrideEvaluationRule");
 end
 
 
@@ -898,7 +899,51 @@ rule "Not Duplicate Shot/Same Day: No duplicate shots to shot being evaluated; I
 			setPreEvaluationCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $tdAssociatedTargetSeries);
-		setFocus("customEvaluationRule");
+		setFocus("doseOverrideEvaluationRule");
+end
+
+
+///////// ***
+// General Design Rule... Do not  Edit
+/////////
+rule "HistoryEvaluation.setDoseEvaluationStatusValidAndBypassEvaluationLogicIfDoseOverrideValidSpecified" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "doseOverrideEvaluationRule"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS)
+		do[invokeCustomEvaluationRules]
+		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null, isValid.isValue() == true)
+	then
+		modify ($td) { 
+			setStatus(DoseStatus.EVALUATION_COMPLETE),
+			addValidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName()),
+			addDoseRuleProcessed(kcontext.rule.name);
+		}
+	then[invokeCustomEvaluationRules]
+		ICELogicHelper.logDRLDebugMessage(kcontext.rule.name, "Dose Override Valid Check Complete.");
+		drools.setFocus("customEvaluationRule");			
+end
+
+
+///////// ***
+// General Design Rule... Do not  Edit
+/////////
+rule "HistoryEvaluation.setDoseEvaluationStatusInvalidAndBypassEvaluationLogicIfDoseOverrideInvalidSpecified" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "doseOverrideEvaluationRule"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS)
+		do[invokeCustomEvaluationRules]
+		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null, isValid.isValue() == false)
+	then
+		modify ($td) { 
+			setStatus(DoseStatus.EVALUATION_COMPLETE),
+			addInvalidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName()),
+			addDoseRuleProcessed(kcontext.rule.name);
+		}
+	then[invokeCustomEvaluationRules]
+		ICELogicHelper.logDRLDebugMessage(kcontext.rule.name, "Dose Override Invalid Check Complete.");
+		drools.setFocus("customEvaluationRule");			
 end
 
 

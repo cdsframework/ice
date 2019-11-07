@@ -42,11 +42,11 @@ import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Vaccine
 
-expander ../../knowledgeCommon/org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
+expander org.cdsframework^ICE^1.0.0/org.cdsframework^ICE^1.0.0.dsl
 
 global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
-// global org.drools.runtime.KnowledgeContext kcontext
+/////// global org.drools.runtime.KnowledgeContext kcontext
 
 
 // If for some reason an administered shot is removed from working memory (should not happen) and there is an associated IceFact with that shot, then remove the IceFact
@@ -99,7 +99,7 @@ rule "Evaluation(Any): Remove IceFact if corresponding TargetSeries is no longer
 end
 
 
-rule "Evalaluate the Age when the Shot Administered is Before the Birthdate" ruleflow-group "HistoryEvaluation"
+rule "Evaluate the Age when the Shot Administered is Before the Birthdate" ruleflow-group "HistoryEvaluation"
 	agenda-group "customEvaluationRule"
 	activation-group "doseAgeCheck"
 	when

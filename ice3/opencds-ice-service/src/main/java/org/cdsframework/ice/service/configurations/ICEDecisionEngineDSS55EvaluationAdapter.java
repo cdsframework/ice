@@ -111,6 +111,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
 	private String baseRulesScopingKmId = null;
 	private Boolean outputEarliestOverdueDates = null;
+	private Boolean doseOverrideFeatureEnabled = null;
 	
 	private static Log logger = LogFactory.getLog(ICEDecisionEngineDSS55EvaluationAdapter.class);
 
@@ -369,11 +370,18 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		cmds.add(CommandFactory.newSetGlobal("schedule", lSchedule));
 		
 		if (outputEarliestOverdueDates == null) {
-			String lErrStr = "An error occurred: knowledge module not properly initialized: output earliest/overdue flag not set; cannot continue";
+			String lErrStr = "An error occurred: knowledge module not properly initialized: output earliest/overdue flag not set; this should not happen. Cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("outputEarliestOverdueDates", outputEarliestOverdueDates));
+		
+		if (doseOverrideFeatureEnabled == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: dose override flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		cmds.add(CommandFactory.newSetGlobal("doseOverrideFeatureEnabled", doseOverrideFeatureEnabled));
 		
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -677,6 +685,15 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			outputEarliestOverdueDates = new Boolean(false);
 		}
 
+		// Permit Dose Override by client?
+		String lEnableDoseOverrideFeature = lProps.getProperty("enable_dose_override_feature");
+		if (lEnableDoseOverrideFeature != null && lEnableDoseOverrideFeature.equals("Y")) {
+			doseOverrideFeatureEnabled = new Boolean(true);
+		}
+		else {
+			doseOverrideFeatureEnabled = new Boolean(false);
+		}
+		
 		/////// Set up knowledge base
 		KnowledgeBase lKnowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
 
