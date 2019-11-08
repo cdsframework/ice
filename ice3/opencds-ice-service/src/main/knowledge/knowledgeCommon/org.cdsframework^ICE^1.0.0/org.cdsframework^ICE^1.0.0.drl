@@ -699,7 +699,7 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation: Determine & Record if the Selected TargetDose to be Evaluated is a Primary Shot of the Series, and Initialize the TargetDose Shot and Dose Numbers" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation: Determine & Record if the Selected TargetDose to be Evaluated is a Primary Shot of the Series, and Initialize the TargetDose Shot Number and Dose Number" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
