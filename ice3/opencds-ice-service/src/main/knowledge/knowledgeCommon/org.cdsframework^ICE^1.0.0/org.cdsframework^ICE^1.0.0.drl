@@ -663,7 +663,8 @@ end
 
 ///////// ***
 // General Design and Supplemental Series Table rule... modifying this rule not suggested;
-// VALID "dose override", if feature is enabled and override for the shot is specified by the caller. Shots specified with a dose override are processed before other shots on the same day.
+// VALID "dose override", if feature is enabled and override for the shot is specified by the caller. Shots specified with a dose override are processed before other shots on the same day - thus, the higher salience.
+// In addition, all evaluation logic is skipped for the dose override shot, and recorded as Valid or Invalid as specified by the car.
 /////////
 rule "HistoryEvaluation.setDoseEvaluationStatusValidAndBypassEvaluationLogicIfDoseOverrideSpecified" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -683,9 +684,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusValidAndBypassEvaluationLogicIfDo
 			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
 			setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
 			setStatus(DoseStatus.VALID),	
-			addValidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName()),
-			/////// setDuplicateShotSameDayCheckCompleted(true),
-			addDoseRuleProcessed(_RULENAME);
+			addValidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName());
 		}
 		modify($ts) {
 			setHistoryEvaluationInitiated(true);
@@ -696,7 +695,8 @@ end
 
 ///////// ***
 // General Design and Supplemental Series Table rule... modifying this rule not suggested;
-// INVALID "dose override", if feature is enabled and override for the shot is specified by the caller. Shots specified with a dose override are processed before other shots on the same day.
+// INVALID "dose override", if feature is enabled and override for the shot is specified by the caller. Shots specified with a dose override are processed before other shots on the same day - thus, the higher salience.
+// In addition, all evaluation logic is skipped for the dose override shot, and recorded as Valid or Invalid as specified by the car.
 /////////
 rule "HistoryEvaluation.setDoseEvaluationStatusInvalidAndBypassEvaluationLogicIfDoseOverrideSpecified" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -716,9 +716,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalidAndBypassEvaluationLogicIf
 			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
 			setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
 			setStatus(DoseStatus.INVALID),	
-			addInvalidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName()),
-			/////// setDuplicateShotSameDayCheckCompleted(true),
-			addDoseRuleProcessed(_RULENAME);
+			addInvalidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName());
 		}
 		modify($ts) {
 			setHistoryEvaluationInitiated(true);
@@ -727,97 +725,26 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalidAndBypassEvaluationLogicIf
 end
 
 
-
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.setIsPrimarySeriesShotToTrueIfSeriesIsNotComplete" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation: Determine if the Selected TargetDose to be Evaluated is a Primary Shot of the Series, and Initialize TargetDose Shot and Dose Numbers" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
-		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, isPrimarySeriesShot() == false)
-		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == false)
+		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))	
 	then
 		String _RULENAME = kcontext.rule.name;
-		int tddosenumber = $ts.determineDoseNumberInSeries();
+		int tddosenumber = $td.getAssociatedTargetSeries().determineDoseNumberInSeries();
 		int tdshotnumber = $tdsEvaluated.size()+1;
+		boolean isSeriesComplete = $td.getAssociatedTargetSeries().isSeriesComplete();
 		modify($td) {
 			setStatus(DoseStatus.EVALUATION_IN_PROCESS),
-			setIsPrimarySeriesShot(true),
+			setIsPrimarySeriesShot(! isSeriesComplete),
 			setDoseNumberInSeries(tddosenumber),
 			setAdministeredShotNumberInSeries(tdshotnumber);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
-		setFocus("preEvaluationValidation");
-end
-
-
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "HistoryEvaluation.setIsPrimarySeriesShotToFalseIfSeriesIsComplete" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	when
-		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, isPrimarySeriesShot() == true)
-		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == true)
-		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
-	then
-		String _RULENAME = kcontext.rule.name;
-		int tddosenumber = $ts.determineDoseNumberInSeries();
-		int tdshotnumber = $tdsEvaluated.size()+1;
-		modify($td) {
-			setStatus(DoseStatus.EVALUATION_IN_PROCESS),
-			setIsPrimarySeriesShot(false),
-			setDoseNumberInSeries(tddosenumber),
-			setAdministeredShotNumberInSeries(tdshotnumber);
-		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
-		setFocus("preEvaluationValidation");
-end
-
-
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "HistoryEvaluation.primarySeriesShotAlreadyFalseAndSeriesIsComplete" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	when
-		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, isPrimarySeriesShot() == false)
-		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == true)
-		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
-	then
-		String _RULENAME = kcontext.rule.name;
-		int tddosenumber = $ts.determineDoseNumberInSeries();
-		int tdshotnumber = $tdsEvaluated.size()+1;
-		modify($td) {
-			setStatus(DoseStatus.EVALUATION_IN_PROCESS),
-			setDoseNumberInSeries(tddosenumber),
-			setAdministeredShotNumberInSeries(tdshotnumber);
-		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
-		setFocus("preEvaluationValidation");
-end
-
-
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "HistoryEvaluation.primarySeriesShotAlreadyTrueAndSeriesNotComplete" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	when
-		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, isPrimarySeriesShot() == true)
-		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == false)
-		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
-	then
-		String _RULENAME = kcontext.rule.name;
-		int tddosenumber = $ts.determineDoseNumberInSeries();
-		int tdshotnumber = $tdsEvaluated.size()+1;
-		modify($td) {
-			setStatus(DoseStatus.EVALUATION_IN_PROCESS),
-			setDoseNumberInSeries(tddosenumber),
-			setAdministeredShotNumberInSeries(tdshotnumber);
-		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.getAssociatedTargetSeries());
 		setFocus("preEvaluationValidation");
 end
 
