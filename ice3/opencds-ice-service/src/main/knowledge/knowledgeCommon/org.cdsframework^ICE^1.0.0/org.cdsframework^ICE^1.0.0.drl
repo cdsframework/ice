@@ -169,6 +169,22 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
+rule "ImmunizationReferenceData: Initialize Dose Override Feature Enabled Fact Object" ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+	when
+		not ICEFactTypeFinding(iceResultFinding == "DOSE_OVERRIDE_FEATURE_ENABLED")
+		eval(doseOverrideFeatureEnabled != null && doseOverrideFeatureEnabled.booleanValue() == true)
+	then
+		String _RULENAME = kcontext.rule.name;		
+		ICEFactTypeFinding ift = new ICEFactTypeFinding("DOSE_OVERRIDE_FEATURE_ENABLED");
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Dose Override Feature Enabled Fact Object Initialized");
+		insert(ift);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
 rule "ImmunizationReferenceData: Initialize Target Seasons Fact Object" ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
 	when
@@ -605,34 +621,13 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.setNextTargetDoseNonNOSInNonSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	when
-		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)	
-		$ts : TargetSeries(targetSeason == null, this == $td.associatedTargetSeries)
-	then
-		String _RULENAME = kcontext.rule.name;
-		modify($td) {
-			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
-		}
-		$ts.setHistoryEvaluationInitiated(true);
-		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
-end
-
-
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "HistoryEvaluation.setNextTargetDoseNonNOSInSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.setNextTargetDoseNonNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
-		$ts : TargetSeries(targetSeason != null, this == $td.associatedTargetSeries)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -647,14 +642,14 @@ end
 ///////// ***
 // General Design rule... Do not Edit - for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
 ///////// ***
-rule "HistoryEvaluation.setNextTargetDoseNOSInNonSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.setNextTargetDoseNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
-		$ts : TargetSeries(targetSeason == null, this == $td.associatedTargetSeries)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -667,24 +662,68 @@ end
 
 
 ///////// ***
-// General Design rule... Do not Edit - for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
-///////// ***
-rule "HistoryEvaluation.setNextTargetDoseNOSInSeasonalSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+// General Design and Supplemental Series Table rule... modifying this rule not suggested;
+// VALID "dose override", if feature is enabled and override for the shot is specified by the caller. Shots specified with a dose override are processed before other shots on the same day.
+/////////
+rule "HistoryEvaluation.setDoseEvaluationStatusValidAndBypassEvaluationLogicIfDoseOverrideSpecified" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
+	salience 10
 	when
+		exists ICEFactTypeFinding(iceResultFinding == "DOSE_OVERRIDE_FEATURE_ENABLED")
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
-		$ts : TargetSeries(targetSeason != null, this == $td.associatedTargetSeries)
+		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null, isValid.isValue() == true)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
 	then
 		String _RULENAME = kcontext.rule.name;
-		modify($td) {
-			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
+		modify ($td) {
+			setDoseStatusOverridden(true),
+			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
+			setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
+			setStatus(DoseStatus.VALID),	
+			addValidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName()),
+			/////// setDuplicateShotSameDayCheckCompleted(true),
+			addDoseRuleProcessed(_RULENAME);
 		}
-		$ts.setHistoryEvaluationInitiated(true);
-		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+		modify($ts) {
+			setHistoryEvaluationInitiated(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(kcontext.rule.name, "Dose Override Valid Check Complete for TargetDose " + $td + " in TargetSeries " + $ts);
+end
+
+
+///////// ***
+// General Design and Supplemental Series Table rule... modifying this rule not suggested;
+// INVALID "dose override", if feature is enabled and override for the shot is specified by the caller. Shots specified with a dose override are processed before other shots on the same day.
+/////////
+rule "HistoryEvaluation.setDoseEvaluationStatusInvalidAndBypassEvaluationLogicIfDoseOverrideSpecified" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 10
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "DOSE_OVERRIDE_FEATURE_ENABLED")
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null, isValid.isValue() == false)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify ($td) {
+			setDoseStatusOverridden(true),
+			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
+			setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
+			setStatus(DoseStatus.INVALID),	
+			addInvalidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName()),
+			/////// setDuplicateShotSameDayCheckCompleted(true),
+			addDoseRuleProcessed(_RULENAME);
+		}
+		modify($ts) {
+			setHistoryEvaluationInitiated(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(kcontext.rule.name, "Dose Override Invalid Check Complete for TargetDose " + $td + " in TargetSeries " + $ts);
 end
 
 
@@ -852,7 +891,7 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 			setPreEvaluationCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
-		setFocus("doseOverrideEvaluationRule");
+		setFocus("customEvaluationRule");
 end
 
 
@@ -878,7 +917,7 @@ rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 d
 			setPreEvaluationCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
-		setFocus("doseOverrideEvaluationRule");
+		setFocus("customEvaluationRule");
 end
 
 
@@ -890,60 +929,15 @@ rule "Not Duplicate Shot/Same Day: No duplicate shots to shot being evaluated; I
 	dialect "mvel"
 	agenda-group "makeNoteOfDuplicateShotSameDayIfAny"
 	when
-		$td: TargetDose(isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
-			$tdAssociatedTargetSeries : associatedTargetSeries)
-		not TargetDose(this != $td, administrationDate == $administrationDate, administeredShotNumberInSeries < $tdAdministeredShotNumber, associatedTargetSeries == $tdAssociatedTargetSeries)
+		$td: TargetDose(isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS)
+		not TargetDose(this != $td, administrationDate == $td.administrationDate, administeredShotNumberInSeries < $td.administeredShotNumberInSeries, associatedTargetSeries == $td.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($td) {
 			setPreEvaluationCheckCompleted(true);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $tdAssociatedTargetSeries);
-		setFocus("doseOverrideEvaluationRule");
-end
-
-
-///////// ***
-// General Design Rule... Do not  Edit
-/////////
-rule "HistoryEvaluation.setDoseEvaluationStatusValidAndBypassEvaluationLogicIfDoseOverrideValidSpecified" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	agenda-group "doseOverrideEvaluationRule"
-	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS)
-		do[invokeCustomEvaluationRules]
-		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null, isValid.isValue() == true)
-	then
-		modify ($td) { 
-			setStatus(DoseStatus.EVALUATION_COMPLETE),
-			addValidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName()),
-			addDoseRuleProcessed(kcontext.rule.name);
-		}
-	then[invokeCustomEvaluationRules]
-		ICELogicHelper.logDRLDebugMessage(kcontext.rule.name, "Dose Override Valid Check Complete.");
-		drools.setFocus("customEvaluationRule");			
-end
-
-
-///////// ***
-// General Design Rule... Do not  Edit
-/////////
-rule "HistoryEvaluation.setDoseEvaluationStatusInvalidAndBypassEvaluationLogicIfDoseOverrideInvalidSpecified" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	agenda-group "doseOverrideEvaluationRule"
-	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS)
-		do[invokeCustomEvaluationRules]
-		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null, isValid.isValue() == false)
-	then
-		modify ($td) { 
-			setStatus(DoseStatus.EVALUATION_COMPLETE),
-			addInvalidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName()),
-			addDoseRuleProcessed(kcontext.rule.name);
-		}
-	then[invokeCustomEvaluationRules]
-		ICELogicHelper.logDRLDebugMessage(kcontext.rule.name, "Dose Override Invalid Check Complete.");
-		drools.setFocus("customEvaluationRule");			
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
+		setFocus("customEvaluationRule");
 end
 
 

@@ -66,9 +66,9 @@ rule "Duplicate Shot/Same Day (Abstract Hep A): Make note if the adult vaccine (
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", status == DoseStatus.VALID, vaccineComponent.cdsConceptName == "ICE52")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, vaccineComponent.cdsConceptName in ("ICE83","ICE84"),
-			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "ICE52")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, 
+			vaccineComponent.cdsConceptName in ("ICE83","ICE84"), isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td + " in TargetSeries VACCINE_GROUP_CONCEPT.810 (Hep A)");	

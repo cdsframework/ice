@@ -85,9 +85,9 @@ rule "Duplicate Shot/Same Day Overview Abstract DTP Rule #4: Make note if all sh
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.isUnspecifiedFormulation() == true, 
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == true, 
 			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.033.9",	associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200")
-		$tdother : TargetDose(hasBeenEvaluated == true, this != $td, administrationDate == $td.administrationDate, status == DoseStatus.VALID, associatedTargetSeries == $td.associatedTargetSeries, 
+		$tdother : TargetDose(hasBeenEvaluated == true, this != $td, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries, 
 			vaccineComponent.isUnspecifiedFormulation() == true, vaccineComponent.allDiseasesTargetedForImmunity not contains "SUPPORTED_DISEASE_CONCEPT.033.9", 
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
@@ -152,8 +152,8 @@ rule "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neithe
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
-		$tdother : TargetDose(this != $td, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false, 
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false, 
 			$tdOtherIsCombination : administeredVaccine.isCombinationVaccine(), isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 		eval($tdIsCombination == true && $tdOtherIsCombination == true || $tdIsCombination == false && $tdOtherIsCombination == false)
 	then
