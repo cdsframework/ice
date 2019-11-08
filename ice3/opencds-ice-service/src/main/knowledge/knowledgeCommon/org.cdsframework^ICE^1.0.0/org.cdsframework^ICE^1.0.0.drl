@@ -663,10 +663,10 @@ end
 
 ///////// ***
 // General Design and Supplemental Series Table rule... modifying this rule not suggested;
-// VALID "dose override", if feature is enabled and override for the shot is specified by the caller. Shots specified with a dose override are processed before other shots on the same day - thus, the higher salience.
-// In addition, all evaluation logic is skipped for the dose override shot, and recorded as Valid or Invalid as specified by the car.
+// "Dose Override". If the Dose Override feature is enabled and caller specifies a shot should be treated as Valid or Invalid, processed this shot before other shots on the same day.
+// Thus, the higher salience. In addition, all other rules related to evaluation logic are skipped for this dose override shot.
 /////////
-rule "HistoryEvaluation.setDoseEvaluationStatusValidAndBypassEvaluationLogicIfDoseOverrideSpecified" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation: If Dose Override Specified, set Dose Evaluation Status Accordingly and Bypass Evaluation Logic" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	salience 10
 	when
@@ -674,61 +674,32 @@ rule "HistoryEvaluation.setDoseEvaluationStatusValidAndBypassEvaluationLogicIfDo
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
-		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null, isValid.isValue() == true)
+		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
 	then
 		String _RULENAME = kcontext.rule.name;
+		DoseStatus evaluationStatus = $sae.getIsValid().isValue() == true ? DoseStatus.VALID : DoseStatus.INVALID;
+		String evaluationStatusReason = $sae.getIsValid().isValue() == true ? BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName(): BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName();
 		modify ($td) {
 			setDoseStatusOverridden(true),
+			setIsPrimarySeriesShot(! $ts.isSeriesComplete()),
 			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
 			setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
-			setStatus(DoseStatus.VALID),	
-			addValidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName());
+			setStatus(evaluationStatus),	
+			addValidReason(evaluationStatusReason);
 		}
 		modify($ts) {
 			setHistoryEvaluationInitiated(true);
 		}
-		ICELogicHelper.logDRLDebugMessage(kcontext.rule.name, "Dose Override Valid Check Complete for TargetDose " + $td + " in TargetSeries " + $ts);
-end
-
-
-///////// ***
-// General Design and Supplemental Series Table rule... modifying this rule not suggested;
-// INVALID "dose override", if feature is enabled and override for the shot is specified by the caller. Shots specified with a dose override are processed before other shots on the same day - thus, the higher salience.
-// In addition, all evaluation logic is skipped for the dose override shot, and recorded as Valid or Invalid as specified by the car.
-/////////
-rule "HistoryEvaluation.setDoseEvaluationStatusInvalidAndBypassEvaluationLogicIfDoseOverrideSpecified" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
-	salience 10
-	when
-		exists ICEFactTypeFinding(iceResultFinding == "DOSE_OVERRIDE_FEATURE_ENABLED")
-		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
-		$sae : SubstanceAdministrationEvent(id == $td.doseId, isValid != null, isValid.isValue() == false)
-		$ts : TargetSeries(this == $td.associatedTargetSeries)
-		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
-	then
-		String _RULENAME = kcontext.rule.name;
-		modify ($td) {
-			setDoseStatusOverridden(true),
-			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
-			setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
-			setStatus(DoseStatus.INVALID),	
-			addInvalidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName());
-		}
-		modify($ts) {
-			setHistoryEvaluationInitiated(true);
-		}
-		ICELogicHelper.logDRLDebugMessage(kcontext.rule.name, "Dose Override Invalid Check Complete for TargetDose " + $td + " in TargetSeries " + $ts);
+		ICELogicHelper.logDRLDebugMessage(kcontext.rule.name, "Dose Override Check Complete for TargetDose " + $td + " in TargetSeries " + $ts);
 end
 
 
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation: Determine if the Selected TargetDose to be Evaluated is a Primary Shot of the Series, and Initialize TargetDose Shot and Dose Numbers" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation: Determine & Record if the Selected TargetDose to be Evaluated is a Primary Shot of the Series, and Initialize the TargetDose Shot and Dose Numbers" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		$td : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
