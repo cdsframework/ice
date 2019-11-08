@@ -38,7 +38,6 @@ public class SeriesRules {
 
 	private String seriesId;
 	private String seriesName;
-	/////// private String vaccineGroup;
 	private CdsConcept vaccineGroupConcept;
 	private int numberOfDosesInSeries;
 	private boolean recurringDosesAfterSeriesComplete;

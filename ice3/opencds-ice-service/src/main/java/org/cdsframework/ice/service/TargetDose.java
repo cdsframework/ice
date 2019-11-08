@@ -56,6 +56,7 @@ public class TargetDose {
 	private boolean postEvaluationCheckCompleted;
 	private boolean duplicateShotSameDayEvaluationOrderCompleted;
 	private boolean duplicateShotSameDayCheckCompleted;
+	private boolean doseStatusOverridden;
 	private DoseStatus status;
 	private HashSet<String> validReasons;
 	private HashSet<String> acceptedReasons;
@@ -101,6 +102,7 @@ public class TargetDose {
 		hasBeenEvaluated = false;
 		preEvaluationCheckCompleted = false;
 		postEvaluationCheckCompleted = false;
+		doseStatusOverridden = false;
 		duplicateShotSameDayEvaluationOrderCompleted = false;
 		duplicateShotSameDayCheckCompleted = false;
 	}
@@ -346,6 +348,14 @@ public class TargetDose {
 	
 	public void setDuplicateShotSameDayCheckCompleted(boolean truefalse) {
 		this.duplicateShotSameDayCheckCompleted = truefalse;
+	}
+	
+	public boolean isDoseStatusOverridden() {
+		return this.doseStatusOverridden;
+	}
+	
+	public void setDoseStatusOverridden(boolean truefalse) {
+		this.doseStatusOverridden = truefalse;
 	}
 
 	public Vaccine getAdministeredVaccine() {

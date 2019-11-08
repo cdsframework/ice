@@ -60,10 +60,35 @@ rule "Duplicate Shots/Same Day Overview Rule #1: If both shots are of the same C
 	auto-focus true
 	when
 		// All valid duplicate, valid shots on same day have the same CVX code
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID)
-		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $td.associatedTargetSeries, 
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false)
+		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries, 
 			administeredVaccine.cdsConceptName == $td.administeredVaccine.cdsConceptName, doseNumberInSeries == $td.doseNumberInSeries, administeredShotNumberInSeries > $td.administeredShotNumberInSeries,
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
+// Duplicate Shot/Same Day Dose Overrude Rule 
+// If one of the shots is a dose override marked as Valid and the other shot is not a dose override, evaluate the shot that is _not_ a dose override as Invalid with a reason code of DUPLICATE_SHOT_SAME_DAY
+rule "Duplicate Shots/Same Day Overview Rule (Dose Override): If one of the shots is a Dose Override marked as Valid and the other shot is not a Dose Override, evaluate the shot that is _not_ a Dose Override as Invalid with a reason code of DUPLICATE_SHOT_SAME_DAY" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "duplicateShotSameDay"
+	activation-group "duplicateShotGeneralNOSActivationGroup"
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == true) 
+		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries, 
+			doseNumberInSeries == $td.doseNumberInSeries, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
@@ -86,8 +111,8 @@ rule "Duplicate Shots/Same Day Overview Rule #2: If one of those shots is an NOS
 	activation-group "duplicateShotGeneralNOSActivationGroup"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, $tdAdministrationDate : administrationDate, vaccineComponent.isUnspecifiedFormulation() == false) 
-		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $td.associatedTargetSeries, 
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false) 
+		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $td.associatedTargetSeries, 
 			doseNumberInSeries == $td.doseNumberInSeries, vaccineComponent.isUnspecifiedFormulation() == true, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -112,8 +137,8 @@ rule "Duplicate Shots/Same Day Overview Rule #3: If neither shot is an NOS CVX, 
 	activation-group "duplicateShotComboAndOrNOSActivationGroup"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.isCombinationVaccine() == true)
-		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $td.associatedTargetSeries, 
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.isCombinationVaccine() == true)
+		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries, 
 			doseNumberInSeries == $td.doseNumberInSeries, vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.isCombinationVaccine() == false, 
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
@@ -170,8 +195,8 @@ rule "Duplicate Shots/Same Day Overview Rule #4: If both shots are an NOS CVX, t
 	activation-group "duplicateShotComboAndOrNOSActivationGroup"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.isUnspecifiedFormulation() == true)
-		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries == $td.associatedTargetSeries, 
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == true)
+		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries, 
 			doseNumberInSeries == $td.doseNumberInSeries, vaccineComponent.isUnspecifiedFormulation() == true, administeredShotNumberInSeries > $td.administeredShotNumberInSeries,
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
@@ -195,8 +220,8 @@ rule "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if vaccines d
 	activation-group "duplicateShotAbstractRule5"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, 
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
 			vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, $tdOtherIsCombination : administeredVaccine.isCombinationVaccine(),
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 		eval($tdIsCombination == true && $tdOtherIsCombination == true || $tdIsCombination == false && $tdOtherIsCombination == false)

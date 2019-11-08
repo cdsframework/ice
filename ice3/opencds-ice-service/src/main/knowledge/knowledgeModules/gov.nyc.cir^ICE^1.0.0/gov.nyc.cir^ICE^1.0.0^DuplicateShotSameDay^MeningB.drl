@@ -66,9 +66,10 @@ rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162/CVX 163 reported on same
 	auto-focus true
 	no-loop true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", associatedTargetSeries.seriesName == "MenB4C2DoseSeries",	vaccineComponent.cdsConceptName == "ICE163")
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", associatedTargetSeries.seriesName == "MenB4C2DoseSeries",	vaccineComponent.cdsConceptName == "ICE163",
+			isDoseStatusOverridden() == false)
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, doseNumberInSeries == $td.doseNumberInSeries, 
-			vaccineComponent.cdsConceptName == "ICE162", isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+			vaccineComponent.cdsConceptName == "ICE162", isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
@@ -89,9 +90,9 @@ rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162/CVX 163 reported on same
 	auto-focus true
 	no-loop true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162", 
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162", isDoseStatusOverridden() == false, 
 			associatedTargetSeries.seriesName == "MenBFHbp2DoseSeries" || associatedTargetSeries.seriesName == "MenBFHbp3DoseSeries")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, 
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false,
 			doseNumberInSeries == $td.doseNumberInSeries, vaccineComponent.cdsConceptName == "ICE163", isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;

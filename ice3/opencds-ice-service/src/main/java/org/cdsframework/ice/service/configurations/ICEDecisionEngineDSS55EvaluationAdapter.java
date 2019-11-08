@@ -111,6 +111,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 
 	private String baseRulesScopingKmId = null;
 	private Boolean outputEarliestOverdueDates = null;
+	private Boolean doseOverrideFeatureEnabled = null;
 	
 	private static Log logger = LogFactory.getLog(ICEDecisionEngineDSS55EvaluationAdapter.class);
 
@@ -369,11 +370,18 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		cmds.add(CommandFactory.newSetGlobal("schedule", lSchedule));
 		
 		if (outputEarliestOverdueDates == null) {
-			String lErrStr = "An error occurred: knowledge module not properly initialized: output earliest/overdue flag not set; cannot continue";
+			String lErrStr = "An error occurred: knowledge module not properly initialized: output earliest/overdue flag not set; this should not happen. Cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("outputEarliestOverdueDates", outputEarliestOverdueDates));
+		
+		if (doseOverrideFeatureEnabled == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: dose override flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		cmds.add(CommandFactory.newSetGlobal("doseOverrideFeatureEnabled", doseOverrideFeatureEnabled));
 		
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -677,6 +685,15 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			outputEarliestOverdueDates = new Boolean(false);
 		}
 
+		// Permit Dose Override by client?
+		String lEnableDoseOverrideFeature = lProps.getProperty("enable_dose_override_feature");
+		if (lEnableDoseOverrideFeature != null && lEnableDoseOverrideFeature.equals("Y")) {
+			doseOverrideFeatureEnabled = new Boolean(true);
+		}
+		else {
+			doseOverrideFeatureEnabled = new Boolean(false);
+		}
+		
 		/////// Set up knowledge base
 		KnowledgeBase lKnowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
 
@@ -750,12 +767,20 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 				logger.error(_METHODNAME + lErrStr);
 				throw new InconsistentConfigurationException(lErrStr);
 			}
-			// Load the files - only DRL files permitted for the base cdsframework rules
+			// Load the files - DRL and DSLR files permitted for the base cdsframework rules
 			for (File lFileToLoad : lBaseFilesToLoad) {
 				if (lFileToLoad != null) {
 					if (lFileToLoad.getName().endsWith(".drl") || lFileToLoad.getName().endsWith(".DRL")) {
 						knowledgeBuilder.add(ResourceFactory.newFileResource(lFileToLoad), ResourceType.DRL);
-						logger.info(_METHODNAME + "Loaded DRL file " + lFileToLoad.getPath());
+						logger.info(_METHODNAME + "Loaded Base DRL file " + lFileToLoad.getPath());
+					}
+				}
+			}
+			for (File lFileToLoad : lBaseFilesToLoad) {
+				if (lFileToLoad != null) {
+					if (lFileToLoad.getName().endsWith(".dslr") || lFileToLoad.getName().endsWith(".DSLR")) {
+						knowledgeBuilder.add(ResourceFactory.newFileResource(lFileToLoad), ResourceType.DSLR);
+						logger.info(_METHODNAME + "Loaded Base DSLR file " + lFileToLoad.getPath());
 					}
 				}
 			}
@@ -834,7 +859,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		}
 
 		// Obtain the files in this directory that adheres to the base and extension, ordered.
-		String[] lValidFileExtensionsForCustomRules = { "drl", "dslr" };
+		String[] lValidFileExtensionsForCustomRules = { "drl", "dslr", "DRL", "DSLR" };
 		String[] lResultFiles = pDSLRFileDirectory.list(new FileNameWithExtensionFilterImpl(pRequestedKmId, lValidFileExtensionsForCustomRules));
 		if (lResultFiles != null && lResultFiles.length > 0) {
 			Arrays.sort(lResultFiles);
