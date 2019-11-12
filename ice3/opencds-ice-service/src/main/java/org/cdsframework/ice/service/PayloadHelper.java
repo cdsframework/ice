@@ -90,14 +90,6 @@ public class PayloadHelper {
 			logger.debug(str);
 		}
 		String conceptTargetId = sae.getId();
-		// Record Substance AdministrationEvent CDS System Data Source
-		if (cdsSource != null &&  cdsSource.isEmpty() == false && sae.getDataSourceType() == null) {
-			CD cdsDataSource = new CD();
-			cdsDataSource.setCodeSystem("2.16.840.1.113883.3.795.5.4.12.1.2");
-			cdsDataSource.setCodeSystemName("ICE CDS Framework Source");
-			cdsDataSource.setCode(cdsSource);
-			sae.setDataSourceType(cdsDataSource);
-		}
 		
 		// Embedded SubstanceAdministrationEvent
 		SubstanceAdministrationEvent lSAE = new SubstanceAdministrationEvent();
@@ -107,6 +99,15 @@ public class PayloadHelper {
 		lSAE.setTemplateId(subsAdmEvtTemplateArr);
 		lSAE.setEvaluatedPersonId(focalPersonId); 
 		lSAE.setSubjectIsFocalPerson(true);
+
+		// Record Substance AdministrationEvent CDS System Data Source
+		if (cdsSource != null &&  cdsSource.isEmpty() == false) {
+			CD cdsDataSource = new CD();
+			cdsDataSource.setCodeSystem("2.16.840.1.113883.3.795.5.4.12.1.2");
+			cdsDataSource.setCodeSystemName("org.cdsframework source");
+			cdsDataSource.setCode(cdsSource);
+			lSAE.setDataSourceType(cdsDataSource);
+		}
 		
 		// Substance Proposal General Purpose
 		CD subsAdmGeneralPurposeCD = new CD();
@@ -261,14 +262,6 @@ public class PayloadHelper {
 			logger.debug(str);
 		}
 		String conceptTargetId = sae.getId();
-		// Record Substance AdministrationEvent CDS System Data Source
-		if (cdsSource != null &&  cdsSource.isEmpty() == false && sae.getDataSourceType() == null) {
-			CD cdsDataSource = new CD();
-			cdsDataSource.setCodeSystem("2.16.840.1.113883.3.795.5.4.12.1.2");
-			cdsDataSource.setCodeSystemName("ICE CDS Framework Source");
-			cdsDataSource.setCode(cdsSource);
-			sae.setDataSourceType(cdsDataSource);
-		}
 
 		// SubstanceAdministrationEvent
 		SubstanceAdministrationEvent lSAE = new SubstanceAdministrationEvent();
@@ -278,6 +271,15 @@ public class PayloadHelper {
 		lSAE.setTemplateId(subsAdmEvtTemplateArr);
 		lSAE.setEvaluatedPersonId(focalPersonId); 
 		lSAE.setSubjectIsFocalPerson(true);
+
+		// Record Substance AdministrationEvent CDS System Data Source
+		if (cdsSource != null &&  cdsSource.isEmpty() == false) {
+			CD cdsDataSource = new CD();
+			cdsDataSource.setCodeSystem("2.16.840.1.113883.3.795.5.4.12.1.2");
+			cdsDataSource.setCodeSystemName("org.cdsframework source");
+			cdsDataSource.setCode(cdsSource);
+			lSAE.setDataSourceType(cdsDataSource);
+		}
 
 		// Substance Proposal General Purpose
 		CD subsAdmGeneralPurposeCD = new CD();
@@ -419,7 +421,7 @@ public class PayloadHelper {
 		if (cdsSource != null && ! cdsSource.isEmpty()) {
 			CD cdsDataSource = new CD();
 			cdsDataSource.setCodeSystem("2.16.840.1.113883.3.795.5.4.12.1.2");
-			cdsDataSource.setCodeSystemName("ICE CDS Framework Source");
+			cdsDataSource.setCodeSystemName("org.cdsframework source");
 			cdsDataSource.setCode(cdsSource);
 			sap.setDataSourceType(cdsDataSource);
 		}

@@ -1296,6 +1296,7 @@ end
 
 ///////////////////////////////////////////////////////////// Hib-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
+/* ICE3-639 - Comment this out for now, until logic is confirmed.
 // Hib: If the Series that was selected is Not Complete but the other Series is Complete, select the other (completed) Series instead
 rule "SeriesSelection(Hib): If the Series that was selected is Not Complete but the other Series is Complete, select the other (completed) Series instead" ruleflow-group "SeriesSelection"
 	dialect "mvel"
@@ -1315,7 +1316,7 @@ rule "SeriesSelection(Hib): If the Series that was selected is Not Complete but 
 		update($tsSelected);
 		update($tss);
 end
-
+*/
 
 rule "SeriesSelection.SelectByDefaultHib4DoseSeries" ruleflow-group "SeriesSelection"
 	dialect "mvel"
