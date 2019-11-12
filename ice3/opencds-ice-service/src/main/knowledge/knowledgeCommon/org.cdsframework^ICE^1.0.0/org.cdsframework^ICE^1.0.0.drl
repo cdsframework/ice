@@ -95,6 +95,7 @@ global java.util.Date patientAgeTimeOfInterest
 global org.cdsframework.ice.service.Schedule schedule
 global java.lang.Boolean outputEarliestOverdueDates
 global java.lang.Boolean doseOverrideFeatureEnabled
+global java.lang.String iceVersion
 
 // global org.drools.runtime.KnowledgeContext kcontext
 
@@ -113,6 +114,7 @@ rule "ImmunizationReferenceData.Initialize Immunization Schedule and Supporting 
 	then
 		String _RULENAME = kcontext.rule.name;
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
+		kcontext.getKnowledgeRuntime().setGlobal("iceVersion", "ICE_VERSION_1.22.1");
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Initialized patientAgeTimeOfInterest" + evalTime);		
 end
 
@@ -2272,7 +2274,7 @@ rule "ProcessResults: Return Evaluations" ruleflow-group "ProcessResults"
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, $sae, $vaccineGroup, $td);
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td);
 		$sae.setToBeReturned(true);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $td);	
 end
@@ -2293,7 +2295,7 @@ rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported" ruleflow-
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationNotSupported(drools, namedObjects, $evalTime, focalPersonId, $sae, "VACCINE_GROUP_CONCEPT.999");
+		p.OutputNestedImmEvaluationNotSupported(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, "VACCINE_GROUP_CONCEPT.999");
 		$sae.setToBeReturned(true);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $sae);	
 end
@@ -2311,7 +2313,7 @@ rule "ProcessResults: Return Recommendations for Vaccines Not Supported" extends
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputOtherImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId); 
+		p.outputOtherImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion); 
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");		
 end
 
@@ -2363,7 +2365,7 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series" ruleflow-gr
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts, outputEarliestOverdueDates);
+		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates);
 		insert(sap);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
@@ -2382,7 +2384,7 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, $ts, outputEarliestOverdueDates);
+		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
 
