@@ -22,7 +22,7 @@ steps:
     path: /root/.m2
 - name: 'maven:3-jdk-8-slim'
   entrypoint: 'java'
-  args: ['-jar', 'rules-packager/target/rules-packager-1.0.0-SNAPSHOT-jar-with-dependencies.jar', 'org.cdsframework^ICE^1.0.0', 'org.nyc.cir^ICE^1.0.0' 'ice3/opencds-ice-service-data/src/main/resources/knowledgeModules']
+  args: ['-jar', 'rules-packager/target/rules-packager-1.0.0-SNAPSHOT-jar-with-dependencies.jar', 'org.cdsframework^ICE^1.0.0', 'org.nyc.cir^ICE^1.0.0', 'ice3/opencds-ice-service-data/src/main/resources/knowledgeModules']
   dir: '.'
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '--tag=gcr.io/$PROJECT_ID/ice-opencds:$BRANCH_NAME', '-f', 'docker/Dockerfile', '.']
