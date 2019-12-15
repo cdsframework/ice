@@ -35,7 +35,8 @@ COPY docker/log4j.xml /usr/local/tomcat/webapps/opencds-decision-support-service
 COPY docker/ice.properties /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
 COPY docker/start-ice.sh ./
 
-RUN chown -R appuser: /home/appuser /usr/local/tomcat
+RUN chown -R appuser: /home/appuser /usr/local/tomcat && \
+    rm /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/log4j.properties
 
 USER appuser
 
