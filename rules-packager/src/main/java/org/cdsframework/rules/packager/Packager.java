@@ -1,17 +1,18 @@
 package org.cdsframework.rules.packager;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-
+import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
 import org.drools.builder.KnowledgeBuilder;
@@ -34,7 +35,6 @@ public class Packager {
      * @throws java.lang.Exception
      */
     public static void main(String[] args) throws Exception {
-        final String _METHODNAME = "main ";
         Packager packager = new Packager();
         packager.run(args);
     }
@@ -42,40 +42,118 @@ public class Packager {
     public void run(String[] args) throws Exception {
         final String _METHODNAME = "run ";
 
-        String lBaseRulesScopingKmId = args[0];
+        String propsPath = args[0];
+        Properties lProps = new Properties();
+        lProps.load(new FileInputStream(propsPath));
+
         String lRequestedKmId = args[1];
-        String path = args[2];
+        String lBaseRulesScopingKmId = args[2];
 
         logger.info(_METHODNAME + "loading knowledge from source files");
-
+        if (lRequestedKmId != null && lRequestedKmId.equals("org.nyc.cir^ICE^1.0.0")) {
+            lRequestedKmId = "gov.nyc.cir^ICE^1.0.0";
+        }
+        logger.info("Initializing ICE3 Drools 5.5 KnowledgeBase");
         KnowledgeBuilderConfiguration config = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration();
         config.setProperty("drools.accumulate.function.maxDate", "org.cdsframework.ice.service.MaximumDateAccumulateFunction");
         config.setProperty("drools.accumulate.function.minDate", "org.cdsframework.ice.service.MinimumDateAccumulateFunction");
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(config);
 
-        File pkgFile = new File(path + "/" + lRequestedKmId + "/" + lRequestedKmId + ".pkg");
-        KnowledgeBase lKnowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
+        File pkgFile = null;
         File drlFile = null;
         File drlFileDuplicateShotSameDay = null;
         File dslFile = null;
         File bpmnFile = null;
 
+        /////// Get the ICE knowledge repository directory location
+        String baseConfigurationLocation = lProps.getProperty("ice_knowledge_repository_location");
+        if (baseConfigurationLocation == null) {
+            String lErrStr = "ICE knowledge repository data location not specified in properties file";
+            logger.error(_METHODNAME + lErrStr);
+            throw new RuntimeException(lErrStr);
+        } else {
+            if (logger.isInfoEnabled()) {
+                String lErrStr = "ICE knowledge repository data location specified in properties file: " + baseConfigurationLocation;
+                logger.info(lErrStr);
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////
+        // START - Get the ICE knowledge modules subdirectory location
+        ////////////////////////////////////////////////////////////////////////////////////		
+        String knowledgeModulesSubDirectory = lProps.getProperty("ice_knowledge_modules_subdirectory");
+        if (knowledgeModulesSubDirectory == null) {
+            String lErrStr = "ICE knowledge modules subdirectory location not specified in properties file";
+            logger.error(_METHODNAME + lErrStr);
+            throw new RuntimeException(lErrStr);
+        } else {
+            if (logger.isDebugEnabled()) {
+                String lInfoStr = "ICE knowledge modules data location specified in properties file: " + knowledgeModulesSubDirectory;
+                logger.info(lInfoStr);
+            }
+        }
+        /////// 
+        // Determine Knowledge Modules Directory Location
+        ///////
+        File lKnowledgeModulesDirectory = new File(baseConfigurationLocation, knowledgeModulesSubDirectory);
+        if (!new File(lKnowledgeModulesDirectory, lRequestedKmId).exists()) {
+            String lErrStr = "Requested ICE knowledge module does not exist: " + lKnowledgeModulesDirectory.getAbsolutePath() + "; knowledge module " + lRequestedKmId;
+            logger.error(_METHODNAME + lErrStr);
+            throw new RuntimeException(lErrStr);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug(_METHODNAME + "Requested ICE knowledge module directory: " + lKnowledgeModulesDirectory.getAbsolutePath() + "; knowledge module " + lRequestedKmId);
+        }
+        ////////////////////////////////////////////////////////////////////////////////////
+        // END - Get the ICE knowledge modules subdirectory location
+        ////////////////////////////////////////////////////////////////////////////////////		
+
+        ////////////////////////////////////////////////////////////////////////////////////
+        // START - Get the ICE Common rules subdirectory location
+        ////////////////////////////////////////////////////////////////////////////////////		
+        String knowledgeCommonSubDirectory = lProps.getProperty("ice_knowledge_common_subdirectory");
+        if (knowledgeCommonSubDirectory == null) {
+            String lErrStr = "ICE common knowledge subdirectory location not specified in properties file";
+            logger.error(_METHODNAME + lErrStr);
+            throw new RuntimeException(lErrStr);
+        } else {
+            if (logger.isDebugEnabled()) {
+                String lInfoStr = "ICE common knowledge data location specified in properties file: " + knowledgeCommonSubDirectory;
+                logger.info(lInfoStr);
+            }
+        }
+
+        File lKnowledgeCommonDirectory = new File(baseConfigurationLocation, knowledgeCommonSubDirectory);
+        if (!new File(lKnowledgeCommonDirectory, lBaseRulesScopingKmId).exists()) {
+            String lErrStr = "Base ICE knowledge module does not exist" + lKnowledgeCommonDirectory.getAbsolutePath() + "; knowledge module " + lBaseRulesScopingKmId;;
+            logger.error(_METHODNAME + lErrStr);
+            throw new RuntimeException(lErrStr);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug(_METHODNAME + "Base knowledge modules directory: " + lKnowledgeCommonDirectory.getAbsolutePath() + "; knowledge module " + lBaseRulesScopingKmId);
+        }
+        ////////////////////////////////////////////////////////////////////////////////////
+        // END - Get the ICE Common rules subdirectory location
+        ////////////////////////////////////////////////////////////////////////////////////		
+
+        pkgFile = new File(lKnowledgeModulesDirectory + "/" + lRequestedKmId + "/" + lRequestedKmId + ".pkg");
+
+        KnowledgeBase lKnowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
+
         //////////////////////////////////////////////////////////////////////
         // Base rules and DSL
         // DSL and Base rules
-        dslFile = new File(path + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".dsl");
-        drlFile = new File(path + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".drl");
-        drlFileDuplicateShotSameDay = new File(path + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + "^DuplicateShotSameDay.drl");
-        bpmnFile = new File(path + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".bpmn");
+        dslFile = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".dsl");
+        drlFile = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".drl");
+        drlFileDuplicateShotSameDay = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + "^DuplicateShotSameDay.drl");
+        bpmnFile = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId + "/" + lBaseRulesScopingKmId + ".bpmn");
 
         if (!dslFile.exists() || !drlFile.exists() || !drlFileDuplicateShotSameDay.exists() || !bpmnFile.exists()) {
             // Try in the knowledge module directory
-            dslFile = new File(path + "/" + lRequestedKmId + "/" + lRequestedKmId + ".dsl");
-            drlFile = new File(path + "/" + lRequestedKmId + "/" + lRequestedKmId + ".drl");
-            drlFileDuplicateShotSameDay = new File(path + "/" + lRequestedKmId + "/" + lRequestedKmId + "^DuplicateShotSameDay.drl");
-            bpmnFile = new File(path + "/" + lRequestedKmId + "/" + lRequestedKmId + ".bpmn");
+            dslFile = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lRequestedKmId + "/" + lRequestedKmId + ".dsl");
+            drlFile = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lRequestedKmId + "/" + lRequestedKmId + ".drl");
+            drlFileDuplicateShotSameDay = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lRequestedKmId + "/" + lRequestedKmId + "^DuplicateShotSameDay.drl");
+            bpmnFile = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lRequestedKmId + "/" + lRequestedKmId + ".bpmn");
             if (!dslFile.exists() || !drlFile.exists() || !drlFileDuplicateShotSameDay.exists() || !bpmnFile.exists()) {
-                String lErrStr = "Some or all ICE base rules not found; base repository location: " + path + "; "
+                String lErrStr = "Some or all ICE base rules not found; base repository location: " + baseConfigurationLocation + "; "
                         + "base rules scoping entity id: " + lBaseRulesScopingKmId + "; knowledge module location: " + lRequestedKmId;
                 logger.error(_METHODNAME + lErrStr);
                 throw new RuntimeException(lErrStr);
@@ -103,25 +181,33 @@ public class Packager {
         // lFilesToExcludeFromKB.add(drlFileDuplicateShotSameDay);
 
         // Add base rules to knowledge base
-        File dslrBaseFileDirectory = new File(path + "/" + lBaseRulesScopingKmId);
+        File dslrBaseFileDirectory = new File(baseConfigurationLocation, knowledgeCommonSubDirectory + "/" + lBaseRulesScopingKmId);
         List<File> lBaseFilesToLoad = retrieveCollectionOfDSLRsToAddToKnowledgeBase(lBaseRulesScopingKmId, dslrBaseFileDirectory, lFilesToExcludeFromKB);
         if (lBaseFilesToLoad.isEmpty()) {
             String lErrStr = "No base ICE rules found; cannot continue";
             logger.error(_METHODNAME + lErrStr);
-            throw new IllegalStateException(lErrStr);
+            throw new InconsistentConfigurationException(lErrStr);
         }
-        // Load the files - only DRL files permitted for the base cdsframework rules
+        // Load the files - DRL and DSLR files permitted for the base cdsframework rules
         for (File lFileToLoad : lBaseFilesToLoad) {
             if (lFileToLoad != null) {
                 if (lFileToLoad.getName().endsWith(".drl") || lFileToLoad.getName().endsWith(".DRL")) {
                     knowledgeBuilder.add(ResourceFactory.newFileResource(lFileToLoad), ResourceType.DRL);
-                    logger.info(_METHODNAME + "Loaded DRL file " + lFileToLoad.getPath());
+                    logger.info(_METHODNAME + "Loaded Base DRL file " + lFileToLoad.getPath());
+                }
+            }
+        }
+        for (File lFileToLoad : lBaseFilesToLoad) {
+            if (lFileToLoad != null) {
+                if (lFileToLoad.getName().endsWith(".dslr") || lFileToLoad.getName().endsWith(".DSLR")) {
+                    knowledgeBuilder.add(ResourceFactory.newFileResource(lFileToLoad), ResourceType.DSLR);
+                    logger.info(_METHODNAME + "Loaded Base DSLR file " + lFileToLoad.getPath());
                 }
             }
         }
 
         // Add custom rules to knowledge base - both DRL and DSLR files permitted, DRL files loaded first.
-        File dslrFileDirectory = new File(path + "/" + lRequestedKmId);
+        File dslrFileDirectory = new File(baseConfigurationLocation, knowledgeModulesSubDirectory + "/" + lRequestedKmId);
         List<File> lFilesToLoad = retrieveCollectionOfDSLRsToAddToKnowledgeBase(lRequestedKmId, dslrFileDirectory, lFilesToExcludeFromKB);
         // First do the DRL files, then the DSLR files
         for (File lFileToLoad : lFilesToLoad) {
