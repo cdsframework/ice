@@ -30,8 +30,8 @@
         <groovy.eclipse.batch.version>2.3.4-01</groovy.eclipse.batch.version>
         <commons.cli.version>1.2</commons.cli.version>
 
-        <hapi-fhir.version>1.0</hapi-fhir.version>
-        <woodstox.core.version>4.4.1</woodstox.core.version>
+        <!--  <hapi-fhir.version>4.1.0</hapi-fhir.version> -->
+        <!--  <woodstox.core.version>4.4.1</woodstox.core.version> -->
 
         <!-- testing - uses groovy -->
         <spock.version>1.0-groovy-2.4</spock.version>
@@ -42,9 +42,11 @@
         <xml.unit.version>1.5</xml.unit.version>
 
         <!-- spring -->
-        <spring.version>4.0.6.RELEASE</spring.version>
-        <spring.security.version>3.2.4.RELEASE</spring.security.version>
-        <spring.ws.core.version>2.2.0.RELEASE</spring.ws.core.version>
+        <spring.version>4.3.25.RELEASE</spring.version>
+        <spring.security.version>4.2.13.RELEASE</spring.security.version>
+        <spring.ws.core.version>2.4.6.RELEASE</spring.ws.core.version>
+        <!--  <spring.ws.core.version>2.2.0.RELEASE</spring.ws.core.version> -->
+        
 
         <!-- apelon dts -->
         <apelon.dts.version>3.5.0</apelon.dts.version>
@@ -79,7 +81,7 @@
         <module>dss-java-stub</module>
         <module>opencds-vmr-1_0</module>
         <module>opencds-vmr-evaluation</module>
-        <module>opencds-fhir-evaluation</module>
+        <!--  <module>opencds-fhir-evaluation</module> -->
         <module>opencds-plugins</module>
         <module>opencds-dss-components</module>
         <module>opencds-decision-support-service</module>
@@ -206,6 +208,8 @@
             </dependency>
 
             <!-- fhir specific -->
+            <!--  Not currently used by ICE -->
+            <!-- 
             <dependency>
                 <groupId>ca.uhn.hapi.fhir</groupId>
                 <artifactId>hapi-fhir-base</artifactId>
@@ -221,8 +225,11 @@
                 <artifactId>woodstox-core-asl</artifactId>
                 <version>4.4.1</version>
             </dependency>
-
+			--> 
+			
             <!-- jboss drools specific -->
+            <!--  Not currently used by ICE -->
+            <!--  
             <dependency>
                 <groupId>org.drools</groupId>
                 <artifactId>drools-decisiontables</artifactId>
@@ -239,7 +246,8 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
+			-->
+			
             <!-- jboss jbpm specific -->
             <dependency>
                 <groupId>org.jbpm</groupId>

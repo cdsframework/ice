@@ -65,7 +65,7 @@
         <constructor-arg name="unmarshallerPool" ref="unmarshallerPool" />
     </bean>
     
-     <bean id="fhirInboundPayloadProcessor" class="org.opencds.service.evaluate.FHIRInboundPayloadProcessor"/>
+    <!-- <bean id="fhirInboundPayloadProcessor" class="org.opencds.service.evaluate.FHIRInboundPayloadProcessor"/> -->
     
     <bean id="marshallerFactory" class="org.opencds.config.api.pool.MarshallerFactory">
         <constructor-arg name="jaxbContextService" ref="jaxbContextService" />
@@ -79,7 +79,7 @@
         <constructor-arg name="marshallerPool" ref="marshallerPool" />
     </bean>
     
-    <bean id="fhirOutboundPayloadProcessor" class="org.opencds.service.evaluate.FHIROutboundPayloadProcessor"/>
+    <!-- <bean id="fhirOutboundPayloadProcessor" class="org.opencds.service.evaluate.FHIROutboundPayloadProcessor"/> -->
    
        
     <bean id="requestProcessorService" class="org.opencds.service.evaluate.RequestProcessorService">
@@ -87,7 +87,7 @@
          <property name="inboundPayloadProcessorsMap">
             <map>
                 <entry key="org.opencds.vmr^VMR^1.0"  value-ref="vmrInboundPayloadProcessor" />
-                <entry key="org.opencds.fhir^FHIR^1.0" value-ref="fhirInboundPayloadProcessor" />
+                <!-- <entry key="org.opencds.fhir^FHIR^1.0" value-ref="fhirInboundPayloadProcessor" /> -->
             </map>
         </property>
     </bean>
@@ -103,7 +103,7 @@
         <property name="outboundPayloadProcessorsMap">
             <map>
                 <entry key="org.opencds.vmr^VMR^1.0"  value-ref="vmrOutboundPayloadProcessor" />
-                <entry key="org.opencds.fhir^FHIR^1.0" value-ref="fhirOutboundPayloadProcessor" />
+                <!-- <entry key="org.opencds.fhir^FHIR^1.0" value-ref="fhirOutboundPayloadProcessor" /> -->
             </map>
         </property>
     </bean>
@@ -164,7 +164,7 @@
         <constructor-arg name="location" value="${config.security}" />
     </bean>
 
-
+	<!-- 
     <bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
         <constructor-arg>
             <list>
@@ -172,7 +172,8 @@
             </list>
         </constructor-arg>
     </bean>
-
+	-->
+	 
     <!-- To allow public access by default and to set authentication mode to basic login/password -->
     <security:http create-session="stateless" realm="OpenCDS Configuration Service" use-expressions="true" authentication-manager-ref="authenticationManager">
         <!-- <security:intercept-url pattern="/config/**" method="GET" access="ROLE_CONFIG_USER" /> -->
@@ -189,11 +190,13 @@
         <property name="realmName" value="OpenCDS Configuration Service" />
     </bean>
 
+	<!-- 
     <bean id="basicAuthenticationFilter" class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="authenticationEntryPoint" ref="authenticationEntryPoint" />
     </bean>
-
+	 -->
+	 
     <bean id="roleVoter" class="org.springframework.security.access.vote.RoleHierarchyVoter">
         <constructor-arg ref="roleHierarchy" />
     </bean>
