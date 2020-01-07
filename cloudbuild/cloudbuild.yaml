@@ -44,7 +44,7 @@ steps:
   args:
   - '-c'
   - |
-    cat /root/keystore/gcp-token.txt | docker login --username nicolary --password-stdin docker.io
+    cat /root/keystore/gcp_token.txt | docker login --username nicolary --password-stdin docker.io
     docker image ls -a
     docker tag gcr.io/$PROJECT_ID/ice:$BRANCH_NAME hlnconsulting/ice-dev:latest
     docker push docker.io/hlnconsulting/ice-dev:latest
