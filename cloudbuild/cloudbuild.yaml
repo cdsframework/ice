@@ -1,4 +1,16 @@
 steps:
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+  - kms
+  - decrypt
+  - --ciphertext-file=cloudbuild/gcp_token.enc
+  - --plaintext-file=/root/keystore/gcp_token.txt
+  - --location=global
+  - --keyring=main
+  - --key=gcb_key
+  volumes:
+  - name: 'keystore'
+    path: /root/keystore
 - name: 'maven:3-jdk-8-slim'
   entrypoint: 'mvn'
   args: ['-Dmaven.compiler.source=1.7', '-Dmaven.compiler.target=1.7', 'install']
@@ -27,5 +39,17 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '--tag=gcr.io/$PROJECT_ID/ice:$BRANCH_NAME', '-f', 'docker/Dockerfile', '.']
   dir: '.'
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    cat /root/keystore/gcp_token.txt | docker login --username $_DH_USERNAME --password-stdin $_DH_HOSTNAME
+    docker tag gcr.io/$PROJECT_ID/ice:$BRANCH_NAME $_DH_REPO:$_DH_TAG
+    docker push $_DH_HOSTNAME/$_DH_REPO:$_DH_TAG
+    rm /root/keystore/gcp_token.txt
+  volumes:
+  - name: 'keystore'
+    path: /root/keystore
 images: ['gcr.io/$PROJECT_ID/ice']
 timeout: 900s
