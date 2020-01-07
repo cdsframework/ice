@@ -44,11 +44,10 @@ steps:
   args:
   - '-c'
   - |
-    env
-    cat /root/keystore/gcp_token.txt | docker login --username $_DH_USERNAME --password-stdin docker.io
-    docker image ls -a
-    docker tag gcr.io/$PROJECT_ID/ice:$BRANCH_NAME hlnconsulting/ice-dev:latest
-    docker push docker.io/hlnconsulting/ice-dev:latest
+    cat /root/keystore/gcp_token.txt | docker login --username $_DH_USERNAME --password-stdin $_DH_HOSTNAME
+    docker tag gcr.io/$PROJECT_ID/ice:$BRANCH_NAME $_DH_REPO:$_DH_TAG
+    docker push $_DH_HOSTNAME/$_DH_REPO:$_DH_TAG
+    rm /root/keystore/gcp_token.txt
   volumes:
   - name: 'keystore'
     path: /root/keystore
