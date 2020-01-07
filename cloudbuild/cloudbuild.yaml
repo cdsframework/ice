@@ -25,7 +25,7 @@ steps:
   args: ['-jar', 'rules-packager/target/rules-packager-1.0.0-SNAPSHOT-jar-with-dependencies.jar', 'org.cdsframework^ICE^1.0.0', 'org.nyc.cir^ICE^1.0.0', 'ice3/opencds-ice-service-data/src/main/resources/knowledgeModules']
   dir: '.'
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--tag=gcr.io/$PROJECT_ID/ice-opencds:$BRANCH_NAME', '-f', 'docker/Dockerfile', '.']
+  args: ['build', '--tag=gcr.io/$PROJECT_ID/ice:$BRANCH_NAME', '-f', 'docker/Dockerfile', '.']
   dir: '.'
-images: ['gcr.io/$PROJECT_ID/ice-opencds']
+images: ['gcr.io/$PROJECT_ID/ice']
 timeout: 900s
