@@ -6,7 +6,8 @@ import groovy.xml.MarkupBuilder
 @Log4j
 class IceClient {
 
-	private static final String WS_URL = "http://localhost:28080/opencds-decision-support-service/evaluate"
+	// private static final String WS_URL = "http://localhost:28080/opencds-decision-support-service/evaluate"
+	private static final String WS_URL = "http://localhost:32775/opencds-decision-support-service/evaluate"
 	private static final String DSS_NS = "http://www.omg.org/spec/CDSS/201105/dss"
 	private static final String EVALUATE = 'evaluate'
 	private static final String EVALUATE_AT_SPEC_TIME = 'evaluateAtSpecifiedTime'
@@ -19,7 +20,7 @@ class IceClient {
 
 		def params = [
 			kmEvaluationRequest:[scopingEntityId: 'org.nyc.cir', businessId: 'ICE', version: '1.0.0'],
-			specifiedTime: '2019-03-19'
+			specifiedTime: '2019-12-15'
 		]
 		def params1_0_0 = [
 			kmEvaluationRequest:[scopingEntityId: 'org.nyc.cir', businessId: 'ICE', version: '1.0.0'],

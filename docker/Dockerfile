@@ -4,9 +4,10 @@ FROM tomcat:9-jre8-alpine AS build
 LABEL organization="HLN Consulting, LLC"
 LABEL maintainer="Sam Nicolary<sdn@hln.com>"
 
-ENV TZ="America/New_York"
+#ENV TZ="America/New_York"
+ENV TZ="America/Denver"
 ENV DEBUG="N"
-ENV KM_THREADS="2"
+ENV KM_THREADS="8"
 ENV OUTPUT_EARLIEST_OVERDUE_DATES="Y"
 ENV ENABLE_DOSE_OVERRIDE_FEATURE="Y"
 ENV REMOTE_CONFIG_ENABLED="N"
