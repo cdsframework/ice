@@ -14,31 +14,6 @@ import org.omg.dss.common.ScopedDO;
 import org.omg.dss.common.ScopingEntity;
 import org.omg.dss.common.SemanticPayload;
 import org.omg.dss.common.ServiceRequestBase;
-import org.omg.dss.evaluation.Evaluate;
-import org.omg.dss.evaluation.EvaluateAtSpecifiedTime;
-import org.omg.dss.evaluation.EvaluateAtSpecifiedTimeResponse;
-import org.omg.dss.evaluation.EvaluateIteratively;
-import org.omg.dss.evaluation.EvaluateIterativelyAtSpecifiedTime;
-import org.omg.dss.evaluation.EvaluateIterativelyAtSpecifiedTimeResponse;
-import org.omg.dss.evaluation.EvaluateIterativelyResponse;
-import org.omg.dss.evaluation.EvaluateResponse;
-import org.omg.dss.evaluation.requestresponse.DataRequirementItemData;
-import org.omg.dss.evaluation.requestresponse.EvaluationRequest;
-import org.omg.dss.evaluation.requestresponse.EvaluationRequestBase;
-import org.omg.dss.evaluation.requestresponse.EvaluationResponse;
-import org.omg.dss.evaluation.requestresponse.EvaluationResponseBase;
-import org.omg.dss.evaluation.requestresponse.FinalKMEvaluationResponse;
-import org.omg.dss.evaluation.requestresponse.IntermediateKMEvaluationResponse;
-import org.omg.dss.evaluation.requestresponse.IntermediateState;
-import org.omg.dss.evaluation.requestresponse.IterativeEvaluationRequest;
-import org.omg.dss.evaluation.requestresponse.IterativeEvaluationResponse;
-import org.omg.dss.evaluation.requestresponse.IterativeKMEvaluationRequest;
-import org.omg.dss.evaluation.requestresponse.IterativeKMEvaluationResponse;
-import org.omg.dss.evaluation.requestresponse.KMEvaluationRequest;
-import org.omg.dss.evaluation.requestresponse.KMEvaluationRequestBase;
-import org.omg.dss.evaluation.requestresponse.KMEvaluationResponse;
-import org.omg.dss.evaluation.requestresponse.KMEvaluationResultData;
-import org.omg.dss.evaluation.requestresponse.Warning;
 import org.omg.dss.exception.DSSException;
 import org.omg.dss.exception.DSSRuntimeException;
 import org.omg.dss.exception.EvaluationException;
@@ -149,42 +124,30 @@ public class ObjectFactory {
     private final static QName _UnsupportedLanguageException_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "UnsupportedLanguageException");
     private final static QName _SemanticRequirement_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "SemanticRequirement");
     private final static QName _GetKMDataRequirementsResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "getKMDataRequirementsResponse");
-    private final static QName _KMEvaluationRequestBase_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMEvaluationRequestBase");
     private final static QName _CPQPInUse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "CPQPInUse");
     private final static QName _ListProfiles_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "listProfiles");
     private final static QName _ServiceRequestBase_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "ServiceRequestBase");
-    private final static QName _IntermediateState_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "IntermediateState");
     private final static QName _KMDataRequirementGroup_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMDataRequirementGroup");
     private final static QName _ListKMsResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "listKMsResponse");
     private final static QName _KMTraitCriterion_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMTraitCriterion");
     private final static QName _RequiredDataRequirement_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "RequiredDataRequirement");
-    private final static QName _IterativeKMEvaluationResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "IterativeKMEvaluationResponse");
-    private final static QName _IterativeEvaluationResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "IterativeEvaluationResponse");
     private final static QName _ProfilesByType_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "ProfilesByType");
     private final static QName _SemanticPayload_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "SemanticPayload");
-    private final static QName _EvaluationRequest_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "EvaluationRequest");
-    private final static QName _EvaluateResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "evaluateResponse");
     private final static QName _ConformanceProfile_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "ConformanceProfile");
     private final static QName _InvalidTraitCriterionDataFormatException_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "InvalidTraitCriterionDataFormatException");
-    private final static QName _EvaluationResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "EvaluationResponse");
     private final static QName _KMEvaluationResultSemanticsList_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMEvaluationResultSemanticsList");
-    private final static QName _EvaluateIterativelyResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "evaluateIterativelyResponse");
     private final static QName _TraitRequirement_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "TraitRequirement");
-    private final static QName _EvaluateIterativelyAtSpecifiedTime_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "evaluateIterativelyAtSpecifiedTime");
     private final static QName _DescribeScopingEntityHierarchy_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeScopingEntityHierarchy");
-    private final static QName _EvaluationResponseBase_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "EvaluationResponseBase");
     private final static QName _GetKMDescription_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "getKMDescription");
     private final static QName _DescribedDO_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "DescribedDO");
     private final static QName _KMDataRequirementItem_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMDataRequirementItem");
     private final static QName _ListKMs_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "listKMs");
-    private final static QName _EvaluateIteratively_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "evaluateIteratively");
     private final static QName _DescribeSemanticSignifierResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeSemanticSignifierResponse");
     private final static QName _RelatedKM_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "RelatedKM");
     private final static QName _DescribeTrait_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeTrait");
     private final static QName _KMDataRequirements_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMDataRequirements");
     private final static QName _KMItem_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMItem");
     private final static QName _KMCriterion_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMCriterion");
-    private final static QName _EvaluateIterativelyAtSpecifiedTimeResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "evaluateIterativelyAtSpecifiedTimeResponse");
     private final static QName _RankedKM_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "RankedKM");
     private final static QName _ExtendedKMDescription_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "ExtendedKMDescription");
     private final static QName _KMTraitCriterionValue_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMTraitCriterionValue");
@@ -194,41 +157,31 @@ public class ObjectFactory {
     private final static QName _LanguageSupportRequirement_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "LanguageSupportRequirement");
     private final static QName _EvaluationResultCriterion_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "EvaluationResultCriterion");
     private final static QName _ScopingEntity_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "ScopingEntity");
-    private final static QName _IterativeEvaluationRequest_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "IterativeEvaluationRequest");
     private final static QName _GetKMEvaluationResultSemanticsResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "getKMEvaluationResultSemanticsResponse");
     private final static QName _AllowedDataRequirement_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "AllowedDataRequirement");
     private final static QName _DescribeTraitResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeTraitResponse");
     private final static QName _DescribeProfileResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeProfileResponse");
     private final static QName _UnrecognizedTraitCriterionException_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "UnrecognizedTraitCriterionException");
-    private final static QName _EvaluationRequestBase_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "EvaluationRequestBase");
     private final static QName _ComputableDefinition_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "ComputableDefinition");
     private final static QName _ItemIdentifier_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "ItemIdentifier");
     private final static QName _EntityIdentifier_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "EntityIdentifier");
     private final static QName _KMTraitInclusionSpecification_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMTraitInclusionSpecification");
     private final static QName _GetKMEvaluationResultSemantics_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "getKMEvaluationResultSemantics");
-    private final static QName _IntermediateKMEvaluationResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "IntermediateKMEvaluationResponse");
-    private final static QName _Evaluate_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "evaluate");
     private final static QName _ListProfilesResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "listProfilesResponse");
     private final static QName _FunctionalProfile_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "FunctionalProfile");
-    private final static QName _DataRequirementItemData_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "DataRequirementItemData");
     private final static QName _KMTraitValue_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMTraitValue");
     private final static QName _DescribeSemanticRequirementResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeSemanticRequirementResponse");
     private final static QName _DescribeSemanticSignifier_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeSemanticSignifier");
     private final static QName _InvalidDataFormatException_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "InvalidDataFormatException");
     private final static QName _RankedKMList_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "RankedKMList");
-    private final static QName _Warning_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "Warning");
-    private final static QName _FinalKMEvaluationResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "FinalKMEvaluationResponse");
     private final static QName _DataRequirementCriterion_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "DataRequirementCriterion");
     private final static QName _InvalidTimeZoneOffsetException_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "InvalidTimeZoneOffsetException");
-    private final static QName _KMEvaluationResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMEvaluationResponse");
     private final static QName _DescribeSemanticRequirement_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeSemanticRequirement");
-    private final static QName _EvaluateAtSpecifiedTimeResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "evaluateAtSpecifiedTimeResponse");
     private final static QName _XSDComputableDefinition_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "XSDComputableDefinition");
     private final static QName _KMStatusCriterion_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMStatusCriterion");
     private final static QName _DataRequirementBase_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "DataRequirementBase");
     private final static QName _KMList_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMList");
     private final static QName _GetKMDataRequirementsForEvaluationAtSpecifiedTimeResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse");
-    private final static QName _KMEvaluationRequest_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMEvaluationRequest");
     private final static QName _UnrecognizedLanguageException_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "UnrecognizedLanguageException");
     private final static QName _RelatedKMSearchCriterion_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "RelatedKMSearchCriterion");
     private final static QName _KMSearchCriteria_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMSearchCriteria");
@@ -254,15 +207,12 @@ public class ObjectFactory {
     private final static QName _DescribeScopingEntityHierarchyResponse_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeScopingEntityHierarchyResponse");
     private final static QName _OtherSemanticRequirement_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "OtherSemanticRequirement");
     private final static QName _DescribeProfile_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "describeProfile");
-    private final static QName _EvaluateAtSpecifiedTime_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "evaluateAtSpecifiedTime");
     private final static QName _KMConsumerProvidedQueryParameter_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMConsumerProvidedQueryParameter");
     private final static QName _ScopedDO_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "ScopedDO");
     private final static QName _InformationModelRequirement_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "InformationModelRequirement");
-    private final static QName _KMEvaluationResultData_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "KMEvaluationResultData");
     private final static QName _TraitCriterion_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "TraitCriterion");
     private final static QName _ProfilesOfType_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "ProfilesOfType");
     private final static QName _SemanticSignifier_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "SemanticSignifier");
-    private final static QName _IterativeKMEvaluationRequest_QNAME = new QName("http://www.omg.org/spec/CDSS/201105/dss", "IterativeKMEvaluationRequest");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.omg.spec.cdss._201105.dss
@@ -288,14 +238,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link DataRequirementItemData }
-     * 
-     */
-    public DataRequirementItemData createDataRequirementItemData() {
-        return new DataRequirementItemData();
-    }
-
-    /**
      * Create an instance of {@link InvalidDataFormatException }
      * 
      */
@@ -309,14 +251,6 @@ public class ObjectFactory {
      */
     public UnrecognizedTraitCriterionException createUnrecognizedTraitCriterionException() {
         return new UnrecognizedTraitCriterionException();
-    }
-
-    /**
-     * Create an instance of {@link KMEvaluationRequest }
-     * 
-     */
-    public KMEvaluationRequest createKMEvaluationRequest() {
-        return new KMEvaluationRequest();
     }
 
     /**
@@ -432,14 +366,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link IterativeEvaluationResponse }
-     * 
-     */
-    public IterativeEvaluationResponse createIterativeEvaluationResponse() {
-        return new IterativeEvaluationResponse();
-    }
-
-    /**
      * Create an instance of {@link ItemIdentifier }
      * 
      */
@@ -480,14 +406,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link IntermediateKMEvaluationResponse }
-     * 
-     */
-    public IntermediateKMEvaluationResponse createIntermediateKMEvaluationResponse() {
-        return new IntermediateKMEvaluationResponse();
-    }
-
-    /**
      * Create an instance of {@link UnrecognizedLanguageException }
      * 
      */
@@ -501,22 +419,6 @@ public class ObjectFactory {
      */
     public GetKMDescriptionResponse createGetKMDescriptionResponse() {
         return new GetKMDescriptionResponse();
-    }
-
-    /**
-     * Create an instance of {@link EvaluateAtSpecifiedTime }
-     * 
-     */
-    public EvaluateAtSpecifiedTime createEvaluateAtSpecifiedTime() {
-        return new EvaluateAtSpecifiedTime();
-    }
-
-    /**
-     * Create an instance of {@link IterativeKMEvaluationRequest }
-     * 
-     */
-    public IterativeKMEvaluationRequest createIterativeKMEvaluationRequest() {
-        return new IterativeKMEvaluationRequest();
     }
 
     /**
@@ -557,14 +459,6 @@ public class ObjectFactory {
      */
     public ListProfiles createListProfiles() {
         return new ListProfiles();
-    }
-
-    /**
-     * Create an instance of {@link KMEvaluationResultData }
-     * 
-     */
-    public KMEvaluationResultData createKMEvaluationResultData() {
-        return new KMEvaluationResultData();
     }
 
     /**
@@ -656,35 +550,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link FinalKMEvaluationResponse }
-     * 
-     */
-    public FinalKMEvaluationResponse createFinalKMEvaluationResponse() {
-        return new FinalKMEvaluationResponse();
-    }
-
-    /**
      * Create an instance of {@link GetKMDataRequirements }
      * 
      */
     public GetKMDataRequirements createGetKMDataRequirements() {
         return new GetKMDataRequirements();
-    }
-
-    /**
-     * Create an instance of {@link IterativeEvaluationRequest }
-     * 
-     */
-    public IterativeEvaluationRequest createIterativeEvaluationRequest() {
-        return new IterativeEvaluationRequest();
-    }
-
-    /**
-     * Create an instance of {@link EvaluationRequest }
-     * 
-     */
-    public EvaluationRequest createEvaluationRequest() {
-        return new EvaluationRequest();
     }
 
     /**
@@ -720,51 +590,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Warning }
-     * 
-     */
-    public Warning createWarning() {
-        return new Warning();
-    }
-
-    /**
-     * Create an instance of {@link EvaluateIterativelyAtSpecifiedTimeResponse }
-     * 
-     */
-    public EvaluateIterativelyAtSpecifiedTimeResponse createEvaluateIterativelyAtSpecifiedTimeResponse() {
-        return new EvaluateIterativelyAtSpecifiedTimeResponse();
-    }
-
-    /**
      * Create an instance of {@link XSDComputableDefinition }
      * 
      */
     public XSDComputableDefinition createXSDComputableDefinition() {
         return new XSDComputableDefinition();
-    }
-
-    /**
-     * Create an instance of {@link EvaluateIteratively }
-     * 
-     */
-    public EvaluateIteratively createEvaluateIteratively() {
-        return new EvaluateIteratively();
-    }
-
-    /**
-     * Create an instance of {@link EvaluateIterativelyAtSpecifiedTime }
-     * 
-     */
-    public EvaluateIterativelyAtSpecifiedTime createEvaluateIterativelyAtSpecifiedTime() {
-        return new EvaluateIterativelyAtSpecifiedTime();
-    }
-
-    /**
-     * Create an instance of {@link EvaluationResponse }
-     * 
-     */
-    public EvaluationResponse createEvaluationResponse() {
-        return new EvaluationResponse();
     }
 
     /**
@@ -797,14 +627,6 @@ public class ObjectFactory {
      */
     public OtherSemanticRequirement createOtherSemanticRequirement() {
         return new OtherSemanticRequirement();
-    }
-
-    /**
-     * Create an instance of {@link Evaluate }
-     * 
-     */
-    public Evaluate createEvaluate() {
-        return new Evaluate();
     }
 
     /**
@@ -912,14 +734,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link IterativeKMEvaluationResponse }
-     * 
-     */
-    public IterativeKMEvaluationResponse createIterativeKMEvaluationResponse() {
-        return new IterativeKMEvaluationResponse();
-    }
-
-    /**
      * Create an instance of {@link InvalidDriDataFormatException }
      * 
      */
@@ -941,14 +755,6 @@ public class ObjectFactory {
      */
     public EntityIdentifier createEntityIdentifier() {
         return new EntityIdentifier();
-    }
-
-    /**
-     * Create an instance of {@link IntermediateState }
-     * 
-     */
-    public IntermediateState createIntermediateState() {
-        return new IntermediateState();
     }
 
     /**
@@ -1016,14 +822,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link EvaluateResponse }
-     * 
-     */
-    public EvaluateResponse createEvaluateResponse() {
-        return new EvaluateResponse();
-    }
-
-    /**
      * Create an instance of {@link FindKMs }
      * 
      */
@@ -1064,14 +862,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link EvaluateAtSpecifiedTimeResponse }
-     * 
-     */
-    public EvaluateAtSpecifiedTimeResponse createEvaluateAtSpecifiedTimeResponse() {
-        return new EvaluateAtSpecifiedTimeResponse();
-    }
-
-    /**
      * Create an instance of {@link KMList }
      * 
      */
@@ -1085,14 +875,6 @@ public class ObjectFactory {
      */
     public GetKMDataRequirementsResponse createGetKMDataRequirementsResponse() {
         return new GetKMDataRequirementsResponse();
-    }
-
-    /**
-     * Create an instance of {@link EvaluateIterativelyResponse }
-     * 
-     */
-    public EvaluateIterativelyResponse createEvaluateIterativelyResponse() {
-        return new EvaluateIterativelyResponse();
     }
 
     /**
@@ -1157,15 +939,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link KMEvaluationRequestBase }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "KMEvaluationRequestBase")
-    public JAXBElement<KMEvaluationRequestBase> createKMEvaluationRequestBase(KMEvaluationRequestBase value) {
-        return new JAXBElement<KMEvaluationRequestBase>(_KMEvaluationRequestBase_QNAME, KMEvaluationRequestBase.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link CPQPInUse }{@code >}}
      * 
      */
@@ -1190,15 +963,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "ServiceRequestBase")
     public JAXBElement<ServiceRequestBase> createServiceRequestBase(ServiceRequestBase value) {
         return new JAXBElement<ServiceRequestBase>(_ServiceRequestBase_QNAME, ServiceRequestBase.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link IntermediateState }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "IntermediateState")
-    public JAXBElement<IntermediateState> createIntermediateState(IntermediateState value) {
-        return new JAXBElement<IntermediateState>(_IntermediateState_QNAME, IntermediateState.class, null, value);
     }
 
     /**
@@ -1238,24 +1002,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link IterativeKMEvaluationResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "IterativeKMEvaluationResponse")
-    public JAXBElement<IterativeKMEvaluationResponse> createIterativeKMEvaluationResponse(IterativeKMEvaluationResponse value) {
-        return new JAXBElement<IterativeKMEvaluationResponse>(_IterativeKMEvaluationResponse_QNAME, IterativeKMEvaluationResponse.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link IterativeEvaluationResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "IterativeEvaluationResponse")
-    public JAXBElement<IterativeEvaluationResponse> createIterativeEvaluationResponse(IterativeEvaluationResponse value) {
-        return new JAXBElement<IterativeEvaluationResponse>(_IterativeEvaluationResponse_QNAME, IterativeEvaluationResponse.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link ProfilesByType }{@code >}}
      * 
      */
@@ -1271,24 +1017,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "SemanticPayload")
     public JAXBElement<SemanticPayload> createSemanticPayload(SemanticPayload value) {
         return new JAXBElement<SemanticPayload>(_SemanticPayload_QNAME, SemanticPayload.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluationRequest }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "EvaluationRequest")
-    public JAXBElement<EvaluationRequest> createEvaluationRequest(EvaluationRequest value) {
-        return new JAXBElement<EvaluationRequest>(_EvaluationRequest_QNAME, EvaluationRequest.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluateResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "evaluateResponse")
-    public JAXBElement<EvaluateResponse> createEvaluateResponse(EvaluateResponse value) {
-        return new JAXBElement<EvaluateResponse>(_EvaluateResponse_QNAME, EvaluateResponse.class, null, value);
     }
 
     /**
@@ -1310,30 +1038,12 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluationResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "EvaluationResponse")
-    public JAXBElement<EvaluationResponse> createEvaluationResponse(EvaluationResponse value) {
-        return new JAXBElement<EvaluationResponse>(_EvaluationResponse_QNAME, EvaluationResponse.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link KMEvaluationResultSemanticsList }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "KMEvaluationResultSemanticsList")
     public JAXBElement<KMEvaluationResultSemanticsList> createKMEvaluationResultSemanticsList(KMEvaluationResultSemanticsList value) {
         return new JAXBElement<KMEvaluationResultSemanticsList>(_KMEvaluationResultSemanticsList_QNAME, KMEvaluationResultSemanticsList.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluateIterativelyResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "evaluateIterativelyResponse")
-    public JAXBElement<EvaluateIterativelyResponse> createEvaluateIterativelyResponse(EvaluateIterativelyResponse value) {
-        return new JAXBElement<EvaluateIterativelyResponse>(_EvaluateIterativelyResponse_QNAME, EvaluateIterativelyResponse.class, null, value);
     }
 
     /**
@@ -1346,30 +1056,12 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluateIterativelyAtSpecifiedTime }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "evaluateIterativelyAtSpecifiedTime")
-    public JAXBElement<EvaluateIterativelyAtSpecifiedTime> createEvaluateIterativelyAtSpecifiedTime(EvaluateIterativelyAtSpecifiedTime value) {
-        return new JAXBElement<EvaluateIterativelyAtSpecifiedTime>(_EvaluateIterativelyAtSpecifiedTime_QNAME, EvaluateIterativelyAtSpecifiedTime.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DescribeScopingEntityHierarchy }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "describeScopingEntityHierarchy")
     public JAXBElement<DescribeScopingEntityHierarchy> createDescribeScopingEntityHierarchy(DescribeScopingEntityHierarchy value) {
         return new JAXBElement<DescribeScopingEntityHierarchy>(_DescribeScopingEntityHierarchy_QNAME, DescribeScopingEntityHierarchy.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluationResponseBase }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "EvaluationResponseBase")
-    public JAXBElement<EvaluationResponseBase> createEvaluationResponseBase(EvaluationResponseBase value) {
-        return new JAXBElement<EvaluationResponseBase>(_EvaluationResponseBase_QNAME, EvaluationResponseBase.class, null, value);
     }
 
     /**
@@ -1406,15 +1098,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "listKMs")
     public JAXBElement<ListKMs> createListKMs(ListKMs value) {
         return new JAXBElement<ListKMs>(_ListKMs_QNAME, ListKMs.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluateIteratively }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "evaluateIteratively")
-    public JAXBElement<EvaluateIteratively> createEvaluateIteratively(EvaluateIteratively value) {
-        return new JAXBElement<EvaluateIteratively>(_EvaluateIteratively_QNAME, EvaluateIteratively.class, null, value);
     }
 
     /**
@@ -1469,15 +1152,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "KMCriterion")
     public JAXBElement<KMCriterion> createKMCriterion(KMCriterion value) {
         return new JAXBElement<KMCriterion>(_KMCriterion_QNAME, KMCriterion.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluateIterativelyAtSpecifiedTimeResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "evaluateIterativelyAtSpecifiedTimeResponse")
-    public JAXBElement<EvaluateIterativelyAtSpecifiedTimeResponse> createEvaluateIterativelyAtSpecifiedTimeResponse(EvaluateIterativelyAtSpecifiedTimeResponse value) {
-        return new JAXBElement<EvaluateIterativelyAtSpecifiedTimeResponse>(_EvaluateIterativelyAtSpecifiedTimeResponse_QNAME, EvaluateIterativelyAtSpecifiedTimeResponse.class, null, value);
     }
 
     /**
@@ -1562,15 +1236,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link IterativeEvaluationRequest }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "IterativeEvaluationRequest")
-    public JAXBElement<IterativeEvaluationRequest> createIterativeEvaluationRequest(IterativeEvaluationRequest value) {
-        return new JAXBElement<IterativeEvaluationRequest>(_IterativeEvaluationRequest_QNAME, IterativeEvaluationRequest.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link GetKMEvaluationResultSemanticsResponse }{@code >}}
      * 
      */
@@ -1613,15 +1278,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "UnrecognizedTraitCriterionException")
     public JAXBElement<UnrecognizedTraitCriterionException> createUnrecognizedTraitCriterionException(UnrecognizedTraitCriterionException value) {
         return new JAXBElement<UnrecognizedTraitCriterionException>(_UnrecognizedTraitCriterionException_QNAME, UnrecognizedTraitCriterionException.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluationRequestBase }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "EvaluationRequestBase")
-    public JAXBElement<EvaluationRequestBase> createEvaluationRequestBase(EvaluationRequestBase value) {
-        return new JAXBElement<EvaluationRequestBase>(_EvaluationRequestBase_QNAME, EvaluationRequestBase.class, null, value);
     }
 
     /**
@@ -1670,24 +1326,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link IntermediateKMEvaluationResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "IntermediateKMEvaluationResponse")
-    public JAXBElement<IntermediateKMEvaluationResponse> createIntermediateKMEvaluationResponse(IntermediateKMEvaluationResponse value) {
-        return new JAXBElement<IntermediateKMEvaluationResponse>(_IntermediateKMEvaluationResponse_QNAME, IntermediateKMEvaluationResponse.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link Evaluate }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "evaluate")
-    public JAXBElement<Evaluate> createEvaluate(Evaluate value) {
-        return new JAXBElement<Evaluate>(_Evaluate_QNAME, Evaluate.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link ListProfilesResponse }{@code >}}
      * 
      */
@@ -1703,15 +1341,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "FunctionalProfile")
     public JAXBElement<FunctionalProfile> createFunctionalProfile(FunctionalProfile value) {
         return new JAXBElement<FunctionalProfile>(_FunctionalProfile_QNAME, FunctionalProfile.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link DataRequirementItemData }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "DataRequirementItemData")
-    public JAXBElement<DataRequirementItemData> createDataRequirementItemData(DataRequirementItemData value) {
-        return new JAXBElement<DataRequirementItemData>(_DataRequirementItemData_QNAME, DataRequirementItemData.class, null, value);
     }
 
     /**
@@ -1760,24 +1389,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link Warning }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "Warning")
-    public JAXBElement<Warning> createWarning(Warning value) {
-        return new JAXBElement<Warning>(_Warning_QNAME, Warning.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link FinalKMEvaluationResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "FinalKMEvaluationResponse")
-    public JAXBElement<FinalKMEvaluationResponse> createFinalKMEvaluationResponse(FinalKMEvaluationResponse value) {
-        return new JAXBElement<FinalKMEvaluationResponse>(_FinalKMEvaluationResponse_QNAME, FinalKMEvaluationResponse.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DataRequirementCriterion }{@code >}}
      * 
      */
@@ -1796,30 +1407,12 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link KMEvaluationResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "KMEvaluationResponse")
-    public JAXBElement<KMEvaluationResponse> createKMEvaluationResponse(KMEvaluationResponse value) {
-        return new JAXBElement<KMEvaluationResponse>(_KMEvaluationResponse_QNAME, KMEvaluationResponse.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DescribeSemanticRequirement }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "describeSemanticRequirement")
     public JAXBElement<DescribeSemanticRequirement> createDescribeSemanticRequirement(DescribeSemanticRequirement value) {
         return new JAXBElement<DescribeSemanticRequirement>(_DescribeSemanticRequirement_QNAME, DescribeSemanticRequirement.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluateAtSpecifiedTimeResponse }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "evaluateAtSpecifiedTimeResponse")
-    public JAXBElement<EvaluateAtSpecifiedTimeResponse> createEvaluateAtSpecifiedTimeResponse(EvaluateAtSpecifiedTimeResponse value) {
-        return new JAXBElement<EvaluateAtSpecifiedTimeResponse>(_EvaluateAtSpecifiedTimeResponse_QNAME, EvaluateAtSpecifiedTimeResponse.class, null, value);
     }
 
     /**
@@ -1865,15 +1458,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse")
     public JAXBElement<GetKMDataRequirementsForEvaluationAtSpecifiedTimeResponse> createGetKMDataRequirementsForEvaluationAtSpecifiedTimeResponse(GetKMDataRequirementsForEvaluationAtSpecifiedTimeResponse value) {
         return new JAXBElement<GetKMDataRequirementsForEvaluationAtSpecifiedTimeResponse>(_GetKMDataRequirementsForEvaluationAtSpecifiedTimeResponse_QNAME, GetKMDataRequirementsForEvaluationAtSpecifiedTimeResponse.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link KMEvaluationRequest }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "KMEvaluationRequest")
-    public JAXBElement<KMEvaluationRequest> createKMEvaluationRequest(KMEvaluationRequest value) {
-        return new JAXBElement<KMEvaluationRequest>(_KMEvaluationRequest_QNAME, KMEvaluationRequest.class, null, value);
     }
 
     /**
@@ -2102,15 +1686,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EvaluateAtSpecifiedTime }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "evaluateAtSpecifiedTime")
-    public JAXBElement<EvaluateAtSpecifiedTime> createEvaluateAtSpecifiedTime(EvaluateAtSpecifiedTime value) {
-        return new JAXBElement<EvaluateAtSpecifiedTime>(_EvaluateAtSpecifiedTime_QNAME, EvaluateAtSpecifiedTime.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link KMConsumerProvidedQueryParameter }{@code >}}
      * 
      */
@@ -2138,15 +1713,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link KMEvaluationResultData }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "KMEvaluationResultData")
-    public JAXBElement<KMEvaluationResultData> createKMEvaluationResultData(KMEvaluationResultData value) {
-        return new JAXBElement<KMEvaluationResultData>(_KMEvaluationResultData_QNAME, KMEvaluationResultData.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link TraitCriterion }{@code >}}
      * 
      */
@@ -2171,15 +1737,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "SemanticSignifier")
     public JAXBElement<SemanticSignifier> createSemanticSignifier(SemanticSignifier value) {
         return new JAXBElement<SemanticSignifier>(_SemanticSignifier_QNAME, SemanticSignifier.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link IterativeKMEvaluationRequest }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.omg.org/spec/CDSS/201105/dss", name = "IterativeKMEvaluationRequest")
-    public JAXBElement<IterativeKMEvaluationRequest> createIterativeKMEvaluationRequest(IterativeKMEvaluationRequest value) {
-        return new JAXBElement<IterativeKMEvaluationRequest>(_IterativeKMEvaluationRequest_QNAME, IterativeKMEvaluationRequest.class, null, value);
     }
 
 }
