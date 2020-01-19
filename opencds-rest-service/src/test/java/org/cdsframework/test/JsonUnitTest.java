@@ -22,6 +22,8 @@ import org.omg.dss.evaluation.EvaluateAtSpecifiedTime;
  */
 public class JsonUnitTest {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     public JsonUnitTest() {
     }
 
@@ -47,11 +49,7 @@ public class JsonUnitTest {
         File file = new File("src/test/resources/sampleEvaluateAtSpecifiedTime.xml");
         FileInputStream fileInputStream = new FileInputStream(file);
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        EvaluateAtSpecifiedTime evaluateAtSpecifiedTime = MarshalUtils.unmarshal(
-                fileInputStream,
-                EvaluateAtSpecifiedTime.class);
+        EvaluateAtSpecifiedTime evaluateAtSpecifiedTime = MarshalUtils.unmarshal(fileInputStream, EvaluateAtSpecifiedTime.class);
 
         fileInputStream.close();
 
@@ -63,9 +61,9 @@ public class JsonUnitTest {
         fileInputStream = new FileInputStream(file);
 
         evaluateAtSpecifiedTime = mapper.readValue(fileInputStream, EvaluateAtSpecifiedTime.class);
-        
+
         fileInputStream.close();
-        
+
         System.out.println(new String(evaluateAtSpecifiedTime.getEvaluationRequest().getDataRequirementItemData().get(0).getData().getBase64EncodedPayload().get(0)));
 
     }
