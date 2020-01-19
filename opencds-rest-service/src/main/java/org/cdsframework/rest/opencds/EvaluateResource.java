@@ -1,10 +1,12 @@
 package org.cdsframework.rest.opencds;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -86,8 +88,8 @@ public class EvaluateResource {
      * @throws javax.xml.transform.TransformerException
      */
     @POST
-    @Consumes({MediaType.APPLICATION_XML})
-    @Produces({MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
     @Path("evaluateAtSpecifiedTime")
     public Response evaluateAtSpecifiedTime(
             String evaluateAtSpecifiedTimeString,
@@ -109,20 +111,45 @@ public class EvaluateResource {
 
         final String METHODNAME = "evaluateAtSpecifiedTime ";
 
-        EvaluateAtSpecifiedTime evaluateAtSpecifiedTime = MarshalUtils.unmarshal(
-                new ByteArrayInputStream(evaluateAtSpecifiedTimeString.getBytes()),
-                EvaluateAtSpecifiedTime.class);
+        ObjectMapper mapper = new ObjectMapper();
+
+        EvaluateAtSpecifiedTime evaluateAtSpecifiedTime;
+        MediaType mediaType = header.getMediaType();
+
+        log.debug(METHODNAME + "mediaType=" + mediaType);
+        log.debug(METHODNAME + "mediaType.toString()=" + mediaType.toString());
+        log.debug(METHODNAME + "MediaType.APPLICATION_JSON=" + MediaType.APPLICATION_JSON);
+        log.debug(METHODNAME + "mediaType.toString().equals(MediaType.APPLICATION_JSON)=" + mediaType.toString().equals(MediaType.APPLICATION_JSON));
+        log.debug(METHODNAME + "mediaType.toString().equals(MediaType.APPLICATION_XML)=" + mediaType.toString().equals(MediaType.APPLICATION_XML));
+
+        if (mediaType.toString().equals(MediaType.APPLICATION_JSON)) {
+            evaluateAtSpecifiedTime = mapper.readValue(evaluateAtSpecifiedTimeString, EvaluateAtSpecifiedTime.class);
+        } else if (mediaType.toString().equals(MediaType.APPLICATION_XML)) {
+            evaluateAtSpecifiedTime = MarshalUtils.unmarshal(
+                    new ByteArrayInputStream(evaluateAtSpecifiedTimeString.getBytes()),
+                    EvaluateAtSpecifiedTime.class);
+        } else {
+            throw new IllegalArgumentException("Unsupported media type: " + mediaType);
+        }
 
         try {
 
+            Response.ResponseBuilder responseBuilder;
             EvaluateAtSpecifiedTimeResponse evaluateAtSpecifiedTimeResponse = evaluationService.evaluateAtSpecifiedTime(evaluateAtSpecifiedTime);
             EvaluationResponse evaluationResponse = evaluateAtSpecifiedTimeResponse.getEvaluationResponse();
 
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            List<MediaType> acceptableMediaTypes = header.getAcceptableMediaTypes();
+            log.debug(METHODNAME + "acceptableMediaTypes=" + acceptableMediaTypes);
 
-            MarshalUtils.marshal(evaluationResponse, stream);
-            stream.toByteArray();
-            Response.ResponseBuilder responseBuilder = Response.ok(new String(stream.toByteArray())).type(MediaType.APPLICATION_XML);
+            if (acceptableMediaTypes.contains(MediaType.APPLICATION_JSON_TYPE)) {
+                String data = mapper.writeValueAsString(evaluateAtSpecifiedTime);
+                responseBuilder = Response.ok(data).type(MediaType.APPLICATION_JSON);
+            } else {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                MarshalUtils.marshal(evaluationResponse, stream);
+                stream.toByteArray();
+                responseBuilder = Response.ok(new String(stream.toByteArray())).type(MediaType.APPLICATION_XML);
+            }
             return responseBuilder.build();
         } finally {
 
