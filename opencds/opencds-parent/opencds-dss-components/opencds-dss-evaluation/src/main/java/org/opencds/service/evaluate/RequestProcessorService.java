@@ -270,8 +270,9 @@ public class RequestProcessorService implements RequestProcessor
      * @throws UnsupportedEncodingException
      */
     private String getInputPayloadString(DataRequirementItemData driData) throws DSSRuntimeExceptionFault {
-        SemanticPayload data = driData.getData();
-        List<byte[]> base64EncodedPayload = data.getBase64EncodedPayload();
+
+        // gunzip the data if it has been compressed
+        List<byte[]> base64EncodedPayload = DssUtil.gUnzipData(driData);
         // input is automatically decoded from Base64 data by presenting it to
         // us...
         StringBuffer payloadStringBuffer = new StringBuffer();
