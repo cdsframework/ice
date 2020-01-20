@@ -142,7 +142,7 @@ public class EvaluateResource {
             log.debug(METHODNAME + "acceptableMediaTypes=" + acceptableMediaTypes);
 
             if (acceptableMediaTypes.contains(MediaType.APPLICATION_JSON_TYPE)) {
-                String data = mapper.writeValueAsString(evaluateAtSpecifiedTime);
+                String data = mapper.writeValueAsString(evaluationResponse);
                 responseBuilder = Response.ok(data).type(MediaType.APPLICATION_JSON);
             } else {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
