@@ -303,7 +303,7 @@ public class EvaluationService implements Evaluation {
 
             KnowledgeModule km = knowledgeModuleService.find(oneRequest.getRequestedKmId());
 
-            SemanticPayload semanticPayload = createSemanticPayload(result.getBytes(), km.getSSId());
+            SemanticPayload semanticPayload = createSemanticPayload(DssUtil.gZipData(result.getBytes(), oneRequest.getEvaluationRequestDataItem()), km.getSSId());
 
             KMEvaluationResultData kmerData = createKMEvaluationResultData(semanticPayload, itemId);
 
