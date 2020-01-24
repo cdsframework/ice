@@ -4,7 +4,6 @@ FROM tomcat:9-jre8-alpine AS build
 LABEL organization="HLN Consulting, LLC"
 LABEL maintainer="Sam Nicolary<sdn@hln.com>"
 
-ENV TZ="America/New_York"
 ENV DEBUG="N"
 ENV KM_THREADS="2"
 ENV OUTPUT_EARLIEST_OVERDUE_DATES="Y"
@@ -18,8 +17,6 @@ EXPOSE 8080
 EXPOSE 8009
 
 RUN adduser -u 1000 -D appuser && \
-    apk add --no-cache tzdata && \
-    cp /usr/share/zoneinfo/$TZ /etc/timezone && \
     rm -rf /usr/local/tomcat/webapps/docs /usr/local/tomcat/webapps/ROOT /usr/local/tomcat/webapps/examples /usr/local/tomcat/webapps/host-manager /usr/local/tomcat/webapps/manager && \
     mkdir -p /home/appuser/.opencds
 

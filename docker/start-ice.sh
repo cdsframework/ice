@@ -8,6 +8,11 @@ if [ -n $DEBUG ]; then
     fi
 fi
 
+if [ -n $TZ ]; then
+    echo "TZ is set to: $TZ"
+    export JAVA_OPTS="$JAVA_OPS -Duser.timezone=$TZ"
+fi
+
 if [ -n $KM_THREADS ]
 then
     echo "Setting km.threads in opencds.properties to: $KM_THREADS"

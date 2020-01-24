@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -58,6 +60,13 @@ public class EvaluateResource {
      */
     public EvaluateResource(EvaluationService evaluationService) {
         this.evaluationService = evaluationService;
+    }
+
+    @GET
+    @Produces({MediaType.TEXT_PLAIN})
+    @Path("tz")
+    public String tz() {
+        return TimeZone.getDefault().getID();
     }
 
     /**
