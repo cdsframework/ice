@@ -9,7 +9,6 @@ import java.text.ParseException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -30,8 +29,10 @@ import org.omg.dss.RequiredDataNotProvidedExceptionFault;
 import org.omg.dss.UnrecognizedLanguageExceptionFault;
 import org.omg.dss.UnrecognizedScopedEntityExceptionFault;
 import org.omg.dss.UnsupportedLanguageExceptionFault;
+import org.omg.dss.evaluation.Evaluate;
 import org.omg.dss.evaluation.EvaluateAtSpecifiedTime;
 import org.omg.dss.evaluation.EvaluateAtSpecifiedTimeResponse;
+import org.omg.dss.evaluation.EvaluateResponse;
 import org.omg.dss.evaluation.requestresponse.EvaluationResponse;
 import org.opencds.dss.evaluate.EvaluationService;
 
@@ -59,13 +60,97 @@ public class EvaluateResource {
         this.evaluationService = evaluationService;
     }
 
-    @GET
-    @Produces({MediaType.TEXT_PLAIN})
-    @Path("test")
-    public String test() {
-        return "hello world!";
-    }
+    /**
+     * Retrieves representation of an instance of
+     * org.cdsframework.rest.opencds.EvaluateResource
+     * 
+     * @param evaluateString
+     * @param header
+     * @param response
+     * @return
+     * @throws ParseException
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     * @throws InvalidDriDataFormatExceptionFault
+     * @throws UnrecognizedLanguageExceptionFault
+     * @throws RequiredDataNotProvidedExceptionFault
+     * @throws UnsupportedLanguageExceptionFault
+     * @throws UnrecognizedScopedEntityExceptionFault
+     * @throws EvaluationExceptionFault
+     * @throws InvalidTimeZoneOffsetExceptionFault
+     * @throws DSSRuntimeExceptionFault
+     * @throws JAXBException
+     * @throws TransformerException 
+     */
+   @POST
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
+    @Path("evaluate")
+    public Response evaluate(
+            String evaluateString,
+            @Context HttpHeaders header,
+            @Context HttpServletResponse response)
+            throws ParseException,
+            UnsupportedEncodingException,
+            IOException,
+            InvalidDriDataFormatExceptionFault,
+            UnrecognizedLanguageExceptionFault,
+            RequiredDataNotProvidedExceptionFault,
+            UnsupportedLanguageExceptionFault,
+            UnrecognizedScopedEntityExceptionFault,
+            EvaluationExceptionFault,
+            InvalidTimeZoneOffsetExceptionFault,
+            DSSRuntimeExceptionFault,
+            JAXBException,
+            TransformerException {
 
+        final String METHODNAME = "evaluate ";
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Evaluate evaluate;
+        MediaType mediaType = header.getMediaType();
+
+        log.debug(METHODNAME + "mediaType=" + mediaType);
+        log.debug(METHODNAME + "mediaType.toString()=" + mediaType.toString());
+        log.debug(METHODNAME + "MediaType.APPLICATION_JSON=" + MediaType.APPLICATION_JSON);
+        log.debug(METHODNAME + "mediaType.toString().equals(MediaType.APPLICATION_JSON)=" + mediaType.toString().equals(MediaType.APPLICATION_JSON));
+        log.debug(METHODNAME + "mediaType.toString().equals(MediaType.APPLICATION_XML)=" + mediaType.toString().equals(MediaType.APPLICATION_XML));
+
+        if (mediaType.toString().equals(MediaType.APPLICATION_JSON)) {
+            evaluate = mapper.readValue(evaluateString, Evaluate.class);
+        } else if (mediaType.toString().equals(MediaType.APPLICATION_XML)) {
+            evaluate = MarshalUtils.unmarshal(
+                    new ByteArrayInputStream(evaluateString.getBytes()),
+                    Evaluate.class);
+        } else {
+            throw new IllegalArgumentException("Unsupported media type: " + mediaType);
+        }
+
+        try {
+
+            Response.ResponseBuilder responseBuilder;
+            EvaluateResponse evaluateResponse = evaluationService.evaluate(evaluate);
+            EvaluationResponse evaluationResponse = evaluateResponse.getEvaluationResponse();
+
+            List<MediaType> acceptableMediaTypes = header.getAcceptableMediaTypes();
+            log.debug(METHODNAME + "acceptableMediaTypes=" + acceptableMediaTypes);
+
+            if (acceptableMediaTypes.contains(MediaType.APPLICATION_JSON_TYPE)) {
+                String data = mapper.writeValueAsString(evaluationResponse);
+                responseBuilder = Response.ok(data).type(MediaType.APPLICATION_JSON);
+            } else {
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                MarshalUtils.marshal(evaluationResponse, stream);
+                stream.toByteArray();
+                responseBuilder = Response.ok(new String(stream.toByteArray())).type(MediaType.APPLICATION_XML);
+            }
+            return responseBuilder.build();
+        } finally {
+
+        }
+    }
+    
     /**
      * Retrieves representation of an instance of
      * org.cdsframework.rest.opencds.EvaluateResource
@@ -154,10 +239,5 @@ public class EvaluateResource {
         } finally {
 
         }
-//        } catch (DSSRuntimeExceptionFault | EvaluationExceptionFault | InvalidDriDataFormatExceptionFault | InvalidTimeZoneOffsetExceptionFault | RequiredDataNotProvidedExceptionFault | UnrecognizedLanguageExceptionFault | UnrecognizedScopedEntityExceptionFault | UnsupportedLanguageExceptionFault e) {
-//            System.out.println(METHODNAME + "e.getMessage()=" + e.getMessage());
-//            Response.ResponseBuilder responseBuilder = Response.serverError().entity(e.getMessage()).type(MediaType.TEXT_PLAIN);
-//            return responseBuilder.build();
-//        }
     }
 }
