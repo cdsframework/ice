@@ -74,6 +74,20 @@ rule "Pneumococcal Adult Series: Evaluate PCV Shot >= 5yrs and < 65y as Accepted
 end
 
 
+// If a PCV is administered after 19 years, then override the default extra dose rule check - PCV shots should not be marked as an EXTRA_DOSE in this circumstance
+rule "Pneumococcal Adult Series: Do _not_ mark PCV shots that have been evaluated as ACCEPTED/OUTSIDE_SERIES also as ACCEPTED/EXTRA_DOSE" 
+		extends "Pneumococcal Adult Series: Evaluate PCV Shot >= 5yrs and < 65y as Accepted with reason code OUTSIDE_SERIES" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	agenda-group "customEvaluationRule"
+	activation-group "extraDoseCheck"
+	when
+		// Nothing to do
+	then
+		Record that this dose rule was processed for the TargetDose $currentDose
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+
 // For Adult Series: Identified (for Abstract) that PPSV shot was administered >= 5 years and < 65y-4d
 rule "Pneumococcal Adult Series: (Abstract) PPSV Shot (CVX 33, 109) >= 5yrs and < 65y-4d (below minimum age)" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -124,7 +138,7 @@ rule "Pneumococcal Adult Series: Absolute minimum interval from the accepted dos
 			- make note of the administered shot number as $nShotNumber
 			- make note of the date this shot was Administered as $adultPPSVShot2Date
 		There is an Administered Shot $previousShot
-			- that is the same shot as $adultPPSVShot1BelowMinAge
+			- that is not the same shot as $adultPPSVShot1BelowMinAge
 			- the administered shot number is < $nShotNumber
 		Confirm Elapsed time between $adultPPSVShot1Date and $adultPPSVShot2Date < "5y"
 	then

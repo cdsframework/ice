@@ -73,7 +73,6 @@ rule "Pneumococcal Adult Series: Recommended Earliest/Recommended Interval of 5y
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
-			- the dose number in the Series is <= 6
 			- the vaccine administered a member of ("ICE33","ICE109")
 			- make note of the date this Shot was administered as $dateOtherAdultPPSVAdministeredBelowAbsMinAge
 			- the date $dateOtherAdultPPSVAdministeredBelowAbsMinAge > $dateAdultPPSVAdministeredBelowAbsMinAge
@@ -82,6 +81,7 @@ rule "Pneumococcal Adult Series: Recommended Earliest/Recommended Interval of 5y
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtCalculated
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtCalculated
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -106,7 +106,6 @@ rule "Pneumococcal Adult Series: Recommended Earliest/Recommended Interval of 1y
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
-			- the dose number in the Series is <= 6
 			- the vaccine administered a member of ("ICE133","ICE152")
 			- make note of the date this Shot was administered as $dateOtherRecentPCVAdministered
 			- the date $dateOtherRecentPCVAdministered > $dateMostRecentPCVAdministered
@@ -115,6 +114,7 @@ rule "Pneumococcal Adult Series: Recommended Earliest/Recommended Interval of 1y
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtCalculated
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtCalculated
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series		
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -296,10 +296,10 @@ end
 /*************************************************************************************************************************************************************************************
 Recommendation Rules based on Age
 * If a patient is < 5 years and has completed the Child series (including meeting the PCV 13 Rule), then the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK.
-* If a patient is >= 5 years (or will be >= 5 years at the recommended due date) and < 65 years, and they have completed the Child Series, then the Recommendation is Conditional and 
+* If a patient is >= 5 years (or will be >= 5 years at the recommended due date) and < 19 years, and they have completed the Child Series, then the Recommendation is Conditional and 
 * the reason code is COMPLETE_HIGH_RISK; otherwise the Recommendation is Conditional and the reason code is HIGH_RISK.
  
-* If a patient is >= 5 years (or will be >= 5 years at the recommended due date) and < 65 years, then the Recommendation is Conditional and the reason code is HIGH_RISK.
+* If a patient is >= 5 years (or will be >= 5 years at the recommended due date) and < 19 years, then the Recommendation is Conditional and the reason code is HIGH_RISK.
 /************************************************************************************************************************************************************************************/
 
 // If patient is < 5 years and has completed the Child series (including meeting the PCV 13 Rule), then the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK. Has a lower
@@ -331,8 +331,8 @@ rule "Pneumococcal Child Series: if patient < 5yrs completed the Child series (i
 end
 
 
-// If patient is >= 5 years and < 65 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
-rule "Pneumococcal Series: if patient *is* >= 5yrs and < 65yrs of age and the series *is not* complete, then recommend Conditional/HIGH_RISK" ruleflow-group "RecommendationForecast"
+// If patient is >= 5 years and < 19 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
+rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age and the series *is not* complete, then recommend Conditional/HIGH_RISK" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	salience 200
@@ -345,7 +345,7 @@ rule "Pneumococcal Series: if patient *is* >= 5yrs and < 65yrs of age and the se
 			- that has associated series $targetSeries
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "65y"
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "19y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
@@ -355,8 +355,8 @@ rule "Pneumococcal Series: if patient *is* >= 5yrs and < 65yrs of age and the se
 end
 
 
-// If patient is >= 5 years and < 65 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
-rule "Pneumococcal Series: if patient *is* >= 5yrs and < 65yrs of age and the series *is* complete, then recommend Conditional/COMPLETE_HIGH_RISK" ruleflow-group "RecommendationForecast"
+// If patient is >= 5 years and < 19 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
+rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age and the series *is* complete, then recommend Conditional/COMPLETE_HIGH_RISK" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	salience 200
@@ -369,7 +369,7 @@ rule "Pneumococcal Series: if patient *is* >= 5yrs and < 65yrs of age and the se
 			- that has associated series $targetSeries
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "65y"
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "19y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
@@ -379,11 +379,11 @@ rule "Pneumococcal Series: if patient *is* >= 5yrs and < 65yrs of age and the se
 end
 
 
-// Post Recommendation Check: If the series is not complete and the patient will be >= 5 years at the recommended due date and < 65 years at the recommended due date, 
+// Post Recommendation Check: If the series is not complete and the patient will be >= 5 years at the recommended due date and < 19 years at the recommended due date, 
 // then the Recommendation is Conditional and the reason code is HIGH_RISK. This rule will only fire if there is a recommendation date attached to the final recommendation 
 // (i.e. - if the recommendation status is RECOMMENDED or RECOMMENDED_IN_FUTURE) and with the added conditional recommendation, ICE will override that recommendation with 
 // the conditionally recommended (as per general ICE rules)
-rule "Pneumococcal: if patient *will be* >= 5 years at the recommended due date and < 65 years and the series *is not* complete, then recommend Conditional/High Risk" ruleflow-group "RecommendationForecast"
+rule "Pneumococcal: if patient **will be** >= 5 years at the recommended due date and < 19 years and the series *is not* complete, then recommend Conditional/High Risk" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "postRecommendationCheck"
 	when
@@ -398,7 +398,7 @@ rule "Pneumococcal: if patient *will be* >= 5 years at the recommended due date 
 			- that has associated series $targetSeries
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and $recommendationDate >= "5y" && elapsed time between $birthDate and $recommendationDate < "65y"
+		Confirm elapsed time between $birthDate and $recommendationDate >= "5y" && elapsed time between $birthDate and $recommendationDate < "19y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
