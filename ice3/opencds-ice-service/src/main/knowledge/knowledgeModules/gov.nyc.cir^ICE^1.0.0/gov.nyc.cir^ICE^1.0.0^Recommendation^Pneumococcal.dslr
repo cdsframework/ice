@@ -40,9 +40,10 @@ import org.cdsframework.ice.service.Recommendation
 import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.Schedule
 import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Vaccine
@@ -121,8 +122,35 @@ end
 
 
 /*************************************************************************************************************************************************************************************
- END Rules for Adult Recommending Intervals from shots administered below absolute minimum age for Dose 5 (Adult Dose 1)
+ END Rules for Adult Recommending Intervals from shots administered below absolute minimum age for Dose 6 (Adult Dose 1)
 /************************************************************************************************************************************************************************************/
+
+// If the patient is >= 65 years old, and a PCV (CVX 133, 152) shot was not administered, ICE will return Descriptive Text:
+// "Consider PCV13 based on shared clinical decision making for adults 65 years or older. MMWR. 2019;68(46);1069–1075.", along with the vaccine group recommendation. 
+rule "Pneumococcal Adult: If patient >= 65yrs and has not had a PCV shot, return supplemental text to consider PCV shared clinical decision making" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	agenda-group "customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge65 when the patient is "65y" of age
+			- the date evalTime >= $dtDateAtAge65
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated
+			- the vaccine administered a member of ("ICE133","ICE152")
+			- the administration date of the shot is >= $dtDateAtAge65
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $oRecommendation to "Consider PCV13 based on shared clinical decision making for adults 65 years or older. MMWR. 2019;68(46);1069–1075."
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series		
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
 
 
 /*************************************************************************************************************************************************************************************

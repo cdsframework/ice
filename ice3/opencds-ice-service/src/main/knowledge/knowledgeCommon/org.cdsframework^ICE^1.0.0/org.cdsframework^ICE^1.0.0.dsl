@@ -13,6 +13,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Pp]atient's birthdate as {assign_dtBirthDate}={assign_dtBirthDate} : demographics.birthTime
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate as {assign_dtDateAtAge} when the [Pp]atient is {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})} of [Aa]ge={assign_dtDateAtAge} : TimePeriod.addTimePeriod(demographics.birthTime, {sDuration})
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate as {assign_dtDateAtAge} when the [Pp]atient is {refer_oTimePeriod} of [Aa]ge={assign_dtDateAtAge} : TimePeriod.addTimePeriod(demographics.birthTime, {refer_oTimePeriod})
+[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Disease Immunity 
@@ -92,7 +93,7 @@
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:([0-9]+)([\\.][0-9]+)?}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:([0-9]+)([\\.][0-9]+)?}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
-[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo} 
+[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -299,6 +300,7 @@
 [consequence][][Ss]et the [Rr]ecommendation [Rr]ecommended [Ff]orecast [Dd]ate for {refer_oRecommendation} to {dtForecastDate}={refer_oRecommendation}.setRecommendationDate({dtForecastDate});
 [consequence][][Ss]et the [Rr]ecommendation [Oo]verdue [Ff]orecast [Dd]ate for {refer_oRecommendation} to {dtForecastDate}={refer_oRecommendation}.setOverdueDate({dtForecastDate});
 [consequence][][Ss]et the [Rr]ecommendation [Rr]eason for {refer_oRecommendation} to {oCD}={refer_oRecommendation}.setRecommendationReason({oCD});
+[consequence][][Ss]et the [Rr]ecommendation [Ss]upplemental [Tt]ext for {refer_oRecommendation} to {sSupplementalText}={refer_oRecommendation}.setRecommendationSupplementalText({sSupplementalText}); {refer_oRecommendation}.setRecommendationReason(BaseDataRecommendationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
 [consequence][][Ss]et the [Rr]ecommendation [Vv]accine for {refer_oRecommendation} to {dd_strCdsConceptValue}={refer_oRecommendation}.setRecommendedVaccine(schedule.getVaccineByCdsConceptValue({dd_strCdsConceptValue}));
 [consequence][][Uu]nset the [Rr]ecommendation [Vv]accine for {refer_oRecommendation}={refer_oRecommendation}.setRecommendedVaccine(null);
 [consequence][][Ii]nclude a [Rr]ecommendation as {assign_oRecommendation} with [Ss]tatus {enum_RecommendationStatus} and [Rr]ecommended [Ff]orecast [Dd]ate {dtForecastDate} for [Cc]onsideration in the final [Ff]orecast of the [Ss]eries {refer_oTargetSeries}=Recommendation {assign_oRecommendation} = new Recommendation({refer_oTargetSeries}); {assign_oRecommendation}.setRecommendationDate({dtForecastDate}); {assign_oRecommendation}.setRecommendationStatus({enum_RecommendationStatus}); insert({assign_oRecommendation});
