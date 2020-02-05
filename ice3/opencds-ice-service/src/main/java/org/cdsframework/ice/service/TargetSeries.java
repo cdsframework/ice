@@ -1799,7 +1799,7 @@ public class TargetSeries {
 	 * be in the future or now based on date calculations with the supplied evaluation date of the next parameter
 	 * @param pEvalDate Evaluation Date that this recommendation should be made against. If null, the current date is used.
 	 */
-	private void addInterimRecommendationForConsideration(Date recommendationDate, Vaccine v, RecommendationStatus recommendationStatus, String recommendationReason, Date pEvalDate) {
+	private void addInterimRecommendationForConsideration(Date recommendationDate, Vaccine v, RecommendationStatus recommendationStatus, String recommendationReason, String recommendationSupplementalText, Date pEvalDate) {
 
 		String _METHODNAME = "addInterimRecommendationForConsideration(Date, Vaccine, RecommendationStatus, String, Date): ";
 		// if (recommendationDate == null) {			TODO:
@@ -1821,6 +1821,8 @@ public class TargetSeries {
 		rec.setRecommendationDate(recommendationDate);
 		rec.setRecommendedVaccine(v);
 		rec.setRecommendationReason(recommendationReason);
+		rec.setRecommendationSupplementalText(recommendationSupplementalText);
+		
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Recommendation: " + rec);
 		}
@@ -1855,7 +1857,7 @@ public class TargetSeries {
 	 */
 	public void addInterimRecommendationForConsideration(Date recommendationDate, RecommendationStatus recommendationStatus, Date pEvalDate) {
 
-		addInterimRecommendationForConsideration(recommendationDate, null, recommendationStatus, null, pEvalDate);
+		addInterimRecommendationForConsideration(recommendationDate, null, recommendationStatus, null, null, pEvalDate);
 	}
 
 
@@ -1908,7 +1910,7 @@ public class TargetSeries {
 		RecommendationStatus lRS = recommendation.getRecommendationStatus();
 		if (lRS == null || (lRS != RecommendationStatus.CONDITIONALLY_RECOMMENDED && lRS != RecommendationStatus.NOT_RECOMMENDED && lRS != RecommendationStatus.RECOMMENDED && 
 				lRS != RecommendationStatus.RECOMMENDED_IN_FUTURE)) {
-			addInterimRecommendationForConsideration(recommendation.getRecommendationDate(), recommendation.getRecommendedVaccine(), null, recommendation.getRecommendationReason(), pEvalDate);
+			addInterimRecommendationForConsideration(recommendation.getRecommendationDate(), recommendation.getRecommendedVaccine(), null, recommendation.getRecommendationReason(), recommendation.getRecommendationSupplementalText(), pEvalDate);
 		}
 		else if (recommendation.getRecommendationDate() == null || recommendation.getRecommendationStatus() != null) {
 			populateInterimRecommendationsAndRecordGenericReasonHelper(interimRecommendationsCustom, recommendation, recommendation.getRecommendationStatus());

@@ -127,7 +127,7 @@ end
 
 // If the patient is >= 65 years old, and a PCV (CVX 133, 152) shot was not administered, ICE will return Descriptive Text:
 // "Consider PCV13 based on shared clinical decision making for adults 65 years or older. MMWR. 2019;68(46);1069–1075.", along with the vaccine group recommendation. 
-rule "Pneumococcal Adult: If patient >= 65yrs and has not had a PCV shot, return supplemental text to consider PCV shared clinical decision making" ruleflow-group "RecommendationForecast"
+rule "Pneumococcal Adult Series: If patient >= 65yrs and has not had a PCV shot, return supplemental text to consider PCV shared clinical decision making" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	when

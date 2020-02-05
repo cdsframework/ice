@@ -169,13 +169,8 @@ public class Recommendation {
 		return recommendationSupplementalText;
 	}
 
-	public void setRecommendationSupplementalText(String recommendationSupplementalText) {
-		if (recommendationSupplementalText == null) {
-			this.recommendationSupplementalText = null;
-		}
-		else {
-			this.recommendationSupplementalText = recommendationSupplementalText;
-		}
+	public void setRecommendationSupplementalText(String pRecommendationSupplementalText) {
+		this.recommendationSupplementalText = pRecommendationSupplementalText;
 	}	
 	
 	/**
@@ -304,7 +299,8 @@ public class Recommendation {
 				+ recommendationStatus + ", recommendedVaccine="
 				+ recommendedVaccine + ", recommendationDate="
 				+ recommendationDate + ", recommendationReason="
-				+ recommendationReason + "]";
+				+ recommendationReason + ", supplementalTest="
+				+ recommendationSupplementalText + " ]";
 	}
 	
 }
