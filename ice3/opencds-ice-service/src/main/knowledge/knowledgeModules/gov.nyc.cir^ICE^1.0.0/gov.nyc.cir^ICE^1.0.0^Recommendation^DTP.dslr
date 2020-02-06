@@ -93,7 +93,7 @@ end
 
 
 // If a patient is >=7 years; has _not_ completed the series and has received a dose of pertussis at >=7 years of age, then the next dose in the series should be recommended as Td (CVX 09).
-rule "DTP: Recommend Td (CVX 09) at 7yrs of age if series is not complete, patient >= 7yrs, has received a dose of pertussis >= 7yrs" ruleflow-group "RecommendationForecast"
+rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if series is not complete, patient >= 7yrs, has received a dose of pertussis >= 7yrs" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	activation-group "recommendationAgeCheck"
@@ -111,7 +111,9 @@ rule "DTP: Recommend Td (CVX 09) at 7yrs of age if series is not complete, patie
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE09"
+		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
+		Set the Recommendation Overdue Forecast Date for $oRecommendation to $dtDateAtAge
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -119,7 +121,7 @@ end
 
 
 // If a patient is >=7 years, has _not_ completed the series and has _not_ received a dose of pertussis at >=7 years of age, then the next dose in the series should be Tdap (CVX 115).
-rule "DTP: Recommend Tdap (CVX 115) at age 7yrs if series is not complete, if patient >= 7yrs and has _not_ received a dose of Pertussis >= 7yrs" ruleflow-group "RecommendationForecast"
+rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) at age 7yrs if series is not complete, if patient >= 7yrs and has _not_ received a dose of Pertussis >= 7yrs" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	agenda-group "customRecommendationRule"
 	activation-group "recommendationAgeCheck"			// override series default age rule
@@ -137,7 +139,9 @@ rule "DTP: Recommend Tdap (CVX 115) at age 7yrs if series is not complete, if pa
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE115"
+		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
+		Set the Recommendation Overdue Forecast Date for $oRecommendation to $dtDateAtAge		
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
