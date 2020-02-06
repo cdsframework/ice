@@ -124,7 +124,7 @@ rule "Hib: Cancel Extra Dose Rule for Shot if Patient >=5 Yrs and Series Not Com
 end	
 
 
-rule "Hib:Evaluate Hib Shot as Below Absolute Minimum Age for Final Dose of 4-Dose Hib Series if 4th Dose Administered < 1y-4d of Age and Received 0 Doses Administered Prior to 7months of Age" ruleflow-group "HistoryEvaluation"
+rule "Hib:Evaluate Hib Shot as Below Absolute Minimum Age for Final Dose of 4-Dose Hib Series if 4th Dose Administered < the Absolute Minimum Age (1y-4d) and received 0 Doses Prior to 7months of Age" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "doseAgeCheck"
@@ -153,7 +153,7 @@ end
 
 
 
-rule "Hib: Allow Hib Booster Vaccine For Last Dose of 4-Dose Hib Series if 4th Dose Administered >= 1y-4d and Prior Doses Administered" ruleflow-group "HistoryEvaluation"
+rule "Hib: Allow Hib Booster Vaccine For Last Dose of 4-Dose Hib Series if 4th Dose Administered >= the Absolute Minimum Age of 1y-4d and Prior Doses Administered" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
