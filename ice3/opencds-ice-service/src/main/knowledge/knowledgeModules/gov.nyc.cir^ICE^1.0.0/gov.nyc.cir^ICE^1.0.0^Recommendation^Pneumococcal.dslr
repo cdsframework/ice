@@ -134,16 +134,13 @@ rule "Pneumococcal Adult Series: If patient >= 65yrs and has not had a PCV shot,
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
-		The patient information $patientInformation must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge65 when the patient is "65y" of age
-			- the date evalTime >= $dtDateAtAge65
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
 			- the vaccine administered a member of ("ICE133","ICE152")
-			- the administration date of the shot is >= $dtDateAtAge65
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge65 when the patient is "65y" of age
+			- the date evalTime >= $dtDateAtAge65
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Supplemental Text for $oRecommendation to "Consider PCV13 based on shared clinical decision making for adults 65 years or older. MMWR. 2019;68(46);1069–1075."
