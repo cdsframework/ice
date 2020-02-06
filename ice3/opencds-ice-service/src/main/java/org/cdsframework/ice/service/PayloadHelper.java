@@ -398,7 +398,7 @@ public class PayloadHelper {
 		       </relatedClinicalStatement>
 		   </substanceAdministrationProposal>
 	 */
-	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String cdsSource, TargetSeries ts, boolean outputEarliestOverdue) 
+	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String cdsSource, TargetSeries ts, boolean outputEarliestOverdue, boolean outputSupplementalText) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
@@ -524,9 +524,19 @@ public class PayloadHelper {
 			for (Recommendation rec : recs) {
 				String recommendationReasonCode = rec.getRecommendationReason();
 				if (recommendationReasonCode != null) {
-					CD localCDInterp = getLocalCodeForRecommendationReason(recommendationReasonCode, this.backingSchedule);
-					if (localCDInterp != null && rec.getRecommendationStatus() == rs && ! interpretations.contains(localCDInterp))
-						interpretations.add(localCDInterp);
+					boolean lSupplementalTextFound = false;
+					if (rec.getRecommendationSupplementalText() != null && recommendationReasonCode.equals(BaseDataRecommendationReason._SUPPLEMENTAL_TEXT.getCdsListItemName())) {
+						lSupplementalTextFound = true;
+					}
+					if (outputSupplementalText == true || (outputSupplementalText == false && lSupplementalTextFound == false)) {
+						CD localCDInterp = getLocalCodeForRecommendationReason(recommendationReasonCode, this.backingSchedule);
+						if (localCDInterp != null && rec.getRecommendationStatus() == rs && ! interpretations.contains(localCDInterp)) {
+							if (lSupplementalTextFound && outputSupplementalText) {
+								localCDInterp.setOriginalText(rec.getRecommendationSupplementalText());
+							}	
+							interpretations.add(localCDInterp);
+						}
+					}
 				}
 			}
 			if (interpretations.size() > 0)

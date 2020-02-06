@@ -95,6 +95,7 @@ global java.util.Date patientAgeTimeOfInterest
 global org.cdsframework.ice.service.Schedule schedule
 global java.lang.Boolean outputEarliestOverdueDates
 global java.lang.Boolean doseOverrideFeatureEnabled
+global java.lang.Boolean outputSupplementalText
 global java.lang.String iceVersion
 
 // global org.drools.runtime.KnowledgeContext kcontext
@@ -2365,7 +2366,7 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series" ruleflow-gr
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates);
+		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
 		insert(sap);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
@@ -2384,7 +2385,7 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates);
+		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing");	
 end
 

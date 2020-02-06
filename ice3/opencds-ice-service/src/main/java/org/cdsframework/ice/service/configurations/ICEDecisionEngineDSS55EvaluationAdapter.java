@@ -112,6 +112,7 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 	private String baseRulesScopingKmId = null;
 	private Boolean outputEarliestOverdueDates = null;
 	private Boolean doseOverrideFeatureEnabled = null;
+	private Boolean outputSupplementalText = null;
 	
 	private static Log logger = LogFactory.getLog(ICEDecisionEngineDSS55EvaluationAdapter.class);
 
@@ -382,6 +383,13 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("doseOverrideFeatureEnabled", doseOverrideFeatureEnabled));
+		
+		if (outputSupplementalText == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: dose override flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);			
+		}
+		cmds.add(CommandFactory.newSetGlobal("outputSupplementalText", outputSupplementalText));
 		
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -692,6 +700,15 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		}
 		else {
 			doseOverrideFeatureEnabled = new Boolean(false);
+		}
+		
+		// Output Supplemental Text, when available?
+		String lOutputSupplementalText = lProps.getProperty("output_supplemental_text");
+		if (lOutputSupplementalText != null && lOutputSupplementalText.equals("Y")) {
+			outputSupplementalText = new Boolean(true);
+		}
+		else {
+			outputSupplementalText = new Boolean(false);
 		}
 		
 		/////// Set up knowledge base

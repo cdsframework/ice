@@ -53,6 +53,7 @@ public class Recommendation {
 	private Date recommendationDate;
 	private Date latestRecommendationDate;
 	private String recommendationReason;
+	private String recommendationSupplementalText;
 
 	private static Log logger = LogFactory.getLog(Recommendation.class);
 	
@@ -80,6 +81,7 @@ public class Recommendation {
 		latestRecommendationDate = null;
 		recommendationStatus = RecommendationStatus.NOT_FORECASTED;
 		recommendationReason = null;
+		recommendationSupplementalText = null;
 	}
 	
 	public String getRecommendationIdentifier() {
@@ -162,6 +164,14 @@ public class Recommendation {
 			this.recommendationReason = recommendationReason;
 		}
 	}
+	
+	public String getRecommendationSupplementalText() {
+		return recommendationSupplementalText;
+	}
+
+	public void setRecommendationSupplementalText(String pRecommendationSupplementalText) {
+		this.recommendationSupplementalText = pRecommendationSupplementalText;
+	}	
 	
 	/**
 	 * Return a subset of the supplied Recommendation List with a List of those Recommendations that have the same RecommendationStatuses as the ones 
@@ -289,7 +299,8 @@ public class Recommendation {
 				+ recommendationStatus + ", recommendedVaccine="
 				+ recommendedVaccine + ", recommendationDate="
 				+ recommendationDate + ", recommendationReason="
-				+ recommendationReason + "]";
+				+ recommendationReason + ", supplementalTest="
+				+ recommendationSupplementalText + " ]";
 	}
 	
 }
