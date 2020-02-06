@@ -377,7 +377,7 @@ For patients who completed the 3-dose series (i.e., dose 1 at >= 7 years):
 /************************************************************************************************************************************************************************************/
 
 // If one or more of the Adolescent Tdap Exception Rules A or B apply, recommend an Adolescent Tdap 0 days from the last non-pertussis shot  
-rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Tdap at earliest & recommended interval of 0 days from last non-pertussis dose" ruleflow-group "RecommendationForecast"
+rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Tdap at earliest & recommended interval of 0 days from last non-pertussis shot" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationRule"
 	dialect "mvel"
 	when
@@ -389,13 +389,11 @@ rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent T
 			- that has Associated Series $targetSeries
 		There is an administered shot $administeredShotContainsNonPertussis
 			- the shot belongs to the series $targetSeries
-			/////// - that has already been evaluated and whose shot validity is VALID or ACCEPTED
 			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
 			- the collection $diseasesTargeted does not contain "SUPPORTED_DISEASE_CONCEPT.033.9"
 			- make note of the date this shot was administered as $dtAdministrationDate
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
-			/////// - that has already been evaluated and whose shot validity is VALID or ACCEPTED
 			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedOther
 			- the collection $diseasesTargetedOther does not contain "SUPPORTED_DISEASE_CONCEPT.033.9"
 			- the administration date of the shot is > $dtAdministrationDate
@@ -411,7 +409,7 @@ rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent T
 end
 
 
-rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Tdap at earliest & recommended interval of 6 months from last pertussis dose" ruleflow-group "RecommendationForecast"
+rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Tdap at earliest & recommended interval of 6 months from last pertussis shot" ruleflow-group "RecommendationForecast"
 	agenda-group "customRecommendationRule"
 	dialect "mvel"
 	when

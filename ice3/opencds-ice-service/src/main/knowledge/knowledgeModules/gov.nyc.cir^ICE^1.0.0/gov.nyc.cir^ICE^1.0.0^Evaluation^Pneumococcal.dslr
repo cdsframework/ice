@@ -394,16 +394,17 @@ end
 /************************************************************************************************************************************************************************************/
 
 
-rule "Pneumococcal Child Series: Exception 1: Evaluate PCV Shot as Below Minimum Age for Final Dose if 4th Dose Administered < 361 Days of Age and Received 0 Doses Administered Prior to 7m of Age" ruleflow-group "HistoryEvaluation"
+rule "Pneumococcal Child Series: Exception 1: Evaluate PCV Shot as Below Minimum Age for Final Dose if 4th Dose Administered < 1y-4d of Age and Received 0 Doses Administered Prior to 7m of Age" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "doseAgeCheck"
 	when		
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- the Dose Number in the Series is == 4
+			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the Absolute Minimum Age of this dose as $absMinAgeDose4
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dateOfInterest when the Patient is "7m" of age
@@ -411,7 +412,8 @@ rule "Pneumococcal Child Series: Exception 1: Evaluate PCV Shot as Below Minimum
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Number of Doses Administered before $dateOfInterest is == 0			
-		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "361d"	
+		/////// Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "361d"
+		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < $absMinAgeDose4
 	then
 		Include the reason for shot $currentDose Invalid due to "Below Minimum Age for Final Dose"
 		Record that this dose rule was processed for the TargetDose $currentDose
