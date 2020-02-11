@@ -13,6 +13,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Pp]atient's birthdate as {assign_dtBirthDate}={assign_dtBirthDate} : demographics.birthTime
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate as {assign_dtDateAtAge} when the [Pp]atient is {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})} of [Aa]ge={assign_dtDateAtAge} : TimePeriod.addTimePeriod(demographics.birthTime, {sDuration})
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate as {assign_dtDateAtAge} when the [Pp]atient is {refer_oTimePeriod} of [Aa]ge={assign_dtDateAtAge} : TimePeriod.addTimePeriod(demographics.birthTime, {refer_oTimePeriod})
+[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Disease Immunity 
@@ -92,7 +93,7 @@
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:([0-9]+)([\\.][0-9]+)?}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:([0-9]+)([\\.][0-9]+)?}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
-[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo} 
+[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,6 +252,8 @@
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Below Minimum Age for Final Dose"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_FINAL_DOSE"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Vaccine Not Part of This Series"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_PART_OF_THIS_SERIES");
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Shot Administered Outside of a Series"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.OUTSIDE_SERIES");
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Clinical Patient Discretion"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted for this [Ss]eries={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid for this [Ss]eries={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Nn]ot [Ee]valuated due to "Vaccine Not Supported"={refer_oTargetDose}.addNotEvalatedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED");
@@ -297,6 +300,7 @@
 [consequence][][Ss]et the [Rr]ecommendation [Rr]ecommended [Ff]orecast [Dd]ate for {refer_oRecommendation} to {dtForecastDate}={refer_oRecommendation}.setRecommendationDate({dtForecastDate});
 [consequence][][Ss]et the [Rr]ecommendation [Oo]verdue [Ff]orecast [Dd]ate for {refer_oRecommendation} to {dtForecastDate}={refer_oRecommendation}.setOverdueDate({dtForecastDate});
 [consequence][][Ss]et the [Rr]ecommendation [Rr]eason for {refer_oRecommendation} to {oCD}={refer_oRecommendation}.setRecommendationReason({oCD});
+[consequence][][Ss]et the [Rr]ecommendation [Ss]upplemental [Tt]ext for {refer_oRecommendation} to {sSupplementalText}={refer_oRecommendation}.setRecommendationSupplementalText({sSupplementalText}); {refer_oRecommendation}.setRecommendationReason(BaseDataRecommendationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
 [consequence][][Ss]et the [Rr]ecommendation [Vv]accine for {refer_oRecommendation} to {dd_strCdsConceptValue}={refer_oRecommendation}.setRecommendedVaccine(schedule.getVaccineByCdsConceptValue({dd_strCdsConceptValue}));
 [consequence][][Uu]nset the [Rr]ecommendation [Vv]accine for {refer_oRecommendation}={refer_oRecommendation}.setRecommendedVaccine(null);
 [consequence][][Ii]nclude a [Rr]ecommendation as {assign_oRecommendation} with [Ss]tatus {enum_RecommendationStatus} and [Rr]ecommended [Ff]orecast [Dd]ate {dtForecastDate} for [Cc]onsideration in the final [Ff]orecast of the [Ss]eries {refer_oTargetSeries}=Recommendation {assign_oRecommendation} = new Recommendation({refer_oTargetSeries}); {assign_oRecommendation}.setRecommendationDate({dtForecastDate}); {assign_oRecommendation}.setRecommendationStatus({enum_RecommendationStatus}); insert({assign_oRecommendation});

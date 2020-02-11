@@ -124,7 +124,7 @@ rule "Hib: Cancel Extra Dose Rule for Shot if Patient >=5 Yrs and Series Not Com
 end	
 
 
-rule "Hib:Evaluate Hib Shot as Below Minimum Age for Final Dose of 4-Dose Hib Series if 4th Dose Administered <361 Days of Age and Received 0 Doses Administered Prior to 7months of Age" ruleflow-group "HistoryEvaluation"
+rule "Hib:Evaluate Hib Shot as Below Absolute Minimum Age for Final Dose of 4-Dose Hib Series if 4th Dose Administered < the Absolute Minimum Age (1y-4d) and received 0 Doses Prior to 7months of Age" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "doseAgeCheck"
@@ -132,9 +132,10 @@ rule "Hib:Evaluate Hib Shot as Below Minimum Age for Final Dose of 4-Dose Hib Se
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.300" and the Series with Name "Hib4DoseSeries"
-			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- the Dose Number in the Series is == 4
 			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate			
+			- make note of the Absolute Minimum Age of this dose as $absMinAgeDose4
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dateOfInterest when the Patient is "7m" of age
@@ -142,7 +143,8 @@ rule "Hib:Evaluate Hib Shot as Below Minimum Age for Final Dose of 4-Dose Hib Se
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.300"
 			- the name of the Series is "Hib4DoseSeries"
 			- the Number of Doses Administered before $dateOfInterest is == 0			
-		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "361d"	
+		///// Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "1y-4d"	
+		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < $absMinAgeDose4
 	then
 		Include the reason for shot $currentDose Invalid due to "Below Minimum Age for Final Dose"
 		Record that this dose rule was processed for the TargetDose $currentDose
@@ -151,7 +153,7 @@ end
 
 
 
-rule "Hib: Allow Hib Booster Vaccine For Last Dose of 4-Dose Hib Series if 4th Dose Administered >=361 Days and Prior Doses Administered" ruleflow-group "HistoryEvaluation"
+rule "Hib: Allow Hib Booster Vaccine For Last Dose of 4-Dose Hib Series if 4th Dose Administered >= the Absolute Minimum Age of 1y-4d and Prior Doses Administered" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	agenda-group "customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -170,7 +172,7 @@ rule "Hib: Allow Hib Booster Vaccine For Last Dose of 4-Dose Hib Series if 4th D
 			- the Number of Doses Administered is > 0
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate			
-		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "361d"
+		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "1y-4d"
     then
         //actions
 		Record that this dose rule was processed for the TargetDose $currentDose
