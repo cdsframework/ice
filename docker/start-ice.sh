@@ -31,6 +31,12 @@ then
     sed -i "s/enable_dose_override_feature=.*/enable_dose_override_feature=$ENABLE_DOSE_OVERRIDE_FEATURE/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
 fi
 
+if [ -n $OUTPUT_SUPPLEMENTAL_TEXT ]
+then
+    echo "Setting output_supplemental_text in ice.properties to: $OUTPUT_SUPPLEMENTAL_TEXT"
+    sed -i "s/output_supplemental_text=.*/output_supplemental_text=$OUTPUT_SUPPLEMENTAL_TEXT/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
+fi
+
 if [ -n $REMOTE_CONFIG_ENABLED ]; then
     echo "REMOTE_CONFIG_ENABLED is set to: $REMOTE_CONFIG_ENABLED"
     if [ "$REMOTE_CONFIG_ENABLED" == "Y" ]; then
