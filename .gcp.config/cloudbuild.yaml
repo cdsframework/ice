@@ -77,7 +77,7 @@ steps:
 # produce the compiled pkg for ice
 - name: 'maven:3-jdk-8-slim'
   entrypoint: 'java'
-  args: ['-jar', 'rules-packager/target/rules-packager-1.0.0-SNAPSHOT-jar-with-dependencies.jar', 'docker/ice-gen.properties', 'gov.nyc.cir^ICE^1.0.0', 'org.cdsframework^ICE^1.0.0']
+  args: ['-jar', 'rules-packager/target/rules-packager-1.0.0-SNAPSHOT-jar-with-dependencies.jar', '.gcp.config/ice-gen.properties', 'gov.nyc.cir^ICE^1.0.0', 'org.cdsframework^ICE^1.0.0']
   dir: '.'
   volumes:
   - name: m2
