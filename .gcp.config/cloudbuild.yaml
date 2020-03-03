@@ -66,6 +66,7 @@ steps:
 
 # build the rules packager
 - name: 'maven:3-jdk-8-slim'
+  id: build
   entrypoint: 'mvn'
   args: ['-Dmaven.compiler.source=1.7', '-Dmaven.compiler.target=1.7', 'compile', 'assembly:single']
   dir: 'rules-packager'
