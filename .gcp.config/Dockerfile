@@ -15,7 +15,6 @@ ENV REMOTE_CONFIG_PASSWORD="password"
 
 # Tomcat Server
 EXPOSE 8080
-EXPOSE 8009
 
 RUN adduser -u 1000 -D appuser && \
     rm -rf /usr/local/tomcat/webapps/docs /usr/local/tomcat/webapps/ROOT /usr/local/tomcat/webapps/examples /usr/local/tomcat/webapps/host-manager /usr/local/tomcat/webapps/manager && \
@@ -27,11 +26,11 @@ WORKDIR /home/appuser
 COPY opencds/opencds-parent/opencds-decision-support-service/target/opencds-decision-support-service-2.0.5 /usr/local/tomcat/webapps/opencds-decision-support-service
 COPY ice3/opencds-ice-service/src/main/knowledge /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/knowledge
 COPY ice3/opencds-ice-service/META-INF /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/META-INF
-COPY docker/opencds.properties .opencds
-COPY docker/sec.xml .opencds
-COPY docker/log4j.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
-COPY docker/ice.properties /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
-COPY docker/start-ice.sh ./
+COPY .gcp.config/opencds.properties .opencds
+COPY .gcp.config/sec.xml .opencds
+COPY .gcp.config/log4j.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
+COPY .gcp.config/ice.properties /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
+COPY .gcp.config/start-ice.sh ./
 
 RUN chown -R appuser: /home/appuser /usr/local/tomcat && \
     rm -f /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/log4j.properties && \
