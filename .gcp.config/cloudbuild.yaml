@@ -100,7 +100,7 @@ steps:
 
 # build the docker image
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--tag=gcr.io/$PROJECT_ID/ice:$BRANCH_NAME', '-f', 'docker/Dockerfile', '.']
+  args: ['build', '--tag=gcr.io/$PROJECT_ID/ice:$BRANCH_NAME', '-f', '.gcp.config/Dockerfile', '.']
   dir: '.'
 
 # push the image to docker hub
