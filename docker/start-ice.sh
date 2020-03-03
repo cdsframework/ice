@@ -10,7 +10,7 @@ fi
 
 if [ -n $TZ ]; then
     echo "TZ is set to: $TZ"
-    export JAVA_OPTS="$JAVA_OPS -Duser.timezone=$TZ"
+    export JAVA_OPTS="$JAVA_OPTS -Duser.timezone=$TZ"
 fi
 
 if [ -n $KM_THREADS ]
