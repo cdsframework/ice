@@ -8,6 +8,12 @@ if [ -n $DEBUG ]; then
     fi
 fi
 
+if [ -n $PRE_EVALUATE_HOOK_URI ]
+then
+    echo "Setting system property preEvaluateHookUri to: $PRE_EVALUATE_HOOK_URI"
+    export JAVA_OPTS="$JAVA_OPTS -DpreEvaluateHookUri=$PRE_EVALUATE_HOOK_URI"
+fi
+
 if [ -n $TZ ]; then
     echo "TZ is set to: $TZ"
     export JAVA_OPTS="$JAVA_OPTS -Duser.timezone=$TZ"
