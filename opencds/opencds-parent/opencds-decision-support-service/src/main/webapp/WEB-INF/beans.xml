@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:util="http://www.springframework.org/schema/util"
-    xmlns:security="http://www.springframework.org/schema/security"
-    xsi:schemaLocation="
+<beans xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:jaxws="http://cxf.apache.org/jaxws" 
+    xmlns:jaxrs="http://cxf.apache.org/jaxrs" 
+    xmlns:util="http://www.springframework.org/schema/util" 
+    xmlns:security="http://www.springframework.org/schema/security" xsi:schemaLocation="
 	http://www.springframework.org/schema/beans 
 	http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/util
@@ -64,9 +67,9 @@
     <bean id="vmrInboundPayloadProcessor" class="org.opencds.service.evaluate.VMRInboundPayloadProcessor">
         <constructor-arg name="unmarshallerPool" ref="unmarshallerPool" />
     </bean>
-    
+
     <!-- <bean id="fhirInboundPayloadProcessor" class="org.opencds.service.evaluate.FHIRInboundPayloadProcessor"/> -->
-    
+
     <bean id="marshallerFactory" class="org.opencds.config.api.pool.MarshallerFactory">
         <constructor-arg name="jaxbContextService" ref="jaxbContextService" />
     </bean>
@@ -78,22 +81,22 @@
     <bean id="vmrOutboundPayloadProcessor" class="org.opencds.service.evaluate.VMROutboundPayloadProcessor">
         <constructor-arg name="marshallerPool" ref="marshallerPool" />
     </bean>
-    
+
     <!-- <bean id="fhirOutboundPayloadProcessor" class="org.opencds.service.evaluate.FHIROutboundPayloadProcessor"/> -->
-   
-       
+
+
     <bean id="requestProcessorService" class="org.opencds.service.evaluate.RequestProcessorService">
         <constructor-arg name="inboundPayloadProcessor" ref="vmrInboundPayloadProcessor" />
-         <property name="inboundPayloadProcessorsMap">
+        <property name="inboundPayloadProcessorsMap">
             <map>
-                <entry key="org.opencds.vmr^VMR^1.0"  value-ref="vmrInboundPayloadProcessor" />
+                <entry key="org.opencds.vmr^VMR^1.0" value-ref="vmrInboundPayloadProcessor" />
                 <!-- <entry key="org.opencds.fhir^FHIR^1.0" value-ref="fhirInboundPayloadProcessor" /> -->
             </map>
         </property>
     </bean>
 
     <bean id="evaluationFactory" class="org.opencds.dss.evaluate.EvaluationFactory" />
-    
+
 
     <bean id="evaluationService" class="org.opencds.dss.evaluate.EvaluationService">
         <constructor-arg name="configurationService" ref="configurationService" />
@@ -102,7 +105,7 @@
         <constructor-arg name="outboundPayloadProcessor" ref="vmrOutboundPayloadProcessor" />
         <property name="outboundPayloadProcessorsMap">
             <map>
-                <entry key="org.opencds.vmr^VMR^1.0"  value-ref="vmrOutboundPayloadProcessor" />
+                <entry key="org.opencds.vmr^VMR^1.0" value-ref="vmrOutboundPayloadProcessor" />
                 <!-- <entry key="org.opencds.fhir^FHIR^1.0" value-ref="fhirOutboundPayloadProcessor" /> -->
             </map>
         </property>
@@ -112,7 +115,8 @@
         <constructor-arg name="evaluation" ref="evaluationService" />
     </bean>
 
-    <jaxws:endpoint id="evaluationWebService" address="/evaluate" serviceName="dss:DecisionSupportService" endpointName="dss:evaluate" xmlns:dss="http://www.omg.org/spec/CDSS/201105/dssWsdl" wsdlLocation="WEB-INF/wsdl/dss.wsdl">
+    <jaxws:endpoint id="evaluationWebService" address="/evaluate" serviceName="dss:DecisionSupportService" endpointName="dss:evaluate" 
+        xmlns:dss="http://www.omg.org/spec/CDSS/201105/dssWsdl" wsdlLocation="WEB-INF/wsdl/dss.wsdl">
         <jaxws:implementor>
             <bean parent="evaluationSoapService" />
         </jaxws:implementor>
@@ -147,9 +151,10 @@
     <!--
     <bean id="evaluateAtSpecifiedTimeMessageBodyReader" class="org.cdsframework.rest.opencds.EvaluateAtSpecifiedTimeMessageBodyReader"/>
     -->
- 
+
     <bean id="evaluateResource" class="org.cdsframework.rest.opencds.EvaluateResource">
         <constructor-arg name="evaluationService" ref="evaluationService" />
+        <constructor-arg name="configurationService" ref="configurationService" />
     </bean>
 
     <jaxrs:server id="evaluationRESTService" address="/api">
@@ -183,7 +188,7 @@
         <constructor-arg name="location" value="${config.security}" />
     </bean>
 
-	<!-- 
+    <!-- 
     <bean id="filterChainProxy" class="org.springframework.security.web.FilterChainProxy">
         <constructor-arg>
             <list>
@@ -192,7 +197,7 @@
         </constructor-arg>
     </bean>
 	-->
-	 
+
     <!-- To allow public access by default and to set authentication mode to basic login/password -->
     <security:http create-session="stateless" realm="OpenCDS Configuration Service" use-expressions="true" authentication-manager-ref="authenticationManager">
         <!-- <security:intercept-url pattern="/config/**" method="GET" access="ROLE_CONFIG_USER" /> -->
@@ -209,13 +214,13 @@
         <property name="realmName" value="OpenCDS Configuration Service" />
     </bean>
 
-	<!-- 
+    <!-- 
     <bean id="basicAuthenticationFilter" class="org.springframework.security.web.authentication.www.BasicAuthenticationFilter">
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="authenticationEntryPoint" ref="authenticationEntryPoint" />
     </bean>
 	 -->
-	 
+
     <bean id="roleVoter" class="org.springframework.security.access.vote.RoleHierarchyVoter">
         <constructor-arg ref="roleHierarchy" />
     </bean>
