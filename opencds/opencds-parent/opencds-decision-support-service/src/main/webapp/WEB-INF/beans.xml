@@ -148,24 +148,24 @@
         <constructor-arg name="configurationService" ref="configurationService" />
     </bean>
 
-    <!--
-    <bean id="evaluateAtSpecifiedTimeMessageBodyReader" class="org.cdsframework.rest.opencds.EvaluateAtSpecifiedTimeMessageBodyReader"/>
-    -->
+    <bean id="healthResource" class="org.cdsframework.rest.opencds.HealthResource">
+    </bean>
 
     <bean id="evaluateResource" class="org.cdsframework.rest.opencds.EvaluateResource">
         <constructor-arg name="evaluationService" ref="evaluationService" />
         <constructor-arg name="configurationService" ref="configurationService" />
     </bean>
 
+    <jaxrs:server id="healthRESTService" address="/">
+        <jaxrs:serviceBeans>
+            <ref bean="healthResource" />
+        </jaxrs:serviceBeans>
+    </jaxrs:server>
+
     <jaxrs:server id="evaluationRESTService" address="/api">
         <jaxrs:serviceBeans>
             <ref bean="evaluateResource" />
         </jaxrs:serviceBeans>
-        <!--
-        <jaxrs:providers>
-            <ref bean="evaluateAtSpecifiedTimeMessageBodyReader"/>
-        </jaxrs:providers>
-        -->
     </jaxrs:server>
 
     <jaxrs:server id="configurationRESTService" address="/config/v1">
