@@ -2,120 +2,148 @@ substitutions:
   _GCS_CACHE_BUCKET: ice-mvn-cache
 
 steps:
+  # load the cache from GCS if it exists
+  - name: gcr.io/cloud-builders/gsutil
+    dir: /root
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        (
+          gsutil cp gs://${_GCS_CACHE_BUCKET}/m2-cache.tar.gz /tmp/m2-cache.tar.gz &&
+          tar -xzf /tmp/m2-cache.tar.gz
+          rm -rf /root/.m2/repository/org/cdsframework/opencds-rest-service/
+        ) || echo 'Cache not found'
+    volumes:
+      - name: m2
+        path: /root/.m2/
 
-# load the cache from GCS if it exists
-- name: gcr.io/cloud-builders/gsutil
-  dir: /root
-  entrypoint: bash
-  args:
-  - -c
-  - |
-    (
-      gsutil cp gs://${_GCS_CACHE_BUCKET}/m2-cache.tar.gz /tmp/m2-cache.tar.gz &&
-      tar -xzf /tmp/m2-cache.tar.gz
-    ) || echo 'Cache not found'
-  volumes:
-  - name: m2
-    path: /root/.m2/
+  # decrypt settings.xml
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - kms
+      - decrypt
+      - --ciphertext-file=.gcp.config/settings.enc
+      - --plaintext-file=/root/.m2/settings.xml
+      - --location=global
+      - --keyring=main
+      - --key=gcb_key
+    volumes:
+      - name: "m2"
+        path: /root/.m2
 
-# decrypt settings.xml
-- name: 'gcr.io/cloud-builders/gcloud'
-  args:
-  - kms
-  - decrypt
-  - --ciphertext-file=.gcp.config/settings.enc
-  - --plaintext-file=/root/.m2/settings.xml
-  - --location=global
-  - --keyring=main
-  - --key=gcb_key
-  volumes:
-  - name: 'm2'
-    path: /root/.m2
+  # decrypt docker hub token
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - kms
+      - decrypt
+      - --ciphertext-file=.gcp.config/gcp_token.enc
+      - --plaintext-file=/root/keystore/gcp_token.txt
+      - --location=global
+      - --keyring=main
+      - --key=gcb_key
+    volumes:
+      - name: "keystore"
+        path: /root/keystore
 
-# decrypt docker hub token
-- name: 'gcr.io/cloud-builders/gcloud'
-  args:
-  - kms
-  - decrypt
-  - --ciphertext-file=.gcp.config/gcp_token.enc
-  - --plaintext-file=/root/keystore/gcp_token.txt
-  - --location=global
-  - --keyring=main
-  - --key=gcb_key
-  volumes:
-  - name: 'keystore'
-    path: /root/keystore
+  # build opencds-knowledge-repository-data dep first
+  - name: "maven:3-jdk-8-slim"
+    entrypoint: "mvn"
+    args:
+      ["-Dmaven.compiler.source=1.7", "-Dmaven.compiler.target=1.7", "install"]
+    dir: "opencds/opencds-knowledge-repository-data"
+    volumes:
+      - name: "m2"
+        path: /root/.m2
 
-# build opencds-knowledge-repository-data dep first
-- name: 'maven:3-jdk-8-slim'
-  entrypoint: 'mvn'
-  args: ['-Dmaven.compiler.source=1.7', '-Dmaven.compiler.target=1.7', 'install']
-  dir: 'opencds/opencds-knowledge-repository-data'
-  volumes:
-  - name: 'm2'
-    path: /root/.m2
+  # build main project
+  - name: "maven:3-jdk-8-slim"
+    entrypoint: "mvn"
+    args:
+      [
+        "-P drools-5.5",
+        "-DskipTests",
+        "-Dmaven.compiler.source=1.7",
+        "-Dmaven.compiler.target=1.7",
+        "install",
+      ]
+    dir: "opencds/opencds-parent"
+    volumes:
+      - name: "m2"
+        path: /root/.m2
 
-# build main project
-- name: 'maven:3-jdk-8-slim'
-  entrypoint: 'mvn'
-  args: ['-P drools-5.5', '-DskipTests', '-Dmaven.compiler.source=1.7', '-Dmaven.compiler.target=1.7', 'install']
-  dir: 'opencds/opencds-parent'
-  volumes:
-  - name: 'm2'
-    path: /root/.m2
+  # build the rules packager
+  - name: "maven:3-jdk-8-slim"
+    id: build
+    entrypoint: "mvn"
+    args:
+      [
+        "-Dmaven.compiler.source=1.7",
+        "-Dmaven.compiler.target=1.7",
+        "compile",
+        "assembly:single",
+      ]
+    dir: "rules-packager"
+    volumes:
+      - name: "m2"
+        path: /root/.m2
 
-# build the rules packager
-- name: 'maven:3-jdk-8-slim'
-  id: build
-  entrypoint: 'mvn'
-  args: ['-Dmaven.compiler.source=1.7', '-Dmaven.compiler.target=1.7', 'compile', 'assembly:single']
-  dir: 'rules-packager'
-  volumes:
-  - name: 'm2'
-    path: /root/.m2
+  # produce the compiled pkg for ice
+  - name: "maven:3-jdk-8-slim"
+    entrypoint: "java"
+    args:
+      [
+        "-jar",
+        "rules-packager/target/rules-packager-1.0.0-SNAPSHOT-jar-with-dependencies.jar",
+        ".gcp.config/ice-gen.properties",
+        "gov.nyc.cir^ICE^1.0.0",
+        "org.cdsframework^ICE^1.0.0",
+      ]
+    dir: "."
+    volumes:
+      - name: m2
+        path: /root/.m2/
 
-# produce the compiled pkg for ice
-- name: 'maven:3-jdk-8-slim'
-  entrypoint: 'java'
-  args: ['-jar', 'rules-packager/target/rules-packager-1.0.0-SNAPSHOT-jar-with-dependencies.jar', '.gcp.config/ice-gen.properties', 'gov.nyc.cir^ICE^1.0.0', 'org.cdsframework^ICE^1.0.0']
-  dir: '.'
-  volumes:
-  - name: m2
-    path: /root/.m2/
+  # cache the /root/.m2 folder and upload it to GCS bucket
+  - name: gcr.io/cloud-builders/gsutil
+    waitFor:
+      - build
+    dir: /root
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        tar -czf /tmp/m2-cache.tar.gz .m2 &&
+        gsutil cp /tmp/m2-cache.tar.gz gs://${_GCS_CACHE_BUCKET}/m2-cache.tar.gz
+    volumes:
+      - name: m2
+        path: /root/.m2/
 
-# cache the /root/.m2 folder and upload it to GCS bucket
-- name: gcr.io/cloud-builders/gsutil
-  waitFor:
-  - build
-  dir: /root
-  entrypoint: bash
-  args:
-  - -c
-  - |
-    tar -czf /tmp/m2-cache.tar.gz .m2 &&
-    gsutil cp /tmp/m2-cache.tar.gz gs://${_GCS_CACHE_BUCKET}/m2-cache.tar.gz
-  volumes:
-  - name: m2
-    path: /root/.m2/
+  # build the docker image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "--tag=gcr.io/$PROJECT_ID/ice:$BRANCH_NAME",
+        "-f",
+        ".gcp.config/Dockerfile",
+        ".",
+      ]
+    dir: "."
 
-# build the docker image
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--tag=gcr.io/$PROJECT_ID/ice:$BRANCH_NAME', '-f', '.gcp.config/Dockerfile', '.']
-  dir: '.'
+  # push the image to docker hub
+  - name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        cat /root/keystore/gcp_token.txt | docker login --username $_DH_USERNAME --password-stdin $_DH_HOSTNAME
+        docker tag gcr.io/$PROJECT_ID/ice:$BRANCH_NAME $_DH_REPO:$_DH_TAG
+        docker push $_DH_HOSTNAME/$_DH_REPO:$_DH_TAG
+        rm /root/keystore/gcp_token.txt
+    volumes:
+      - name: "keystore"
+        path: /root/keystore
 
-# push the image to docker hub
-- name: 'gcr.io/cloud-builders/docker'
-  entrypoint: 'bash'
-  args:
-  - '-c'
-  - |
-    cat /root/keystore/gcp_token.txt | docker login --username $_DH_USERNAME --password-stdin $_DH_HOSTNAME
-    docker tag gcr.io/$PROJECT_ID/ice:$BRANCH_NAME $_DH_REPO:$_DH_TAG
-    docker push $_DH_HOSTNAME/$_DH_REPO:$_DH_TAG
-    rm /root/keystore/gcp_token.txt
-  volumes:
-  - name: 'keystore'
-    path: /root/keystore
-
-images: ['gcr.io/$PROJECT_ID/ice']
+images: ["gcr.io/$PROJECT_ID/ice"]
 timeout: 900s
