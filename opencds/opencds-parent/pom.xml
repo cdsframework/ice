@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
     <properties>
         <!-- java -->
-        <java.version>1.7</java.version>
+        <java.version>1.8</java.version>
 
         <!-- maven libs -->
         <maven.assembly.plugin.version>2.4</maven.assembly.plugin.version>
@@ -22,55 +22,45 @@
         <maven.tomcat.plugin.version>2.2</maven.tomcat.plugin.version>
 
         <!-- groovy -->
-        <!--  <groovy.version>2.4.4</groovy.version> -->
-        <groovy.version>2.4.15</groovy.version>
+        <groovy.version>2.4.20</groovy.version>
         <gmavenplus.plugin.version>1.4</gmavenplus.plugin.version>
-        <!--  <groovy.eclipse.compiler.version>2.9.0-01</groovy.eclipse.compiler.version> -->
         <groovy.eclipse.compiler.version>3.2.0.xx-201811052024-e49</groovy.eclipse.compiler.version>
         <groovy.eclipse.batch.version>2.3.4-01</groovy.eclipse.batch.version>
-        <commons.cli.version>1.2</commons.cli.version>
-
-        <!--  <hapi-fhir.version>4.1.0</hapi-fhir.version> -->
-        <!--  <woodstox.core.version>4.4.1</woodstox.core.version> -->
+        <commons.cli.version>1.4</commons.cli.version>
 
         <!-- testing - uses groovy -->
         <spock.version>1.0-groovy-2.4</spock.version>
         <cglib.version>3.1</cglib.version>
         <cglib.nodep.version>3.1</cglib.nodep.version>
-        <junit.version>4.11</junit.version>
-        <tomcat.servletapi.version>7.0.54</tomcat.servletapi.version>
-        <xml.unit.version>1.5</xml.unit.version>
+        <junit.version>4.13</junit.version>
+        <tomcat.servletapi.version>7.0.104</tomcat.servletapi.version>
+        <xml.unit.version>1.6</xml.unit.version>
 
         <!-- spring -->
-        <spring.version>4.3.25.RELEASE</spring.version>
-        <spring.security.version>4.2.13.RELEASE</spring.security.version>
-        <spring.ws.core.version>2.4.6.RELEASE</spring.ws.core.version>
-        <!--  <spring.ws.core.version>2.2.0.RELEASE</spring.ws.core.version> -->
-        
-
-        <!-- apelon dts -->
-        <apelon.dts.version>3.5.0</apelon.dts.version>
+        <spring.version>4.3.27.RELEASE</spring.version>
+        <spring.security.version>4.2.18.RELEASE</spring.security.version>
+        <spring.ws.core.version>2.4.7.RELEASE</spring.ws.core.version>
 
         <!-- google -->
-        <google.guava.version>17.0</google.guava.version>
+        <google.guava.version>29.0-jre</google.guava.version>
 
         <!-- logging libs -->
         <commons.logging.version>1.1.1</commons.logging.version>
-        <slf4j.version>1.7.10</slf4j.version>
+        <slf4j.version>1.7.30</slf4j.version>
 
-        <jaxrs.api.version>2.0</jaxrs.api.version>
-        <jersey.version>2.11</jersey.version>
+        <jaxrs.api.version>2.1.1</jaxrs.api.version>
+        <jersey.version>2.25.1</jersey.version>
 
         <!-- xml libs -->
-        <cxf.version>3.0.3</cxf.version>
-        <jaxb.api.version>2.2.11</jaxb.api.version>
-        <xerces.impl.version>2.11.0</xerces.impl.version> <!-- Needs this specific version -->
+        <cxf.version>3.0.16</cxf.version>
+        <jaxb.api.version>2.2.12</jaxb.api.version>
+        <xerces.impl.version>2.12.0</xerces.impl.version> <!-- Needs this specific version -->
 
         <!-- other libs -->
-        <commons.pool2.version>2.2</commons.pool2.version>
+        <commons.pool2.version>2.8.1</commons.pool2.version>
         <commons.lang3.version>3.2.1</commons.lang3.version>
-        <commons.codec.version>1.10</commons.codec.version>
-        <quartz.version>2.2.1</quartz.version>
+        <commons.codec.version>1.14</commons.codec.version>
+        <quartz.version>2.3.2</quartz.version>
 
         <!-- databases -->
         <bdb.je.version>5.0.73</bdb.je.version>
@@ -90,25 +80,8 @@
         <module>../../opencds-support-client</module>
         <module>../../cdsframework-support-xml</module>
         <module>../../ice3/opencds-ice-service</module>
-        <!--  <module>../../ice3/opencds-ice-service-data</module> --> 
     </modules>
     <profiles>
-        <profile>
-            <id>drools-5.3</id>
-            <properties>
-                <opencds.drools.adapter.module>opencds-dss-drools-53-adapter</opencds.drools.adapter.module>
-                <drools.version>5.3.3.Final</drools.version>
-                <jbpm.version>5.2.2.Final</jbpm.version>
-            </properties>
-        </profile>
-        <profile>
-            <id>drools-5.4</id>
-            <properties>
-                <opencds.drools.adapter.module>opencds-dss-drools-54-adapter</opencds.drools.adapter.module>
-                <drools.version>5.4.0.Final</drools.version>
-                <jbpm.version>5.3.0.Final</jbpm.version>
-            </properties>
-        </profile>
         <profile>
             <id>drools-5.5</id>
             <activation>
@@ -132,26 +105,6 @@
     </profiles>
     <dependencyManagement>
         <dependencies>
-            <!-- apelon dts -->
-            <dependency>
-                <groupId>apelon-dts</groupId>
-                <artifactId>apelonserver</artifactId>
-                <version>${apelon.dts.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>apelon-dts</groupId>
-                <artifactId>common</artifactId>
-                <version>${apelon.dts.version}</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>apelon-dts</groupId>
-                <artifactId>dtscore</artifactId>
-                <version>${apelon.dts.version}</version>
-                <scope>compile</scope>
-            </dependency>
-
             <!-- google -->
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -583,7 +536,7 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin>
+			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.plugin.version}</version>
