@@ -1,34 +1,35 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
 		<artifactId>opencds-parent</artifactId>
 		<groupId>org.opencds</groupId>
 		<version>2.0.5</version>
-		<relativePath>../../opencds/opencds-parent/pom.xml</relativePath>  
-  </parent>
-  <artifactId>opencds-ice-service</artifactId>
-  <packaging>jar</packaging>
-  <name>Immunization Calculation Engine</name>
-  <description>ICE Implementation of DSS Evaluation Operation using Drools 5.5</description>
+		<relativePath>../../opencds/opencds-parent/pom.xml</relativePath>
+	</parent>
+	<artifactId>opencds-ice-service</artifactId>
+	<packaging>jar</packaging>
+	<name>Immunization Calculation Engine</name>
+	<description>ICE Implementation of DSS Evaluation Operation using Drools 5.5</description>
 	<build>
-	    <resources>
-	      <resource>
-	        <directory>src/main/resources</directory>
-	        <excludes>
-	          <exclude>**/*</exclude>
-	        </excludes>
-	      </resource>
-	    </resources>
-	</build>	
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/*</exclude>
+				</excludes>
+			</resource>
+		</resources>
+	</build>
 	<properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>	
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+	</properties>
 	<dependencies>
-	
+
 		<dependency>
-       		<groupId>javax.xml.bind</groupId>
+			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 		</dependency>
 		<dependency>
@@ -41,11 +42,11 @@
 			<artifactId>opencds-dss-evaluation</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>javax.servlet-api</artifactId>
-                </exclusion>
-            </exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -69,108 +70,108 @@
 		</dependency>
 		<dependency>
 			<groupId>org.cdsframework</groupId>
-    		<artifactId>opencds-support-client</artifactId>
+			<artifactId>opencds-support-client</artifactId>
 			<version>0.9.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cdsframework</groupId>
-    		<artifactId>cdsframework-support-xml</artifactId>
+			<artifactId>cdsframework-support-xml</artifactId>
 			<version>0.9.5</version>
 		</dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>opencds-config-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>opencds-plugin-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>opencds-plugin-support</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 		<dependency>
-            <groupId>org.eclipse.jdt.core.compiler</groupId>
-            <artifactId>ecj</artifactId>
-            <version>4.6.1</version>
-        </dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>opencds-config-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>opencds-plugin-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>opencds-plugin-support</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jdt.core.compiler</groupId>
+			<artifactId>ecj</artifactId>
+			<version>4.6.1</version>
+		</dependency>
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-compiler</artifactId>
 			<version>5.5.0.Final</version>
 			<exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                    	<groupId>org.eclipse.jdt.core.compiler</groupId>
-                    	<artifactId>ecj</artifactId>
-                </exclusion>
-			</exclusions>			
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.jdt.core.compiler</groupId>
+					<artifactId>ecj</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-core</artifactId>
 			<version>5.5.0.Final</version>
 			<exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-			</exclusions>			
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>knowledge-api</artifactId>
 			<version>5.5.0.Final</version>
 			<exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-	    	<groupId>org.drools</groupId>
+			<groupId>org.drools</groupId>
 			<artifactId>knowledge-internal-api</artifactId>
 			<version>5.5.0.Final</version>
 			<exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>			
-		</dependency>
-		<dependency>
-    		<groupId>org.jbpm</groupId>
-    		<artifactId>jbpm-bpmn2</artifactId>
-    		<exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
-	    	<groupId>org.jbpm</groupId>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-bpmn2</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.jbpm</groupId>
 			<artifactId>jbpm-flow</artifactId>
 			<version>5.4.0.Final</version>
-			    		<exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
-   	    <dependency>
+		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>2.10.5</version>
-   	    </dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -185,62 +186,57 @@
 			<artifactId>jbpm-flow-builder</artifactId>
 			<version>5.4.0.Final</version>
 		</dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-        </dependency>
-        <!-- groovy -->
-        <!-- 
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>${groovy.version}</version>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-test</artifactId>
-            <!--  <version>${groovy.version}</version> -->
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-xml</artifactId>
-            <!--  <version>${groovy.version}</version> -->
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.ws</groupId>
-            <artifactId>spring-ws-core</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>xmlunit</groupId>
-            <artifactId>xmlunit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+		</dependency>
+		<!-- groovy -->
+		<!-- <dependency> <groupId>org.codehaus.groovy</groupId> <artifactId>groovy-all</artifactId> 
+			<version>${groovy.version}</version> </dependency> -->
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-test</artifactId>
+			<!-- <version>${groovy.version}</version> -->
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-xml</artifactId>
+			<!-- <version>${groovy.version}</version> -->
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.ws</groupId>
+			<artifactId>spring-ws-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>xmlunit</groupId>
+			<artifactId>xmlunit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
 	</dependencies>
 </project>
