@@ -2063,6 +2063,7 @@ public class TargetSeries {
 				lRecStatusListOfInterest.add(RecommendationStatus.NOT_RECOMMENDED);
 				/////// setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
 				addFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				addFinalRecommendations(eliminatedOthersWithRecDate);
 			}
 			else if (lFinalRecommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED) {
 				List<RecommendationStatus> lRecStatusListOfInterest = new ArrayList<RecommendationStatus>();
@@ -2096,6 +2097,7 @@ public class TargetSeries {
 				lRecStatusListOfInterest.add(RecommendationStatus.NOT_RECOMMENDED);
 				/////// setFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
 				addFinalRecommendations(Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended, lRecStatusListOfInterest));
+				addFinalRecommendations(eliminatedOthersWithRecDate);
 			}
 
 			// Debug logging - list final recommendations

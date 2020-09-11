@@ -1017,7 +1017,7 @@ rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "History
 		String _RULENAME = kcontext.rule.name;
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
 		insert(hef)		
-		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAX_AGE_VACCINE.getCdsListItemName());
+		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_VACCINE.getCdsListItemName());
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 

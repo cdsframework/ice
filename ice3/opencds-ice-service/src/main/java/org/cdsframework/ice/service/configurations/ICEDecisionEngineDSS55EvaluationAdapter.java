@@ -692,7 +692,10 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		else {
 			outputEarliestOverdueDates = new Boolean(false);
 		}
-
+		if (logger.isInfoEnabled()) {
+			logger.info(_METHODNAME + "output_earliest_and_overdue_dates set to " + outputEarliestOverdueDates);
+		}
+		
 		// Permit Dose Override by client?
 		String lEnableDoseOverrideFeature = lProps.getProperty("enable_dose_override_feature");
 		if (lEnableDoseOverrideFeature != null && lEnableDoseOverrideFeature.equals("Y")) {
@@ -700,6 +703,9 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		}
 		else {
 			doseOverrideFeatureEnabled = new Boolean(false);
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info(_METHODNAME + "enable_dose_override_feature set to " + doseOverrideFeatureEnabled);
 		}
 		
 		// Output Supplemental Text, when available?
@@ -709,6 +715,9 @@ public class ICEDecisionEngineDSS55EvaluationAdapter implements Evaluater {
 		}
 		else {
 			outputSupplementalText = new Boolean(false);
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info(_METHODNAME + "output_supplemental_text set to " + outputSupplementalText);
 		}
 		
 		/////// Set up knowledge base
