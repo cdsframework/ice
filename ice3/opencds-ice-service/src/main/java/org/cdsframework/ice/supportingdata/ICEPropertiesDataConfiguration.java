@@ -152,7 +152,7 @@ public class ICEPropertiesDataConfiguration {
 				logger.info(lErrStr);
 			}
 		}
-		
+
 		// Get the ICE knowledge modules subdirectory location
 		String knowledgeCommonSubDirectory = iceProps.getProperty("ice_knowledge_common_subdirectory");
 		if (knowledgeCommonSubDirectory == null) {

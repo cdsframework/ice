@@ -24,13 +24,11 @@ public enum SupportedFactConcept {
 
 	private CD supportedFactConcept;
 
-
 	private SupportedFactConcept(String pConceptCodeValue, String pConceptDisplayNameValue) {
 		supportedFactConcept = new CD();
 		supportedFactConcept.setCode(pConceptCodeValue);
 		supportedFactConcept.setDisplayName(pConceptDisplayNameValue);
 	}
-
 
 	/**
 	 * Return SupportedEvaluationConcept for the specified concept code; null if no associated SupportedEvaluationConcept exists

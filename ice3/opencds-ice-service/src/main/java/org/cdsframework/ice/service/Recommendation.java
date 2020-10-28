@@ -34,6 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.kie.api.definition.type.ClassReactive;
 
 /**
  * Interim recommendation class to store information that is used to determine a final recommendation. All information stored in instantiated Recommendation objects are utilized to determine 
@@ -41,6 +42,7 @@ import org.cdsframework.ice.util.TimePeriod.DurationType;
  * to be considered for the forecast, it must be added to a separate instantiated object. Various forecast dates are taken into consideration by different rules (e.g. - age and interval rules) and by 
  * the type of forecast (e.g. - earliest, recommended, and latest recommended). 
  */
+@ClassReactive
 public class Recommendation {
 	
 	public enum RecommendationDateType { EARLIEST, EARLIEST_RECOMMENDED, LATEST_RECOMMENDED }

@@ -27,6 +27,7 @@
 package org.cdsframework.ice.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -42,7 +43,9 @@ import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineItem;
 import org.cdsframework.ice.supportingdata.SupportedVaccineGroups;
 import org.cdsframework.ice.supportingdata.SupportedVaccines;
+import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.opencds.common.exceptions.ImproperUsageException;
+import org.opencds.config.api.model.KMId;
 
 
 public class Schedule {
@@ -69,7 +72,7 @@ public class Schedule {
 		String _METHODNAME = "ScheduleImpl(): ";
 
 		this.scheduleHasBeenInitialized = false;
-		if (pScheduleId == null || pCommonLogicModule == null|| pCommonLogicModuleLocation == null || pKnowledgeRepositoryLocation == null) {
+		if (pScheduleId == null || pCommonLogicModule == null|| pCommonLogicModuleLocation == null || pKnowledgeRepositoryLocation == null || pKnowledgeModules == null || pKnowledgeModules.isEmpty()) {
 			String lErrStr = "Schedule not properly initialized: one or more parameters null";
 			logger.error(_METHODNAME + lErrStr);
 			throw new ImproperUsageException(lErrStr);
@@ -77,6 +80,7 @@ public class Schedule {
 		this.scheduleId = pScheduleId;
 
 		// Initialize the supporting data for the common logic and knowledge modules specified and available
+		/////// this.iceSupportingDataConfiguration = new ICESupportingDataConfiguration(lCommonLogicModuleSubdirectory, pCommonLogicModuleLocation, lKnowledgeModulesSubDirectoryList, pKnowledgeRepositoryLocation);
 		this.iceSupportingDataConfiguration = new ICESupportingDataConfiguration(pCommonLogicModule, pCommonLogicModuleLocation, pKnowledgeModules, pKnowledgeRepositoryLocation);
 
 		// Log initialization of Schedule

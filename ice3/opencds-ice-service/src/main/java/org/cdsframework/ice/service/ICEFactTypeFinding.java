@@ -26,8 +26,10 @@
 
 package org.cdsframework.ice.service;
 
-import org.cdsframework.ice.service.TargetSeries;
+import org.kie.api.definition.type.ClassReactive;
 
+
+@ClassReactive
 public class ICEFactTypeFinding {
 
 	private String iceResultFinding;

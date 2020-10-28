@@ -28,7 +28,10 @@ package org.cdsframework.ice.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.kie.api.definition.type.ClassReactive;
 
+
+@ClassReactive
 public class TargetSeriesSelection {
 
 	public enum SeriesSelectionStatus {

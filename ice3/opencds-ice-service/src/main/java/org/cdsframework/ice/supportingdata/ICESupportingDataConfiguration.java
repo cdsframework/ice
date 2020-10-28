@@ -49,6 +49,7 @@ import org.cdsframework.ice.service.DoseStatus;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.cdsframework.ice.util.XMLSupportingDataFilenameFilterImpl;
 import org.cdsframework.util.support.data.cds.list.CdsListItem;
 import org.cdsframework.util.support.data.cds.list.CdsListItemConceptMapping;
@@ -60,6 +61,7 @@ import org.cdsframework.util.support.data.ice.series.IceSeriesSpecificationFile;
 import org.cdsframework.util.support.data.ice.vaccine.IceVaccineSpecificationFile;
 import org.cdsframework.util.support.data.ice.vaccinegroup.IceVaccineGroupSpecificationFile;
 import org.opencds.common.exceptions.ImproperUsageException;
+import org.opencds.config.api.model.KMId;
 import org.opencds.vmr.v1_0.schema.CD;
 
 
@@ -116,17 +118,24 @@ public class ICESupportingDataConfiguration {
 				i++;
 			}
 		}
-
-		this.supportingDataDirectoryLocations = new ArrayList<File>();
-		this.supportedCdsVersions = new ArrayList<String>();
 		
+		this.supportingDataDirectoryLocations = new ArrayList<File>();
+		this.supportedCdsVersions = new ArrayList<String>();		
 		StringBuffer lSbSDlocation = new StringBuffer(720);
 		StringBuffer lSbCdsVersion = new StringBuffer(160);
 		lSbSDlocation.append("Supporting Data Directories: ");
 		lSbCdsVersion.append("CDS versions: ");
 
+		///////
 		// First the common logic
-		File lKnowledgeCommonDirectory = new File(pCommonLogicModuleLocation, pCommonLogicModule); 
+		///////
+		KMId lCommonLogicKMId = KnowledgeModuleUtils.returnKMIdRepresentationOfKnowledgeModule(pCommonLogicModule);
+		if (lCommonLogicKMId == null) {
+			String lErrStr = "Common Logic Module not specified in proper format: " + pCommonLogicModule + ". Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
+		File lKnowledgeCommonDirectory = new File(pCommonLogicModuleLocation, KnowledgeModuleUtils.returnPackageNameForKnowledgeModule(lCommonLogicKMId.getScopingEntityId(), lCommonLogicKMId.getBusinessId(), lCommonLogicKMId.getVersion())); 
 		File lCommonSupportingDataDirectory = new File(lKnowledgeCommonDirectory, supportingDataDirectory);
 		if (lCommonSupportingDataDirectory.isDirectory() == false) {
 			String lErrStr = "Supporting data directory location \"" + lCommonSupportingDataDirectory + "\" does not exist";
@@ -143,9 +152,17 @@ public class ICESupportingDataConfiguration {
 			logger.info(_METHODNAME + "Added supporting data directory: " + lCommonSupportingDataDirectory.getAbsolutePath());
 		}
 		
-		// Then the knowledge module logic
+		///////
+		// Then the knowledge module logic for each specified knowledge module
+		///////
 		for (String lCdsVersion : pSupportedKnowledgeModules) {
-			File lKnowledgeModuleDirectory = new File(pKnowledgeModuleRepositoryLocation, lCdsVersion); 
+			KMId lKMId = KnowledgeModuleUtils.returnKMIdRepresentationOfKnowledgeModule(lCdsVersion);
+			if (lKMId == null) {
+				String lErrStr = "Knowledge Module not specified in proper format: " + lCdsVersion + ". Cannot continue";
+				logger.error(_METHODNAME + lErrStr);
+				throw new ImproperUsageException(lErrStr);
+			}
+			File lKnowledgeModuleDirectory = new File(pKnowledgeModuleRepositoryLocation, KnowledgeModuleUtils.returnPackageNameForKnowledgeModule(lKMId.getScopingEntityId(), lKMId.getBusinessId(), lKMId.getVersion())); 
 			File lSupportingDataDirectory = new File(lKnowledgeModuleDirectory, supportingDataDirectory);
 			if (lSupportingDataDirectory.isDirectory() == false) {
 				String lErrStr = "Supporting data directory location \"" + lSupportingDataDirectory + "\" does not exist";
@@ -163,7 +180,7 @@ public class ICESupportingDataConfiguration {
 			if (logger.isDebugEnabled()) {
 				logger.info(_METHODNAME + "Added supporting data directory: " + lSupportingDataDirectory.getAbsolutePath());
 			}
-		}
+		}				
 		
 		///////
 		// Initialize Code Systems/Value Sets supporting data
@@ -969,14 +986,17 @@ public class ICESupportingDataConfiguration {
 		}
 	}
 
-	/*
+	/**
 	public static void main(String[] args) {
 			
 		List<String> lCdsVersions = new ArrayList<String>();
-		lCdsVersions.add("org.cdsframework^ICE^1.0.0");
-		lCdsVersions.add("org.nyc.cir^ICE^1.0.0");
+		// lCdsVersions.add("org.cdsframework^ICE^1.0.0");
+		// lCdsVersions.add("org.nyc.cir^ICE^1.0.0");
+		lCdsVersions.add("gov.nyc.cir^ICE^1.0.0");
+
 		try {
-			ICESupportingDataConfiguration icdh = new ICESupportingDataConfiguration(lCdsVersions, new File("/usr/local/projects/ice/ice3/opencds-ice-service-data/src/main/resources/knowledgeModules"));
+			ICESupportingDataConfiguration icdh = new ICESupportingDataConfiguration("org.cdsframework^ICE^1.0.0", new File("/usr/local/projects/ice-dev/ice-private/ice3/opencds-ice-service/src/main/resources"), 
+					lCdsVersions, new File("/usr/local/projects/ice-dev/ice-private/ice3/opencds-ice-service/src/main/resources"));
 		}
 		catch (Exception e) {
 			System.out.print("An unexpected error occurred :" + e.toString());
@@ -985,6 +1005,4 @@ public class ICESupportingDataConfiguration {
 		System.out.println("\n\nmain(): END.\n\n");
 	}
 	*/
-	
 }
-

@@ -50,8 +50,11 @@ import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.ice.util.TimePeriod.DurationType;
 import org.cdsframework.ice.util.TimePeriodException;
+import org.kie.api.definition.type.ClassReactive;
 import org.opencds.common.exceptions.ImproperUsageException;
 
+
+@ClassReactive
 public class TargetSeries {
 
 	private String targetSeriesIdentifier;

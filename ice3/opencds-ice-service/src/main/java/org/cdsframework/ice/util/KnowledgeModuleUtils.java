@@ -25,7 +25,19 @@ public class KnowledgeModuleUtils {
 		
 		return scopingEntityId + "^" + businessId + "^" + version;
 	}
-	
+
+	public static String returnPackageNameForKnowledgeModule(String scopingEntityId, String businessId, String version) {
+		
+		String _METHODNAME = "returnPackageNameForKnowledgeModule(): ";
+		
+		if (StringUtils.isNullOrEmpty(scopingEntityId) || StringUtils.isNullOrEmpty(businessId) || StringUtils.isNullOrEmpty(version)) {
+			String lErrStr = "One or more parameters not specified";
+			logger.error(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
+		
+		return (scopingEntityId + "." + businessId).toLowerCase();
+	}
 	
 	public static KMId returnKMIdRepresentationOfKnowledgeModule(String pStringRepresentationOfKnowledgeModuleName) {
 		

@@ -36,7 +36,7 @@ import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
-import org.drools.spi.KnowledgeHelper;
+import org.drools.core.spi.KnowledgeHelper;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
 import org.opencds.vmr.v1_0.internal.ClinicalStatementRelationship;
@@ -530,7 +530,7 @@ public class PayloadHelper {
 					}
 					if (outputSupplementalText == true || (outputSupplementalText == false && lSupplementalTextFound == false)) {
 						CD localCDInterp = getLocalCodeForRecommendationReason(recommendationReasonCode, this.backingSchedule);
-						if (localCDInterp != null && rec.getRecommendationStatus() == rs && ! interpretations.contains(localCDInterp)) {
+						if (localCDInterp != null && (rec.getRecommendationStatus() == RecommendationStatus.FORECASTING_COMPLETE || rec.getRecommendationStatus() == rs) && ! interpretations.contains(localCDInterp)) {
 							if (lSupplementalTextFound && outputSupplementalText) {
 								localCDInterp.setOriginalText(rec.getRecommendationSupplementalText());
 							}	

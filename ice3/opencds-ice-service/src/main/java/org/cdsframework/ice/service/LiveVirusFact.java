@@ -27,7 +27,10 @@
 package org.cdsframework.ice.service;
 
 import java.util.Date;
+import org.kie.api.definition.type.ClassReactive;
 
+
+@ClassReactive
 public class LiveVirusFact {
 
 	private Date liveVirusDate = null;

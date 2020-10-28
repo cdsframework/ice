@@ -30,17 +30,13 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.drools.runtime.rule.AccumulateFunction;
+import org.kie.api.runtime.rule.AccumulateFunction;
 
-// import org.kie.api.runtime.rule.AccumulateFunction;
-
-public class MaximumDateAccumulateFunction implements AccumulateFunction  { // , org.kie.api.runtime.rule.AccumulateFunction {
-// public class MaximumDateAccumulateFunction implements TypedAccumulateFunction {
+public class MaximumDateAccumulateFunction implements AccumulateFunction<MaximumDateAccumulateFunction.DateAccumulationData>  {
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -55,7 +51,7 @@ public class MaximumDateAccumulateFunction implements AccumulateFunction  { // ,
 	}
 	
 	 public static class DateAccumulationData implements Externalizable {
-		 public List<Date> list = new ArrayList<Date>();
+		 public List<Date> list = new ArrayList<>();
 	     
 		 public DateAccumulationData() {}
 
@@ -63,34 +59,36 @@ public class MaximumDateAccumulateFunction implements AccumulateFunction  { // ,
 		 
 		 }
 
-
 		 public void writeExternal(ObjectOutput out) throws IOException {
 		 }
 	 }
 
 
 	@Override
-	public void accumulate(Serializable context, Object pDateAccumulationElement) {
-		DateAccumulationData data = (DateAccumulationData) context;
-	    data.list.add((Date) pDateAccumulationElement);
+	public void accumulate(DateAccumulationData context, Object pDateAccumulationElement) {
+		if (context != null && pDateAccumulationElement != null && pDateAccumulationElement instanceof Date) {
+			context.list.add((Date) pDateAccumulationElement);
+		}
 	}
 
 	@Override
-	public Serializable createContext() {
+	public DateAccumulationData createContext() {
 		return new DateAccumulationData();
 	}
 
 	@Override
-	public void init(Serializable context) throws Exception {
-		DateAccumulationData data = (DateAccumulationData) context;
-	    data.list.clear();
+	public void init(DateAccumulationData context) throws Exception {
+		if (context != null) {
+			context.list.clear();
+		}
 	}
 
 	
 	@Override
-	public void reverse(Serializable context, Object value) throws Exception {
-		DateAccumulationData data = (DateAccumulationData) context;
-	    data.list.remove( value );
+	public void reverse(DateAccumulationData context, Object value) throws Exception {
+		if (context != null && value instanceof Date) {
+			context.list.remove((Date) value );
+		}
 	}
 
 	@Override
@@ -98,14 +96,13 @@ public class MaximumDateAccumulateFunction implements AccumulateFunction  { // ,
 		return true;
 	}
 	
-	public Object getResult(Serializable context) throws Exception {
-		DateAccumulationData data = (DateAccumulationData) context;
-		if (data.list == null) {
+	public Object getResult(DateAccumulationData context) throws Exception {
+		if (context.list == null) {
 			// return new ArrayList<Object>();
 			return null;
 		}
 		Date maxDate = null;
-		for (Date d : data.list) {
+		for (Date d : context.list) {
 			if (maxDate == null) {
 				maxDate = d;
 			}
@@ -117,16 +114,7 @@ public class MaximumDateAccumulateFunction implements AccumulateFunction  { // ,
 		return maxDate;
 	}
 	
-	/*
 	public Class<?> getResultType() {
-		
-		try {
-			return Date.class;
-		}
-		catch (Exception e) {
-			throw new RuntimeException();
-		}
-		// return new Class<Object>();
+		return Date.class;
 	}
-	*/
 }

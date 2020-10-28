@@ -31,12 +31,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.kie.api.definition.type.ClassReactive;
 import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
 
 
+@ClassReactive
 public class TargetDose {
 	
 	private String uniqueId;

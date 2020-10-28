@@ -1,0 +1,109 @@
+/**
+ * Copyright (C) 2020 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package knowledgeModule.gov.nyc.cir.ice
+
+import java.util.Date
+import java.util.Iterator
+import java.util.List
+import java.util.Set
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+global java.util.Date evalTime
+
+
+// If one of the duplicate shots is a non-combination CVX 49 (Hib OMP) and the other shot is not an unspecified formulation, then: evaluate the CVX 49 as Invalid with a reason code of DUPLICATE_SAME_DAY 
+// and evaluate the other Hib CVX as Valid. NOTE that this rule, unlike the default duplicate shot/same day rules, works _across_ series of the vaccine group. CVX 49 should never be marked valid if 
+// there is another non-CVX 49 shot in _any_ series that _is_ valid. This will prevent the OMP series from being selected in circumstances where the CVX 49 is a duplicate to a non-CVX 49 dose.
+// (In this case, the other shot may either be a combination or monovalent vaccine, but must not be an NOS.)
+rule "Duplicate Shots/Same Day Hib: If one of the shots is a non-combination vaccine with component CVX 49 and the other shot is _not_ an NOS vaccine, then evaluate the CVX 49 as Invalid / DUPLICATE_SAME_DAY and evaluate the other specified Hib CVX as Valid"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10		// This rule should run before the general duplicate shots/same day rules
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, 
+			vaccineComponent.cdsConceptName == "ICE49",	administeredVaccine.isCombinationVaccine() == false)
+		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID, 
+			isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "ICE49", 
+			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries with Duplicate CVX 49 Shot: " + $td.associatedTargetSeries + "; TargetSeries with VALID shot: " + $tdother.associatedTargetSeries);
+end
+
+
+// If one of the duplicate shots is a *combination* CVX 49 (Hib OMP) and the other shot is *also* a (non-CVX 49) *combination* vaccine: evaluate the CVX 49 as Invalid with a reason code of DUPLICATE_SAME_DAY 
+// and evaluate the other Hib CVX as Valid. NOTE that this rule, unlike the default duplicate shot/same day rules, works _across_ series of the vaccine group. CVX 49 should never be marked valid if 
+// there is another non-CVX 49 shot in _any_ series that _is_ valid. This will prevent the OMP series from being selected in circumstances where the CVX 49 is a duplicate to a non-CVX 49 dose.
+// (In this case, both shots are combination vaccines and the other vaccine must not be an NOS.)
+rule "Duplicate Shots/Same Day Hib: If one of the shots is a combination vaccine with component CVX 49 and the other is also a combination vaccine, non-NOS vaccine, evaluate the CVX 49 as Invalid / DUPLICATE_SAME_DAY and other Hib as Valid"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10		// This rule should run before the general duplicate shots/same day rules
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.cdsConceptName == "ICE49", 
+			isDoseStatusOverridden() == false, administeredVaccine.isCombinationVaccine() == true)
+		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID, 
+			isDoseStatusOverridden() == false, administeredVaccine.isCombinationVaccine() == true, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "ICE49", 
+			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries with Duplicate CVX 49 Shot: " + $td.associatedTargetSeries + "; TargetSeries with VALID shot: " + $tdother.associatedTargetSeries);
+end
+
