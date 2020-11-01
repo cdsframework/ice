@@ -268,7 +268,7 @@
 [consequence][][Ss]et [Dd]ose [Nn]umber of {refer_oTargetDose} to {nDoseNumber}=modify({refer_oTargetDose}) \{ setDoseNumberInSeries({nDoseNumber}); \};
 [consequence][][Mm]ark that [Ee]valuation of [Ss]hot {refer_oTargetDose} is complete and therefore should not be reevaluated by any other rules=modify ({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_COMPLETE) \}
 ////////////// [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ee]valuation [Nn]ot [Ss]tarted for this [Ss]eries=modify({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_NOT_STARTED), removeAllEvaluationReasonsFromAllReasonSets(); \};
-
+[consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Vv]alid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"); {refer_oTargetDose}.addSupplementalTextForValidShot({sSupplementalText});
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TargetSeries Actions
@@ -362,7 +362,7 @@
 [consequence][][Uu]nset the [Rr]ecommended [Vv]accine for the [Ff]orecast in the [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.setRecommendationVaccine(null); for (Recommendation r : {refer_oTargetSeries}.getFinalRecommendations()) \{ r.setRecommendedVaccine(null); \}
 [consequence][][Ss]et [Dd]isplay [Ff]orecast [Dd]ate for [Cc]onditional [Rr]ecommendations in the [Ss]eries {refer_oTargetSeries} to [Tt]rue={refer_oTargetSeries}.setForecastDateToBeDisplayedForConditionalRecommendations(true);
 [consequence][][Ss]et [Dd]isplay [Ff]orecast [Dd]ate for [Cc]onditional [Rr]ecommendations in the [Ss]eries {refer_oTargetSeries} to [Ff]alse={refer_oTargetSeries}.setForecastDateToBeDisplayedForConditionalRecommendations(false);
-[consequence][][Ss]et the [Aa]genda [Gg]roup [Ff]ocus to {sAgendaGroupFocus:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}}=drools.setFocus({sAgendaGroupFocus}); 
+[consequence][][Ss]et the [Aa]genda [Gg]roup [Ff]ocus to {sAgendaGroupFocus:[\\"]{1}[a-zA-Z0-9\\^\\.\\_\\ ]+[\\"]{1}}=drools.setFocus({sAgendaGroupFocus}); 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Logging actions

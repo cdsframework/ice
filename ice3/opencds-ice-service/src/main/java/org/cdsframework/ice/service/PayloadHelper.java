@@ -75,7 +75,7 @@ public class PayloadHelper {
 	}
 	
 
-	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d) {
+	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d,  boolean outputSupplementalText) {
 
 		String _METHODNAME = "OutputNestedImmEvaluationResult: ";
 		if (k == null || pNamedObjects == null || evalTime == null || sae == null || d == null) {
@@ -219,9 +219,37 @@ public class PayloadHelper {
 					interpretations.add(localCDInterp);
 			}
 			for (String interp : d.getValidReasons()) {
-				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
-				if (localCDInterp != null && ! interpretations.contains(localCDInterp))
-					interpretations.add(localCDInterp);
+				if (interp == null) {
+					continue;
+				}
+				boolean lSupplementalTextToOutput = false;
+				if (interp.equals(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName()) && ! d.getSupplementalTextsForValidShot().isEmpty()) {
+					lSupplementalTextToOutput = true;
+				}
+				if (outputSupplementalText == false && lSupplementalTextToOutput == true) {
+					// Supplemental text was output by the rule but the output_supplemental_text option is turned off
+					continue;
+				}
+				else if (lSupplementalTextToOutput == true) {
+					// Output supplemental text - multiple supplemental texts are permitted for shots
+					CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
+					if (localCDInterp != null) {
+						for (String lSupplementalText : d.getSupplementalTextsForValidShot()) {
+							CD lSupplInterp = new CD();
+							lSupplInterp.setCode(localCDInterp.getCode());
+							lSupplInterp.setCodeSystem(localCDInterp.getCodeSystem());
+							lSupplInterp.setCodeSystemName(localCDInterp.getCodeSystemName());
+							lSupplInterp.setDisplayName(localCDInterp.getDisplayName());
+							lSupplInterp.setOriginalText(lSupplementalText);
+							interpretations.add(lSupplInterp);
+						}
+					}
+				}
+				else {
+					CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
+					if (localCDInterp != null && ! interpretations.contains(localCDInterp))
+						interpretations.add(localCDInterp);
+				}
 			}
 			if (interpretations.size() > 0)
 				childObs.setInterpretation(interpretations);

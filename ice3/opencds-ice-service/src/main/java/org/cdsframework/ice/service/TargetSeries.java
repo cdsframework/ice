@@ -98,7 +98,6 @@ public class TargetSeries {
 	private List<Recommendation> finalRecommendations;
 	private List<String> seriesRulesProcessed;
 	private boolean displayForecastDateForConditionalRecommendations;
-	/////// private Date evalTime
 	private static Log logger = LogFactory.getLog(TargetSeries.class);
 
 
@@ -108,7 +107,6 @@ public class TargetSeries {
 	 * @param pScheduleBackingSeries Schedule parameter, must be provided
 	 * @throws IllegalArgumentException If SeriesRules or Schedule parameter not populated or improperly populated
 	 */
-	/////// public TargetSeries(SeriesRules pSeriesRules, Schedule pScheduleBackingSeries, Date pEvalTime) {
 	public TargetSeries(SeriesRules pSeriesRules, Schedule pScheduleBackingSeries) {
 
 		String _METHODNAME = "TargetSeries(SeriesRules, Schedule): ";

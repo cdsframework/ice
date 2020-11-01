@@ -1850,6 +1850,66 @@ end
 
 
 ///////// ***
+// General rule
+// Earliest, Recommended, and Past Due Dates must be on or after the Last Shot Given
+///////// ***
+rule "RecommendationForecast.recommendEarliestDateOnOrAfterLastShotGiven"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^adjustRecommendationDates"
+	when
+		$ts : TargetSeries(finalEarliestDate != null)
+		$td : TargetDose(associatedTargetSeries == $ts, administrationDate > $ts.finalEarliestDate)
+		not TargetDose(associatedTargetSeries == $ts, administrationDate > $td.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($ts) {
+			setFinalEarliestDate($td.administrationDate);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
+// General rule
+// Earliest, Recommended, and Past Due Dates must be on or after the Last Shot Given
+///////// ***
+rule "RecommendationForecast.recommendRecommendedDateOnOrAfterLastShotGiven"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^adjustRecommendationDates"
+	when
+		$ts : TargetSeries(finalRecommendationDate != null)
+		$td : TargetDose(associatedTargetSeries == $ts, administrationDate > $ts.finalRecommendationDate)
+		not TargetDose(associatedTargetSeries == $ts, administrationDate > $td.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($ts) {
+			setFinalRecommendationDate($td.administrationDate);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
+// General rule
+// Earliest, Recommended, and Past Due Dates must be on or after the Last Shot Given
+///////// ***
+rule "RecommendationForecast.recommendOverdueDateOnOrAfterLastShotGiven"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^adjustRecommendationDates"
+	when
+		$ts : TargetSeries(finalOverdueDate != null)
+		$td : TargetDose(associatedTargetSeries == $ts, administrationDate > $ts.finalOverdueDate)
+		not TargetDose(associatedTargetSeries == $ts, administrationDate > $td.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($ts) {
+			setFinalOverdueDate($td.administrationDate);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
 // General Design rule... Do not Edit
 ///////// ***
 rule "RecommendationForecast.finalizeRecommendationsForSeries" ruleflow-group "RecommendationForecast"
@@ -1863,6 +1923,7 @@ rule "RecommendationForecast.finalizeRecommendationsForSeries" ruleflow-group "R
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Finalized recommendations for TargetSeries " + $ts.getSeriesName());
 		update($ts);
 		setFocus("RecommendationForecast^supplementalSeriesRule");
+		setFocus("RecommendationForecast^adjustRecommendationDates");
 end
 
 
@@ -2297,7 +2358,7 @@ rule "ProcessResults: Return Evaluations" ruleflow-group "ProcessResults"
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td);
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText);
 		$sae.setToBeReturned(true);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $td);	
 end

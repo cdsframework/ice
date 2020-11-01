@@ -64,6 +64,7 @@ public class TargetDose {
 	private HashSet<String> invalidReasons;
 	private HashSet<String> notEvaluatedReasons;
 	private HashSet<String> doseRulesProcessed;
+	private HashSet<String> supplementalTextsForValidShots;
 	
 	private static Log logger = LogFactory.getLog(TargetDose.class);
 
@@ -97,6 +98,7 @@ public class TargetDose {
 		invalidReasons = new HashSet<String>();
 		notEvaluatedReasons = new HashSet<String>();
 		doseRulesProcessed = new HashSet<String>();
+		supplementalTextsForValidShots = new HashSet<String>();
 		isPrimarySeriesShot = false;
 		isValid = false;
 		isShotIgnored = false;
@@ -170,6 +172,16 @@ public class TargetDose {
 		}
 	}
 	
+	public void removeAllSupplementalTextsForValidShot() {
+		supplementalTextsForValidShots = new HashSet<String>();
+	}
+	
+	public void removeSupplementalTextForValidShot(String supplementalText) {
+		if (supplementalText != null) {
+			supplementalTextsForValidShots.remove(supplementalText);
+		}
+	}
+
 	public void removeValidReason(String openCdsConceptCode) {
 		
 		if (openCdsConceptCode != null) {
@@ -388,6 +400,7 @@ public class TargetDose {
 			}
 			else {
 				setIsValid(false);
+				removeAllSupplementalTextsForValidShot();
 			}
 			if (status == DoseStatus.EVALUATION_NOT_STARTED || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS) {
 				setPostEvaluationCheckCompleted(false);
@@ -469,6 +482,19 @@ public class TargetDose {
 			notEvaluatedReasons.add(reason);
 	}
 	
+	/**
+	 * Add the supplemental text, if not already present
+	 */
+	public void addSupplementalTextForValidShot(String supplementalTextForValidShots) {
+		if (supplementalTextForValidShots != null && ! supplementalTextsForValidShots.contains(supplementalTextForValidShots)) {
+			supplementalTextsForValidShots.add(supplementalTextForValidShots);
+		}
+	}
+	
+	public Collection<String> getSupplementalTextsForValidShot() {
+		return supplementalTextsForValidShots;
+	}
+	
 	@Override
 	public String toString() {
 		
@@ -512,6 +538,17 @@ public class TargetDose {
 		if (i > 0) {
 			s += "}";
 		}
+		i = 0;
+		for (String supplementalText : supplementalTextsForValidShots) {
+			if (i == 0)
+				s += ", supplementalTexts={\"" + supplementalText + "\"";
+			else
+				s += "\"" + supplementalText + "\"";
+			i++;
+		}
+		if (i > 0) {
+			s += "}";
+		}		
 		for (String reason : notEvaluatedReasons) {
 			if (i == 0)
 				s += ", notEvaluatedReasons={\"" + reason + "\"";

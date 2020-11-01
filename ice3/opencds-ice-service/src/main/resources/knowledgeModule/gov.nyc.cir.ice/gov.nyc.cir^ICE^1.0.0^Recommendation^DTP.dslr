@@ -184,7 +184,7 @@ rule "DTP: If the 5-Dose Series is Complete and the patient has NOT received a p
 			- the date $pertussisDoseDate >= $dtDateAtAge7y
 			- the date $pertussisDoseDate < $dtDateAtAge10y
 	then
-		Set the Agenda Group Focus to "customRecommendationAdolescentTdapExceptionRule"
+		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -257,7 +257,7 @@ If any one of the following exceptions apply, then:
 // * NOTE: No need to include a rule for the recommended interval in this section, as it is taken care of by the same recommendation interval rule below which encompasses all series (not just the 5-dose series) 
 rule "DTP: If the 5-dose series is complete and a Tdap 5-dose series recommendation exception did _not_ occur, recommend Tdap at earliest date & recommended date of 11yrs, overdue date of 13yrs+4w"
 	dialect "mvel"
-	agenda-group "customRecommendationAdolescentTdapExceptionRule"
+	agenda-group "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
@@ -285,7 +285,7 @@ end
 
 // If an Adolescent Tdap needed and ANY Adolescent Tdap exception occurred, recommend an Adolescent Tdap at 7 years of age
 rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If the 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Adolescent Tdap at Earliest, Recommended & Overdue Date of 7yrs"
-	agenda-group "customRecommendationAdolescentTdapExceptionRule"
+	agenda-group "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"	
 	when
 		There is a Series $targetSeries that needs forecasting
@@ -314,7 +314,7 @@ end
 // Exception A) The patient DOES NOT have a dose of pertussis at >= 4 years minus 4 days.
 // Excepion A - higher activation priority than the general adolescent tdap recommendation rule above for 5-dose series 
 rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not have a dose of pertussis >= 4y-4d in the 5-Dose Series(Exception A), make note that the Adolescent Tdap Recommendation Exception criteria was met"
-	agenda-group "customRecommendationAdolescentTdapExceptionRule"
+	agenda-group "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"
 	salience 10
 	when
@@ -339,7 +339,7 @@ end
 // Exception B) The patient DOES NOT have at least 4 doses of pertussis-containing vaccine given at < 7 years
 // Excepion B - As with Exception A, higher activation priority than the general adolescent tdap recommendation rule above for 5-dose series 
 rule "DTP: (Tdap 5-Dose Series Recommendation Exception B)- If the patient DOES NOT have at least 4 doses of pertussis given at < 7 years, make note that the Adolescent Tdap Recommendation Exception criteria was met"
-	agenda-group "customRecommendationAdolescentTdapExceptionRule"
+	agenda-group "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"
 	salience 10
 	when
@@ -449,17 +449,17 @@ end
 
 
 /*************************************************************************************************************************************************************************************
-Rules for Recurring Td (CVX 09)
+Rules for Recurring booster
 Once the patient has completed the primary DTP series (3-dose or 5-dose) and has received a dose of pertussis at >= 7 years of age, a Td (09) is needed every 10 years.  
 
-Evaluation Rules for Recurring Td
-    + All vaccines in the DTP vaccine group are allowed for the recurring Td.
+Evaluation Rules for Recurring booster
+    + All vaccines in the DTP vaccine group are allowed for the recurring booster
     + Minimum interval = 0 days 
-    + Once the primary series is complete and the patient has a dose of pertussis at >=7, any DTP shot is evaluated as VALID for the recurring Td.
+    + Once the primary series is complete and the patient has a dose of pertussis at >=7, any DTP shot is evaluated as VALID for the recurring booster
 *************************************************************************************************************************************************************************************/
 
-// If a patient has completed the Adolescent Tdap requirements, then the next dose in the series should be recommended as Td (CVX 09).
-rule "DTP: Recommend Td (CVX 09) at earliest interval of 5y, recommended interval of 10yrs, and latest recommended interval of 10y+4w if series is complete has received a pertussis dose >= 7yrs"
+// If a patient has completed the Adolescent Tdap requirements, then the next dose in the series should be recommended is a booster dose
+rule "DTP: Recommend booster at earliest interval of 5y, recommended interval of 10yrs, and latest recommended interval of 10y+4w if series is complete has received a pertussis dose >= 7yrs"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationIntervalCheck"
@@ -479,7 +479,6 @@ rule "DTP: Recommend Td (CVX 09) at earliest interval of 5y, recommended interva
 		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtRecommendedCalculated
 		Set the Recommendation Earliest Forecast Date for $oRecommendationInterval to $dtEarliestRecommendedCalculated
 		Set the Recommendation Overdue Forecast Date for $oRecommendationInterval to $dtOverdueCalculated
-		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE09"
 		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -493,11 +492,13 @@ Recurring Rules for Td END
 /*************************************************************************************************************************************************************************************
 5-Dose Series Special Rules 
 Rule for Recommending/Evaluating Next Dose From Invalid Tdap/TD Given Below Minimum Age for Vaccine
-If Tdap (CVX 115) or Td (CVX 09, 113, 138, 139) is given as target dose 1, 2 or 3 to a patient < 7yrs-4days old (vaccine minimum age), then the invalid shot should be ignored 
+If Tdap (CVX 115) is given as target dose 1, 2 or 3 to a patient < 7yrs-4days old (vaccine minimum age), then the invalid shot should be ignored 
 when determining the recommended due date for the next target dose due
 *************************************************************************************************************************************************************************************/
 
+///////
 // Nothing to do. Shots marked ignored during evaluation stage will be ignored by base rules when calculating recommendation intervals.
+///////
 
 /*************************************************************************************************************************************************************************************
 5-Dose Series Special Rules  END
