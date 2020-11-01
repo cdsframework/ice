@@ -539,7 +539,7 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for
 			- that has already been evaluated and whose Shot Validity is VALID
 			- the Administration Date of the shot is >= $dtDateAtAge4y
 			- the Dose Number in the series is >= 2
-		Confirm elapsed time between $birthDate and $recommendationDate >= "7y" 	
+		Confirm elapsed time between $birthDate and $recommendationDate >= "7y"
  	then
 		Mark the Series $targetSeries Complete
 		Refresh all Facts in the Series $targetSeries for forecasting
