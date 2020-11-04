@@ -15,9 +15,8 @@
  */
 
 package org.opencds.common;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An Adaptor that allows us to log to Console
@@ -26,25 +25,22 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ConsoleLogger implements ILogger {
 
-	
-	private Log log = LogFactory.getLog(getClass());
-	
-
+	private static final Logger logger = LogManager.getLogger();
 	
 	public ConsoleLogger(){
 		
 	}
 	
 	public void debug(String output){
-		log.debug(output);
+		logger.debug(output);
 	}
 	
 	public void info(String output){
-		log.info(output);
+		logger.info(output);
 	}
 	
 	public void exception(String output, Throwable t){
-		log.error(output,t);
+		logger.error(output,t);
 	}
 
 

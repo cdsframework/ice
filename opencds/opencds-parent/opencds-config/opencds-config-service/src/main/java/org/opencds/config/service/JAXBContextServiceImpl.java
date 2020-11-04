@@ -5,15 +5,15 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.api.model.SemanticSignifier;
 import org.opencds.config.api.model.XSDComputableDefinition;
 import org.opencds.config.api.service.JAXBContextService;
 
 public class JAXBContextServiceImpl implements JAXBContextService {
-    private static final Log log = LogFactory.getLog(JAXBContextServiceImpl.class);
+	private static final Logger log = LogManager.getLogger();
 
     @Override
     public JAXBContext getJAXBContext(SemanticSignifier semanticSignifier) {

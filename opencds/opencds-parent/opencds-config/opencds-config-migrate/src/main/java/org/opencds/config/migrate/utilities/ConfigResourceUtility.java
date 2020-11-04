@@ -6,8 +6,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.migrate.BaseConfigLocationType;
 import org.opencds.config.migrate.ConfigResource;
@@ -15,7 +15,7 @@ import org.opencds.config.migrate.ConfigResourceType;
 import org.opencds.config.migrate.OpencdsBaseConfig;
 
 public class ConfigResourceUtility {
-    private static final Log log = LogFactory.getLog(ConfigResourceUtility.class);
+	private static final Logger log = LogManager.getLogger();
 
     public String getResourceAsString(OpencdsBaseConfig opencdsBaseConfig, ConfigResourceType configResourceType) {
         ConfigResource configResource = opencdsBaseConfig.getConfigResource(configResourceType);

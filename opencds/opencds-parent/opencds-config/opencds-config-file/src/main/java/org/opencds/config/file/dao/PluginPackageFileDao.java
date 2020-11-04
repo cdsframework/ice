@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.dao.PluginPackageDao;
 import org.opencds.config.api.dao.util.ResourceUtil;
 import org.opencds.config.api.model.PPId;
@@ -16,7 +16,7 @@ import org.opencds.config.api.model.PluginPackage;
 import org.opencds.config.file.dao.support.RestConfigUtil;
 
 public class PluginPackageFileDao implements PluginPackageDao {
-    private static final Log log = LogFactory.getLog(PluginPackageFileDao.class);
+	private static final Logger log = LogManager.getLogger();
     private final Map<PPId, PluginPackage> cache;
     private final Map<PluginId, PluginPackage> pluginToPackages;
     private RestConfigUtil restConfigUtil;

@@ -29,16 +29,16 @@ package org.cdsframework.ice.supportingdata;
 import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class ICEPropertiesDataConfiguration {
 
 	private Properties iceProps;
 	
 	public static final String _ICE_PROPERTIES_FILENAME = "ice.properties";
-	private static Log logger = LogFactory.getLog(ICEPropertiesDataConfiguration.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	public ICEPropertiesDataConfiguration() {
 		

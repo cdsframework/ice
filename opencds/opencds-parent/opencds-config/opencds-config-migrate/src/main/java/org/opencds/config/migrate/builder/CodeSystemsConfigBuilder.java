@@ -3,8 +3,8 @@ package org.opencds.config.migrate.builder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.cache.OpencdsCache;
 import org.opencds.common.xml.XmlEntity;
 import org.opencds.config.migrate.ConfigResourceType;
@@ -15,7 +15,7 @@ import org.opencds.config.migrate.utilities.ConfigResourceUtility;
 import org.opencds.config.migrate.utilities.XmlUtility;
 
 public class CodeSystemsConfigBuilder {
-    private static final Log log = LogFactory.getLog(CodeSystemsConfigBuilder.class);
+	private static final Logger log = LogManager.getLogger();
 
     private static final String CODE_SYSTEM = "codeSystem";
     private static final String CODE_SYSTEM_OID = "codeSystemOID";

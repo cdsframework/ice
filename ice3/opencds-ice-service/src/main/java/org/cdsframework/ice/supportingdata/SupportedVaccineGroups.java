@@ -33,8 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
@@ -53,7 +53,7 @@ public class SupportedVaccineGroups implements SupportingData {
 	private Map<String, LocallyCodedVaccineGroupItem> cdsListItemNameToVaccineGroupItem;		// LOCAL CODE-RELATED: cdsListCode().cdsListItemKey -> LocallyCodedVaccineGroupItem
 	private boolean isSupportingDataConsistent;
 	
-	private static Log logger = LogFactory.getLog(SupportedVaccineGroups.class);	
+	private static final Logger logger = LogManager.getLogger();
 
 	
 	/**

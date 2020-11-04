@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.api.dao.util.FileUtil;
 import org.opencds.config.api.dao.util.ResourceUtil;
 
 public class ClasspathUtil implements ResourceUtil {
-    private static final Log log = LogFactory.getLog(ClasspathUtil.class);
+	private static final Logger log = LogManager.getLogger();
     private static final ResourceUtil fileUtil = new FileUtil();
 
     private String jarPrefix;

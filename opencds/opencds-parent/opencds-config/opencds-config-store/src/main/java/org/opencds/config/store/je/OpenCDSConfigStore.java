@@ -3,8 +3,8 @@ package org.opencds.config.store.je;
 import java.io.File;
 import java.nio.file.Paths;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Environment;
@@ -13,7 +13,7 @@ import com.sleepycat.persist.EntityStore;
 import com.sleepycat.persist.StoreConfig;
 
 public class OpenCDSConfigStore {
-    private static final Log log = LogFactory.getLog(OpenCDSConfigStore.class);
+	private static final Logger log = LogManager.getLogger();
     private static final String STORE_NAME = "OpenCDSConfigStore";
 
     private boolean initialized;

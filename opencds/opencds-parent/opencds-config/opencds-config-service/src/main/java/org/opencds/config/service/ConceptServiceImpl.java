@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.cache.OpencdsCache.CacheRegion;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.api.cache.CacheService;
@@ -28,7 +28,7 @@ import org.opencds.config.api.service.ConceptService;
 import org.opencds.config.api.service.KnowledgeModuleService;
 
 public class ConceptServiceImpl implements ConceptService, Observer {
-    private static final Log log = LogFactory.getLog(ConceptServiceImpl.class);
+	private static final Logger log = LogManager.getLogger();
     private static final String ALL_CONCEPTS = "allConcepts";
 
     private ConceptDeterminationMethodService conceptDeterminationMethodService;

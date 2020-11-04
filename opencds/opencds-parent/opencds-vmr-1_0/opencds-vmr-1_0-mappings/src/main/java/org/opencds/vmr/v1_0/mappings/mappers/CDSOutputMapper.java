@@ -19,8 +19,8 @@ package org.opencds.vmr.v1_0.mappings.mappers;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
@@ -39,9 +39,9 @@ import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
  */
 public class CDSOutputMapper {
 
-	private static Log logger = LogFactory.getLog(CDSOutputMapper.class);
+	private static final Logger logger = LogManager.getLogger();
 	
-//NOTE: there is no pullIn method for CDSOutput, because it is an output-only structure.  Data is pushed out to it.
+	// NOTE: there is no pullIn method for CDSOutput, because it is an output-only structure.  Data is pushed out to it.
     
 	/**
 	 * Populate external vMR object from corresponding internal vMR object

@@ -31,15 +31,16 @@ import java.io.FilenameFilter;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 public class FileNameWithExtensionFilterImpl implements FilenameFilter {
 	
 	private String baseFilename = null;
 	private Set<String> validFileExtensions = null;
 	
-	private static Log logger = LogFactory.getLog(FileNameWithExtensionFilterImpl.class);
+	private static final Logger logger = LogManager.getLogger();
 
 
 	/**

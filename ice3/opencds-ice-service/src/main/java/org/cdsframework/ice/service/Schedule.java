@@ -27,12 +27,10 @@
 package org.cdsframework.ice.service;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
@@ -43,9 +41,7 @@ import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineItem;
 import org.cdsframework.ice.supportingdata.SupportedVaccineGroups;
 import org.cdsframework.ice.supportingdata.SupportedVaccines;
-import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.opencds.common.exceptions.ImproperUsageException;
-import org.opencds.config.api.model.KMId;
 
 
 public class Schedule {
@@ -54,7 +50,7 @@ public class Schedule {
 	private ICESupportingDataConfiguration iceSupportingDataConfiguration;
 	private boolean scheduleHasBeenInitialized;
 	
-	private static Log logger = LogFactory.getLog(Schedule.class);
+	private static final Logger logger = LogManager.getLogger();
 
 
 	/**

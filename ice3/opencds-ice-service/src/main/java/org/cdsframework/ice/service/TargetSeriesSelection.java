@@ -26,8 +26,8 @@
 
 package org.cdsframework.ice.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kie.api.definition.type.ClassReactive;
 
 
@@ -44,7 +44,7 @@ public class TargetSeriesSelection {
 	private String selectedSeriesName;
 	private int seriesSelectionPriority;
 	
-	private static Log logger = LogFactory.getLog(TargetSeriesSelection.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	private TargetSeriesSelection(String seriesSelectionVG, Schedule pSchedule) {
 		

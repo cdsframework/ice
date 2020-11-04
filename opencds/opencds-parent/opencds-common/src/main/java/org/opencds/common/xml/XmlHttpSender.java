@@ -22,8 +22,8 @@ import javax.net.ssl.X509TrustManager;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.utilities.EncoderUtility;
 
 /**
@@ -36,7 +36,7 @@ import org.opencds.common.utilities.EncoderUtility;
  */
 public class XmlHttpSender extends Object
 {
-    private static final Log log = LogFactory.getLog(XmlHttpSender.class);
+	private static final Logger log = LogManager.getLogger();
 
     /**
      * Create the XmlHttpSender; need to specify where the certificate Trust Store

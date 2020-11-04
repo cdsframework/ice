@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.schema.ConceptDeterminationMethod;
 import org.opencds.config.schema.ConceptDeterminationMethods;
@@ -19,7 +19,7 @@ import org.opencds.config.schema.SemanticSignifiers;
 import org.opencds.config.util.URIUtil;
 
 public class NewConfigWriter {
-    private static final Log log = LogFactory.getLog(NewConfigWriter.class);
+	private static final Logger log = LogManager.getLogger();
 
     public void writeExecutionEngineConfig(ConfigHandler configHandler, ExecutionEngines ees) throws Exception {
         configHandler.write(ees);

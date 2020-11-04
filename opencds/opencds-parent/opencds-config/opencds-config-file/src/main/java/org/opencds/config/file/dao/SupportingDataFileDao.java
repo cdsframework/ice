@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.dao.SupportingDataDao;
 import org.opencds.config.api.dao.util.ResourceUtil;
 import org.opencds.config.api.model.KMId;
@@ -17,7 +17,7 @@ import org.opencds.config.api.model.SupportingData;
 import org.opencds.config.file.dao.support.RestConfigUtil;
 
 public class SupportingDataFileDao implements SupportingDataDao {
-    private static final Log log = LogFactory.getLog(SupportingDataFileDao.class);
+	private static final Logger log = LogManager.getLogger();
     private final Map<SDKey, SupportingData> cache;
     private RestConfigUtil restConfigUtil;
 

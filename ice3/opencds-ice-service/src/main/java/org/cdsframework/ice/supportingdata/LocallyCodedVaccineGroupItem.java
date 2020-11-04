@@ -29,8 +29,8 @@ package org.cdsframework.ice.supportingdata;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsItem;
 import org.opencds.common.exceptions.ImproperUsageException;
@@ -61,7 +61,7 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 	private Collection<String> relatedDiseasesCdsListItemNames;
 	private int priority;
 	
-	private static Log logger = LogFactory.getLog(LocallyCodedVaccineGroupItem.class);	
+	private static final Logger logger = LogManager.getLogger();
 
 
 	protected LocallyCodedVaccineGroupItem(String pVaccineGroupCdsListItemName, CdsConcept pVaccineGroupCdsConcept, Collection<String> pCdsVersions, Collection<String> pRelatedDiseasesCdsListItemNames) 

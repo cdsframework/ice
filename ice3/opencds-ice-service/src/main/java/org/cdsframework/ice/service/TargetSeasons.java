@@ -36,9 +36,8 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.kie.api.definition.type.ClassReactive;
 
@@ -56,7 +55,7 @@ public class TargetSeasons {
 	// The default season for this invocation
 	private Map<String, Season> defaultSeason;					 						// Vaccine Group -> Season
 	
-	private static Log logger = LogFactory.getLog(TargetSeasons.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	
 	public TargetSeasons(Date pEvalTime) {

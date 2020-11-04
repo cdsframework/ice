@@ -29,8 +29,8 @@ import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.xml.XmlEntity;
 
 /**
@@ -55,7 +55,7 @@ import org.opencds.common.xml.XmlEntity;
  * 
  */
 public class VMREnumerationsClient {
-    private static final Log log = LogFactory.getLog(VMREnumerationsClient.class);
+	private static final Logger logger = LogManager.getLogger();
     protected static final String APELON_SERVICE_URL_PROPERTY_NAME = "guvnor.vmrenumerations.service.url";
     protected static final String CONFIG_LOCATION = ".opencds";
     protected static final String CONFIG_FILE = "opencds-guvnor.properties";
@@ -72,7 +72,7 @@ public class VMREnumerationsClient {
                 config.load(in);
                 apelonServiceUrl = config.getProperty(APELON_SERVICE_URL_PROPERTY_NAME);
             } catch (IOException e) {
-                log.error(e.getMessage(),e);
+                logger.error(e.getMessage(),e);
                 throw new RuntimeException("Failure loading or cannot find system property; property= " + APELON_SERVICE_URL_PROPERTY_NAME + ", expected location= " + path);
             }
         }

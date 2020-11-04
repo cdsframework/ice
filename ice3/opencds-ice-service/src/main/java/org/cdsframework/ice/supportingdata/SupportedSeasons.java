@@ -35,8 +35,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportingData;
@@ -58,7 +58,7 @@ public class SupportedSeasons implements SupportingData {
 	private SupportedVaccineGroups supportedVaccineGroups;										// Supporting vaccine groups from which this season data is built
 	private boolean isSupportingDataConsistent;
 	
-	private static Log logger = LogFactory.getLog(SupportedSeasons.class);	
+	private static final Logger logger = LogManager.getLogger();
 
 	
 	protected SupportedSeasons(ICESupportingDataConfiguration isdc) 

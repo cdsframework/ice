@@ -26,14 +26,13 @@
 
 package org.cdsframework.ice.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
 
 
@@ -47,7 +46,7 @@ public class Vaccine extends AbstractVaccine {
 	 * private String lotNo;	
 	 */
 	
-	private static Log logger = LogFactory.getLog(Vaccine.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	
 	private Vaccine(Vaccine pVaccine) {

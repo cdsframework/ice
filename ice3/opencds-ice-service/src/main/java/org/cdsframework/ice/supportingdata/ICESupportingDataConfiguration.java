@@ -39,8 +39,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
@@ -89,7 +89,7 @@ public class ICESupportingDataConfiguration {
 	private static String supportingDataSeasonsSubdirectory = "Seasons";
 	private static String supportingDataSeriesSubdirectory = "Series";
 	
-	private static Log logger = LogFactory.getLog(ICESupportingDataConfiguration.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	
 	/**

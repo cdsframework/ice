@@ -18,8 +18,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.ConfigurationService;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.KnowledgeModule;
@@ -37,7 +37,7 @@ import org.opencds.config.util.URIUtil;
 @Path("knowledgemodules")
 public class KnowledgeModuleRestService {
     private static final String SELF = "self";
-    private static final Log log = LogFactory.getLog(KnowledgeModuleRestService.class);
+	private static final Logger log = LogManager.getLogger();
     private ConfigurationService configurationService;
 
     public KnowledgeModuleRestService(ConfigurationService configurationService) {

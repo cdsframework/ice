@@ -12,8 +12,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.cache.OpencdsCache.CacheRegion;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.api.ConfigData;
@@ -28,7 +28,7 @@ import org.opencds.config.api.service.ExecutionEngineService;
 import org.opencds.config.api.service.KnowledgePackageService;
 
 public class KnowledgePackageServiceImpl implements KnowledgePackageService {
-    private static final Log log = LogFactory.getLog(KnowledgePackageServiceImpl.class);
+	private static final Logger log = LogManager.getLogger();
     private static final int KP_LOAD_SCALE_FACTOR = 8; // magic number
     private ForkJoinPool pool;
 
@@ -51,7 +51,7 @@ public class KnowledgePackageServiceImpl implements KnowledgePackageService {
     }
 
     private static class KPExceptionHandler implements UncaughtExceptionHandler {
-        private static final Log log = LogFactory.getLog(KPExceptionHandler.class);
+    	private static final Logger log = LogManager.getLogger();
 
         @Override
         public void uncaughtException(Thread t, Throwable e) {

@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBElement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.common.interfaces.ModelExitPoint;
 import org.opencds.common.interfaces.ResultSetBuilder;
@@ -15,7 +15,8 @@ import org.opencds.vmr.v1_0.schema.CDSOutput;
 import org.opencds.vmr.v1_0.schema.ObjectFactory;
 
 public class CdsOutputModelExitPoint implements ModelExitPoint<CDSOutput> {
-    private static Log log = LogFactory.getLog(CdsOutputModelExitPoint.class);
+
+	private static final Logger log = LogManager.getLogger();
 
     @Override
     public JAXBElement<CDSOutput> createOutput(ResultSetBuilder<?> resultSetBuilder, Map<String, List<?>> results, EvaluationRequestKMItem dssRequestKMItem) {

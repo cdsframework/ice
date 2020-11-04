@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
@@ -26,7 +27,7 @@ public class SupportedCdsConcepts {
 	private Map<ICEConceptType, Map<CdsConcept, LocallyCodedCdsListItem>> iceConceptTypeToConceptCdsListItemMap;	// ICEConceptType -> (map of cds concepts -> cdsListItem)  
 	private Map<LocallyCodedCdsListItem, Set<CdsConcept>> cdsListItemToConceptList;									// cdsListItem -> map of all OpenCDS and non-OpenCDS concepts
 	
-	private static Log logger = LogFactory.getLog(SupportedCdsConcepts.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	
 	public SupportedCdsConcepts() {

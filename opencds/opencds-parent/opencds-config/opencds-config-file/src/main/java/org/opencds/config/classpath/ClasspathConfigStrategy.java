@@ -4,8 +4,8 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.ConfigData;
 import org.opencds.config.api.KnowledgeRepository;
 import org.opencds.config.api.KnowledgeRepositoryService;
@@ -33,8 +33,7 @@ import org.opencds.config.strategy.AbstractConfigStrategy;
 import org.opencds.config.strategy.ConfigCapability;
 
 public class ClasspathConfigStrategy extends AbstractConfigStrategy {
-	private static final Log log = LogFactory
-			.getLog(ClasspathConfigStrategy.class);
+	private static final Logger log = LogManager.getLogger();
 	private static final String CLASSPATH_SEPARATOR = "/";
 	private static final String JAR_PREFIX = "opencds-knowledge-repository-data";
 

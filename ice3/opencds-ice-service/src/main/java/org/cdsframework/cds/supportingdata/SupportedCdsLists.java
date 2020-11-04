@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
@@ -44,8 +45,8 @@ public class SupportedCdsLists implements SupportingData {
 	// This class provides public methods for other classes to populate the IceConceptType.OPENCDS supported concepts, but other IceConceptType concepts
 	// are populated by this class when reading the XML. Concepts are stored in the following structure.
 	private SupportedCdsConcepts supportedCdsConcepts;
-	
-	private static Log logger = LogFactory.getLog(SupportedCdsLists.class);
+
+	private static final Logger logger = LogManager.getLogger();
 		
 	
 	public SupportedCdsLists(List<String> pCdsVersions) {

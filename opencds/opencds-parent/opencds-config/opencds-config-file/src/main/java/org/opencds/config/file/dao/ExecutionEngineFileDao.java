@@ -6,15 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.dao.ExecutionEngineDao;
 import org.opencds.config.api.dao.util.ResourceUtil;
 import org.opencds.config.api.model.ExecutionEngine;
 import org.opencds.config.file.dao.support.RestConfigUtil;
 
 public class ExecutionEngineFileDao implements ExecutionEngineDao {
-    private static final Log log = LogFactory.getLog(ExecutionEngineFileDao.class);
+	private static final Logger log = LogManager.getLogger();
     private final Map<String, ExecutionEngine> cache;
     private RestConfigUtil restConfigUtil;
     

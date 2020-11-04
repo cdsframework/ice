@@ -14,8 +14,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.omg.dss.DSSRuntimeExceptionFault;
 import org.omg.dss.EvaluationExceptionFault;
 import org.omg.dss.InvalidDriDataFormatExceptionFault;
@@ -51,7 +51,6 @@ import org.opencds.config.api.model.SSId;
 import org.opencds.config.api.model.SemanticSignifier;
 import org.opencds.config.api.model.impl.SSIdImpl;
 import org.opencds.config.api.service.KnowledgeModuleService;
-import org.opencds.config.api.service.SemanticSignifierService;
 import org.opencds.dss.util.DssUtil;
 import org.opencds.service.evaluate.RequestProcessor;
 
@@ -70,7 +69,7 @@ import org.opencds.service.evaluate.RequestProcessor;
  */
 public class EvaluationService implements Evaluation {
 
-    private static Log log = LogFactory.getLog(EvaluationService.class);
+	private static final Logger log = LogManager.getLogger();
 
     private final ConfigurationService configurationService;
     private final RequestProcessor requestProcessor;

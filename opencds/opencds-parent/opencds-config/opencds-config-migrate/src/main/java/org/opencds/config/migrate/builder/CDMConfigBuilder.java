@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.cache.OpencdsCache;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.common.terminology.CodeSystems;
@@ -31,7 +31,7 @@ import org.opencds.config.migrate.utilities.ConfigResourceUtility;
 import org.xml.sax.SAXParseException;
 
 public class CDMConfigBuilder {
-    private static Log log = LogFactory.getLog(CDMConfigBuilder.class);
+	private static final Logger log = LogManager.getLogger();
     
     private static final String CODE = "code";
     private static final String CODE_SYSTEM = "codeSystem";

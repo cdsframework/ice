@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
@@ -52,7 +52,7 @@ import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
  */
 public class EvaluatedPersonMapper extends EntityBaseMapper {
 
-	private static Log logger = LogFactory.getLog(EntityMapper.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	/**
 	 * @param external

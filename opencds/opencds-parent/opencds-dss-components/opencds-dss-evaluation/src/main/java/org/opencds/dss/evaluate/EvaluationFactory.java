@@ -16,8 +16,8 @@
 
 package org.opencds.dss.evaluate;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.omg.dss.DSSRuntimeExceptionFault;
 import org.omg.dss.RequiredDataNotProvidedExceptionFault;
 import org.omg.dss.UnrecognizedScopedEntityExceptionFault;
@@ -36,8 +36,8 @@ import org.opencds.config.api.model.KnowledgeModule;
  * @version 2.0
  */
 public class EvaluationFactory {
-    private static Log log = LogFactory.getLog(EvaluationFactory.class);
-
+	private static final Logger log = LogManager.getLogger();
+	
     /**
      * 
      * @param knowledgeRepository

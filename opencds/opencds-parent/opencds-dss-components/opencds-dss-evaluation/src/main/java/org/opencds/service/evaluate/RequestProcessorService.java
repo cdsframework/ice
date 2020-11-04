@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.omg.dss.DSSRuntimeExceptionFault;
 import org.omg.dss.EvaluationExceptionFault;
 import org.omg.dss.InvalidDriDataFormatExceptionFault;
@@ -34,7 +34,6 @@ import org.omg.dss.UnrecognizedScopedEntityExceptionFault;
 import org.omg.dss.UnsupportedLanguageExceptionFault;
 import org.omg.dss.common.EntityIdentifier;
 import org.omg.dss.common.ItemIdentifier;
-import org.omg.dss.common.SemanticPayload;
 import org.omg.dss.evaluation.requestresponse.DataRequirementItemData;
 import org.omg.dss.evaluation.requestresponse.EvaluationRequest;
 import org.omg.dss.evaluation.requestresponse.KMEvaluationRequest;
@@ -95,7 +94,7 @@ import org.opencds.dss.util.DssUtil;
  */
 public class RequestProcessorService implements RequestProcessor
 {
-    private static Log log = LogFactory.getLog(RequestProcessorService.class);
+	private static final Logger log = LogManager.getLogger();
 
     private final InboundPayloadProcessor inboundPayloadProcessor;
     private Map<String, InboundPayloadProcessor> inboundPayloadProcessorsMap;

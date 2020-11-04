@@ -25,8 +25,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.EvaluationException;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.common.interfaces.ModelExitPoint;
@@ -51,7 +51,7 @@ import org.opencds.config.util.EntityIdentifierUtil;
  */
 
 public class VMROutboundPayloadProcessor implements OutboundPayloadProcessor {
-    private static Log log = LogFactory.getLog(VMROutboundPayloadProcessor.class);
+	private static final Logger log = LogManager.getLogger();
 	private static final String EMPTY_STRING = "";
 	
 	public final MarshallerPool marshallerPool;

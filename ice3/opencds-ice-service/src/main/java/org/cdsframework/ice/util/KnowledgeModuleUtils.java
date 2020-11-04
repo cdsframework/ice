@@ -1,7 +1,7 @@
 package org.cdsframework.ice.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.impl.KMIdImpl;
 
@@ -10,7 +10,7 @@ import org.opencds.config.api.model.impl.KMIdImpl;
  */
 public class KnowledgeModuleUtils {
 
-	private static Log logger = LogFactory.getLog(KnowledgeModuleUtils.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	
 	public static String returnStringRepresentationOfKnowledgeModuleName(String scopingEntityId, String businessId, String version) {

@@ -6,11 +6,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class OpencdsCache {
-    private static final Log log = LogFactory.getLog(OpencdsCache.class);
+	
+	private static final Logger logger = LogManager.getLogger();
 
     public interface CacheRegion {
         public boolean supports(Class<?> type);
@@ -54,7 +55,7 @@ public class OpencdsCache {
 
     public void put(CacheRegion cacheRegion, Object key, Object instance) {
         if (!cacheRegion.supports(instance.getClass())) {
-            log.warn("This CacheRegion (" + cacheRegion + ") should not support instance type: " + instance.getClass());
+            logger.warn("This CacheRegion (" + cacheRegion + ") should not support instance type: " + instance.getClass());
         }
         ensureRegionExists(cacheRegion);
         cache.get(cacheRegion).put(key, instance);

@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.cache.OpencdsCache;
 import org.opencds.common.xml.XmlEntity;
 import org.opencds.config.api.model.DssOperation;
@@ -21,7 +21,7 @@ import org.opencds.config.migrate.utilities.ConfigResourceUtility;
 import org.opencds.config.migrate.utilities.XmlUtility;
 
 public class ExecutionEnginesConfigBuilder {
-	private static final Log log = LogFactory.getLog(ExecutionEnginesConfigBuilder.class);
+	private static final Logger log = LogManager.getLogger();
 	
 	private static final Map<String, DssOperation> operations = new HashMap<>();
 	static {

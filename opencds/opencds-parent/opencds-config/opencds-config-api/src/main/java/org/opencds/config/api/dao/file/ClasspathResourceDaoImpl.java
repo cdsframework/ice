@@ -1,12 +1,12 @@
 package org.opencds.config.api.dao.file;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.dao.FileDao;
 import org.opencds.config.api.dao.util.ResourceUtil;
 
 public class ClasspathResourceDaoImpl implements FileDao {
-    private static final Log log = LogFactory.getLog(ClasspathResourceDaoImpl.class);
+	private static final Logger log = LogManager.getLogger();
     private static final String CLASSPATH_SEPARATOR = "/";
 
     private final ResourceUtil resourceUtil;

@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 
 /**
@@ -40,7 +40,7 @@ import org.opencds.common.exceptions.OpenCDSRuntimeException;
  * @version 1.00
  */
 public class FileUtility implements ResourceUtility {
-    private static final Log log = LogFactory.getLog(FileUtility.class);
+	private static final Logger log = LogManager.getLogger();
     private static final Pattern URI_PATH_SEPARATOR = Pattern.compile("/");
 
     /**

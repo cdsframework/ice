@@ -26,19 +26,18 @@
 
 package org.cdsframework.ice.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
 
 public class VaccineComponent extends AbstractVaccine {
 
 	private Collection<String> diseaseImmunityList;
 	
-	private static Log logger = LogFactory.getLog(VaccineComponent.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 
 	private VaccineComponent(VaccineComponent pVaccineComponent) {

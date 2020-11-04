@@ -28,8 +28,8 @@ package org.cdsframework.ice.supportingdata;
 
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsItem;
 import org.cdsframework.ice.service.Vaccine;
@@ -39,7 +39,7 @@ public class LocallyCodedVaccineItem extends LocallyCodedCdsItem {
 	
 	private Vaccine vaccine;
 	
-	private static Log logger = LogFactory.getLog(LocallyCodedVaccineItem.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	/**
 	 * Create a LocallyCodedVaccineItem. All parameters to this method must be specified, or an ImproperUsageException is thrown.

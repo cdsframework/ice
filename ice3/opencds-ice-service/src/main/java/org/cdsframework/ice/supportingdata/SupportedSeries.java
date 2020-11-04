@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
@@ -67,7 +67,7 @@ public class SupportedSeries implements SupportingData {
 	private Map<String, LocallyCodedSeriesItem> cdsListItemNameToSeriesItem;					// cdsListItemName (cdsListCode.cdsListItemKey) to LocallyCodedSeriesItem
 	private Map<LocallyCodedVaccineGroupItem, List<SeriesRules>> vaccineGroupItemToSeriesRules;	// vaccine group -> List of associated series
 	
-	private static Log logger = LogFactory.getLog(SupportedSeries.class);	
+	private static final Logger logger = LogManager.getLogger();
 
 	
 	/**

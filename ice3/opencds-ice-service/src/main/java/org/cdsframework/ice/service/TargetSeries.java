@@ -26,6 +26,8 @@
 
 package org.cdsframework.ice.service;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,9 +41,6 @@ import java.util.Map;
 import java.util.NavigableSet;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.service.Recommendation.RecommendationDateType;
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
@@ -98,7 +97,8 @@ public class TargetSeries {
 	private List<Recommendation> finalRecommendations;
 	private List<String> seriesRulesProcessed;
 	private boolean displayForecastDateForConditionalRecommendations;
-	private static Log logger = LogFactory.getLog(TargetSeries.class);
+
+	private static final Logger logger = LogManager.getLogger();
 
 
 	/**

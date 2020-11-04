@@ -46,8 +46,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
@@ -115,7 +115,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private Boolean doseOverrideFeatureEnabled = null;
 	private Boolean outputSupplementalText = null;
 	
-	private static Log logger = LogFactory.getLog(ICEDecisionEngineDSS7EvaluationAdapter.class);
+	private static final Logger logger = LogManager.getLogger();
 
 	private static final String EVAL_TIME = "evalTime";
 	private static final String CLIENT_LANG = "clientLanguage";

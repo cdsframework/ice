@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
@@ -61,7 +61,7 @@ import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
  */
 public class CdsOutputResultSetBuilder implements ResultSetBuilder<org.opencds.vmr.v1_0.schema.CDSOutput>
 {
-	private static Log logger = LogFactory.getLog(CdsOutputResultSetBuilder.class);
+	private static final Logger logger = LogManager.getLogger();
 
     private static final String[] clinicalStatementNames = {
     		"AdverseEvent", "DeniedAdverseEvent",

@@ -29,9 +29,8 @@ package org.cdsframework.ice.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
@@ -54,7 +53,7 @@ public class PayloadHelper {
 
 	private Schedule backingSchedule;
 	
-	private static Log logger = LogFactory.getLog(PayloadHelper.class);
+	private static final Logger logger = LogManager.getLogger();
 	// TODO: CDSOutput Template codes... Make configurable
 
 	

@@ -12,8 +12,8 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.cache.OpencdsCache;
 import org.opencds.config.api.model.ConceptDeterminationMethod;
 import org.opencds.config.api.model.ExecutionEngine;
@@ -30,7 +30,7 @@ import org.opencds.config.schema.KnowledgeModules;
 import org.opencds.config.schema.SemanticSignifiers;
 
 public class ConfigWriter {
-    private static final Log log = LogFactory.getLog(ConfigWriter.class);
+	private static final Logger log = LogManager.getLogger();
 
     private static final String CONFIG_SCHEMA_URL = "org.opencds.config.schema";
     private static final String KM_FILE = "knowledgeModules.xml";

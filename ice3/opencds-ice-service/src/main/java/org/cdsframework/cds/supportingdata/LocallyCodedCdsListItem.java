@@ -29,9 +29,8 @@ package org.cdsframework.cds.supportingdata;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.util.support.data.cds.list.CdsListItem;
@@ -85,8 +84,8 @@ public class LocallyCodedCdsListItem {
 	private Collection<CdsConcept> opencdsConceptMappings;
 	private Collection<String> cdsListVersions;
 	private CD cdsListItemCD;
-	
-	private static Log logger = LogFactory.getLog(LocallyCodedCdsListItem.class);	
+
+	private static final Logger logger = LogManager.getLogger();
 
 	
 	/**

@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.omg.dss.common.EntityIdentifier;
 import org.omg.dss.common.SemanticPayload;
 import org.omg.dss.evaluation.requestresponse.DataRequirementItemData;
@@ -18,7 +19,7 @@ import org.opencds.common.structures.EvaluationRequestDataItem;
 
 public class DssUtil {
 
-    private static final Log log = LogFactory.getLog(DssUtil.class);
+	private static final Logger log = LogManager.getLogger();
 
     public static EntityIdentifier makeEIFromCommon(org.opencds.config.api.model.EntityIdentifier commonEI) {
         EntityIdentifier ei = new EntityIdentifier();

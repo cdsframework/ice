@@ -29,9 +29,8 @@ package org.cdsframework.ice.service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 
 public class SeriesRules {
@@ -45,7 +44,7 @@ public class SeriesRules {
 	private List<DoseRule> seriesDoseRules;
 	private List<Season> applicableSeasons;
 	
-	private static Log logger = LogFactory.getLog(SeriesRules.class);
+	private static final Logger logger = LogManager.getLogger();
 
 	
 	/**

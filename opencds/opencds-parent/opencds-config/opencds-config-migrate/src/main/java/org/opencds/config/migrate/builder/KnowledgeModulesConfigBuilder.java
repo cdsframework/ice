@@ -8,8 +8,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.cache.OpencdsCache;
 import org.opencds.common.xml.XmlEntity;
 import org.opencds.config.api.model.ExecutionEngine;
@@ -27,7 +27,7 @@ import org.opencds.config.migrate.utilities.ConfigResourceUtility;
 import org.opencds.config.migrate.utilities.XmlUtility;
 
 public class KnowledgeModulesConfigBuilder {
-    private static final Log log = LogFactory.getLog(KnowledgeModulesConfigBuilder.class);
+	private static final Logger log = LogManager.getLogger();
     private XmlUtility xmlUtility = new XmlUtility();
 
     private ConfigResourceUtility configResourceUtility = new ConfigResourceUtility();

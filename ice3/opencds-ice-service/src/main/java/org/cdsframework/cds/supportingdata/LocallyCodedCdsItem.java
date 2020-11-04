@@ -2,8 +2,9 @@ package org.cdsframework.cds.supportingdata;
 
 import java.util.Collection;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.ConceptUtils;
 import org.opencds.common.exceptions.ImproperUsageException;
@@ -14,7 +15,7 @@ public abstract class LocallyCodedCdsItem {
 	private CdsConcept cdsConcept;
 	private Collection<String> cdsVersions;
 
-	private static Log logger = LogFactory.getLog(LocallyCodedCdsItem.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	/**
 	 * Creates a LocallyCodedCdsItem. Both the CdsItemName and CdsVersions must be specified, or an ImproerUsageException is thrown is thrown. If the CdsItemName 

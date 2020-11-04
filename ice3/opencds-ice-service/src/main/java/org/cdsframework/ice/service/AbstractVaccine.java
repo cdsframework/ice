@@ -26,8 +26,8 @@
 
 package org.cdsframework.ice.service;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.util.TimePeriod;
 
@@ -45,8 +45,8 @@ public abstract class AbstractVaccine {
 	private TimePeriod validMaximumAgeOfUse;
 	private TimePeriod licensedForUseMinimumAge;
 	private TimePeriod licensedForUseMaximumAge;
-	
-	private static Log logger = LogFactory.getLog(AbstractVaccine.class);
+
+	private static final Logger logger = LogManager.getLogger();
 	
 
 	public AbstractVaccine(AbstractVaccine pAbstractVaccine) {

@@ -1,13 +1,12 @@
 package org.opencds.config.service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.cache.OpencdsCache.CacheRegion;
 import org.opencds.config.api.cache.CacheService;
 import org.opencds.config.api.dao.FileDao;
@@ -17,7 +16,7 @@ import org.opencds.config.api.model.SupportingData;
 import org.opencds.config.api.service.SupportingDataPackageService;
 
 public class SupportingDataPackageServiceImpl implements SupportingDataPackageService {
-    private static final Log log = LogFactory.getLog(SupportingDataPackageServiceImpl.class);
+	private static final Logger log = LogManager.getLogger();
 
     private final FileDao fileDao;
 

@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.cache.OpencdsCache.CacheRegion;
 import org.opencds.config.api.cache.CacheService;
 import org.opencds.config.api.dao.SupportingDataDao;
@@ -18,7 +18,7 @@ import org.opencds.config.api.service.SupportingDataPackageService;
 import org.opencds.config.api.service.SupportingDataService;
 
 public class SupportingDataServiceImpl implements SupportingDataService {
-    private static final Log log = LogFactory.getLog(SupportingDataService.class);
+	private static final Logger log = LogManager.getLogger();
 
     private final SupportingDataDao dao;
     private final SupportingDataPackageService supportingDataPackageService;

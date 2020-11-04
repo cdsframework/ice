@@ -31,12 +31,13 @@ import java.io.FilenameFilter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 public class XMLSupportingDataFilenameFilterImpl implements FilenameFilter {
 	
-	private static Log logger = LogFactory.getLog(XMLSupportingDataFilenameFilterImpl.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	
 	public XMLSupportingDataFilenameFilterImpl() {

@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
@@ -63,7 +63,7 @@ public class SupportedVaccines implements SupportingData {
 	private Map<CD, VaccineComponent> cDToVaccineComponentsMap;						// VaccineComponents previously defined, keyed by CD
 	private Map<CD, Set<Vaccine>> vaccineComponentCDToVaccinesNotFullySpecified;	// VaccineComponents which have been encountered in a Vaccine object but not yet defined
 
-	private static Log logger = LogFactory.getLog(SupportedVaccines.class);	
+	private static final Logger logger = LogManager.getLogger();
 
 	
 	/**

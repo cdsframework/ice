@@ -1,13 +1,14 @@
 package org.cdsframework.cds;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public class ConceptUtils {
 
 	public static final String _attributeNamingConvention = "[a-zA-Z0-9_\\/\\.\\- ]+";	
-	private static Log logger = LogFactory.getLog(ConceptUtils.class);	
+	private static final Logger logger = LogManager.getLogger();
 	
 	
 	/**

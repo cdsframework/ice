@@ -24,8 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.bind.JAXBElement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
@@ -35,9 +35,7 @@ import org.opencds.common.utilities.AbsoluteTimeDifference;
 import org.opencds.common.utilities.DateUtility;
 import org.opencds.config.api.FactListsBuilder;
 import org.opencds.config.api.KnowledgeRepository;
-import org.opencds.config.api.model.ConceptDeterminationMethod;
 import org.opencds.config.api.model.KnowledgeModule;
-import org.opencds.config.api.model.SupportMethod;
 import org.opencds.config.api.service.ConceptService;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
 import org.opencds.vmr.v1_0.internal.AdverseEvent;
@@ -118,7 +116,7 @@ import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
  */
 public class CdsInputFactListsBuilder implements FactListsBuilder 
 {
-	private static Log log = LogFactory.getLog(CdsInputFactListsBuilder.class);
+	private static final Logger log = LogManager.getLogger();
 	
 	private final BuildOpenCDSConceptLists buildOpenCDSConceptLists;
 

@@ -2,8 +2,8 @@ package org.opencds.config.api;
 
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.api.cache.CacheService;
 import org.opencds.config.strategy.ConfigStrategy;
@@ -24,7 +24,7 @@ import org.opencds.config.strategy.ConfigStrategy;
  *
  */
 public class ConfigurationService {
-    private static final Log log = LogFactory.getLog(ConfigurationService.class);
+	private static final Logger log = LogManager.getLogger();
     private final ConfigStrategy configStrategy;
     private final CacheService cacheService;
     private final ConfigData configData;

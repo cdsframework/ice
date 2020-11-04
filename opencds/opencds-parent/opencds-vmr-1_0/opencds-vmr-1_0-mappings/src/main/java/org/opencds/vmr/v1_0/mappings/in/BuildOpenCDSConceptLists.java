@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.common.terminology.CodeSystems;
 import org.opencds.common.utilities.MiscUtility;
@@ -159,7 +159,7 @@ import org.opencds.vmr.v1_0.internal.datatypes.CD;
  *
  */
 public class BuildOpenCDSConceptLists implements Cloneable {
-    private static Log log = LogFactory.getLog(BuildOpenCDSConceptLists.class);
+	private static final Logger log = LogManager.getLogger();
 
     public <C extends VmrOpenCdsConcept> void buildConceptLists(ConceptService conceptService, FactLists factLists,
             Map<Class<?>, List<?>> allFactLists) {

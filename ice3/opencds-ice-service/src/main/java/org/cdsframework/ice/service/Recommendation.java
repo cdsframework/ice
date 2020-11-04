@@ -29,9 +29,8 @@ package org.cdsframework.ice.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.ice.util.TimePeriod.DurationType;
 import org.kie.api.definition.type.ClassReactive;
@@ -57,7 +56,7 @@ public class Recommendation {
 	private String recommendationReason;
 	private String recommendationSupplementalText;
 
-	private static Log logger = LogFactory.getLog(Recommendation.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	/**
 	 * Initializes a Recommendation object; recommendationReason is set to empty (it is never null), TargetSeriesIdentifier to the supplied 

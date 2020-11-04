@@ -21,8 +21,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.InvalidDriDataFormatException;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.common.interfaces.InboundPayloadProcessor;
@@ -38,8 +38,7 @@ import org.opencds.config.api.pool.UnmarshallerPool;
  */
 public class VMRInboundPayloadProcessor implements InboundPayloadProcessor, Cloneable {
 
-	private static Log log = LogFactory
-			.getLog(VMRInboundPayloadProcessor.class);
+	private static final Logger log = LogManager.getLogger();
 	
 	private final UnmarshallerPool unmarshallerPool;
 	

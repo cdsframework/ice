@@ -29,9 +29,8 @@ package org.cdsframework.ice.service;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 
@@ -49,7 +48,7 @@ public class Season {
 	private String associatedVaccineGroup;
 
 	private enum SeasonDateType { START, END, OFFSEASON_START, OFFSEASON_END }; 
-	private static Log logger = LogFactory.getLog(Season.class);
+	private static final Logger logger = LogManager.getLogger();
 
 	
 	private Season() {

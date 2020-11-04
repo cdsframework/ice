@@ -9,8 +9,8 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.service.JAXBContextService;
 import org.opencds.config.mapper.ConfigUserMapper;
 import org.opencds.config.schema.ConfigSecurity;
@@ -19,7 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private static final Log log = LogFactory.getLog(UserDetailsServiceImpl.class);
+	private static final Logger log = LogManager.getLogger();
     private static final String CONFIG_SCHEMA_PATH = "org.opencds.config.schema";
 
     private Set<UserDetails> users = new HashSet<>();

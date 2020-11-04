@@ -6,8 +6,8 @@ package org.opencds.config.migrate;
 import java.io.File;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.migrate.utilities.FileUtility;
 import org.opencds.config.migrate.utilities.ResourceUtility;
@@ -23,7 +23,7 @@ import org.opencds.config.migrate.utilities.ResourceUtility;
  */
 public class OpencdsBaseConfig {
 
-    private static Log log = LogFactory.getLog(OpencdsBaseConfig.class);
+	private static final Logger log = LogManager.getLogger();
 
     private final BaseConfigLocation baseConfigLocation;
 

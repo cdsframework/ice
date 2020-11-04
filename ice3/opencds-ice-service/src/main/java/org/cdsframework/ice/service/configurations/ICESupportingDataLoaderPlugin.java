@@ -29,9 +29,8 @@ package org.cdsframework.ice.service.configurations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
@@ -44,7 +43,7 @@ import org.opencds.plugin.PreProcessPlugin;
 import org.opencds.plugin.SupportingData;
 
 public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
-    private static final Log logger = LogFactory.getLog(ICESupportingDataLoaderPlugin.class);
+	private static final Logger logger = LogManager.getLogger();
 
     // AI: determine supportingData.identifier dynamically (fix upon OpenCDS upgrade)
     private static final String SD_ICE = "ice-supporting-data";

@@ -29,8 +29,8 @@ package org.cdsframework.ice.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -43,7 +43,7 @@ import org.opencds.common.exceptions.ImproperUsageException;
 public class TimePeriod {
 	
 	private static final String TimePeriodStringFormat = "([-|+]?[ ]*[0-9]+[Yy])?([ ]*[-|+]?[ ]*[0-9]+[Mm])?([ ]*[-|+]?[ ]*[0-9]+[Ww])?([ ]*[-|+]?[ ]*[0-9]+[Dd])?";
-	private static Log logger = LogFactory.getLog(TimePeriod.class);
+	private static final Logger logger = LogManager.getLogger();
 
 	public enum DurationType {
 		DAYS, MONTHS, WEEKS, YEARS

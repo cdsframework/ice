@@ -27,9 +27,8 @@
 package org.cdsframework.ice.service;
 
 import java.util.Date;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kie.api.definition.type.ClassReactive;
 
 
@@ -41,8 +40,8 @@ public class DiseaseImmunity {
 	private String immunityReason;
 	private String evaluationReasonResult;
 	private String recommendationReasonResult;
-	
-	private static Log logger = LogFactory.getLog(DiseaseImmunity.class);
+
+	private static final Logger logger = LogManager.getLogger();
 	
 	
 	public DiseaseImmunity(String pDiseaseImmunityObtained) {

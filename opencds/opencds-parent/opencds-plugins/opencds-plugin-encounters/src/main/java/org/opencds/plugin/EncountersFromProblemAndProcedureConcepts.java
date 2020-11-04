@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.plugin.PluginContext.PreProcessPluginContext;
 import org.opencds.vmr.v1_0.internal.ClinicalStatementRelationship;
 import org.opencds.vmr.v1_0.internal.EncounterEvent;
@@ -18,7 +18,7 @@ import org.opencds.vmr.v1_0.internal.concepts.ProblemConcept;
 import org.opencds.vmr.v1_0.internal.concepts.ProcedureConcept;
 
 public class EncountersFromProblemAndProcedureConcepts implements OpencdsPlugin<PreProcessPluginContext> {
-    private static final Log log = LogFactory.getLog(EncountersFromProblemAndProcedureConcepts.class);
+	private static final Logger log = LogManager.getLogger();
 
     private <T> List<T> get(Map<Class<?>, List<?>> allFactLists, Class<T> clazz) {
         List<T> list = (List<T>) allFactLists.get(clazz);

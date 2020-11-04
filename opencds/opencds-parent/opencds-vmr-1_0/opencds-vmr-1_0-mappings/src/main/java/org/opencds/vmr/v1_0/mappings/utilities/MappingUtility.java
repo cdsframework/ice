@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.InvalidDataException;
 import org.opencds.common.utilities.DateUtility;
@@ -86,9 +86,7 @@ import org.opencds.vmr.v1_0.internal.datatypes.TelecommunicationCapability;
 
 public class MappingUtility extends java.lang.Object {
 
-	private static Log logger = LogFactory.getLog(MappingUtility.class);
-	
-	
+	private static final Logger logger = LogManager.getLogger();
 	
 	protected static CD noInformation = setNoInfo();
 	

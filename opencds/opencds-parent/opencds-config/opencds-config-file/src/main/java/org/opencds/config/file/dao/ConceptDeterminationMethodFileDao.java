@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.config.api.dao.ConceptDeterminationMethodDao;
 import org.opencds.config.api.dao.util.ResourceUtil;
 import org.opencds.config.api.model.CDMId;
@@ -14,7 +14,7 @@ import org.opencds.config.api.model.ConceptDeterminationMethod;
 import org.opencds.config.file.dao.support.RestConfigUtil;
 
 public class ConceptDeterminationMethodFileDao implements ConceptDeterminationMethodDao {
-    private static final Log log = LogFactory.getLog(ConceptDeterminationMethodFileDao.class);
+	private static final Logger log = LogManager.getLogger();
     private final Map<CDMId, ConceptDeterminationMethod> cache;
     private final RestConfigUtil restConfigUtil;
 

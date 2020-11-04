@@ -16,8 +16,8 @@
 
 package org.opencds.vmr.v1_0.mappings.mappers;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.vmr.v1_0.internal.EntityRelationship;
 import org.opencds.vmr.v1_0.mappings.in.FactLists;
@@ -32,7 +32,7 @@ import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
  */
 public class EntityRelationshipMapper {
 
-	 private static Log logger = LogFactory.getLog(EntityRelationshipMapper.class);
+	private static final Logger logger = LogManager.getLogger();
 	
 	/**
 	 * Populate internal vMR object from corresponding external vMR object, and adds it to list
