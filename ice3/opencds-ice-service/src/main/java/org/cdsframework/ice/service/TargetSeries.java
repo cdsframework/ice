@@ -1369,8 +1369,9 @@ public class TargetSeries {
 		}
 		if (rAge == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
-				String msg = "No routine age recommendation specified for dose " + vaccineGroupDoseRule.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup();
-				logger.info(_METHODNAME + msg);
+				if (logger.isDebugEnabled()) {
+					logger.debug(_METHODNAME + "No routine age recommendation specified for dose " + vaccineGroupDoseRule.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup());
+				}
 			}
 			return;
 		}
@@ -1535,8 +1536,9 @@ public class TargetSeries {
 		}
 		if (rInterval == null) {
 			if (pRecommendationDateType == RecommendationDateType.EARLIEST_RECOMMENDED) {
-				String msg = "No routine interval specified for dose " + doseRulePreviousDose.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup() + "; Series Name: " + seriesRules.getSeriesName();
-				logger.info(_METHODNAME + msg);
+				if (logger.isDebugEnabled() ) {
+					logger.debug(_METHODNAME + "No routine interval specified for dose " + doseRulePreviousDose.getDoseNumber() + " in Vaccine Group " + seriesRules.getVaccineGroup() + "; Series Name: " + seriesRules.getSeriesName());
+				}
 			}
 			return;
 		}
@@ -2551,8 +2553,9 @@ public class TargetSeries {
 
 		TimePeriod minimumAge = seriesDoseRule.getAbsoluteMinimumAge();
 		if (minimumAge == null) {
-			String str = "No minimum age associated with this dose rule";
-			logger.info(_METHODNAME + str);
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "No minimum age associated with this dose rule");
+			}
 			return new TimePeriod(0, DurationType.DAYS);
 		}
 
@@ -2602,8 +2605,9 @@ public class TargetSeries {
 
 		TimePeriod minimumAge = seriesDoseRule.getAbsoluteMinimumAge();
 		if (minimumAge == null) {
-			String str = "No minimum age associated with this dose rule";
-			logger.info(_METHODNAME + str);
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "No minimum age associated with this dose rule");
+			}
 			return new TimePeriod(0, DurationType.DAYS);
 		}
 
@@ -2743,8 +2747,9 @@ public class TargetSeries {
 
 		TimePeriod minimumAge = seriesDoseRule.getMinimumAge();
 		if (minimumAge == null) {
-			String str = "No minimum age associated with this dose rule";
-			logger.info(_METHODNAME + str);
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "No minimum age associated with this dose rule");
+			}
 			return new TimePeriod(0, DurationType.DAYS);
 		}
 
@@ -2794,8 +2799,9 @@ public class TargetSeries {
 
 		TimePeriod minimumAge = seriesDoseRule.getMinimumAge();
 		if (minimumAge == null) {
-			String str = "No minimum age associated with this dose rule";
-			logger.info(_METHODNAME + str);
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "No minimum age associated with this dose rule");
+			}
 			return new TimePeriod(0, DurationType.DAYS);
 		}
 
@@ -2829,8 +2835,9 @@ public class TargetSeries {
 
 		TimePeriod recommendedAge = seriesDoseRule.getEarliestRecommendedAge();
 		if (recommendedAge == null) {
-			String str = "No minimum age associated with this dose rule";
-			logger.info(_METHODNAME + str);
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "No minimum age associated with this dose rule");
+			}
 			return new TimePeriod(0, DurationType.DAYS);
 		}
 
@@ -2864,8 +2871,9 @@ public class TargetSeries {
 
 		TimePeriod recommendedAge = seriesDoseRule.getEarliestRecommendedAge();
 		if (recommendedAge == null) {
-			String str = "No recommended age associated with this dose rule";
-			logger.info(_METHODNAME + str);
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "No recommended age associated with this dose rule");
+			}
 			return new TimePeriod(0, DurationType.DAYS);
 		}
 
