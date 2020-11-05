@@ -601,6 +601,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			lKMId = KMIdImpl.create("gov.nyc.cir", "ICE", "1.0.0");
 		}
 		logger.info("Initializing ICE3 Drools 7 KnowledgeBase - Knowledge Module " + lRequestedKmId);
+
 		File pkgFile = null;
 		File drlFile = null;
 		File drlFileDuplicateShotSameDay = null;
