@@ -2286,8 +2286,9 @@ public class TargetSeries {
 		TimePeriod minimumAge = seriesDoseRule.getAbsoluteMinimumAge();
 		if (minimumAge == null) {
 			// There is no required age for this dose.
-			String msg = "No minimum age specified for dose: " + pTD;
-			logger.info(_METHODNAME + msg);
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "No minimum age specified for dose: " + pTD);
+			}
 			return;
 		}
 
@@ -2340,8 +2341,9 @@ public class TargetSeries {
 		DoseRule doseRulePreviousDose = obtainDoseRuleForSeriesByDoseNumber(doseNumberForWhichToObtainRule);
 		TimePeriod minimumInterval = doseRulePreviousDose.getAbsoluteMinimumInterval();
 		if (minimumInterval == null) {
-			String msg = "No minimum interval specified for dose: " + pTDprev;
-			logger.info(_METHODNAME + msg);
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "No minimum interval specified for dose: " + pTDprev);
+			}
 			return;
 		}
 

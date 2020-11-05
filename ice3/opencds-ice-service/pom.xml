@@ -127,34 +127,40 @@
 			<groupId>org.drools</groupId>
 			<artifactId>drools-compiler</artifactId>
 			<version>${runtime.drools7.version}</version>
+			<!--
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
 			</exclusions>
+			-->
 		</dependency>
 		<dependency>
 			<groupId>org.jbpm</groupId>
 			<artifactId>jbpm-bpmn2</artifactId>
 			<version>${runtime.drools7.version}</version>
+			<!-- 
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
-			</exclusions>			
+			</exclusions>
+			-->			
 		</dependency>
 		<dependency>
 			<groupId>org.kie</groupId>
 			<artifactId>kie-api</artifactId>
 			<version>${runtime.drools7.version}</version>
+			<!-- 
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
-			</exclusions>			
+			</exclusions>
+			-->			
 		</dependency>
 		<!--  end of Drools 7 artifacts -->
 		<dependency>
@@ -162,6 +168,7 @@
 			<artifactId>joda-time</artifactId>
 			<version>2.10.8</version>
 		</dependency>
+		<!-- Runtime jars needed for testing using Groovy START
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
@@ -184,13 +191,15 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 		</dependency>
+		-->
+		<!-- Runtime jars needed for testing using Groovy END -->
+		<!-- Groovy START -->
+		<!-- <dependency> <groupId>org.codehaus.groovy</groupId> <artifactId>groovy-all</artifactId> 
+			<version>${groovy.version}</version> </dependency> -->
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib-nodep</artifactId>
 		</dependency>
-		<!-- groovy -->
-		<!-- <dependency> <groupId>org.codehaus.groovy</groupId> <artifactId>groovy-all</artifactId> 
-			<version>${groovy.version}</version> </dependency> -->
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-test</artifactId>
@@ -214,5 +223,6 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+		<!-- Groovy END -->
 	</dependencies>
 </project>

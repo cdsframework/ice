@@ -1,8 +1,5 @@
 package org.opencds.config.cli
 
-import groovy.util.logging.Log4j
-import groovy.util.slurpersupport.GPathResult
-
 import java.nio.file.Paths
 
 import javax.ws.rs.client.Client
@@ -18,7 +15,9 @@ import org.opencds.config.cli.commands.TransferCommand
 import org.opencds.config.cli.util.ResourceUtil
 import org.opencds.config.client.rest.RestClient
 
-@Log4j
+import groovy.util.logging.Log4j2
+
+@Log4j2
 class RestCli {
 
     public void run(Closure command, String outfile) {

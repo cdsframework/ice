@@ -1,13 +1,13 @@
 package org.opencds.config.cli.util
 
-import groovy.util.logging.Log4j
-
 import javax.ws.rs.core.MediaType
 
 import org.apache.xerces.impl.io.MalformedByteSequenceException;
 import org.xml.sax.SAXParseException
 
-@Log4j
+import groovy.util.logging.Log4j2
+
+@Log4j2
 class ResourceUtil {
 
     static Map get(File file) {

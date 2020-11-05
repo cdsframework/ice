@@ -1,8 +1,5 @@
 package org.opencds.config.migrate
 
-import groovy.util.logging.Log4j
-
-import java.nio.file.Path
 import java.nio.file.Paths
 
 import javax.ws.rs.client.Client
@@ -30,7 +27,9 @@ import org.opencds.config.migrate.cache.ConfigCacheRegion
 import org.opencds.config.migrate.utilities.ConfigResourceUtility
 import org.opencds.config.migrate.utilities.FileUtility
 
-@Log4j
+import groovy.util.logging.Log4j2
+
+@Log4j2
 public class ConfigMigrator {
     private OpencdsBaseConfig config
 

@@ -1,9 +1,5 @@
 package org.opencds.config.migrate;
 
-import java.io.OutputStream;
-
-import groovy.util.logging.Log4j;
-
 import org.apache.commons.lang3.tuple.Pair
 import org.opencds.config.api.model.KMId
 import org.opencds.config.client.rest.ConceptDeterminationMethodRestClient
@@ -14,15 +10,14 @@ import org.opencds.config.client.rest.SemanticSignifierRestClient
 import org.opencds.config.mapper.KMIdMapper
 import org.opencds.config.schema.ConceptDeterminationMethod;
 import org.opencds.config.schema.ConceptDeterminationMethods
-import org.opencds.config.schema.ExecutionEngine
 import org.opencds.config.schema.ExecutionEngines
-import org.opencds.config.schema.KnowledgeModule;
 import org.opencds.config.schema.KnowledgeModules
-import org.opencds.config.schema.SemanticSignifier;
 import org.opencds.config.schema.SemanticSignifiers
 import org.opencds.config.util.URIUtil
 
-@Log4j
+import groovy.util.logging.Log4j2
+
+@Log4j2
 public class RestConfigHandler implements ConfigHandler {
 
     Closure client

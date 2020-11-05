@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+    <Properties>
+        <!--  <Property name="basePath">C:\\logs</Property> -->
+        <Property name="basePath">/usr/local/tomcat/webapps/opencds-decision-support-service</Property>
+    </Properties>
+    <Appenders>
+        <RollingFile name="fileLogger" fileName="${basePath}/root.log" filePattern="${basePath}/root.log.%d{yyyy-MM-dd}">
+            <PatternLayout>
+                <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.cdsframework.ice.service.ICELogicHelper" level="info" additivity="false">
+            <appender-ref ref="fileLogger" level="info" />
+        </Logger>
+        <Root level="info" additivity="false">
+            <appender-ref ref="fileLogger" />
+        </Root>
+    </Loggers>
+</Configuration>
