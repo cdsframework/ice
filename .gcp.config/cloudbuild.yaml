@@ -61,10 +61,10 @@ steps:
     entrypoint: "mvn"
     args:
       [
-        "-P drools-5.5",
+        "-P drools-7",
         "-DskipTests",
-        "-Dmaven.compiler.source=1.7",
-        "-Dmaven.compiler.target=1.7",
+        "-Dmaven.compiler.source=1.8",
+        "-Dmaven.compiler.target=1.8",
         "install",
       ]
     dir: "opencds/opencds-parent"
@@ -78,8 +78,8 @@ steps:
     entrypoint: "mvn"
     args:
       [
-        "-Dmaven.compiler.source=1.7",
-        "-Dmaven.compiler.target=1.7",
+        "-Dmaven.compiler.source=1.8",
+        "-Dmaven.compiler.target=1.8",
         "compile",
         "assembly:single",
       ]

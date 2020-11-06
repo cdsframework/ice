@@ -28,18 +28,11 @@ COPY ice3/opencds-ice-service/src/main/knowledge /usr/local/tomcat/webapps/openc
 COPY ice3/opencds-ice-service/META-INF /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/META-INF
 COPY .gcp.config/opencds.properties .opencds
 COPY .gcp.config/sec.xml .opencds
-COPY .gcp.config/log4j.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
+COPY .gcp.config/log4j2.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
 COPY .gcp.config/ice.properties /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
 COPY .gcp.config/start-ice.sh ./
 
-RUN chown -R appuser: /home/appuser /usr/local/tomcat && \
-    rm -f /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/log4j.properties && \
-    rm -f /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/knowledge/knowledgeCommon/org.cdsframework^ICE^1.0.0/*.dsl && \
-    rm -f /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/knowledge/knowledgeCommon/org.cdsframework^ICE^1.0.0/*.bpmn && \
-    rm -f /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/knowledge/knowledgeCommon/org.cdsframework^ICE^1.0.0/*.drl && \
-    rm -f /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/knowledge/knowledgeCommon/org.cdsframework^ICE^1.0.0/*.dslr && \
-    rm -f /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/knowledge/knowledgeModules/gov.nyc.cir^ICE^1.0.0/*.drl && \
-    rm -f /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/knowledge/knowledgeModules/gov.nyc.cir^ICE^1.0.0/*.dslr
+RUN chown -R appuser: /home/appuser /usr/local/tomcat
 
 USER appuser
 
