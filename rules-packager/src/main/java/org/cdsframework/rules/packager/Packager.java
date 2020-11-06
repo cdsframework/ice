@@ -19,6 +19,7 @@ import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
 import org.kie.api.builder.Message;
+import org.kie.api.builder.ReleaseId;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieContainer;
@@ -256,6 +257,8 @@ public class Packager {
 			throw new RuntimeException(lErrStr);
 		}	
 		//////////////////////////////////////////////////////////////////////
+		/////// ReleaseId kieContainerRelease = kieServices.newReleaseId(lKMId.getScopingEntityId(), lKMId.getBusinessId(), lKMId.getVersion());
+		/////// KieContainer kieContainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
 		KieContainer kieContainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
 		kieBase = kieContainer.getKieBase();
 
@@ -268,6 +271,8 @@ public class Packager {
 		catch (Exception e) {
 			throw new RuntimeException("Failed to write serialized pkg file", e);
 		}
+		
+		logger.info(_METHODNAME + "Completed generation of pkg file");
 	}
 	
 

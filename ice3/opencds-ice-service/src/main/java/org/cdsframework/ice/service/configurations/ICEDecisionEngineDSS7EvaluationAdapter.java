@@ -745,11 +745,10 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		if (loadRulesFromPkgFileBool == true && pkgFile != null && pkgFile.exists()) {
 			logger.info(_METHODNAME + "loading knowledge from pkg file: " + pkgFile.getAbsolutePath());
 			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(pkgFile.getAbsolutePath()))) {
-				kieServices.getResources().newInputStreamResource(ois);
 				kieBase = (KieBase) ois.readObject();
 			}
 			catch (Exception e) {
-				throw new RuntimeException("Failed to load Drools package file" + pkgFile.getAbsolutePath(), e);			
+				throw new RuntimeException("Failed to load Drools package file" + pkgFile.getAbsolutePath(), e);
 			}
 		}
 		else {
@@ -866,6 +865,8 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			}	
 			//////////////////////////////////////////////////////////////////////
 			KieContainer kieContainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
+			/////// ReleaseId kieContainerRelease = kieServices.newReleaseId(lKMId.getScopingEntityId(), lKMId.getBusinessId(), lKMId.getVersion());
+			/////// KieContainer kieContainer = kieServices.newKieContainer(kieContainerRelease);
 			kieBase = kieContainer.getKieBase();
 		}
 
@@ -891,9 +892,9 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 
 		return kieBase;
 	}
-	
-	
-	private List<File> retrieveCollectionOfDSLRsToAddToKnowledgeBase(String pRequestedKmId, File pDSLRFileDirectory, List<File> pFilesToExcludeFromKB) {
+
+
+	private static List<File> retrieveCollectionOfDSLRsToAddToKnowledgeBase(String pRequestedKmId, File pDSLRFileDirectory, List<File> pFilesToExcludeFromKB) {
 		
 		String _METHODNAME = "retrieveCollectionOfDSLRsToAddToKnowledgeBase(): ";
 		
@@ -951,5 +952,5 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		
 		return drlFilesToAddToKB;
 	}
-	
+
 }
