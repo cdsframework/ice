@@ -25,7 +25,6 @@ WORKDIR /home/appuser
 # copy config files
 COPY opencds/opencds-parent/opencds-decision-support-service/target/opencds-decision-support-service-2.0.5 /usr/local/tomcat/webapps/opencds-decision-support-service
 COPY ice3/opencds-ice-service/src/main/resources /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/resources
-COPY ice3/opencds-ice-service/META-INF /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/META-INF
 COPY .gcp.config/opencds.properties .opencds
 COPY .gcp.config/sec.xml .opencds
 COPY .gcp.config/log4j2.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
