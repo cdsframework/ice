@@ -72,38 +72,6 @@ steps:
       - name: "m2"
         path: /root/.m2
 
-  # build the rules packager
-  #- name: "maven:3-jdk-8-slim"
-  #  id: build
-  #  entrypoint: "mvn"
-  #  args:
-  #    [
-  #      "-Dmaven.compiler.source=1.8",
-  #      "-Dmaven.compiler.target=1.8",
-  #      "compile",
-  #      "assembly:single",
-  #    ]
-  #  dir: "rules-packager"
-  #  volumes:
-  #    - name: "m2"
-  #      path: /root/.m2
-
-  # produce the compiled pkg for ice
-  #- name: "maven:3-jdk-8-slim"
-  #  entrypoint: "java"
-  #  args:
-  #    [
-  #      "-jar",
-  #      "rules-packager/target/rules-packager-1.0.0-SNAPSHOT-jar-with-dependencies.jar",
-  #      ".gcp.config/ice-gen.properties",
-  #      "gov.nyc.cir^ICE^1.0.0",
-  #      "org.cdsframework^ICE^1.0.0",
-  #    ]
-  #  dir: "."
-  #  volumes:
-  #    - name: m2
-  #      path: /root/.m2/
-
   # cache the /root/.m2 folder and upload it to GCS bucket
   - name: gcr.io/cloud-builders/gsutil
     waitFor:
