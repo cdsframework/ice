@@ -1,9 +1,9 @@
 package org.opencds.service.util
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import groovy.xml.MarkupBuilder
 
-@Log4j
+@Log4j2
 class OpencdsClient {
     private static final String WS_URL = "http://localhost:28080/opencds-decision-support-service/evaluate"
     private static final String DSS_NS = "http://www.omg.org/spec/CDSS/201105/dss"
