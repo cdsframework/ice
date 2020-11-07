@@ -29,7 +29,7 @@ ICE is open source software and in active development. Please check in to http:/
 
 An overview of the capabilities of ICE is available http://www.hln.com/ice/. This distribution comes bundled with OpenCDS 2.0.5, which was released on August 2015. The ICE software will continually update to the latest versions of OpenCDS as they become available. The out of the box (default) immunization rules documentation, as well as technical documentation for ICE and CAT, can be found at http://www.cdsframework.org/.
 
-This version of ICE requires Java 7, and has been tested under the latest version of Tomcat 7 and Tomcat 8. OpenCDS is known to run under Tomcat 9 but has not yet been tested with ICE. 
+This version of ICE requires Java 8, and has been tested under the latest version of Tomcat 7 and Tomcat 9. 
 
 It is recommended that at least 1GB of memory be allocated to the Tomcat instance, though in our internal performance tests, we have noted a significant performance increase when allocating 2GB of memory.
 
