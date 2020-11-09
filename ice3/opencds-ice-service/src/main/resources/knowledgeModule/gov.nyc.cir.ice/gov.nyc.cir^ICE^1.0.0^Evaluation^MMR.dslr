@@ -58,6 +58,7 @@ rule "MMR: Mark Target Dose 2 as Accepted / EXTRA_DOSE if the shot is administer
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y"
 	then
 		Include the reason for shot $currentShot Accepted due to "Extra Dose"
+		Mark the Series $associatedTargetSeries Complete
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
