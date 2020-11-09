@@ -72,6 +72,9 @@ rule "MMR: Mark the series complete if Patient >= 19 yrs and there is 1 dose in 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
 			- the number of doses administered is == 1
 			- the series is not complete
+		There does not exist an Administered Shot
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
+			- that has not already been Evaluated
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "19y"
