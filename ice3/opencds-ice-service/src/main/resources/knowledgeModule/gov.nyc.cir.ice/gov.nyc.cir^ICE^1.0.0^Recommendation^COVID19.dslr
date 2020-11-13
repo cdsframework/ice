@@ -53,7 +53,7 @@ global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
 
 
-rule "COVID-19 (Pfizer Series Implemented Only For Now): If the patient has no shots on record, recommendation is CONDITIONAL/HIGH_RISK"
+rule "COVID-19: If the patient has no shots on record, recommendation is CONDITIONAL/HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -69,14 +69,31 @@ rule "COVID-19 (Pfizer Series Implemented Only For Now): If the patient has no s
 end
 
 
-rule "COVID-19 (Pfizer Series Implemented Only For Now): Recommend at the vaccine level; always recommend CVX 208"
+// If no doses have been administered, then do not recommend a specific vaccine
+rule "COVID-19: Do not recommend a specific vaccine if no (valid) doses have been administered"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a Specific Vaccine is Recommended
+			- the effective dose number in the Series is == 1
+	then
+		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the Pfizer 2-dose Series, recommend CVX 208 for the next target dose.
+rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is not complete
-			- the number of administered shots is > 0
+			- the name of the series is "COVID19Pfizer2DoseSeries"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE208"
@@ -84,3 +101,23 @@ rule "COVID-19 (Pfizer Series Implemented Only For Now): Recommend at the vaccin
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+// When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
+rule "COVID-19: Recommend CVX 207 for the next target dose in the Moderna 2-dose Series"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the series is "COVID19Moderna2DoseSeries"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE207"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+
