@@ -84,9 +84,7 @@ public class PayloadHelper {
 		}
 
 		if (logger.isDebugEnabled()) {
-			String str = "focalPersonId " + focalPersonId + ", sae: " + sae.getId() + ", VG: " + vg + ", Dose unique ID: " + d.getUniqueId() + ", Dose ID " + d.getDoseId() +
-					", Dose all: " + d.toString();
-			logger.debug(str);
+			logger.debug("focalPersonId " + focalPersonId + ", sae: " + sae.getId() + ", VG: " + vg + ", Dose unique ID: " + d.getUniqueId() + ", Dose ID " + d.getDoseId() + ", Dose all: " + d.toString());
 		}
 		String conceptTargetId = sae.getId();
 		

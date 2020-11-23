@@ -3312,7 +3312,10 @@ public class TargetSeries {
 
 	/**
 	 * Remove a target dose from TargetSeries. This method should be used to allow rule author says that the vaccine should not be evaluated as a part
-	 * of this series. (e.g. CVX 109 may be evaluated as a part of PCV or PPSV depending circumstances).
+	 * of this series. (e.g. CVX 109 may be evaluated as a part of PCV or PPSV depending circumstances). This should never be called unless during or
+	 * before the evaluation stage, because this method sets all remaining shots after the one being removed to DoseStatus EVALUATION_NOT_STARTED, 
+	 * so that they may be reevaluated. If the caller requires that the shots after the removed shot be reevaluated, then he/she should mark the
+	 * each TargetDose with status EVALUATION_NOT_STARTED in the drools fact as modified/updated
 	 * @param targetDose
 	 */
 	public void removeTargetDoseFromSeries(TargetDose targetDose) {
@@ -3343,6 +3346,8 @@ public class TargetSeries {
 				int nextDoseNumber = td.getDoseNumberInSeries();
 				td.setAdministeredShotNumberInSeries(i);
 				td.setDoseNumberInSeries(prevDoseNumber);
+				td.setStatus(DoseStatus.EVALUATION_NOT_STARTED);
+				td.setDoseStatusOverridden(false);	// Starting all over with these shots
 				prevDoseNumber = nextDoseNumber;
 				i++;
 			}

@@ -49,29 +49,3 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 global java.util.Date evalTime
 
 
-// Duplicate shot/same day rule. AI: Is this still valid?
-rule "Zoster: Evaluate CVX 187 as Invalid/Below Minimum Interval if administered on same day as CVX 121 or CVX 188"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "doseIntervalCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
-			- the vaccine administered is "ICE187"
-			- make note of the date this shot was administered as $currentShotDate
-			- make note of the Associated Series as $associatedTargetSeries
-		There is an administered shot $zoster121or188Shot
-			- the shot belongs to the Series $associatedTargetSeries
-			- the vaccine administered a member of ("ICE121","ICE188")
-			- the administration date of the shot is == $currentShotDate
-			- the shot has not been evaluated yet
-		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.620"
-			- the series is not complete
-	then
-		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-
-
