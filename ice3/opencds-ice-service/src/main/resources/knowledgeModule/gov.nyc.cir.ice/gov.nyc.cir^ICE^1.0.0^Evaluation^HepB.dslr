@@ -186,7 +186,7 @@ end
  For the purpose of evaluation of the non-CVX 189 administered vaccines, ignore the non-CVX 189 shots.
 ********************************************************************************************************************************************************************************************/
 
-rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete (regardless of any other prior Hep B shots administered"
+rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete regardless of any other prior Hep B shots administered"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
@@ -216,29 +216,29 @@ rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete (regardless of any oth
 end
 
 // If a CVX 189 has been administered and there is a previous, VALID CVX 189 administered beforehand, mark any intervening non-CVX 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
-rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a prior VALID CVX 189, mark all intervening non-CVX 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN" 
-		extends "Hep B: Mark Series with 2 Doses of CVX 189 Complete (regardless of any other prior Hep B shots administered"
+rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a prior VALID CVX 189, mark all intervening or prior Valid non-CVX 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN" 
+		extends "Hep B: Mark Series with 2 Doses of CVX 189 Complete regardless of any other prior Hep B shots administered"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is a Series $targetSeriesSame
 			- that is the same series as $targetSeries
-			- the series is complete
-		There is an administered shot $interveningShot
+		There is an administered shot $interveningOrEarlierShot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.100"
 			- the shot belongs to the series $targetSeries			
 			- the vaccine administered is not "ICE189"
-			- that has already been evaluated
-			/////// - that has already been evaluated and whose shot validity status is not VALID
-			/////// - the administration date of the shot is >= $priorDoseDate
+			/////// - that has already been evaluated
+			- that has already been evaluated and whose shot validity status is VALID
 			- the administration date of the shot is <= $targetDoseDate
 	then
-		Remove all evaluation reasons from shot $interveningShot
-		Set the shot status of $interveningShot to Accepted
-		Include the reason for shot $interveningShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Record that this dose rule was Processed for the TargetDose $interveningShot
-		Log that this dose rule fired for the dose $interveningShot in the Series $targetSeries
+		Remove all evaluation reasons from shot $interveningOrEarlierShot
+		Set the Shot Status of $interveningOrEarlierShot to Accepted
+		Include the reason for shot $interveningOrEarlierShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
+		Refresh all facts in the Shot $interveningOrEarlierShot
+		Record that this dose rule was Processed for the TargetDose $interveningOrEarlierShot
+		Log that this dose rule fired for the dose $interveningOrEarlierShot in the Series $targetSeries
 end
+
 
 // When evaluating a CVX 189, ignore intervals to any intervening non-CVX 189 shots if there is a prior CVX 189 (valid) dose at least 24 days prior to this shot
 rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots are ignored if there is a prior valid CVX 189 dose at least 24 days apart"
@@ -251,6 +251,8 @@ rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots
 			- the vaccine administered is "ICE189"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
 			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series is not complete
 		There is an Administered Shot $priorCVX189dose
 			- the shot belongs to the Series $associatedTargetSeries
 			- the vaccine administered is "ICE189"
@@ -259,8 +261,42 @@ rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots
 		Confirm Elapsed time between $dtAdministrationDatePriorCVXdose and $dtAdministrationDateCurrentShot >= "24d"
 	then
 		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+
+
+rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots are ignored and the prior shot is marked valid if there is a prior CVX 189 shot at least 24 days apart and the only reason it was not valid is BELOW_MINIMUM_INTERVAL"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the vaccine administered is "ICE189"
+			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series is not complete
+		There is an Administered Shot $priorCVX189shot
+			- the shot belongs to the Series $associatedTargetSeries
+			- the vaccine administered is "ICE189"
+			- that has already been evaluated and whose shot validity status is not VALID
+			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
+			- the size of the collection $collectionOfStrReasons is == 1
+			- make note of the date this shot was administered as $dtAdministrationDatePriorCVXdose
+		There is an IceFact $ICEFactTypeFinding
+			- that has associated administered shot $priorCVX189shot
+			- that has finding SupportedFactConcept._BELOW_MINIMUM_INTERVAL.conceptCodeValue
+		Confirm Elapsed time between $dtAdministrationDatePriorCVXdose and $dtAdministrationDateCurrentShot >= "24d"
+	then 
+		Remove all evaluation reasons from shot $priorCVX189shot
+		Retract IceFact $ICEFactTypeFinding from working memory
+		Set the Shot Status of $priorCVX189shot to Valid
+		Refresh all facts in the Shot $priorCVX189shot
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
 
 // In the Hep B Adult series, remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE 
 rule "Hep B: In Adult Series, remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
