@@ -87,7 +87,8 @@ rule "Hep B: Verify Adherence to the Maximum Valid Age for the Vaccine if Hep B 
 end 
 
 
-rule "Hep B: Evaluate the Minimum Interval Between Doses 1 and 3"
+// Abolute minimum interval between doses 1 and 3 in Child Adult Series is 108 days
+rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the Child Adult Series is >= 108d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when  
@@ -96,6 +97,9 @@ rule "Hep B: Evaluate the Minimum Interval Between Doses 1 and 3"
 			- the Dose Number in the Series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the name of the Series is "HepBChildAdultSeries"
+			- the Series is not complete
 		There is an Administered Shot $previousDose
 			- the Shot belongs to the Series $associatedTargetSeries
 			- the dose number in the series is == 1
@@ -227,8 +231,9 @@ rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.100"
 			- the shot belongs to the series $targetSeries			
 			- the vaccine administered is not "ICE189"
-			/////// - that has already been evaluated
-			- that has already been evaluated and whose shot validity status is VALID
+			- that has already been evaluated and whose shot validity status is not ACCEPTED
+			- make note of all evaluation reasons for this shot as $allEvaluationReasons
+			- the collection $allEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN" 
 			- the administration date of the shot is <= $targetDoseDate
 	then
 		Remove all evaluation reasons from shot $interveningOrEarlierShot
