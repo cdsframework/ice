@@ -1177,7 +1177,7 @@ rule "SeriesSelection: Initialize Next Non-Seasonal TargetSeriesSelection" rulef
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionSeason == null)
 		// Perform selection on series; higher priority vaccine groups first and those with seasons in start date ascending order
-		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup != $tss.seriesSelectionVaccineGroup, seriesSelectionPriority > $tss.serriesSelectionPriority)
+		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup != $tss.seriesSelectionVaccineGroup, seriesSelectionPriority > $tss.seriesSelectionPriority)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($tss) {
@@ -1195,7 +1195,7 @@ rule "SeriesSelection: Initialize Next Seasonal TargetSeriesSelection" ruleflow-
 	when
 		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionSeason != null)
 		// Perform selection on series; higher priority vaccine groups first and those with seasons in start date ascending order
-		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup != $tss.seriesSelectionVaccineGroup, seriesSelectionPriority > $tss.seriesSelectionpriority) 		
+		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup != $tss.seriesSelectionVaccineGroup, seriesSelectionPriority > $tss.seriesSelectionPriority) 		
 		not TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED, seriesSelectionVaccineGroup == $tss.seriesSelectionVaccineGroup, 
 			seriesSelectionSeason != null && seriesSelectionSeason.fullySpecifiedSeasonStartDate.isBefore($tss.seriesSelectionSeason.fullySpecifiedSeasonStartDate))
 	then
