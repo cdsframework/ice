@@ -846,7 +846,6 @@ end
 ///////// ***
 rule "HistoryEvaluation.setDoseEvaluationStatusInvalid" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
-	salience 10
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty == false) 
 		$ts : TargetSeries(containsTargetDose($td))
@@ -868,7 +867,6 @@ end
 ///////// ***
 rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
-	salience 10
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty == false) 
 		$ts : TargetSeries(containsTargetDose($td))
@@ -890,7 +888,6 @@ end
 ///////// ***
 rule "HistoryEvaluation.setDoseEvaluationStatusAccepted" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
-	salience 10
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty, acceptedReasons.empty == false)
 		$ts : TargetSeries(containsTargetDose($td))
@@ -901,6 +898,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusAccepted" ruleflow-group "History
 			setStatus(DoseStatus.ACCEPTED),
 			addDoseRuleProcessed(_RULENAME);
 		}
+		// setStatus() above also sets hasBeenEvaluated to true
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		setFocus("HistoryEvaluation^postEvaluationCheck");
@@ -911,21 +909,21 @@ end
 // General Design rule... Do not Edit
 ///////// ***
 rule "HistoryEvaluation.setDoseEvaluationStatusValid" ruleflow-group "HistoryEvaluation"
-	dialect "java"
-	salience 10
+	dialect "mvel"
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, acceptedReasons.empty, notEvaluatedReasons.empty)
 		$ts : TargetSeries(containsTargetDose($td))
 	then
-		String _RULENAME = drools.getRule().getName();
+		String _RULENAME = kcontext.rule.name;
 		modify($td) {
 			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
 			addDoseRuleProcessed(_RULENAME),
-			setStatus(DoseStatus.VALID);					// Also sets hasBeenEvaluated flag to true
+			setStatus(DoseStatus.VALID);
 		}
+		// setStatus() above also sets hasBeenEvaluated to true
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
-		drools.setFocus("HistoryEvaluation^postEvaluationCheck");
+		setFocus("HistoryEvaluation^postEvaluationCheck");
 end
 
 
@@ -948,7 +946,8 @@ end
 
 
 ///////// ***
-// Supplemental Series Table rule... modifying this rule not suggested
+// Series Table rule... Do not Edit.
+// The activation-group property is specified so that custom rules may optionally override this rule.
 ///////// ***
 rule "HistoryEvaluation.markExtraneousDosesAcceptedIfCompleteForAllDiseaseTargetedByThisDose" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -967,6 +966,7 @@ end
 
 ///////// ***
 // Series Table rule... Do not Edit
+// The activation-group property is specified so that custom rules may optionally override this rule.
 ///////// ***
 rule "HistoryEvaluation.checkIsAllowableVaccine" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -987,6 +987,7 @@ end
 
 ///////// ***
 // Series Table rule... Do not Edit
+// The activation-group property is specified so that custom rules may optionally override this rule.
 ///////// ***
 rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1009,6 +1010,7 @@ end
 
 ///////// ***
 // Series Table rule... Do not Edit
+// The activation-group property is specified so that custom rules may optionally override this rule.
 ///////// ***
 rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1030,6 +1032,7 @@ end
 
 ///////// ***
 // Series Table rule... Do not Edit
+// The activation-group property is specified so that custom rules may optionally override this rule.
 ///////// ***
 rule "HistoryEvaluation.evaluateVaccineGroupMinimumAge" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1054,6 +1057,7 @@ end
 
 ///////// ***
 // Series table rule... Do not Edit
+// The activation-group property is specified so that custom rules may optionally override this rule.
 ///////// ***
 rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
