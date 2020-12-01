@@ -3,13 +3,7 @@ Build Order
 Build opencds-knowledge-repository-data
 mvn clean install
 
-Build opencds-parent
-mvn clean install
-
-To build OpenCDS with other versions of Drools, do the following:
-Checkout the branch for the version you would like to build.
-Perform the Build Order steps (above)
-Build opencds-decision-support-service as follows (depending on the version of Drools you need):
+To build OpenCDS with other ICE, do the following:
 mvn -P drools-7 -Dmaven.test.skip=true clean install
+
 The war file will be in the target folder.
-Please note that only version 7 is currently supported.
