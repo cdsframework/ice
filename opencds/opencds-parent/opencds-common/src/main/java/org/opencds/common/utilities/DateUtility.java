@@ -229,6 +229,16 @@ public class DateUtility extends java.lang.Object
 
 	        return dateToReturn;
 	    }
+	    
+	    public boolean isValidDateFormat(String dateAsString, String formatTemplate){
+	    	SimpleDateFormat formatter = new SimpleDateFormat(formatTemplate);
+    		try {
+				formatter.parse(dateAsString);
+				return true;
+			} catch (ParseException e) {
+				return false;
+			}
+	    }
 
 	    /**
 	     * Returns whether getDateFromString will be able to succeed without error.
@@ -1088,16 +1098,32 @@ public class DateUtility extends java.lang.Object
 //	        String pretty_time = formatter.format( dt );
 //
 //	        System.out.println( pretty_time );
+	       
+	        String formatTemplate = "yyyyMMddHHmmss.SSSZZZZZ";
+	        String hl7Time = "20201002113456+0000";
+	        System.out.println("Calling getDateFromString() for " + hl7Time);
 	        
+	        Date dateFromValue;
+	        if (DateUtility.getInstance().isValidDateFormat(hl7Time, formatTemplate.substring(0, hl7Time.length()))) {
+	        	dateFromValue = DateUtility.getInstance().getDateFromString(hl7Time, formatTemplate.substring(0, hl7Time.length()));
+	        }
+	        else {
+	        	dateFromValue = DateUtility.getInstance().getDateFromString(hl7Time, "yyyyMMddHHmmssZ");
+	        }
+	        if (dateFromValue != null) {
+	        	System.out.println("Date is not null: " + dateFromValue);
+	        }
+	        else {
+	        	System.out.println("Date is null");
+	        }
 /**
 	        AbsoluteTimeDifference atd = utility.getAbsoluteTimeDifference(
 	                (new GregorianCalendar(2007, Calendar.FEBRUARY, 1)).getTime(), (new GregorianCalendar(2007, Calendar.MARCH, 31)).getTime(),
 	                Calendar.MONTH, true, Calendar.HOUR);
 	        atd.print();
 	        System.out.println(atd.getMonthDifference());
-**/
+	        
 	        //System.out.println(utility.getDateAsString(new Date(), "MMMMM dd, yyyy"));
-	        /**
 	         Date date1 = utility.getDate(2003, 12, 14);
 	         Date date2 = utility.getDate(2003, 12, 12);
 
@@ -1180,6 +1206,7 @@ public class DateUtility extends java.lang.Object
 	         }
 	         **/
 	        
+	        /**	        
 	        Date date1 = utility.getDate(2012, 1, 1);
 	        System.out.println( date1 );
 	        
@@ -1195,7 +1222,6 @@ public class DateUtility extends java.lang.Object
 	        System.out.println( pretty_time2 );
 	        
 	        System.out.println(utility.timeDifferenceLessThanOrEqualTo(date1, date2, Calendar.YEAR, 2));
-
-
+			**/
 	    }
 }

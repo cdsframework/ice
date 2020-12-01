@@ -17,6 +17,7 @@
 package org.opencds.vmr.v1_0.mappings.utilities;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -728,7 +729,14 @@ public class MappingUtility extends java.lang.Object {
 		// value is populated and correct length. Parse it and return internal TS if successful
 		try {
 			// properly formatted; set internal TS object
-			return DateUtility.getInstance().getDateFromString(hl7Time, formatTemplate.substring(0, hl7Time.length() ));
+			Date dateFromStrValue;
+	        if (DateUtility.getInstance().isValidDateFormat(hl7Time, formatTemplate.substring(0, hl7Time.length()))) {
+	        	dateFromStrValue = DateUtility.getInstance().getDateFromString(hl7Time, formatTemplate.substring(0, hl7Time.length()));
+	        }
+	        else {
+	        	dateFromStrValue = DateUtility.getInstance().getDateFromString(hl7Time, "yyyyMMddHHmmssZ");
+	        }
+			return dateFromStrValue; 
 		}
 		catch (Exception e) {
 			errStr = _METHODNAME + "getValue() \"" + hl7Time + "\" is in wrong format; must follow format: " + formatTemplate;

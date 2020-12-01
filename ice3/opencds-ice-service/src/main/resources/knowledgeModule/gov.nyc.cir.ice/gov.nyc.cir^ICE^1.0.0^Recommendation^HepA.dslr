@@ -44,9 +44,9 @@ global java.util.Date evalTime
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
 
 
-//If a person => 18 years old and did NOT get a shot, recommendation should be Conditional / Recommended for High Risk Groups.
+//If a person => 19 years old and did NOT get a shot, recommendation should be Conditional / Recommended for High Risk Groups.
 // Overrides routine recommendationAgeCheck
-rule "HepA: Recommend Conditional/High Risk when >= 18 years old and no shots"
+rule "HepA: Recommend Conditional/High Risk when >= 19 years old and no shots"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationAgeCheck"
     when
@@ -55,7 +55,7 @@ rule "HepA: Recommend Conditional/High Risk when >= 18 years old and no shots"
         	- the number of Administered Shots is == 0
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime >= 18 DurationType.YEARS
+		Confirm elapsed time between $dtBirthDate and evalTime >= 19 DurationType.YEARS
 	then
 		Add "2y" to $dtBirthDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
