@@ -90,6 +90,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Aa]dministered [Vv]accine as {assign_oVaccineAdministered}={assign_oVaccineAdministered} : administeredVaccine 
 [condition][]- [Tt]he [Cc]ollection {oCollection} contains {oCollectionElement}={oCollection} contains {oCollectionElement}
 [condition][]- [Tt]he [Cc]ollection {oCollection} does not contain {oCollectionElement}={oCollection} not contains {oCollectionElement}
+[condition][]- [Tt]he [Ss]ize of the [Cc]ollection {oCollection} is {aOp}  {nNumeric:([0-9]+)([\\.][0-9]+)?}={oCollection}.size() {aOp} {nNumeric}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:([0-9]+)([\\.][0-9]+)?}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:([0-9]+)([\\.][0-9]+)?}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
@@ -175,6 +176,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Pp]referable [Vv]accines for [Dd]ose {nDoseNumber} in the [Ss]eries as {assign_oListVaccines}={assign_oListVaccines} : getPreferableVaccinesForTargetDose({nDoseNumber})
 [condition][]- [Tt]he [Cc]ollection {oCollection} contains {oCollectionElement}={oCollection} contains {oCollectionElement}
 [condition][]- [Tt]he [Cc]ollection {oCollection} does not contain {oCollectionElement}={oCollection} not contains {oCollectionElement}
+[condition][]- [Tt]he [Ss]ize of the [Cc]ollection {oCollection} is {aOp}  {nNumeric:([0-9]+)([\\.][0-9]+)?}={oCollection}.size() {aOp} {nNumeric}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:([0-9]+)([\\.][0-9]+)?}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:([0-9]+)([\\.][0-9]+)?}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
@@ -244,7 +246,6 @@
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Vaccine not Allowed in U.S."={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_IN_US");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Proof of Immunity"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Above Recommended Age for Series"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.ABOVE_REC_AGE_SERIES");
-[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Above Recommended Age"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.ABOVE_REC_AGE");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Below Recommended Age"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.BELOW_REC_AGE_SERIES"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Vaccine Not Licensed For Males"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_LICENSED_FOR_MALES");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Vaccine Not Allowed For This Dose"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"); insert(new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), {refer_oTargetDose}));

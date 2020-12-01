@@ -167,6 +167,27 @@ rule "HPV: Recommend NOT_RECOMMENDED / TOO_OLD If Patient >=46 yrs"
 end
 
 
+rule "HPV: Recommend NOT_RECOMMENDED / TOO_OLD if will be >= 46 Years of Age as of the Routine Recommendation Date"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- a forecast for the Series has been made and a recommendation date has been determined
+			- make note of the recommendation date as $recommendationDate
+			- post processing on the Series forecast has not already been run
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and $recommendationDate >= "46y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.TOO_OLD"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
 rule "HPV: Recommend CONDITIONAL / CLINICAL_PATIENT_DISCRETION if Series is Not Complete, Patient >=27 yrs with one or more doses < 46 yrs"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"

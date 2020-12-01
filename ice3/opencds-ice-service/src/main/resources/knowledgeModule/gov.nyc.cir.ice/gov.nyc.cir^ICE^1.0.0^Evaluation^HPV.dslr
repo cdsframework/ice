@@ -73,7 +73,7 @@ rule "HPV: Evaluate CVX 118 administered to male patient as Accepted with reason
 end
 
 
-rule "Evaluate HPV Shot as Accepted / ABOVE_REC_AGE if Patient >= 46 yrs and Series is Not Complete"
+rule "Evaluate HPV Shot as Accepted / ABOVE_REC_AGE_SERIES if Patient >= 46 yrs and Series is Not Complete"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseAgeCheck"
@@ -88,7 +88,7 @@ rule "Evaluate HPV Shot as Accepted / ABOVE_REC_AGE if Patient >= 46 yrs and Ser
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "46y"
 	then
-		Include the reason for shot $currentDose Accepted due to "Above Recommended Age"
+		Include the reason for shot $currentDose Accepted due to "Above Recommended Age for Series"
 		Mark that evaluation of shot $currentDose is complete and therefore should not be reevaluated by any other rules
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
