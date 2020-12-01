@@ -51,5 +51,5 @@ Alternatively, to build the software via source:
 5) Compile the software:
     $ cd opencds/opencds-parent
     $ mvn clean
-    $ mvn -P drools-5.5 -Dmaven.test.skip=true install
+    $ mvn -P drools-7 -Dmaven.test.skip=true install
 
