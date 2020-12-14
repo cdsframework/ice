@@ -60,8 +60,8 @@ global java.util.Date evalTime
 COVID-19 Pfizer 2-dose Series specific rules
 *************************************************************************************************************************************************************************************/
 
-// If non-CVX 208 vaccine is reported in the Pfizer 2-dose series, evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN.
-rule "COVID-19 / Pfizer 2-dose series: Evaluate non-CVX 208 shot as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+// If non-CVX 208 vaccine is reported in the Pfizer 2-dose series, allow the vaccine to be evaluated as Valid.
+rule "COVID-19 / Pfizer 2-dose series: Evaluate non-CVX 208 shot as VALID"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -72,7 +72,7 @@ rule "COVID-19 / Pfizer 2-dose series: Evaluate non-CVX 208 shot as ACCEPTED/VAC
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
+		Include the reason for shot $currentShot Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
@@ -86,8 +86,8 @@ COVID-19 Pfizer 2-dose Series specific END
 COVID-19 Moderna 2-dose Series specific
 *************************************************************************************************************************************************************************************/
 
-// If non-CVX 207 vaccine is reported in Moderna 2-dose series, evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN.
-rule "COVID-19 / Moderna 2-dose series : Evaluate non-CVX 207 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+// If non-CVX 207 vaccine is reported in Moderna 2-dose series, allow the vaccine to be evaluated as Valid.
+rule "COVID-19 / Moderna 2-dose series : Evaluate non-CVX 207 as VALID"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -98,7 +98,7 @@ rule "COVID-19 / Moderna 2-dose series : Evaluate non-CVX 207 as ACCEPTED/VACCIN
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
+		Include the reason for shot $currentShot Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end

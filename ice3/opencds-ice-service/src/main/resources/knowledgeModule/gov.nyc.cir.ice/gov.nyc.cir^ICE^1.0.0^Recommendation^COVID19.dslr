@@ -53,7 +53,7 @@ global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
 
 
-rule "COVID-19: If the patient has no shots on record, recommendation is CONDITIONAL/HIGH_RISK"
+rule "COVID-19: If the patient has no shots on record, recommendation is CONDITIONAL / CLINICAL_PATIENT_DISCRETION"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -62,7 +62,7 @@ rule "COVID-19: If the patient has no shots on record, recommendation is CONDITI
 			- the number of administered shots is == 0
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -118,30 +118,3 @@ rule "COVID-19: Recommend CVX 207 for the next target dose in the Moderna 2-dose
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
-
-
-// For any of the Mening B series, if patient has at least one CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and at least one CVX 163 (Meningococcal B 4C, OMV (Bexsero)) on record, 
-// recommend CVX 163 and include the reason codes: DUE_NOW or DUE_IN_FUTURE and OTHER_VACCINE_PRODUCT_POSSIBLE.
-/*
-rule "COVID-19: If a patient has at least one CVX 207 and at least one CVX 208 and a shot is recommended, include a recommendation with reason OTHER_VACCINE_PRODUCT_POSSIBLE"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
-	when
-		There is a Series $targetSeries
-			- a Forecast for the Series has been made and a shot is recommended
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- post processing on the Series forecast has not already been run
-		There exists an administered shot
-			- the shot belongs to the series $targetSeries
-			- the vaccine administered is "ICE207"
-		There exists another administered shot
-			- the shot belongs to the series $targetSeries
-			- the vaccine administered is "ICE208"
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.OTHER_VACCINE_PRODUCT_POSSIBLE"
-		Include the Recommendation $oRecommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-*/
