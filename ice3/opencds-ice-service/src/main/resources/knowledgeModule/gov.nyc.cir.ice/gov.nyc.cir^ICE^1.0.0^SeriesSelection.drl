@@ -784,98 +784,13 @@ end
 
 ///////////////////////////////////////////////////////////// COVID-19 Specific Series Selection Rules Start Here ////////////////////////////////////////////////////////////////////
 
-//////////////
-// Logic currently incorporates Moderna and Pfizer vaccines.
-//////////////
-
-// Select one of the series. It doesn't matter which one, since if there are no doses on record, then the recommendation will be at the vaccine group level, 
-// and threfore this does not "prefer" one product over another.
 rule "SeriesSelection(COVID-19): Select the Pfizer 2-Dose Series by default"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries", isSeriesComplete() == false)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isSeriesComplete() == true)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
-		update($tss);
-		update($ts);
-end
-
-
-// If one or more of the series is complete, pick it; leave it to default series selection rules to determine which series was complete first
-rule "SeriesSelection(COVID-19): Select Complete Series"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isSeriesComplete() == true)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
-		update($tss);
-		update($ts);
-end
-
-
-// If patient has one dose of the Pfizer product and no other valid doses from another product after it, select the 2-dose Pfizer series
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// If patient has one dose of the Moderna or Pfizer product and no other valid doses from another product after it, select the corresponding 2-dose series
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-rule "ABSTRACT SeriesSelection(COVID-19): Select vaccine-based product series if patient has one (valid) dose of a specific vaccine and no other (valid) doses after it from another product"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 5
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", determineNumberOfDosesAdministeredInSeries() == 1)
-		$td : TargetDose(associatedTargetSeries == $ts, isValid == true)
-		not TargetDose(associatedTargetSeries == $ts, administrationDate > $td.administrationDate, isValid == true)
-		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, administrationDate > $td.administrationDate, isValid == true)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-end
-
-
-rule "SerieSelection(COVID-19): Select the identified series if target dose 1 is Valid; Series _is_ complete" 
-		extends "ABSTRACT SeriesSelection(COVID-19): Select vaccine-based product series if patient has one (valid) dose of a specific vaccine and no other (valid) doses after it from another product"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 5
-	when
-		TargetSeries(this == $ts, isSeriesComplete() == true)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
-		update($tss);
-		update($ts);
-end
-
-rule "SerieSelection(COVID-19): Select the identified series if target dose 1 is Valid; Series is _not_ complete and _no_ _other_ series is complete" 
-		extends "ABSTRACT SeriesSelection(COVID-19): Select vaccine-based product series if patient has one (valid) dose of a specific vaccine and no other (valid) doses after it from another product"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 5
-	when
-		TargetSeries(this == $ts, isSeriesComplete() == false)
-		not TargetSeries(this != $ts, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isSeriesComplete() == true)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
