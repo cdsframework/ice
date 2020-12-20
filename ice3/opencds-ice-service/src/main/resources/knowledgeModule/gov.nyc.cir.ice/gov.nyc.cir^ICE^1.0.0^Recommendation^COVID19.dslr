@@ -93,10 +93,31 @@ rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the series is "COVID19Pfizer2DoseSeries"
+			- the name of the Series is "COVID19Pfizer2DoseSeries"
+			- the Series is not complete
+			- the number of doses administered is == 1
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE208"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the Moderna 2-dose Series, recommend CVX 207 for the next target dose.
+rule "COVID-19: Recommend CVX 207 for the next target dose in the Moderna 2-dose Series"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Moderna2DoseSeries"
+			- the Series is not complete
+			- the number of doses administered is == 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE207"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
