@@ -17,6 +17,8 @@ ENV REMOTE_CONFIG_PASSWORD="password"
 EXPOSE 8080
 
 RUN adduser -u 1000 -D appuser && \
+    apk update && \
+    apk upgrade && \
     rm -rf /usr/local/tomcat/webapps/docs /usr/local/tomcat/webapps/ROOT /usr/local/tomcat/webapps/examples /usr/local/tomcat/webapps/host-manager /usr/local/tomcat/webapps/manager && \
     mkdir -p /home/appuser/.opencds
 
