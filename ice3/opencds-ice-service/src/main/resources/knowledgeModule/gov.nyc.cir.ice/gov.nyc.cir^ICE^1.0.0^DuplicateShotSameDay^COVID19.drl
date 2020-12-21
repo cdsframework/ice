@@ -50,22 +50,16 @@ import org.cdsframework.ice.service.Vaccine
 global java.util.Date evalTime
 
 
-rule "Duplicate Shots/Same Day (COVID-19): If two doses occur on the same day, they are both evaluated as Valid"
+rule "Duplicate Shots/Same Day (COVID-19): Bypass Duplicate Shot/Same Day Processing by not setting the target dose number of the shot to be evaluated shot to the prior dose number"
 	dialect "mvel"
-	agenda-group "HistoryEvaluation^duplicateShotSameDay"
-	auto-focus true
-	salience 10		// This rule should run before the general duplicate shots/same day rules
+	agenda-group "HistoryEvaluation^customMakeNoteOfDuplicateShotSameDayIfAny"
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false) 
-		$tdother : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID, 
-			isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS)
 	then
 		String _RULENAME = kcontext.rule.name;
-		modify($td) {
-			setDuplicateShotSameDayCheckCompleted(true);
+		modify ($td) {
+			setPreEvaluationCheckCompleted(true);
 		}
-		modify($tdother) {
-			setDuplicateShotSameDayCheckCompleted(true);
-		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "COVID-19 duplicate shots permitted: (1): " + $td + "; (2): " + $tdother);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
+		setFocus("HistoryEvaluation^customEvaluationRule");
 end
