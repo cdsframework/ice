@@ -1,0 +1,103 @@
+/**
+ * Copyright (C) 2020 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+
+package knowledgeModule.gov.nyc.cir.ice
+
+import java.util.List
+import java.util.Set
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
+
+global java.util.Date evalTime
+
+
+// If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
+// Descriptive Text: "The timing of the administration of this shot does not follow the guidelines of the EUA regarding the minimum age and/or minimum interval."
+
+rule "COVID-19: If shot administered below the absolute minimum age, override absolute minimum age check and return supplemental text that the shot does not follow EUA guidelines for minimum age and/or minimum interval"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseAgeCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the absolute minimum age of this dose as $absoluteMinimumAge
+			- make note of the associated series as $associatedTargetSeries
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm Elapsed time between $dtBirthDate and $administrationDate < $absoluteMinimumAge
+	then
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the EUA regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19: If shot administered below the absolute minimum interval, override absolute minimum interval check and return supplemental text that the shot does not follow EUA guidelines for minimum age and/or minimum interval"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the dose number in the series is > 1
+			- make note of the dose number as $doseNumber
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+		There is an Administered Shot $priorDose
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the dose number in the series is == $doseNumber-1
+			- make note of the date this shot was administered as $administrationDatePrior
+			- make note of the absolute minimum interval from this dose to the next dose as $absoluteMinimumInterval
+		There does not exist an Administered Shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the dose number in the series is == $doseNumber-1
+			- the administration date of the shot is > $administrationDatePrior
+		Confirm Elapsed time between $administrationDatePrior and $administrationDate < $absoluteMinimumInterval
+	then
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the EUA regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
