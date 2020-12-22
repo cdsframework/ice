@@ -635,8 +635,8 @@ end
 end
 
 
- rule "If a patient is administered a Valid DT (CVX 28) > 7yrs, return the reason code SUPPLEMENTAL_TEXT and descriptive text indicating limitations of when DT should be administered"
- 	dialect "mvel"
+rule "If a patient is administered a Valid DT (CVX 28) > 7yrs, return the reason code SUPPLEMENTAL_TEXT and descriptive text indicating limitations of when DT should be administered"
+	dialect "mvel"
  	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an administered shot $administeredShot

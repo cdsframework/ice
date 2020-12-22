@@ -234,13 +234,15 @@ public class PayloadHelper {
 					CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
 					if (localCDInterp != null) {
 						for (String lSupplementalText : d.getSupplementalTextsForValidShot()) {
-							CD lSupplInterp = new CD();
-							lSupplInterp.setCode(localCDInterp.getCode());
-							lSupplInterp.setCodeSystem(localCDInterp.getCodeSystem());
-							lSupplInterp.setCodeSystemName(localCDInterp.getCodeSystemName());
-							lSupplInterp.setDisplayName(localCDInterp.getDisplayName());
-							lSupplInterp.setOriginalText(lSupplementalText);
-							interpretations.add(lSupplInterp);
+							if (lSupplementalText != null && lSupplementalText.isEmpty() == false) {
+								CD lSupplInterp = new CD();
+								lSupplInterp.setCode(localCDInterp.getCode());
+								lSupplInterp.setCodeSystem(localCDInterp.getCodeSystem());
+								lSupplInterp.setCodeSystemName(localCDInterp.getCodeSystemName());
+								lSupplInterp.setDisplayName(localCDInterp.getDisplayName());
+								lSupplInterp.setOriginalText(lSupplementalText);
+								interpretations.add(lSupplInterp);
+							}
 						}
 					}
 				}

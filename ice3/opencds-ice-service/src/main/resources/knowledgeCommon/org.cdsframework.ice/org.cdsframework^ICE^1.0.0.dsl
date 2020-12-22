@@ -270,6 +270,7 @@
 [consequence][][Mm]ark that [Ee]valuation of [Ss]hot {refer_oTargetDose} is complete and therefore should not be reevaluated by any other rules=modify ({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_COMPLETE) \}
 ////////////// [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ee]valuation [Nn]ot [Ss]tarted for this [Ss]eries=modify({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_NOT_STARTED), removeAllEvaluationReasonsFromAllReasonSets(); \};
 [consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Vv]alid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"); {refer_oTargetDose}.addSupplementalTextForValidShot({sSupplementalText});
+[consequence][][Rr]emove [Ss]upplemental [Tt]ext {sSupplementalText} from [Vv]alid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.removeSupplementalTextForValidShot({sSupplementalText});
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TargetSeries Actions
