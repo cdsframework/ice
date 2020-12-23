@@ -739,7 +739,7 @@ rule "HistoryEvaluation: Check if Shot should be marked Accepted and Series Comp
 	agenda-group "HistoryEvaluation^preEvaluationValidation" 
 	when
 		$targetDose : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $diseasesTargetedByThisDose : vaccineComponent.allDiseasesTargetedForImmunity, $doseAdministrationDate : administrationDate)
-		$targetSeries : TargetSeries(containsTargetDose($targetDose))
+		$targetSeries : TargetSeries(this == $targetDose.associatedTargetSeries)
 		$diseaseImmunityList : List(size == $diseasesTargetedByThisDose.size()) from 
 			accumulate($di : DiseaseImmunity($d : getDisease(), getDateOfImmunity() <= $doseAdministrationDate, $r : getImmunityReason(), disease memberOf $diseasesTargetedByThisDose), collectList($di))
 	then
@@ -764,7 +764,7 @@ rule "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
 		$td: TargetDose(isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
 			$doseNumber : doseNumberInSeries)
 		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries == $tdAdministeredShotNumber-1, $tdprevDoseNumber: doseNumberInSeries, $tdprevDoseNumber <= $doseNumber)
-		$targetSeries : TargetSeries(containsTargetDose($td), containsTargetDose($tdprev))
+		$targetSeries : TargetSeries(this == $td.associatedTargetSeries, this == $tdprev.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $targetSeries);
@@ -850,16 +850,15 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalid" ruleflow-group "HistoryE
 	salience 10
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty == false) 
-		$ts : TargetSeries(containsTargetDose($td))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
-			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
+			setDoseNumberCount($td.associatedTargetSeries.determineNumberOfDosesAdministeredInSeries()+1),
 			setStatus(DoseStatus.INVALID),
 			addDoseRuleProcessed(_RULENAME);
 		}
 		// setStatus() above also sets hasBeenEvaluated to true
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 		setFocus("HistoryEvaluation^postEvaluationCheck");
 end
 
@@ -872,16 +871,15 @@ rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "His
 	salience 10
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty == false) 
-		$ts : TargetSeries(containsTargetDose($td))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
-			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
+			setDoseNumberCount($td.associatedTargetSeries.determineNumberOfDosesAdministeredInSeries()+1),
 			setStatus(DoseStatus.NOT_EVALUATED),
 			addDoseRuleProcessed(_RULENAME);
 		}
 		// setStatus() above also sets hasBeenEvaluated to true
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 		setFocus("HistoryEvaluation^postEvaluationCheck");
 end
 
@@ -894,7 +892,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusAccepted" ruleflow-group "History
 	salience 10
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty, acceptedReasons.empty == false)
-		$ts : TargetSeries(containsTargetDose($td))
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -903,7 +901,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusAccepted" ruleflow-group "History
 			addDoseRuleProcessed(_RULENAME);
 		}
 		update($ts);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 		setFocus("HistoryEvaluation^postEvaluationCheck");
 end
 
@@ -916,7 +914,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusValid" ruleflow-group "HistoryEva
 	salience 10
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, acceptedReasons.empty, notEvaluatedReasons.empty)
-		$ts : TargetSeries(containsTargetDose($td))
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
 		String _RULENAME = drools.getRule().getName();
 		modify($td) {
@@ -938,13 +936,12 @@ rule "HistoryEvaluation.denoteDoseReadyForFinalEvaluationStatus" ruleflow-group 
 	salience 60
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS)
-		$ts : TargetSeries(containsTargetDose($td))
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
 			setStatus(DoseStatus.EVALUATION_COMPLETE);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries.seriesName);
 end
 
 
@@ -957,7 +954,7 @@ rule "HistoryEvaluation.markExtraneousDosesAcceptedIfCompleteForAllDiseaseTarget
 	activation-group "extraDoseCheck"
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $doseNumber : doseNumberInSeries) 
-		$ts : TargetSeries(containsTargetDose($td), isSeriesComplete() == true || seriesRules.numberOfDosesInSeries < determineDoseNumberInSeriesForDiseasesTargetedByThisDose($td)) 
+		$ts : TargetSeries(this == $td.associatedTargetSeries, isSeriesComplete() == true || seriesRules.numberOfDosesInSeries < determineDoseNumberInSeriesForDiseasesTargetedByThisDose($td)) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		$td.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
@@ -975,7 +972,7 @@ rule "HistoryEvaluation.checkIsAllowableVaccine" ruleflow-group "HistoryEvaluati
 	activation-group "allowableVaccineCheck"
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $vaccine : administeredVaccine, $doseNumber : doseNumberInSeries)
-		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries, seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == false) 
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $doseNumber <= seriesRules.numberOfDosesInSeries, seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == false) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
@@ -995,7 +992,7 @@ rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "History
 	activation-group "minimumAgeVaccineCheck"
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $doseNumber : doseNumberInSeries)
-		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries) // , seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $doseNumber <= seriesRules.numberOfDosesInSeries) // , seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
 	then
@@ -1017,7 +1014,7 @@ rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "History
 	activation-group "maximumAgeVaccineCheck"
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null, $doseNumber : doseNumberInSeries)
-		$ts : TargetSeries(containsTargetDose($td), $doseNumber <= seriesRules.numberOfDosesInSeries)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $doseNumber <= seriesRules.numberOfDosesInSeries)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) > 0)
 	then
@@ -1038,7 +1035,7 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumAge" ruleflow-group "HistoryE
 	salience 100
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $doseNumber : doseNumberInSeries) 
-		$ts : TargetSeries(containsTargetDose($td), seriesRules.numberOfDosesInSeries >= $doseNumber)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, seriesRules.numberOfDosesInSeries >= $doseNumber)
 		$person : EvaluatedPerson()
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1066,7 +1063,7 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval" ruleflow-group "His
 		$tdprev : TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administeredShotNumberInSeries < $admindose, administrationDate < $tddate, 
 			isShotIgnoredForCompletionOfSeries() == false, $tdprevdate : administrationDate)
 		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate, isShotIgnoredForCompletionOfSeries() == false)
-		$ts : TargetSeries(containsTargetDose($td) && containsTargetDose($tdprev), seriesRules.numberOfDosesInSeries >= $doseNumber)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, this == $tdprev.associatedTargetSeries, seriesRules.numberOfDosesInSeries >= $doseNumber)
 		not (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1, 
 			associatedTargetDose.administeredShotNumberInSeries == $admindose-1))
 	then
@@ -1090,7 +1087,7 @@ rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasona
 	salience 100
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, administeredShotNumberInSeries == 1, $doseNumber : doseNumberInSeries)
-		$ts : TargetSeries(containsTargetDose($td), seriesRules.numberOfDosesInSeries >= $doseNumber, targetSeason != null, $tseason : targetSeason, 
+		$ts : TargetSeries(this == $td.associatedTargetSeries, seriesRules.numberOfDosesInSeries >= $doseNumber, targetSeason != null, $tseason : targetSeason, 
 			$vaccineGroup : vaccineGroup, $tsid : targetSeriesIdentifier)
 		$tsprev : TargetSeries(vaccineGroup == $vaccineGroup, targetDoses.size() > 0, targetSeriesIdentifier != $tsid, targetSeason != null, 
 			$tseasonPrev : targetSeason, targetSeason.getFullySpecifiedSeasonStartDate().isBefore($tseason.getFullySpecifiedSeasonStartDate()))
@@ -1120,7 +1117,7 @@ rule "HistoryEvaluation: Evaluate Shot as Invalid if it is not between the Seaso
 	salience 100
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate)
-		$ts : TargetSeries(containsTargetDose($td), targetSeason != null, targetSeason.dateIsApplicableToSeason($administrationDate, false) == false)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, targetSeason != null, targetSeason.dateIsApplicableToSeason($administrationDate, false) == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		$td.addInvalidReason(BaseDataEvaluationReason._OUTSIDE_SEASON_REASON.getCdsListItemName());
@@ -2344,7 +2341,7 @@ rule "ProcessResults: Return Evaluations" ruleflow-group "ProcessResults"
 	when
 		$sae : SubstanceAdministrationEvent()	
 		$td : TargetDose(doseId == $sae.id)
-		$ts : TargetSeries(containsTargetDose($td), $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true)
 		$evalTime: EvalTime()
 	then
 		String _RULENAME = kcontext.rule.name;

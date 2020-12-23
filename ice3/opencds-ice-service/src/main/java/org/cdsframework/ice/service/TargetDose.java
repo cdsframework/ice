@@ -399,8 +399,10 @@ public class TargetDose {
 				setIsValid(true);
 			}
 			else {
+				if (hasBeenEvaluated() == true) {
+					removeAllSupplementalTextsForValidShot();
+				}
 				setIsValid(false);
-				removeAllSupplementalTextsForValidShot();
 			}
 			if (status == DoseStatus.EVALUATION_NOT_STARTED || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS) {
 				setPostEvaluationCheckCompleted(false);
@@ -548,7 +550,8 @@ public class TargetDose {
 		}
 		if (i > 0) {
 			s += "}";
-		}		
+		}
+		i = 0;
 		for (String reason : notEvaluatedReasons) {
 			if (i == 0)
 				s += ", notEvaluatedReasons={\"" + reason + "\"";

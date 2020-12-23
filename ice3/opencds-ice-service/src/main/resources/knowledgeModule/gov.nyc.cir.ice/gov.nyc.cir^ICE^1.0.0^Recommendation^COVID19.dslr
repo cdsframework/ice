@@ -69,24 +69,54 @@ rule "COVID-19: If the patient has no shots on record, recommendation is CONDITI
 end
 
 
-// If no doses have been administered, then do not recommend a specific vaccine
-rule "COVID-19: Do not recommend a specific vaccine if no (valid) doses have been administered"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+// If the series is not complete and the last shot administered is CVX 213, recommend earliest and routine interval of 28 days to the next dose
+rule "COVID-19: If the Series is not complete and the last shot administered was CVX 213, recommend earliest and routine age of 18 years"
+	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
-		There is a Series $targetSeries
+		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- post processing on the Series forecast has not already been run
-			- a forecast for the Series has been made and a Specific Vaccine is Recommended
-			- the effective dose number in the Series is == 1
+			- the Series is not complete
+			- make note of the last shot administered in the series as $lastShotAdministered
+		There is an Administered Shot $administeredShot
+			- that is the same shot as $lastShotAdministered
+			- the vaccine administered is "ICE213"
+			- make note of the date this shot was administered as $dtAdministrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $ageAt18y when the patient is "18y" of age
 	then
-		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
+		Create a Recommendation as $r for the Series $targetSeries
+		Set the recommendation Earliest Forecast Date for $r to $ageAt18y
+		Set the recommendation Recommended Forecast Date for $r to $ageAt18y
+		Include the Recommendation $r for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
 
-// When recommending in the Pfizer 2-dose Series, recommend CVX 208 for the next target dose.
+// If the series is not complete and the last shot administered is CVX 213, recommend earliest and routine interval of 28 days to the next dose
+rule "COVID-19: If the Series is not complete and the last shot administered was CVX 213, recommend both an minimum and recommended interval of at least 28 days"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series is not complete
+			- make note of the last shot administered in the series as $lastShotAdministered
+		There is an Administered Shot $administeredShot
+			- that is the same shot as $lastShotAdministered
+			- the vaccine administered is "ICE213"
+			- make note of the date this shot was administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "28d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the Pfizer 2-dose Series, recommend CVX 208 for the next target dose only if a Valid CVX 208 has already been administered.
 rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
@@ -95,7 +125,10 @@ rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19Pfizer2DoseSeries"
 			- the Series is not complete
-			- the number of doses administered is >= 1
+		There exists an Administered Shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE208"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE208"
@@ -105,7 +138,7 @@ rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose 
 end
 
 
-// When recommending in the Moderna 2-dose Series, recommend CVX 207 for the next target dose.
+// When recommending in the Moderna 2-dose Series, recommend CVX 207 for the next target dose only if a Valid CVX 207 has already been admininstered
 rule "COVID-19: Recommend CVX 207 for the next target dose in the Moderna 2-dose Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
@@ -114,7 +147,10 @@ rule "COVID-19: Recommend CVX 207 for the next target dose in the Moderna 2-dose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19Moderna2DoseSeries"
 			- the Series is not complete
-			- the number of doses administered is >= 1
+		There exists an Administered Shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE207"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE207"
