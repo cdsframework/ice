@@ -181,7 +181,6 @@ rule "Duplicate Shots/Same Day DTP Rule 5a (BOTH Primary Series Doses): If one D
 		modify($td) {
 			setDuplicateShotSameDayCheckCompleted(true),
 			setStatus(DoseStatus.VALID);
-			/////// removeAllEvaluationReasonsFromAllReasonSets();
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries DTP vaccine group");
 end
