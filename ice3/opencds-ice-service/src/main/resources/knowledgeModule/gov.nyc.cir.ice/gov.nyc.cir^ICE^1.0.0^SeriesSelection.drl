@@ -807,9 +807,59 @@ end
 
 
 // This scenario depicted by this rule should never happen based on the current logic, but just in case..
-rule "SeriesSelection(COVID-19): If there are _no_ (Valid) doses but the most recently administered shots have been administered on the same day, select the Moderna series because it has a larger recommended interval"
+rule "SeriesSelection(COVID-19): If there are _no_ (Valid) doses but shots have been administered, select the series for the product most recently administered"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850")
+		$td : TargetDose(associatedTargetSeries == $ts)
+		$tsother : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $ts)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tsother, administrationDate >= $td.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+
+// This scenario depicted by this rule should never happen based on the current logic, but just in case.
+rule "SeriesSelection(COVID-19): If there are _no_ (Valid) Pfizer or AstraZeneca doses but the most recently administered Pfizer/AstraZeneca shots have been administered on the same day, select the AstraZeneca series because it has a larger recommended interval"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 15
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
+		$tsazn : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19AstraZeneca2DoseSeries")
+		$td : TargetDose(associatedTargetSeries == $tsazn)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate > $td.administrationDate)
+		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries")
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tspfizer, administrationDate == $td.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsazn);
+		$tsazn.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsazn.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($tsazn);
+end
+
+
+// This scenario depicted by this rule should never happen based on the current logic, but just in case.
+rule "SeriesSelection(COVID-19): If there are _no_ (Valid) Pfizer or Moderna doses but the most recently administered Pfizer/Moderna shots have been administered on the same day, select the Moderna series because it has a larger recommended interval"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 20
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
@@ -830,36 +880,17 @@ rule "SeriesSelection(COVID-19): If there are _no_ (Valid) doses but the most re
 end
 
 
-// This scenario depicted by this rule should never happen based on the current logic, but just in case..
-rule "SeriesSelection(COVID-19): If there are _no_ (Valid) doses but shots have been administered, select the series for the product most recently administered"
+// Select the Pfizer, Moderna or Janssen series that has the earliest (Valid) dose administered to it. Mark the series for post-processing so that series selection catch-all rules will be activated; in the case that the Janssen vaccine
+// was administered after a Pfizer, Moderna or AstraZenca and the Pfizer/Moderna/AstraZeneca series is not complete, the catch all selection rule that examines for earliest completed series will override this rule and select Janssen
+// since it is a 1-dose series.
+rule "SeriesSelection(COVID-19): Select the series that has the earliest (Valid) dose administered to it (Pfizer 2-Dose, Moderna 2-Dose, AstraZeneca 2-Dose, or Janssen 1-Dose)"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries" || seriesRules.seriesName == "COVID19Moderna2DoseSeries")
-		$td : TargetDose(associatedTargetSeries == $ts)
-		$tsother : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $ts, seriesRules.seriesName == "COVID19Pfizer2DoseSeries" || seriesRules.seriesName == "COVID19Moderna2DoseSeries")
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tsother, administrationDate >= $td.administrationDate)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
-		update($tss);
-		update($ts);
-end
-
-
-rule "SeriesSelection(COVID-19): Select the Pfizer 2-Dose Series or Moderna 2-Dose Series that has the earliest (Valid) dose administered to it"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries" || seriesRules.seriesName == "COVID19Moderna2DoseSeries")
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850")
 		$td : TargetDose(associatedTargetSeries == $ts, isValid == true, doseNumberInSeries == 1)
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, isValid == true, administrationDate < $td.administrationDate)
 	then
@@ -867,7 +898,7 @@ rule "SeriesSelection(COVID-19): Select the Pfizer 2-Dose Series or Moderna 2-Do
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
 		update($tss);
 		update($ts);
 end

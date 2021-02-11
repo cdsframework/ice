@@ -1341,12 +1341,10 @@ rule "SeriesSelection: Select already completed series that has the fewest doses
 	activation-group "SeriesSelectionFewestDoses"
 	salience 60
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
-			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
-		not (TargetSeries(selectedSeries == true, seriesRules.vaccineGroup == $ssvg, targetSeason == $sss))
-		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, isSeriesComplete() == true, $id1 : targetSeriesIdentifier, 
-			$numberOfDosesInSeries1 : seriesRules.numberOfDosesInSeries, targetSeason == $sss)
-		not (TargetSeries(seriesRules.vaccineGroup == $ssvg, isSeriesComplete() == true, $numberOfDosesInSeries1 > seriesRules.numberOfDosesInSeries, targetSeason == $sss))
+		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		not (TargetSeries(selectedSeries == true, seriesRules.vaccineGroup == $tss.seriesSelectionVaccineGroup, targetSeason == $tss.seriesSelectionSeason))
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == $tss.seriesSelectionVaccineGroup, isSeriesComplete() == true, $numberOfDosesInSeries1 : seriesRules.numberOfDosesInSeries, targetSeason == $tss.seriesSelectionSeason)
+		not (TargetSeries(seriesRules.vaccineGroup == $tss.seriesSelectionVaccineGroup, isSeriesComplete() == true, $numberOfDosesInSeries1 > seriesRules.numberOfDosesInSeries, targetSeason == $tss.seriesSelectionSeason))
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts1.setSelectedSeries(true);
@@ -1368,11 +1366,10 @@ rule "SeriesSelection: Select already completed series with earliest completion 
 	salience 60
 	activation-group "SeriesSelectionFewestDoses"
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
-			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
-		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $sss, $seriesComplete1 : isSeriesComplete(), 
+		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == $tss.seriesSelectionVaccineGroup, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == $tss.seriesSelectionSeason, $seriesComplete1 : isSeriesComplete(), 
 			$lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
-		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id2 : targetSeriesIdentifier, $id2 != $id1, selectedSeries == false, targetSeason == $sss, $seriesComplete2 : isSeriesComplete(), 
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == $tss.seriesSelectionVaccineGroup, targetSeriesIdentifier != $ts1.targetSeriesIdentifier, selectedSeries == false, targetSeason == $tss.seriesSelectionSeason, $seriesComplete2 : isSeriesComplete(), 
 			$lastAdministeredShot2InSeries: lastShotAdministeredInSeries, $lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
 		eval($seriesComplete1 == true && $seriesComplete2 == true && ($lastAdministeredShot2InSeries == null || 
 			($lastNecessaryShotAdministered1 != null && $lastNecessaryShotAdministered2 != null && $lastNecessaryShotAdministered2.getAdministrationDate() != null && 
@@ -1394,11 +1391,10 @@ rule "SeriesSelection.SelectOnlySeriesRemainingInVaccineGroup" ruleflow-group "S
 	dialect "mvel"
 	salience 100
 	when
-		$tss : TargetSeriesSelection($ssvg : seriesSelectionVaccineGroup, 
-			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == $ssvg, selectedSeries == false)
-		accumulate($tsthis : TargetSeries(vaccineGroup == $ssvg); $countInVG : count($tsthis); $countInVG == 1)		
+		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == $tss.seriesSelectionVaccineGroup, selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == $tss.seriesSelectionVaccineGroup, selectedSeries == false)
+		accumulate($tsthis : TargetSeries(vaccineGroup == $tss.seriesSelectionVaccineGroup); $countInVG : count($tsthis); $countInVG == 1)		
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
