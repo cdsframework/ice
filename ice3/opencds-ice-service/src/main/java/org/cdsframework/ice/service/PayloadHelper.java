@@ -27,8 +27,10 @@
 package org.cdsframework.ice.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
@@ -193,8 +195,25 @@ public class PayloadHelper {
 
 		// Observation interpretation
 		List<CD> interpretations = new ArrayList<CD>();
-		if (doseStatus == DoseStatus.INVALID) {
-			for (String interp : d.getInvalidReasons()) {
+		if (doseStatus == DoseStatus.INVALID || doseStatus == DoseStatus.NOT_EVALUATED || doseStatus == DoseStatus.ACCEPTED) {
+			Collection<String> lReasons;
+			switch(doseStatus) {
+			case INVALID:
+				lReasons = d.getInvalidReasons();
+				break;
+			case ACCEPTED:
+				lReasons = d.getAcceptedReasons();
+				break;
+			case NOT_EVALUATED:
+				lReasons = d.getNotEvaluatedReasons();
+				break;
+			default:
+				lReasons = new ArrayList<String>();
+			}
+			for (String interp : lReasons) {
+				if (interp.equals(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName())) {
+					continue;
+				}
 				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
 				if (localCDInterp != null && ! interpretations.contains(localCDInterp))
 					interpretations.add(localCDInterp);
@@ -202,21 +221,16 @@ public class PayloadHelper {
 			if (interpretations.size() > 0)
 				childObs.setInterpretation(interpretations);
 		}
-		else if (doseStatus == DoseStatus.NOT_EVALUATED) {
-			for (String interp : d.getNotEvaluatedReasons()) {
-				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
-				if (localCDInterp != null && ! interpretations.contains(localCDInterp))
-					interpretations.add(localCDInterp);
-			}
-			if (interpretations.size() > 0)
-				childObs.setInterpretation(interpretations);
-		}
-		else if (doseStatus == DoseStatus.ACCEPTED || doseStatus == DoseStatus.VALID) {
-			for (String interp : d.getAcceptedReasons()) {
-				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
-				if (localCDInterp != null && ! interpretations.contains(localCDInterp))
-					interpretations.add(localCDInterp);
-			}
+		/////// else if (doseStatus == DoseStatus.ACCEPTED || doseStatus == DoseStatus.VALID) {
+		else if (doseStatus == DoseStatus.VALID) {
+			/////// for (String interp : d.getAcceptedReasons()) {
+			///////	if (interp.equals(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName())) {
+			///////		continue;
+			///////	}
+			///////	CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
+			///////	if (localCDInterp != null && ! interpretations.contains(localCDInterp))
+			///////		interpretations.add(localCDInterp);
+			/////// }
 			for (String interp : d.getValidReasons()) {
 				if (interp == null) {
 					continue;
