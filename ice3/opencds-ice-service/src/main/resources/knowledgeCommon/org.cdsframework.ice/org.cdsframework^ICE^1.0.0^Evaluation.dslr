@@ -167,25 +167,3 @@ rule "Check if the Shot is Too Early Due to Live Virus Conflict"
 		Include the reason for shot $targetDose Invalid due to "Too Early Live Virus"
 		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
 end
-
-
-// Adjuvant products must be administered with an absolute minimum interval of 24 days; otherwise the vaccine that does not meet the absolute 
-// minimum interval is evaluated as Invalid with a reason code of SELECT_ADJUVANT_PRODUCT_INTERVAL.
-rule "Check if the Shot is Too Early Due to Select Adjuvant Product Interval"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	when
-		There is an Administered Shot $targetDose that needs to be evaluated
-			- the Vaccine Administered is a Select Adjuvant Product
-			- the Shot has not already been marked as a Select Adjuvant Product Interval Conflict (as we do not want this rule executing more than necessary)
-			- make note of the Date this Shot was Administered as $administrationDate
-			- make note of the Associated Series as $associatedTargetSeries
-		There is an Administered Shot $otherShot
-			- the Vaccine Administered is a Select Adjuvant Product
-			- the Administration Date of the shot is < $administrationDate
-			- make note of the Date this Shot was Administered as $previousShotDate
-		Confirm elapsed time between $previousShotDate and $administrationDate < "24d"
-	then
-		Include the reason for shot $targetDose Invalid due to "Select Adjuvant Product Interval"
-		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
-end
