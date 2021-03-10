@@ -58,7 +58,8 @@ rule "Duplicate Shots/Same Day (COVID-19): Bypass Duplicate Shot/Same Day Proces
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($td) {
-			setPreEvaluationCheckCompleted(true);
+			setPreEvaluationCheckCompleted(true),
+			setDuplicateShotSameDayCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 		setFocus("HistoryEvaluation^customEvaluationRule");
