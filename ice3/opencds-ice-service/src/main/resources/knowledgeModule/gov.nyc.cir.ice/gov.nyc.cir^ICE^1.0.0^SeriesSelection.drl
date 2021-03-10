@@ -908,7 +908,7 @@ end
 // Select the Pfizer, Moderna or Janssen series that has the earliest (Valid) dose administered to it. Mark the series for post-processing so that series selection catch-all rules will be activated; in the case that the Janssen vaccine
 // was administered after a Pfizer, Moderna or AstraZenca and the Pfizer/Moderna/AstraZeneca series is not complete, the catch all selection rule that examines for earliest completed series will override this rule and select Janssen
 // since it is a 1-dose series.
-rule "SeriesSelection(COVID-19): Select the series that has the latest, non-NOS (Valid) dose administered to it that is (Pfizer 2-Dose, Moderna 2-Dose, AstraZeneca 2-Dose, or Janssen 1-Dose)"
+rule "SeriesSelection(COVID-19): Select the series that has the earliest, non-NOS (Valid) dose administered to it that is (Pfizer 2-Dose, Moderna 2-Dose, AstraZeneca 2-Dose, or Janssen 1-Dose)"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -917,7 +917,7 @@ rule "SeriesSelection(COVID-19): Select the series that has the latest, non-NOS 
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850")
 		$td : TargetDose(associatedTargetSeries == $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate > $td.administrationDate)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
