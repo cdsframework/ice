@@ -149,13 +149,13 @@ end
 
 // If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
 // Descriptive Text: "The timing of the administration of this shot does not follow the guidelines of the EUA regarding the minimum age and/or minimum interval."
-rule "COVID-19: If shot administered below the absolute minimum interval, override absolute minimum interval check and return supplemental text that the shot does not follow EUA guidelines for minimum age and/or minimum interval"
+rule "COVID-19: If shot in the Pfizer series is administered below 17d after the prior shot, return supplemental text that the shot does not follow EUA guidelines for minimum age and/or minimum interval"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Pfizer2DoseSeries"
 			- the administered shot number is > 1
 			- make note of the administered shot number as $administeredShotNumber
 			- make note of the date this shot was administered as $administrationDate
@@ -171,12 +171,73 @@ rule "COVID-19: If shot administered below the absolute minimum interval, overri
 			- that has already been evaluated
 			- the administered shot number is == $administeredShotNumber-1
 			- the administration date of the shot is > $administrationDatePrior
-		Confirm Elapsed time between $administrationDatePrior and $administrationDate < $minimumInterval
+		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "17d"
 	then
 		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the EUA regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
         Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
+
+
+rule "COVID-19: If shot in the Moderna series is administered below 24d after the prior shot, return supplemental text that the shot does not follow EUA guidelines for minimum age and/or minimum interval"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Moderna2DoseSeries"
+			- the administered shot number is > 1
+			- make note of the administered shot number as $administeredShotNumber
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+		There is an Administered Shot $priorDose
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is == $administeredShotNumber-1
+			- make note of the date this shot was administered as $administrationDatePrior
+			- make note of the minimum interval from this dose to the next dose as $minimumInterval
+		There does not exist an Administered Shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is == $administeredShotNumber-1
+			- the administration date of the shot is > $administrationDatePrior
+		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "24d"
+	then
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the EUA regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19: If shot in the AstraZeneca series is administered below 24d after the prior shot, return supplemental text that the shot does not follow EUA guidelines for minimum age and/or minimum interval"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19AstraZeneca2DoseSeries"
+			- the administered shot number is > 1
+			- make note of the administered shot number as $administeredShotNumber
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+		There is an Administered Shot $priorDose
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is == $administeredShotNumber-1
+			- make note of the date this shot was administered as $administrationDatePrior
+			- make note of the minimum interval from this dose to the next dose as $minimumInterval
+		There does not exist an Administered Shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is == $administeredShotNumber-1
+			- the administration date of the shot is > $administrationDatePrior
+		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "24d"
+	then
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the EUA regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
 
 /*************************************************************************************************************************************************************************************
 END If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
