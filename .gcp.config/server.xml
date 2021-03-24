@@ -68,6 +68,7 @@
     -->
     <Connector port="8080" protocol="HTTP/1.1"
                connectionTimeout="20000"
+	       maxHttpHeaderSize="32768" maxSwallowSize="-1"
                redirectPort="8443" />
     <!-- A "Connector" using the shared thread pool-->
     <!--
@@ -85,6 +86,7 @@
          the SSLImplementation selected. JSSE style configuration is used below.
     -->
     <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+	       maxHttpHeaderSize="32768" maxSwallowSize="-1"
                maxThreads="150" SSLEnabled="true">
         <SSLHostConfig>
             <Certificate certificateKeystoreFile="conf/localhost-rsa.jks"
