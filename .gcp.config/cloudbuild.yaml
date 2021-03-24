@@ -18,34 +18,6 @@ steps:
       - name: m2
         path: /root/.m2/
 
-  # decrypt settings.xml
-  - name: "gcr.io/cloud-builders/gcloud"
-    args:
-      - kms
-      - decrypt
-      - --ciphertext-file=.gcp.config/settings.enc
-      - --plaintext-file=/root/.m2/settings.xml
-      - --location=global
-      - --keyring=main
-      - --key=gcb_key
-    volumes:
-      - name: "m2"
-        path: /root/.m2
-
-  # decrypt docker hub token
-  - name: "gcr.io/cloud-builders/gcloud"
-    args:
-      - kms
-      - decrypt
-      - --ciphertext-file=.gcp.config/gcp_token.enc
-      - --plaintext-file=/root/keystore/gcp_token.txt
-      - --location=global
-      - --keyring=main
-      - --key=gcb_key
-    volumes:
-      - name: "keystore"
-        path: /root/keystore
-
   # build opencds-knowledge-repository-data dep first
   - name: "maven:3-jdk-8-slim"
     entrypoint: "mvn"
@@ -130,20 +102,6 @@ steps:
         ".",
       ]
     dir: "."
-
-  # push the image to docker hub
-  - name: "gcr.io/cloud-builders/docker"
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        cat /root/keystore/gcp_token.txt | docker login --username $_DH_USERNAME --password-stdin $_DH_HOSTNAME
-        docker tag gcr.io/$PROJECT_ID/ice:$BRANCH_NAME $_DH_REPO:$_DH_TAG
-        docker push $_DH_HOSTNAME/$_DH_REPO:$_DH_TAG
-        rm /root/keystore/gcp_token.txt
-    volumes:
-      - name: "keystore"
-        path: /root/keystore
 
 images: ["gcr.io/$PROJECT_ID/ice"]
 timeout: 900s

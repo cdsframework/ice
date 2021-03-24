@@ -14,11 +14,11 @@ ENV REMOTE_CONFIG_USER="remote_admin"
 ENV REMOTE_CONFIG_PASSWORD="password"
 
 # Tomcat Server
-EXPOSE 8080
+EXPOSE 8080 8443
 
 RUN adduser -u 1000 -D appuser && \
     apk --no-cache -U upgrade --available && \
-    apk --no-cache add openjdk8-jre openjdk8-jre-lib --upgrade && \
+    apk --no-cache add openjdk8-jre openjdk8-jre-lib curl --upgrade && \
     rm -rf /usr/local/tomcat/webapps/docs /usr/local/tomcat/webapps/ROOT /usr/local/tomcat/webapps/examples /usr/local/tomcat/webapps/host-manager /usr/local/tomcat/webapps/manager && \
     mkdir -p /home/appuser/.opencds
 
@@ -32,6 +32,8 @@ COPY .gcp.config/sec.xml .opencds
 COPY .gcp.config/log4j2.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
 COPY .gcp.config/ice.properties /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
 COPY .gcp.config/start-ice.sh ./
+COPY .gcp.config/localhost-rsa.jks /usr/local/tomcat/conf
+COPY .gcp.config/server.xml /usr/local/tomcat/conf
 
 RUN chown -R appuser: /home/appuser /usr/local/tomcat
 
