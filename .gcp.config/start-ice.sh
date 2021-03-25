@@ -75,6 +75,4 @@ fi
 
 echo JAVA_OPTS=$JAVA_OPTS
 
-openssl req -newkey rsa:2048 -nodes -keyout /usr/local/tomcat/conf/domain.key -x509 -days 3650 -out /usr/local/tomcat/conf/domain.crt -subj "/C=US/ST=California/L=San Mateo/O=HLN Consulting, LLC/CN=cds.hln.com"
-
 . $@
