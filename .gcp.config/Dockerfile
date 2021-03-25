@@ -32,7 +32,6 @@ COPY .gcp.config/sec.xml .opencds
 COPY .gcp.config/log4j2.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
 COPY .gcp.config/ice.properties /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
 COPY .gcp.config/start-ice.sh ./
-COPY .gcp.config/localhost-rsa.jks /usr/local/tomcat/conf
 COPY .gcp.config/server.xml /usr/local/tomcat/conf
 
 RUN chown -R appuser: /home/appuser /usr/local/tomcat
