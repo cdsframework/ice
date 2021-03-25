@@ -91,10 +91,6 @@ steps:
       - name: m2
         path: /root/.m2/
 
-  # update the vm instance image
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['compute','instances','update-container','ice-01','--zone','us-central1-c','--project', 'cdsframework', '--container-image=gcr.io/cdsframework/ice:cds']
-
   # build the docker image
   - name: "gcr.io/cloud-builders/docker"
     args:
@@ -106,6 +102,10 @@ steps:
         ".",
       ]
     dir: "."
+
+  # update the vm instance image
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['compute','instances','update-container','ice-01','--zone','us-central1-c','--project', 'cdsframework', '--container-image=gcr.io/cdsframework/ice:cds']
 
 images: ["gcr.io/$PROJECT_ID/ice"]
 timeout: 900s
