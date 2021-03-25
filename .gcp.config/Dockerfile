@@ -36,7 +36,7 @@ COPY .gcp.config/server.xml /usr/local/tomcat/conf
 
 RUN chown -R appuser: /home/appuser /usr/local/tomcat
 
-#USER appuser
+USER appuser
 
 # Run Tomcat server
 CMD ["./start-ice.sh", "catalina.sh", "run"]
