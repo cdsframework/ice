@@ -53,16 +53,42 @@ global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
 
 
-rule "COVID-19: If the patient has no shots on record, recommendation is CONDITIONAL / CLINICAL_PATIENT_DISCRETION"
+rule "COVID-19: If the patient has no shots on record and is >= 12 years old, recommend at the vaccine group level at today's date"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the number of administered shots is == 0
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge12 when the patient is "12y" of age
+		Confirm the date evalTime is on the same date or after $dtDateAtAge12
 	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.BASED_ON_VAC_AVAIL_AND_PRIORITY_RECS"
+		Create a Recommendation as $recommendation with Status RecommendationStatus.RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.DUE_NOW"
+		Set the recommendation Earliest Forecast Date for $recommendation to evalTime
+		Set the recommendation Recommended Forecast Date for $recommendation to evalTime
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+ 
+
+rule "COVID-19: If the patient has no shots on record and is < 12 years old, recommend at the vaccine group level at 12 years of age"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the number of administered shots is == 0
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge12 when the patient is "12y" of age
+		Confirm the date evalTime is before $dtDateAtAge12
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.DUE_NOW"
+		Set the recommendation Earliest Forecast Date for $recommendation to $dtDateAtAge12
+		Set the recommendation Recommended Forecast Date for $recommendation to $dtDateAtAge12
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
