@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# Be sure to change ICE_BASE_URL to reflect the hostname and port that
+# ICE is listening on.  If you followed the ICE Docker instructions,
+# this may be port 32775 instead of port 8080.
+#
 export ICE_BASE_URI=http://localhost:8080
 
 RED='\033[1;31m'
@@ -23,7 +28,7 @@ tz=$(curl -s --location --request GET "${ICE_BASE_URI}/opencds-decision-support-
 
 echo -e "${BLUE}Server TZ: ${GREEN}${tz}${NC}"
 
-for test in `ls . | grep -v run-all-tests.sh`
+for test in `ls *.sh | grep -v run-all-tests.sh`
 do
     run_test $test
 done
