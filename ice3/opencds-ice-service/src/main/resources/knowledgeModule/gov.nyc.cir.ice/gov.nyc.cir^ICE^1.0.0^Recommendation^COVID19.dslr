@@ -118,8 +118,8 @@ rule "COVID-19: If the Series is not complete and the last shot administered was
 end
 
 
-// If the series is not complete and the last shot administered is CVX 213, recommend earliest and routine interval of 28 days to the next dose
-rule "COVID-19: If the Series is not complete and the last shot administered was CVX 213, recommend both an minimum and recommended interval of at least 28 days"
+// If the series is not complete and the last shot administered is AstraZeneca CVX 210 or CVX 213, recommend earliest and routine interval of 28 days to the next dose
+rule "COVID-19: If the Series is not complete and the last shot administered was CVX 210 or CVX 213, recommend both an minimum and recommended interval of at least 28 days"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
@@ -128,7 +128,7 @@ rule "COVID-19: If the Series is not complete and the last shot administered was
 			- make note of the last shot administered in the series as $lastShotAdministered
 		There is an Administered Shot $administeredShot
 			- that is the same shot as $lastShotAdministered
-			- the vaccine administered is "ICE213"
+			- the vaccine administered a member of ("ICE210","ICE213")
 			- make note of the date this shot was administered as $dtAdministrationDate
 	then
 		Create a Recommendation as $r for the Series $targetSeries
@@ -136,6 +136,31 @@ rule "COVID-19: If the Series is not complete and the last shot administered was
 		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
 		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// If the last shot administered is AstraZeneca CVX 210, and the series is not the AstraZeneca series and it is not complete, recommend at the vaccine group level
+rule "COVID-19: If the last shot administered is CVX 210, but the series is not the AstraZeneca series and it is not complete, recommend at the vaccine group level"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a Forecast for the Series has been made
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is not "COVID19AstraZeneca2DoseSeries"
+			- the Series is not complete
+			- post processing on the Series forecast has not already been run
+		There is an administered shot $administeredShot
+			- the shot belongs to the Series $targetSeries
+			- the vaccine administered is "ICE210"
+			- make note of the date this shot was administered as $latestShotDate
+		There does not exist another administered shot
+			- the shot belongs to the Series $targetSeries
+			- that is not the same shot as $administeredShot
+			- the administration date of the shot is > $latestShotDate
+	then
+		Unset the recommended vaccine for the forecast in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
