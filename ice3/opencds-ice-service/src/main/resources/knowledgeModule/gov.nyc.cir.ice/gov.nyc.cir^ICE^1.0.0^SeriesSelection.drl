@@ -787,13 +787,14 @@ end
 // Logic currently incorporates Moderna and Pfizer vaccines.
 //////////////
 
-rule "SeriesSelection(COVID-19): Select the Pfizer 2-Dose Series by default if no valid shots on record"
+rule "SeriesSelection(COVID-19): Select the Pfizer 2-Dose Series by default if no valid shots on record (excluding AstraZeneca)"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"),
+			vaccineComponent.isUnspecifiedFormulation() == false) 
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries")
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -806,13 +807,35 @@ rule "SeriesSelection(COVID-19): Select the Pfizer 2-Dose Series by default if n
 end
 
 
+rule "SeriesSelection(COVID-19): Select AstraZeneca Series if it is already _complete_ and no other series was previously selected"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19AstraZeneca2DoseSeries", isSeriesComplete() == true) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts);
+		update($tss);
+		update($ts);
+end
+
+
 ///////// ***
-// If one series is complete but another has been selected, selected an already completed one. This is the only way the AstraZeneca series can be selected (it must be complete).
+// If one series is complete but another has been selected, selected an already completed one. 
+// This is the only way the AstraZeneca series can be selected (it must be complete).
 // If there is more than one series that has been complete, this rule picks one of them, and the general rules will pick the earliest completed.
 ///////// ***
 rule "SeriesSelection(COVID-19): Select already _completed_ series if a different, _incomplete_ series was previously selected"
 	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"	
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, isSeriesComplete() == false) 
@@ -822,7 +845,8 @@ rule "SeriesSelection(COVID-19): Select already _completed_ series if a differen
 		$ts1.setSelectedSeries(false);
 		$ts2.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts2.seriesName);
-		// Do not mark it complete, in case there is another a series that was completed earlier than this one
+		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts2);
 		update($tss);
 		update($ts1);
@@ -831,76 +855,97 @@ end
 
 
 // This scenario depicted by this rule should never happen based on the current logic, but just in case..
-rule "SeriesSelection(COVID-19): If there are _no_ (Valid) doses but shots have been administered, select the series for the product most recently administered"
+rule "SeriesSelection(COVID-19): If there are _no_ (Valid) doses but Pfizer was the most recent shot administered (excluding AstraZeneca), select the Pfizer Series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850")
-		$td : TargetDose(associatedTargetSeries == $ts)
-		$tsother : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $ts)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tsother, administrationDate >= $td.administrationDate)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries")
+		$td : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName != "ICE210")
+		$tsother : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $ts, seriesRules.seriesName in ("COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tsother, administrationDate > $td.administrationDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+
+// This scenario depicted by this rule should never happen based on the current logic, but just in case..
+rule "SeriesSelection(COVID-19): If there are _no_ (Valid) doses but Moderna was the most recent shot administered (excluding AstraZeneca), select the Moderna Series"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Moderna2DoseSeries")
+		$td : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName != "ICE210")
+		$tsother : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $ts, seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Janssen1DoseSeries"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tsother, administrationDate > $td.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+
+// This scenario depicted by this rule should never happen based on the current logic, but just in case..
+rule "SeriesSelection(COVID-19): If there are _no_ (Valid) doses but Janssen was the most recent shot administered (excluding AstraZeneca), select the Janssen Series"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Janssen1DoseSeries")
+		$td : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName != "ICE210")
+		$tsother : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $ts, seriesRules.seriesName in ("COVID19Moderna2DoseSeries", "COVID19Pfizer2DoseSeries"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tsother, administrationDate > $td.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
 		update($tss);
 		update($ts);
 end
 
 
 // This scenario depicted by this rule should never happen based on the current logic, but just in case.
-rule "SeriesSelection(COVID-19): If there are _no_ (Valid) Pfizer, Moderna or Janssen doses but the _most recently administered_ _shots_ are Pfizer/AstraZeneca on the same day, select the Pfizer Series because AstraZeneca has not been authorized in the U.S."
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 15
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, 
-			associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
-		$tsazn : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19AstraZeneca2DoseSeries")
-		$td : TargetDose(associatedTargetSeries == $tsazn)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate > $td.administrationDate)
-		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries")
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tspfizer, administrationDate == $td.administrationDate)
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tspfizer);
-		$tspfizer.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($tspfizer.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
-		update($tss);
-		update($tspfizer);
-end
-
-
-// This scenario depicted by this rule should never happen based on the current logic, but just in case.
-rule "SeriesSelection(COVID-19): If there are _no_ (Valid) Pfizer or Moderna doses but the _most recently administered_ _shots_ are Pfizer/Moderna on the same day, select the Moderna series because it has a larger recommended interval"
+rule "SeriesSelection(COVID-19): If there are _no_ (Valid) Pfizer, Moderna or Janssen doses but the _most recently administered_ _shots_ are Pfizer/Moderna on the same day, select the Moderna series because it has a larger recommended interval"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 20
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, 
-			associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
 		$tsmoderna : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Moderna2DoseSeries")
-		$td : TargetDose(associatedTargetSeries == $tsmoderna)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate > $td.administrationDate)
+		$td : TargetDose(associatedTargetSeries == $tsmoderna, vaccineComponent.cdsConceptName == "ICE207")
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate > $td.administrationDate, associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
 		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries")
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tspfizer, administrationDate == $td.administrationDate)
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tspfizer, vaccineComponent.cdsConceptName == "ICE208", administrationDate == $td.administrationDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsmoderna);
 		$tsmoderna.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($tsmoderna.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
 		update($tss);
 		update($tsmoderna);
 end
@@ -909,7 +954,7 @@ end
 // Select the Pfizer, Moderna or Janssen series that has the earliest (Valid) dose administered to it. Mark the series for post-processing so that series selection catch-all rules will be activated; in the case that the Janssen vaccine
 // was administered after a Pfizer, Moderna or AstraZenca and the Pfizer/Moderna/AstraZeneca series is not complete, the catch all selection rule that examines for earliest completed series will override this rule and select Janssen
 // since it is a 1-dose series.
-rule "SeriesSelection(COVID-19): Select the series that has the earliest, non-NOS (Valid) _dose_ administered to it that is (Pfizer 2-Dose, Moderna 2-Dose or Janssen 1-Dose)"
+rule "SeriesSelection(COVID-19): Select the series that has the earliest, non-NOS (Valid) _dose_ administered to it that is Pfizer, Moderna or Janssen"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -917,9 +962,9 @@ rule "SeriesSelection(COVID-19): Select the series that has the earliest, non-NO
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
-		$td : TargetDose(associatedTargetSeries == $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false)
+		$td : TargetDose(associatedTargetSeries == $ts, isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE208", "ICE212"))
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate, 
-			associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries")) 
+			vaccineComponent.cdsConceptName in ("ICE207", "ICE208", "ICE212"), associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries")) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
