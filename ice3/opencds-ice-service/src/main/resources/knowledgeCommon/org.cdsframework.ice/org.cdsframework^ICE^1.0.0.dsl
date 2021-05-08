@@ -247,6 +247,7 @@
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Missing Antigen"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.MISSING_ANTIGEN");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "D_AND_T_INVALID/P_VALID"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.D_AND_T_INVALID/P_VALID");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Vaccine not Allowed in U.S."={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_IN_US");
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Vaccine not Approved for Use in U.S."={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_APPROVED_IN_US");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Proof of Immunity"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Above Recommended Age for Series"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.ABOVE_REC_AGE_SERIES");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Below Recommended Age"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.BELOW_REC_AGE_SERIES"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
