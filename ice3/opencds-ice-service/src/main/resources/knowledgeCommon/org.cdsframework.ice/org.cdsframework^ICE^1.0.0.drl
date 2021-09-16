@@ -1553,17 +1553,21 @@ rule "RecommendationForecast.noteCompletionOfPostRecommendationCheck - _Do_ repr
 end
 
 
+/*************************************************************************************************************************************************************************************
+ START Rules for adjusting live virus intervals to ensure adequate spacing between live virus vaccines
+/************************************************************************************************************************************************************************************/
+
 ///////// ***
 // Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
 // If a recommended, conditionally recommended, or future recommendation for a live virus vaccine and other live virus shots have been administered less than 28 days from 
 // the recommendation date, then adjust the earliest recommendation date to be 28 days later than the most recent live virus shot
 ///////// ***
-rule "RecommendationForecast.adjustEarliestRecommendedDateDueToLiveVirus"
+rule "RecommendationForecast.adjustEarliestDateDueToLiveVirusToFutureDate"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^supplementalSeriesRule"
 	when
 		$lvd : LiveVirusFact(liveVirusDate != null, liveVirusDateSet == true)				  
-		$targetSeries : TargetSeries($earliestDate : getFinalEarliestDate() != null, 
+		$targetSeries : TargetSeries($earliestDate : getFinalEarliestDate() != null, $recommendationDueDate : getFinalRecommendationDate(), 
 			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
 				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccine() == true,
 				liveVirusDatesAccountedForInRecommendedFinalEarliestDate not contains $lvd.liveVirusDate)
@@ -1571,8 +1575,7 @@ rule "RecommendationForecast.adjustEarliestRecommendedDateDueToLiveVirus"
 			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
 			(TimePeriod.differenceInDays($lvd.liveVirusDate, evalTime) == 0 &&
 			(TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
-			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS))) || 
-			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS))))
+			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS)))))
 	then
 		String _RULENAME = kcontext.rule.name;
 		Date $newRecommendationDate = TimePeriod.addTimePeriod($lvd.liveVirusDate, new TimePeriod(28, DurationType.DAYS));
@@ -1582,7 +1585,33 @@ rule "RecommendationForecast.adjustEarliestRecommendedDateDueToLiveVirus"
 			addSeriesRuleProcessed(_RULENAME);
 		}
       	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Earliest date adjustment from " + $earliestDate + " to " + $newRecommendationDate + " due to live virus vaccine administered on : " + $lvd.liveVirusDate + " in TargetSeries " + $targetSeries.getSeriesName());
-		// update($lvd);
+end 
+
+
+///////// ***
+// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// If a recommended, conditionally recommended, or future recommendation for a live virus vaccine, other live virus shots have been administered more than 28 days in the past,
+// and the live virus date is the same as today's date, set the earliest date for the shot previously recommended in the past to today's date
+///////// ***
+rule "RecommendationForecast.adjustPriorEarliestDateDueToLiveVirusToCurrentDate"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^supplementalSeriesRule"
+	when
+		$lvd : LiveVirusFact(liveVirusDate != null, liveVirusDateSet == true)				  
+		$targetSeries : TargetSeries($earliestDate : getFinalEarliestDate() != null, $earliestDate < $lvd.liveVirusDate,
+			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccine() == true,
+				liveVirusDatesAccountedForInRecommendedFinalEarliestDate not contains $lvd.liveVirusDate)
+		eval(TimePeriod.differenceInDays($lvd.liveVirusDate, evalTime) == 0 &&
+			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($targetSeries) {
+			setFinalEarliestDate($lvd.liveVirusDate),
+			addLiveVirusDateAccountedForInRecommendedFinalEarliestDate($lvd.liveVirusDate),
+			addSeriesRuleProcessed(_RULENAME);
+		}
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Earliest date adjustment from " + $earliestDate + " to " + $lvd.liveVirusDate + " due to live virus vaccine administered on : " + $lvd.liveVirusDate + " in TargetSeries " + $targetSeries.getSeriesName());
 end 
 
 
@@ -1591,7 +1620,7 @@ end
 // If a recommended, conditionally recommended, or future recommendation for a live virus vaccine and other live virus shots have been administered less than 28 days from 
 // the recommendation date, then adjust the recommendation date to be 28 days later than the most recent live virus shot
 ///////// ***
-rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirus"
+rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirusToFutureDate"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^supplementalSeriesRule"
 	when
@@ -1604,8 +1633,7 @@ rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirus"
 			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
 			(TimePeriod.differenceInDays($lvd.liveVirusDate, evalTime) == 0 &&
 			(TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
-			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS))) || 
-			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS))))
+			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS)))))
 	then
 		String _RULENAME = drools.getRule().getName();
 		Date newRecommendationDate = TimePeriod.addTimePeriod($lvd.liveVirusDate, new TimePeriod(28, DurationType.DAYS));
@@ -1615,16 +1643,50 @@ rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirus"
 			addSeriesRuleProcessed(_RULENAME);
 		}
       	ICELogicHelper.logDRLDebugMessage(_RULENAME, "evalTime " + evalTime + "; Recommendation date adjustment from " + $recommendationDueDate + " to " + newRecommendationDate + " due to live virus vaccine administered on : " + $lvd.liveVirusDate + " in TargetSeries " + $targetSeries.getSeriesName());			
-		// update($lvd);
 end
 
+
+///////// ***
+// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// If a recommended, conditionally recommended, or future recommendation for a live virus vaccine, other live virus shots have been administered more than 28 days in the past,
+// and the live virus date is the same as today's date, set the recommended date for the shot previously recommended in the past to today's date
+///////// ***
+rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirusToCurrentDate"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^supplementalSeriesRule"
+	when
+		$lvd : LiveVirusFact(liveVirusDate != null, liveVirusDateSet == true)
+		$targetSeries : TargetSeries($recommendationDueDate : getFinalRecommendationDate() != null, $recommendationDueDate < $lvd.liveVirusDate,
+			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccine() == true,
+				liveVirusDatesAccountedForInRecommendedFinalDate not contains $lvd.liveVirusDate)
+		eval(TimePeriod.differenceInDays($lvd.liveVirusDate, evalTime) == 0 &&
+			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS)))
+	then
+		String _RULENAME = drools.getRule().getName();
+		modify($targetSeries) {
+			setFinalRecommendationDate($lvd.liveVirusDate),
+			addLiveVirusDateAccountedForInRecommendedFinalDate($lvd.liveVirusDate),
+			addSeriesRuleProcessed(_RULENAME);
+		}
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "evalTime " + evalTime + "; Recommendation date adjustment from " + $recommendationDueDate + " to " + $lvd.liveVirusDate + " due to live virus vaccine administered on : " + $lvd.liveVirusDate + " in TargetSeries " + $targetSeries.getSeriesName());			
+end
+
+/*************************************************************************************************************************************************************************************
+ END Rules for adjusting live virus intervals to ensure adequate spacing between live virus vaccines
+/************************************************************************************************************************************************************************************/
+
+
+/*************************************************************************************************************************************************************************************
+ START Rules for adjusting adjuvant product intervals to ensure adequate spacing between vaccines with adjuvant
+/************************************************************************************************************************************************************************************/
 
 ///////// ***
 // Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
 // If a recommended, conditionally recommended, or future recommendation for a select adjuvant product and other select adjuvant product shots been administered less than 28 days
 // from the recommendation date, then adjust the earliest recommendation date to be 28 days later than the most recent select adjuvant product
 ///////// ***
-rule "RecommendationForecast.adjustEarliestRecommendedDateDueToSelectAdjuvantProduct"
+rule "RecommendationForecast.adjustEarliestDateDueToSelectAdjuvantProductToFutureDate"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^supplementalSeriesRule"
 	when
@@ -1636,8 +1698,7 @@ rule "RecommendationForecast.adjustEarliestRecommendedDateDueToSelectAdjuvantPro
 			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
 			(TimePeriod.differenceInDays($dftDate, evalTime) == 0 &&
 			(TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
-			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS))) || 
-			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS))))
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS)))))
 	then
 		String _RULENAME = kcontext.rule.name;
 		Date $newRecommendationDate = TimePeriod.addTimePeriod($dftDate, new TimePeriod(28, DurationType.DAYS));
@@ -1652,10 +1713,36 @@ end
 
 ///////// ***
 // Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// If a recommended, conditionally recommended, or future recommendation for a select adjuvant product, other adjuvant shots have been administered more than 28 days in the past,
+// and the adjuvant date is the same as today's date, set the earliest date for the shot previously recommended in the past to today's date
+///////// ***
+rule "RecommendationForecast.adjustEarliestDateDueToSelectAdjuvantProductToCurrentDate"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^supplementalSeriesRule"
+	when
+		$dft : DateFactType(factName == "SELECT_ADJUVANT_PRODUCT_INTERVAL", factDate != null, factDateSet == true, $dftDate : factDate)
+		$targetSeries : TargetSeries($earliestDate : getFinalEarliestDate() != null, $earliestDate < $dftDate,
+			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedSelectAdjuvantProduct() == true)  
+		eval(TimePeriod.differenceInDays($dftDate, evalTime) == 0 &&
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($targetSeries) {
+			setFinalEarliestDate($dftDate),
+			addAdjuvantDateAccountedForInRecommendedFinalDate($dftDate),
+			addSeriesRuleProcessed(_RULENAME);
+		}
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Earliest date adjustment from " + $earliestDate + " to " + $dftDate + " due to select adjuvant product administered on : " + $dftDate + " in TargetSeries " + $targetSeries.getSeriesName());			
+end
+
+
+///////// ***
+// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
 // If a recommended, conditionally recommended, or future recommendation for a select adjuvant product and other select adjuvant product shots have been administered less than 28 days
 // from the recommendation date, then adjust the recommendation date to be 28 days later than the most recent select adjuvant product
 ///////// ***
-rule "RecommendationForecast.adjustRecommendedDateDueToSelectAdjuvantProduct"
+rule "RecommendationForecast.adjustRecommendedDateDueToSelectAdjuvantProductToFutureDate"
 	dialect "java"
 	agenda-group "RecommendationForecast^supplementalSeriesRule"
 	when
@@ -1667,8 +1754,7 @@ rule "RecommendationForecast.adjustRecommendedDateDueToSelectAdjuvantProduct"
 			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
 			(TimePeriod.differenceInDays($dftDate, evalTime) == 0 &&
 			(TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
-			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS))) || 
-			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS))))
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS))))) 
 	then
 		String _RULENAME = drools.getRule().getName();
 		Date $newRecommendationDate = TimePeriod.addTimePeriod($dftDate, new TimePeriod(28, DurationType.DAYS));
@@ -1679,6 +1765,36 @@ rule "RecommendationForecast.adjustRecommendedDateDueToSelectAdjuvantProduct"
 		}
       	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Recommendation date adjustment from " + $recommendationDueDate + " to " + $newRecommendationDate + " due to select adjuvant product administered on : " + $dftDate + " in TargetSeries " + $targetSeries.getSeriesName());			
 end 
+
+
+///////// ***
+// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// If a recommended, conditionally recommended, or future recommendation for a select adjuvant product, other adjuvant shots have been administered more than 28 days in the past,
+// and the adjuvant date is the same as today's date, set the earliest date for the shot previously recommended in the past to today's date
+///////// ***
+rule "RecommendationForecast.adjustRecommendedDateDueToSelectAdjuvantProductToCurrentDate"
+	dialect "java"
+	agenda-group "RecommendationForecast^supplementalSeriesRule"
+	when
+		$dft : DateFactType(factName == "SELECT_ADJUVANT_PRODUCT_INTERVAL", factDate != null, factDateSet == true, $dftDate : factDate)
+		$targetSeries : TargetSeries($recommendationDueDate : getFinalRecommendationDate() != null, $recommendationDueDate < $dftDate,
+			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedSelectAdjuvantProduct() == true)  
+		eval(TimePeriod.differenceInDays($dftDate, evalTime) == 0 &&
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(-28, DurationType.DAYS)))
+	then
+		String _RULENAME = drools.getRule().getName();
+		modify($targetSeries) {
+			setFinalRecommendationDate($dftDate),
+			addAdjuvantDateAccountedForInRecommendedFinalDate($dftDate),
+			addSeriesRuleProcessed(_RULENAME);
+		}
+      	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Recommendation date adjustment from " + $recommendationDueDate + " to " + $dftDate + " due to select adjuvant product administered on : " + $dftDate + " in TargetSeries " + $targetSeries.getSeriesName());			
+end 
+
+/*************************************************************************************************************************************************************************************
+ END Rules for adjusting adjuvant product intervals to ensure adequate spacing between vaccines with adjuvant
+/************************************************************************************************************************************************************************************/
 
 
 ///////// ***
