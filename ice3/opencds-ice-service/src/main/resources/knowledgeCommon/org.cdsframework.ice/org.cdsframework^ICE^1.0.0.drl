@@ -1567,12 +1567,12 @@ rule "RecommendationForecast.adjustEarliestDateDueToLiveVirusToFutureDate"
 	agenda-group "RecommendationForecast^supplementalSeriesRule"
 	when
 		$lvd : LiveVirusFact(liveVirusDate != null, liveVirusDateSet == true)				  
-		$targetSeries : TargetSeries($earliestDate : getFinalEarliestDate() != null, $recommendationDueDate : getFinalRecommendationDate(), 
+		$targetSeries : TargetSeries($earliestDate : getFinalEarliestDate() != null,
 			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
 				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccine() == true,
 				liveVirusDatesAccountedForInRecommendedFinalEarliestDate not contains $lvd.liveVirusDate)
 		eval((TimePeriod.differenceInDays($lvd.liveVirusDate, evalTime) != 0 &&
-			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
+			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
 			(TimePeriod.differenceInDays($lvd.liveVirusDate, evalTime) == 0 &&
 			(TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
 			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $earliestDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS)))))
@@ -1630,7 +1630,7 @@ rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirusToFutureDate"
 				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccine() == true,
 				liveVirusDatesAccountedForInRecommendedFinalDate not contains $lvd.liveVirusDate)
 		eval((TimePeriod.differenceInDays($lvd.liveVirusDate, evalTime) != 0 &&
-			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
+			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
 			(TimePeriod.differenceInDays($lvd.liveVirusDate, evalTime) == 0 &&
 			(TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
 			TimePeriod.calculateElapsedTimePeriod($lvd.liveVirusDate, $recommendationDueDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS)))))
@@ -1695,7 +1695,7 @@ rule "RecommendationForecast.adjustEarliestDateDueToSelectAdjuvantProductToFutur
 			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
 				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedSelectAdjuvantProduct() == true)  
 		eval((TimePeriod.differenceInDays($dftDate, evalTime) != 0 &&
-			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
 			(TimePeriod.differenceInDays($dftDate, evalTime) == 0 &&
 			(TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
 			TimePeriod.calculateElapsedTimePeriod($dftDate, $earliestDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS)))))
@@ -1751,7 +1751,7 @@ rule "RecommendationForecast.adjustRecommendedDateDueToSelectAdjuvantProductToFu
 			(recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
 				recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED), isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedSelectAdjuvantProduct() == true)  
 		eval((TimePeriod.differenceInDays($dftDate, evalTime) != 0 &&
-			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, true).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
+			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS))) ||
 			(TimePeriod.differenceInDays($dftDate, evalTime) == 0 &&
 			(TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isLessThan(new TimePeriod(28, DurationType.DAYS)) &&
 			TimePeriod.calculateElapsedTimePeriod($dftDate, $recommendationDueDate, DurationType.DAYS, false).isGreaterThan(new TimePeriod(0, DurationType.DAYS))))) 
