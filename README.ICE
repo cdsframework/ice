@@ -49,6 +49,8 @@ Alternatively, to build the software via source:
 4) Edit opencds/opencds-parent/opencds-decision-support-service/src/main/resources/log4j.properties to suit your installation
 
 5) Compile the software:
+    $ cd opencds/opencds-knowledge-repository-data
+    $ mvn clean install
     $ cd opencds/opencds-parent
     $ mvn clean
     $ mvn -P drools-7 -DskipTests -DskipITs install
