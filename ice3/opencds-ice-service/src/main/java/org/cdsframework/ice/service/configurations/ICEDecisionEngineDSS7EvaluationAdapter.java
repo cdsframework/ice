@@ -572,8 +572,8 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		return resultFactLists;
 	}
 
-	
-	public KieBase loadKnowledgePackage(KnowledgePackageService knowledgePackageService, KnowledgeModule knowledgeModule) {
+	@Override
+	public Collection<KieBase> loadKnowledgePackages(KnowledgePackageService knowledgePackageService, KnowledgeModule knowledgeModule, int count) {
 
 		String _METHODNAME = "loadKnowledgePackage(): ";
 		if (knowledgePackageService == null || knowledgeModule == null) {
@@ -865,8 +865,6 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			}	
 			//////////////////////////////////////////////////////////////////////
 			KieContainer kieContainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
-			/////// ReleaseId kieContainerRelease = kieServices.newReleaseId(lKMId.getScopingEntityId(), lKMId.getBusinessId(), lKMId.getVersion());
-			/////// KieContainer kieContainer = kieServices.newKieContainer(kieContainerRelease);
 			kieBase = kieContainer.getKieBase();
 		}
 
@@ -885,12 +883,17 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			}
 		}
 		
-		knowledgePackageService.putPackage(knowledgeModule, kieBase);
+		List<KieBase> knowledgeBases = new ArrayList<KieBase>(count);
+		for (int i = 0; i < count; i++)
+			knowledgeBases.add(kieBase);
+		
+		/////// knowledgePackageService.putPackage(knowledgeModule, kieBase);
 
 		this.baseRulesScopingKmId = lBaseRulesScopingKmId;
 		logger.info("Date/Time " + lRequestedKmId + "; Base Rules Scoping Km Id: " + this.baseRulesScopingKmId + "; Initialized: " + new Date());
 
-		return kieBase;
+		//// return kieBase;
+		return knowledgeBases;
 	}
 
 
