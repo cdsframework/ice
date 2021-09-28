@@ -528,15 +528,15 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		for (String key : namedObjects.keySet()) {
 			Object oneNamedObject = namedObjects.get(key);
 			if (oneNamedObject != null) {
-				// String className = oneNamedObject.getClass().getSimpleName();
-				List<Object> oneList = (List<Object>) resultFactLists.get(oneNamedObject.getClass().getSimpleName());
+				String className = oneNamedObject.getClass().getSimpleName();
+				List<Object> oneList = (List<Object>) resultFactLists.get(className);
 				if (oneList == null) {
 					oneList = new ArrayList<Object>();
 					oneList.add(oneNamedObject);
 				} else {
 					oneList.add(oneNamedObject);
 				}
-				resultFactLists.put(oneNamedObject.getClass().getSimpleName(), oneList);
+				resultFactLists.put(className, oneList);
 			}
 		}
 

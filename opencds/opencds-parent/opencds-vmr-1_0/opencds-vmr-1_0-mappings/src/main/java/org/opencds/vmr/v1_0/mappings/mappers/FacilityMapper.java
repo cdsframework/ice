@@ -65,8 +65,8 @@ public class FacilityMapper extends EntityBaseMapper {
 		if (source == null) {
 			return null;
 		}
-		
-		logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());
 		EntityBaseMapper.pullIn(source, target, parentId, relationshipToParent, subjectPersonId, focalPersonId, factLists);
 		
     	if (source.getName() != null) {
@@ -120,8 +120,9 @@ public class FacilityMapper extends EntityBaseMapper {
 		
 		if (source == null)
 			return null;
-		
-		logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());
+
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());
 		EntityBaseMapper.pushOut(source, target);
 		
     	if (source.getName() != null) {   		

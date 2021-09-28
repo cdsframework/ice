@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>DateUtility is used to perform date functions.  It is thread-safe,
@@ -44,6 +46,7 @@ public class DateUtility extends java.lang.Object
 	    public final static double AVG_DAYS_PER_MONTH = 365.5 / 12.0;
 
 	    private static DateUtility instance = new DateUtility();  //singleton instance
+			private static final ThreadLocal<Map<String, SimpleDateFormat>> dateFormatters = new ThreadLocal<Map<String, SimpleDateFormat>>();
 
 	    private DateUtility()
 	    {
@@ -53,6 +56,21 @@ public class DateUtility extends java.lang.Object
 	    {
 	        return instance;
 	    }
+
+	    private SimpleDateFormat getDateFormatter(String pattern)
+			{
+				Map<String, SimpleDateFormat> formatters = dateFormatters.get();
+				if (formatters == null) {
+					formatters = new HashMap<String, SimpleDateFormat>();
+					dateFormatters.set(formatters);
+				}
+				SimpleDateFormat formatter = formatters.get(pattern);
+				if (formatter == null) {
+					formatter = new SimpleDateFormat(pattern);
+					formatters.put(pattern, formatter);
+				}
+				return formatter;
+			}
 
 	    /**
 	     * Month 1 = January (note difference from calendar).  Thus, to set as January 1, 2001,
@@ -216,11 +234,9 @@ public class DateUtility extends java.lang.Object
 	    // returns Date corresponding to the dateAsString
 	    {
 	        Date dateToReturn = null;
-
 	        try
 	        {
-	            SimpleDateFormat formatter = new SimpleDateFormat(formatTemplate);
-	            dateToReturn = formatter.parse(dateAsString);
+	            dateToReturn = getDateFromStringOrThrow(dateAsString, formatTemplate);
 	        }
 	        catch (Exception e)
 	        {
@@ -229,9 +245,24 @@ public class DateUtility extends java.lang.Object
 
 	        return dateToReturn;
 	    }
-	    
+
+			/**
+			 * Parse a date string into a Date or throw a ParseException if the format is invalid
+			 *
+			 * @param dateAsString
+			 * @param formatTemplate
+			 * @return
+			 * @throws ParseException
+			 */
+			public Date getDateFromStringOrThrow(String dateAsString, String formatTemplate) throws ParseException
+			{
+					SimpleDateFormat formatter = getDateFormatter(formatTemplate);
+					Date date = formatter.parse(dateAsString);
+					return date;
+			}
+
 	    public boolean isValidDateFormat(String dateAsString, String formatTemplate){
-	    	SimpleDateFormat formatter = new SimpleDateFormat(formatTemplate);
+	    	SimpleDateFormat formatter = getDateFormatter(formatTemplate);
     		try {
 				formatter.parse(dateAsString);
 				return true;
@@ -239,7 +270,7 @@ public class DateUtility extends java.lang.Object
 				return false;
 			}
 	    }
-
+	    
 	    /**
 	     * Returns whether getDateFromString will be able to succeed without error.
 	     * Added because getDateFromString was not implemented with error throwing.
@@ -257,7 +288,7 @@ public class DateUtility extends java.lang.Object
 
 	        try
 	        {
-	            SimpleDateFormat formatter = new SimpleDateFormat(formatTemplate);
+	            SimpleDateFormat formatter = getDateFormatter(formatTemplate);
 	            formatter.parse(dateAsString);
 	        }
 	        catch (ParseException e)
@@ -279,7 +310,7 @@ public class DateUtility extends java.lang.Object
 
 	        try
 	        {
-	            SimpleDateFormat formatter = new SimpleDateFormat(formatTemplate);
+	            SimpleDateFormat formatter = getDateFormatter(formatTemplate);
 	            stringToReturn = formatter.format(date);
 	        }
 	        catch (Exception e)
@@ -1223,5 +1254,10 @@ public class DateUtility extends java.lang.Object
 	        
 	        System.out.println(utility.timeDifferenceLessThanOrEqualTo(date1, date2, Calendar.YEAR, 2));
 			**/
+				SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssZ");
+				System.out.println(sdf.format(new Date()));
+	        SimpleDateFormat sdf2 = new SimpleDateFormat("yyMMddHHmmssZZZZ");
+	        System.out.println(sdf2.format(new Date()));
+
 	    }
 }

@@ -114,67 +114,69 @@ public abstract class OneObjectMapper extends Object {
 			logger.error(errStr);
 			throw new ImproperUsageException(errStr);
 		}
+
+		final String sourceClassName = source.getClass().getSimpleName();
 		
-		if ("AdverseEvent".equals(source.getClass().getSimpleName())) {
+		if ("AdverseEvent".equals(sourceClassName)) {
 			AdverseEventMapper.pullIn((org.opencds.vmr.v1_0.schema.AdverseEvent)source, (AdverseEvent)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("DeniedAdverseEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("DeniedAdverseEvent".equals(sourceClassName)) {
 			DeniedAdverseEventMapper.pullIn((org.opencds.vmr.v1_0.schema.DeniedAdverseEvent)source, (DeniedAdverseEvent)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("AppointmentProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("AppointmentProposal".equals(sourceClassName)) {
 			AppointmentProposalMapper.pullIn((org.opencds.vmr.v1_0.schema.AppointmentProposal)source, (AppointmentProposal)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("AppointmentRequest".equals(source.getClass().getSimpleName())) {
+		} else if ("AppointmentRequest".equals(sourceClassName)) {
 			AppointmentRequestMapper.pullIn((org.opencds.vmr.v1_0.schema.AppointmentRequest)source, (AppointmentRequest)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("EncounterEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("EncounterEvent".equals(sourceClassName)) {
 			EncounterEventMapper.pullIn((org.opencds.vmr.v1_0.schema.EncounterEvent)source, (EncounterEvent)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("MissedAppointment".equals(source.getClass().getSimpleName())) {
+		} else if ("MissedAppointment".equals(sourceClassName)) {
 			MissedAppointmentMapper.pullIn((org.opencds.vmr.v1_0.schema.MissedAppointment)source, (MissedAppointment)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("ScheduledAppointment".equals(source.getClass().getSimpleName())) {
+		} else if ("ScheduledAppointment".equals(sourceClassName)) {
 			ScheduledAppointmentMapper.pullIn((org.opencds.vmr.v1_0.schema.ScheduledAppointment)source, (ScheduledAppointment)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("Goal".equals(source.getClass().getSimpleName())) {
+		} else if ("Goal".equals(sourceClassName)) {
 			GoalMapper.pullIn((org.opencds.vmr.v1_0.schema.Goal)source, (Goal)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("GoalProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("GoalProposal".equals(sourceClassName)) {
 			GoalProposalMapper.pullIn((org.opencds.vmr.v1_0.schema.GoalProposal)source, (GoalProposal)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("ObservationOrder".equals(source.getClass().getSimpleName())) {
+		} else if ("ObservationOrder".equals(sourceClassName)) {
 			ObservationOrderMapper.pullIn((org.opencds.vmr.v1_0.schema.ObservationOrder)source, (ObservationOrder)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("ObservationProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("ObservationProposal".equals(sourceClassName)) {
 			ObservationProposalMapper.pullIn((org.opencds.vmr.v1_0.schema.ObservationProposal)source, (ObservationProposal)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("ObservationResult".equals(source.getClass().getSimpleName())) {
+		} else if ("ObservationResult".equals(sourceClassName)) {
 			ObservationResultMapper.pullIn((org.opencds.vmr.v1_0.schema.ObservationResult)source, (ObservationResult)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("UnconductedObservation".equals(source.getClass().getSimpleName())) {
+		} else if ("UnconductedObservation".equals(sourceClassName)) {
 			UnconductedObservationMapper.pullIn((org.opencds.vmr.v1_0.schema.UnconductedObservation)source, (UnconductedObservation)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("DeniedProblem".equals(source.getClass().getSimpleName())) {
+		} else if ("DeniedProblem".equals(sourceClassName)) {
 			DeniedProblemMapper.pullIn((org.opencds.vmr.v1_0.schema.DeniedProblem)source, (DeniedProblem)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("Problem".equals(source.getClass().getSimpleName())) {
+		} else if ("Problem".equals(sourceClassName)) {
 			ProblemMapper.pullIn((org.opencds.vmr.v1_0.schema.Problem)source, (Problem)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("ProcedureEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("ProcedureEvent".equals(sourceClassName)) {
 			ProcedureEventMapper.pullIn((org.opencds.vmr.v1_0.schema.ProcedureEvent)source, (ProcedureEvent)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("ProcedureOrder".equals(source.getClass().getSimpleName())) {
+		} else if ("ProcedureOrder".equals(sourceClassName)) {
 			ProcedureOrderMapper.pullIn((org.opencds.vmr.v1_0.schema.ProcedureOrder)source, (ProcedureOrder)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("ProcedureProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("ProcedureProposal".equals(sourceClassName)) {
 			ProcedureProposalMapper.pullIn((org.opencds.vmr.v1_0.schema.ProcedureProposal)source, (ProcedureProposal)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("ScheduledProcedure".equals(source.getClass().getSimpleName())) {
+		} else if ("ScheduledProcedure".equals(sourceClassName)) {
 			ScheduledProcedureMapper.pullIn((org.opencds.vmr.v1_0.schema.ScheduledProcedure)source, (ScheduledProcedure)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("UndeliveredProcedure".equals(source.getClass().getSimpleName())) {
+		} else if ("UndeliveredProcedure".equals(sourceClassName)) {
 			UndeliveredProcedureMapper.pullIn((org.opencds.vmr.v1_0.schema.UndeliveredProcedure)source, (UndeliveredProcedure)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("SubstanceAdministrationEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("SubstanceAdministrationEvent".equals(sourceClassName)) {
 			SubstanceAdministrationEventMapper.pullIn((org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent)source, (SubstanceAdministrationEvent)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("SubstanceAdministrationOrder".equals(source.getClass().getSimpleName())) {
+		} else if ("SubstanceAdministrationOrder".equals(sourceClassName)) {
 			SubstanceAdministrationOrderMapper.pullIn((org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder)source, (SubstanceAdministrationOrder)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("SubstanceAdministrationProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("SubstanceAdministrationProposal".equals(sourceClassName)) {
 			SubstanceAdministrationProposalMapper.pullIn((org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal)source, (SubstanceAdministrationProposal)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("SubstanceDispensationEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("SubstanceDispensationEvent".equals(sourceClassName)) {
 			SubstanceDispensationEventMapper.pullIn((org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent)source, (SubstanceDispensationEvent)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("UndeliveredSubstanceAdministration".equals(source.getClass().getSimpleName())) {
+		} else if ("UndeliveredSubstanceAdministration".equals(sourceClassName)) {
 			UndeliveredSubstanceAdministrationMapper.pullIn((org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration)source, (UndeliveredSubstanceAdministration)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("SupplyEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("SupplyEvent".equals(sourceClassName)) {
 			SupplyEventMapper.pullIn((org.opencds.vmr.v1_0.schema.SupplyEvent)source, (SupplyEvent)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("SupplyOrder".equals(source.getClass().getSimpleName())) {
+		} else if ("SupplyOrder".equals(sourceClassName)) {
 			SupplyOrderMapper.pullIn((org.opencds.vmr.v1_0.schema.SupplyOrder)source, (SupplyOrder)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("SupplyProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("SupplyProposal".equals(sourceClassName)) {
 			SupplyProposalMapper.pullIn((org.opencds.vmr.v1_0.schema.SupplyProposal)source, (SupplyProposal)target, subjectPersonId, focalPersonId, factLists);
-		} else if ("UndeliveredSupply".equals(source.getClass().getSimpleName())) {
+		} else if ("UndeliveredSupply".equals(sourceClassName)) {
 			UndeliveredSupplyMapper.pullIn((org.opencds.vmr.v1_0.schema.UndeliveredSupply)source, (UndeliveredSupply)target, subjectPersonId, focalPersonId, factLists);
 		} else {
-			throw new ImproperUsageException("OneObjectMapper failed to pullInRelatedClinicalStatement for: " + source.getClass().getSimpleName());
+			throw new ImproperUsageException("OneObjectMapper failed to pullInRelatedClinicalStatement for: " + sourceClassName);
 		}
 	}
 	
@@ -492,152 +494,153 @@ public abstract class OneObjectMapper extends Object {
 		 */
 		if (( !((ClinicalStatement)source).isToBeReturned() ) 							//if not flagged then ignore it
 				|| ( ((ClinicalStatement)source).isClinicalStatementToBeRoot() != true ))	//if not a root clinical statement then ignore it
-			return;		
-		
-		
-		logger.trace(_METHODNAME + source.getClass().getSimpleName());
-		
-		if ("AdverseEvent".equals(source.getClass().getSimpleName())) {
+			return;
+
+
+		final String sourceClassName = source.getClass().getSimpleName();
+		logger.trace(_METHODNAME + sourceClassName);
+
+		if ("AdverseEvent".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.AdverseEvent rootClinicalStatement = new org.opencds.vmr.v1_0.schema.AdverseEvent();
 			rootClinicalStatement = AdverseEventMapper.pushOut(
 					(AdverseEvent)source, new org.opencds.vmr.v1_0.schema.AdverseEvent(), organizedResults);	
 			organizedResults.getOutput().getAdverseEvents().getAdverseEvent().add(rootClinicalStatement);
-		} else if ("DeniedAdverseEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("DeniedAdverseEvent".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.DeniedAdverseEvent rootClinicalStatement = new org.opencds.vmr.v1_0.schema.DeniedAdverseEvent();
 			rootClinicalStatement = DeniedAdverseEventMapper.pushOut(
 					(DeniedAdverseEvent)source, new org.opencds.vmr.v1_0.schema.DeniedAdverseEvent(), organizedResults);
 			organizedResults.getOutput().getDeniedAdverseEvents().getDeniedAdverseEvent().add(rootClinicalStatement);
-		} else if ("AppointmentProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("AppointmentProposal".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.AppointmentProposal rootClinicalStatement = new org.opencds.vmr.v1_0.schema.AppointmentProposal();
 			rootClinicalStatement = AppointmentProposalMapper.pushOut(
 					(AppointmentProposal)source, new org.opencds.vmr.v1_0.schema.AppointmentProposal(), organizedResults);
 			organizedResults.getOutput().getAppointmentProposals().getAppointmentProposal().add(rootClinicalStatement);
-		} else if ("AppointmentRequest".equals(source.getClass().getSimpleName())) {
+		} else if ("AppointmentRequest".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.AppointmentRequest rootClinicalStatement = new org.opencds.vmr.v1_0.schema.AppointmentRequest();
 			rootClinicalStatement = AppointmentRequestMapper.pushOut(
 					(AppointmentRequest)source, new org.opencds.vmr.v1_0.schema.AppointmentRequest(), organizedResults);
 			organizedResults.getOutput().getAppointmentRequests().getAppointmentRequest().add(rootClinicalStatement);
-		} else if ("EncounterEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("EncounterEvent".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.EncounterEvent rootClinicalStatement = new org.opencds.vmr.v1_0.schema.EncounterEvent();
 			rootClinicalStatement = EncounterEventMapper.pushOut(
 					(EncounterEvent)source, new org.opencds.vmr.v1_0.schema.EncounterEvent(), organizedResults);
 			organizedResults.getOutput().getEncounterEvents().getEncounterEvent().add(rootClinicalStatement);
-		} else if ("MissedAppointment".equals(source.getClass().getSimpleName())) {
+		} else if ("MissedAppointment".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.MissedAppointment rootClinicalStatement = new org.opencds.vmr.v1_0.schema.MissedAppointment();
 			rootClinicalStatement = MissedAppointmentMapper.pushOut(
 					(MissedAppointment)source, new org.opencds.vmr.v1_0.schema.MissedAppointment(), organizedResults);
 			organizedResults.getOutput().getMissedAppointments().getMissedAppointment().add(rootClinicalStatement);
-		} else if ("ScheduledAppointment".equals(source.getClass().getSimpleName())) {
+		} else if ("ScheduledAppointment".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.ScheduledAppointment rootClinicalStatement = new org.opencds.vmr.v1_0.schema.ScheduledAppointment();
 			rootClinicalStatement = ScheduledAppointmentMapper.pushOut(
 					(ScheduledAppointment)source, new org.opencds.vmr.v1_0.schema.ScheduledAppointment(), organizedResults);
 			organizedResults.getOutput().getScheduledAppointments().getScheduledAppointment().add(rootClinicalStatement);
-		} else if ("Goal".equals(source.getClass().getSimpleName())) {
+		} else if ("Goal".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.Goal rootClinicalStatement = new org.opencds.vmr.v1_0.schema.Goal();
 			rootClinicalStatement = GoalMapper.pushOut(
 					(Goal)source, new org.opencds.vmr.v1_0.schema.Goal(), organizedResults);
 			organizedResults.getOutput().getGoals().getGoal().add(rootClinicalStatement);
-		} else if ("GoalProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("GoalProposal".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.GoalProposal rootClinicalStatement = new org.opencds.vmr.v1_0.schema.GoalProposal();
 			rootClinicalStatement = GoalProposalMapper.pushOut(
 					(GoalProposal)source, new org.opencds.vmr.v1_0.schema.GoalProposal(), organizedResults);
 			organizedResults.getOutput().getGoalProposals().getGoalProposal().add(rootClinicalStatement);
-		} else if ("ObservationOrder".equals(source.getClass().getSimpleName())) {
+		} else if ("ObservationOrder".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.ObservationOrder rootClinicalStatement = new org.opencds.vmr.v1_0.schema.ObservationOrder();
 			rootClinicalStatement = ObservationOrderMapper.pushOut(
 					(ObservationOrder)source, new org.opencds.vmr.v1_0.schema.ObservationOrder(), organizedResults);
 			organizedResults.getOutput().getObservationOrders().getObservationOrder().add(rootClinicalStatement);
-		} else if ("ObservationProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("ObservationProposal".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.ObservationProposal rootClinicalStatement = new org.opencds.vmr.v1_0.schema.ObservationProposal();
 			rootClinicalStatement = ObservationProposalMapper.pushOut(
 					(ObservationProposal)source, new org.opencds.vmr.v1_0.schema.ObservationProposal(), organizedResults);
 			organizedResults.getOutput().getObservationProposals().getObservationProposal().add(rootClinicalStatement);
-		} else if ("ObservationResult".equals(source.getClass().getSimpleName())) {
+		} else if ("ObservationResult".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.ObservationResult rootClinicalStatement = new org.opencds.vmr.v1_0.schema.ObservationResult();
 			rootClinicalStatement = ObservationResultMapper.pushOut(
 					(ObservationResult)source, new org.opencds.vmr.v1_0.schema.ObservationResult(), organizedResults);
 			organizedResults.getOutput().getObservationResults().getObservationResult().add(rootClinicalStatement);
-		} else if ("UnconductedObservation".equals(source.getClass().getSimpleName())) {
+		} else if ("UnconductedObservation".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.UnconductedObservation rootClinicalStatement = new org.opencds.vmr.v1_0.schema.UnconductedObservation();
 			rootClinicalStatement = UnconductedObservationMapper.pushOut(
 					(UnconductedObservation)source, new org.opencds.vmr.v1_0.schema.UnconductedObservation(), organizedResults);
 			organizedResults.getOutput().getUnconductedObservations().getUnconductedObservation().add(rootClinicalStatement);
-		} else if ("DeniedProblem".equals(source.getClass().getSimpleName())) {
+		} else if ("DeniedProblem".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.DeniedProblem rootClinicalStatement = new org.opencds.vmr.v1_0.schema.DeniedProblem();
 			rootClinicalStatement = DeniedProblemMapper.pushOut(
 					(DeniedProblem)source, new org.opencds.vmr.v1_0.schema.DeniedProblem(), organizedResults);
 			organizedResults.getOutput().getDeniedProblems().getDeniedProblem().add(rootClinicalStatement);
-		} else if ("Problem".equals(source.getClass().getSimpleName())) {
+		} else if ("Problem".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.Problem rootClinicalStatement = new org.opencds.vmr.v1_0.schema.Problem();
 			rootClinicalStatement = ProblemMapper.pushOut(
 					(Problem)source, new org.opencds.vmr.v1_0.schema.Problem(), organizedResults);
 			organizedResults.getOutput().getProblems().getProblem().add(rootClinicalStatement);
-		} else if ("ProcedureEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("ProcedureEvent".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.ProcedureEvent rootClinicalStatement = new org.opencds.vmr.v1_0.schema.ProcedureEvent();
 			rootClinicalStatement = ProcedureEventMapper.pushOut(
 					(ProcedureEvent)source, new org.opencds.vmr.v1_0.schema.ProcedureEvent(), organizedResults);
 			organizedResults.getOutput().getProcedureEvents().getProcedureEvent().add(rootClinicalStatement);
-		} else if ("ProcedureOrder".equals(source.getClass().getSimpleName())) {
+		} else if ("ProcedureOrder".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.ProcedureOrder rootClinicalStatement = new org.opencds.vmr.v1_0.schema.ProcedureOrder();
 			rootClinicalStatement = ProcedureOrderMapper.pushOut(
 					(ProcedureOrder)source, new org.opencds.vmr.v1_0.schema.ProcedureOrder(), organizedResults);
 			organizedResults.getOutput().getProcedureOrders().getProcedureOrder().add(rootClinicalStatement);
-		} else if ("ProcedureProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("ProcedureProposal".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.ProcedureProposal rootClinicalStatement = new org.opencds.vmr.v1_0.schema.ProcedureProposal();
 			rootClinicalStatement =  ProcedureProposalMapper.pushOut(
 					(ProcedureProposal)source, new org.opencds.vmr.v1_0.schema.ProcedureProposal(), organizedResults);
 			organizedResults.getOutput().getProcedureProposals().getProcedureProposal().add(rootClinicalStatement);
-		} else if ("ScheduledProcedure".equals(source.getClass().getSimpleName())) {
+		} else if ("ScheduledProcedure".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.ScheduledProcedure rootClinicalStatement = new org.opencds.vmr.v1_0.schema.ScheduledProcedure();
 			rootClinicalStatement = ScheduledProcedureMapper.pushOut(
 					(ScheduledProcedure)source, new org.opencds.vmr.v1_0.schema.ScheduledProcedure(), organizedResults);
 			organizedResults.getOutput().getScheduledProcedures().getScheduledProcedure().add(rootClinicalStatement);
-		} else if ("UndeliveredProcedure".equals(source.getClass().getSimpleName())) {
+		} else if ("UndeliveredProcedure".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.UndeliveredProcedure rootClinicalStatement = new org.opencds.vmr.v1_0.schema.UndeliveredProcedure();
 			rootClinicalStatement = UndeliveredProcedureMapper.pushOut(
 					(UndeliveredProcedure)source, new org.opencds.vmr.v1_0.schema.UndeliveredProcedure(), organizedResults);
 			organizedResults.getOutput().getUndeliveredProcedures().getUndeliveredProcedure().add(rootClinicalStatement);
-		} else if ("SubstanceAdministrationEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("SubstanceAdministrationEvent".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent rootClinicalStatement = new org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent();
 			rootClinicalStatement = SubstanceAdministrationEventMapper.pushOut(
 					(SubstanceAdministrationEvent)source, new org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent(), organizedResults);
 			organizedResults.getOutput().getSubstanceAdministrationEvents().getSubstanceAdministrationEvent().add(rootClinicalStatement);
-		} else if ("SubstanceAdministrationOrder".equals(source.getClass().getSimpleName())) {
+		} else if ("SubstanceAdministrationOrder".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder rootClinicalStatement = new org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder();
 			rootClinicalStatement = SubstanceAdministrationOrderMapper.pushOut(
 					(SubstanceAdministrationOrder)source, new org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder(), organizedResults);
 			organizedResults.getOutput().getSubstanceAdministrationOrders().getSubstanceAdministrationOrder().add(rootClinicalStatement);
-		} else if ("SubstanceAdministrationProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("SubstanceAdministrationProposal".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal rootClinicalStatement = new org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal();
 			rootClinicalStatement = SubstanceAdministrationProposalMapper.pushOut(
 					(SubstanceAdministrationProposal)source, new org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal(), organizedResults);
 			organizedResults.getOutput().getSubstanceAdministrationProposals().getSubstanceAdministrationProposal().add(rootClinicalStatement);
-		} else if ("SubstanceDispensationEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("SubstanceDispensationEvent".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent rootClinicalStatement = new org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent();
 			rootClinicalStatement = SubstanceDispensationEventMapper.pushOut(
 					(SubstanceDispensationEvent)source, new org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent(), organizedResults);
 			organizedResults.getOutput().getSubstanceDispensationEvents().getSubstanceDispensationEvent().add(rootClinicalStatement);
-		} else if ("UndeliveredSubstanceAdministration".equals(source.getClass().getSimpleName())) {
+		} else if ("UndeliveredSubstanceAdministration".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration rootClinicalStatement = new org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration();
 			rootClinicalStatement = UndeliveredSubstanceAdministrationMapper.pushOut(
 					(UndeliveredSubstanceAdministration)source, new org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration(), organizedResults);
 			organizedResults.getOutput().getUndeliveredSubstanceAdministrations().getUndeliveredSubstanceAdministration().add(rootClinicalStatement);
-		} else if ("SupplyEvent".equals(source.getClass().getSimpleName())) {
+		} else if ("SupplyEvent".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.SupplyEvent rootClinicalStatement = new org.opencds.vmr.v1_0.schema.SupplyEvent();
 			rootClinicalStatement = SupplyEventMapper.pushOut(
 					(SupplyEvent)source, new org.opencds.vmr.v1_0.schema.SupplyEvent(), organizedResults);
 			organizedResults.getOutput().getSupplyEvents().getSupplyEvent().add(rootClinicalStatement);
-		} else if ("SupplyOrder".equals(source.getClass().getSimpleName())) {
+		} else if ("SupplyOrder".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.SupplyOrder rootClinicalStatement = new org.opencds.vmr.v1_0.schema.SupplyOrder();
 			rootClinicalStatement = SupplyOrderMapper.pushOut(
 					(SupplyOrder)source, new org.opencds.vmr.v1_0.schema.SupplyOrder(), organizedResults);
 			organizedResults.getOutput().getSupplyOrders().getSupplyOrder().add(rootClinicalStatement);
-		} else if ("SupplyProposal".equals(source.getClass().getSimpleName())) {
+		} else if ("SupplyProposal".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.SupplyProposal rootClinicalStatement = new org.opencds.vmr.v1_0.schema.SupplyProposal();
 			rootClinicalStatement = SupplyProposalMapper.pushOut(
 					(SupplyProposal)source, new org.opencds.vmr.v1_0.schema.SupplyProposal(), organizedResults);
 			organizedResults.getOutput().getSupplyProposals().getSupplyProposal().add(rootClinicalStatement);
-		} else if ("UndeliveredSupply".equals(source.getClass().getSimpleName())) {
+		} else if ("UndeliveredSupply".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.UndeliveredSupply rootClinicalStatement = new org.opencds.vmr.v1_0.schema.UndeliveredSupply();
 			rootClinicalStatement = UndeliveredSupplyMapper.pushOut(
 					(UndeliveredSupply)source, new org.opencds.vmr.v1_0.schema.UndeliveredSupply(), organizedResults);
@@ -682,143 +685,145 @@ public abstract class OneObjectMapper extends Object {
 //			logger.error(errStr);
 //			throw new ImproperUsageException(errStr);
 //		}
-		
-		logger.trace(_METHODNAME + internalVMR.getClass().getSimpleName() + ", " + ((ClinicalStatement)internalVMR).getId() + ": " + ((ClinicalStatement)internalVMR).getEvaluatedPersonId());
+
+		final String internalVMRClassName = internalVMR.getClass().getSimpleName();
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + internalVMRClassName + ", " + ((ClinicalStatement)internalVMR).getId() + ": " + ((ClinicalStatement)internalVMR).getEvaluatedPersonId());
 
 		org.opencds.vmr.v1_0.schema.RelatedClinicalStatement relatedClinicalStatement = null; 
-		
-		if ("AdverseEvent".equals(internalVMR.getClass().getSimpleName())) {
+
+		if ("AdverseEvent".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.AdverseEvent nestedClinicalStatement = AdverseEventMapper.pushOut(
 //					(AdverseEvent)internalVMR, (org.opencds.vmr.v1_0.schema.AdverseEventnew org.opencds.vmr.v1_0.schema, organizedResults);
 					(AdverseEvent)internalVMR, new org.opencds.vmr.v1_0.schema.AdverseEvent(), organizedResults);
 			relatedClinicalStatement.setAdverseEvent(nestedClinicalStatement);
-		} else if ("DeniedAdverseEvent".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("DeniedAdverseEvent".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.DeniedAdverseEvent nestedClinicalStatement = DeniedAdverseEventMapper.pushOut(
 					(DeniedAdverseEvent)internalVMR, new org.opencds.vmr.v1_0.schema.DeniedAdverseEvent(), organizedResults);
 			relatedClinicalStatement.setDeniedAdverseEvent(nestedClinicalStatement);
-		} else if ("EncounterEvent".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("EncounterEvent".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.EncounterEvent nestedClinicalStatement = EncounterEventMapper.pushOut(
 					(EncounterEvent)internalVMR, new org.opencds.vmr.v1_0.schema.EncounterEvent(), organizedResults);
 			relatedClinicalStatement.setEncounterEvent(nestedClinicalStatement);
-		} else if ("AppointmentProposal".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("AppointmentProposal".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.AppointmentProposal nestedClinicalStatement = AppointmentProposalMapper.pushOut(
 					(AppointmentProposal)internalVMR, new org.opencds.vmr.v1_0.schema.AppointmentProposal(), organizedResults);
 			relatedClinicalStatement.setAppointmentProposal(nestedClinicalStatement);
-		} else if ("AppointmentRequest".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("AppointmentRequest".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.AppointmentRequest nestedClinicalStatement = AppointmentRequestMapper.pushOut(
 					(AppointmentRequest)internalVMR, new org.opencds.vmr.v1_0.schema.AppointmentRequest(), organizedResults);
 			relatedClinicalStatement.setAppointmentRequest(nestedClinicalStatement);
-		} else if ("MissedAppointment".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("MissedAppointment".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.MissedAppointment nestedClinicalStatement = MissedAppointmentMapper.pushOut(
 					(MissedAppointment)internalVMR, new org.opencds.vmr.v1_0.schema.MissedAppointment(), organizedResults);
 			relatedClinicalStatement.setMissedAppointment(nestedClinicalStatement);
-		} else if ("ScheduledAppointment".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("ScheduledAppointment".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.ScheduledAppointment nestedClinicalStatement = ScheduledAppointmentMapper.pushOut(
 					(ScheduledAppointment)internalVMR, new org.opencds.vmr.v1_0.schema.ScheduledAppointment(), organizedResults);
 			relatedClinicalStatement.setScheduledAppointment(nestedClinicalStatement);
-		} else if ("Goal".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("Goal".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.Goal nestedClinicalStatement = GoalMapper.pushOut(
 					(Goal)internalVMR, new org.opencds.vmr.v1_0.schema.Goal(), organizedResults);
 			relatedClinicalStatement.setGoal(nestedClinicalStatement);
-		} else if ("GoalProposal".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("GoalProposal".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.GoalProposal nestedClinicalStatement = GoalProposalMapper.pushOut(
 					(GoalProposal)internalVMR, new org.opencds.vmr.v1_0.schema.GoalProposal(), organizedResults);
 			relatedClinicalStatement.setGoalProposal(nestedClinicalStatement);
-		} else if ("ObservationOrder".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("ObservationOrder".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.ObservationOrder nestedClinicalStatement = ObservationOrderMapper.pushOut(
 					(ObservationOrder)internalVMR, new org.opencds.vmr.v1_0.schema.ObservationOrder(), organizedResults);
 			relatedClinicalStatement.setObservationOrder(nestedClinicalStatement);
-		} else if ("ObservationProposal".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("ObservationProposal".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.ObservationProposal nestedClinicalStatement = ObservationProposalMapper.pushOut(
 					(ObservationProposal)internalVMR, new org.opencds.vmr.v1_0.schema.ObservationProposal(), organizedResults);
 			relatedClinicalStatement.setObservationProposal(nestedClinicalStatement);
-		} else if ("ObservationResult".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("ObservationResult".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.ObservationResult nestedClinicalStatement = ObservationResultMapper.pushOut(
 					(ObservationResult)internalVMR, new org.opencds.vmr.v1_0.schema.ObservationResult(), organizedResults);
 			relatedClinicalStatement.setObservationResult(nestedClinicalStatement);
-		} else if ("UnconductedObservation".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("UnconductedObservation".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.UnconductedObservation nestedClinicalStatement = UnconductedObservationMapper.pushOut(
 					(UnconductedObservation)internalVMR, new org.opencds.vmr.v1_0.schema.UnconductedObservation(), organizedResults);
 			relatedClinicalStatement.setUnconductedObservation(nestedClinicalStatement);
-		} else if ("Problem".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("Problem".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.Problem nestedClinicalStatement = ProblemMapper.pushOut(
 					(Problem)internalVMR, new org.opencds.vmr.v1_0.schema.Problem(), organizedResults);
 			relatedClinicalStatement.setProblem(nestedClinicalStatement);
-		} else if ("ProcedureEvent".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("ProcedureEvent".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.ProcedureEvent nestedClinicalStatement = ProcedureEventMapper.pushOut(
 					(ProcedureEvent)internalVMR, new org.opencds.vmr.v1_0.schema.ProcedureEvent(), organizedResults);
 			relatedClinicalStatement.setProcedureEvent(nestedClinicalStatement);
-		} else if ("ProcedureOrder".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("ProcedureOrder".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.ProcedureOrder nestedClinicalStatement = ProcedureOrderMapper.pushOut(
 					(ProcedureOrder)internalVMR, new org.opencds.vmr.v1_0.schema.ProcedureOrder(), organizedResults);
 			relatedClinicalStatement.setProcedureOrder(nestedClinicalStatement);
-		} else if ("ProcedureProposal".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("ProcedureProposal".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.ProcedureProposal nestedClinicalStatement = ProcedureProposalMapper.pushOut(
 					(ProcedureProposal)internalVMR, new org.opencds.vmr.v1_0.schema.ProcedureProposal(), organizedResults);
 			relatedClinicalStatement.setProcedureProposal(nestedClinicalStatement);
-		} else if ("UndeliveredProcedure".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("UndeliveredProcedure".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.UndeliveredProcedure nestedClinicalStatement = UndeliveredProcedureMapper.pushOut(
 					(UndeliveredProcedure)internalVMR, new org.opencds.vmr.v1_0.schema.UndeliveredProcedure(), organizedResults);
 			relatedClinicalStatement.setUndeliveredProcedure(nestedClinicalStatement);
-		} else if ("SubstanceAdministrationEvent".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("SubstanceAdministrationEvent".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent nestedClinicalStatement = SubstanceAdministrationEventMapper.pushOut(
 					(SubstanceAdministrationEvent)internalVMR, new org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent(), organizedResults);
 			relatedClinicalStatement.setSubstanceAdministrationEvent(nestedClinicalStatement);
-		} else if ("SubstanceAdministrationOrder".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("SubstanceAdministrationOrder".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder nestedClinicalStatement = SubstanceAdministrationOrderMapper.pushOut(
 					(SubstanceAdministrationOrder)internalVMR, new org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder(), organizedResults);
 			relatedClinicalStatement.setSubstanceAdministrationOrder(nestedClinicalStatement);
-		} else if ("SubstanceAdministrationProposal".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("SubstanceAdministrationProposal".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal nestedClinicalStatement = SubstanceAdministrationProposalMapper.pushOut(
 					(SubstanceAdministrationProposal)internalVMR, new org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal(), organizedResults);
 			relatedClinicalStatement.setSubstanceAdministrationProposal(nestedClinicalStatement);
-		} else if ("UndeliveredSubstanceAdministration".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("UndeliveredSubstanceAdministration".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration nestedClinicalStatement = UndeliveredSubstanceAdministrationMapper.pushOut(
 					(UndeliveredSubstanceAdministration)internalVMR, new org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration(), organizedResults);
 			relatedClinicalStatement.setUndeliveredSubstanceAdministration(nestedClinicalStatement);
-		} else if ("SubstanceDispensationEvent".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("SubstanceDispensationEvent".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent nestedClinicalStatement = SubstanceDispensationEventMapper.pushOut(
 					(SubstanceDispensationEvent)internalVMR, new org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent(), organizedResults);
 			relatedClinicalStatement.setSubstanceDispensationEvent(nestedClinicalStatement);
-		} else if ("SupplyEvent".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("SupplyEvent".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.SupplyEvent nestedClinicalStatement = SupplyEventMapper.pushOut(
 					(SupplyEvent)internalVMR, new org.opencds.vmr.v1_0.schema.SupplyEvent(), organizedResults);
 			relatedClinicalStatement.setSupplyEvent(nestedClinicalStatement);
-		} else if ("SupplyOrder".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("SupplyOrder".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.SupplyOrder nestedClinicalStatement = SupplyOrderMapper.pushOut(
 					(SupplyOrder)internalVMR, new org.opencds.vmr.v1_0.schema.SupplyOrder(), organizedResults);
 			relatedClinicalStatement.setSupplyOrder(nestedClinicalStatement);
-		} else if ("SupplyProposal".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("SupplyProposal".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.SupplyProposal nestedClinicalStatement = SupplyProposalMapper.pushOut(
 					(SupplyProposal)internalVMR, new org.opencds.vmr.v1_0.schema.SupplyProposal(), organizedResults);
 			relatedClinicalStatement.setSupplyProposal(nestedClinicalStatement);
-		} else if ("UndeliveredSupply".equals(internalVMR.getClass().getSimpleName())) {
+		} else if ("UndeliveredSupply".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.UndeliveredSupply nestedClinicalStatement = UndeliveredSupplyMapper.pushOut(
 					(UndeliveredSupply)internalVMR, new org.opencds.vmr.v1_0.schema.UndeliveredSupply(), organizedResults);
@@ -871,11 +876,13 @@ public abstract class OneObjectMapper extends Object {
 			logger.error(errStr);
 			throw new ImproperUsageException(errStr);
 		}
-		
-		logger.trace(_METHODNAME + "push out " + oneInternalEntityObject.getClass().getSimpleName() + ", sourceEntity Id " + internal.getSourceId()
-				+ ", targetEntityId " + internal.getTargetEntityId() 
-				+ ", relationshipTimeInterval " + internal.getRelationshipTimeInterval()
-				+ ", with relationship " + internal.getTargetRole().toString());
+		final String oneInternalEntityObjectClassName = oneInternalEntityObject.getClass().getSimpleName();
+
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + "push out " + oneInternalEntityObjectClassName + ", sourceEntity Id " + internal.getSourceId()
+					+ ", targetEntityId " + internal.getTargetEntityId()
+					+ ", relationshipTimeInterval " + internal.getRelationshipTimeInterval()
+					+ ", with relationship " + internal.getTargetRole().toString());
 		
 		if (internal.getSourceId().equals(internal.getTargetEntityId())) {
             throw new OpenCDSRuntimeException(
@@ -883,7 +890,7 @@ public abstract class OneObjectMapper extends Object {
                             + ", target (root^extension)= " + internal.getTargetEntityId());
 		}
 		
-		 if ("AdministrableSubstance".equals(oneInternalEntityObject.getClass().getSimpleName())) {
+		 if ("AdministrableSubstance".equals(oneInternalEntityObjectClassName)) {
 			org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance	 	schemaNestedEntity 		= new org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance();
 			AdministrableSubstanceMapper.pushOut(
 					(AdministrableSubstance)organizedResults.getEntityList().get(internal.getTargetEntityId()), 
@@ -897,7 +904,7 @@ public abstract class OneObjectMapper extends Object {
 			schemaRelatedEntity.setAdministrableSubstance(schemaNestedEntity);
 			return schemaRelatedEntity;
 				
-		} else if ("Entity".equals(oneInternalEntityObject.getClass().getSimpleName())) {
+		} else if ("Entity".equals(oneInternalEntityObjectClassName)) {
 			org.opencds.vmr.v1_0.schema.RelatedEntity.Entity	 	schemaNestedEntity 		= new org.opencds.vmr.v1_0.schema.RelatedEntity.Entity();
 			EntityMapper.pushOut(
 					(Entity)organizedResults.getEntityList().get(internal.getTargetEntityId()), 
@@ -911,7 +918,7 @@ public abstract class OneObjectMapper extends Object {
 			schemaRelatedEntity.setEntity(schemaNestedEntity);
 			return schemaRelatedEntity;
 				
-		} else if ("Facility".equals(oneInternalEntityObject.getClass().getSimpleName())) {
+		} else if ("Facility".equals(oneInternalEntityObjectClassName)) {
 			org.opencds.vmr.v1_0.schema.RelatedEntity.Facility	 	schemaNestedEntity 		= new org.opencds.vmr.v1_0.schema.RelatedEntity.Facility();
 			FacilityMapper.pushOut(
 					(Facility)organizedResults.getEntityList().get(internal.getTargetEntityId()), 
@@ -925,7 +932,7 @@ public abstract class OneObjectMapper extends Object {
 			schemaRelatedEntity.setFacility(schemaNestedEntity);
 			return schemaRelatedEntity;
 				
-		} else if ("Organization".equals(oneInternalEntityObject.getClass().getSimpleName())) {
+		} else if ("Organization".equals(oneInternalEntityObjectClassName)) {
 			org.opencds.vmr.v1_0.schema.RelatedEntity.Organization	 	schemaNestedEntity 		= new org.opencds.vmr.v1_0.schema.RelatedEntity.Organization();
 			OrganizationMapper.pushOut(
 					(Organization)organizedResults.getEntityList().get(internal.getTargetEntityId()), 
@@ -939,7 +946,7 @@ public abstract class OneObjectMapper extends Object {
 			schemaRelatedEntity.setOrganization(schemaNestedEntity);
 			return schemaRelatedEntity;
 				
-		} else if ("Person".equals(oneInternalEntityObject.getClass().getSimpleName())) {
+		} else if ("Person".equals(oneInternalEntityObjectClassName)) {
 			org.opencds.vmr.v1_0.schema.RelatedEntity.Person	 	schemaNestedEntity 		= new org.opencds.vmr.v1_0.schema.RelatedEntity.Person();
 			PersonMapper.pushOut(
 					(Person)organizedResults.getEntityList().get(internal.getTargetEntityId()), 
@@ -953,7 +960,7 @@ public abstract class OneObjectMapper extends Object {
 			schemaRelatedEntity.setPerson(schemaNestedEntity);
 			return schemaRelatedEntity;
 				
-		} else if ("Specimen".equals(oneInternalEntityObject.getClass().getSimpleName())) {
+		} else if ("Specimen".equals(oneInternalEntityObjectClassName)) {
 			org.opencds.vmr.v1_0.schema.RelatedEntity.Specimen	 	schemaNestedEntity 		= new org.opencds.vmr.v1_0.schema.RelatedEntity.Specimen();
 			SpecimenMapper.pushOut(
 					(Specimen)organizedResults.getEntityList().get(internal.getTargetEntityId()), 
@@ -968,7 +975,7 @@ public abstract class OneObjectMapper extends Object {
 			return schemaRelatedEntity;
 				
 		} else {
-			String errStr = _METHODNAME + "improper usage: listedEntity not recognized: " + oneInternalEntityObject.getClass().getSimpleName();
+			String errStr = _METHODNAME + "improper usage: listedEntity not recognized: " + oneInternalEntityObjectClassName;
 			logger.error(errStr);
 			throw new InvalidDataException(errStr);
 		}

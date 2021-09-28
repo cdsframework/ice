@@ -3,6 +3,7 @@
  */
 package org.opencds.common.structures;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 /**
@@ -18,7 +19,8 @@ public class EvaluationRequestDataItem {
 	protected String 	externalFactModelSSId;
 	protected String	inputItemName;
 	protected String	inputContainingEntityId;
-	protected String 	inputPayloadString;
+	protected byte[]  inputPayload;
+	private String 	inputPayloadString;
 	protected String	interactionId;
 	protected Object	cdsInput; 	//must be cast to a JAXB object when used...
 
@@ -108,17 +110,34 @@ public class EvaluationRequestDataItem {
 	}
 
 	/**
+	 * Calling this method should be discouraged as it is expensive to convert a large byte[] to a String
 	 * @return the inputPayloadString
 	 */
 	public String getInputPayloadString() {
+		if (inputPayload != null && inputPayloadString == null)
+		{
+			try
+			{
+				inputPayloadString = new String(inputPayload, "UTF-8");
+			}
+			catch (UnsupportedEncodingException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 		return inputPayloadString;
 	}
 
 	/**
-	 * @param inputPayloadString the inputPayloadString to set
+	 * @param inputPayload the inputPayload to set
 	 */
-	public void setInputPayloadString(String inputPayloadString) {
-		this.inputPayloadString = inputPayloadString;
+	public void setInputPayload(byte[] inputPayload) {
+		this.inputPayload = inputPayload;
+	}
+
+	public byte[] getInputPayload()
+	{
+		return inputPayload;
 	}
 
 	/**

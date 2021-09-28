@@ -161,7 +161,8 @@ public class CdsOutputResultSetBuilder implements ResultSetBuilder<org.opencds.v
 	       							 * 
 	       							 * First look for Clinical Statements
 	       							 */
-	       							if ( csNameList.contains( oneResult.getClass().getSimpleName()) ) {	 
+											final String onResultClassName = oneResult.getClass().getSimpleName();
+	       							if ( csNameList.contains( onResultClassName) ) {
 	       								
 	       								ClinicalStatement oneCSResult = ((ClinicalStatement)oneResult);
 		       							if ( subjectPersonId.equals(((ClinicalStatement)oneResult).getEvaluatedPersonId()) ) {
@@ -232,7 +233,7 @@ public class CdsOutputResultSetBuilder implements ResultSetBuilder<org.opencds.v
 	       							/*
 	       							 * Second look for Entities
 	       							 */
-	       							} else if ( entityNameList.contains(oneResult.getClass().getSimpleName() ) ) {
+	       							} else if ( entityNameList.contains(onResultClassName ) ) {
 	       								EntityBase oneEBresult = (EntityBase)oneResult;
 		       							if ( subjectPersonId.equals(oneEBresult.getEvaluatedPersonId()) ) {
 			       							/*
@@ -244,7 +245,7 @@ public class CdsOutputResultSetBuilder implements ResultSetBuilder<org.opencds.v
 	       							/*
 	       							 * Third look for EntityRelationships
 	       							 */
-	       							} else if ( "EntityRelationship".equals(oneResult.getClass().getSimpleName() ) ) {
+	       							} else if ( "EntityRelationship".equals(onResultClassName ) ) {
 	       								EntityRelationship oneERresult = (EntityRelationship)oneResult;
 		       							/*
 		       							 * Accumulate map of relationship of child entities to another entity in one list, 
@@ -285,7 +286,7 @@ public class CdsOutputResultSetBuilder implements ResultSetBuilder<org.opencds.v
 	       						 * results for this clinical statement are not empty
 	       						 */
 	       						for ( Object oneResult : oneResultList ) 
-	       						{	
+	       						{
 	       							if (( oneResult.getClass().getSuperclass() != null )   
 	       									&& ( oneResult.getClass().getSuperclass().getSuperclass() != null )   
 	       									&& ( "ClinicalStatement".equals(oneResult.getClass().getSuperclass().getSuperclass().getSimpleName() ) )) {
