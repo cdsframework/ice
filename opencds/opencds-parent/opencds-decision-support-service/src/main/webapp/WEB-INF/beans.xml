@@ -23,8 +23,8 @@
         <property name="locations">
             <list>
                 <value>file:${user.home}/.opencds/opencds.properties</value>
-                <value>classpath:iceversion.properties</value>
-                <value>classpath:git.properties</value>
+                <value>classpath:org/cdsframework/ice/util/iceversion.properties</value>
+                <value>classpath:org/cdsframework/ice/util/git.properties</value>
             </list>
         </property>
     </bean>
@@ -55,11 +55,20 @@
         <constructor-arg name="configData" ref="configData" />
     </bean>
 
-    <bean id="versionData" class="org.opencds.config.api.VersionData">
-        <constructor-arg index="0" value="${ice-version?unknown}"/>
-        <constructor-arg index="1" value="${git.commit.id.abbrev?no-git-sha}"/>
-        <constructor-arg index="2" value="${git.build.time?no-build-time}"/>
+    <!-- version data map for use in ice and version controller -->
+    <util:map id="versionData" map-class="java.util.HashMap">
+        <entry key="iceVersion" value="${ice-version?unknown}"/>
+        <entry key="gitCommitSha" value="${git.commit.id.abbrev?no-git-sha}"/>
+        <entry key="buildDate" value="${git.build.time?no-build-time}"/>
+    </util:map>
+
+    <!-- set the version data inside ICEVersionUtil -->
+    <bean id="iceVersionSetup" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="org.cdsframework.ice.util.ICEVersionUtil" />
+        <property name="targetMethod" value="setVersionData" />
+        <property name="arguments" ref="versionData"/>
     </bean>
+
     <!-- END: CONFIGURATION -->
 
     <!-- utilities -->
@@ -99,7 +108,6 @@
 
     <bean id="requestProcessorService" class="org.opencds.service.evaluate.RequestProcessorService">
         <constructor-arg name="inboundPayloadProcessor" ref="vmrInboundPayloadProcessor" />
-        <constructor-arg name="versionData" ref="versionData"/>
         <property name="inboundPayloadProcessorsMap">
             <map>
                 <entry key="org.opencds.vmr^VMR^1.0" value-ref="vmrInboundPayloadProcessor" />

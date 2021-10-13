@@ -45,7 +45,6 @@ import org.opencds.common.structures.EvaluationRequestKMItem;
 import org.opencds.common.structures.Payload;
 import org.opencds.config.api.FactListsBuilder;
 import org.opencds.config.api.KnowledgeRepository;
-import org.opencds.config.api.VersionData;
 import org.opencds.config.api.model.KnowledgeModule;
 import org.opencds.config.api.model.SSId;
 import org.opencds.config.api.model.SemanticSignifier;
@@ -98,12 +97,10 @@ public class RequestProcessorService implements RequestProcessor
 	private static final Logger log = LogManager.getLogger();
 
     private final InboundPayloadProcessor inboundPayloadProcessor;
-    private final VersionData versionData;
     private Map<String, InboundPayloadProcessor> inboundPayloadProcessorsMap;
     
-    public RequestProcessorService(InboundPayloadProcessor inboundPayloadProcessor, VersionData versionData) {
+    public RequestProcessorService(InboundPayloadProcessor inboundPayloadProcessor) {
         this.inboundPayloadProcessor = inboundPayloadProcessor;
-        this.versionData = versionData;
     }
     
     private static void validateDRIDataFormat(List<DataRequirementItemData> listDRID)
@@ -226,7 +223,6 @@ public class RequestProcessorService implements RequestProcessor
 
         Object cdsInput = getCdsInput(ss, request, evaluationRequestDataItem, inputPayloadString);
         evaluationRequestDataItem.setCdsInput(cdsInput);
-        evaluationRequestDataItem.setIceVersion(versionData.getIceVersion());
 
         log.debug("II: " + evaluationRequestDataItem.getInteractionId() + " unmarshalling completed");
 
