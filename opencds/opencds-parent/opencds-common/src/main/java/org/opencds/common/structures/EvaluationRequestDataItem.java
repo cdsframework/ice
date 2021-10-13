@@ -21,6 +21,7 @@ public class EvaluationRequestDataItem {
 	protected String 	inputPayloadString;
 	protected String	interactionId;
 	protected Object	cdsInput; 	//must be cast to a JAXB object when used...
+	protected String	iceVersion;
 
 	/**
 	 * @return the evalTime
@@ -149,6 +150,16 @@ public class EvaluationRequestDataItem {
 		this.cdsInput = cdsInput;
 	}
 
+	public String getIceVersion()
+	{
+		return iceVersion;
+	}
+
+	public void setIceVersion(String iceVersion)
+	{
+		this.iceVersion = iceVersion;
+	}
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -163,6 +174,7 @@ public class EvaluationRequestDataItem {
 				+ ", inputPayloadString=" + inputPayloadString
 				+ ", interactionId=" + interactionId 
 				+ ", cdsInput=" + cdsInput
+				+ ", iceVersion=" + iceVersion
 				+ "]";
 	}
 }
