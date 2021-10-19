@@ -86,7 +86,7 @@ rule "COVID-19: If the patient has completed the Pfizer series, no extra doses h
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		/////// Mark Forecasting of the Series $targetSeries Complete
+		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -131,7 +131,9 @@ rule "COVID-19: If the patient >= 65y has completed the Pfizer 2-dose series, no
 		Add "6m" to $pfizerSecondDoseDate and make note of the newly calculated date as $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
 		Set the Recommendation Supplemental Text for $r to "Although patients are considered fully vaccinated two weeks after their second dose of the Pfizer COVID-19 vaccine, a booster dose is recommended 6 months after the second dose for patients >= 65 years old."
+		Set the Recommendation Vaccine for $r to "ICE208"
 		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -149,6 +151,7 @@ rule "COVID-19: If the patient < 65y has completed the Pfizer 2-dose series, no 
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -169,7 +172,7 @@ rule "COVID-19: If the patient has completed the Moderna 2-dose series with no e
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		/////// Mark Forecasting of the Series $targetSeries Complete
+		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -190,7 +193,7 @@ rule "COVID-19: If the patient has completed the Janssen 1-dose series and no ex
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		/////// Mark Forecasting of the Series $targetSeries Complete
+		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -211,7 +214,7 @@ rule "COVID-19: If the patient has completed a series for a vaccine that is WHO-
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		/////// Mark Forecasting of the Series $targetSeries Complete
+		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end	
