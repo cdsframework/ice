@@ -47,8 +47,9 @@ public class AdministrableSubstanceMapper extends EntityBaseMapper {
 			FactLists							factLists
 	) throws ImproperUsageException, DataFormatException, InvalidDataException {	
 		
-		String _METHODNAME = "pullIn(): ";		
-		logger.trace(_METHODNAME + external.getClass().getSimpleName() + ", " + MappingUtility.iI2FlatId(external.getId()) + ", " + parentId);
+		String _METHODNAME = "pullIn(): ";
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + external.getClass().getSimpleName() + ", " + MappingUtility.iI2FlatId(external.getId()) + ", " + parentId);
 		
 		EntityBaseMapper.pullIn(external, internal, parentId, relationshipToParent, subjectPersonId, focalPersonId, factLists);
 		
@@ -92,8 +93,9 @@ public class AdministrableSubstanceMapper extends EntityBaseMapper {
 		
 		if (source == null)
 			return null;
-		
-		logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());		
+
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());
 		EntityBaseMapper.pushOut(source, target);
 		
 		if ( source.getSubstanceCode() != null ) target.setSubstanceCode(MappingUtility.cDInternal2CD(source.getSubstanceCode()));
@@ -131,8 +133,9 @@ public class AdministrableSubstanceMapper extends EntityBaseMapper {
 		
 		if (source == null)
 			return null;
-		
-		logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());		
+
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());
 		EntityBaseMapper.pushOut(source, target);
 		
 		if ( source.getSubstanceCode() != null ) target.setSubstanceCode(MappingUtility.cDInternal2CD(source.getSubstanceCode()));

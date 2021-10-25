@@ -171,14 +171,14 @@ end
 // START For series representing non-FDA but authorized vaccines, mark vaccines that are not in the series as ACCEPTED/VACCINE_NOT_COUNTERED_BASED_ON_MOST_RECENT_VACCINE_GIVEN 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19: If CVX 213 is administered for the AstraZeneca series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+rule "COVID-19: If a different WHO-approved vaccine is administered for the AstraZeneca series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19AstraZeneca2DoseSeries"
-			- the vaccine administered is "ICE213"
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE510", "ICE511")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -188,14 +188,14 @@ rule "COVID-19: If CVX 213 is administered for the AstraZeneca series and the se
 end
 
 
-rule "COVID-19: If CVX 213 is administered for the Novavax series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
+rule "COVID-19: If a different WHO-approved vaccine is administered for the Novavax series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Novavax2DoseSeries"			
-			- the vaccine administered is "ICE213"
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE213", "ICE510", "ICE511")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -205,14 +205,14 @@ rule "COVID-19: If CVX 213 is administered for the Novavax series and the series
 end
 
 
-rule "COVID-19: If CVX 213 is administered for the BIBP-Sinopharm series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
+rule "COVID-19: If a different WHO-approved vaccine is administered for the BIBP-Sinopharm series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19BIBPSinopharm2DoseSeries"			
-			- the vaccine administered is "ICE213"
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE511")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -222,14 +222,14 @@ rule "COVID-19: If CVX 213 is administered for the BIBP-Sinopharm series and the
 end
 
 
-rule "COVID-19: If CVX 213 is administered for the CoronaVac-Sinovac series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
+rule "COVID-19: If a different WHO-approved vaccine is administered for the CoronaVac-Sinovac series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19CoronaVacSinovac2DoseSeries"			
-			- the vaccine administered is "ICE213"
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE512")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -382,7 +382,7 @@ end
 
 // If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
 // Descriptive Text: "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval."
-rule "COVID-19: If shot in the Pfizer series is administered below 17d after the prior shot, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: If shot in the Pfizer series is administered below 17d after the prior shot and series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -412,7 +412,7 @@ rule "COVID-19: If shot in the Pfizer series is administered below 17d after the
 end
 
 
-rule "COVID-19: If shot in the Moderna series is administered below 24d after the prior shot, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: If shot in the Moderna series is administered below 24d after the prior shot and the series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"

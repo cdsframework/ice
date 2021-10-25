@@ -52,8 +52,9 @@ public class EntityMapper extends EntityBaseMapper {
 		if (source == null) {
 			return null;
 		}
-		
-		logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());
+
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());
 		EntityBaseMapper.pullIn(source, target, parentId, relationshipToParent, subjectPersonId, focalPersonId, factLists);
 		if ( source.getDescription() != null ) target.setDescription(MappingUtility.sT2STInternal(source.getDescription()));
 		
@@ -89,8 +90,9 @@ public class EntityMapper extends EntityBaseMapper {
 		
 		if (source == null)
 			return null;
-		
-		logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());	
+
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + source.getClass().getSimpleName() + ", " + source.getId());
 		EntityBaseMapper.pushOut(source, target);		
 
 		if ( source.getDescription() != null ) target.setDescription(MappingUtility.sTInternal2ST(source.getDescription()));		

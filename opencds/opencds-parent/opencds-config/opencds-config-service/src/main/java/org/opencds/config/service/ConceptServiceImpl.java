@@ -79,13 +79,16 @@ public class ConceptServiceImpl implements ConceptService, Observer {
             throw new OpenCDSRuntimeException("Unsupported ... <what?>");
         }
 
-        log.debug("Finding concept in conceptMaps: codeSystem= " + codeSystem + ", code= " + code);
+        if (log.isDebugEnabled())
+            log.debug("Finding concept in conceptMaps: codeSystem= " + codeSystem + ", code= " + code);
         List<ConceptMap> concepts = conceptMaps.get(ConceptImpl.create(code, codeSystem, null, null));
-        log.debug("Concepts found in conceptMaps: " + concepts);
+        if (log.isDebugEnabled())
+            log.debug("Concepts found in conceptMaps: " + concepts);
         if (concepts != null) {
             for (ConceptMap cm : concepts) {
                 conceptViews.add(new ConceptViewImpl(cm.getToConcept(), cm.getCdmCode()));
-                log.debug("Adding conceptView: to= " + cm.getToConcept() + ", cdm= " + cm.getCdmCode());
+                if (log.isDebugEnabled())
+                    log.debug("Adding conceptView: to= " + cm.getToConcept() + ", cdm= " + cm.getCdmCode());
             }
         }
 

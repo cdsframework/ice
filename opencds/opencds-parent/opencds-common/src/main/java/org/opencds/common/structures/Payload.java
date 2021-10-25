@@ -3,15 +3,15 @@ package org.opencds.common.structures;
 import java.util.Date;
 
 public class Payload {
-    private final String payload;
+    private final byte[] payload;
     private final Date evalTime;
     
-    public Payload(String payload, Date evalTime) {
+    public Payload(byte[] payload, Date evalTime) {
         this.payload = payload;
         this.evalTime = evalTime;
     }
 
-    public String getPayload() {
+    public byte[] getPayload() {
         return payload;
     }
 

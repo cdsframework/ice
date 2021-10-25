@@ -35,7 +35,9 @@ import org.opencds.common.utilities.AbsoluteTimeDifference;
 import org.opencds.common.utilities.DateUtility;
 import org.opencds.config.api.FactListsBuilder;
 import org.opencds.config.api.KnowledgeRepository;
+import org.opencds.config.api.model.ConceptDeterminationMethod;
 import org.opencds.config.api.model.KnowledgeModule;
+import org.opencds.config.api.model.SupportMethod;
 import org.opencds.config.api.service.ConceptService;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
 import org.opencds.vmr.v1_0.internal.AdverseEvent;
@@ -135,6 +137,7 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
 		Map<Class<?>, List<?>> allFactLists = new ConcurrentHashMap<>();
 
 		try {
+			MappingUtility.initParsedDatesCache();
 		    FactLists factLists = new FactLists();
 		    
 		    @SuppressWarnings("unchecked")
@@ -227,6 +230,9 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
             e.printStackTrace();
             throw new InvalidDriDataFormatException("Unknown error initializing CdsInputFactListsBuilder: " 
                     + unknownError + ", therefore unable to complete unmarshalling input Semantic Payload: " + payload.toString() );
+		} finally {
+			// Make sure to clear out the date cache for this request
+			MappingUtility.clearParsedDatesCache();
 		}
 		/**
 		 * The actual output of the mapping is in allFactLists, which is a live I-O input parameter
@@ -527,7 +533,7 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
 		}
 		// ================= End Clinical Statement Entity Relationships =======================//
 		
-		// ================= End of Building FactLists from One Evaluated Person =======================//					
+		// ================= End of Building FactLists from One Evaluated Person =======================//
 	}
 	
 
@@ -544,7 +550,6 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
 	 * @param birthTime
 	 * @param evalTime
 	 * @param internalSubjectPersonId
-	 * @param internalPersonAgeAtEvalTimeList
 	 */
 	private void populateEvaluatedPersonAgeAtEvalTime(Date birthTime, Date evalTime, String internalSubjectPersonId, FactLists factLists)
 	{

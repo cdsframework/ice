@@ -18,8 +18,10 @@ package org.opencds.vmr.v1_0.mappings.utilities;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,6 +89,58 @@ import org.opencds.vmr.v1_0.internal.datatypes.TelecommunicationCapability;
 
 public class MappingUtility extends java.lang.Object {
 
+	/**
+	 * Stores the dates that have been parsed during the evaluation process. This cache was added because, large vMRs
+	 * are known to contain thousands of date strings that must be parsed into Date objects, and the large majority of the values
+	 * appear numerous (even hundreds) of times throughout the vMR. For example, in one very large vMR, there were > 24,000
+	 * dates in the file that needed to be parsed, but only about 5% were unique values. Using a cache, instead of re-parsing,
+	 * saves a large amount of memory allocations and improves performance.
+	 *
+	 * The ThreadLocal is being used because the calls to parse dates (ts2DateInternal()) occur throughout the various "mapper"
+	 * classes. In this way, those mappers can call the normal MappingUtility.ts2DateInternal() method without knowledge of the
+	 * cache and the ts2DateInternal() method will take care of the actual caching.
+	 *
+	 * This cache should be scoped only to the life of the evaluation request, or ideally even shorter. You would not want this
+	 * to live beyond a single request since the number of unique entries would be limitless.
+	 * To reduce the risk of accidentally using it carelessly/unknowingly, it is not enabled by default. It must be explicitly enabled
+	 * during the request via the initParsedDatesCache() method.
+	 *
+	 * When done, the clearParsedDatesCache() method should be called to remove the cache from the thread, making them eligible for GC.
+	 */
+	private static final class ParsedDatesCache
+	{
+		private static ThreadLocal<Map<String, Date>> parsedDates = new ThreadLocal<>();
+
+		/**
+		 * To enable this cache, this must be explicitly called
+		 */
+		static void init()
+		{
+			parsedDates.set(new HashMap<String, Date>());
+		}
+
+		static void clear()
+		{
+			parsedDates.remove();
+		}
+
+		private boolean isEnabled()
+		{
+			return parsedDates.get() != null;
+		}
+
+		Date get(String key)
+		{
+			return isEnabled() ? parsedDates.get().get(key) : null;
+		}
+
+		void cache(String key, Date date)
+		{
+			if (isEnabled())
+				parsedDates.get().put(key, date);
+		}
+	}
+
 	private static final Logger logger = LogManager.getLogger();
 	
 	protected static CD noInformation = setNoInfo();
@@ -99,7 +153,19 @@ public class MappingUtility extends java.lang.Object {
 	}
 	
 	public static CD OPENCDS_NO_INFORMATION = noInformation;
-	
+
+	private static final ParsedDatesCache parsedDatesCache = new ParsedDatesCache();
+
+	public static void initParsedDatesCache()
+	{
+		parsedDatesCache.init();
+	}
+
+	public static void clearParsedDatesCache()
+	{
+		parsedDatesCache.clear();
+	}
+
 	public MappingUtility()
 	{
 	}
@@ -508,7 +574,7 @@ public class MappingUtility extends java.lang.Object {
 
 	/**
 	 * Build an II list from a list of root and optional extension (extension not present when the root is a GUID)
-	 * @param rootCaratExtension
+	 * @param rootCaratExtensionList
 	 * @return
 	 */
 	public static List<org.opencds.vmr.v1_0.schema.II> iIFlatList2IIList( String[] rootCaratExtensionList )
@@ -712,36 +778,27 @@ public class MappingUtility extends java.lang.Object {
 
 		String errStr = null;
 		String hl7Time = pTS.getValue();
-		String formatTemplate = "yyyyMMddHHmmss.SSSZZZZZ";
 		if (hl7Time == null) {
-			errStr = _METHODNAME + "getValue() is null; must follow format: " + formatTemplate;
+			errStr = _METHODNAME + "TS.getValue() is null";
 			logger.error(errStr);
 			throw new RuntimeException(errStr);
 		}
 
-		int hl7TimeLen = hl7Time.length();
-		if (hl7TimeLen > 23) {
-			errStr = _METHODNAME + "getValue() \"" + hl7Time + "\" is too long; must follow format: " + formatTemplate;
-			logger.error(errStr);
-			throw new RuntimeException(errStr);
+		Date parsedDate = parsedDatesCache.get(hl7Time);
+		if (parsedDate == null)
+		{
+			try
+			{
+				parsedDate = DateUtility.getInstance().getDateFromString(hl7Time, TSDateFormat.forInput(hl7Time));
+				parsedDatesCache.cache(hl7Time, parsedDate);
+			}
+			catch (Exception e)
+			{
+				errStr = _METHODNAME + "TS.getValue() \"" + hl7Time + "\" is in an invalid format";
+				throw new RuntimeException(errStr + ": " + e.getMessage(), e);
+			}
 		}
-
-		// value is populated and correct length. Parse it and return internal TS if successful
-		try {
-			// properly formatted; set internal TS object
-			Date dateFromStrValue;
-	        if (DateUtility.getInstance().isValidDateFormat(hl7Time, formatTemplate.substring(0, hl7Time.length()))) {
-	        	dateFromStrValue = DateUtility.getInstance().getDateFromString(hl7Time, formatTemplate.substring(0, hl7Time.length()));
-	        }
-	        else {
-	        	dateFromStrValue = DateUtility.getInstance().getDateFromString(hl7Time, "yyyyMMddHHmmssZ");
-	        }
-			return dateFromStrValue; 
-		}
-		catch (Exception e) {
-			errStr = _METHODNAME + "getValue() \"" + hl7Time + "\" is in wrong format; must follow format: " + formatTemplate;
-			throw new RuntimeException(errStr + ": " + e.getMessage() );
-		}
+		return parsedDate;
 	}
 
 	public static org.opencds.vmr.v1_0.schema.TS dateInternal2TS(java.util.Date pDate) {
@@ -962,7 +1019,6 @@ public class MappingUtility extends java.lang.Object {
 
 	/**
 	 * Translate from internal EN object to external EN object
-	 * @param pADEx external EN object
 	 * @return EN external EN object
 	 */
 	public static org.opencds.vmr.v1_0.schema.EN eNInternal2EN(EN pENInt) 

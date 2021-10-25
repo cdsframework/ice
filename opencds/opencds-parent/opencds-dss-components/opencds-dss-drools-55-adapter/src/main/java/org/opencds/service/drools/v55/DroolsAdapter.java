@@ -365,15 +365,15 @@ public class DroolsAdapter implements Evaluater {
         for (String key : namedObjects.keySet()) {
             Object oneNamedObject = namedObjects.get(key);
             if (oneNamedObject != null) {
-                // String className = oneNamedObject.getClass().getSimpleName();
-                List<Object> oneList = (List<Object>) resultFactLists.get(oneNamedObject.getClass().getSimpleName());
+                String className = oneNamedObject.getClass().getSimpleName();
+                List<Object> oneList = (List<Object>) resultFactLists.get(className);
                 if (oneList == null) {
                     oneList = new ArrayList<Object>();
                     oneList.add(oneNamedObject);
                 } else {
                     oneList.add(oneNamedObject);
                 }
-                resultFactLists.put(oneNamedObject.getClass().getSimpleName(), oneList);
+                resultFactLists.put(className, oneList);
             }
         }
 
@@ -405,7 +405,7 @@ public class DroolsAdapter implements Evaluater {
     }
     
     @Override
-    public KnowledgeBase loadKnowledgePackage(KnowledgePackageService knowledgePackageService, KnowledgeModule knowledgeModule) {
+    public Collection<KnowledgeBase> loadKnowledgePackages(KnowledgePackageService knowledgePackageService, KnowledgeModule knowledgeModule, int count) {
         KnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
         InputStream packageInputStream = knowledgePackageService.getPackageInputStream(knowledgeModule);
@@ -422,14 +422,16 @@ public class DroolsAdapter implements Evaluater {
                                 + knowledgeModule.getKMId() + "', " + knowledgeBuilder.getErrors().toString());
             }
             knowledgeBase.addKnowledgePackages(knowledgeBuilder.getKnowledgePackages());
-            knowledgePackageService.putPackage(knowledgeModule, knowledgeBase);
         } else {
             throw new OpenCDSRuntimeException(
                     "KnowledgeModule package cannot be found (possibly due to misconfiguration?); packageId= "
                             + knowledgeModule.getPackageId() + ", packageType= " + knowledgeModule.getPackageType());
         }
-        log.debug("Loaded KnowledgeModule package; kmId= " + knowledgeModule.getKMId());
-        return knowledgeBase;
+        log.info("Loaded KnowledgeModule package; kmId= " + knowledgeModule.getKMId());
+        List<KnowledgeBase> knowledgeBases = new ArrayList<KnowledgeBase>(count);
+        for (int i = 0; i < count; i++)
+            knowledgeBases.add(knowledgeBase);
+        return knowledgeBases;
     }
     
 }
