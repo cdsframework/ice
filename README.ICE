@@ -53,5 +53,5 @@ Alternatively, to build the software via source:
     $ mvn clean install
     $ cd opencds/opencds-parent
     $ mvn clean
-    $ mvn -P drools-7 -DskipTests -DskipITs install
+    $ mvn -DskipTests -DskipITs install
 
