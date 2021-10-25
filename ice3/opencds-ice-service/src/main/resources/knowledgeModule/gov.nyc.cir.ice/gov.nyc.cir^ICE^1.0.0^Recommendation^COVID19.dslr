@@ -150,7 +150,7 @@ rule "COVID-19: If the patient >= 65y has completed the Pfizer 2-dose series, no
 end
 
 
-rule "COVID-19: If the patient < 65y has completed the Pfizer 2-dose series, no extra doses have been administered and all doses were CVX 208 and < 65y old, then recommend a booster dose CVX 208 recommended interval 6 months, along with recommendation reason code SUPPLEMENTAL_TEXT"
+rule "COVID-19: If the patient < 65y has completed the Pfizer 2-dose series, no extra doses have been administered and all doses were CVX 208 and < 65y old, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 		// extends "COVID-19(Abstract): The patient has completed the Pfizer series with all Pfizer vaccine shots and no extra doses have been administered"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
