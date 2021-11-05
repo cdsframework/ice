@@ -92,28 +92,6 @@ rule "COVID-19: If the patient has completed the Pfizer series, no extra doses h
 end
 
 
-// If the patient completes the Pfizer COVID-19 2-dose series with all Pfizer vaccine shots (no extra doses)
-/*
-rule "COVID-19(Abstract): The patient has completed the Pfizer series with all Pfizer vaccine shots and no extra doses have been administered"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19Pfizer2DoseSeries"
-			- the Series is complete
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
-		There does not exist an administered shot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose Shot Validity is VALID
-			- the vaccine administered is not "ICE208"
-	then
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-*/
-
 rule "COVID-19: If the patient >= 65y has completed the Pfizer 2-dose series, no extra doses have been administered and all doses are CVX 208, then recommend a booster dose CVX 208 recommended interval 6 months, along with recommendation reason code SUPPLEMENTAL_TEXT"
 		// extends "COVID-19(Abstract): The patient has completed the Pfizer series with all Pfizer vaccine shots and no extra doses have been administered"
 	dialect "mvel"
@@ -135,16 +113,18 @@ rule "COVID-19: If the patient >= 65y has completed the Pfizer 2-dose series, no
 			- that has already been evaluated and whose Shot Validity is VALID
 			- make note of the date this shot was administered as $pfizerSecondDoseDate
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the Patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime >= "65y"
+			- make note of the date as $dtAtAge65y when the Patient is "65y" of age
+			- the date evalTime >= $dtAtAge65y
 	then
-		Create a Recommendation as $r for the Series $targetSeries
+		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "6m" to $pfizerSecondDoseDate and make note of the newly calculated date as $dtCalculated
-		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		// Set the Recommendation Supplemental Text for $r to "Although patients are considered fully vaccinated two weeks after their second dose of the Pfizer COVID-19 vaccine, a booster dose is recommended 6 months after the second dose for patients >= 65 years old."
-		Set the Recommendation Vaccine for $r to "ICE208"
-		Include the Recommendation $r for Consideration in the final forecast of the Series
-		/////// Mark Forecasting of the Series $targetSeries Complete
+		Set the Recommendation Vaccine for $r_interval to "ICE208"
+		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
+		Create a Recommendation as $r_age for the Series $targetSeries
+		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge65y
+		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
