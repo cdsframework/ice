@@ -176,38 +176,19 @@ rule "COVID-19: If Pfizer series is complete with 3 doses, set the recommendatio
 end
 
 
-// Because the Pfizer 2-dose series has been configured as a recurring dose series, if the recommendation reason  Pfizer 2-dose series is FUTURE_RECOMMENDED, the reason "DUE_IN_FUTURE" has to manually be set
-rule "COVID-19: If Pfizer series recommends a dose in the future and the series is complete, set the recommendation reason to Due In Future"
+// Because the Pfizer 2-dose series has been configured as a recurring dose series; if a recommendation date is forecasted after the  Pfizer 2-dose series is already complete, add the recommendation reason "BOOSTER_DOSE"
+rule "COVID-19: If Pfizer series recommends a dose in the future and the series is complete, add the recommendation reason Booster"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19Pfizer2DoseSeries"
 			- the Series is complete
-			- a forecast for the Series has been made and a shot is Recommended in the Future
+			- a forecast for the Series has been made and a shot is Recommended
 			- post processing on the Series forecast has not already been run
 	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.RECOMMENDED_IN_FUTURE for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.DUE_IN_FUTURE"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-// Because the Pfizer 2-dose series has been configured as a recurring dose series, if the recommendation reason  Pfizer 2-dose series is RECOMMENDED, the reason "DUE_NOW" has to manually be set
-rule "COVID-19: If Pfizer series recommends a dose now and the series is complete, set the recommendation reason to Due Now"
-	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
-	when
-		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19Pfizer2DoseSeries"
-			- the series is complete
-			- a forecast for the Series has been made and a shot is Recommended Now
-			- post processing on the Series forecast has not already been run
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.DUE_NOW"
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.BOOSTER_DOSE"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
