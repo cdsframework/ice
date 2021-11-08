@@ -302,29 +302,6 @@ rule "COVID-19: If the patient has no shots on record and is < 5 years old, reco
 end
 
 
-// If the series is not complete and the last shot administered is CVX 213, recommend earliest and routine age of 18 years
-rule "COVID-19: If the Series is not complete and the last shot administered was CVX 213, recommend earliest and routine age of 18 years"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is not complete
-			- make note of the last shot administered in the series as $lastShotAdministered
-		There is an Administered Shot $administeredShot
-			- that is the same shot as $lastShotAdministered
-			- the vaccine administered is "ICE213"
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $ageAt18y when the patient is "18y" of age
-	then
-		Create a Recommendation as $r for the Series $targetSeries
-		Set the recommendation Earliest Forecast Date for $r to $ageAt18y
-		Set the recommendation Recommended Forecast Date for $r to $ageAt18y
-		Include the Recommendation $r for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
 // If the series is not complete and the last shot administered is CVX 213 or shot not authorized by the FDA, recommend earliest and routine interval of 28 days to the next dose
 rule "COVID-19: If the Series is not complete and the last shot administered was CVX 213 or shot not authorized by the FDA, recommend both an minimum and recommended interval of at least 28 days"
 	agenda-group "RecommendationForecast^customRecommendationRule"
