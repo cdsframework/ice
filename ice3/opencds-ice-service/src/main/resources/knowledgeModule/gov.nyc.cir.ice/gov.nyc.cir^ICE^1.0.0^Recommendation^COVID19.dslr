@@ -177,7 +177,7 @@ end
 
 
 // Because the Pfizer 2-dose series has been configured as a recurring dose series; if a recommendation date is forecasted after the  Pfizer 2-dose series is already complete, add the recommendation reason "BOOSTER_DOSE"
-rule "COVID-19: If Pfizer series recommends a dose in the future and the series is complete, add the recommendation reason Booster"
+rule "COVID-19: If Pfizer series recommends a dose in the future and the series is complete, add the recommendation reason BOOSTER_DOSE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
@@ -261,8 +261,7 @@ end
  END Series Completion Special Rule
 /************************************************************************************************************************************************************************************/
 
-
-rule "COVID-19: If the patient has no shots on record and is >= 5 years old, recommend at the vaccine group level at today's date"
+rule "COVID-19: If the patient has no shots on record and is >= 18 yrs of age, recommend at the vaccine group level on today's date"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -270,8 +269,8 @@ rule "COVID-19: If the patient has no shots on record and is >= 5 years old, rec
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the number of administered shots is == 0
 		The patient information $patientInformation must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge5 when the patient is "5y" of age
-		Confirm the date evalTime is on the same date or after $dtDateAtAge5
+			- make note of the date as $dtDateAtAge18 when the patient is "18y" of age
+		Confirm the date evalTime is on the same date or after $dtDateAtAge18
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.DUE_NOW"
@@ -280,9 +279,55 @@ rule "COVID-19: If the patient has no shots on record and is >= 5 years old, rec
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+rule "COVID-19: If the patient has no shots on record and is >= 12 years and < 18 years of age, recommend a CVX 208 on today's date"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the number of administered shots is == 0
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge12 when the patient is "12y" of age
+			- make note of the date as $dtDateAtAge18 when the patient is "18y" of age
+		Confirm the date evalTime is on the same date or after $dtDateAtAge12
+		Confirm the date evalTime is before $dtDateAtAge18
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Vaccine for $recommendation to "ICE208"
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.DUE_NOW"
+		Set the recommendation Recommended Forecast Date for $recommendation to evalTime
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If the patient has no shots on record and is >= 5 yrs and < 12 yrs old, recommend a CVX 208 on today's date"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the number of administered shots is == 0
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge5 when the patient is "5y" of age
+			- make note of the date as $dtDateAtAge12 when the patient is "12y" of age
+		Confirm the date evalTime is on the same date or after $dtDateAtAge5
+		Confirm the date evalTime is before $dtDateAtAge12
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Vaccine for $recommendation to "ICE218"
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.DUE_NOW"
+		Set the recommendation Recommended Forecast Date for $recommendation to evalTime
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
  
 
-rule "COVID-19: If the patient has no shots on record and is < 5 years old, recommend at the vaccine group level at 5 years of age"
+rule "COVID-19: If the patient has no shots on record and is < 5 yrs old, recommend a CVX 218 at 5 yrs of age"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -294,6 +339,7 @@ rule "COVID-19: If the patient has no shots on record and is < 5 years old, reco
 		Confirm the date evalTime is before $dtDateAtAge5
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Vaccine for $recommendation to "ICE218"
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.DUE_NOW"
 		Set the recommendation Recommended Forecast Date for $recommendation to $dtDateAtAge5
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
