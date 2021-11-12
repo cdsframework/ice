@@ -73,29 +73,31 @@ end
 //     at >= 28 days-4 days after series completion, then evaluate the shot as Valid.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19: If one extra shot of CVX 207, 208 or 213 is administered for an already completed Pfizer series, evaluate the shot as Valid"
+rule "COVID-19(Abstract): If one extra shot of CVX 207, 208, 213 or 218 is administered for an already completed Pfizer series and the patient >= 12 yrs of age"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Pfizer2DoseSeries"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE213")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE213", "ICE218")
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the dose number as $targetDoseNumber
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
 			- the number of doses required to complete this Series is == $targetDoseNumber-1
+		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
+			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
+			- the date evalTime >= $dateAt12yOfAge
 	then
-		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
 
-rule "COVID-19: If an extra dose is administered to an already completed Pfizer series prior to 24 days, include descriptive text that follow guidelines regarding minimum ages/intervals"
-		extends "COVID-19: If one extra shot of CVX 207, 208 or 213 is administered for an already completed Pfizer series, evaluate the shot as Valid"
+rule "COVID-19: If an extra dose is administered to an already completed Pfizer series prior to 24 days in the _Adult_ series, mark the shot Valid and include descriptive text that follow guidelines regarding minimum ages/intervals"
+		extends "COVID-19(Abstract): If one extra shot of CVX 207, 208, 213 or 218 is administered for an already completed Pfizer series and the patient >= 12 yrs of age"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -110,9 +112,61 @@ rule "COVID-19: If an extra dose is administered to an already completed Pfizer 
 			- that is not the same shot as $priorShot
 			- the administration date of the shot is > $priorShotDate
 			- the administration date of the shot is < $currentShotDate
+		// To be in the Adult series, the first dose must be >= 18y of age
+		There is an administered shot $firstValidDose
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- make note of the date this shot was administered as $administrationDateOf1stDose
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is < $administrationDateOf1stDose
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+			- make note of the date as $dateAt18yOfAge when the patient is "18y" of age
+			- the date $administrationDateOf1stDose >= $dateAt18yOfAge
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "24d"
 	then
+		Set the Shot Status of $currentShot to Valid
 		Include Supplemental Text "The timing of the administration of this shot does not follow ACIP guidelines regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+
+// This rule soon to be modified to enforce absolute minimum interval for all ages
+rule "COVID-19: If an extra dose is administered to an already completed Pfizer series prior to 24 days in the _Childhood_ series, mark the shot INVALID / BELOW_MINIMUM_INTERVAL"
+		extends "COVID-19(Abstract): If one extra shot of CVX 207, 208, 213 or 218 is administered for an already completed Pfizer series and the patient >= 12 yrs of age"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an administered shot $priorShot
+			- the shot belongs to the series $targetSeries
+			- that is not the same shot as $currentShot
+			- the administration date of the shot is < $currentShotDate
+			- make note of the date this shot was administered as $priorShotDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that is not the same shot as $currentShot
+			- that is not the same shot as $priorShot
+			- the administration date of the shot is > $priorShotDate
+			- the administration date of the shot is < $currentShotDate
+		// To be in the Childhood series, the first dose must be < 18y of age
+		There is an administered shot $firstValidDose
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- make note of the date this shot was administered as $administrationDateOf1stDose
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is < $administrationDateOf1stDose
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+			- make note of the date as $dateAt18yOfAge when the patient is "18y" of age
+			- the date $administrationDateOf1stDose < $dateAt18yOfAge
+		Confirm elapsed time between $priorShotDate and $currentShotDate < "24d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentShot
         Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end

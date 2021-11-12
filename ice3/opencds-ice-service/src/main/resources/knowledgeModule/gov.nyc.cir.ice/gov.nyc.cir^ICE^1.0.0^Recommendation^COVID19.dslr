@@ -57,18 +57,119 @@ global org.cdsframework.ice.service.Schedule schedule
 /*************************************************************************************************************************************************************************************
  Series Completion Special Rule
  Once a patient completes:
-   + the Pfizer COVID-19 2-dose series and all doses were CVX 208, and is >= 65 years old, recommend a booster dose of Pfizer (CVX 208) at Dose 2 + recommended interval (6 months), 
+ -Childhood-
+   + the Pfizer Childhood (< 18y) COVID-19 2-dose series and no extra doses have been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK
+   + the Pfizer 2-dose Childhood (< 18y) series and an additional dose has been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK along with SUPPLEMENTAL_TEXT
+ -Adult-
+   + the Pfizer COVID-19 2-dose series and all doses were CVX 208/218, and is >= 65 years old, recommend a booster dose of Pfizer (CVX 208) at Dose 2 + recommended interval (6 months), 
          along with recommendation reason code SUPPLEMENTAL_TEXT; Descriptive Text: "Although patients are considered fully vaccinated two weeks after their second dose of the 
          Pfizer COVID-19 vaccine, a booster dose is recommended 6 months after the second dose for patients >= 65 years old."
-   + the Pfizer COVID-19 2-dose series but not all doses were CVX 208, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK
+   + the Pfizer COVID-19 2-dose series and all doses were CVX 208/218, and is < 65 yrs old, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK
+   + the Pfizer COVID-19 2-dose series but not all doses were CVX 208 or CVX 218, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK
+ -Other-
    + the Moderna COVID-19 2-dose series, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK. 
-   + either the Pfizer COVID-19 2-dose series or the Moderna COVID-19 2-dose series AND receives an additional dose, the Recommendation is Not Recommended and reason code is COMPLETE.
+   + either the Pfizer COVID-19 2-dose series, Moderna COVID-19 2-dose series or Janssen 1-dose series AND receives an additional dose, the Recommendation is Not Recommended and 
+   	     reason code is COMPLETE.
    + either the 1) Janssen COVID-19 1-dose series, 2) COVID-19 vaccine series not authorized by the FDA, but authorized by the WHO, or a 3) COVID-19 vaccine series not authorized by 
    + the FDA or WHO, but is an active COVID-19 vaccine candidate as part of a U.S.-based clinical trial of a COVID-19 vaccine, the Recommendation is Not Recommended/COMPLETE_HIGH_RISK.
 /************************************************************************************************************************************************************************************/        
 
+rule "COVID-19: If the patient < 18y has completed the Pfizer 2-dose _childhood_ series and no extra doses have been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Pfizer2DoseSeries"
+			- the Series is complete
+			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- the number of doses administered is == $numberOfDosesRequired
+		There is an administered shot $firstValidDose
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- make note of the date this shot was administered as $administrationDateOf1stDose
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is < $administrationDateOf1stDose
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+			- make note of the date as $dateAt18yOfAge when the patient is "18y" of age
+			- the date $administrationDateOf1stDose <= $dateAt18yOfAge
+			- the date evalTime <= $dateAt18yOfAge
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If the patient completes the Pfizer 2-dose _childhood_ series and an additional dose has been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK with SUPPLEMENTAL_TEXT"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Pfizer2DoseSeries"
+			- the Series is complete
+			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- the number of doses administered is == $numberOfDosesRequired+1
+		There is an administered shot $firstValidDose
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- make note of the date this shot was administered as $administrationDateOf1stDose
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is < $administrationDateOf1stDose
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+			- make note of the date as $dateAt18yOfAge when the patient is "18y" of age
+			- the date $administrationDateOf1stDose <= $dateAt18yOfAge
+			- the date evalTime <= $dateAt18yOfAge
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		// Set the Recommendation Supplemental Text for $r to "The primary series was completed with 2-doses; one or more valid doses were administered after primary series completion."
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If the patient < 65y has completed the Pfizer 2-dose series, no extra doses have been administered and _ALL_ doses were CVX 208/CVX 218 and < 65y old, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Pfizer2DoseSeries"
+			- the Series is complete
+			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- the number of doses administered is == $numberOfDosesRequired
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the vaccine administered not a member of ("ICE208", "ICE218")
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime < "65y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
 // If the patient completes the Pfizer COVID-19 2-dose series (no extra doses), the Recommendation is Conditional with reason code COMPLETE_HIGH_RISK
-rule "COVID-19: If the patient has completed the Pfizer series, no extra doses have been administered and _not_ all doses were CVX 208, then recommend Conditional with reason code is COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient has completed the Pfizer series, no extra doses have been administered and _NOT_ all doses were CVX 208/CVX 218, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -92,8 +193,7 @@ rule "COVID-19: If the patient has completed the Pfizer series, no extra doses h
 end
 
 
-rule "COVID-19: If the patient >= 65y has completed the Pfizer 2-dose series, no extra doses have been administered and all doses are CVX 208, then recommend a booster dose CVX 208 recommended interval 6 months, along with recommendation reason code SUPPLEMENTAL_TEXT"
-		// extends "COVID-19(Abstract): The patient has completed the Pfizer series with all Pfizer vaccine shots and no extra doses have been administered"
+rule "COVID-19: If the patient >= 65y has completed the Pfizer 2-dose series, no extra doses have been administered and _all_ doses are CVX 208/CVX 218, then recommend a booster dose CVX 208 recommended interval 6 months, along with recommendation reason code SUPPLEMENTAL_TEXT"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -130,54 +230,8 @@ rule "COVID-19: If the patient >= 65y has completed the Pfizer 2-dose series, no
 end
 
 
-rule "COVID-19: If the patient < 65y has completed the Pfizer 2-dose series, no extra doses have been administered and all doses were CVX 208 and < 65y old, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
-		// extends "COVID-19(Abstract): The patient has completed the Pfizer series with all Pfizer vaccine shots and no extra doses have been administered"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19Pfizer2DoseSeries"
-			- the Series is complete
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
-		There does not exist an administered shot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose Shot Validity is VALID
-			- the vaccine administered not a member of ("ICE208", "ICE218")
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the Patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime < "65y"
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Mark Forecasting of the Series $targetSeries Complete
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-// Because the Pfizer 2-dose series has been configured as a recurring dose series, if the recommendation reason for the Pfizer 2-dose series is NOT_RECOMMENDED, the reason has to manually be set to COMPLETE
-rule "COVID-19: If Pfizer series is complete with 3 doses, set the recommendation reason to Complete"
-	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
-	when
-		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19Pfizer2DoseSeries"
-			- a forecast for the Series has been made and a shot is Not Recommended
-			- post processing on the Series forecast has not already been run
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-// Because the Pfizer 2-dose series has been configured as a recurring dose series; if a recommendation date is forecasted after the  Pfizer 2-dose series is already complete, add the recommendation reason "BOOSTER_DOSE"
-rule "COVID-19: If Pfizer series recommends a dose in the future and the series is complete, add the recommendation reason BOOSTER_DOSE"
+// Because the Pfizer 2-dose series has been configured as a recurring dose series; if a recommendation date is forecasted after the Pfizer 2-dose series is already complete, add the recommendation reason "BOOSTER_DOSE"
+rule "COVID-19: If Pfizer series recommends a dose and the series is complete, add the recommendation reason BOOSTER_DOSE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
@@ -189,6 +243,24 @@ rule "COVID-19: If Pfizer series recommends a dose in the future and the series 
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.BOOSTER_DOSE"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// Because the Pfizer 2-dose series has been configured as a recurring dose series, if the recommendation reason for the Pfizer 2-dose series is NOT_RECOMMENDED, the reason has to manually be set to COMPLETE
+rule "COVID-19: If Pfizer series is complete and a dose is NOT_RECOMMENDED (i.e. - 3 or more doses), add the recommendation reason to COMPLATE"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Pfizer2DoseSeries"
+			- a forecast for the Series has been made and a shot is Not Recommended
+			- post processing on the Series forecast has not already been run
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -401,7 +473,7 @@ end
 /************************************************************************************************************************************************************************************/
 
 // When recommending in the Pfizer 2-dose Series, recommend CVX 208 for the next target dose of a patient < 12yrs if a Valid CVX 208 has already been administered.
-rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose Series if the most recent dose was a Moderna vaccine and the patient will be >= 12 yrs of age as of the next recommendation date"
+rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose Series if the most recent dose was a Pfizer vaccine and the patient will be >= 12 yrs of age as of the next recommendation date"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
