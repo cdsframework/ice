@@ -69,6 +69,28 @@ rule "COVID-19: If the vaccine administered is authorized neither by the FDA nor
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// CVX 218, if evaluated as Invalid due to being above the maximum age for that vaccine, should be ignored for purposes of recommendations
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19: If CVX 218 was evaluated and Not Valid due to ABOVE_MAXIMUM_AGE_VACCINE, ignore the shot when calculating intervals"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an administered shot $administeredShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- that has already been evaluated and whose Shot Validity Status is not VALID
+			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
+			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_VACCINE"
+			- make note of the Associated Series as $associatedTargetSeries
+	then
+		Mark the shot $administeredShot as Ignored
+		Record that this dose rule was Processed for the TargetDose $administeredShot
+		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
+end
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // START Rules for an Additional Dose:
 //  Pfizer or Moderna
