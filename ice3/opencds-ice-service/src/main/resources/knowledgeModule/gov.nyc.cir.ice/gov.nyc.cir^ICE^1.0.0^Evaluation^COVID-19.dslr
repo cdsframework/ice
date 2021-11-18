@@ -49,7 +49,11 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 global java.util.Date evalTime
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Evaluation of vaccines not authorized by the FDA or WHO
 // If the patient has received a COVID-19 vaccine not authorized by the FDA or WHO, then evaluate the shot as Invalid/VACCINE_NOT_APPROVED_IN_US_OR_BY_WHO
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
 rule "COVID-19: If the vaccine administered is authorized neither by the FDA nor WHO, evaluate the shot as INVALID/VACCINE_NOT_APPROVED_IN_US_OR_BY_WHO"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -78,7 +82,7 @@ end
 //     at >= 28 days-4 days after series completion, then evaluate the shot as Valid.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 218) is administered for an already completed Pfizer or Moderna series and the patient >= 12 yrs of age"
+rule "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 218) is administered for an already completed __Pfizer or Moderna Series__ and the patient >= 12 yrs of age"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -102,8 +106,8 @@ rule "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208,
 end
 
 
-rule "COVID-19: If an extra dose is administered to an already completed Pfizer series prior to 24 days in the _Adult_ series, mark the shot Valid and include descriptive text that follow guidelines regarding minimum ages/intervals"
-		extends "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 218) is administered for an already completed Pfizer or Moderna series and the patient >= 12 yrs of age"
+rule "COVID-19: If an extra dose is administered to an already completed __Pfizer Adult Series__ prior to 24 days, mark the shot Valid and include descriptive text that follow guidelines regarding minimum ages/intervals"
+		extends "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 218) is administered for an already completed __Pfizer or Moderna Series__ and the patient >= 12 yrs of age"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -141,8 +145,8 @@ end
 
 
 // This rule soon to be modified to enforce absolute minimum interval for all ages
-rule "COVID-19: If an extra dose is administered to an already completed Pfizer series prior to 24 days in the _Childhood_ series, mark the shot INVALID / BELOW_MINIMUM_INTERVAL"
-		extends "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 218) is administered for an already completed Pfizer or Moderna series and the patient >= 12 yrs of age"
+rule "COVID-19: If an extra dose is administered to an already completed __Pfizer Childhood Series__ prior to 24 days, mark the shot INVALID / BELOW_MINIMUM_INTERVAL"
+		extends "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 218) is administered for an already completed __Pfizer or Moderna Series__ and the patient >= 12 yrs of age"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -178,7 +182,7 @@ rule "COVID-19: If an extra dose is administered to an already completed Pfizer 
 end
 
 
-rule "COVID-19: If one extra shot of CVX 207, 208, 212 or 213 is administered for an already completed Janssen series, evaluate the shot as Valid"
+rule "COVID-19: If one extra shot of CVX 207, 208, 212 or 213 is administered for an already completed __Janssen Series__, evaluate the shot as Valid"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -280,12 +284,15 @@ end
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// START
+// START ACCEPTED vaccines in a wrong FDA-approved series
 // FDA-approved vaccines in the wrong FDA-approved series that is not complete always get evaluated as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN rather than Invalid. 
 // Non-FDA approved vaccines in a FDA-approved series that is not complete always gets evaluated as ACCEPTED/VACCINE_NOT_APPROVED_IN_US.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19: If either an FDA-approved (Pfizer, Moderna or NOS vaccine) is administered for the Janssen series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+///////
+// Janssen ACCEPTED evaluation rules
+///////
+rule "COVID-19: If either an FDA-approved (Pfizer, Moderna or NOS vaccine) is administered for the Janssen Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -301,8 +308,7 @@ rule "COVID-19: If either an FDA-approved (Pfizer, Moderna or NOS vaccine) is ad
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-
-rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Janssen series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
+rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Janssen Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -317,9 +323,12 @@ rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+///////
 
-
-rule "COVID-19: If the Janssen vaccine is administered for the Pfizer series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+///////
+// Pfizer ACCEPTED evaluation rules
+///////
+rule "COVID-19: If the Janssen vaccine is administered for the Pfizer Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -335,8 +344,7 @@ rule "COVID-19: If the Janssen vaccine is administered for the Pfizer series and
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-
-rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Pfizer series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
+rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Pfizer Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -351,9 +359,12 @@ rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+///////
 
-
-rule "COVID-19: If the Janssen vaccine is administered for the Moderna series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+///////
+// Moderna ACCEPTED evaluation rules
+///////
+rule "COVID-19: If the Janssen vaccine is administered for the Moderna Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -369,8 +380,7 @@ rule "COVID-19: If the Janssen vaccine is administered for the Moderna series an
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-
-rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Moderna series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
+rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Moderna Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -385,9 +395,10 @@ rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+///////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// END Vaccines in the wrong FDA-approved series
+// END ACCEPTED vaccines in a wrong FDA-approved series
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -418,7 +429,7 @@ end
 
 // If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
 // Descriptive Text: "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval."
-rule "COVID-19: If the Pfizer or CVX 213 vaccine is administered in the Pfizer/Moderna series less than 17 days after the prior Pfizer/NOS shot and series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: If the Pfizer or CVX 213 vaccine is administered in the Pfizer/Moderna series less than 17 days after a prior Pfizer/NOS shot and series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -439,11 +450,13 @@ rule "COVID-19: If the Pfizer or CVX 213 vaccine is administered in the Pfizer/M
 			- make note of the date this shot was administered as $administrationDatePrior
 			- the vaccine administered a member of ("ICE208", "ICE213", "ICE218")
 			- the date $administrationDatePrior <= $administrationDate
-		There does not exist an Administered Shot
-			- the shot belongs to the series $associatedTargetSeries
-			- that has already been evaluated
-			- the vaccine administered a member of ("ICE208", "ICE213", "ICE218")
-			- the administration date of the shot is > $administrationDatePrior
+			- the shot is not ignored for completion of the series
+		/////// There does not exist an Administered Shot
+		///////	- the shot belongs to the series $associatedTargetSeries
+		///////	- that has already been evaluated
+		///////	- the vaccine administered a member of ("ICE208", "ICE213", "ICE218")
+		///////	- the administration date of the shot is > $administrationDatePrior
+		Confirm the date $administrationDate is before "25-Oct-2021"
 		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "17d"
 	then
 		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
@@ -452,7 +465,7 @@ rule "COVID-19: If the Pfizer or CVX 213 vaccine is administered in the Pfizer/M
 end
 
 
-rule "COVID-19: If a shot is administered in the Pfizer/Moderna series less than 24 days after the prior non-Pfizer/NOS shot and series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: If a shot is administered before 10/25/2021 in the Pfizer/Moderna Series, less than 24 days after a prior non-Pfizer/NOS shot, and the series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -472,45 +485,125 @@ rule "COVID-19: If a shot is administered in the Pfizer/Moderna series less than
 			- make note of the date this shot was administered as $administrationDatePrior
 			- the vaccine administered not a member of ("ICE208", "ICE213", "ICE218")
 			- the date $administrationDatePrior <= $administrationDate
+			- the shot is not ignored for completion of the series
+		/////// There does not exist an Administered Shot
+		///////	- the shot belongs to the series $associatedTargetSeries
+		///////	- that has already been evaluated
+		///////	- the vaccine administered not a member of ("ICE208", "ICE213", "ICE218")
+		///////	- the administration date of the shot is > $administrationDatePrior
+		Confirm the date $administrationDate is before "25-Oct-2021"
+		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "24d"
+	then
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19: If a non-Pfizer vaccine is administered before 10/25/2021 in the Pfizer/Moderna Series, less than 24 days after a prior shot, and the series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries")
+			- the administered shot number is > 1
+			- the vaccine administered not a member of ("ICE208", "ICE213", "ICE218")
+			- make note of the administered shot number as $administeredShotNumber
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series is not complete
+		There is an Administered Shot $priorShot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- make note of the date this shot was administered as $administrationDatePrior
+			- the date $administrationDatePrior <= $administrationDate
+			- the shot is not ignored for completion of the series
+		Confirm the date $administrationDate is before "25-Oct-2021"
+		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "24d"
+	then
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+////////////////////////////
+// START - Backward-compatible, temporary rules. If the patient in the Pfizer Adult or Moderna Series (> 18 yrs upon receiving first dose), do not do 10/25 date check and always return supplemental text 
+////////////////////////////
+rule "COVID-19: If the first Pfizer dose is administered >= 18y of age and below 17d after the prior shot and series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Pfizer2DoseSeries"
+			- the administered shot number is > 1
+			- make note of the administered shot number as $administeredShotNumber
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
+		There exists an Administered Shot
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= $dtDateAtAge18y
+		There is an Administered Shot $priorDose
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is == $administeredShotNumber-1
+			- make note of the date this shot was administered as $administrationDatePrior
+			- make note of the minimum interval from this dose to the next dose as $minimumInterval
 		There does not exist an Administered Shot
 			- the shot belongs to the series $associatedTargetSeries
 			- that has already been evaluated
-			- the vaccine administered not a member of ("ICE208", "ICE213", "ICE218")
+			- the administered shot number is == $administeredShotNumber-1
 			- the administration date of the shot is > $administrationDatePrior
-		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "24d"
+		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "17d"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
         Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
 
-rule "COVID-19: If a non-Pfizer vaccine is administered in the Pfizer/Moderna series less than 24 days after the prior shot and series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: If the first dose in the Moderna Series is administered >=18y of age and below 24d after the prior shot and the series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the shot belongs to the Series with name a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Moderna2DoseSeries"
 			- the administered shot number is > 1
-			- the vaccine administered not a member of ("ICE208", "ICE213", "ICE218")
 			- make note of the administered shot number as $administeredShotNumber
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
-		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the series is not complete
-		There is an Administered Shot $priorShot
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
+		There exists an Administered Shot
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= $dtDateAtAge18y
+		There is an Administered Shot $priorDose
 			- the shot belongs to the series $associatedTargetSeries
 			- that has already been evaluated
+			- the administered shot number is == $administeredShotNumber-1
 			- make note of the date this shot was administered as $administrationDatePrior
-			- the date $administrationDatePrior <= $administrationDate
+			- make note of the minimum interval from this dose to the next dose as $minimumInterval
+		There does not exist an Administered Shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is == $administeredShotNumber-1
+			- the administration date of the shot is > $administrationDatePrior
 		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "24d"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
         Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
+
+////////////////////////////
+// END Backward-compatible, temporary rules. If the patient in the Pfizer Adult or Moderna Series (> 18 yrs upon receiving first dose), do not do 10/25 date check and always return supplemental text 
+////////////////////////////
 
 /*************************************************************************************************************************************************************************************
 END If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 

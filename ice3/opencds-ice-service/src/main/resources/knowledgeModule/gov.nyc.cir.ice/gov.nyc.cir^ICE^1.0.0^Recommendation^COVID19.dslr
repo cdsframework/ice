@@ -55,26 +55,39 @@ global org.cdsframework.ice.service.Schedule schedule
 
 
 /*************************************************************************************************************************************************************************************
- Series Completion Special Rule
+ Recommended Interval from prior CVX 218 evaluated as Invalid / ABOVE_MAXIMUM_AGE_VACCINE is 0 days.
+/************************************************************************************************************************************************************************************/
+
+rule "COVID-19: Recommended interval from prior CVX 218 shot evaluated as Invalid / ABOVE_MAXIMUM_AGE_VACCINE is 0 days" 
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+	
+	then
+	
+end
+
+
+/*************************************************************************************************************************************************************************************
+ ____Series Completion Special Rules____
  Once a patient completes:
  -Childhood-
-   + the Pfizer Childhood (< 18y) COVID-19 2-dose series and no extra doses have been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK
-   + the Pfizer 2-dose Childhood (< 18y) series and an additional dose has been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK along with SUPPLEMENTAL_TEXT
+   + the Pfizer Childhood (< 18y) Series and no extra doses have been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK
+   + the Pfizer Childhood (< 18y) Series and an additional dose has been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK along with SUPPLEMENTAL_TEXT
  -Adult-
-   + the Pfizer COVID-19 2-dose series and all doses were CVX 208/218, and is >= 65 years old, recommend a booster dose of Pfizer (CVX 208) at Dose 2 + recommended interval (6 months), 
+   + the Pfizer Series and all doses were CVX 208/218, and is >= 65 years old, recommend a booster dose of Pfizer (CVX 208) at Dose 2 + recommended interval (6 months), 
          along with recommendation reason code SUPPLEMENTAL_TEXT; Descriptive Text: "Although patients are considered fully vaccinated two weeks after their second dose of the 
          Pfizer COVID-19 vaccine, a booster dose is recommended 6 months after the second dose for patients >= 65 years old."
-   + the Pfizer COVID-19 2-dose series and all doses were CVX 208/218, and is < 65 yrs old, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK
-   + the Pfizer COVID-19 2-dose series but not all doses were CVX 208 or CVX 218, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK
+   + the Pfizer Series and all doses were CVX 208/218, and is < 65 yrs old, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK
+   + the Pfizer Series but not all doses were CVX 208 or CVX 218, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK
  -Other-
-   + the Moderna COVID-19 2-dose series, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK. 
-   + either the Pfizer COVID-19 2-dose series, Moderna COVID-19 2-dose series or Janssen 1-dose series AND receives an additional dose, the Recommendation is Not Recommended and 
-   	     reason code is COMPLETE.
-   + either the 1) Janssen COVID-19 1-dose series, 2) COVID-19 vaccine series not authorized by the FDA, but authorized by the WHO, or a 3) COVID-19 vaccine series not authorized by 
-   + the FDA or WHO, but is an active COVID-19 vaccine candidate as part of a U.S.-based clinical trial of a COVID-19 vaccine, the Recommendation is Not Recommended/COMPLETE_HIGH_RISK.
-/************************************************************************************************************************************************************************************/        
+   + the Moderna Series, the Recommendation is Conditional and the reason code is COMPLETE_HIGH_RISK. 
+   + either the Pfizer Series, Moderna Series or Janssen Series AND receives an additional dose, the Recommendation is Not Recommended and reason code is COMPLETE.
+   + either the 1) Janssen Series, 2) a COVID-19 Series not authorized by the FDA but authorized by the WHO, or a 3) a COVID-19 vaccine series not authorized by the FDA or 
+   +     WHO but is an active COVID-19 vaccine candidate as part of a U.S.-based clinical trial of a COVID-19 vaccine, the Recommendation is Not Recommended / COMPLETE_HIGH_RISK.
+/************************************************************************************************************************************************************************************/
 
-rule "COVID-19: If the patient < 18y has completed the Pfizer 2-dose _childhood_ series and no extra doses have been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient < 18y has completed the Pfizer _Childhood_ Series and no extra doses have been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -107,7 +120,7 @@ rule "COVID-19: If the patient < 18y has completed the Pfizer 2-dose _childhood_
 end
 
 
-rule "COVID-19: If the patient completes the Pfizer 2-dose _childhood_ series and an additional dose has been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK with SUPPLEMENTAL_TEXT"
+rule "COVID-19: If the patient completes the Pfizer _Childhood_ Series and an additional dose has been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK with SUPPLEMENTAL_TEXT"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -141,7 +154,7 @@ rule "COVID-19: If the patient completes the Pfizer 2-dose _childhood_ series an
 end
 
 
-rule "COVID-19: If the patient < 65y has completed the Pfizer 2-dose series, no extra doses have been administered and _ALL_ doses were CVX 208/CVX 218 and < 65y old, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient < 65y has completed the Pfizer Series, no extra doses have been administered and _ALL_ doses were CVX 208/CVX 218 and < 65y old, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -169,7 +182,7 @@ end
 
 
 // If the patient completes the Pfizer COVID-19 2-dose series (no extra doses), the Recommendation is Conditional with reason code COMPLETE_HIGH_RISK
-rule "COVID-19: If the patient has completed the Pfizer series, no extra doses have been administered and _NOT_ all doses were CVX 208/CVX 218, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient has completed the Pfizer Series, no extra doses have been administered and _NOT_ all doses were CVX 208/CVX 218, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -193,7 +206,7 @@ rule "COVID-19: If the patient has completed the Pfizer series, no extra doses h
 end
 
 
-rule "COVID-19: If the patient >= 65y has completed the Pfizer 2-dose series, no extra doses have been administered and _all_ doses are CVX 208/CVX 218, then recommend a booster dose CVX 208 recommended interval 6 months, along with recommendation reason code SUPPLEMENTAL_TEXT"
+rule "COVID-19: If the patient >= 65y has completed the Pfizer Series, no extra doses have been administered and _all_ doses are CVX 208/CVX 218, then recommend a booster dose CVX 208 recommended interval 6 months, along with recommendation reason code SUPPLEMENTAL_TEXT"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -231,7 +244,7 @@ end
 
 
 // Because the Pfizer 2-dose series has been configured as a recurring dose series; if a recommendation date is forecasted after the Pfizer 2-dose series is already complete, add the recommendation reason "BOOSTER_DOSE"
-rule "COVID-19: If Pfizer series recommends a dose and the series is complete, add the recommendation reason BOOSTER_DOSE"
+rule "COVID-19: If Pfizer Series recommends a dose and the series is complete, add the recommendation reason BOOSTER_DOSE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
@@ -250,7 +263,7 @@ end
 
 
 // Because the Pfizer 2-dose series has been configured as a recurring dose series, if the recommendation reason for the Pfizer 2-dose series is NOT_RECOMMENDED, the reason has to manually be set to COMPLETE
-rule "COVID-19: If Pfizer series is complete and a dose is NOT_RECOMMENDED (i.e. - 3 or more doses), add the recommendation reason to COMPLATE"
+rule "COVID-19: If Pfizer Series is complete and a dose is NOT_RECOMMENDED (i.e. - 3 or more doses), add the recommendation reason to COMPLATE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
@@ -268,7 +281,7 @@ end
 
 
 // If the patient completes the Moderna COVID-19 2-dose series (no extra doses), the Recommendation is Conditional with reason code COMPLETE_HIGH_RISK
-rule "COVID-19: If the patient has completed the Moderna 2-dose series with no extra doses and no extra dose has been administered, recommend Conditional with reason code is COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient has completed the Moderna Series with no extra doses and no extra dose has been administered, recommend Conditional with reason code is COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -289,7 +302,7 @@ end
 
 
 // If the patient completes the Janssen COVID-19 1-dose series (no extra doses), the Recommendation is Not Recommended with reason code COMPLETE_HIGH_RISK
-rule "COVID-19: If the patient has completed the Janssen 1-dose series and no extra dose has been administered, recommend Not Recommended with reason code is COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient has completed the Janssen Series and no extra dose has been administered, recommend Not Recommended with reason code is COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -330,7 +343,11 @@ rule "COVID-19: If the patient has completed a series for a vaccine that is WHO-
 end	
 
 /*************************************************************************************************************************************************************************************
- END Series Completion Special Rule
+ END Series Completion Special Rules
+/************************************************************************************************************************************************************************************/
+
+/*************************************************************************************************************************************************************************************
+ START Recommendations if no shots on record
 /************************************************************************************************************************************************************************************/
 
 rule "COVID-19: If the patient has no shots on record and is >= 18 yrs of age, recommend at the vaccine group level on today's date"
@@ -419,6 +436,13 @@ rule "COVID-19: If the patient has no shots on record and is < 5 yrs old, recomm
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/*************************************************************************************************************************************************************************************
+ END Recommendations if no shots on record
+/************************************************************************************************************************************************************************************/
+
+/*************************************************************************************************************************************************************************************
+ START Recommendation rules if last shot on record was a XVX 213 or shot not authorized by the FDA
+/************************************************************************************************************************************************************************************/
 
 // If the series is not complete and the last shot administered is CVX 213 or shot not authorized by the FDA, recommend earliest and routine interval of 28 days to the next dose
 rule "COVID-19: If the Series is not complete and the last shot administered was CVX 213 or shot not authorized by the FDA, recommend both an minimum and recommended interval of at least 28 days"
@@ -467,9 +491,13 @@ rule "COVID-19: If the Series is not complete and the last shot administered was
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
+/*************************************************************************************************************************************************************************************
+ END Recommendation rules if last shot on record was a XVX 213 or shot not authorized by the FDA
+/************************************************************************************************************************************************************************************/
+
 
 /*************************************************************************************************************************************************************************************
- Recommendation at the Vaccine Level
+ START Recommendation rules of specific vaccines (CVXs 207, 208, 218)
 /************************************************************************************************************************************************************************************/
 
 // When recommending in the Pfizer 2-dose Series, recommend CVX 208 for the next target dose of a patient < 12yrs if a Valid CVX 208 has already been administered.
@@ -572,5 +600,5 @@ end
 
 
 /*************************************************************************************************************************************************************************************
- END Recommendation at the Vaccine Level
+ END Recommendation rules of specific vaccines (CVXs 207,208, 218)
 /************************************************************************************************************************************************************************************/
