@@ -55,6 +55,8 @@ rule "Duplicate Shots/Same Day (COVID-19): Bypass Duplicate Shot/Same Day Proces
 	agenda-group "HistoryEvaluation^customMakeNoteOfDuplicateShotSameDayIfAny"
 	when
 		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS)
+		EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y"), $td.administrationDate >= $dtDateAtAge)
+		eval(evalTime.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat("25-Oct-2021")) < 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($td) {
