@@ -55,20 +55,6 @@ global org.cdsframework.ice.service.Schedule schedule
 
 
 /*************************************************************************************************************************************************************************************
- Recommended Interval from prior CVX 218 evaluated as Invalid / ABOVE_MAXIMUM_AGE_VACCINE is 0 days.
-/************************************************************************************************************************************************************************************/
-
-rule "COVID-19: Recommended interval from prior CVX 218 shot evaluated as Invalid / ABOVE_MAXIMUM_AGE_VACCINE is 0 days" 
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-	
-	then
-	
-end
-
-
-/*************************************************************************************************************************************************************************************
  ____Series Completion Special Rules____
  Once a patient completes:
  -Childhood-
@@ -108,8 +94,8 @@ rule "COVID-19: If the patient < 18y has completed the Pfizer _Childhood_ Series
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $dtBirthDate
 			- make note of the date as $dateAt18yOfAge when the patient is "18y" of age
-			- the date $administrationDateOf1stDose <= $dateAt18yOfAge
-			- the date evalTime <= $dateAt18yOfAge
+			- the date $administrationDateOf1stDose < $dateAt18yOfAge
+			- the date evalTime < $dateAt18yOfAge
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
@@ -120,7 +106,7 @@ rule "COVID-19: If the patient < 18y has completed the Pfizer _Childhood_ Series
 end
 
 
-rule "COVID-19: If the patient completes the Pfizer _Childhood_ Series and an additional dose has been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK with SUPPLEMENTAL_TEXT"
+rule "COVID-19: If the patient completes the Pfizer _Childhood_ Series and an additional dose has been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -141,12 +127,11 @@ rule "COVID-19: If the patient completes the Pfizer _Childhood_ Series and an ad
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $dtBirthDate
 			- make note of the date as $dateAt18yOfAge when the patient is "18y" of age
-			- the date $administrationDateOf1stDose <= $dateAt18yOfAge
-			- the date evalTime <= $dateAt18yOfAge
+			- the date $administrationDateOf1stDose < $dateAt18yOfAge
+			- the date evalTime < $dateAt18yOfAge
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
-		// Set the Recommendation Supplemental Text for $r to "The primary series was completed with 2-doses; one or more valid doses were administered after primary series completion."
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -206,7 +191,7 @@ rule "COVID-19: If the patient has completed the Pfizer Series, no extra doses h
 end
 
 
-rule "COVID-19: If the patient >= 65y has completed the Pfizer Series, no extra doses have been administered and _all_ doses are CVX 208/CVX 218, then recommend a booster dose CVX 208 recommended interval 6 months, along with recommendation reason code SUPPLEMENTAL_TEXT"
+rule "COVID-19: If the patient >= 65y has completed the Pfizer Series, no extra doses have been administered and _all_ doses are CVX 208/CVX 218, then recommend a booster dose CVX 208 recommended interval 6 months"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -232,7 +217,6 @@ rule "COVID-19: If the patient >= 65y has completed the Pfizer Series, no extra 
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "6m" to $pfizerSecondDoseDate and make note of the newly calculated date as $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
-		// Set the Recommendation Supplemental Text for $r to "Although patients are considered fully vaccinated two weeks after their second dose of the Pfizer COVID-19 vaccine, a booster dose is recommended 6 months after the second dose for patients >= 65 years old."
 		Set the Recommendation Vaccine for $r_interval to "ICE208"
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
@@ -428,43 +412,55 @@ end
  START Recommendation rules of specific vaccines (CVXs 207, 208, 218)
 /************************************************************************************************************************************************************************************/
 
-// When recommending in the Pfizer 2-dose Series, recommend CVX 208 for the next target dose of a patient < 12yrs if a Valid CVX 208 has already been administered.
-rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose Series if the most recent dose was a Pfizer vaccine and the patient will be >= 12 yrs of age as of the next recommendation date"
+rule "COVID-19: If the series is not complete and the next recommendation date is >= 5 yrs and < 12 yrs, recommend a CVX 218"
 	dialect "mvel"
-	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	agenda-group "RecommendationForecast^postRecommendationCheck"
 	when
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a recommendation date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19Pfizer2DoseSeries"
 			- the Series is not complete
 			- make note of the recommendation date as $recommendationDate
 			- post processing on the Series forecast has not already been run
-		There is an Administered Shot $lastAdministeredShot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE208", "ICE218")
-			- make note of the date this shot was administered as $latestShotDate
-		There does not exist another administered shot
-			- the shot belongs to the Series $targetSeries
-			- that is not the same shot as $lastAdministeredShot
-			- that has already been evaluated
-			- the vaccine administered not a member of ("ICE208", "ICE218")
-			- the administration date of the shot is >= $latestShotDate
-		The Patient information $patientInfo must be known to complete writing this rule
-			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and $recommendationDate >= "12y"
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge5 when the patient is "5y" of age
+			- make note of the date as $dtDateAtAge12 when the patient is "12y" of age
+		Confirm the date $recommendationDate is on the same date or after $dtDateAtAge5
+		Confirm the date $recommendationDate is before $dtDateAtAge12
 	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE208"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $recommendation to "ICE218"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
 end
 
 
-// When recommending in the Pfizer 2-dose Series, recommend CVX 218 for the next target dose of a patient < 12yrs if a Valid CVX 208 or 218 has already been administered.
-rule "COVID-19: Recommend CVX 218 for the next target dose in the Pfizer 2-dose Series if the most recent dose was a Pfizer vaccines and the patient will be < 12 yrs of age as of the next recommendation date"
+rule "COVID-19: If the series is not complete and the next recommendation date is >= 12 years and < 18 yrs, recommend a CVX 208"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a forecast for the Series has been made and a recommendation date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series is not complete
+			- make note of the recommendation date as $recommendationDate
+			- post processing on the Series forecast has not already been run
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge12 when the patient is "12y" of age
+			- make note of the date as $dtDateAtAge18 when the patient is "18y" of age
+		Confirm the date $recommendationDate is on the same date or after $dtDateAtAge12
+		Confirm the date $recommendationDate is before $dtDateAtAge18
+	then
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $recommendation to "ICE208"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose Series if the most recent dose was a Pfizer vaccine and the patient will be >= 18yrs of age as of next recommendation date"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
@@ -483,15 +479,15 @@ rule "COVID-19: Recommend CVX 218 for the next target dose in the Pfizer 2-dose 
 		There does not exist another administered shot
 			- the shot belongs to the Series $targetSeries
 			- that is not the same shot as $lastAdministeredShot
+			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered not a member of ("ICE208", "ICE218")
-			- that has already been evaluated
 			- the administration date of the shot is >= $latestShotDate
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and $recommendationDate < "12y"
+		Confirm elapsed time between $birthDate and $recommendationDate >= "18y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE218"
+		Set the Recommendation Vaccine for $oRecommendation to "ICE208"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -518,7 +514,7 @@ rule "COVID-19: Recommend CVX 207 for the next target dose in the Moderna 2-dose
 		There does not exist another administered shot
 			- the shot belongs to the Series $targetSeries
 			- that is not the same shot as $lastAdministeredShot
-			- that has already been evaluated
+			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered is not "ICE207"
 			- the administration date of the shot is >= $latestShotDate
 		The Patient information $patientInfo must be known to complete writing this rule
@@ -530,89 +526,6 @@ rule "COVID-19: Recommend CVX 207 for the next target dose in the Moderna 2-dose
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "COVID-19: If the patient has no doses on record in the Pfizer Series and recommendation date is >= 5 yrs and < 12 yrs, recommend a CVX 218"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^postRecommendationCheck"
-	when
-		There is a Series $targetSeries
-			- a forecast for the Series has been made and a recommendation date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19Pfizer2DoseSeries"
-			- the number of doses administered is == 0
-			- make note of the recommendation date as $recommendationDate
-			- post processing on the Series forecast has not already been run
-		The patient information $patientInformation must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge5 when the patient is "5y" of age
-			- make note of the date as $dtDateAtAge12 when the patient is "12y" of age
-		Confirm the date $recommendationDate is on the same date or after $dtDateAtAge5
-		Confirm the date $recommendationDate is before $dtDateAtAge12
-	then
-		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $recommendation to "ICE208"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "COVID-19: If the patient has no doses on record and recommendation date >= 12 years and < 18 yrs, recommend a CVX 208"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^postRecommendationCheck"
-	when
-		There is a Series $targetSeries
-			- a forecast for the Series has been made and a recommendation date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19Pfizer2DoseSeries"
-			- the number of doses administered is == 0
-			- make note of the recommendation date as $recommendationDate
-			- post processing on the Series forecast has not already been run
-		The patient information $patientInformation must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge12 when the patient is "12y" of age
-			- make note of the date as $dtDateAtAge18 when the patient is "18y" of age
-		Confirm the date $recommendationDate is on the same date or after $dtDateAtAge12
-		Confirm the date $recommendationDate is before $dtDateAtAge18
-	then
-		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $recommendation to "ICE208"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "COVID-19: If the patient has no doses on record, the most recent shot administered was an Invalid CVX 218, and the recommendation date >= 18 yrs, recommend a CVX 208"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^postRecommendationCheck"
-	when
-		There is a Series $targetSeries
-			- a forecast for the Series has been made and a recommendation date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19Pfizer2DoseSeries"
-			- the number of doses administered is == 0
-			- make note of the recommendation date as $recommendationDate
-			- post processing on the Series forecast has not already been run
-		There is an Administered Shot $lastAdministeredShot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is INVALID
-			- the vaccine administered is "ICE218"
-			- make note of the date this shot was administered as $latestShotDate
-		There does not exist another administered shot
-			- the shot belongs to the Series $targetSeries
-			- that is not the same shot as $lastAdministeredShot
-			- that has already been evaluated
-			- the administration date of the shot is >= $latestShotDate
-		The patient information $patientInformation must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge18 when the patient is "18y" of age
-		Confirm the date $recommendationDate is on the same date or after $dtDateAtAge18
-	then
-		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $recommendation to "ICE208"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
 end
 
 /*************************************************************************************************************************************************************************************
