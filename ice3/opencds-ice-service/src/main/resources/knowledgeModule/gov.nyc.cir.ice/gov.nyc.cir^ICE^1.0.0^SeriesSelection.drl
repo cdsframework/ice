@@ -807,6 +807,26 @@ rule "SeriesSelection(COVID-19): Select the Pfizer 2-Dose Series by default if n
 end
 
 
+rule "SeriesSelection(COVID-19): Select COVAXIN Series if it is already _complete_ and no other series was previously selected"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19COVAXIN2DoseSeries", isSeriesComplete() == true) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts);
+		update($tss);
+		update($ts);
+end
+
+
 rule "SeriesSelection(COVID-19): Select AstraZeneca Series if it is already _complete_ and no other series was previously selected"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
