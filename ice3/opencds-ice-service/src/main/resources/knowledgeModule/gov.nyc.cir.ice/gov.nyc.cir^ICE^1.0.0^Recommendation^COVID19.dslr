@@ -415,6 +415,7 @@ end
 rule "COVID-19: If the series is not complete and the next recommendation date is >= 5 yrs and < 12 yrs, recommend a CVX 218"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postRecommendationCheck"
+	activation-group "RecommendationForecast^COVID19VaccineSpecific"
 	when
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a recommendation date has been determined
@@ -439,6 +440,7 @@ end
 rule "COVID-19: If the series is not complete and the next recommendation date is >= 12 years and < 18 yrs, recommend a CVX 208"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postRecommendationCheck"
+	activation-group "RecommendationForecast^COVID19VaccineSpecific"
 	when
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a recommendation date has been determined
@@ -463,6 +465,7 @@ end
 rule "COVID-19: Recommend CVX 208 for the next target dose in the Pfizer 2-dose Series if the most recent dose was a Pfizer vaccine and the patient will be >= 18yrs of age as of next recommendation date"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	activation-group "RecommendationForecast^COVID19VaccineSpecific"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
@@ -498,6 +501,7 @@ end
 rule "COVID-19: Recommend CVX 207 for the next target dose in the Moderna 2-dose Series if the most recent dose was a Moderna vaccine and the patient will be >= 18yrs of age as of next recommendation date"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	activation-group "RecommendationForecast^COVID19VaccineSpecific"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
@@ -524,6 +528,37 @@ rule "COVID-19: Recommend CVX 207 for the next target dose in the Moderna 2-dose
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE207"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// If the most recent shot is a non-FDA vaccine, recommend at the vaccine group level
+rule "COVID-19: Recommend at the vaccine group level if the most recent shot was a non-FDA vaccine"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	activation-group "RecommendationForecast^COVID19VaccineSpecific"
+	salience 10
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- a forecast for the Series has been made and a recommendation date has been determined
+			- the Series is not complete
+			- make note of the recommendation date as $recommendationDate
+			- post processing on the Series forecast has not already been run		
+		There is an Administered Shot $lastAdministeredShot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated
+			- the vaccine administered a member of ("ICE210", "ICE211", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511")
+			- make note of the date this shot was administered as $latestShotDate
+		There does not exist another administered shot
+			- the shot belongs to the Series $targetSeries
+			- that is not the same shot as $lastAdministeredShot
+			- that has already been evaluated
+			- the vaccine administered not a member of ("ICE210", "ICE211", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511")
+			- the administration date of the shot is >= $latestShotDate
+	then
+		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
