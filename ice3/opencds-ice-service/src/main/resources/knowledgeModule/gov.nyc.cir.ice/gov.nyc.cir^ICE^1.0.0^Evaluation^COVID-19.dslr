@@ -104,7 +104,7 @@ end
 //     at >= 28 days-4 days after series completion, then evaluate the shot as Valid.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 218) is administered for an already completed __Pfizer or Moderna Series__ and the patient >= 12 yrs of age"
+rule "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 217, 218) is administered for an already completed __Pfizer or Moderna Series__ and the patient >= 12 yrs of age"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -112,7 +112,7 @@ rule "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208,
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the shot belongs to the Series with name a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries")
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE218")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE217", "ICE218")
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the dose number as $targetDoseNumber
 			- make note of the associated series as $associatedTargetSeries
@@ -129,7 +129,7 @@ end
 
 
 rule "COVID-19: If an extra dose is administered to an already completed __Pfizer Adult Series__ prior to 24 days, mark the shot Valid and include descriptive text that follow guidelines regarding minimum ages/intervals"
-		extends "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 218) is administered for an already completed __Pfizer or Moderna Series__ and the patient >= 12 yrs of age"
+		extends "COVID-19(Abstract): One extra shot of FDA-approved vaccines (CVX 207, 208, 212, 213, 217, 218) is administered for an already completed __Pfizer or Moderna Series__ and the patient >= 12 yrs of age"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -204,14 +204,14 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 end
 
 
-rule "COVID-19: If one extra shot of CVX 207, 208, 212 or 213 is administered for an already completed __Janssen Series__, evaluate the shot as Valid"
+rule "COVID-19: If one extra shot of CVX 207, 208, 212, 213 or 217 is administered for an already completed __Janssen Series__, evaluate the shot as Valid"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Janssen1DoseSeries"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE217")
 			- make note of the dose number as $targetDoseNumber
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
@@ -240,7 +240,7 @@ rule "COVID-19: If a different WHO-approved vaccine is administered for the Astr
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19AstraZeneca2DoseSeries"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE218", "ICE502", "ICE510", "ICE511")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE502", "ICE510", "ICE511")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -257,7 +257,7 @@ rule "COVID-19: If a different WHO-approved vaccine is administered for the Nova
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Novavax2DoseSeries"			
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE213", "ICE218", "ICE502", "ICE510", "ICE511")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE213", "ICE217", "ICE218", "ICE502", "ICE510", "ICE511")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -274,7 +274,7 @@ rule "COVID-19: If a different WHO-approved vaccine is administered for the BIBP
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19BIBPSinopharm2DoseSeries"			
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE218", "ICE502", "ICE511")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE502", "ICE511")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -291,7 +291,7 @@ rule "COVID-19: If a different WHO-approved vaccine is administered for the Coro
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19CoronaVacSinovac2DoseSeries"			
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE218", "ICE502", "ICE512")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE502", "ICE512")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -308,7 +308,7 @@ rule "COVID-19: If a different WHO-approved vaccine is administered for the COVA
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19COVAXIN2DoseSeries"			
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE218", "ICE511", "ICE512")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE511", "ICE512")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -338,7 +338,7 @@ rule "COVID-19: If either an FDA-approved (Pfizer, Moderna or NOS vaccine) is ad
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Janssen1DoseSeries"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE213", "ICE218")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE213", "ICE217", "ICE218")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
