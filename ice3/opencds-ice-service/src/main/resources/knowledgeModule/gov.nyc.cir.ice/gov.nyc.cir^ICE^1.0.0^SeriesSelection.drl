@@ -944,7 +944,7 @@ rule "SeriesSelection(COVID-19): If there are _no_ (Valid) doses but Pfizer was 
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries")
-		$td : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName in ("ICE208", "ICE218"))
+		$td : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName in ("ICE208", "ICE217", "ICE218"))
 		$tsother : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $ts, seriesRules.seriesName in ("COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tsother, administrationDate > $td.administrationDate)
 	then
@@ -1019,7 +1019,7 @@ rule "SeriesSelection(COVID-19): If there are _no_ (Valid) Pfizer, Moderna or Ja
 		$td : TargetDose(associatedTargetSeries == $tsmoderna, vaccineComponent.cdsConceptName == "ICE207")
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate > $td.administrationDate, associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
 		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Pfizer2DoseSeries")
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tspfizer, vaccineComponent.cdsConceptName in ("ICE208", "ICE218"), administrationDate == $td.administrationDate)
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $tspfizer, vaccineComponent.cdsConceptName in ("ICE208", "ICE217", "ICE218"), administrationDate == $td.administrationDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsmoderna);
@@ -1042,7 +1042,7 @@ rule "SeriesSelection(COVID-19): Select the series that has the earliest, non-NO
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"))
-		$td : TargetDose(associatedTargetSeries == $ts, isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE208", "ICE212", "ICE218"))
+		$td : TargetDose(associatedTargetSeries == $ts, isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE208", "ICE217", "ICE218"))
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate, 
 			associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries")) 
 	then
