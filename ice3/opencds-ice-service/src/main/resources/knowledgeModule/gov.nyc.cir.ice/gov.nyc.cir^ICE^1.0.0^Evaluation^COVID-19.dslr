@@ -468,7 +468,7 @@ end
 
 // If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
 // Descriptive Text: "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval."
-rule "COVID-19: If shot in the Pfizer series is administered below 17d after the prior shot and series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: For patients >= 18y, if shot in the Pfizer series is administered prior to 10/25/2021, below 17d after the prior shot, and the series is not complete, override series interval logic and return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -487,12 +487,12 @@ rule "COVID-19: If shot in the Pfizer series is administered below 17d after the
 			- the administered shot number is == $administeredShotNumber-1
 			- the administration date of the shot is >= $dtDateAtAge18y
 			- make note of the date this shot was administered as $administrationDatePrior
-			- make note of the minimum interval from this dose to the next dose as $minimumInterval
 		There does not exist an Administered Shot
 			- the shot belongs to the series $associatedTargetSeries
 			- that has already been evaluated
 			- the administered shot number is == $administeredShotNumber-1
 			- the administration date of the shot is > $administrationDatePrior
+		Confirm the date $administrationDate is before "25-Oct-2021"
 		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "17d"
 	then
 		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
@@ -501,7 +501,7 @@ rule "COVID-19: If shot in the Pfizer series is administered below 17d after the
 end
 
 
-rule "COVID-19: If shot in the Moderna series is administered below 24d after the prior shot and the series is not complete, return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: For patients >= 18y, if shot in the Moderna series is administered prior to 10/25/2021, below 24d after the prior shot, and the series is not complete, override series interval logic and return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -520,12 +520,12 @@ rule "COVID-19: If shot in the Moderna series is administered below 24d after th
 			- the administered shot number is == $administeredShotNumber-1
 			- the administration date of the shot is >= $dtDateAtAge18y
 			- make note of the date this shot was administered as $administrationDatePrior
-			- make note of the minimum interval from this dose to the next dose as $minimumInterval
 		There does not exist an Administered Shot
 			- the shot belongs to the series $associatedTargetSeries
 			- that has already been evaluated
 			- the administered shot number is == $administeredShotNumber-1
 			- the administration date of the shot is > $administrationDatePrior
+		Confirm the date $administrationDate is before "25-Oct-2021"
 		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "24d"
 	then
 		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
