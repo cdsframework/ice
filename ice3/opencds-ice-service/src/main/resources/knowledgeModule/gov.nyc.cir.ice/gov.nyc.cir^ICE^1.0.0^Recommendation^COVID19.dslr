@@ -92,6 +92,44 @@ rule "COVID-19: If the patient is < 16y has completed the Childhood Primary Seri
 end
 
 
+rule "COVID-19: If the patient >= 16y has completed the Pfizer or Moderna Series, or Series not authorized by the FDA but authorized by the WHO, and no extra doses have been administered, then recommend a booster dose at earliest age 16y/recommended age 18y or recommended interval of 6 months, whichever is later"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the Series is complete
+			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- the number of doses administered is == $numberOfDosesRequired
+		There is an administered shot $lastShotAdministered
+			- the shot belongs to the series $targetSeries
+			- the dose number in the series is == $numberOfDosesRequired
+			- that has already been evaluated
+			- make note of the date this shot was administered as $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated
+			- the administration date of the shot is > $lastShotAdministeredDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtAtAge16y when the Patient is "16y" of age
+			- the date evalTime >= $dtAtAge16y
+			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
+	then
+		Create a Recommendation as $r_interval for the Series $targetSeries
+		Add "6m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r_interval to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
+		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
+		Create a Recommendation as $r_age for the Series $targetSeries
+		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge16y
+		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
+		Include the Recommendation $r_age for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
 rule "COVID-19: If the patient >= 16y has completed the Janssen Series and no extra doses have been administered, then recommend a booster dose at earliest age 16y/recommended age 18y or recommended interval of 8 weeks, whichever is later"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
@@ -118,43 +156,7 @@ rule "COVID-19: If the patient >= 16y has completed the Janssen Series and no ex
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
-		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
-		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
-		Create a Recommendation as $r_age for the Series $targetSeries
-		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge16y
-		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
-		Include the Recommendation $r_age for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "COVID-19: If the patient >= 16y has completed the Pfizer or Moderna Series and no extra doses have been administered, then recommend a booster dose at earliest age 16y/recommended age 18y or recommended interval of 6 months, whichever is later"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries")
-			- the Series is complete
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
-		There is an administered shot $lastShotAdministered
-			- the shot belongs to the series $targetSeries
-			- the dose number in the series is == $numberOfDosesRequired
-			- that has already been evaluated
-			- make note of the date this shot was administered as $lastShotAdministeredDate
-		There does not exist an administered shot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated
-			- the administration date of the shot is > $lastShotAdministeredDate
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge16y when the Patient is "16y" of age
-			- the date evalTime >= $dtAtAge16y
-			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
-	then
-		Create a Recommendation as $r_interval for the Series $targetSeries
-		Add "6m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r_interval to $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
