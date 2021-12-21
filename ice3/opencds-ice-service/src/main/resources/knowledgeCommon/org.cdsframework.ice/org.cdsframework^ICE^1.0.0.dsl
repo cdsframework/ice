@@ -47,6 +47,7 @@
 [condition][]- [Tt]he [Ss]hot does not belong to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == false
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries with name a [Mm]ember of {list_sSeriesName:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+}=associatedSeriesName in {list_sSeriesName}
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries with [Nn]ame {sSeriesName}=associatedSeriesName == {sSeriesName}
+[condition][]- [Tt]he [Ss]hot does not belong to the [Ss]eries with [Nn]ame {sSeriesName}=associatedSeriesName != {sSeriesName}
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
 [condition][]- [Tt]he [Ss]hot does not belong to the [Ss]eries {oTargetSeries}=associatedTargetSeries != {oTargetSeries}
 [condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem} and the [Ss]eries with [Nn]ame {sSeriesName}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}, associatedSeriesName == {sSeriesName}

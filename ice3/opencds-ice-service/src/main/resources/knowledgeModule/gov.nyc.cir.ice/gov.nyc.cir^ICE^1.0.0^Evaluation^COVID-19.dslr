@@ -492,25 +492,56 @@ end
 
 
 /*************************************************************************************************************************************************************************************
-If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
-Descriptive Text: "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval."
+ If the patient receives a shot below the absolute minimum age, or below the absolute minimum interval prior to 10/25/2021, override vaccine minimum age and series intervals and 
+ evaluate the shot as Valid
 /************************************************************************************************************************************************************************************/
 
-rule "COVID-19: If shot administered below the absolute minimum age for the vaccine, override absolute vaccine minimum age check and return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: If shot administered below the age of 18y-4d for CVX 212 in the Janssen Series, override absolute vaccine minimum age check _and_ return supplemental text that the shot does not follow guidelines for minimum age"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "minimumAgeVaccineCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Janssen1DoseSeries"
+			- the Vaccine Administered is "ICE212"
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm Elapsed time between $dtBirthDate and $administrationDate < "18y-4d"
+	then
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age." for Valid Shot $currentShot
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Abstract): If shot administered for CVX 207/208/213/217/218, override absolute vaccine minimum age check"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "minimumAgeVaccineCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot does not belong to the Series with name "COVID19Janssen1DoseSeries"
 			- make note of the date this shot was administered as $administrationDate
-			- make note of the minimum vaccine age for this shot as $absoluteMinimumVaccineAge
 			- make note of the associated series as $associatedTargetSeries
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19: If shot administered below the age of 5 yrs for CVX 207/208/213/217/218, override absolute vaccine minimum age check _and_ return supplemental text that the shot does not follow guidelines for minimum age"
+		extends "COVID-19(Abstract): If shot administered for CVX 207/208/213/217/218, override absolute vaccine minimum age check"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm Elapsed time between $dtBirthDate and $administrationDate < $absoluteMinimumVaccineAge
+		Confirm Elapsed time between $dtBirthDate and $administrationDate < "5y"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age." for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
         Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -518,7 +549,7 @@ end
 
 // If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
 // Descriptive Text: "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval."
-rule "COVID-19: For patients >= 18y, if shot in the Pfizer series is administered prior to 10/25/2021, below 17d after the prior shot, and the series is not complete, override series interval logic and return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: For patients >= 18y, if shot in the Pfizer series is administered prior to 10/25/2021 and the series is not complete, override series interval logic"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -543,15 +574,13 @@ rule "COVID-19: For patients >= 18y, if shot in the Pfizer series is administere
 			- the administered shot number is == $administeredShotNumber-1
 			- the administration date of the shot is > $administrationDatePrior
 		Confirm the date $administrationDate is before "25-Oct-2021"
-		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "17d"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
         Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
 
-rule "COVID-19: For patients >= 18y, if shot in the Moderna series is administered prior to 10/25/2021, below 24d after the prior shot, and the series is not complete, override series interval logic and return supplemental text that the shot does not follow guidelines for minimum age and/or minimum interval"
+rule "COVID-19: For patients >= 18y, if shot in the Moderna series is administered prior to 10/25/2021 and the series is not complete, override series interval logic"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -576,14 +605,12 @@ rule "COVID-19: For patients >= 18y, if shot in the Moderna series is administer
 			- the administered shot number is == $administeredShotNumber-1
 			- the administration date of the shot is > $administrationDatePrior
 		Confirm the date $administrationDate is before "25-Oct-2021"
-		Confirm Elapsed time between $administrationDatePrior and $administrationDate < "24d"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval." for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
         Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
 /*************************************************************************************************************************************************************************************
-END If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
+END If the patient receives a shot below the absolute minimum age or below the absolute minimum interval 
 /************************************************************************************************************************************************************************************/
 

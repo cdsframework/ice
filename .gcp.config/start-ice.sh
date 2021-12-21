@@ -73,6 +73,12 @@ if [[ -v REMOTE_CONFIG_PASSWORD ]]; then
     unset REMOTE_CONFIG_PASSWORD
 fi
 
+if [[ -v RULE_TASK_FIRELIMIT ]]
+then
+    echo "Setting system property org.jbpm.rule.task.firelimit to: $RULE_TASK_FIRELIMIT"
+    export JAVA_OPTS="$JAVA_OPTS -Dorg.jbpm.rule.task.firelimit=$RULE_TASK_FIRELIMIT"
+fi
+
 echo JAVA_OPTS=$JAVA_OPTS
 
 . $@
