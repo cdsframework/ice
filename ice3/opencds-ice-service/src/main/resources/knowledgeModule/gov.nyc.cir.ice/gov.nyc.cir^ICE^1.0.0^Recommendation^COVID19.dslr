@@ -58,13 +58,13 @@ global org.cdsframework.ice.service.Schedule schedule
  ____Series Completion Special Rules____
 /************************************************************************************************************************************************************************************/
 
-rule "COVID-19: If the patient is < 16y has completed a COVID-19 Series (w/ or w/out an additional dose), then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient is < 16y has completed a Pfizer or Moderna Series (w/ or w/out an additional dose), then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries")
+			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries")
 			- the Series is complete
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is >= $numberOfDosesRequired
@@ -100,30 +100,6 @@ rule "COVID-19: If the patient is >= 16y has completed the Pfizer, Moderna or FD
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Mark Forecasting of the Series $targetSeries Complete
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "COVID-19: If the patient is >= 16y has completed the Janssen Series and one extra dose, then recommend NOT_RECOMMENDED / COMPLETE"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- the Series is complete
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the Patient's birthdate as $dtBirthDate
-			- make note of the date as $dateAt16yOfAge when the patient is "16y" of age
-			- the date evalTime >= $dateAt16yOfAge
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -169,7 +145,7 @@ rule "COVID-19: If the patient >= 16y has completed the Pfizer or Moderna Series
 end
 
 
-rule "COVID-19: If the patient >= 16y has completed the Janssen Series and no extra doses have been administered, then recommend a booster dose at earliest age 16y/recommended age 18y or recommended interval of 8 weeks, whichever is later"
+rule "COVID-19: If the patient >= 18y has completed the Janssen Series and no extra doses have been administered, then recommend a booster dose at earliest age 18y/recommended age 18y or recommended interval of 8 weeks, whichever is later"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -188,9 +164,8 @@ rule "COVID-19: If the patient >= 16y has completed the Janssen Series and no ex
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge16y when the Patient is "16y" of age
-			- the date evalTime >= $dtAtAge16y
 			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
+			- the date evalTime >= $dtAtAge18y
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -198,9 +173,56 @@ rule "COVID-19: If the patient >= 16y has completed the Janssen Series and no ex
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
-		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge16y
+		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge18y
 		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If the patient is < 18y has completed the Janssen Series and no extra doses have been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Janssen1DoseSeries"			
+			- the Series is complete
+			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- the number of doses administered is == $numberOfDosesRequired
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dateAt18yOfAge when the patient is "18y" of age
+			- the date evalTime < $dateAt18yOfAge
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If the patient is >= 16y has completed the Janssen Series and one extra dose, then recommend NOT_RECOMMENDED / COMPLETE"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Janssen1DoseSeries"
+			- the Series is complete
+			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- the number of doses administered is == $numberOfDosesRequired+1
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+			- make note of the date as $dateAt16yOfAge when the patient is "16y" of age
+			- the date evalTime >= $dateAt16yOfAge
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
