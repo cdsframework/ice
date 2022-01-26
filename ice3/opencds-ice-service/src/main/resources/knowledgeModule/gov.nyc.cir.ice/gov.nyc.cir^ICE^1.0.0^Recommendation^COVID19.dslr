@@ -58,7 +58,7 @@ global org.cdsframework.ice.service.Schedule schedule
  ____Series Completion Special Rules____
 /************************************************************************************************************************************************************************************/
 
-rule "COVID-19: If the patient is < 16y has completed a Pfizer or Moderna Series (w/ or w/out an additional dose), then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient is < 12y has completed a Pfizer or Moderna Series (w/ or w/out an additional dose), then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -71,8 +71,8 @@ rule "COVID-19: If the patient is < 16y has completed a Pfizer or Moderna Series
 			- the number of doses administered is < $numberOfDosesRequired+2
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $dtBirthDate
-			- make note of the date as $dateAt16yOfAge when the patient is "16y" of age
-			- the date evalTime < $dateAt16yOfAge
+			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
+			- the date evalTime < $dateAt12yOfAge
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
@@ -83,7 +83,7 @@ rule "COVID-19: If the patient is < 16y has completed a Pfizer or Moderna Series
 end
 
 
-rule "COVID-19: If the patient is >= 16y has completed the Pfizer, Moderna or FDA-authorized/WHO Series and one extra dose, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient is >= 12y has completed along with one extra dose in the Pfizer Series, Moderna Series, or Series not authorized by the FDA but authorized by the WHO, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -95,8 +95,8 @@ rule "COVID-19: If the patient is >= 16y has completed the Pfizer, Moderna or FD
 			- the number of doses administered is == $numberOfDosesRequired+1
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $dtBirthDate
-			- make note of the date as $dateAt16yOfAge when the patient is "16y" of age
-			- the date evalTime >= $dateAt16yOfAge
+			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
+			- the date evalTime >= $dateAt12yOfAge
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
@@ -107,7 +107,7 @@ rule "COVID-19: If the patient is >= 16y has completed the Pfizer, Moderna or FD
 end
 
 
-rule "COVID-19: If the patient >= 16y has completed the Pfizer or Moderna Series, or Series not authorized by the FDA but authorized by the WHO, and no extra doses have been administered, then recommend a booster dose at earliest age 16y/recommended age 18y or recommended interval of 6 months, whichever is later"
+rule "COVID-19: If the patient >= 12y has completed the Series along with no extra doses in the Pfizer Series, Moderna Series, or Series not authorized by the FDA but authorized by the WHO, then recommend a booster dose at earliest/recommended age of 12y w/ earliest/recommended interval of 5 months"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -127,18 +127,17 @@ rule "COVID-19: If the patient >= 16y has completed the Pfizer or Moderna Series
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge16y when the Patient is "16y" of age
-			- the date evalTime >= $dtAtAge16y
-			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
+			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
+			- the date evalTime >= $dtAtAge12y
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
-		Add "6m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
+		Add "5m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
 		Set the recommendation Earliest Forecast Date for $r_interval to $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
-		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge16y
-		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
+		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge12y
+		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge12y
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -181,7 +180,7 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and no ex
 end
 
 
-rule "COVID-19: If the patient is < 18y has completed the Janssen Series and no extra doses have been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient is < 12y has completed the Janssen Series and no extra doses have been administered, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -192,8 +191,8 @@ rule "COVID-19: If the patient is < 18y has completed the Janssen Series and no 
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is == $numberOfDosesRequired
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dateAt18yOfAge when the patient is "18y" of age
-			- the date evalTime < $dateAt18yOfAge
+			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
+			- the date evalTime < $dateAt12yOfAge
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
@@ -204,7 +203,7 @@ rule "COVID-19: If the patient is < 18y has completed the Janssen Series and no 
 end
 
 
-rule "COVID-19: If the patient is >= 16y has completed the Janssen Series and one extra dose, then recommend NOT_RECOMMENDED / COMPLETE"
+rule "COVID-19: If the patient is >= 12y has completed the Janssen Series and one extra dose, then recommend NOT_RECOMMENDED / COMPLETE"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -216,8 +215,8 @@ rule "COVID-19: If the patient is >= 16y has completed the Janssen Series and on
 			- the number of doses administered is == $numberOfDosesRequired+1
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $dtBirthDate
-			- make note of the date as $dateAt16yOfAge when the patient is "16y" of age
-			- the date evalTime >= $dateAt16yOfAge
+			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
+			- the date evalTime >= $dateAt12yOfAge
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
@@ -228,7 +227,7 @@ rule "COVID-19: If the patient is >= 16y has completed the Janssen Series and on
 end
 
 
-// Because the Pfizer and Moderna 2-dose series has been configured as a recurring dose series; if a recommendation date is forecasted after the either of those series is already complete, add the recommendation reason "BOOSTER_DOSE"
+// Because the Pfizer 2-dose, Moderna 2-dose and Janssen series have been configured as a recurring dose series; if a recommendation date is forecasted after the either of those series is already complete, add the recommendation reason "BOOSTER_DOSE"
 rule "COVID-19: If a dose is recommended in the Pfizer, Moderna, Janssen or FDA-authorized/WHO series and the series is complete, add the recommendation reason BOOSTER_DOSE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
@@ -247,7 +246,7 @@ rule "COVID-19: If a dose is recommended in the Pfizer, Moderna, Janssen or FDA-
 end
 
 
-// Because the Pfizer 2-dose series has been configured as a recurring dose series, if the recommendation reason for the Pfizer 2-dose series is NOT_RECOMMENDED, the reason has to manually be set to COMPLETE
+// Because the Pfizer 2-dose, Moderna 2-dose, and Janssen series have been configured as a recurring dose series, if the recommendation reason for the Pfizer 2-dose series is NOT_RECOMMENDED, the reason has to manually be set to COMPLETE
 rule "COVID-19: If Pfizer, Moderna, Janssen or FDA-authorized/WHO Series is complete and a dose is NOT_RECOMMENDED (i.e. - 2 or more doses for Janseen; 3 or more doses for Pfizer/Moderna), add the recommendation reason to COMPLETE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
@@ -376,7 +375,7 @@ end
 
 
 // If the most recent shot is a non-FDA vaccine, recommend at the vaccine group level
-rule "COVID-19: Recommend at the vaccine group level if the most recent shot was a non-FDA vaccine"
+rule "COVID-19: Recommend at the vaccine group level if the most recent shot was a non-FDA vaccine along with supplemental text: The vaccine administered should be a single dose of a Pfizer COVID-19 vaccine."
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	activation-group "RecommendationForecast^COVID19VaccineSpecific"
@@ -401,6 +400,8 @@ rule "COVID-19: Recommend at the vaccine group level if the most recent shot was
 			- the administration date of the shot is >= $latestShotDate
 	then
 		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $recommendation to "The vaccine administered should be a single dose of a Pfizer COVID-19 vaccine."
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
