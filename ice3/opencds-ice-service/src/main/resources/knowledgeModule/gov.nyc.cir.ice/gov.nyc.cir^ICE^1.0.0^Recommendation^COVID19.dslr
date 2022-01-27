@@ -319,7 +319,7 @@ end
 /************************************************************************************************************************************************************************************/
 
 // If the series is not complete and the last shot administered is CVX 213 or shot not authorized by the FDA, recommend earliest and routine interval of 28 days to the next dose
-rule "COVID-19: If the Series is not complete and the last shot administered was CVX 213 or shot not authorized by the FDA, recommend both an minimum and recommended interval of at least 28 days"
+rule "COVID-19: If the Series is not complete and the last shot administered was CVX 213 or shot not authorized by the FDA, recommend earliest and recommended interval of 28 days"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
@@ -340,6 +340,35 @@ rule "COVID-19: If the Series is not complete and the last shot administered was
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
+
+rule "COVID-19: If the Series is not complete and the last shot administered was a WHO-approved vaccine not authorized by the FDA, override default earliest interval rule to not fire"
+		extends "COVID-19: If the Series is not complete and the last shot administered was CVX 213 or shot not authorized by the FDA, recommend earliest and recommended interval of 28 days"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+	when
+		There exists an Administered Shot
+			- that is the same shot as $lastShotAdministered
+			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If the Series is not complete and the last shot administered was a WHO-approved vaccine not authorized by the FDA, override default recommendation interval rule to not fire"
+		extends "COVID-19: If the Series is not complete and the last shot administered was CVX 213 or shot not authorized by the FDA, recommend earliest and recommended interval of 28 days"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationIntervalCheck"
+	when
+		There exists an Administered Shot
+			- that is the same shot as $lastShotAdministered
+			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+	
 /*************************************************************************************************************************************************************************************
  END Recommendation rules if last shot on record was a XVX 213 or shot not authorized by the FDA
 /************************************************************************************************************************************************************************************/
@@ -375,7 +404,7 @@ end
 
 
 // If the most recent shot is a non-FDA vaccine, recommend at the vaccine group level
-rule "COVID-19: Recommend at the vaccine group level if the most recent shot was a non-FDA vaccine along with supplemental text: The vaccine administered should be a single dose of a Pfizer COVID-19 vaccine."
+rule "COVID-19: Recommend at the vaccine group level if the most recent shot was a non-FDA vaccine and the series is not complete"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	activation-group "RecommendationForecast^COVID19VaccineSpecific"
@@ -400,8 +429,37 @@ rule "COVID-19: Recommend at the vaccine group level if the most recent shot was
 			- the administration date of the shot is >= $latestShotDate
 	then
 		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
-		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $recommendation to "The vaccine administered should be a single dose of a Pfizer COVID-19 vaccine."
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// IF the most recent shot was a WHO-approved vaccine, add supplemental text that the recommended vaccine should be a single dose of a Pfizer COVID-19 vaccine"
+rule "COVID-19: If the most recent shot was a WHO-approved vaccine and the series is not complete, add supplemental text: The vaccine administered should be a single dose of a Pfizer COVID-19 vaccine."
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- a forecast for the Series has been made and a recommendation date has been determined
+			- the Series is not complete
+			- make note of the recommendation date as $recommendationDate
+			- post processing on the Series forecast has not already been run		
+		There is an Administered Shot $lastAdministeredShot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated
+			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+			- make note of the date this shot was administered as $latestShotDate
+		There does not exist another administered shot
+			- the shot belongs to the Series $targetSeries
+			- that is not the same shot as $lastAdministeredShot
+			- that has already been evaluated
+			- the vaccine administered not a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+			- the administration date of the shot is >= $latestShotDate
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $oRecommendation to "The vaccine administered should be a single dose of a Pfizer COVID-19 vaccine."
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series	
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end

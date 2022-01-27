@@ -282,7 +282,7 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // START For series representing non-FDA but authorized vaccines, mark vaccines that are not in the series as ACCEPTED/VACCINE_NOT_COUNTERED_BASED_ON_MOST_RECENT_VACCINE_GIVEN 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-
+/*
 rule "COVID-19: If a different WHO-approved vaccine is administered for the AstraZeneca series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -366,7 +366,7 @@ rule "COVID-19: If a different WHO-approved vaccine is administered for the COVA
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
 end
-
+*/
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // END for series representing non-FDA but authorized vaccines, mark vaccines that are not in the series as ACCEPTED/VACCINE_NOT_COUNTERED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,14 +381,14 @@ end
 ///////
 // Janssen ACCEPTED evaluation rules
 ///////
-rule "COVID-19: If either an FDA-approved (Pfizer, Moderna or NOS vaccine) is administered for the Janssen Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+rule "COVID-19: If either an FDA-approved (Pfizer, Moderna, NOS or WHO-approved vaccine) is administered for the Janssen Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Janssen1DoseSeries"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE213", "ICE217", "ICE218")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE213", "ICE217", "ICE218", "ICE502", "ICE510", "ICE511")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -397,6 +397,7 @@ rule "COVID-19: If either an FDA-approved (Pfizer, Moderna or NOS vaccine) is ad
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+/*
 rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Janssen Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -412,19 +413,21 @@ rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+*/
 ///////
 
 ///////
 // Pfizer ACCEPTED evaluation rules
 ///////
-rule "COVID-19: If the Janssen vaccine is administered for the Pfizer Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+rule "COVID-19: If the Janssen of WHO-approved vaccine is administered for the Pfizer Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Pfizer2DoseSeries"
-			- the vaccine administered is "ICE212"
+			- the vaccine administered a member of ("ICE212", "ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+			/////// - the vaccine administered is "ICE212"
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -433,6 +436,7 @@ rule "COVID-19: If the Janssen vaccine is administered for the Pfizer Series and
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+/*
 rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Pfizer Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -448,19 +452,21 @@ rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+*/
 ///////
 
 ///////
 // Moderna ACCEPTED evaluation rules
 ///////
-rule "COVID-19: If the Janssen vaccine is administered for the Moderna Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+rule "COVID-19: If the Janssen or WHO-approved vaccine is administered for the Moderna Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Moderna2DoseSeries"
-			- the vaccine administered is "ICE212"
+			- the vaccine administered a member of ("ICE212", "ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+			/////// - the vaccine administered is "ICE212"
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -469,6 +475,7 @@ rule "COVID-19: If the Janssen vaccine is administered for the Moderna Series an
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+/*
 rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Moderna Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -484,6 +491,7 @@ rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+*/
 ///////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
