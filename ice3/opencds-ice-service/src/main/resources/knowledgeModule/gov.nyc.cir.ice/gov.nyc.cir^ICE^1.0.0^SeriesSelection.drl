@@ -807,106 +807,6 @@ rule "SeriesSelection(COVID-19): Select the Pfizer 2-Dose Series by default if n
 end
 
 
-rule "SeriesSelection(COVID-19): Select COVAXIN Series if it is already _complete_ and no other series was previously selected"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 5
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19COVAXIN2DoseSeries", isSeriesComplete() == true) 
-	then
-		String _RULENAME = kcontext.rule.name;
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts);
-		update($tss);
-		update($ts);
-end
-
-
-rule "SeriesSelection(COVID-19): Select AstraZeneca Series if it is already _complete_ and no other series was previously selected"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 5
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19AstraZeneca2DoseSeries", isSeriesComplete() == true) 
-	then
-		String _RULENAME = kcontext.rule.name;
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts);
-		update($tss);
-		update($ts);
-end
-
-
-rule "SeriesSelection(COVID-19): Select Novavax Series if it is already _complete_ and no other series was previously selected"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 5
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries", isSeriesComplete() == true) 
-	then
-		String _RULENAME = kcontext.rule.name;
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts);
-		update($tss);
-		update($ts);
-end
-
-
-rule "SeriesSelection(COVID-19): Select BIBP-Sinopharm Series if it is already _complete_ and no other series was previously selected"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 5
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19BIBPSinopharm2DoseSeries", isSeriesComplete() == true) 
-	then
-		String _RULENAME = kcontext.rule.name;
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts);
-		update($tss);
-		update($ts);
-end
-
-
-rule "SeriesSelection(COVID-19): Select CoronaVac-Sinovac Series if it is already _complete_ and no other series was previously selected"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 5
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19CoronaVacSinovac2DoseSeries", isSeriesComplete() == true) 
-	then
-		String _RULENAME = kcontext.rule.name;
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts);
-		update($tss);
-		update($ts);
-end
-
-
 rule "SeriesSelection(COVID-19): If the Pfizer Series was selected but the earliest, non-NOS dose Moderna dose was administered on the same day (or before), select the Moderna Series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
@@ -1056,20 +956,40 @@ rule "SeriesSelection(COVID-19): If there are _no_ (Valid) Pfizer, Moderna or Ja
 end
 
 
+rule "SeriesSelection(COVID-19): If an FDA-approved vaccine was not determined to be the earliest Valid shot (see related rule), then select the series that has the earliest, non-NOS (Valid) _dose_ administered to it which is a Valid WHO-approved vaccine"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 25
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.isUnspecifiedFormulation() == false)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, getPreferableVaccinesForTargetDose($td.doseNumberInSeries) contains $td.administeredVaccine)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+
 // Select the Pfizer, Moderna or Janssen series that has the earliest (Valid) dose administered to it. Mark the series for post-processing so that series selection catch-all rules will be activated; in the case that the Janssen vaccine
 // was administered after a Pfizer, Moderna or non-FDA series and the Pfizer/Moderna/non-FDA series is not complete, the catch all selection rule that examines for earliest completed series will override this rule and select Janssen
 // since it is a 1-dose series.
-rule "SeriesSelection(COVID-19): Select the series that has the earliest, non-NOS (Valid) _dose_ administered to it that is an FDA-approved or WHO-approved vaccine"
+rule "SeriesSelection(COVID-19): Select the series that has the earliest, non-NOS (Valid) _dose_ administered to it that is an FDA-approved vaccine, if no prior Valid WHO-approved vaccine was administered"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850") /////// , seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
-		$td : TargetDose(associatedTargetSeries == $ts, isValid == true)	/////// vaccineComponent.cdsConceptName in ("ICE207", "ICE208", "ICE217", "ICE218"))
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate) /////// , 
-			/////// associatedTargetSeries.seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE208", "ICE212", "ICE217", "ICE218"))
+		$ts : TargetSeries(this == $td.associatedTargetSeries, seriesRules.seriesName in ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19Janssen1DoseSeries"), getPreferableVaccinesForTargetDose($td.doseNumberInSeries) contains $td.administeredVaccine)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
