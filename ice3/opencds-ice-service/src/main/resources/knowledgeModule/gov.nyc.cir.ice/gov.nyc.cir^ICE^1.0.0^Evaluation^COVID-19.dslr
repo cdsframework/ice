@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2021 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2022 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -95,7 +95,7 @@ end
 // START Rules for an Additional Dose and Booster Dose:
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19: 3rd Dose permitted for >= 12 yrs of age with FDA-approved vaccines (CVX 207, 208, 212, 213, 217, 218) in an already completed __Pfizer or Moderna Series or Series not authorized by the FDA but authorized by the WHO__"
+rule "COVID-19: 3rd Dose permitted for >= 5 yrs of age with FDA-approved vaccines (CVX 207, 208, 212, 213, 217, 218) in an already completed __Pfizer or Moderna Series or Series not authorized by the FDA but authorized by the WHO__"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -111,8 +111,8 @@ rule "COVID-19: 3rd Dose permitted for >= 12 yrs of age with FDA-approved vaccin
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is == $numberOfDosesRequired
 		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
-			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
-			- the date $currentShotDate >= $dateAt12yOfAge
+			- make note of the date as $dateAt5yOfAge when the patient is "5y" of age
+			- the date $currentShotDate >= $dateAt5yOfAge
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -120,7 +120,7 @@ rule "COVID-19: 3rd Dose permitted for >= 12 yrs of age with FDA-approved vaccin
 end
 
 
-rule "COVID-19: 4th Dose permitted for >= 16 yrs of age with FDA-approved vaccines (CVX 207, 208, 212, 213, 217, 218) in an already completed __Pfizer or Moderna Series or Series not authorized by the FDA but authorized by the WHO__"
+rule "COVID-19: 4th Dose permitted for >= 12 yrs of age with FDA-approved vaccines (CVX 207, 208, 212, 213, 217, 218) in an already completed __Pfizer or Moderna Series or Series not authorized by the FDA but authorized by the WHO__"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -136,8 +136,8 @@ rule "COVID-19: 4th Dose permitted for >= 16 yrs of age with FDA-approved vaccin
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is == $numberOfDosesRequired+1
 		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
-			- make note of the date as $dateAt16yOfAge when the patient is "16y" of age
-			- the date $currentShotDate >= $dateAt16yOfAge
+			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
+			- the date $currentShotDate >= $dateAt12yOfAge
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -175,13 +175,13 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "28d"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 28 days required for an Additional Dose for immunocompromised patients or the minimum interval of 6 months required for a Booster Dose." for Valid Shot $administeredShot
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 28 days required for an Additional Dose for immunocompromised patients or the minimum interval of 5 months required for a Booster Dose." for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
         Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
 
 
-rule "COVID-19: If an extra dose is administered to an already completed __Pfizer, Moderna or WHO  Series__ >= 28 days and < 6 months, include supplemental text that follow guidelines regarding minimum ages/intervals"
+rule "COVID-19: If an extra dose is administered to an already completed __Pfizer, Moderna or WHO  Series__ >= 28 days and < 5 months, include supplemental text that follow guidelines regarding minimum ages/intervals"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
@@ -210,9 +210,9 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 			- the administration date of the shot is > $priorShotDate
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate >= "28d"
-		Confirm elapsed time between $priorShotDate and $currentShotDate < "6m"
+		Confirm elapsed time between $priorShotDate and $currentShotDate < "5m"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 6 months required for a Booster Dose." for Valid Shot $administeredShot
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 5 months required for a Booster Dose." for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
         Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
@@ -269,7 +269,7 @@ rule "COVID-19: If an extra dose is administered to an already completed __Janss
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "8w"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 6 months required for a Booster Dose." for Valid Shot $administeredShot
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 8 weeks required for a Booster Dose." for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
         Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
@@ -280,211 +280,29 @@ end
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// START For series representing non-FDA but authorized vaccines, mark vaccines that are not in the series as ACCEPTED/VACCINE_NOT_COUNTERED_BASED_ON_MOST_RECENT_VACCINE_GIVEN 
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-rule "COVID-19: If a different WHO-approved vaccine is administered for the AstraZeneca series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19AstraZeneca2DoseSeries"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE502", "ICE510", "ICE511")
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-
-
-rule "COVID-19: If a different WHO-approved vaccine is administered for the Novavax series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Novavax2DoseSeries"			
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE213", "ICE217", "ICE218", "ICE502", "ICE510", "ICE511")
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
-end
-
-
-rule "COVID-19: If a different WHO-approved vaccine is administered for the BIBP-Sinopharm series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19BIBPSinopharm2DoseSeries"			
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE502", "ICE511")
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
-end
-
-
-rule "COVID-19: If a different WHO-approved vaccine is administered for the CoronaVac-Sinovac series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19CoronaVacSinovac2DoseSeries"			
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE502", "ICE512")
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
-end
-
-
-rule "COVID-19: If a different WHO-approved vaccine is administered for the COVAXIN series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_SHOT_GIVEN"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19COVAXIN2DoseSeries"			
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE511", "ICE512")
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries	
-end
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-// END for series representing non-FDA but authorized vaccines, mark vaccines that are not in the series as ACCEPTED/VACCINE_NOT_COUNTERED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
 // START ACCEPTED vaccines in a wrong FDA-approved series
-// FDA-approved vaccines in the wrong FDA-approved series that is not complete always get evaluated as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN rather than Invalid. 
-// Non-FDA approved vaccines in a FDA-approved series that is not complete always gets evaluated as ACCEPTED/VACCINE_NOT_APPROVED_IN_US.
+// FDA-approved or WHO-approved vaccines in the wrong FDA-approved series that is not complete always get evaluated as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN rather than Invalid. 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////
-// Janssen ACCEPTED evaluation rules
-///////
-rule "COVID-19: If either an FDA-approved (Pfizer, Moderna or NOS vaccine) is administered for the Janssen Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+rule "COVID-19: If an FDA-approved, NOS or WHO-approved vaccine, the vaccine is not permitted be default for the series, and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Janssen1DoseSeries"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE213", "ICE217", "ICE218")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE213", "ICE217", "ICE218", "ICE502", "ICE510", "ICE511")
 			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
+			- make note of the administered vaccine as $vaccineAdministered
+			- make note of the dose number as $doseNumber
+			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the vaccine $vaccineAdministered is not permitted for dose number $doseNumber in this series
 	then
 		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
-
-rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Janssen Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Janssen1DoseSeries"
-			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Approved for Use in U.S."
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-///////
-
-///////
-// Pfizer ACCEPTED evaluation rules
-///////
-rule "COVID-19: If the Janssen vaccine is administered for the Pfizer Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Pfizer2DoseSeries"
-			- the vaccine administered is "ICE212"
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-
-rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Pfizer Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Pfizer2DoseSeries"
-			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Approved for Use in U.S."
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-///////
-
-///////
-// Moderna ACCEPTED evaluation rules
-///////
-rule "COVID-19: If the Janssen vaccine is administered for the Moderna Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Moderna2DoseSeries"
-			- the vaccine administered is "ICE212"
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-
-rule "COVID-19: If a non-FDA approved but authorized vaccine is administered for the Moderna Series and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_APPROVED_IN_US"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Moderna2DoseSeries"
-			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
-			- the series that the shot belongs to is not complete
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Accepted due to "Vaccine Not Approved for Use in U.S."
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-///////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // END ACCEPTED vaccines in a wrong FDA-approved series
