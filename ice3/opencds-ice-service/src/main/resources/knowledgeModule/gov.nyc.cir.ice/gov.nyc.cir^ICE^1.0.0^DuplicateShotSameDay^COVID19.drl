@@ -68,6 +68,30 @@ rule "Duplicate Shots/Same Day (COVID-19): For shots prior to 10/25/2021, bypass
 end
 
 
+rule "Duplicate Shots/Same Day (COVID-19): If shot is marked valid but another shot on the same day is marked Accepted, evaluate the non-preferred shot as Invalid with reason DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	no-loop true
+	when
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isDoseStatusOverridden() == false)
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, doseNumberInSeries == $td.doseNumberInSeries, 
+			status == DoseStatus.ACCEPTED, isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
 rule "Duplicate Shots/Same Day (COVID-19): If one of those shots is Valid and another shot on the same day is Invalid with reason code VACCINE_NOT_ALLOWED_FOR_THIS_DOSE, replace this reason code with DUPLICATE_SAME_DAY"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
