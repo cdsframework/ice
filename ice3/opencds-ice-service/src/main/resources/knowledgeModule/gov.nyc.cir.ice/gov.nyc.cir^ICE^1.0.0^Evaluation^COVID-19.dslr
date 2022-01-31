@@ -175,7 +175,7 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "28d"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 28 days required for an Additional Dose for immunocompromised patients or the minimum interval of 6 months required for a Booster Dose." for Valid Shot $administeredShot
+		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 28 days required for an Additional Dose for immunocompromised patients or the minimum interval of 5 months required for a Booster Dose." for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
         Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
