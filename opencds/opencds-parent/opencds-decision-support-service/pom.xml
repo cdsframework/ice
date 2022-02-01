@@ -265,10 +265,12 @@
             <groupId>org.spockframework</groupId>
             <artifactId>spock-spring</artifactId>
         </dependency>
+        <!-- 
         <dependency>
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-core</artifactId>
         </dependency>
+        -->
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-servlet-api</artifactId>
@@ -282,6 +284,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <!-- START: Override opencds-rest-service version used of the following to match that used by Drools. TODO: Update opencds-rest-service -->
         <dependency>
             <groupId>org.cdsframework</groupId>
             <artifactId>opencds-rest-service</artifactId>
@@ -295,6 +298,18 @@
 					<groupId>jakarta.activation</groupId>
 					<artifactId>jakarta.activation-api</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.jaxrs</groupId>
+					<artifactId>jackson-jaxrs-json-provider</artifactId>
+				</exclusion>
+				<exclusion>
+        			<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+        		</exclusion>
+        		 <exclusion>
+		        	<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+		        </exclusion>
 			</exclusions>
         </dependency>
         <!-- 
