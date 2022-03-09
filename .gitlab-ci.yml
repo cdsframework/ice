@@ -20,12 +20,12 @@ build-ice:
   only:
     - deployment
 
-upload-knowledge-repo:
-  image: maven:3-jdk-8-slim
-  stage: upload
-  script: "mvn -f opencds/opencds-knowledge-repository-data/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
-  only:
-    - deployment
+#upload-knowledge-repo:
+#  image: maven:3-jdk-8-slim
+#  stage: upload
+#  script: "mvn -f opencds/opencds-knowledge-repository-data/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
+#  only:
+#    - deployment
 
 upload-ice-repo:
   image: maven:3-jdk-8-slim
