@@ -2,7 +2,23 @@ variables:
   MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
 
 stages:
+  - build-knowledge
+  - build-ice
   - upload
+
+build-knowledge:
+  image: maven:3-jdk-8-slim
+  stage: build-knowledge
+  script: "mvn -f opencds/opencds-knowledge-repository-data/pom.xml clean install -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
+  only:
+    - deployment
+
+build-ice:
+  image: maven:3-jdk-8-slim
+  stage: build-ice
+  script: "mvn -f opencds/opencds-parent/pom.xml clean install -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
+  only:
+    - deployment
 
 upload-knowledge-repo:
   image: maven:3-jdk-8-slim
@@ -11,9 +27,9 @@ upload-knowledge-repo:
   only:
     - deployment
 
-upload-ice:
+upload-ice-repo:
   image: maven:3-jdk-8-slim
   stage: upload
-  script: "mvn -f opencds/opencds-parent/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
+  script: "mvn -f ice3/opencds-ice-service/pom.xml clean install -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
   only:
     - deployment
