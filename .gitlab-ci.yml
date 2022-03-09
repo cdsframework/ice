@@ -2,15 +2,7 @@ variables:
   MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
 
 stages:
-  - dependencies
   - upload
-
-dependencies:
-  image: maven:3-jdk-11-slim
-  stage: dependencies
-  script: "mvn dependency:go-offline -B -Dmaven.wagon.http.ssl.insecure=true"
-  only:
-    - deployment
 
 upload-knowledge-repo:
   image: maven:3-jdk-11-slim
