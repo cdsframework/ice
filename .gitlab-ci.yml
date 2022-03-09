@@ -5,14 +5,14 @@ stages:
   - upload
 
 upload-knowledge-repo:
-  image: maven:3-jdk-11-slim
+  image: maven:3-jdk-8-slim
   stage: upload
   script: "mvn -f opencds/opencds-knowledge-repository-data/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true -Dnexus.deploy.release.url=http://repo1.connexin.local/content/repositories/thirdparty/"
   only:
     - deployment
 
 upload-ice:
-  image: maven:3-jdk-11-slim
+  image: maven:3-jdk-8-slim
   stage: upload
   script: "mvn -f opencds/opencds-parent/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true -Dnexus.deploy.release.url=http://repo1.connexin.local/content/repositories/thirdparty/"
   only:
