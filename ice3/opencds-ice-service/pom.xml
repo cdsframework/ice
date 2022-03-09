@@ -37,6 +37,19 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>opencds</id>
+			<name>OpenCDS Nexus Repository</name>
+			<url>${nexus.deploy.release.url}</url>
+		</repository>
+		<snapshotRepository>
+			<id>opencds</id>
+			<name>OpenCDS Nexus Snapshot Repository</name>
+			<url>${nexus.deploy.snapshots.url}</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<repositories>
 		<repository>
 			<id>jboss-public-repository-group</id>

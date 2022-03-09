@@ -12,6 +12,19 @@
         <netbeans.hint.license>apache20</netbeans.hint.license>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>opencds</id>
+            <name>OpenCDS Nexus Repository</name>
+            <url>${nexus.deploy.release.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>opencds</id>
+            <name>OpenCDS Nexus Snapshot Repository</name>
+            <url>${nexus.deploy.snapshots.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>

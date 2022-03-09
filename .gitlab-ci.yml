@@ -1,0 +1,27 @@
+variables:
+  MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
+
+stages:
+  - dependencies
+  - upload
+
+dependencies:
+  image: maven:3-jdk-11-slim
+  stage: dependencies
+  script: "mvn dependency:go-offline -B -Dmaven.wagon.http.ssl.insecure=true"
+  only:
+    - deployment
+
+upload-knowledge-repo:
+  image: maven:3-jdk-11-slim
+  stage: upload
+  script: "mvn -f opencds/opencds-knowledge-repository-data/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true -Dnexus.deploy.release.url=http://repo1.connexin.local/content/repositories/thirdparty/"
+  only:
+    - deployment
+
+upload-ice:
+  image: maven:3-jdk-11-slim
+  stage: upload
+  script: "mvn -f opencds/opencds-parent/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true -Dnexus.deploy.release.url=http://repo1.connexin.local/content/repositories/thirdparty/"
+  only:
+    - deployment
