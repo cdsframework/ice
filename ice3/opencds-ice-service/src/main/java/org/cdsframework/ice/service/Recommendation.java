@@ -55,6 +55,7 @@ public class Recommendation {
 	private Date latestRecommendationDate;
 	private String recommendationReason;
 	private String recommendationSupplementalText;
+	private String ruleName;
 
 	private static final Logger logger = LogManager.getLogger();
 	
@@ -83,6 +84,7 @@ public class Recommendation {
 		recommendationStatus = RecommendationStatus.NOT_FORECASTED;
 		recommendationReason = null;
 		recommendationSupplementalText = null;
+		ruleName = null;
 	}
 	
 	public String getRecommendationIdentifier() {
@@ -140,6 +142,14 @@ public class Recommendation {
 		this.latestRecommendationDate = latestRecommendationDate;
 	}
 	
+	public String getRuleName() {
+		return ruleName;
+	}
+
+	public void setRuleName(String ruleName) {
+		this.ruleName = ruleName;
+	}
+
 	/**
 	 * Sets the latest recommendation date to the overdue date - 1 days
 	 */
@@ -300,8 +310,9 @@ public class Recommendation {
 				+ recommendationStatus + ", recommendedVaccine="
 				+ recommendedVaccine + ", recommendationDate="
 				+ recommendationDate + ", recommendationReason="
-				+ recommendationReason + ", supplementalTest="
-				+ recommendationSupplementalText + " ]";
+				+ recommendationReason + ", supplementalText="
+				+ recommendationSupplementalText + ", ruleName="
+				+ ruleName + " ]";
 	}
 	
 }

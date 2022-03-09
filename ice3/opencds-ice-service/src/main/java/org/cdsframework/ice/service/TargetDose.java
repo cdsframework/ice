@@ -42,6 +42,7 @@ public class TargetDose {
 	
 	private String uniqueId;
 	private String doseId;
+	private String ruleName;						/* only populated when evaluation is Invalid */
 	private TargetSeries associatedTargetSeries;
 	private Vaccine administeredVaccine;
 	private VaccineComponent vaccineComponent;
@@ -85,6 +86,7 @@ public class TargetDose {
 		}
 		uniqueId = ICELogicHelper.generateUniqueString();
 		doseId = pAssociatedSAE.getId();
+		ruleName = null;
 		associatedTargetSeries = pEncompassingTargetSeries;
 		administeredVaccine = pAdministeredVaccine;
 		vaccineComponent = pVaccineComponentToBeEvaluated;
@@ -237,6 +239,14 @@ public class TargetDose {
 	 */
 	public String getDoseId() {
 		return doseId;
+	}
+
+	public String getRuleName() {
+		return ruleName;
+	}
+
+	public void setRuleName(String ruleName) {
+		this.ruleName = ruleName;
 	}
 
 	/**
@@ -500,7 +510,7 @@ public class TargetDose {
 	@Override
 	public String toString() {
 		
-		String s = "TargetDose [uniqueId=" + uniqueId + ", doseId=" + doseId + ", administeredShotNumber=" + administeredShotNumberInSeries + 
+		String s = "TargetDose [uniqueId=" + uniqueId + ", doseId=" + doseId + ", ruleName=" + ruleName + ", administeredShotNumber=" + administeredShotNumberInSeries +
 				"; doseNumber=" + doseNumberInSeries + ", doseNumberCount=" + doseNumberCount + "vaccine=" + administeredVaccine.getCdsConceptName() + ", isPrimarySeriesShot=" + isPrimarySeriesShot() + 
 				"; vaccineComponent=" + vaccineComponent.getCdsConceptName() + ", administrationDate=" + administrationDate + ", status=" + status + 
 				"; isValid=" + isValid + "; preEvaluationCheck=" + preEvaluationCheckCompleted + "; isLiveVirus: " + this.getAdministeredVaccine().isLiveVirusVaccine() + 

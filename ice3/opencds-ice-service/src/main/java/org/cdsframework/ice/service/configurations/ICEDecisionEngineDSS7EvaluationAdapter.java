@@ -114,6 +114,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private Boolean outputEarliestOverdueDates = null;
 	private Boolean doseOverrideFeatureEnabled = null;
 	private Boolean outputSupplementalText = null;
+	private Boolean outputRuleName = null;
 	
 	private static final Logger logger = LogManager.getLogger();
 
@@ -379,12 +380,20 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		cmds.add(CommandFactory.newSetGlobal("doseOverrideFeatureEnabled", doseOverrideFeatureEnabled));
 		
 		if (outputSupplementalText == null) {
-			String lErrStr = "An error occurred: knowledge module not properly initialized: dose override flag not set; this should not happen. Cannot continue";
+			String lErrStr = "An error occurred: knowledge module not properly initialized: output supplemental text flag not set; this should not happen. Cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);			
 		}
 		cmds.add(CommandFactory.newSetGlobal("outputSupplementalText", outputSupplementalText));
-		
+
+		if (outputRuleName == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: output rule name flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		cmds.add(CommandFactory.newSetGlobal("outputRuleName", outputRuleName));
+
+
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
 		 */
@@ -737,6 +746,18 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		}
 		if (logger.isInfoEnabled()) {
 			logger.info(_METHODNAME + "output_supplemental_text set to " + outputSupplementalText);
+		}
+
+		// Output Supplemental Text, when available?
+		String lOutputRuleName = lProps.getProperty("output_rule_name");
+		if (lOutputRuleName != null && lOutputRuleName.equals("Y")) {
+			outputRuleName = new Boolean(true);
+		}
+		else {
+			outputRuleName = new Boolean(false);
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info(_METHODNAME + "output_rule_name set to " + outputRuleName);
 		}
 		
 		/////// Set up knowledge base

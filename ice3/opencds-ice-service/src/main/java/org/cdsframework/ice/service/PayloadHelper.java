@@ -76,7 +76,7 @@ public class PayloadHelper {
 	}
 	
 
-	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d,  boolean outputSupplementalText) {
+	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d,  boolean outputSupplementalText, boolean outputRuleName) {
 
 		String _METHODNAME = "OutputNestedImmEvaluationResult: ";
 		if (k == null || pNamedObjects == null || evalTime == null || sae == null || d == null) {
@@ -215,8 +215,12 @@ public class PayloadHelper {
 					continue;
 				}
 				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
-				if (localCDInterp != null && ! interpretations.contains(localCDInterp))
+				if (localCDInterp != null && ! interpretations.contains(localCDInterp)) {
+					if ((outputRuleName == true) && (d.getRuleName() != null)) {
+						localCDInterp.setAny(d.getRuleName());
+					}
 					interpretations.add(localCDInterp);
+				}
 			}
 			if (interpretations.size() > 0)
 				childObs.setInterpretation(interpretations);
@@ -441,7 +445,7 @@ public class PayloadHelper {
 		       </relatedClinicalStatement>
 		   </substanceAdministrationProposal>
 	 */
-	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String cdsSource, TargetSeries ts, boolean outputEarliestOverdue, boolean outputSupplementalText) 
+	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String cdsSource, TargetSeries ts, boolean outputEarliestOverdue, boolean outputSupplementalText, boolean outputRuleName)
 		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
@@ -571,12 +575,15 @@ public class PayloadHelper {
 					if (rec.getRecommendationSupplementalText() != null && recommendationReasonCode.equals(BaseDataRecommendationReason._SUPPLEMENTAL_TEXT.getCdsListItemName())) {
 						lSupplementalTextFound = true;
 					}
-					if (outputSupplementalText == true || (outputSupplementalText == false && lSupplementalTextFound == false)) {
+					if ((outputSupplementalText == true) || (outputRuleName == true) || (outputSupplementalText == false && lSupplementalTextFound == false)) {
 						CD localCDInterp = getLocalCodeForRecommendationReason(recommendationReasonCode, this.backingSchedule);
 						if (localCDInterp != null && (rec.getRecommendationStatus() == RecommendationStatus.FORECASTING_COMPLETE || rec.getRecommendationStatus() == rs) && ! interpretations.contains(localCDInterp)) {
 							if (lSupplementalTextFound && outputSupplementalText) {
 								localCDInterp.setOriginalText(rec.getRecommendationSupplementalText());
 							}	
+							if ((localCDInterp != null) && (outputRuleName == true) && (rec.getRuleName() != null)) {
+								localCDInterp.setAny(rec.getRuleName());
+							}
 							interpretations.add(localCDInterp);
 						}
 					}
@@ -607,7 +614,7 @@ public class PayloadHelper {
 	public void outputOtherImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String cdsSource) 
 		throws ImproperUsageException, InconsistentConfigurationException {
 
-		String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
+		String _METHODNAME = "OutputOtherImmRecommendationSubstanceAdministrationProposal: ";
 
 		if (pNamedObjects == null || drools == null) {
 			String lErrStr = "Error outputting SubstanceAdministrationProposal: one or more method parameters not initialized";
