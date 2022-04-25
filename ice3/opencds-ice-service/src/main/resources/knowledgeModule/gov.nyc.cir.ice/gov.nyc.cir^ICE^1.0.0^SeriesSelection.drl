@@ -1669,7 +1669,7 @@ rule "SeriesSelection(Hep B).SelectHepBNewbornSeriesAtLeastOneShotAdministered"
 		$td : TargetDose(administeredShotNumberInSeries == 1)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBNewbornSeries", selectedSeries == false, containsTargetDose($td))
 		$person : EvaluatedPerson()
-		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isLessThan(new TimePeriod(28, DurationType.DAYS)))
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isLessThan(new TimePeriod(55, DurationType.DAYS)))
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -2012,6 +2012,28 @@ rule "SeriesSelection.SelectRotavirus2DoseSeriesIf1DoseRV1"
 		update($ts);	
 end
 
+
+///////////////////////////////////////////////////////////// RSV-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
+
+// Since there is only one RSV series, just select it for forecasting. Note that if additional series are defined, this rule will just pick one.
+rule "SeriesSelection.SelectOnlyRSVSeries"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	activation-group "RSVSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.905", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.905", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.905")
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
 
 
 /*****************************************************************************************************************************************************************************/
