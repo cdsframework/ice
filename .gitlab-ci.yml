@@ -2,25 +2,10 @@ variables:
   MAVEN_OPTS: -Dmaven.repo.local=/root/.m2
 
 stages:
-  - deploy
   - build-knowledge
   - build-ice
   - upload
-
-s3-deploy:
-  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
-  stage: deploy
-  environment:
-    name: dev
-  script:
-    - apt-get install zip -y
-    - rm -rf /tmp/ice
-    - mkdir -p /tmp/ice
-    - cp -r ice3/opencds-ice-service/src/main/resources/* /tmp/ice
-    - cd /tmp && zip -r ice.zip ice
-    - aws s3 cp /tmp/ice.zip $S3_PATH --acl public-read
-  only:
-    - deployment
+  - deploy
 
 build-knowledge:
   image: maven:3-jdk-8-slim
@@ -47,6 +32,21 @@ upload-ice-repo:
   image: maven:3-jdk-8-slim
   stage: upload
   script: "mvn -f ice3/opencds-ice-service/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
+  only:
+    - deployment
+
+s3-deploy:
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  stage: deploy
+  environment:
+    name: dev
+  script:
+    - apt-get install zip -y
+    - rm -rf /tmp/ice
+    - mkdir -p /tmp/ice
+    - cp -r ice3/opencds-ice-service/src/main/resources/* /tmp/ice
+    - cd /tmp && zip -r ice.zip ice
+    - aws s3 cp /tmp/ice.zip $S3_PATH --acl public-read
   only:
     - deployment
 
