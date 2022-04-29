@@ -13,6 +13,7 @@ build-knowledge:
   script: "mvn -f opencds/opencds-knowledge-repository-data/pom.xml clean install -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
   only:
     - deployment
+    - tags
 
 build-ice:
   image: maven:3-jdk-8-slim
@@ -20,6 +21,7 @@ build-ice:
   script: "mvn -f opencds/opencds-parent/pom.xml clean install -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
   only:
     - deployment
+    - tags
 
 upload-ice-repo:
   image: maven:3-jdk-8-slim
@@ -27,6 +29,7 @@ upload-ice-repo:
   script: "mvn -f ice3/opencds-ice-service/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
   only:
     - deployment
+    - tags
 
 s3-deploy:
   image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
