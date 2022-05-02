@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2021 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2022 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,7 @@ public enum BaseDataRecommendationReason implements BaseData {
 	_RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON("RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"),
 	_RECOMMENDED_IN_FUTURE_REASON("RECOMMENDATION_REASON_CONCEPT.DUE_IN_FUTURE"),
 	_RECOMMENDED_DUE_NOW_REASON("RECOMMENDATION_REASON_CONCEPT.DUE_NOW"),
+	_BOOSTER_DOSE_REASON("RECOMMENDATION_REASON_CONCEPT.BOOSTER_DOSE"),
 	_RECOMMENDATION_NOT_SUPPORTED("RECOMMENDATION_REASON_CONCEPT.NOT_SUPPORTED"),
 	_SUPPLEMENTAL_TEXT("RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT");
 	

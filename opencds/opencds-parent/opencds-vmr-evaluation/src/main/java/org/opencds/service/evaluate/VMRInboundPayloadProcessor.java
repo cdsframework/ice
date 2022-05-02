@@ -16,6 +16,9 @@
 
 package org.opencds.service.evaluate;
 
+import java.io.ByteArrayInputStream;
+import java.io.StringReader;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -58,12 +61,12 @@ public class VMRInboundPayloadProcessor implements InboundPayloadProcessor, Clon
 
 		try {
 		    log.debug("Get unmarshaller for semanticSignifier: " + semanticSignifier);
-            Class<?> entryPoint = Class.forName(semanticSignifier.getEntryPoint());
-            StreamSource payloadStream = new StreamSource(streamUtility.getInputStreamFromString(payload.getPayload()));
-            
-            Unmarshaller unmarshaller = unmarshallerPool.borrowObject(semanticSignifier);
-			cdsInput = unmarshaller.unmarshal( payloadStream, entryPoint);
-			unmarshallerPool.returnObject(semanticSignifier, unmarshaller);
+				Class<?> entryPoint = Class.forName(semanticSignifier.getEntryPoint());
+				StreamSource payloadStream = new StreamSource(new ByteArrayInputStream(payload.getPayload()));
+
+				Unmarshaller unmarshaller = unmarshallerPool.borrowObject(semanticSignifier);
+				cdsInput = unmarshaller.unmarshal( payloadStream, entryPoint);
+				unmarshallerPool.returnObject(semanticSignifier, unmarshaller);
 		} catch (JAXBException e) {
 //			String jaxBError = e.getLinkedException().fillInStackTrace().getMessage();
 			e.printStackTrace();

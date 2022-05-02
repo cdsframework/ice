@@ -51,6 +51,7 @@ import org.opencds.config.api.model.SSId;
 import org.opencds.config.api.model.SemanticSignifier;
 import org.opencds.config.api.model.impl.SSIdImpl;
 import org.opencds.config.api.service.KnowledgeModuleService;
+import org.opencds.config.api.service.SemanticSignifierService;
 import org.opencds.dss.util.DssUtil;
 import org.opencds.service.evaluate.RequestProcessor;
 
@@ -99,8 +100,7 @@ public class EvaluationService implements Evaluation {
 
     /**
      * 
-     * @param date
-     *            as long
+     * @param date as long
      * @return XMLGregorianCalendar
      */
     private static XMLGregorianCalendar long2Gregorian(long date) {
@@ -116,8 +116,7 @@ public class EvaluationService implements Evaluation {
     }
 
     /**
-     * 
-     * @param date
+     *
      * @return XMLGregorianCalendar
      */
     private XMLGregorianCalendar rightNow() {
@@ -142,8 +141,10 @@ public class EvaluationService implements Evaluation {
             EvaluationExceptionFault,
             InvalidTimeZoneOffsetExceptionFault,
             DSSRuntimeExceptionFault {
-        log.debug("II: " + parameters.getInteractionId().getInteractionId().toString()
-                + "EvaluationSoapService.evaluate started");
+    	
+    	if (log.isDebugEnabled()) {
+    		log.debug("II: " + parameters.getInteractionId().getInteractionId().toString() + "EvaluationSoapService.evaluate started");
+    	}
 
         List<FinalKMEvaluationResponse> responses = evaluateInternal(parameters.getInteractionId().getInteractionId(),
                 parameters.getEvaluationRequest(), XMLDateUtility.xmlGregorian2Date(rightNow()));
@@ -154,8 +155,9 @@ public class EvaluationService implements Evaluation {
             evaluateResponse.getEvaluationResponse().getFinalKMEvaluationResponse().add(response);
         }
 
-        log.info("II: " + parameters.getInteractionId().getInteractionId().toString() + " "
-                + " EvaluationSoapService.evaluate completed");
+        if (log.isInfoEnabled()) {
+        	log.info("II: " + parameters.getInteractionId().getInteractionId().toString() + " " + " EvaluationSoapService.evaluate completed");
+        }
 
         return evaluateResponse;
     }
@@ -286,23 +288,24 @@ public class EvaluationService implements Evaluation {
         @Override
         public FinalKMEvaluationResponse call() throws Exception {
             FinalKMEvaluationResponse response = new FinalKMEvaluationResponse();
-            String result = "";
+           // String result = "";
             log.debug("Creating evaluator");
             Map<String, List<?>> resultFactLists = evaluationFactory.createEvaluater(kr, oneRequest).getOneResponse(kr,
                     oneRequest);
             log.debug("Building output");
-            result = outboundPayloadProcessor.buildOutput(kr, resultFactLists, oneRequest);
+            byte[] result = outboundPayloadProcessor.buildOutput(kr, resultFactLists, oneRequest);
             log.debug("Building output done.");
 
             log.debug("KMId: " + oneRequest.getRequestedKmId()
                     + " EvaluationService.evaluateAtSpecifiedTime starting one KM");
-            log.trace("" + result);
+            if (log.isTraceEnabled())
+                log.trace(new String(result));
 
             ItemIdentifier itemId = createItemIdentifier(oneRequest.getEvaluationRequestDataItem());
 
             KnowledgeModule km = knowledgeModuleService.find(oneRequest.getRequestedKmId());
 
-            SemanticPayload semanticPayload = createSemanticPayload(DssUtil.gZipData(result.getBytes(), oneRequest.getEvaluationRequestDataItem()), km.getSSId());
+            SemanticPayload semanticPayload = createSemanticPayload(DssUtil.gZipData(result, oneRequest.getEvaluationRequestDataItem()), km.getSSId());
 
             KMEvaluationResultData kmerData = createKMEvaluationResultData(semanticPayload, itemId);
 

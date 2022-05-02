@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
+import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
 import org.opencds.vmr.v1_0.internal.ClinicalStatement;
 import org.opencds.vmr.v1_0.internal.Entity;
@@ -72,8 +73,9 @@ public abstract class NestedObjectsMapper extends Object {
 		throws ImproperUsageException, DataFormatException, InvalidDataException
 	{
 		String _METHODNAME = "pullInClinicalStatementNestedObjects: ";
-		
-		if ( "AdverseEvent".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+
+		final String statementClassName = externalSchemaSourceClinicalStatement.getClass().getSimpleName();
+		if ( "AdverseEvent".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.AdverseEvent typedSource = (org.opencds.vmr.v1_0.schema.AdverseEvent)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -85,7 +87,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "DeniedAdverseEvent".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "DeniedAdverseEvent".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.DeniedAdverseEvent typedSource = (org.opencds.vmr.v1_0.schema.DeniedAdverseEvent)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -97,7 +99,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "AppointmentProposal".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "AppointmentProposal".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.AppointmentProposal typedSource = (org.opencds.vmr.v1_0.schema.AppointmentProposal)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -109,7 +111,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "AppointmentRequest".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "AppointmentRequest".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.AppointmentRequest typedSource = (org.opencds.vmr.v1_0.schema.AppointmentRequest)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -121,7 +123,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "EncounterEvent".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "EncounterEvent".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.EncounterEvent typedSource = (org.opencds.vmr.v1_0.schema.EncounterEvent)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -133,7 +135,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "MissedAppointment".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "MissedAppointment".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.MissedAppointment typedSource = (org.opencds.vmr.v1_0.schema.MissedAppointment)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -145,7 +147,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "ScheduledAppointment".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "ScheduledAppointment".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.ScheduledAppointment typedSource = (org.opencds.vmr.v1_0.schema.ScheduledAppointment)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -157,7 +159,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "Goal".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "Goal".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.Goal typedSource = (org.opencds.vmr.v1_0.schema.Goal)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -169,7 +171,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "GoalProposal".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "GoalProposal".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.GoalProposal typedSource = (org.opencds.vmr.v1_0.schema.GoalProposal)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -181,7 +183,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "ObservationOrder".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "ObservationOrder".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.ObservationOrder typedSource = (org.opencds.vmr.v1_0.schema.ObservationOrder)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -193,7 +195,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "ObservationProposal".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "ObservationProposal".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.ObservationProposal typedSource = (org.opencds.vmr.v1_0.schema.ObservationProposal)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -205,7 +207,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "ObservationResult".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "ObservationResult".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.ObservationResult typedSource = (org.opencds.vmr.v1_0.schema.ObservationResult)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -217,7 +219,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "UnconductedObservation".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "UnconductedObservation".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.UnconductedObservation typedSource = (org.opencds.vmr.v1_0.schema.UnconductedObservation)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -229,7 +231,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "DeniedProblem".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "DeniedProblem".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.DeniedProblem typedSource = (org.opencds.vmr.v1_0.schema.DeniedProblem)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -241,7 +243,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "Problem".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "Problem".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.Problem typedSource = (org.opencds.vmr.v1_0.schema.Problem)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -253,7 +255,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "ProcedureEvent".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "ProcedureEvent".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.ProcedureEvent typedSource = (org.opencds.vmr.v1_0.schema.ProcedureEvent)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -265,7 +267,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "ProcedureOrder".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "ProcedureOrder".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.ProcedureOrder typedSource = (org.opencds.vmr.v1_0.schema.ProcedureOrder)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -277,7 +279,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "ProcedureProposal".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "ProcedureProposal".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.ProcedureProposal typedSource = (org.opencds.vmr.v1_0.schema.ProcedureProposal)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -289,7 +291,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "ScheduledProcedure".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "ScheduledProcedure".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.ScheduledProcedure typedSource = (org.opencds.vmr.v1_0.schema.ScheduledProcedure)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -301,7 +303,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "UndeliveredProcedure".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "UndeliveredProcedure".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.UndeliveredProcedure typedSource = (org.opencds.vmr.v1_0.schema.UndeliveredProcedure)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -313,7 +315,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "SubstanceAdministrationEvent".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "SubstanceAdministrationEvent".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent typedSource = (org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -325,7 +327,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "SubstanceAdministrationOrder".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "SubstanceAdministrationOrder".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder typedSource = (org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -337,7 +339,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "SubstanceAdministrationProposal".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "SubstanceAdministrationProposal".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal typedSource = (org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -349,7 +351,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "SubstanceDispensationEvent".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "SubstanceDispensationEvent".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent typedSource = (org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -361,7 +363,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "UndeliveredSubstanceAdministration".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "UndeliveredSubstanceAdministration".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration typedSource = (org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -373,7 +375,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "SupplyEvent".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "SupplyEvent".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.SupplyEvent typedSource = (org.opencds.vmr.v1_0.schema.SupplyEvent)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -385,7 +387,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "SupplyOrder".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "SupplyOrder".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.SupplyOrder typedSource = (org.opencds.vmr.v1_0.schema.SupplyOrder)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -397,7 +399,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "SupplyProposal".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "SupplyProposal".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.SupplyProposal typedSource = (org.opencds.vmr.v1_0.schema.SupplyProposal)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -409,7 +411,7 @@ public abstract class NestedObjectsMapper extends Object {
 					OneObjectMapper.pullInRelatedClinicalStatement(oneRelatedClinicalStatement, parentId, subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if( "UndeliveredSupply".equals(externalSchemaSourceClinicalStatement.getClass().getSimpleName()) ) {
+		} else if( "UndeliveredSupply".equals(statementClassName) ) {
 			org.opencds.vmr.v1_0.schema.UndeliveredSupply typedSource = (org.opencds.vmr.v1_0.schema.UndeliveredSupply)externalSchemaSourceClinicalStatement;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -422,7 +424,7 @@ public abstract class NestedObjectsMapper extends Object {
 				}
 			}
 		} else {
-			throw new InvalidDataException(_METHODNAME + "Unrecognized class: " + externalSchemaSourceClinicalStatement.getClass().getSimpleName());
+			throw new InvalidDataException(_METHODNAME + "Unrecognized class: " + statementClassName);
 		}
 		
 		return;
@@ -456,10 +458,12 @@ public abstract class NestedObjectsMapper extends Object {
 			FactLists 				factLists) 
 		throws ImproperUsageException, DataFormatException, InvalidDataException
 	{
-		String _METHODNAME = "pullInRelatedEntityNestedObjects: ";		
+		String _METHODNAME = "pullInRelatedEntityNestedObjects: ";
+		if (logger.isTraceEnabled())
         logger.trace(_METHODNAME + external.getClass().getSimpleName() + ", " + parentId);
 
-        if ("AdministrableSubstance".equals(external.getClass().getSimpleName())) {
+        final String externalClassName = external.getClass().getSimpleName();
+    if ("AdministrableSubstance".equals(externalClassName)) {
 			org.opencds.vmr.v1_0.schema.AdministrableSubstance typedSource = (org.opencds.vmr.v1_0.schema.AdministrableSubstance)external;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -467,7 +471,7 @@ public abstract class NestedObjectsMapper extends Object {
 							oneRelatedEntity, parentId, oneRelatedEntity.getTargetRole(), subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if ( "Entity".equals(external.getClass().getSimpleName()) ) {
+		} else if ( "Entity".equals(externalClassName) ) {
 			org.opencds.vmr.v1_0.schema.Entity typedSource = (org.opencds.vmr.v1_0.schema.Entity)external;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -475,7 +479,7 @@ public abstract class NestedObjectsMapper extends Object {
 							oneRelatedEntity, parentId, oneRelatedEntity.getTargetRole(), subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if ( "EvaluatedPerson".equals(external.getClass().getSimpleName()) ) {
+		} else if ( "EvaluatedPerson".equals(externalClassName) ) {
 			org.opencds.vmr.v1_0.schema.EvaluatedPerson typedSource = (org.opencds.vmr.v1_0.schema.EvaluatedPerson)external;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -483,7 +487,7 @@ public abstract class NestedObjectsMapper extends Object {
 							oneRelatedEntity, parentId, oneRelatedEntity.getTargetRole(), subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if ( "Facility".equals(external.getClass().getSimpleName()) ) {
+		} else if ( "Facility".equals(externalClassName) ) {
 			org.opencds.vmr.v1_0.schema.Facility typedSource = (org.opencds.vmr.v1_0.schema.Facility)external;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -491,7 +495,7 @@ public abstract class NestedObjectsMapper extends Object {
 							oneRelatedEntity, parentId, oneRelatedEntity.getTargetRole(), subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if ( "Organization".equals(external.getClass().getSimpleName()) ) {
+		} else if ( "Organization".equals(externalClassName) ) {
 			org.opencds.vmr.v1_0.schema.Organization typedSource = (org.opencds.vmr.v1_0.schema.Organization)external;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -499,7 +503,7 @@ public abstract class NestedObjectsMapper extends Object {
 							oneRelatedEntity, parentId, oneRelatedEntity.getTargetRole(), subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if ( "Person".equals(external.getClass().getSimpleName()) ) {
+		} else if ( "Person".equals(externalClassName) ) {
 			org.opencds.vmr.v1_0.schema.Person typedSource = (org.opencds.vmr.v1_0.schema.Person)external;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -507,7 +511,7 @@ public abstract class NestedObjectsMapper extends Object {
 							oneRelatedEntity, parentId, oneRelatedEntity.getTargetRole(), subjectPersonId, focalPersonId, factLists);
 				}
 			}
-		} else if ( "Specimen".equals(external.getClass().getSimpleName()) ) {
+		} else if ( "Specimen".equals(externalClassName) ) {
 			org.opencds.vmr.v1_0.schema.Specimen typedSource = (org.opencds.vmr.v1_0.schema.Specimen)external;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -516,7 +520,7 @@ public abstract class NestedObjectsMapper extends Object {
 				}
 			}
 		} else {
-			throw new InvalidDataException(_METHODNAME + "Unrecognized class: " + external.getClass().getSimpleName());
+			throw new InvalidDataException(_METHODNAME + "Unrecognized class: " + externalClassName);
 		}
 		
 		return;
@@ -531,11 +535,13 @@ public abstract class NestedObjectsMapper extends Object {
 	{
 		
 		String _METHODNAME = "pushOutClinicalStatementNestedObjects(): ";
+		final String targetClassName = target.getClass().getSimpleName();
 		
 		//look for related entities to this clinical statement
 		if ( organizedResults.getEntityChildren().get(source.getId()) != null ) 
 		{
-			logger.trace(_METHODNAME + "Entity children of " + source.getId());
+			if (logger.isTraceEnabled())
+				logger.trace(_METHODNAME + "Entity children of " + source.getId());
 			for ( EntityRelationship oneInternalEntityRelationship : organizedResults.getEntityChildren().get(source.getId())) {
 				/*
 				 * oneInternalEntityRelationship is a member of the List of EntityRelationships 
@@ -544,9 +550,10 @@ public abstract class NestedObjectsMapper extends Object {
 				 *  The following line of code populates the nested entity, and will recursively 
 				 *  	populate any further nested entities within the oneInternalEntityRelationship.
 				 */
-				logger.trace(_METHODNAME + "push out source Entity or Clinical Statement Id " + oneInternalEntityRelationship.getSourceId()
-						+ ", targetEntityId " + oneInternalEntityRelationship.getTargetEntityId() 
-						+ ", with relationship " + oneInternalEntityRelationship.getTargetRole().toString());
+				if (logger.isTraceEnabled())
+					logger.trace(_METHODNAME + "push out source Entity or Clinical Statement Id " + oneInternalEntityRelationship.getSourceId()
+							+ ", targetEntityId " + oneInternalEntityRelationship.getTargetEntityId()
+							+ ", with relationship " + oneInternalEntityRelationship.getTargetRole().toString());
 				org.opencds.vmr.v1_0.schema.RelatedEntity oneSchemaNestedEntity = new org.opencds.vmr.v1_0.schema.RelatedEntity();
 				
 				oneSchemaNestedEntity = OneObjectMapper.pushOutRelatedEntityToClinicalStatement(oneInternalEntityRelationship, target, organizedResults);
@@ -556,66 +563,66 @@ public abstract class NestedObjectsMapper extends Object {
 					 * Store the completed nested related entity tree back into 
 					 * 		the source clinical statement as a relatedClinicalStatement.
 					 */
-					if ( "AdverseEvent".equals(target.getClass().getSimpleName()) ) {
+					if ( "AdverseEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.AdverseEvent)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "DeniedAdverseEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "DeniedAdverseEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.DeniedAdverseEvent)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "AppointmentProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "AppointmentProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.AppointmentProposal)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "AppointmentRequest".equals(target.getClass().getSimpleName()) ) {
+					} else if( "AppointmentRequest".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.AppointmentRequest)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "EncounterEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "EncounterEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.EncounterEvent)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "MissedAppointment".equals(target.getClass().getSimpleName()) ) {
+					} else if( "MissedAppointment".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.MissedAppointment)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "ScheduledAppointment".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ScheduledAppointment".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ScheduledAppointment)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "Goal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "Goal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.Goal)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "GoalProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "GoalProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.GoalProposal)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "ObservationOrder".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ObservationOrder".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ObservationOrder)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "ObservationProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ObservationProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ObservationProposal)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "ObservationResult".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ObservationResult".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ObservationResult)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "UnconductedObservation".equals(target.getClass().getSimpleName()) ) {
+					} else if( "UnconductedObservation".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.UnconductedObservation)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "DeniedProblem".equals(target.getClass().getSimpleName()) ) {
+					} else if( "DeniedProblem".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.DeniedProblem)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "Problem".equals(target.getClass().getSimpleName()) ) {
+					} else if( "Problem".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.Problem)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "ProcedureEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ProcedureEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ProcedureEvent)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "ProcedureOrder".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ProcedureOrder".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ProcedureOrder)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "ProcedureProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ProcedureProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ProcedureProposal)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "ScheduledProcedure".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ScheduledProcedure".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ScheduledProcedure)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "UndeliveredProcedure".equals(target.getClass().getSimpleName()) ) {
+					} else if( "UndeliveredProcedure".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.UndeliveredProcedure)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "SubstanceAdministrationEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SubstanceAdministrationEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "SubstanceAdministrationOrder".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SubstanceAdministrationOrder".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "SubstanceAdministrationProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SubstanceAdministrationProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "SubstanceDispensationEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SubstanceDispensationEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "UndeliveredSubstanceAdministration".equals(target.getClass().getSimpleName()) ) {
+					} else if( "UndeliveredSubstanceAdministration".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "SupplyEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SupplyEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SupplyEvent)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "SupplyOrder".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SupplyOrder".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SupplyOrder)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "SupplyProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SupplyProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SupplyProposal)target).getRelatedEntity().add(oneSchemaNestedEntity);
-					} else if( "UndeliveredSupply".equals(target.getClass().getSimpleName()) ) {
+					} else if( "UndeliveredSupply".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.UndeliveredSupply)target).getRelatedEntity().add(oneSchemaNestedEntity);
 					} else {
-						throw new InvalidDataException("_METHOD_NAME + Unrecognized class: " + target.getClass().getSimpleName());
+						throw new InvalidDataException("_METHOD_NAME + Unrecognized class: " + targetClassName);
 					}
 				}
 			}
@@ -624,7 +631,8 @@ public abstract class NestedObjectsMapper extends Object {
 		//look for related clinical statements
 		if ( organizedResults.getCsChildren().get(source.getId()) != null ) 
 		{
-			logger.trace(_METHODNAME + "Clinical Statement children of " + source.getId());
+			if (logger.isTraceEnabled())
+				logger.trace(_METHODNAME + "Clinical Statement children of " + source.getId());
 			for ( ClinicalStatement oneInternalRelatedClinicalStatement : organizedResults.getCsChildren().get(source.getId())) 
 			{
 				/*
@@ -658,66 +666,66 @@ public abstract class NestedObjectsMapper extends Object {
 					 * Store the completed nested clinical statement tree back into 
 					 * 		the source clinical statement as a relatedClinicalStatement.
 					 */
-					if ( "AdverseEvent".equals(target.getClass().getSimpleName()) ) {
+					if ( "AdverseEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.AdverseEvent)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "DeniedAdverseEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "DeniedAdverseEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.DeniedAdverseEvent)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "AppointmentProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "AppointmentProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.AppointmentProposal)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "AppointmentRequest".equals(target.getClass().getSimpleName()) ) {
+					} else if( "AppointmentRequest".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.AppointmentRequest)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "EncounterEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "EncounterEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.EncounterEvent)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "MissedAppointment".equals(target.getClass().getSimpleName()) ) {
+					} else if( "MissedAppointment".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.MissedAppointment)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "ScheduledAppointment".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ScheduledAppointment".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ScheduledAppointment)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "Goal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "Goal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.Goal)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "GoalProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "GoalProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.GoalProposal)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "ObservationOrder".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ObservationOrder".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ObservationOrder)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "ObservationProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ObservationProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ObservationProposal)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "ObservationResult".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ObservationResult".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ObservationResult)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "UnconductedObservation".equals(target.getClass().getSimpleName()) ) {
+					} else if( "UnconductedObservation".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.UnconductedObservation)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "DeniedProblem".equals(target.getClass().getSimpleName()) ) {
+					} else if( "DeniedProblem".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.DeniedProblem)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "Problem".equals(target.getClass().getSimpleName()) ) {
+					} else if( "Problem".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.Problem)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "ProcedureEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ProcedureEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ProcedureEvent)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "ProcedureOrder".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ProcedureOrder".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ProcedureOrder)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "ProcedureProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ProcedureProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ProcedureProposal)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "ScheduledProcedure".equals(target.getClass().getSimpleName()) ) {
+					} else if( "ScheduledProcedure".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.ScheduledProcedure)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "UndeliveredProcedure".equals(target.getClass().getSimpleName()) ) {
+					} else if( "UndeliveredProcedure".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.UndeliveredProcedure)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "SubstanceAdministrationEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SubstanceAdministrationEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "SubstanceAdministrationOrder".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SubstanceAdministrationOrder".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "SubstanceAdministrationProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SubstanceAdministrationProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "SubstanceDispensationEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SubstanceDispensationEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "UndeliveredSubstanceAdministration".equals(target.getClass().getSimpleName()) ) {
+					} else if( "UndeliveredSubstanceAdministration".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "SupplyEvent".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SupplyEvent".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SupplyEvent)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "SupplyOrder".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SupplyOrder".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SupplyOrder)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "SupplyProposal".equals(target.getClass().getSimpleName()) ) {
+					} else if( "SupplyProposal".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.SupplyProposal)target).getRelatedClinicalStatement().add(nestedTarget);
-					} else if( "UndeliveredSupply".equals(target.getClass().getSimpleName()) ) {
+					} else if( "UndeliveredSupply".equals(targetClassName) ) {
 						((org.opencds.vmr.v1_0.schema.UndeliveredSupply)target).getRelatedClinicalStatement().add(nestedTarget);
 					} else {
-						throw new InvalidDataException(_METHODNAME + "Unrecognized class: " + target.getClass().getSimpleName());
+						throw new InvalidDataException(_METHODNAME + "Unrecognized class: " + targetClassName);
 					}
 				}
 			}
@@ -735,13 +743,14 @@ public abstract class NestedObjectsMapper extends Object {
 	{
 		
 		String _METHODNAME = "pushOutRelatedEntityNestedObjects(): ";
-		
+
 		//look for related entities to this entity
 		if ( organizedResults.getEntityChildren().get(sourceId) == null ) {
 			return null;
-		} 
-			
-		logger.trace(_METHODNAME + "Entity children of " + sourceId);	
+		}
+
+		final String externalClassName = external.getClass().getSimpleName();
+		logger.trace(_METHODNAME + "Entity children of " + sourceId);
 		for ( EntityRelationship oneInternalEntityRelationship : organizedResults.getEntityChildren().get(sourceId)) {
 			/*
 			 * At this point oneInternalEntityRelationship is one member of the List 
@@ -759,8 +768,9 @@ public abstract class NestedObjectsMapper extends Object {
 			oneSchemaRelatedEntity.setRelationshipTimeInterval(MappingUtility.iVLDateInternal2IVLTS(oneInternalEntityRelationship.getRelationshipTimeInterval()));
 			
             EntityBase thisInternalNestedEntity = organizedResults.getEntityList().get(targetEntityId);
+            final String thisInternalNestedEntityClassName = thisInternalNestedEntity.getClass().getSimpleName();
 
-            if ("AdministrableSubstance".equals(thisInternalNestedEntity.getClass().getSimpleName())) {
+            if ("AdministrableSubstance".equals(thisInternalNestedEntityClassName)) {
 				org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance schemaNestedEntity = 
 					new org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance();
 				
@@ -774,28 +784,28 @@ public abstract class NestedObjectsMapper extends Object {
 				schemaRelatedEntity.setTargetRole(MappingUtility.cDInternal2CD(oneInternalEntityRelationship.getTargetRole()));
 				schemaRelatedEntity.setRelationshipTimeInterval(MappingUtility.iVLDateInternal2IVLTS(oneInternalEntityRelationship.getRelationshipTimeInterval()));	
 				schemaRelatedEntity.setAdministrableSubstance(schemaNestedEntity);
-				
-				if ("AdministrableSubstance".equals(external.getClass().getSimpleName())) {
+
+				if ("AdministrableSubstance".equals(externalClassName)) {
 					if ("org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance".equals(external.getClass().getName())) {
 						((org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance)external).getRelatedEntity().add(schemaRelatedEntity);
 					} else {
 						((org.opencds.vmr.v1_0.schema.AdministrableSubstance)external).getRelatedEntity().add(schemaRelatedEntity);
 					}
-				} else if ("Entity".equals(external.getClass().getSimpleName())) {
+				} else if ("Entity".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Entity)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Facility".equals(external.getClass().getSimpleName())) {
+				} else if ("Facility".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Facility)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Organization".equals(external.getClass().getSimpleName())) {
+				} else if ("Organization".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Organization)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Person".equals(external.getClass().getSimpleName())) {
+				} else if ("Person".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Person)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Specimen".equals(external.getClass().getSimpleName())) {
+				} else if ("Specimen".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Specimen)external).getRelatedEntity().add(schemaRelatedEntity);
 				} else {
-					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + external.getClass().getSimpleName());
+					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + externalClassName);
 				}
 				
-			} else if ( "Entity".equals(thisInternalNestedEntity.getClass().getSimpleName()) ) {
+			} else if ( "Entity".equals(thisInternalNestedEntityClassName) ) {
 				org.opencds.vmr.v1_0.schema.RelatedEntity.Entity schemaNestedEntity = 
 					new org.opencds.vmr.v1_0.schema.RelatedEntity.Entity();
 				
@@ -810,23 +820,23 @@ public abstract class NestedObjectsMapper extends Object {
 				schemaRelatedEntity.setRelationshipTimeInterval(MappingUtility.iVLDateInternal2IVLTS(oneInternalEntityRelationship.getRelationshipTimeInterval()));	
 				schemaRelatedEntity.setEntity(schemaNestedEntity);
 				
-				if ("AdministrableSubstance".equals(external.getClass().getSimpleName())) {
+				if ("AdministrableSubstance".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Entity".equals(external.getClass().getSimpleName())) {
+				} else if ("Entity".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Entity)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Facility".equals(external.getClass().getSimpleName())) {
+				} else if ("Facility".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Facility)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Organization".equals(external.getClass().getSimpleName())) {
+				} else if ("Organization".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Organization)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Person".equals(external.getClass().getSimpleName())) {
+				} else if ("Person".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Person)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Specimen".equals(external.getClass().getSimpleName())) {
+				} else if ("Specimen".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Specimen)external).getRelatedEntity().add(schemaRelatedEntity);
 				} else {
-					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + external.getClass().getSimpleName());
+					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + externalClassName);
 				}
 				
-			} else if ( "Facility".equals(thisInternalNestedEntity.getClass().getSimpleName()) ) {
+			} else if ( "Facility".equals(thisInternalNestedEntityClassName) ) {
 				org.opencds.vmr.v1_0.schema.RelatedEntity.Facility schemaNestedEntity = 
 					new org.opencds.vmr.v1_0.schema.RelatedEntity.Facility();
 				
@@ -841,23 +851,23 @@ public abstract class NestedObjectsMapper extends Object {
 				schemaRelatedEntity.setRelationshipTimeInterval(MappingUtility.iVLDateInternal2IVLTS(oneInternalEntityRelationship.getRelationshipTimeInterval()));	
 				schemaRelatedEntity.setFacility(schemaNestedEntity);
 				
-				if ("AdministrableSubstance".equals(external.getClass().getSimpleName())) {
+				if ("AdministrableSubstance".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Entity".equals(external.getClass().getSimpleName())) {
+				} else if ("Entity".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Entity)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Facility".equals(external.getClass().getSimpleName())) {
+				} else if ("Facility".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Facility)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Organization".equals(external.getClass().getSimpleName())) {
+				} else if ("Organization".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Organization)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Person".equals(external.getClass().getSimpleName())) {
+				} else if ("Person".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Person)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Specimen".equals(external.getClass().getSimpleName())) {
+				} else if ("Specimen".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Specimen)external).getRelatedEntity().add(schemaRelatedEntity);
 				} else {
-					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + external.getClass().getSimpleName());
+					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + externalClassName);
 				}
 				
-			} else if ( "Organization".equals(thisInternalNestedEntity.getClass().getSimpleName()) ) {
+			} else if ( "Organization".equals(thisInternalNestedEntityClassName) ) {
 				org.opencds.vmr.v1_0.schema.RelatedEntity.Organization schemaNestedEntity = 
 					new org.opencds.vmr.v1_0.schema.RelatedEntity.Organization();
 				
@@ -872,23 +882,23 @@ public abstract class NestedObjectsMapper extends Object {
 				schemaRelatedEntity.setRelationshipTimeInterval(MappingUtility.iVLDateInternal2IVLTS(oneInternalEntityRelationship.getRelationshipTimeInterval()));	
 				schemaRelatedEntity.setOrganization(schemaNestedEntity);
 				
-				if ("AdministrableSubstance".equals(external.getClass().getSimpleName())) {
+				if ("AdministrableSubstance".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Entity".equals(external.getClass().getSimpleName())) {
+				} else if ("Entity".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Entity)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Facility".equals(external.getClass().getSimpleName())) {
+				} else if ("Facility".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Facility)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Organization".equals(external.getClass().getSimpleName())) {
+				} else if ("Organization".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Organization)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Person".equals(external.getClass().getSimpleName())) {
+				} else if ("Person".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Person)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Specimen".equals(external.getClass().getSimpleName())) {
+				} else if ("Specimen".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Specimen)external).getRelatedEntity().add(schemaRelatedEntity);
 				} else {
-					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + external.getClass().getSimpleName());
+					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + externalClassName);
 				}
 				
-			} else if ( "Person".equals(thisInternalNestedEntity.getClass().getSimpleName()) ) {
+			} else if ( "Person".equals(thisInternalNestedEntityClassName) ) {
 				org.opencds.vmr.v1_0.schema.RelatedEntity.Person schemaNestedEntity = 
 					new org.opencds.vmr.v1_0.schema.RelatedEntity.Person();
 				
@@ -903,23 +913,23 @@ public abstract class NestedObjectsMapper extends Object {
 				schemaRelatedEntity.setRelationshipTimeInterval(MappingUtility.iVLDateInternal2IVLTS(oneInternalEntityRelationship.getRelationshipTimeInterval()));	
 				schemaRelatedEntity.setPerson(schemaNestedEntity);
 				
-				if ("AdministrableSubstance".equals(external.getClass().getSimpleName())) {
+				if ("AdministrableSubstance".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Entity".equals(external.getClass().getSimpleName())) {
+				} else if ("Entity".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Entity)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Facility".equals(external.getClass().getSimpleName())) {
+				} else if ("Facility".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Facility)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Organization".equals(external.getClass().getSimpleName())) {
+				} else if ("Organization".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Organization)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Person".equals(external.getClass().getSimpleName())) {
+				} else if ("Person".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Person)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Specimen".equals(external.getClass().getSimpleName())) {
+				} else if ("Specimen".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Specimen)external).getRelatedEntity().add(schemaRelatedEntity);
 				} else {
-					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + external.getClass().getSimpleName());
+					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + externalClassName);
 				}
 				
-			} else if ( "Specimen".equals(thisInternalNestedEntity.getClass().getSimpleName()) ) {
+			} else if ( "Specimen".equals(thisInternalNestedEntityClassName) ) {
 				org.opencds.vmr.v1_0.schema.RelatedEntity.Specimen schemaNestedEntity = 
 					new org.opencds.vmr.v1_0.schema.RelatedEntity.Specimen();
 				
@@ -934,24 +944,24 @@ public abstract class NestedObjectsMapper extends Object {
 				schemaRelatedEntity.setRelationshipTimeInterval(MappingUtility.iVLDateInternal2IVLTS(oneInternalEntityRelationship.getRelationshipTimeInterval()));	
 				schemaRelatedEntity.setSpecimen(schemaNestedEntity);
 				
-				if ("AdministrableSubstance".equals(external.getClass().getSimpleName())) {
+				if ("AdministrableSubstance".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Entity".equals(external.getClass().getSimpleName())) {
+				} else if ("Entity".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Entity)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Facility".equals(external.getClass().getSimpleName())) {
+				} else if ("Facility".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Facility)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Organization".equals(external.getClass().getSimpleName())) {
+				} else if ("Organization".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Organization)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Person".equals(external.getClass().getSimpleName())) {
+				} else if ("Person".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Person)external).getRelatedEntity().add(schemaRelatedEntity);
-				} else if ("Specimen".equals(external.getClass().getSimpleName())) {
+				} else if ("Specimen".equals(externalClassName)) {
 					((org.opencds.vmr.v1_0.schema.Specimen)external).getRelatedEntity().add(schemaRelatedEntity);
 				} else {
-					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + external.getClass().getSimpleName());
+					throw new InvalidDataException("_METHOD_NAME + Unrecognized outerTarget class: " + externalClassName);
 				}
 								
 			} else {
-				throw new InvalidDataException("_METHOD_NAME + Unrecognized class: " + thisInternalNestedEntity.getClass().getSimpleName());
+				throw new InvalidDataException("_METHOD_NAME + Unrecognized class: " + thisInternalNestedEntityClassName);
 			}
 		}
 		

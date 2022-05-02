@@ -3,6 +3,7 @@ package org.opencds.config.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -23,9 +24,11 @@ import org.opencds.config.api.dao.FileDao;
 import org.opencds.config.api.dao.file.CacheElement;
 import org.opencds.config.api.dao.file.StreamCacheElement;
 import org.opencds.config.api.model.ExecutionEngine;
+import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.KnowledgeModule;
 import org.opencds.config.api.service.ExecutionEngineService;
 import org.opencds.config.api.service.KnowledgePackageService;
+import org.opencds.config.util.EntityIdentifierUtil;
 
 public class KnowledgePackageServiceImpl implements KnowledgePackageService {
 	private static final Logger log = LogManager.getLogger();
@@ -95,7 +98,7 @@ public class KnowledgePackageServiceImpl implements KnowledgePackageService {
     }
 
     private void evictPackagesFromQueue(KnowledgeModule knowledgeModule) {
-        BlockingQueue<KnowledgeModule> q = cacheService.get(KPCacheRegion.KNOWLEDGE_PACKAGE, knowledgeModule.getKMId());
+        BlockingQueue<KnowledgeModule> q = getKnowledgePackages(knowledgeModule);
         if (q != null) {
             q.clear();
             log.debug("Cleared KP Queue for KM: " + knowledgeModule.getKMId());
@@ -115,7 +118,7 @@ public class KnowledgePackageServiceImpl implements KnowledgePackageService {
 
     @Override
     public <T> T getPackage(KnowledgeModule knowledgeModule) {
-        BlockingQueue<T> q = cacheService.get(KPCacheRegion.KNOWLEDGE_PACKAGE, knowledgeModule.getKMId());
+        BlockingQueue<T> q = getKnowledgePackages(knowledgeModule);
         if (q != null) {
             return q.peek();
         }
@@ -123,16 +126,38 @@ public class KnowledgePackageServiceImpl implements KnowledgePackageService {
     }
 
     public <T> void putPackage(KnowledgeModule knowledgeModule, T knowledgePackage) {
-        BlockingQueue<T> q = cacheService.get(KPCacheRegion.KNOWLEDGE_PACKAGE, knowledgeModule.getKMId());
+        BlockingQueue<T> q = getKnowledgePackages(knowledgeModule);
         if (q == null) {
-            q = new LinkedBlockingQueue<T>();
+            // Standard double-checked locking idiom to make sure we only initialize this BlockingQueue once.
+            // Synchronizing on the KMId string in order to reduce the scope of this synchronization to this specific KM
+            String kmId = EntityIdentifierUtil.makeEIString(knowledgeModule.getKMId());
+            synchronized(kmId.intern()) {
+                q = getKnowledgePackages(knowledgeModule);
+                if (q == null)
+                {
+                	if (log.isDebugEnabled()) {
+                		log.debug("First package added for " + kmId + ", initializing cache entry.");
+                	}
+                    q = new LinkedBlockingQueue<T>();
+                    cacheService.put(KPCacheRegion.KNOWLEDGE_PACKAGE, knowledgeModule.getKMId(), q);
+                }
+            }
         }
         q.add(knowledgePackage);
-        cacheService.put(KPCacheRegion.KNOWLEDGE_PACKAGE, knowledgeModule.getKMId(), q);
+    }
+
+    private <T> BlockingQueue<T> getKnowledgePackages(KnowledgeModule km)
+    {
+        return getKnowledgePackages(km.getKMId());
+    }
+
+    private <T> BlockingQueue<T> getKnowledgePackages(KMId kmId)
+    {
+        return cacheService.get(KPCacheRegion.KNOWLEDGE_PACKAGE, kmId);
     }
 
     public <T> T takePackage(KnowledgeModule knowledgeModule) {
-        BlockingQueue<T> q = cacheService.get(KPCacheRegion.KNOWLEDGE_PACKAGE, knowledgeModule.getKMId());
+        BlockingQueue<T> q = getKnowledgePackages(knowledgeModule);
         if (q != null) {
             try {
                 return q.take();
@@ -148,15 +173,26 @@ public class KnowledgePackageServiceImpl implements KnowledgePackageService {
         log.debug("Taking package from queue...");
         KP kp = takePackage(knowledgeModule);
         if (kp == null) {
-            List<ForkJoinTask<?>> tasks = loadKnowledgePackage(knowledgeModule);
-            log.debug("Waiting for a KM Package to be loaded...");
-            ForkJoinTask<?> task = tasks.get(0);
-            task.quietlyJoin();
-            if (task.getException() != null) {
-                throw new OpenCDSRuntimeException(task.getException().getCause());
+            // Standard double-checked locking idiom to make sure we only load the KM once.
+            // Synchronizing on the KMId string in order to reduce the scope of this synchronization to this specific KM
+            String kmId = EntityIdentifierUtil.makeEIString(knowledgeModule.getKMId());
+            synchronized(kmId.intern())
+            {
+                kp = takePackage(knowledgeModule);
+                if (kp == null)
+                {
+                    ForkJoinTask<?> task = loadKnowledgePackage(knowledgeModule);
+                    log.debug("Waiting for a KM Package to be loaded...");
+                    task.quietlyJoin();
+                    if (task.getException() != null)
+                    {
+                        log.error("Failed to borrow KM " + knowledgeModule.getPackageId(), task.getException());
+                        throw new OpenCDSRuntimeException(task.getException().getCause());
+                    }
+                    log.debug("Loaded...  Taking package");
+                    kp = takePackage(knowledgeModule);
+                }
             }
-            log.debug("Loaded...  Taking package");
-            kp = takePackage(knowledgeModule);
         }
         return kp;
     }
@@ -166,12 +202,13 @@ public class KnowledgePackageServiceImpl implements KnowledgePackageService {
         putPackage(knowledgeModule, knowledgePackage);
     }
 
-    private List<ForkJoinTask<?>> loadKnowledgePackage(KnowledgeModule knowledgeModule) {
-        List<ForkJoinTask<?>> taskList = new LinkedList<>();
-        for (int i = 0; i < configData.getKmThreads(); i++) {
-            taskList.add(pool.submit(new KPLoader(getKnowledgeLoader(knowledgeModule), this, knowledgeModule)));
-        }
-        return taskList;
+    private ForkJoinTask<?> loadKnowledgePackage(KnowledgeModule knowledgeModule) {
+        ForkJoinTask<?> task = pool.submit(new KPLoader(
+            getKnowledgeLoader(knowledgeModule),
+            this,
+            knowledgeModule,
+            configData.getKmThreads()));
+        return task;
     }
 
     @Override
@@ -181,7 +218,7 @@ public class KnowledgePackageServiceImpl implements KnowledgePackageService {
             if (km.isPreload()) {
                 try {
                     log.info("Preloading KnowledgePackage: " + km.getKMId());
-                    taskList.addAll(loadKnowledgePackage(km));
+                    taskList.add(loadKnowledgePackage(km));
                 } catch (Exception e) {
                     log.error("Unable to load KnowledgePackage: " + km.getKMId(), e);
                 }
@@ -212,17 +249,20 @@ public class KnowledgePackageServiceImpl implements KnowledgePackageService {
         private final KnowledgeLoader<?> loader;
         private final KnowledgeModule knowledgeModule;
         private final KnowledgePackageService knowledgePackageService;
+        private final int count;
 
-        public KPLoader(KnowledgeLoader<?> loader, KnowledgePackageService knowledgePackageService,
-                KnowledgeModule knowledgeModule) {
+        public KPLoader(KnowledgeLoader<?> loader, KnowledgePackageService knowledgePackageService, KnowledgeModule knowledgeModule, int count) {
             this.loader = loader;
             this.knowledgePackageService = knowledgePackageService;
             this.knowledgeModule = knowledgeModule;
+            this.count = count;
         }
 
         @Override
         public void run() {
-            loader.loadKnowledgePackage(knowledgePackageService, knowledgeModule);
+            Collection<?> packages = loader.loadKnowledgePackages(knowledgePackageService, knowledgeModule, count);
+            for (Object pkg: packages)
+                knowledgePackageService.putPackage(knowledgeModule, pkg);
         }
 
     }

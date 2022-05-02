@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2021 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2022 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -50,11 +50,13 @@ import org.cdsframework.ice.service.Vaccine
 global java.util.Date evalTime
 
 
-rule "Duplicate Shots/Same Day (COVID-19): Bypass Duplicate Shot/Same Day Processing by not setting the target dose number of the shot to be evaluated shot to the prior dose number"
+rule "Duplicate Shots/Same Day (COVID-19): For shots prior to 10/25/2021, bypass Duplicate Shot/Same Day Processing by not setting the target dose number of the shot to be evaluated shot to the prior dose number"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customMakeNoteOfDuplicateShotSameDayIfAny"
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS)
+		$td: TargetDose(hasBeenEvaluated == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS)
+		EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y"), $td.administrationDate >= $dtDateAtAge)
+		eval($td.administrationDate.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat("25-Oct-2021")) < 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($td) {
@@ -63,4 +65,53 @@ rule "Duplicate Shots/Same Day (COVID-19): Bypass Duplicate Shot/Same Day Proces
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 		setFocus("HistoryEvaluation^customEvaluationRule");
+end
+
+
+rule "Duplicate Shots/Same Day (COVID-19): If shot is marked valid but another shot on the same day is marked Accepted, evaluate the non-preferred shot as Invalid with reason DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	no-loop true
+	when
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isDoseStatusOverridden() == false)
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, doseNumberInSeries == $td.doseNumberInSeries, 
+			status == DoseStatus.ACCEPTED, isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
+rule "Duplicate Shots/Same Day (COVID-19): If one of those shots is Valid and another shot on the same day is Invalid with reason code VACCINE_NOT_ALLOWED_FOR_THIS_DOSE, replace this reason code with DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", 
+			$tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.INVALID, isDoseStatusOverridden() == false, associatedTargetSeries == $tdAssociatedTargetSeries, 
+			doseNumberInSeries == $tddosenumber, containsInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.cdsListItemName), isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.cdsListItemName),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
 end

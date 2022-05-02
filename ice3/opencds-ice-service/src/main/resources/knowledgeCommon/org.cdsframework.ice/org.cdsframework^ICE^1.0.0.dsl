@@ -45,10 +45,15 @@
 [condition][]- [Tt]he [Ss]hot has [Nn]ot been [Ee]valuated yet=status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.EVALUATION_NOT_STARTED
 [condition][]- [Tt]he [Ss]hot belongs to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == true
 [condition][]- [Tt]he [Ss]hot does not belong to the [Pp]rimary [Ss]eries=isPrimarySeriesShot() == false
+[condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries with name a [Mm]ember of {list_sSeriesName:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+}=associatedSeriesName in {list_sSeriesName}
+[condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries with [Nn]ame {sSeriesName}=associatedSeriesName == {sSeriesName}
+[condition][]- [Tt]he [Ss]hot does not belong to the [Ss]eries with [Nn]ame {sSeriesName}=associatedSeriesName != {sSeriesName}
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
 [condition][]- [Tt]he [Ss]hot does not belong to the [Ss]eries {oTargetSeries}=associatedTargetSeries != {oTargetSeries}
 [condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem} and the [Ss]eries with [Nn]ame {sSeriesName}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}, associatedSeriesName == {sSeriesName}
 [condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}
+[condition][]- [Tt]he [Ss]hot is [Nn]ot [Ii]gnored for [Cc]ompletion of the [Ss]eries=isShotIgnoredForCompletionOfSeries() == false
+[condition][]- [Tt]he [Ss]hot is [Ii]gnored for [Cc]ompletion of the [Ss]eries=isShotIgnoredForCompletionOfSeries() == true
 [condition][]- [Tt]he [Ss]eries that the [Ss]hot belongs to is [Cc]omplete=associatedTargetSeries.isSeriesComplete() == true
 [condition][]- [Tt]he [Ss]eries that the [Ss]hot belongs to is [Nn]ot [Cc]omplete=associatedTargetSeries.isSeriesComplete() == false
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is a [Ll]ive [Vv]irus [Vv]accine=vaccineComponent.isLiveVirusVaccine == true
@@ -80,7 +85,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate this [Ss]hot was [Aa]dministered as {assign_dtAdministrationDate}={assign_dtAdministrationDate} : administrationDate
 [condition][]- [Mm]ake [Nn]ote of the [Dd]iseases [Tt]argeted by the [Vv]accine [Aa]dministered as {assign_oCollectionOfDiseases}={assign_oCollectionOfDiseases} : vaccineComponent.allDiseasesTargetedForImmunity
 [condition][]- [Mm]ake [Nn]ote of the [Mm]inimum [Vv]accine [Aa]ge for this [Ss]hot as {assign_strValidMinimumAge}={assign_strValidMinimumAge} : vaccineComponent.validMinimumAgeForUse, {assign_strValidMinimumAge} != null
-[condition][]- [Mm]ake [Nn]ote of the [Mm]aximum [Vv]accine [Aa]ge for this [Ss]hot as {assign_strValidMaximumAge}={assign_strValidMaximumAge} : vaccineComponent.validMinimumAgeForUse, {assign_strValidMaximumAge} != null
+[condition][]- [Mm]ake [Nn]ote of the [Mm]aximum [Vv]accine [Aa]ge for this [Ss]hot as {assign_strValidMaximumAge}={assign_strValidMaximumAge} : vaccineComponent.validMaximumAgeForUse, {assign_strValidMaximumAge} != null
 [condition][]- [Mm]ake [Nn]ote of the [Aa]bsolute [Mm]inimum [Aa]ge of this [Dd]ose as {assign_oTimePeriod}=getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()) != null, {assign_oTimePeriod} : getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()).getAbsoluteMinimumAge(), {assign_oTimePeriod} != null
 [condition][]- [Mm]ake [Nn]ote of the [Mm]inimum [Aa]ge of this [Dd]ose as {assign_oTimePeriod}=getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()) != null, {assign_oTimePeriod} : getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()).getMinimumAge(), {assign_oTimePeriod} != null
 [condition][]- [Mm]ake [Nn]ote of the [Aa]bsolute [Mm]inimum [Ii]nterval from [Tt]his [Dd]ose to the [Nn]ext [Dd]ose as {assign_oTimePeriod}=getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()) != null, {assign_oTimePeriod} : getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()).getAbsoluteMinimumInterval(), {assign_oTimePeriod} != null
@@ -145,8 +150,12 @@
 [condition][]- [Cc]lear [Rr]ecommendations for [Cc]onsideration=
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has not been made yet=recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a [Rr]ecommendation [Dd]ate has been determined=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null
-[condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended or [Cc]onditionally [Rr]ecommended=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED
+[condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended in the [Ff]uture=recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE
+[condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended [Nn]ow=recommendationStatus == RecommendationStatus.RECOMMENDED
+[condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE
+[condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Nn]ot [Rr]ecommended=recommendationStatus == RecommendationStatus.NOT_RECOMMENDED
+[condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a [Ss]pecific [Vv]accine is [Nn]ot [Rr]ecommended=recommendationVaccine == null && (recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a [Ss]pecific [Vv]accine is [Rr]ecommended=recommendationVaccine != null && (recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED || recommendationStatus == RecommendationStatus.NOT_RECOMMENDED
 [condition][]- [Aa]t least one [Ss]hot has been [Aa]dministered=numberOfShotsAdministeredInSeries > 0

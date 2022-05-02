@@ -17,6 +17,7 @@
 package org.opencds.service.evaluate;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +62,7 @@ public class VMROutboundPayloadProcessor implements OutboundPayloadProcessor {
 	}
 	
 	@Override
-    public String buildOutput(KnowledgeRepository knowledgeRepository, Map<String, List<?>> results, EvaluationRequestKMItem dssRequestKMItem) {
+    public byte[] buildOutput(KnowledgeRepository knowledgeRepository, Map<String, List<?>> results, EvaluationRequestKMItem dssRequestKMItem) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         EntityIdentifier ei = EntityIdentifierUtil.makeEI(dssRequestKMItem.getEvaluationRequestDataItem().getExternalFactModelSSId());
         SSId ssId = SSIdImpl.create(ei.getScopingEntityId(), ei.getBusinessId(), ei.getVersion());
@@ -76,7 +77,7 @@ public class VMROutboundPayloadProcessor implements OutboundPayloadProcessor {
 
             // show the tags, but empty payload
             if (jaxbCDSOutput == null) {
-                return EMPTY_STRING;
+                return EMPTY_STRING.getBytes(StandardCharsets.UTF_8);
             }
 
             StreamResult streamResult = new StreamResult();
@@ -103,7 +104,7 @@ public class VMROutboundPayloadProcessor implements OutboundPayloadProcessor {
         
         log.debug("Finished marshalling results to external VMR.");
 
-        return output.toString();
+        return output.toByteArray();
     }
 	
 }

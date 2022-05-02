@@ -86,8 +86,9 @@ public class EvaluatedPersonMapper extends EntityBaseMapper {
     	
     	internal.setEvaluatedPersonId( subjectPersonId );
     	internal.setFocalPerson(focalPersonId.equals(subjectPersonId));
-    	
-		logger.trace(_METHODNAME + "class " + external.getClass().getSimpleName() + ", " + external.getId());
+
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + "class " + external.getClass().getSimpleName() + ", " + external.getId());
     	if (external.getDemographics() != null) {
     		if (internal.getDemographics() == null) {
     			internal.setDemographics(new Demographics()); 
@@ -173,8 +174,9 @@ public class EvaluatedPersonMapper extends EntityBaseMapper {
 		org.opencds.vmr.v1_0.schema.EvaluatedPerson target = new org.opencds.vmr.v1_0.schema.EvaluatedPerson();
 
     	EntityBaseMapper.pushOut(source, target);
-    
-		logger.trace(_METHODNAME + "children of " + source.getClass().getSimpleName() + ", " + source.getId());
+
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + "children of " + source.getClass().getSimpleName() + ", " + source.getId());
     	if (source.getDemographics() != null) {
     		if (target.getDemographics() == null) {
     			target.setDemographics(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.Demographics());

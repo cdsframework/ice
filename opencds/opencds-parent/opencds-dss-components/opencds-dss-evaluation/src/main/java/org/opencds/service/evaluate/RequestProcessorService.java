@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.omg.dss.DSSRuntimeExceptionFault;
@@ -208,9 +209,9 @@ public class RequestProcessorService implements RequestProcessor
                     + " payloads, and only the first one can be used.");
         }
 
-        String inputPayloadString = getInputPayloadString(listDRIData.get(0));
+        byte[] inputPayload = decodeInputPayload(listDRIData.get(0));
 
-        updateDSSRequestDataItem(evaluationRequestDataItem, request.getEvaluationRequest(), listDRIData, inputPayloadString);
+        updateDSSRequestDataItem(evaluationRequestDataItem, request.getEvaluationRequest(), listDRIData, inputPayload);
         
         // get SemanticSignifier
         EntityIdentifier ei = request.getEvaluationRequest().getDataRequirementItemData().get(0).getData()
@@ -221,8 +222,11 @@ public class RequestProcessorService implements RequestProcessor
             throw new InvalidDriDataFormatException("Unknown/unsupported semantic signifier: " + ssId);
         }
 
-        Object cdsInput = getCdsInput(ss, request, evaluationRequestDataItem, inputPayloadString);
+        Object cdsInput = getCdsInput(ss, request, evaluationRequestDataItem, inputPayload);
         evaluationRequestDataItem.setCdsInput(cdsInput);
+        // Building the fact list below is relatively expensive so aggressively setting the potentially large payload
+        // to null here so it's eligible for GC sooner.
+        inputPayload = null;
 
         log.debug("II: " + evaluationRequestDataItem.getInteractionId() + " unmarshalling completed");
 
@@ -250,7 +254,7 @@ public class RequestProcessorService implements RequestProcessor
     }
 
     private void updateDSSRequestDataItem(EvaluationRequestDataItem evaluationRequestDataItem, EvaluationRequest evaluationRequest,
-            List<DataRequirementItemData> listDRIData, String inputPayloadString) {
+            List<DataRequirementItemData> listDRIData, byte[] inputPayload) {
         // dssRequestDataItem.setInteractionId(ii.getInteractionId());
         evaluationRequestDataItem.setClientLanguage(evaluationRequest.getClientLanguage());
         evaluationRequestDataItem.setClientTimeZoneOffset(evaluationRequest.getClientTimeZoneOffset());
@@ -259,7 +263,7 @@ public class RequestProcessorService implements RequestProcessor
                 .getContainingEntityId()));
         evaluationRequestDataItem.setExternalFactModelSSId(DssUtil.makeEIString(listDRIData.get(0).getData()
                 .getInformationModelSSId()));
-        evaluationRequestDataItem.setInputPayloadString(inputPayloadString);
+        evaluationRequestDataItem.setInputPayload(inputPayload);
     }
 
     /**
@@ -268,37 +272,30 @@ public class RequestProcessorService implements RequestProcessor
      * @throws DSSRuntimeExceptionFault
      * @throws UnsupportedEncodingException
      */
-    private String getInputPayloadString(DataRequirementItemData driData) throws DSSRuntimeExceptionFault {
+    private byte[] decodeInputPayload(DataRequirementItemData driData) throws DSSRuntimeExceptionFault {
 
         // gunzip the data if it has been compressed
-        List<byte[]> base64EncodedPayload = DssUtil.gUnzipData(driData);
-        // input is automatically decoded from Base64 data by presenting it to
-        // us...
-        StringBuffer payloadStringBuffer = new StringBuffer();
-        try {
-            for (byte[] byteList : base64EncodedPayload) {
-                // assembles from chunks of encoded data separated by newline,
-                // which is fairly common
-                payloadStringBuffer.append(new String(byteList, "UTF-8"));
-            }
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            throw new DSSRuntimeExceptionFault("RequestProcessorService.getInputPayloadString had UnsupportedEncoding Exception: "
-                    + e.getMessage());
+        List<byte[]> decodedPayloadChunks = DssUtil.gUnzipData(driData);
+        byte[] payload = null;
+        for (int i = 0; i < decodedPayloadChunks.size(); i++)
+        {
+            if (i == 0)
+                payload = decodedPayloadChunks.get(0);
+            else
+                payload = ArrayUtils.addAll(payload, decodedPayloadChunks.get(i));
         }
-
-        String payloadString = payloadStringBuffer.toString();
-        log.trace(payloadString);
-        return payloadString;
+        if (log.isTraceEnabled())
+            log.trace(new String(payload));
+        return payload;
     }
 
-    private Object getCdsInput(SemanticSignifier ss, KMEvalRequest request, EvaluationRequestDataItem evaluationRequestDataItem, String inputPayloadString)
+    private Object getCdsInput(SemanticSignifier ss, KMEvalRequest request, EvaluationRequestDataItem evaluationRequestDataItem, byte[] inputPayload)
             throws DSSRuntimeExceptionFault,
             InvalidDriDataFormatExceptionFault,
             RequiredDataNotProvidedExceptionFault {
         try {
         	String modelProcessor = ss.getName();
-        	return inboundPayloadProcessorsMap.get( modelProcessor).buildInput(ss, new Payload(inputPayloadString, request.getEvalTime()));
+        	return inboundPayloadProcessorsMap.get( modelProcessor).buildInput(ss, new Payload(inputPayload, request.getEvalTime()));
             // return inboundPayloadProcessor.buildInput(ss, new Payload(inputPayloadString, request.getEvalTime()));
         } catch (InvalidDriDataFormatException e) {
             throw new InvalidDriDataFormatExceptionFault(e.getMessage(), e);

@@ -33,6 +33,6 @@ import org.opencds.config.api.KnowledgeRepository;
  */
 public interface OutboundPayloadProcessor {
 
-    String buildOutput(KnowledgeRepository knowledgeRepository, Map<String, List<?>> results, EvaluationRequestKMItem dssRequestKMItem);
+    byte[] buildOutput(KnowledgeRepository knowledgeRepository, Map<String, List<?>> results, EvaluationRequestKMItem dssRequestKMItem);
     
 }
