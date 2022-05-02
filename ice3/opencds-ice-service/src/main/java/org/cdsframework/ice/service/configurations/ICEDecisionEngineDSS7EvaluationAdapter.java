@@ -53,6 +53,7 @@ import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
 import org.cdsframework.ice.util.FileNameWithExtensionFilterImpl;
+import org.cdsframework.ice.util.ICEVersionUtil;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
@@ -123,8 +124,9 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private static final String FOCAL_PERSON_ID = "focalPersonId";
 	private static final String ASSERTIONS = "assertions";
 	private static final String NAMED_OBJECTS = "namedObjects";
-	private static final Set<String> ALL_GLOBALS = new HashSet<>(Arrays.asList(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID, ASSERTIONS, NAMED_OBJECTS));
-	private static final Set<String> FILTERED_GLOBALS = new HashSet<>(Arrays.asList(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID));
+	private static final String ICE_VERSION = "iceVersion";
+	private static final Set<String> ALL_GLOBALS = new HashSet<>(Arrays.asList(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID, ASSERTIONS, NAMED_OBJECTS, ICE_VERSION));
+	private static final Set<String> FILTERED_GLOBALS = new HashSet<>(Arrays.asList(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID, ICE_VERSION));
 	/////// private static final String ALL_FACT_LISTS = "allFactLists";
 
 	
@@ -216,6 +218,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		String clientLanguage = evalRequestDataItem.getClientLanguage();
 		String clientTimeZoneOffset = evalRequestDataItem.getClientTimeZoneOffset();
 		String interactionId = evalRequestDataItem.getInteractionId();
+		String iceVersion = ICEVersionUtil.getIceVersion();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("II: " + interactionId + " KMId: " + requestedKmId + " (" + knowledgeModule.getKMId() + ")" + ", SSId: " + evalRequestDataItem.getExternalFactModelSSId() + 
@@ -334,6 +337,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		cmds.add(CommandFactory.newSetGlobal(EVAL_TIME, evalTime));
 		cmds.add(CommandFactory.newSetGlobal(CLIENT_LANG, clientLanguage));
 		cmds.add(CommandFactory.newSetGlobal(CLIENT_TZ_OFFSET, clientTimeZoneOffset));
+		cmds.add(CommandFactory.newSetGlobal(ICE_VERSION, iceVersion));
 
 		// following global used to store flags for inter-task communication in a JBPM Process
 		cmds.add(CommandFactory.newSetGlobal(ASSERTIONS, assertions));
