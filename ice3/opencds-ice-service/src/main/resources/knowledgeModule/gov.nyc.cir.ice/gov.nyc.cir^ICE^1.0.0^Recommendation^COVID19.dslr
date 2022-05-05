@@ -280,6 +280,7 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 ext
 		Create a Recommendation as $r_age for the Series $targetSeries
 		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge18y
 		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
+		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -364,6 +365,7 @@ rule "COVID-19: If the patient >= 50y has completed the Janssen Series and 1 ext
 		Create a Recommendation as $r_age for the Series $targetSeries
 		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge50y
 		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge50y
+		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
