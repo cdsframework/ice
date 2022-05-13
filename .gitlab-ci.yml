@@ -42,7 +42,7 @@ s3-deploy:
     - mkdir -p /tmp/ice
     - cp -r ice3/opencds-ice-service/src/main/resources/* /tmp/ice
     - cd /tmp && zip -r ice.zip ice
-    - aws s3 cp /tmp/ice.zip $S3_PATH --acl public-read
+    - aws s3 mv $S3_PATH ${S3_PATH}-$(date +"%Y-%m-%d-%H-%M")
     - aws s3 cp /tmp/ice.zip $S3_PATH --acl public-read
   only:
     - deployment
