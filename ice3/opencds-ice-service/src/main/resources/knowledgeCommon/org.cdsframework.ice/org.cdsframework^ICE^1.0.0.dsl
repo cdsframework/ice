@@ -172,7 +172,6 @@
 [condition][]- [Mm]ake [Nn]ote of the [Ee]arliest [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalEarliestDate, {assign_dtRecommendationDate} != null
 [condition][]- [Mm]ake [Nn]ote of the [Rr]ecommendation [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalRecommendationDate, {assign_dtRecommendationDate} != null
 [condition][]- [Mm]ake [Nn]ote of the [Oo]verdue [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalOverdueDate, {assign_dtRecommendationDate} != null
-/////// [condition][]- [Mm]ake [Nn]ote of the [Rr]ecommended [Vv]accine as {assign_strRecommendationShot}={assign_strRecommendationShot} : recommendationVaccine.cdsConceptName
 [condition][]- [Mm]ake [Nn]ote of the [Rr]ecommended [Vv]accine as {assign_strRecommendationShot}={assign_strRecommendationShot} : recommendationVaccine!.cdsConceptName
 [condition][]- [Mm]ake [Nn]ote of the [Nn]umber of [Ss]hots [Aa]dministered as {assign_nNumberOfShotsAdministered}={assign_nNumberOfShotsAdministered} : numberOfShotsAdministeredInSeries()
 [condition][]- [Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Aa]dministered as {assign_nNumberOfDoses}={assign_nNumberOfDoses} : determineNumberOfDosesAdministeredInSeries()
@@ -193,7 +192,6 @@
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:([0-9]+)([\\.][0-9]+)?}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:([0-9]+)([\\.][0-9]+)?}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
-/////// [condition][]- [Tt]he [Ss]tring {strObject} {aOp}  {strValue}={strObject} != null && {strObject} {aOp} {strValue}
 [condition][]- [Tt]he [Ss]tring {strObject} {aOp}  {strValue}={strObject} != null && {strObject} {aOp} {strValue} || {strObject} == null && {strValue} == null
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
  
@@ -243,6 +241,7 @@
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Ii]nvalid={refer_oTargetDose}.setStatus(DoseStatus.INVALID);
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid=
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Insufficient Antigen"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.INSUFFICIENT_ANTIGEN"); insert(new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Below Minimum Age for Vaccine"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT._BELOW_MINIMUM_AGE_VACCINE_REASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Below Minimum Age for Final Dose"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_FINAL_DOSE"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Below Minimum Age"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_SERIES"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Below Minimum Interval"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_INTERVAL"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_INTERVAL.getConceptCodeValue(), {refer_oTargetDose}));
@@ -270,6 +269,7 @@
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Below Minimum Age for Final Dose"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_FINAL_DOSE"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Vaccine Not Part of This Series"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_PART_OF_THIS_SERIES");
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Shot Administered Outside of a Routine Series"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.OUTSIDE_ROUTINE_SERIES");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Shot Administered Outside of a Series"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.OUTSIDE_SERIES");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted due to "Clinical Patient Discretion"={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted for this [Ss]eries={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
@@ -287,6 +287,10 @@
 ////////////// [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ee]valuation [Nn]ot [Ss]tarted for this [Ss]eries=modify({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_NOT_STARTED), removeAllEvaluationReasonsFromAllReasonSets(); \};
 [consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Vv]alid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"); {refer_oTargetDose}.addSupplementalTextForValidShot({sSupplementalText});
 [consequence][][Rr]emove [Ss]upplemental [Tt]ext {sSupplementalText} from [Vv]alid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.removeSupplementalTextForValidShot({sSupplementalText});
+[consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Aa]ccepted [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"); {refer_oTargetDose}.addSupplementalTextForAcceptedShot({sSupplementalText});
+[consequence][][Rr]emove [Ss]upplemental [Tt]ext {sSupplementalText} from [Aa]ccpeted [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.removeSupplementalTextForAcceptedShot({sSupplementalText});
+[consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Ii]nvalid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"); {refer_oTargetDose}.addSupplementalTextForInvalidShot({sSupplementalText});
+[consequence][][Rr]emove [Ss]upplemental [Tt]ext {sSupplementalText} from [Ii]nvalid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.removeSupplementalTextForInvalidShot({sSupplementalText});
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TargetSeries Actions
