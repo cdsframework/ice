@@ -781,7 +781,8 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 	agenda-group "HistoryEvaluation^makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.isShotIgnoredForCompletionOfSeries() == false || 
+		eval(// $tdprev.isShotIgnoredForCompletionOfSeries() == false || 
+			$tdprev.isShotIgnoredForCompletionOfSeries() == false && 
 			($doseNumber > $targetSeries.getSeriesRules().getNumberOfDosesInSeries() && $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false) || 
 			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() != null &&
