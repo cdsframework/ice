@@ -58,11 +58,11 @@ global org.cdsframework.ice.service.Schedule schedule
  ____Series Completion Special Rules____
 /************************************************************************************************************************************************************************************/
 
-//////////////
-// Booster/additional dose recommendation in any series for patients <= 12yrs
-//////////////
+////////////////////////////////////////////////////////////////////////////////////
+// START Pfizer, Moderna or WHO series booster/additional dose recommendations for patients >= 5yrs and < 12yrs; >= 12 yrs
+////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19: If the patient is < 12y has completed a COVID-19 Series (w/ or w/out an additional dose), then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient is < 12y has completed a COVID-19 Series with one extra fose, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -70,8 +70,8 @@ rule "COVID-19: If the patient is < 12y has completed a COVID-19 Series (w/ or w
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is >= $numberOfDosesRequired
-			- the number of doses administered is < $numberOfDosesRequired+2
+			- the number of doses administered is == $numberOfDosesRequired+1
+			/////// - the number of doses administered is < $numberOfDosesRequired+2
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $dtBirthDate
 			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
@@ -86,35 +86,7 @@ rule "COVID-19: If the patient is < 12y has completed a COVID-19 Series (w/ or w
 end
 
 
-////////////////////////////////////////////////////////////////////////////////////
-// START Pfizer, Moderna or WHO series booster/additional dose recommendations for patients >= 12yrs
-////////////////////////////////////////////////////////////////////////////////////
-
-rule "COVID-19: If the patient is >= 12y has completed along with one extra dose in the Pfizer, Moderna or WHO-approve series, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the Patient's birthdate as $dtBirthDate
-			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
-			- the date evalTime >= $dateAt12yOfAge
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Mark Forecasting of the Series $targetSeries Complete
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "COVID-19: If the patient >= 12y has completed the Series along with no extra doses in the Pfizer, Moderna or WHO-approved series, then recommend a booster dose at earliest/recommended age of 12y w/ earliest/recommended interval of 5 months"
+rule "COVID-19: If the patient >= 5y has completed the Series along with no extra doses in the Pfizer, Moderna or WHO-approved series, then recommend a booster dose at earliest/recommended age of 5y w/ earliest/recommended interval of 5 months"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -133,8 +105,8 @@ rule "COVID-19: If the patient >= 12y has completed the Series along with no ext
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
-			- the date evalTime >= $dtAtAge12y
+			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
+			- the date evalTime >= $dtAtAge5y
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "5m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -142,9 +114,94 @@ rule "COVID-19: If the patient >= 12y has completed the Series along with no ext
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
-		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge12y
-		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge12y
+		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge5y
+		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge5y
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If the patient >= 12y and < 50 years has completed the Series along with one extra dose in the Pfizer, Moderna or WHO-approved series, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series is complete
+			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- the number of doses administered is == $numberOfDosesRequired+1
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
+			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
+			- the date evalTime >= $dtAtAge12y
+			- the date evalTime < $dtAtAge50y
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If the patient >= 50y has completed the Series along with one extra dose in the Pfizer, Moderna or WHO-approved series, then recommend a 2nd booster dose at earliest/recommended age of 50y w/ earliest/recommended interval of 4 months"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series is complete
+			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- the number of doses administered is == $numberOfDosesRequired+1
+		There is an administered shot $lastShotAdministered
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated
+			- make note of the date this shot was administered as $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated
+			- the administration date of the shot is > $lastShotAdministeredDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
+			- the date evalTime >= $dtAtAge50y
+	then
+		Create a Recommendation as $r_interval for the Series $targetSeries
+		Add "4m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r_interval to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
+		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
+		Create a Recommendation as $r_age for the Series $targetSeries
+		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge50y
+		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge50y
+		Include the Recommendation $r_age for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If the patient is >= 12y has completed along with two extra doses in the Pfizer, Moderna or WHO-approve series, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series is complete
+			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- the number of doses administered is == $numberOfDosesRequired+2
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
+			- the date evalTime >= $dateAt12yOfAge
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -282,6 +339,9 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 ext
 		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
 		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
+		Create a Recommendation as $r_reason for the Series $targetSeries
+		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_COVID19_mRNA_VACCINE"
+		Include the Recommendation $r_reason for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -367,6 +427,9 @@ rule "COVID-19: If the patient >= 50y has completed the Janssen Series and 1 ext
 		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge50y
 		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
+		Create a Recommendation as $r_reason for the Series $targetSeries
+		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_COVID19_mRNA_VACCINE"
+		Include the Recommendation $r_reason for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end

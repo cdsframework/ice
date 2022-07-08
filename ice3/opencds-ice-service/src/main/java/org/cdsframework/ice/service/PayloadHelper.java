@@ -54,27 +54,27 @@ import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
 public class PayloadHelper {
 
 	private Schedule backingSchedule;
-	
+
 	private static final Logger logger = LogManager.getLogger();
 	// TODO: CDSOutput Template codes... Make configurable
 
-	
+
 	/**
 	 * Initialize the PayloadHelper with the backing schedule
 	 * @param pS Schedule backing this patient's evaluation and forecast
 	 * @IllegalArgumentException if supplied schedule is null or has not been initialized
 	 */
 	public PayloadHelper(Schedule pS) {
-		
+
 		if (pS == null || pS.isScheduleInitialized() == false) {
 			String lExStr = "Schedule has not been provided or has not been initialized; cannot continue";
 			logger.error("PayloadHelper(): " + lExStr);
 			throw new IllegalArgumentException(lExStr);
 		}
-		
+
 		this.backingSchedule = pS;
 	}
-	
+
 
 	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d,  boolean outputSupplementalText) {
 
@@ -91,14 +91,14 @@ public class PayloadHelper {
 			logger.debug(str);
 		}
 		String conceptTargetId = sae.getId();
-		
+
 		// Embedded SubstanceAdministrationEvent
 		SubstanceAdministrationEvent lSAE = new SubstanceAdministrationEvent();
 		String uniqueSarIdValue = ICELogicHelper.generateUniqueString();
 		lSAE.setId(uniqueSarIdValue);
 		String[] subsAdmEvtTemplateArr = { "2.16.840.1.113883.3.795.11.9.1.1" };
 		lSAE.setTemplateId(subsAdmEvtTemplateArr);
-		lSAE.setEvaluatedPersonId(focalPersonId); 
+		lSAE.setEvaluatedPersonId(focalPersonId);
 		lSAE.setSubjectIsFocalPerson(true);
 
 		// Record Substance AdministrationEvent CDS System Data Source
@@ -109,7 +109,7 @@ public class PayloadHelper {
 			cdsDataSource.setCode(cdsSource);
 			lSAE.setDataSourceType(cdsDataSource);
 		}
-		
+
 		// Substance Proposal General Purpose
 		CD subsAdmGeneralPurposeCD = new CD();
 		subsAdmGeneralPurposeCD.setCodeSystem("2.16.840.1.113883.6.5");
@@ -174,13 +174,13 @@ public class PayloadHelper {
 		childObs.setTemplateId(obsTemplateArr);
 
 		// Eval Time
-		IVLDate obsTime = new IVLDate(); 
-		obsTime.setLow(evalTime.getEvalTimeValue()); 
-		obsTime.setHigh(evalTime.getEvalTimeValue()); 
+		IVLDate obsTime = new IVLDate();
+		obsTime.setLow(evalTime.getEvalTimeValue());
+		obsTime.setHigh(evalTime.getEvalTimeValue());
 		childObs.setId(nestedIdValue);
 		childObs.setEvaluatedPersonId(focalPersonId);
 		childObs.setObservationEventTime(obsTime);
-		childObs.setSubjectIsFocalPerson(true); 
+		childObs.setSubjectIsFocalPerson(true);
 
 		// Observation Focus
 		CD localCD = getLocalCodeForEvaluationConcept(vg);
@@ -195,48 +195,36 @@ public class PayloadHelper {
 
 		// Observation interpretation
 		List<CD> interpretations = new ArrayList<CD>();
-		if (doseStatus == DoseStatus.INVALID || doseStatus == DoseStatus.NOT_EVALUATED || doseStatus == DoseStatus.ACCEPTED) {
+		if (doseStatus == DoseStatus.VALID || doseStatus == DoseStatus.INVALID || doseStatus == DoseStatus.ACCEPTED || doseStatus == DoseStatus.NOT_EVALUATED) {
 			Collection<String> lReasons;
+			Collection<String> lSupplementalTexts;
 			switch(doseStatus) {
+			case VALID:
+				lReasons = d.getValidReasons();
+				lSupplementalTexts = d.getSupplementalTextsForValidShot();
+				break;
 			case INVALID:
 				lReasons = d.getInvalidReasons();
+				lSupplementalTexts = d.getSupplementalTextsForInvalidShot();
 				break;
 			case ACCEPTED:
 				lReasons = d.getAcceptedReasons();
+				lSupplementalTexts = d.getSupplementalTextsForAcceptedShot();
 				break;
 			case NOT_EVALUATED:
 				lReasons = d.getNotEvaluatedReasons();
+				lSupplementalTexts = new ArrayList<String>();
 				break;
 			default:
 				lReasons = new ArrayList<String>();
+				lSupplementalTexts = new ArrayList<String>();
 			}
 			for (String interp : lReasons) {
-				if (interp.equals(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName())) {
-					continue;
-				}
-				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
-				if (localCDInterp != null && ! interpretations.contains(localCDInterp))
-					interpretations.add(localCDInterp);
-			}
-			if (interpretations.size() > 0)
-				childObs.setInterpretation(interpretations);
-		}
-		/////// else if (doseStatus == DoseStatus.ACCEPTED || doseStatus == DoseStatus.VALID) {
-		else if (doseStatus == DoseStatus.VALID) {
-			/////// for (String interp : d.getAcceptedReasons()) {
-			///////	if (interp.equals(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName())) {
-			///////		continue;
-			///////	}
-			///////	CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
-			///////	if (localCDInterp != null && ! interpretations.contains(localCDInterp))
-			///////		interpretations.add(localCDInterp);
-			/////// }
-			for (String interp : d.getValidReasons()) {
 				if (interp == null) {
 					continue;
 				}
 				boolean lSupplementalTextToOutput = false;
-				if (interp.equals(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName()) && ! d.getSupplementalTextsForValidShot().isEmpty()) {
+				if (interp.equals(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName()) && ! lSupplementalTexts.isEmpty()) {
 					lSupplementalTextToOutput = true;
 				}
 				if (outputSupplementalText == false && lSupplementalTextToOutput == true) {
@@ -247,7 +235,7 @@ public class PayloadHelper {
 					// Output supplemental text - multiple supplemental texts are permitted for shots
 					CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
 					if (localCDInterp != null) {
-						for (String lSupplementalText : d.getSupplementalTextsForValidShot()) {
+						for (String lSupplementalText : lSupplementalTexts) {
 							if (lSupplementalText != null && lSupplementalText.isEmpty() == false) {
 								CD lSupplInterp = new CD();
 								lSupplInterp.setCode(localCDInterp.getCode());
@@ -312,7 +300,7 @@ public class PayloadHelper {
 		lSAE.setId(uniqueSarIdValue);
 		String[] subsAdmEvtTemplateArr = { "2.16.840.1.113883.3.795.11.9.1.1" };
 		lSAE.setTemplateId(subsAdmEvtTemplateArr);
-		lSAE.setEvaluatedPersonId(focalPersonId); 
+		lSAE.setEvaluatedPersonId(focalPersonId);
 		lSAE.setSubjectIsFocalPerson(true);
 
 		// Record Substance AdministrationEvent CDS System Data Source
@@ -369,13 +357,13 @@ public class PayloadHelper {
 		childObs.setTemplateId(obsTemplateArr);
 
 		// Eval Time
-		IVLDate obsTime = new IVLDate(); 
-		obsTime.setLow(evalTime.getEvalTimeValue()); 
-		obsTime.setHigh(evalTime.getEvalTimeValue()); 
+		IVLDate obsTime = new IVLDate();
+		obsTime.setLow(evalTime.getEvalTimeValue());
+		obsTime.setHigh(evalTime.getEvalTimeValue());
 		childObs.setId(nestedIdValue);
 		childObs.setEvaluatedPersonId(focalPersonId);
 		childObs.setObservationEventTime(obsTime);
-		childObs.setSubjectIsFocalPerson(true); 
+		childObs.setSubjectIsFocalPerson(true);
 
 		// Observation Focus
 		CD localCD = getLocalCodeForEvaluationConcept(vg);
@@ -414,7 +402,7 @@ public class PayloadHelper {
 		pNamedObjects.put("rel" + nestedIdValue, relO);
 	}
 
-	
+
 	/**
 	 * This method creates a root SubstanceAdministrationProposal in the following format
 		   <substanceAdministrationProposal>
@@ -441,7 +429,7 @@ public class PayloadHelper {
 		       </relatedClinicalStatement>
 		   </substanceAdministrationProposal>
 	 */
-	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String cdsSource, TargetSeries ts, boolean outputEarliestOverdue, boolean outputSupplementalText) 
+	public void OutputRootImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String cdsSource, TargetSeries ts, boolean outputEarliestOverdue, boolean outputSupplementalText)
 		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
@@ -457,9 +445,9 @@ public class PayloadHelper {
 		sap.setId(uniqueSarIdValue);
 		String[] subsAdmPropTemplateArr = { "2.16.840.1.113883.3.795.11.9.3.1" };
 		sap.setTemplateId(subsAdmPropTemplateArr);
-		sap.setEvaluatedPersonId(focalPersonId); 
+		sap.setEvaluatedPersonId(focalPersonId);
 		sap.setSubjectIsFocalPerson(true);
-		
+
 		// Substance Administration Proposal CDS System Data Source
 		if (cdsSource != null && ! cdsSource.isEmpty()) {
 			CD cdsDataSource = new CD();
@@ -468,7 +456,7 @@ public class PayloadHelper {
 			cdsDataSource.setCode(cdsSource);
 			sap.setDataSourceType(cdsDataSource);
 		}
-		
+
 		// Substance Proposal General Purpose
 		CD subsAdmGeneralPurposeCD = new CD();
 		subsAdmGeneralPurposeCD.setCodeSystem("2.16.840.1.113883.6.5");
@@ -491,7 +479,7 @@ public class PayloadHelper {
 				sap.setProposedAdministrationTimeInterval(obsTime);
 			}
 		}
-		else {		
+		else {
 			// Earliest, recommended and latest recommended should be set
 			Date finalLatestRecommendationDate = ts.getFinalOverdueDate();
 			Date finalLatestDate = null;		// We do not support returning "latest" possible date separately in payload, as of now
@@ -518,7 +506,7 @@ public class PayloadHelper {
 				if (finalLatestDate != null) {
 					obsTime.setHigh(finalLatestDate);
 				}
-				sap.setValidAdministrationTimeInterval(obsTime);	
+				sap.setValidAdministrationTimeInterval(obsTime);
 			}
 		}
 		// Set the AdministrableSubstance - may be a vaccine or a vaccine group
@@ -529,8 +517,8 @@ public class PayloadHelper {
 		sap.setSubstance(substance);
 
 		// Set as a root clinical statement
-		sap.setClinicalStatementToBeRoot(true); 
-		sap.setToBeReturned(true); 	
+		sap.setClinicalStatementToBeRoot(true);
+		sap.setToBeReturned(true);
 		drools.insert(sap);
 		pNamedObjects.put("sap" + uniqueSarIdValue, sap);
 
@@ -542,7 +530,7 @@ public class PayloadHelper {
 		String[] observationResultTemplateArr = { "2.16.840.1.113883.3.795.11.6.3.1" };
 		sap.setTemplateId(observationResultTemplateArr);
 		childObs.setEvaluatedPersonId(focalPersonId);
-		childObs.setSubjectIsFocalPerson(true); 
+		childObs.setSubjectIsFocalPerson(true);
 
 		// Set the Observation Focus - always the vaccine group
 		CD localCD = getLocalCodeConceptForRecommendationConcept(ts, false);
@@ -576,7 +564,7 @@ public class PayloadHelper {
 						if (localCDInterp != null && (rec.getRecommendationStatus() == RecommendationStatus.FORECASTING_COMPLETE || rec.getRecommendationStatus() == rs) && ! interpretations.contains(localCDInterp)) {
 							if (lSupplementalTextFound && outputSupplementalText) {
 								localCDInterp.setOriginalText(rec.getRecommendationSupplementalText());
-							}	
+							}
 							interpretations.add(localCDInterp);
 						}
 					}
@@ -603,8 +591,8 @@ public class PayloadHelper {
 		pNamedObjects.put("rel" + nestedIdValue, rel);
 	}
 
-	
-	public void outputOtherImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String cdsSource) 
+
+	public void outputOtherImmRecommendationSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String cdsSource)
 		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
@@ -620,7 +608,7 @@ public class PayloadHelper {
 		sap.setId(uniqueSarIdValue);
 		String[] subsAdmPropTemplateArr = { "2.16.840.1.113883.3.795.11.9.3.1" };
 		sap.setTemplateId(subsAdmPropTemplateArr);
-		sap.setEvaluatedPersonId(focalPersonId); 
+		sap.setEvaluatedPersonId(focalPersonId);
 		sap.setSubjectIsFocalPerson(true);
 
 		// Substance Administration Proposal CDS System Data Source
@@ -649,8 +637,8 @@ public class PayloadHelper {
 		sap.setSubstance(substance);
 
 		// Set as a root clinical statement
-		sap.setClinicalStatementToBeRoot(true); 
-		sap.setToBeReturned(true); 	
+		sap.setClinicalStatementToBeRoot(true);
+		sap.setToBeReturned(true);
 		drools.insert(sap);
 		pNamedObjects.put("sap" + uniqueSarIdValue, sap);
 
@@ -662,7 +650,7 @@ public class PayloadHelper {
 		String[] observationResultTemplateArr = { "2.16.840.1.113883.3.795.11.6.3.1" };
 		sap.setTemplateId(observationResultTemplateArr);
 		childObs.setEvaluatedPersonId(focalPersonId);
-		childObs.setSubjectIsFocalPerson(true); 
+		childObs.setSubjectIsFocalPerson(true);
 
 		// Set the Observation Focus - always the vaccine group
 		childObs.setObservationFocus(localObservationFocusCD);
@@ -694,8 +682,8 @@ public class PayloadHelper {
 		drools.insert(rel);
 		pNamedObjects.put("rel" + nestedIdValue, rel);
 	}
-	
-	
+
+
 	/**
 	 * Return local ICE3 Observation Evaluation Focus code for the Vaccine Group
 	 * @param pVG
@@ -708,7 +696,7 @@ public class PayloadHelper {
 			logger.warn(_METHODNAME + "VaccineGroup parameter supplied is null");
 			return null;
 		}
-		
+
 		LocallyCodedCdsListItem lccli = this.backingSchedule.getICESupportingDataConfiguration().getSupportedVaccineGroups().getCdsListItem(pVG);
 		if (lccli == null) {
 			String lErrStr = "No associated LocallyCodedCdsListItem for the supplied LocallyCodedVaccineGroupItem: " + pVG;
@@ -764,9 +752,9 @@ public class PayloadHelper {
 		return lcvgi.getCdsListItemCD();
 	}
 
-	
+
 	/**
-	 * Return local ICE3 recommendation code for the OpenCDS reason code value. 
+	 * Return local ICE3 recommendation code for the OpenCDS reason code value.
 	 * @param pReasonCode
 	 * @return local ICE3 code value, null if parameter supplied is null, null if local code value for supplied code is not found
 	 */
@@ -785,13 +773,13 @@ public class PayloadHelper {
 			logger.warn(_METHODNAME + lErrStr);
 			return null;
 		}
-		
+
 		return sv.getCdsListItemCD();
 	}
 
-	
+
 	/**
-	 * Return local ICE3 code for the OpenCDS reason code value. 
+	 * Return local ICE3 code for the OpenCDS reason code value.
 	 * @param pReasonCode
 	 * @return local ICE3 code value, null if parameter supplied is null, null if local code value for supplied code is not found
 	 */
@@ -818,9 +806,9 @@ public class PayloadHelper {
 		}
 	}
 
-	
+
 	/**
-	 * Return local ICE3 code value for the DoseStatus. 
+	 * Return local ICE3 code value for the DoseStatus.
 	 * @param pDS
 	 * @return local ICE3 code value, null if DoseStatus is null, "" if local code value for DoseStatus is not found
 	 */
@@ -854,7 +842,7 @@ public class PayloadHelper {
 	 * Return local ICE3 code value for Recommendation
 	 * @param pRecommendation
 	 * @return null if provided value is null; local ICE3 CD code value; CD with no code value set if provided recommendation status is not either
-	 * RecommendationStatus.RECOMMENDED, RecommendationStatus.RECOMMENDED_IN_FUTURE, RecommendationStatus.CONDITIONALLY_RECOMMENDED, 
+	 * RecommendationStatus.RECOMMENDED, RecommendationStatus.RECOMMENDED_IN_FUTURE, RecommendationStatus.CONDITIONALLY_RECOMMENDED,
 	 * or RecommendationStatus.NOT_RECOMMENDED
 	 */
 	public static CD getLocalCodeForRecommendationStatus(RecommendationStatus recStatus, Schedule s) {
@@ -865,14 +853,14 @@ public class PayloadHelper {
 		}
 
 		RecommendationStatus lRecStatusToReturn = null;
-		if (recStatus == RecommendationStatus.RECOMMENDED || recStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED || recStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || 
+		if (recStatus == RecommendationStatus.RECOMMENDED || recStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED || recStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE ||
 			recStatus == RecommendationStatus.NOT_RECOMMENDED || recStatus == RecommendationStatus.RECOMMENDATION_NOT_AVAILABLE) {
 			lRecStatusToReturn = recStatus;
 		}
 		else {
 			lRecStatusToReturn = RecommendationStatus.RECOMMENDED;
 		}
-		
+
 		String lCdsListItemName = lRecStatusToReturn.getCdsListItemName();
 		LocallyCodedCdsListItem sv = s.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(lCdsListItemName);
 		if (sv == null) {
