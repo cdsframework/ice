@@ -218,7 +218,7 @@ rule "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if vaccines d
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
-			vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, $tdOtherIsCombination : administeredVaccine.isCombinationVaccine(),
+			vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, doseNumberInSeries == $td.doseNumberInSeries, $tdOtherIsCombination : administeredVaccine.isCombinationVaccine(),
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 		eval($tdIsCombination == true && $tdOtherIsCombination == true || $tdIsCombination == false && $tdOtherIsCombination == false)
 	then
