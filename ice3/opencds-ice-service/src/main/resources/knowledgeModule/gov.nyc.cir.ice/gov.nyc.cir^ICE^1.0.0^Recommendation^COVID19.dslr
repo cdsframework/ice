@@ -93,7 +93,7 @@ rule "COVID-19: If the patient >= 5y has completed the Series along with no extr
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is == $numberOfDosesRequired
 		There is an administered shot $lastShotAdministered
@@ -129,7 +129,7 @@ rule "COVID-19: If the patient >= 12y and < 50 years has completed the Series al
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is == $numberOfDosesRequired+1
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -154,7 +154,7 @@ rule "COVID-19: If the patient >= 50y has completed the Series along with one ex
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $lastShotAdministered
@@ -190,7 +190,7 @@ rule "COVID-19: If the patient is >= 12y has completed along with two extra dose
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is == $numberOfDosesRequired+2
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -450,7 +450,7 @@ rule "COVID-19: If a dose is recommended in the Pfizer, Moderna, Janssen or FDA-
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries" ,"COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries" ,"COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- the Series is complete
 			- a forecast for the Series has been made and a shot is Recommended
 			- post processing on the Series forecast has not already been run
@@ -469,7 +469,7 @@ rule "COVID-19: If Pfizer, Moderna, Janssen or FDA-authorized/WHO Series is comp
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries" ,"COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries" ,"COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- a forecast for the Series has been made and a shot is Not Recommended
 			- post processing on the Series forecast has not already been run
 	then

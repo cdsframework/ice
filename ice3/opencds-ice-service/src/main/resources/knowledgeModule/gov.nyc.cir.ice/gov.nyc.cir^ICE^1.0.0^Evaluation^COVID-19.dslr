@@ -106,7 +106,7 @@ rule "COVID-19: 3rd Dose permitted for >= 5 yrs of age with FDA-approved vaccine
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the shot belongs to the Series with name a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE217", "ICE218", "ICE221")
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
@@ -131,7 +131,7 @@ rule "COVID-19: 4th dose permitted for >= 12 yrs of age with FDA-approved vaccin
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the shot belongs to the Series with name a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE217", "ICE218", "ICE221")
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
@@ -156,7 +156,7 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot
@@ -192,7 +192,7 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			- the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot
@@ -425,7 +425,7 @@ rule "COVID-19: For patients >= 18y, if shot in the Pfizer series is administere
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Pfizer2DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19PfizerSeries"
 			- the administered shot number is > 1
 			- make note of the administered shot number as $administeredShotNumber
 			- make note of the date this shot was administered as $administrationDate
@@ -456,7 +456,7 @@ rule "COVID-19: For patients >= 18y, if shot in the Moderna series is administer
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Moderna2DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19ModernaSeries"
 			- the administered shot number is > 1
 			- make note of the administered shot number as $administeredShotNumber
 			- make note of the date this shot was administered as $administrationDate
