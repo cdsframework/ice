@@ -793,7 +793,7 @@ rule "SeriesSelection(COVID-19): Select the Pfizer Series by default if no valid
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19Janssen1DoseSeries"),
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries"),
 			vaccineComponent.isUnspecifiedFormulation() == false) 
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries")
 	then
@@ -834,7 +834,7 @@ rule "SeriesSelection(COVID-19): Select already _completed_ series if a differen
 end
 
 
-rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not found in the Pfizer, Moderna, Mixed Product or Janssen series (see related rule), then select the series that has the earliest, non-NOS (Valid) _dose_ administered to it a WHO series"
+rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not found in the Pfizer, Moderna, Mixed Product or Janssen series (see related rules), then select the WHO series that has the earliest, non-NOS (Valid) _dose_ administered to it"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 25
@@ -855,7 +855,7 @@ rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not
 end
 
 
-rule "SeriesSelection(COVID-19): If the Janssen Series was not selected and not all administered doses are a Moderna or Pfizer vaccine (i.e.- Moderna/Pfizer series were both not eslected), but (Valid) doses exist in the Mixed Product Series, then select the Mixed Product Series"
+rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were all administered doses a Moderna or Pfizer vaccine (i.e.- neither Moderna nor Pfizer series were selected), but (Valid) doses exist in the Mixed Product Series, then select the Mixed Product Series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRule"
 	salience 30
