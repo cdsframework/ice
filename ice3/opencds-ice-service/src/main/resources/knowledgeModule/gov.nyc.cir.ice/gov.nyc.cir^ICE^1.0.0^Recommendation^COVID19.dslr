@@ -545,7 +545,7 @@ rule "COVID-19: If the Series is not complete and the last shot administered was
 			- make note of the last shot administered in the series as $lastShotAdministered
 		There is an Administered Shot $administeredShot
 			- that is the same shot as $lastShotAdministered
-			- the vaccine administered a member of ("ICE210", "ICE211", "ICE213", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511")
+			- the vaccine administered a member of ("ICE210", "ICE211", "ICE213", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517")
 			- make note of the date this shot was administered as $dtAdministrationDate
 	then
 		Create a Recommendation as $r for the Series $targetSeries
@@ -565,7 +565,7 @@ rule "COVID-19: If the Series is not complete and the last shot administered was
 	when
 		There exists an Administered Shot
 			- that is the same shot as $lastShotAdministered
-			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511", "ICE512")
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -579,7 +579,7 @@ rule "COVID-19: If the Series is not complete and the last shot administered was
 	when
 		There exists an Administered Shot
 			- that is the same shot as $lastShotAdministered
-			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511", "ICE512")
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -636,13 +636,13 @@ rule "COVID-19: Recommend at the vaccine group level if the most recent shot was
 		There is an Administered Shot $lastAdministeredShot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
-			- the vaccine administered a member of ("ICE210", "ICE211", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511")
+			- the vaccine administered a member of ("ICE210", "ICE211", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517")
 			- make note of the date this shot was administered as $latestShotDate
 		There does not exist another administered shot
 			- the shot belongs to the Series $targetSeries
 			- that is not the same shot as $lastAdministeredShot
 			- that has already been evaluated
-			- the vaccine administered not a member of ("ICE210", "ICE211", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511")
+			- the vaccine administered not a member of ("ICE210", "ICE211", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517")
 			- the administration date of the shot is >= $latestShotDate
 	then
 		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
@@ -665,13 +665,13 @@ rule "COVID-19: If the most recent shot was a WHO-approved vaccine and the serie
 		There is an Administered Shot $lastAdministeredShot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
-			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+			- the vaccine administered a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511", "ICE512")
 			- make note of the date this shot was administered as $latestShotDate
 		There does not exist another administered shot
 			- the shot belongs to the Series $targetSeries
 			- that is not the same shot as $lastAdministeredShot
 			- that has already been evaluated
-			- the vaccine administered not a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511")
+			- the vaccine administered not a member of ("ICE210", "ICE211", "ICE502", "ICE510", "ICE511", "ICE512")
 			- the administration date of the shot is >= $latestShotDate
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
