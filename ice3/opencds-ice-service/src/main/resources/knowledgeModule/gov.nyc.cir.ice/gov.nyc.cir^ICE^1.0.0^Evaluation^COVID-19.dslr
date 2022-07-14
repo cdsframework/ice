@@ -112,9 +112,6 @@ rule "COVID-19: For already completed __Pfizer, Moderna, Mixed Product Or WHO-ap
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the numeric $numberOfDosesRequired is < 5
-			- the number of doses administered is >= $numberOfDosesRequired
 			- the number of doses administered is < 5
 	then
 		Set the Shot Status of $currentShot to Valid
@@ -402,7 +399,7 @@ rule "COVID-19(Abstract): For any vaccine administered in a COVID-19 series, ove
 end
 
 
-rule "COVID-19: If a shot administered below the age of 5 yrs for CVX 207/208/213/217/218/219/221/227/228, override absolute vaccine minimum age check _and_ return supplemental text that the shot does not follow guidelines for minimum age"
+rule "COVID-19: If a shot administered below the age of 6 months for CVX 207/208/213/217/218/219/221/227/228, override absolute vaccine minimum age check _and_ return supplemental text that the shot does not follow guidelines for minimum age"
 		extends "COVID-19(Abstract): For any vaccine administered in a COVID-19 series, override the absolute vaccine minimum age check"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"

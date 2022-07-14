@@ -71,7 +71,8 @@ rule "COVID-19: If the patient >= 5y has completed the Series along with no extr
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
+			- make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
+			- the number of doses administered is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
@@ -229,7 +230,8 @@ rule "COVID-19: If the patient >= 5y and < 50 years has completed the Series alo
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
+			- the number of doses administered is == $doseNumberAfterWhichComplete+1
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
