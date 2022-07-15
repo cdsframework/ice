@@ -116,7 +116,7 @@ rule "ImmunizationReferenceData.Initialize Immunization Schedule and Supporting 
 	then
 		String _RULENAME = kcontext.rule.name;
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
-		kcontext.getKnowledgeRuntime().setGlobal("iceVersion", "ICE_1.35.1-pre.1");
+		/////// kcontext.getKnowledgeRuntime().setGlobal("iceVersion", "ICE_1.35.1");
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Initialized patientAgeTimeOfInterest" + evalTime);		
 end
 
@@ -781,7 +781,8 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 	agenda-group "HistoryEvaluation^makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.isShotIgnoredForCompletionOfSeries() == false || 
+		eval(// $tdprev.isShotIgnoredForCompletionOfSeries() == false || 
+			$tdprev.isShotIgnoredForCompletionOfSeries() == false && 
 			($doseNumber > $targetSeries.getSeriesRules().getNumberOfDosesInSeries() && $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false) || 
 			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() != null &&

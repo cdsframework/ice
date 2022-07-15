@@ -37,14 +37,27 @@
         <ns2:earliestRecommendedInterval>56d</ns2:earliestRecommendedInterval>
     </ns2:doseInterval>    
     <ns2:doseInterval>
-   	    <!-- Setting interval from dose 5 to dose 6 the same as from dose 6 to dose 7 here, in case target dose 5 shot administered is invalid -->
         <ns2:fromDoseNumber>5</ns2:fromDoseNumber>
         <ns2:toDoseNumber>6</ns2:toDoseNumber>
         <ns2:absoluteMinimumInterval>0d</ns2:absoluteMinimumInterval>
         <ns2:minimumInterval>0d</ns2:minimumInterval>
         <ns2:earliestRecommendedInterval>0d</ns2:earliestRecommendedInterval>
     </ns2:doseInterval>
-    <ns2:numberOfDosesInSeries>6</ns2:numberOfDosesInSeries>
+    <ns2:doseInterval>
+        <ns2:fromDoseNumber>6</ns2:fromDoseNumber>
+        <ns2:toDoseNumber>7</ns2:toDoseNumber>
+        <ns2:absoluteMinimumInterval>0d</ns2:absoluteMinimumInterval>
+        <!-- <ns2:minimumInterval>1y</ns2:minimumInterval> -->
+        <ns2:earliestRecommendedInterval>1y</ns2:earliestRecommendedInterval>
+    </ns2:doseInterval>
+    <ns2:doseInterval>
+        <ns2:fromDoseNumber>7</ns2:fromDoseNumber>
+        <ns2:toDoseNumber>8</ns2:toDoseNumber>
+        <ns2:absoluteMinimumInterval>0d</ns2:absoluteMinimumInterval>
+        <!-- <ns2:minimumInterval>1y</ns2:minimumInterval> -->
+        <ns2:earliestRecommendedInterval>1y</ns2:earliestRecommendedInterval>
+    </ns2:doseInterval>
+    <ns2:numberOfDosesInSeries>8</ns2:numberOfDosesInSeries>
     <ns2:vaccineGroup code="750" codeSystem="2.16.840.1.113883.3.795.12.100.1" codeSystemName="ICE Vaccine Group" displayName="Pneumococcal"/>
     <ns2:iceSeriesDose>
         <ns2:doseNumber>1</ns2:doseNumber>
@@ -148,24 +161,57 @@
     </ns2:iceSeriesDose>    
 	<ns2:iceSeriesDose>
         <ns2:doseNumber>6</ns2:doseNumber>
-        <ns2:absoluteMinimumAge>65y-4d</ns2:absoluteMinimumAge>
-        <ns2:minimumAge>65y</ns2:minimumAge>
+        <ns2:absoluteMinimumAge>19y</ns2:absoluteMinimumAge>
         <ns2:earliestRecommendedAge>65y</ns2:earliestRecommendedAge>
         <ns2:doseVaccine>
             <ns2:preferred>true</ns2:preferred>
-            <ns2:vaccine code="109" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal NOS"/>
+            <ns2:vaccine code="215" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal conjugate PCV15"/>
         </ns2:doseVaccine>
         <ns2:doseVaccine>
             <ns2:preferred>true</ns2:preferred>
-            <ns2:vaccine code="33" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal polysaccharide "/>
+            <ns2:vaccine code="216" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal conjugate PCV20"/>
         </ns2:doseVaccine>
         <ns2:doseVaccine>
             <ns2:preferred>false</ns2:preferred>
-            <ns2:vaccine code="133" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal conjugate PCV 13"/>
+            <ns2:vaccine code="133" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal conjugate PCV13"/>
         </ns2:doseVaccine>
         <ns2:doseVaccine>
             <ns2:preferred>false</ns2:preferred>
-            <ns2:vaccine code="152" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal conjugate, unspecified formulation"/>
+            <ns2:vaccine code="33" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal polysaccharide"/>
+        </ns2:doseVaccine>
+    </ns2:iceSeriesDose>
+    	<ns2:iceSeriesDose>
+        <ns2:doseNumber>7</ns2:doseNumber>
+        <ns2:absoluteMinimumAge>19y</ns2:absoluteMinimumAge>
+        <ns2:earliestRecommendedAge>65y</ns2:earliestRecommendedAge>
+        <ns2:doseVaccine>
+            <ns2:preferred>false</ns2:preferred>
+            <ns2:vaccine code="215" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal conjugate PCV15"/>
+        </ns2:doseVaccine>
+        <ns2:doseVaccine>
+            <ns2:preferred>true</ns2:preferred>
+            <ns2:vaccine code="216" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal conjugate PCV20"/>
+        </ns2:doseVaccine>
+        <ns2:doseVaccine>
+            <ns2:preferred>false</ns2:preferred>
+            <ns2:vaccine code="133" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal conjugate PCV13"/>
+        </ns2:doseVaccine>
+        <ns2:doseVaccine>
+            <ns2:preferred>true</ns2:preferred>
+            <ns2:vaccine code="33" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal polysaccharide"/>
+        </ns2:doseVaccine>
+    </ns2:iceSeriesDose>
+   	<ns2:iceSeriesDose>
+        <ns2:doseNumber>8</ns2:doseNumber>
+        <ns2:absoluteMinimumAge>65y</ns2:absoluteMinimumAge>
+        <ns2:earliestRecommendedAge>65y</ns2:earliestRecommendedAge>
+        <ns2:doseVaccine>
+            <ns2:preferred>false</ns2:preferred>
+            <ns2:vaccine code="33" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal polysaccharide"/>
+        </ns2:doseVaccine>
+        <ns2:doseVaccine>
+            <ns2:preferred>true</ns2:preferred>
+            <ns2:vaccine code="216" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="pneumococcal conjugate PCV20"/>
         </ns2:doseVaccine>
     </ns2:iceSeriesDose>
 </ns2:iceSeriesSpecificationFile>
