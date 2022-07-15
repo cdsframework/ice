@@ -70,9 +70,10 @@ rule "COVID-19: If the patient >= 5y has completed the Series along with no extr
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
-			- the number of doses administered is == $doseNumberAfterWhichComplete
+			/////// - make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
+			/////// - the number of doses administered is == $doseNumberAfterWhichComplete
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
@@ -107,8 +108,12 @@ rule "COVID-19: If the patient >= 5y and < 18y of age and has completed the Mode
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19ModernaSeries"			
 			- the Series is complete
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
+			/////// - make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
+			/////// - the number of doses administered is == $doseNumberAfterWhichComplete
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
@@ -132,8 +137,8 @@ rule "COVID-19: If the patient >= 5y and < 12y of age and has completed a WHO-ap
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series a member of ("COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the Series is complete
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
@@ -157,8 +162,10 @@ rule "COVID-19: If the patient >= 12y has completed a WHO-approved series along 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
+			/////// - make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
+			/////// - the number of doses administered is == $doseNumberAfterWhichComplete
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
@@ -193,8 +200,10 @@ rule "COVID-19: If the patient >= 18y has completed the Series along with no ext
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19ModernaSeries"
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
+			/////// - make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
+			/////// - the number of doses administered is == $doseNumberAfterWhichComplete
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
@@ -221,17 +230,16 @@ rule "COVID-19: If the patient >= 18y has completed the Series along with no ext
 end
 
 
-rule "COVID-19: If the patient >= 5y and < 50 years has completed the Series along with one extra dose in the Pfizer, Moderna, Mixed Product or WHO-approved series, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient >= 5y and < 50 years has completed the Series along with one extra dose in the Pfizer, Mixed Product or WHO-approved series, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
-			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
-			- the number of doses administered is == $doseNumberAfterWhichComplete+1
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
@@ -255,8 +263,8 @@ rule "COVID-19: If the patient >= 50y has completed the Series along with one ex
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
@@ -283,7 +291,7 @@ rule "COVID-19: If the patient >= 50y has completed the Series along with one ex
 end
 
 
-rule "COVID-19: If the patient is >= 12y has completed along with two extra doses in the Pfizer, Moderna, Mixed Product or WHO-approved series, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+rule "COVID-19: If the patient is >= 12y has completed along with two extra doses but less than five doses total in the Pfizer, Moderna, Mixed Product or WHO-approved series, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -291,8 +299,11 @@ rule "COVID-19: If the patient is >= 12y has completed along with two extra dose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+2
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+2
+			- make note of the effective dose number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is == $doseNumberAfterWhichComplete+3
+			- the numeric $effectiveDoseNumber is < 5
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $dtBirthDate
 			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
