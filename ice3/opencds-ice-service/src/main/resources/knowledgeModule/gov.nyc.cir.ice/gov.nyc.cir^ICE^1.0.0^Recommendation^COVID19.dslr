@@ -208,7 +208,7 @@ rule "COVID-19: If the patient >= 12y has completed a WHO-approved series along 
 end
 
 
-rule "COVID-19: If the patient >= 18y has completed the Series along with no extra doses in the Moderna series, then recommend a booster dose at earliest/recommended age of 18y w/ earliest/recommended interval of 5 months"
+rule "COVID-19: If the patient >= 18y has completed the Moderna Series along with no extra doses, then recommend a booster dose at earliest/recommended age of 18y w/ earliest/recommended interval of 5 months"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -240,6 +240,40 @@ rule "COVID-19: If the patient >= 18y has completed the Series along with no ext
 		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge18y
 		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
+end
+
+
+rule "COVID-19: If the patient >= 18y and < 50y has completed the Moderna Series along with one extra dose, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series is complete
+			- the name of the Series is "COVID19ModernaSeries"
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
+		There is an administered shot $lastShotAdministered
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated
+			- make note of the date this shot was administered as $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated
+			- the administration date of the shot is > $lastShotAdministeredDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
+			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
+			- the date evalTime >= $dtAtAge18y
+			- the date evalTime < $dtAtAge50y
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
        	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
