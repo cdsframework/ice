@@ -61,7 +61,7 @@ rule "COVID-19: If the vaccine administered is authorized neither by the FDA nor
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE500", "ICE501", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509")
+			- the vaccine administered a member of ("ICE500", "ICE501", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517")
 			- make note of the associated series as $targetSeries
 	then
 		Include the reason for shot $currentShot Invalid due to "Vaccine Not Approved for Use in the U.S. or by the WHO"
@@ -99,24 +99,21 @@ end
 // START Pfizer, Moderna or Authorized WHO Series Additional/Booster Logic
 //////////////////////////////////////////////////////////////////////
 
-rule "COVID-19: 3rd Dose permitted for >= 5 yrs of age with FDA-approved vaccines (CVX 207, 208, 212, 213, 217, 218, 221) in an already completed __Pfizer or Moderna Series or Series not authorized by the FDA but authorized by the WHO__"
+rule "COVID-19: For already completed __Pfizer, Moderna, Mixed Product Or WHO-approved series, extra doses up to a total of 5 doses is permitted with FDA-approved vaccines (CVX 207, 208, 212, 213, 217, 218, 219, 221, 227, 228)"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the shot belongs to the Series with name a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE217", "ICE218", "ICE221")
+			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228")
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
-		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
-			- make note of the date as $dateAt5yOfAge when the patient is "5y" of age
-			- the date $currentShotDate >= $dateAt5yOfAge
+			- the effective number of doses administered in the Series is < 5 
+			/////// - the number of doses administered is < 5
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -124,41 +121,18 @@ rule "COVID-19: 3rd Dose permitted for >= 5 yrs of age with FDA-approved vaccine
 end
 
 
-rule "COVID-19: 4th dose permitted for >= 12 yrs of age with FDA-approved vaccines (CVX 207, 208, 212, 213, 217, 218, 221) in an already completed __Pfizer or Moderna Series or Series not authorized by the FDA but authorized by the WHO__"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "extraDoseCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the shot belongs to the Series with name a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE217", "ICE218", "ICE221")
-			- make note of the date this shot was administered as $currentShotDate
-			- make note of the associated series as $associatedTargetSeries
-		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the series is complete
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
-		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
-			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
-			- the date $currentShotDate >= $dateAt12yOfAge
-	then
-		Set the Shot Status of $currentShot to Valid
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-
-
-rule "COVID-19: If an extra dose is administered to an already completed __Pfizer, Moderna or WHO  Series__ prior to 28 days, include supplemental text that follow guidelines regarding immunocompromised minimum ages/intervals"
+rule "COVID-19: If an extra dose is administered to an already completed __Pfizer, Mixed Product, Moderna or WHO  Series__ prior to 28 days, include supplemental text that follow guidelines regarding immunocompromised minimum ages/intervals"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose Shot Validity Status is VALID
@@ -192,9 +166,13 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
-			- the name of the Series a member of ("COVID19Pfizer2DoseSeries", "COVID19Moderna2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries")
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
+			//- make note of the dose number as $numberOfDosesRequired after which the Series was marked complete
+			//- the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose Shot Validity Status is VALID
@@ -242,7 +220,8 @@ rule "COVID-19: Evaluate as Valid (additional dose and 2 booster doses) up to 3 
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
-			- the number of doses required to complete this Series is >= $targetDoseNumber-3
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is <= $numberOfDosesRequired+3
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -258,8 +237,12 @@ rule "COVID-19: If an extra dose is administered to an already completed __Janss
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
+			// - make note of the effective dose number as $numberOfDosesRequired after which the Series was marked complete
+			// - the number of doses administered is == $numberOfDosesRequired+1
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose Shot Validity Status is VALID
@@ -294,8 +277,12 @@ rule "COVID-19: If an extra dose is administered to an already completed __Janss
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
+			// - make note of the effective dose number as $numberOfDosesRequired after which the Series was marked complete
+			// - the number of doses administered is == $numberOfDosesRequired+1
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose Shot Validity Status is VALID
@@ -322,6 +309,10 @@ rule "COVID-19: If an extra dose is administered to an already completed __Janss
         Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
 
+//////////////////////////////////////////////////////////////////////
+// END Janssen Series Additional/Booster Logic
+//////////////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // END Rules for an Additional Dose in Pfizer, Moderna and Janssen Series
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -339,7 +330,7 @@ rule "COVID-19: If an FDA-approved, NOS or WHO-approved vaccine, the vaccine is 
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE213", "ICE217", "ICE218", "ICE502", "ICE510", "ICE511")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE502", "ICE510", "ICE511", "ICE512")
 			- the series that the shot belongs to is not complete
 			- make note of the administered vaccine as $vaccineAdministered
 			- make note of the dose number as $doseNumber
@@ -352,13 +343,40 @@ rule "COVID-19: If an FDA-approved, NOS or WHO-approved vaccine, the vaccine is 
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-//////////////////////////////////////////////////////////////////////
-// START Janssen Series Additional/Booster Logic
-//////////////////////////////////////////////////////////////////////
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // END ACCEPTED vaccines in a wrong FDA-approved series
 //////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// START "Skip dose" logic
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19: If 2 or more doses were administered >= 5 years of age in the Pfizer or Mixed Product series, then the 3rd dose is not required and the series is complete"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
+			- the series is not complete
+			/////// - the number of doses administered is == 2
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
+		There is an Administered Shot $firstDose
+			- the Shot belongs to the Series $targetSeries 
+			- that has already been evaluated and whose shot validity is VALID
+			- the dose number in the Series is == 1
+			- the administration date of the shot is >= $dtAtAge5y
+		There is an Administered Shot $secondDose
+			- the Shot belongs to the Series $targetSeries 
+			- that has already been evaluated and whose shot validity is VALID
+			- the dose number in the Series is == 2
+			- the administration date of the shot is >= $dtAtAge5y
+	then
+		Mark the Series $targetSeries complete
+		Record that this dose rule was Processed for the TargetDose $firstDose
+		Log that this dose rule fired for the dose $firstDose in the Series $targetSeries
+end
 
 
 /*************************************************************************************************************************************************************************************
@@ -402,14 +420,14 @@ rule "COVID-19(Abstract): For any vaccine administered in a COVID-19 series, ove
 end
 
 
-rule "COVID-19: If a shot administered below the age of 5 yrs for CVX 207/208/213/217/218, override absolute vaccine minimum age check _and_ return supplemental text that the shot does not follow guidelines for minimum age"
+rule "COVID-19: If a shot administered below the age of 6 months for CVX 207/208/213/217/218/219/221/227/228, override absolute vaccine minimum age check _and_ return supplemental text that the shot does not follow guidelines for minimum age"
 		extends "COVID-19(Abstract): For any vaccine administered in a COVID-19 series, override the absolute vaccine minimum age check"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm Elapsed time between $dtBirthDate and $administrationDate < "5y"
+		Confirm Elapsed time between $dtBirthDate and $administrationDate < "6m"
 	then
 		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age." for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -419,48 +437,19 @@ end
 
 // If the patient receives a shot below the absolute minimum age or below the absolute minimum interval, evalute the shot as Valid, with reason code SUPPLEMENTAL_TEXT: 
 // Descriptive Text: "The timing of the administration of this shot does not follow the guidelines of the regarding the minimum age and/or minimum interval."
-rule "COVID-19: For patients >= 18y, if shot in the Pfizer series is administered prior to 10/25/2021 and the series is not complete, override series interval logic"
+rule "COVID-19: For patients >= 18y, if shot in the Pfizer, Mixed Product or Moderna series is administered prior to 10/25/2021 and the series is not complete, override series interval logic"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Pfizer2DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the administered shot number is > 1
 			- make note of the administered shot number as $administeredShotNumber
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
-		There is an Administered Shot $priorDose
-			- the shot belongs to the series $associatedTargetSeries
-			- that has already been evaluated
-			- the administered shot number is == $administeredShotNumber-1
-			- the administration date of the shot is >= $dtDateAtAge18y
-			- make note of the date this shot was administered as $administrationDatePrior
-		There does not exist an Administered Shot
-			- the shot belongs to the series $associatedTargetSeries
-			- that has already been evaluated
-			- the administered shot number is == $administeredShotNumber-1
-			- the administration date of the shot is > $administrationDatePrior
-		Confirm the date $administrationDate is before "25-Oct-2021"
-	then
-		Record that this dose rule was Processed for the TargetDose $currentShot
-        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
-end
-
-
-rule "COVID-19: For patients >= 18y, if shot in the Moderna series is administered prior to 10/25/2021 and the series is not complete, override series interval logic"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "doseIntervalCheck"
-	when
-		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Moderna2DoseSeries"
-			- the administered shot number is > 1
-			- make note of the administered shot number as $administeredShotNumber
-			- make note of the date this shot was administered as $administrationDate
-			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries", "COVID19ModernaSeries")
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
 		There is an Administered Shot $priorDose
