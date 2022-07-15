@@ -834,7 +834,7 @@ rule "SeriesSelection(COVID-19): Select already _completed_ series if a differen
 end
 
 
-rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not found in the Pfizer, Moderna, Mixed Product or Janssen series (see related rules), then select the WHO series that has the earliest, non-NOS (Valid) _dose_ administered to it"
+rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not found in the Pfizer, Moderna, Mixed Product or Janssen series (see related rules), then select the another (i.e. - WHO series) that has the earliest, non-NOS (Valid) _dose_ administered to it"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 25
