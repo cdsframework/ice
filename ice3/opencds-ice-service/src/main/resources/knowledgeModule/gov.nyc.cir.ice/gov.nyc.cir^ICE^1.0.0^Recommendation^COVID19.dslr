@@ -70,8 +70,6 @@ rule "COVID-19: If the patient >= 5y has completed the Series along with no extr
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
-			/////// - make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
-			/////// - the number of doses administered is == $doseNumberAfterWhichComplete
 			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -108,8 +106,6 @@ rule "COVID-19: If the patient >= 5y and < 18y of age and has completed the Mode
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19ModernaSeries"			
 			- the Series is complete
-			/////// - make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
-			/////// - the number of doses administered is == $doseNumberAfterWhichComplete
 			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
@@ -162,8 +158,6 @@ rule "COVID-19: If the patient >= 12y has completed a WHO-approved series along 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			/////// - make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
-			/////// - the number of doses administered is == $doseNumberAfterWhichComplete
 			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -200,8 +194,6 @@ rule "COVID-19: If the patient >= 18y has completed the Series along with no ext
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19ModernaSeries"
-			/////// - make note of the effective dose number as $doseNumberAfterWhichComplete after which the Series was marked complete
-			/////// - the number of doses administered is == $doseNumberAfterWhichComplete
 			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -332,8 +324,10 @@ rule "COVID-19: If the patient is >= 12y has completed along with up to two extr
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+2
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired+2
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+2
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $dtBirthDate
 			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
@@ -358,8 +352,10 @@ rule "COVID-19: If the patient >= 12y has completed the Janssen Series and no ex
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
@@ -394,8 +390,10 @@ rule "COVID-19: If the patient >= 12y and < 18y has completed the Janssen Series
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
@@ -421,8 +419,10 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 ext
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired+1
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose Shot Validity Status is VALID
@@ -469,8 +469,10 @@ rule "COVID-19: If the patient >= 18y and < 50y has completed the Janssen Series
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - the number of doses administered is == $numberOfDosesRequired+1
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose Shot Validity Status is VALID
@@ -510,7 +512,8 @@ rule "COVID-19: If the patient >= 50y has completed the Janssen Series and 1 ext
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
 			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			- the number of doses administered is == $numberOfDosesRequired+1
+			/////// - the number of doses administered is == $numberOfDosesRequired+1
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose Shot Validity Status is VALID
