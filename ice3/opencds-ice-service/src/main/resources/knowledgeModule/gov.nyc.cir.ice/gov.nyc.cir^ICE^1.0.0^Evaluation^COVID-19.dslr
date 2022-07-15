@@ -113,7 +113,7 @@ rule "COVID-19: For already completed __Pfizer, Moderna, Mixed Product Or WHO-ap
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
 			- the effective number of doses administered in the Series is < 5 
-			- the number of doses administered is < 5
+			/////// - the number of doses administered is < 5
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -129,8 +129,8 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the effective dose number as $numberOfDosesRequired after which the Series was marked complete
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot
@@ -167,8 +167,10 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the effective dose number as $numberOfDosesRequired after which the Series was marked complete
-			- the number of doses administered is == $numberOfDosesRequired+1
+			//- make note of the dose number as $numberOfDosesRequired after which the Series was marked complete
+			//- the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot
@@ -218,8 +220,8 @@ rule "COVID-19: Evaluate as Valid (additional dose and 2 booster doses) up to 3 
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
-			- make note of the effective dose number as $numberOfDosesRequired after which the Series was marked complete
-			- the number of doses administered is == $numberOfDosesRequired+3
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+3
 			/////// - the number of doses required to complete this Series is >= $targetDoseNumber-3
 	then
 		Set the Shot Status of $currentShot to Valid
@@ -236,8 +238,10 @@ rule "COVID-19: If an extra dose is administered to an already completed __Janss
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- make note of the effective dose number as $numberOfDosesRequired after which the Series was marked complete
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
+			// - make note of the effective dose number as $numberOfDosesRequired after which the Series was marked complete
+			// - the number of doses administered is == $numberOfDosesRequired+1
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot
@@ -274,8 +278,10 @@ rule "COVID-19: If an extra dose is administered to an already completed __Janss
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- make note of the effective dose number as $numberOfDosesRequired after which the Series was marked complete
-			- the number of doses administered is == $numberOfDosesRequired+1
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
+			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
+			// - make note of the effective dose number as $numberOfDosesRequired after which the Series was marked complete
+			// - the number of doses administered is == $numberOfDosesRequired+1
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired+1
 		There is an administered shot $administeredShot

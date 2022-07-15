@@ -70,7 +70,8 @@ rule "COVID-19: If the patient >= 5y has completed the Series along with no extr
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries

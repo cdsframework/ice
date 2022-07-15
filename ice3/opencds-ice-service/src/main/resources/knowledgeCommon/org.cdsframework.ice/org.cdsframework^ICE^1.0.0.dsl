@@ -177,7 +177,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Nn]umber of [Ss]hots [Aa]dministered as {assign_nNumberOfShotsAdministered}={assign_nNumberOfShotsAdministered} : numberOfShotsAdministeredInSeries()
 [condition][]- [Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Aa]dministered as {assign_nNumberOfDoses}={assign_nNumberOfDoses} : determineNumberOfDosesAdministeredInSeries()
 [condition][]- [Mm]ake [Nn]ote of the [Ee]ffective [Dd]ose [Nn]umber in the [Ss]eries as {assign_nEffectiveDoseNumber}={assign_nEffectiveDoseNumber} : determineDoseNumberInSeries()
-[condition][]- [Mm]ake [Nn]ote of the [Ee]ffective [Dd]ose [Nn]umber as {assign_nEffectiveDoseNumber} after which the [Ss]eries was [Mm]arked [Cc]omplete={assign_nEffectiveDoseNumber} : getDoseAfterWhichSeriesWasMarkedComplete()
+[condition][]- [Mm]ake [Nn]ote of the [Dd]ose [Nn]umber after which the [Ss]eries was [Mm]arked [Cc]omplete as {assign_nEffectiveDoseNumber}={assign_nEffectiveDoseNumber} : getDoseAfterWhichSeriesWasMarkedComplete()
 [condition][]- [Mm]ake [Nn]ote of the [Ss]eason [Ss]tart [Dd]ate as {assign_dtSeasonStartDate}={assign_dtSeasonStartDate} : getSeasonStartDate()
 [condition][]- [Mm]ake [Nn]ote of the [Ss]eason [Ee]nd [Dd]ate as {assign_dtSeasonEndDate}={assign_dtSeasonEndDate} : getSeasonEndDate()
 [condition][]- [Mm]ake [Nn]ote of the [Oo]ff [Ss]eason [Ss]tart [Dd]ate as {assign_dtOffSeasonStartDate}={assign_dtOffSeasonStartDate} : getOffSeasonStartDate()
