@@ -1072,7 +1072,8 @@ public class TargetSeries {
 			if (lastDoseAdministered != null) {
 				if (numberOfEffectiveDoses >= numberOfDosesInSeriesRule) {
 					seriesComplete = true;
-					seriesCompleteAtDoseNumber = numberOfEffectiveDoses;
+					/////// seriesCompleteAtDoseNumber = numberOfEffectiveDoses;'
+					setSeriesCompleteAtSpecifiedDoseNumber(numberOfEffectiveDoses);
 				}
 				else {
 					seriesComplete = false;
@@ -3471,6 +3472,31 @@ public class TargetSeries {
 		return seriesComplete;
 	}
 
+	private void setSeriesCompleteDoseNumber() {
+		if (this.seriesComplete && this.seriesCompleteAtDoseNumber == 0) {
+			int lEffectiveNumberOfDoses = determineEffectiveNumberOfDosesInSeries();
+			int lNumberOfDosesDefinedInSeries = getSeriesRules().getNumberOfDosesInSeries();
+			if (lEffectiveNumberOfDoses > 0 && lEffectiveNumberOfDoses < lNumberOfDosesDefinedInSeries) {
+				this.seriesCompleteAtDoseNumber = lEffectiveNumberOfDoses;
+			}
+			else {
+				this.seriesCompleteAtDoseNumber = lNumberOfDosesDefinedInSeries;
+			}
+		}
+	}
+
+	private void setSeriesCompleteAtSpecifiedDoseNumber(int pDoseNumberSpecified) {
+		if (this.seriesComplete && this.seriesCompleteAtDoseNumber == 0) {
+			int lNumberOfDosesDefinedInSeries = getSeriesRules().getNumberOfDosesInSeries();
+			if (pDoseNumberSpecified > 0 && pDoseNumberSpecified < lNumberOfDosesDefinedInSeries) {
+				this.seriesCompleteAtDoseNumber = pDoseNumberSpecified;
+			}
+			else {
+				this.seriesCompleteAtDoseNumber = lNumberOfDosesDefinedInSeries;
+			}
+		}
+	}
+
 	/**
 	 * Manually mark the series complete. If this method is called, it overrides any automated computations of series completeness based on the generic
 	 * series tables rules, and therefore this series' completeness value will not be changed automatically based on automated generic series
@@ -3482,7 +3508,9 @@ public class TargetSeries {
 	public void setSeriesComplete(boolean pSeriesComplete) {
 		this.seriesComplete = pSeriesComplete;
 		if (pSeriesComplete == true) {
-			this.seriesCompleteAtDoseNumber = determineNumberOfDosesAdministeredInSeries();	/////// determineEffectiveNumberOfDosesInSeries();
+			if (this.seriesCompleteAtDoseNumber == 0) {
+				setSeriesCompleteDoseNumber();
+			}
 		}
 		else {
 			this.seriesCompleteAtDoseNumber = 0;

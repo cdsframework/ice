@@ -58,6 +58,20 @@ global org.cdsframework.ice.service.Schedule schedule
  ____Series Completion Special Rules____
 /************************************************************************************************************************************************************************************/
 
+rule "COVID-19: Debug dose number after which series is marked complete"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series is complete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
+	then
+       	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
+end
+
+	
 ////////////////////////////////////////////////////////////////////////////////////
 // START Pfizer, Moderna or WHO series booster/additional dose recommendations for patients >= 5yrs and < 12yrs; >= 12 yrs
 ////////////////////////////////////////////////////////////////////////////////////
@@ -96,6 +110,7 @@ rule "COVID-19: If the patient >= 5y has completed the Series along with no extr
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -107,7 +122,8 @@ rule "COVID-19: If the patient >= 5y and < 18y of age and has completed the Mode
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19ModernaSeries"			
 			- the Series is complete
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired
@@ -123,6 +139,7 @@ rule "COVID-19: If the patient >= 5y and < 18y of age and has completed the Mode
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -134,7 +151,8 @@ rule "COVID-19: If the patient >= 5y and < 12y of age and has completed a WHO-ap
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series a member of ("COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the Series is complete
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
@@ -148,6 +166,7 @@ rule "COVID-19: If the patient >= 5y and < 12y of age and has completed a WHO-ap
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -159,7 +178,8 @@ rule "COVID-19: If the patient >= 12y has completed a WHO-approved series along 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
@@ -184,6 +204,7 @@ rule "COVID-19: If the patient >= 12y has completed a WHO-approved series along 
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -195,7 +216,8 @@ rule "COVID-19: If the patient >= 18y has completed the Series along with no ext
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19ModernaSeries"
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
@@ -220,6 +242,7 @@ rule "COVID-19: If the patient >= 18y has completed the Series along with no ext
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -231,7 +254,8 @@ rule "COVID-19: If the patient >= 5y and < 50 years has completed the Series alo
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
@@ -245,6 +269,7 @@ rule "COVID-19: If the patient >= 5y and < 50 years has completed the Series alo
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -256,7 +281,8 @@ rule "COVID-19: If the patient >= 50y has completed the Series along with one ex
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
@@ -281,6 +307,7 @@ rule "COVID-19: If the patient >= 50y has completed the Series along with one ex
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -292,8 +319,8 @@ rule "COVID-19: If the patient is >= 12y has completed along with two extra dose
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
-			/////// - the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+2
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- make note of the effective dose number in the Series as $effectiveDoseNumber
 			- the numeric $effectiveDoseNumber is == $doseNumberAfterWhichComplete+3
 			- the numeric $effectiveDoseNumber is < 5
@@ -308,6 +335,7 @@ rule "COVID-19: If the patient is >= 12y has completed along with two extra dose
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -327,7 +355,8 @@ rule "COVID-19: If the patient is >= 12y has completed along with up to two extr
 			- the name of the Series is "COVID19Janssen1DoseSeries"
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired+2
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+2
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the Patient's birthdate as $dtBirthDate
@@ -339,6 +368,7 @@ rule "COVID-19: If the patient is >= 12y has completed along with up to two extr
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
      	Log that this Series Rule fired for the Series $targetSeries
+     	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -355,7 +385,8 @@ rule "COVID-19: If the patient >= 12y has completed the Janssen Series and no ex
 			- the name of the Series is "COVID19Janssen1DoseSeries"
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
@@ -380,6 +411,7 @@ rule "COVID-19: If the patient >= 12y has completed the Janssen Series and no ex
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -393,7 +425,8 @@ rule "COVID-19: If the patient >= 12y and < 18y has completed the Janssen Series
 			- the name of the Series is "COVID19Janssen1DoseSeries"
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired+1
-			- make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			/////// - make note of the number of doses required to complete this Series as $doseNumberAfterWhichComplete
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
@@ -406,6 +439,7 @@ rule "COVID-19: If the patient >= 12y and < 18y has completed the Janssen Series
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
 
 
@@ -422,7 +456,8 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 ext
 			- the name of the Series is "COVID19Janssen1DoseSeries"
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired+1
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
 			- the shot belongs to the series $targetSeries
@@ -456,6 +491,7 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 ext
 		Include the Recommendation $r_reason for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "numberOfDosesRequired" and value $numberOfDosesRequired
 end
 
 
@@ -472,7 +508,8 @@ rule "COVID-19: If the patient >= 18y and < 50y has completed the Janssen Series
 			- the name of the Series is "COVID19Janssen1DoseSeries"
 			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
 			/////// - the number of doses administered is == $numberOfDosesRequired+1
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
 			- the shot belongs to the series $targetSeries
@@ -498,6 +535,7 @@ rule "COVID-19: If the patient >= 18y and < 50y has completed the Janssen Series
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "numberOfDosesRequired" and value $numberOfDosesRequired
 end
 
 
@@ -512,8 +550,8 @@ rule "COVID-19: If the patient >= 50y has completed the Janssen Series and 1 ext
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- make note of the number of doses required to complete this Series as $numberOfDosesRequired
-			/////// - the number of doses administered is == $numberOfDosesRequired+1
+			/////// - make note of the number of doses required to complete this Series as $numberOfDosesRequired
+			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
 			- the shot belongs to the series $targetSeries
@@ -547,6 +585,7 @@ rule "COVID-19: If the patient >= 50y has completed the Janssen Series and 1 ext
 		Include the Recommendation $r_reason for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+       	Log debugging information about object named "numberOfDosesRequired" and value $numberOfDosesRequired
 end
 
 

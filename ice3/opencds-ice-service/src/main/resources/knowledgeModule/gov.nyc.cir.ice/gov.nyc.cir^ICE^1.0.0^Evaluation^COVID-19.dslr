@@ -221,8 +221,7 @@ rule "COVID-19: Evaluate as Valid (additional dose and 2 booster doses) up to 3 
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
-			- the effective number of doses administered in the Series is == $numberOfDosesRequired+3
-			/////// - the number of doses required to complete this Series is >= $targetDoseNumber-3
+			- the effective number of doses administered in the Series is <= $numberOfDosesRequired+3
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
