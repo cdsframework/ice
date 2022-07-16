@@ -57,20 +57,6 @@ global org.cdsframework.ice.service.Schedule schedule
 /*************************************************************************************************************************************************************************************
  ____Series Completion Special Rules____
 /************************************************************************************************************************************************************************************/
-
-rule "COVID-19: Debug dose number after which series is marked complete"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
-			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-	then
-       	Log that this Series Rule fired for the Series $targetSeries
-       	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
-end
-
 	
 ////////////////////////////////////////////////////////////////////////////////////
 // START Pfizer, Moderna or WHO series booster/additional dose recommendations for patients >= 5yrs and < 12yrs; >= 12 yrs
