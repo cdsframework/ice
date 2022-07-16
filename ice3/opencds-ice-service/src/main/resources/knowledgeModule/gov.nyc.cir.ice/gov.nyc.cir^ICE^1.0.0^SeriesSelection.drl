@@ -807,6 +807,50 @@ rule "SeriesSelection(COVID-19): Select the Pfizer Series by default if no valid
 end
 
 
+rule "SeriesSelection(COVID-19): If the Mixed Product Series was selected but all (Valid) doses are a Pfizer vaccine, select the Pfizer Series instead"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$tsmixed : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, seriesRules.seriesName == "COVID19MixedProductSeries")
+		not TargetDose(associatedTargetSeries == $tsmixed, isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219"))
+		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries")
+	then
+		String _RULENAME = kcontext.rule.name;
+		$tsmixed.setSelectedSeries(false);
+		$tspfizer.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tspfizer.seriesName);
+		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $tspfizer);
+		update($tss);
+		update($tsmixed);
+		update($tspfizer);
+end
+
+
+rule "SeriesSelection(COVID-19): If the Mixed Product Series was selected but all (Valid) doses are a Moderna vaccine, select the Moderna Series instead"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$tsmixed : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, seriesRules.seriesName == "COVID19MixedProductSeries")
+		not TargetDose(associatedTargetSeries == $tsmixed, isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228"))
+		$tsmoderna : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries")
+	then
+		String _RULENAME = kcontext.rule.name;
+		$tsmixed.setSelectedSeries(false);
+		$tsmoderna.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsmoderna.seriesName);
+		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $tsmoderna);
+		update($tss);
+		update($tsmixed);
+		update($tsmoderna);
+end
+
+
 ///////// ***
 // If one series is complete but another has been selected, selected an already completed one. 
 // This is the only way a non-FDA, WHO-approved series can be selected (it must be complete).
