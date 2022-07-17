@@ -151,7 +151,7 @@ rule "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of
 end
 
 
-rule "Pneumococcal Adult: if INVALID shot administered >= 5 yrs and < 19 yrs is not a PCV15 or PCV20, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
+rule "Pneumococcal Adult: if INVALID shot administered >= 5 yrs and < 19 yrs is not a PCV15, PCV20, CVX 152 or CVX 109, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
 		extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
@@ -159,12 +159,29 @@ rule "Pneumococcal Adult: if INVALID shot administered >= 5 yrs and < 19 yrs is 
 		There is an Administered Shot $otherPneumococcalShot
 			- that is the same shot as $currentShot
 			- that has already been evaluated and whose shot validity is INVALID
-			- the vaccine administered not a member of ("ICE215", "ICE216")	
+			- the vaccine administered not a member of ("ICE215", "ICE216", "ICE109", "ICE152")	
 	then
 		Remove all evaluation reasons from shot $otherPneumococcalShot
 		Set the Shot Status of $otherPneumococcalShot to Accepted
 		Include the reason for shot $otherPneumococcalShot Accepted due to "Shot Administered Outside of a Routine Series"
 		Refresh all facts in the shot $otherPneumococcalShot
+		Record that this dose rule was processed for the TargetDose $otherPneumococcalShot
+		Log that this dose rule fired for the dose $otherPneumococcalShot in the Series $associatedTargetSeries	
+end
+
+
+rule "Pneumococcal Adult: if INVALID shot administered >= 5 yrs and < 19 yrs is CVX 152 or CVX 109, remove all evaluated reasons except VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
+		extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an Administered Shot $otherPneumococcalShot
+			- that is the same shot as $currentShot
+			- that has already been evaluated and whose shot validity is INVALID
+			- the vaccine administered a member of ("ICE109", "ICE152")	
+	then
+		Remove all evaluation reasons from shot $otherPneumococcalShot
+		Include the reason for shot $otherPneumococcalShot Invalid due to "Vaccine not Permitted for this Dose"
 		Record that this dose rule was processed for the TargetDose $otherPneumococcalShot
 		Log that this dose rule fired for the dose $otherPneumococcalShot in the Series $associatedTargetSeries	
 end
@@ -234,7 +251,7 @@ end
 
 
 // Evaluate CVX 109 or CVX 152 as INVALID / VACCINE_NOT_ALLOWED along with supplemental text if administered in the Adult series.
-rule "Pneumococcal Adult: If CVX 109 or CVX 152 has been evaluated as INVALID / VACCINE_NOT_ALLOWED_FOR_THIS_DOSE in the Adult Series, add supplemental text"
+rule "Pneumococcal Adult: If CVX 109 or CVX 152 has been evaluated as INVALID / VACCINE_NOT_ALLOWED_FOR_THIS_DOSE in the Adult Series, remove all other reason codes and add supplemental text"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when

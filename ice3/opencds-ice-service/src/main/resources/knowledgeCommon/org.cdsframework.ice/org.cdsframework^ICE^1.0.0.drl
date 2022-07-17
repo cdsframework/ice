@@ -850,7 +850,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalid" ruleflow-group "HistoryE
 	dialect "mvel"
 	salience 10
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty == false) 
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty == false, $ts : associatedTargetSeries) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -858,6 +858,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalid" ruleflow-group "HistoryE
 			setStatus(DoseStatus.INVALID),
 			addDoseRuleProcessed(_RULENAME);
 		}
+		update($ts);
 		// setStatus() above also sets hasBeenEvaluated to true
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 		setFocus("HistoryEvaluation^postEvaluationCheck");
@@ -871,7 +872,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "His
 	dialect "mvel"
 	salience 10
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty == false) 
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty == false, $ts : associatedTargetSeries) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -880,6 +881,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "His
 			addDoseRuleProcessed(_RULENAME);
 		}
 		// setStatus() above also sets hasBeenEvaluated to true
+		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 		setFocus("HistoryEvaluation^postEvaluationCheck");
 end
