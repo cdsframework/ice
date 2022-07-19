@@ -105,10 +105,18 @@ steps:
         ".",
       ]
     dir: "."
+    
+  # stop the vm instance
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['compute','instances','stop','ice-01-redux','--zone','us-central1-c','--project', 'cdsframework']
 
   # update the vm instance image
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['compute','instances','update-container','ice-01','--zone','us-central1-c','--project', 'cdsframework', '--container-image=gcr.io/cdsframework/ice:cds']
+    args: ['compute','instances','update-container','ice-01-redux','--zone','us-central1-c','--project', 'cdsframework', '--container-image=gcr.io/cdsframework/ice:cds']
+
+  # start the vm instance
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['compute','instances','start','ice-01-redux','--zone','us-central1-c','--project', 'cdsframework']
 
 images: ["gcr.io/$PROJECT_ID/ice"]
 timeout: 900s
