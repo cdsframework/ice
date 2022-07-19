@@ -124,6 +124,21 @@ end
 // START Pfizer, Moderna or Authorized WHO Series Additional/Booster Logic
 //////////////////////////////////////////////////////////////////////
 
+rule "COVID-19: If the series is complete, override allowable vaccine check, as the allowable vaccines for additional and booster doses are verified by each rule"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the series that the shot belongs to is complete
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+	
+
 rule "COVID-19: If the patient is >= 5 yrs and < 18 yrs of age and an Additional Dose is administered in the __Moderna Series__, the shot is permitted"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -185,7 +200,7 @@ rule "COVID-19: If the patient is >= 5 yrs and < 50 yrs of age and an Additiona
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the shot belongs to the Series with name a member of ("COVID19Pfizer2DoseSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
+			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228")
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
@@ -212,7 +227,6 @@ rule "COVID-19: If the patient is >= 50 yrs of age and an Additional Dose, 1st 
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			/////// - the shot belongs to the Series with name a member of ("COVID19Pfizer2DoseSeries","COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the vaccine administered a member of ("ICE207", "ICE208", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228")
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
@@ -444,10 +458,15 @@ rule "COVID-19: If 2 or more doses were administered >= 5 years of age in the Pf
 			- that has already been evaluated and whose shot validity is VALID
 			- the dose number in the Series is == 2
 			- the administration date of the shot is >= $dtAtAge5y
+		There does not exist an administered shot
+			- the Shot belongs to the Series $targetSeries
+			- that has already been evaluated
+			- the dose number in the Series is > 2
 	then
 		Mark the Series $targetSeries complete
-		Record that this dose rule was Processed for the TargetDose $firstDose
-		Log that this dose rule fired for the dose $firstDose in the Series $targetSeries
+		Refresh all facts in the Series $targetSeries
+		Record that this dose rule was Processed for the TargetDose $secondDose
+		Log that this dose rule fired for the dose $secondDose in the Series $targetSeries
 end
 
 
