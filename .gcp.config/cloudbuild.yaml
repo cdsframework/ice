@@ -1,5 +1,8 @@
 substitutions:
+  _CONTAINER_NAME: ice
+  _GCR_HOSTNAME: gcr.io
   _GCS_CACHE_BUCKET: ice-mvn-cache
+  _GCP_VM_HOSTNAME: ice-01-redux
 
 steps:
   # load the cache from GCS if it exists
@@ -19,7 +22,7 @@ steps:
         path: /root/.m2/
 
   - name: gcr.io/cloud-builders/git
-    args: ['fetch', '--unshallow']
+    args: ["fetch", "--unshallow"]
 
   # build opencds-knowledge-repository-data dep first
   - name: "maven:3-jdk-8-slim"
@@ -99,24 +102,63 @@ steps:
     args:
       [
         "build",
-        "--tag=gcr.io/$PROJECT_ID/ice:$BRANCH_NAME",
+        "--tag=${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}$BRANCH_NAME",
+        "--tag=${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}$SHORT_SHA",
         "-f",
         ".gcp.config/Dockerfile",
         ".",
       ]
     dir: "."
-    
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: docker-push
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        docker push ${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}
+
   # stop the vm instance
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['compute','instances','stop','ice-01-redux','--zone','us-central1-c','--project', 'cdsframework']
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "compute",
+        "instances",
+        "stop",
+        "${_GCP_VM_HOSTNAME}",
+        "--zone",
+        "us-central1-c",
+        "--project",
+        "${PROJECT_ID}",
+      ]
 
   # update the vm instance image
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['compute','instances','update-container','ice-01-redux','--zone','us-central1-c','--project', 'cdsframework', '--container-image=gcr.io/cdsframework/ice:cds']
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "compute",
+        "instances",
+        "update-container",
+        "${_GCP_VM_HOSTNAME}",
+        "--zone",
+        "us-central1-c",
+        "--project",
+        "${PROJECT_ID}",
+        "--container-image=${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}:${SHORT_SHA}",
+      ]
 
   # start the vm instance
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['compute','instances','start','ice-01-redux','--zone','us-central1-c','--project', 'cdsframework']
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "compute",
+        "instances",
+        "start",
+        "${_GCP_VM_HOSTNAME}",
+        "--zone",
+        "us-central1-c",
+        "--project",
+        "${PROJECT_ID}",
+      ]
 
-images: ["gcr.io/$PROJECT_ID/ice"]
 timeout: 900s
