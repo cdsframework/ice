@@ -353,29 +353,6 @@ end
 ////////////////////////////////////////////////////////////////////////////////////
 // START Janssen booster/additional recommendations 
 ////////////////////////////////////////////////////////////////////////////////////
-rule "COVID-19: If the patient is >= 12y has completed along with two extra doses in the Janssen series and no other recommendations have been made, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
-			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+2
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the Patient's birthdate as $dtBirthDate
-			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
-			- the date evalTime >= $dateAt12yOfAge
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-     	Log that this Series Rule fired for the Series $targetSeries
-     	Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
-end
-
 
 //////////////
 // Janssen 1st booster / additional dose recommendations for patients >= 12yrs
