@@ -116,7 +116,8 @@ steps:
     args:
       - "-c"
       - |
-        docker push ${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}
+        docker push ${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}:$BRANCH_NAME
+        docker push ${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}:$SHORT_SHA
 
   # stop the vm instance
   - name: "gcr.io/cloud-builders/gcloud"
