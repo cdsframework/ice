@@ -878,32 +878,6 @@ rule "SeriesSelection(COVID-19): Select already _completed_ series if a differen
 end
 
 
-/////// ****
-// If a series was selected but another series was marked complete with fewer doses, select the series with fewer doses
-/////// ****
-rule "SeriesSelect(COVID-19): If a series was selected but another series was marked complete with fewer doses, select the series with fewest doses"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 5
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
-		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, isSeriesComplete() == true, $doseNumberAfterWhichSeriesComplete : doseAfterWhichSeriesWasMarkedComplete)
-		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == false, isSeriesComplete() == true, doseAfterWhichSeriesWasMarkedComplete < $doseNumberAfterWhichSeriesComplete)
-		// not TargetDose(associatedTargetSeries == $ts2, doseNumberInSeries == 1, isValid == true, admini 
-	then
-		String _RULENAME = kcontext.rule.name;
-		$ts1.setSelectedSeries(false);
-		$ts2.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts2.seriesName);
-		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts2);
-		update($tss);
-		update($ts1);
-		update($ts2);
-end	
-
-
 rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not found in the Pfizer, Moderna, Mixed Product or Janssen series (see related rules), then select the another (i.e. - WHO series) that has the earliest, non-NOS (Valid) _dose_ administered to it"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
