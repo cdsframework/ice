@@ -224,12 +224,12 @@ public class PayloadHelper {
 					continue;
 				}
 
-				CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
-				if (localCDInterp != null && ! interpretations.contains(localCDInterp)) {
+				CD localCode = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
+				if (localCode != null && ! interpretations.contains(localCode)) {
 					if ((outputRuleName == true) && (d.getRuleName() != null)) {
-						localCDInterp.setAny(d.getRuleName());
+						localCode.setAny(d.getRuleName());
 					}
-					interpretations.add(localCDInterp);
+					interpretations.add(localCode);
 				}
 
 				boolean lSupplementalTextToOutput = false;
