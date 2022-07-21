@@ -73,6 +73,7 @@ rule "Duplicate Shots/Same Day (COVID-19): If shot is marked valid but another s
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
 	no-loop true
+	salience 5
 	when
 		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isDoseStatusOverridden() == false)
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, doseNumberInSeries == $td.doseNumberInSeries, 
@@ -114,4 +115,54 @@ rule "Duplicate Shots/Same Day (COVID-19): If one of those shots is Valid and an
 			setDuplicateShotSameDayCheckCompleted(true);
 		}
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+end
+
+
+rule "Duplicate Shots/Same Day (COVID-19): If a Moderna shot and Pfizer shot are both Valid on the same day (after 10/25/2021 as per above), mark the Moderna shot Valid and the other shot Invalid / DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$tdpfizer: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219"))
+		$tdmoderna : TargetDose(this != $tdpfizer, associatedTargetSeries == $tdpfizer.associatedTargetSeries, doseNumberInSeries == $tdpfizer.doseNumberInSeries, administrationDate == $tdpfizer.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, 
+			administeredVaccine.cdsConceptName in ("ICE207", "ICE221", "ICE227", "ICE228"),	isDuplicateShotSameDayCheckCompleted() == false || $tdpfizer.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdpfizer) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($tdmoderna) {
+			setStatus(DoseStatus.VALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets();
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdmoderna + " in TargetSeries " + $tdmoderna.associatedTargetSeries);
+end
+
+
+rule "Duplicate Shots/Same Day (COVID-19): If an FDA-approved vaccine and a WHO-only approved vaccine are both Valid on the same day (after 10/25/2021 as per above), mark the FDA-approved shot as Valid and the other shot Invalid / DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$tdfda: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE207", "ICE221", "ICE227", "ICE228"))
+		$tdwho : TargetDose(this != $tdfda, associatedTargetSeries == $tdfda.associatedTargetSeries, doseNumberInSeries == $tdfda.doseNumberInSeries, administrationDate == $tdfda.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, 
+			administeredVaccine.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE207", "ICE221", "ICE227", "ICE228"), isDuplicateShotSameDayCheckCompleted() == false || $tdfda.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdwho) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($tdfda) {
+			setStatus(DoseStatus.VALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets();
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdfda + " in TargetSeries " + $tdfda.associatedTargetSeries);
 end

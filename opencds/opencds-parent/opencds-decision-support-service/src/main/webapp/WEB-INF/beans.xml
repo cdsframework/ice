@@ -20,7 +20,13 @@
         <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
         <property name="valueSeparator" value="?" />
         <property name="ignoreResourceNotFound" value="true" />
-        <property name="locations" value="file:${user.home}/.opencds/opencds.properties" />
+        <property name="locations">
+            <list>
+                <value>file:${user.home}/.opencds/opencds.properties</value>
+                <value>classpath:org/cdsframework/ice/util/iceversion.properties</value>
+                <value>classpath:org/cdsframework/ice/util/git.properties</value>
+            </list>
+        </property>
     </bean>
 
     <import resource="classpath:META-INF/cxf/cxf.xml" />
@@ -48,6 +54,21 @@
         <constructor-arg name="cacheService" ref="cacheService" />
         <constructor-arg name="configData" ref="configData" />
     </bean>
+
+    <!-- version data map for use in ice and version controller -->
+    <util:map id="versionData" map-class="java.util.HashMap">
+        <entry key="iceVersion" value="${ice-version?unknown}"/>
+        <entry key="gitCommitSha" value="${git.commit.id.abbrev?no-git-sha}"/>
+        <entry key="buildDate" value="${git.build.time?no-build-time}"/>
+    </util:map>
+
+    <!-- set the version data inside ICEVersionUtil -->
+    <bean id="iceVersionSetup" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="org.cdsframework.ice.util.ICEVersionUtil" />
+        <property name="targetMethod" value="setVersionData" />
+        <property name="arguments" ref="versionData"/>
+    </bean>
+
     <!-- END: CONFIGURATION -->
 
     <!-- utilities -->
@@ -151,6 +172,10 @@
     <bean id="healthResource" class="org.cdsframework.rest.opencds.HealthResource">
     </bean>
 
+    <bean id="versionResource" class="org.cdsframework.rest.opencds.VersionResource">
+        <constructor-arg name="versionData" ref="versionData"/>
+    </bean>
+
     <bean id="evaluateResource" class="org.cdsframework.rest.opencds.EvaluateResource">
         <constructor-arg name="evaluationService" ref="evaluationService" />
         <constructor-arg name="configurationService" ref="configurationService" />
@@ -159,6 +184,7 @@
     <jaxrs:server id="healthRESTService" address="/">
         <jaxrs:serviceBeans>
             <ref bean="healthResource" />
+            <ref bean="versionResource"/>
         </jaxrs:serviceBeans>
     </jaxrs:server>
 

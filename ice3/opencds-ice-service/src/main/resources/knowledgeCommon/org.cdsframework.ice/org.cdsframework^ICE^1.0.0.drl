@@ -117,7 +117,6 @@ rule "ImmunizationReferenceData.Initialize Immunization Schedule and Supporting 
 	then
 		String _RULENAME = kcontext.rule.name;
 		kcontext.getKnowledgeRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
-		kcontext.getKnowledgeRuntime().setGlobal("iceVersion", "ICE_1.34.1");
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Initialized patientAgeTimeOfInterest" + evalTime);		
 end
 
@@ -782,7 +781,8 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 	agenda-group "HistoryEvaluation^makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.isShotIgnoredForCompletionOfSeries() == false || 
+		eval(// $tdprev.isShotIgnoredForCompletionOfSeries() == false || 
+			$tdprev.isShotIgnoredForCompletionOfSeries() == false && 
 			($doseNumber > $targetSeries.getSeriesRules().getNumberOfDosesInSeries() && $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false) || 
 			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() != null &&
@@ -850,7 +850,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalid" ruleflow-group "HistoryE
 	dialect "mvel"
 	salience 10
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty == false) 
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty == false, $ts : associatedTargetSeries) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -858,6 +858,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalid" ruleflow-group "HistoryE
 			setStatus(DoseStatus.INVALID),
 			addDoseRuleProcessed(_RULENAME);
 		}
+		update($ts);
 		// setStatus() above also sets hasBeenEvaluated to true
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 		setFocus("HistoryEvaluation^postEvaluationCheck");
@@ -871,7 +872,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "His
 	dialect "mvel"
 	salience 10
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty == false) 
+		$td : TargetDose(status == DoseStatus.EVALUATION_COMPLETE, invalidReasons.empty, notEvaluatedReasons.empty == false, $ts : associatedTargetSeries) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -880,6 +881,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated" ruleflow-group "His
 			addDoseRuleProcessed(_RULENAME);
 		}
 		// setStatus() above also sets hasBeenEvaluated to true
+		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 		setFocus("HistoryEvaluation^postEvaluationCheck");
 end
@@ -1363,7 +1365,7 @@ end
 // selected to the one that was completed the soonest.
 ///////// ***
 rule "SeriesSelection: Select already _completed_ series with earliest completion date if exists and a different, _completed_ series was previously selected" ruleflow-group "SeriesSelection"
-	dialect "mvel"
+	dialect "java"
 	salience 60
 	activation-group "SeriesSelectionFewestDoses"
 	when
@@ -1376,10 +1378,10 @@ rule "SeriesSelection: Select already _completed_ series with earliest completio
 			($lastNecessaryShotAdministered1 != null && $lastNecessaryShotAdministered2 != null && $lastNecessaryShotAdministered2.getAdministrationDate() != null && 
 				$lastNecessaryShotAdministered2.getAdministrationDate().before($lastNecessaryShotAdministered1.getAdministrationDate()))))
 	then
-		String _RULENAME = kcontext.rule.name;
+		String _RULENAME = drools.getRule().getName();
 		$ts1.setSelectedSeries(false);
 		$ts2.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts2.seriesName);
+		$tss.setSelectedSeriesName($ts2.getSeriesName());
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Retracted for Already Complete Series: " + $ts2);
 		update($ts1);

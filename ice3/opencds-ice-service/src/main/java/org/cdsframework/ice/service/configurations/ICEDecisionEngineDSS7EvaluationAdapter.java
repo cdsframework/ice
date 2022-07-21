@@ -53,6 +53,7 @@ import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
 import org.cdsframework.ice.util.FileNameWithExtensionFilterImpl;
+import org.cdsframework.ice.util.ICEVersionUtil;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
@@ -91,19 +92,19 @@ import org.opencds.plugin.PluginContext.PreProcessPluginContext;
 
 /**
  * DroolsAdapter.java
- * 
+ *
  * Adapter to use Drools to process the evaluate operation of the DSS web
  * service: This class is designed to use data input in standard Java classes,
  * to facilitate its use from various settings. Mapping of the input data to the
  * internal Java classes is done by input mappers and output mappers, with a set
  * each for every external data format to be processed.
- * 
- * 
+ *
+ *
  * Simply stated, input messages contain a list of rules (Knowledge Modules, or
  * KMs) to run, and structured data to run against those KMs. The submitted data
  * can be in any structure for which there is a mapper. Currently, OpenCDS
  * supports the HL7 balloted VMR structure.
- * 
+ *
  * Additional structures for the submitted data may be developed, possibly
  * including the CDA / CCD schema structure
  */
@@ -115,7 +116,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private Boolean doseOverrideFeatureEnabled = null;
 	private Boolean outputSupplementalText = null;
 	private Boolean outputRuleName = null;
-	
+
 	private static final Logger logger = LogManager.getLogger();
 
 	private static final String EVAL_TIME = "evalTime";
@@ -124,11 +125,12 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private static final String FOCAL_PERSON_ID = "focalPersonId";
 	private static final String ASSERTIONS = "assertions";
 	private static final String NAMED_OBJECTS = "namedObjects";
+	private static final String ICE_VERSION = "iceVersion";
 	private static final Set<String> ALL_GLOBALS = new HashSet<>(Arrays.asList(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID, ASSERTIONS, NAMED_OBJECTS));
 	private static final Set<String> FILTERED_GLOBALS = new HashSet<>(Arrays.asList(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID));
 	/////// private static final String ALL_FACT_LISTS = "allFactLists";
 
-	
+
 	/*
 	 * Orig:
     private static Map<String, org.opencds.plugin.SupportingData> getSupportingData(KnowledgeRepository knowledgeRepository, KnowledgeModule knowledgeModule) {
@@ -144,12 +146,12 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
         return supportingData;
     }
     */
-    
-    private static Map<String, org.opencds.plugin.SupportingData> getSupportingData(KnowledgeRepository knowledgeRepository, KnowledgeModule knowledgeModule, 
+
+    private static Map<String, org.opencds.plugin.SupportingData> getSupportingData(KnowledgeRepository knowledgeRepository, KnowledgeModule knowledgeModule,
     		boolean getRawData) {
-    	
+
     	String _METHODNAME = "getSupportingData(): ";
-    	
+
         List<SupportingData> supportingDataList = filterByKM(knowledgeModule.getKMId(), knowledgeRepository.getSupportingDataService().getAll());
         Map<String, org.opencds.plugin.SupportingData> supportingDataListWithoutRawData = new LinkedHashMap<>();
         for (SupportingData sd : supportingDataList) {
@@ -161,17 +163,17 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
             	data = knowledgeRepository.getSupportingDataPackageService().getPackageBytes(sd);
             }
             else {
-            	
+
             }
             org.opencds.plugin.SupportingData lSD = org.opencds.plugin.SupportingData.create(sd.getIdentifier(), EntityIdentifierUtil.makeEIString(sd.getKMId()),
                     EntityIdentifierUtil.makeEIString(sd.getLoadedBy()), sd.getPackageId(), sd.getPackageType(), data);
             supportingDataListWithoutRawData.put(sd.getIdentifier(), lSD);
         }
-        
+
         return supportingDataListWithoutRawData;
     }
-    
-    
+
+
     /**
      * Inclusion filter by SupportingData by KMId, or SDs that have no associated KMId.
      */
@@ -184,14 +186,14 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
         }
         return sdList;
     }
-    
+
 
 	/**
 	 * big picture pseudo code for following method:
-	 * 
+	 *
 	 * for this requestedKmId { getResponse: create Drools session load KM into session load globals into session load data from allFactLists into
 	 * session KBase.execute (calls Drools) unload result from KM to outputString }
-	 * 
+	 *
 	 * This means that we are considering the OMG-CDSS concept of KnowledgeModule equivalent to the Drools concept of KnowledgeBase.
 	 */
 	@Override
@@ -200,12 +202,12 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			UnrecognizedScopedEntityExceptionFault, UnrecognizedLanguageExceptionFault, UnsupportedLanguageExceptionFault, DSSRuntimeExceptionFault {
 
 		String _METHODNAME = "getOneResponse(): ";
-		
+
 		long t0 = 0L;
 		if (logger.isInfoEnabled()) {
 			t0 = System.nanoTime();
 		}
-		
+
 		String requestedKmId = evaluationRequestKMItem.getRequestedKmId();
         KnowledgeModule knowledgeModule = knowledgeRepository.getKnowledgeModuleService().find(requestedKmId);
         Map<String, org.opencds.plugin.SupportingData> supportingData = getSupportingData(knowledgeRepository, knowledgeModule, false);
@@ -217,15 +219,16 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		String clientLanguage = evalRequestDataItem.getClientLanguage();
 		String clientTimeZoneOffset = evalRequestDataItem.getClientTimeZoneOffset();
 		String interactionId = evalRequestDataItem.getInteractionId();
+		String iceVersion = ICEVersionUtil.getIceVersion();
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("II: " + interactionId + " KMId: " + requestedKmId + " (" + knowledgeModule.getKMId() + ")" + ", SSId: " + evalRequestDataItem.getExternalFactModelSSId() + 
+			logger.debug("II: " + interactionId + " KMId: " + requestedKmId + " (" + knowledgeModule.getKMId() + ")" + ", SSId: " + evalRequestDataItem.getExternalFactModelSSId() +
 					", evalTime: " + evalTime + ", clTimeZone: " + clientTimeZoneOffset + ", clLang: " + clientLanguage);
 		}
 
 		/**
 		 * Load fact map from specific externalFactModels, as specified in externalFactModel SSId...
-		 * 
+		 *
 		 * Every separately identified SSId, by definition, specifies separate input and output mappings. Input mappings are used here, and then
 		 * output mappings are used following the session.execute.
 		 */
@@ -239,7 +242,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		}
 
 		/**
-		 * Get the KMs and Load them into a stateless session. Currently, assumption is made that each requested knowledge module will be run separately 
+		 * Get the KMs and Load them into a stateless session. Currently, assumption is made that each requested knowledge module will be run separately
 		 * (i.e., as part of a separate distinct knowledge base)
 		 */
 
@@ -257,7 +260,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		/*
 		 * ==================================================================
 		 * Plugin application here?
-		 * 
+		 *
 		 * Plugins should be able to access/update allFactLists, namedObjects (below), and to add globals to the execution context.
 		 * Access to cdsResources from CDSInput (available in the factLists (see CdsInputFactListsBuilder)
 		 * -- Should have access to a cache region to insert data that are persistent across sessions (no lazy loading)
@@ -278,18 +281,18 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 						logger.debug("applying preprocess plugin: " + pluginId.toString());
 					}
 					OpencdsPlugin<PreProcessPluginContext> opencdsPlugin = knowledgeRepository.getPluginPackageService().load(pluginId);
-					PreProcessPluginContext preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData, 
+					PreProcessPluginContext preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData,
 							knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
 
 					/*
-					// Refactor in upgrade to OpenCDS 2.1 or above... (Cheating here by calling ICEPlugin implementation directly :( ) 
+					// Refactor in upgrade to OpenCDS 2.1 or above... (Cheating here by calling ICEPlugin implementation directly :( )
 					// If the supporting data content has not been loaded into the cache, read the raw data from the file so that it can be loaded
 					if (! ICESupportingDataLoaderPlugin.supportingDataAlreadyLoadedInContext(preContext)) {
 						if (logger.isDebugEnabled()) {
 							logger.debug(_METHODNAME + "preprocess plugin: supporting data content not loaded into context: content to be loaded now");
 						}
 						supportingData = getSupportingData(knowledgeRepository, knowledgeModule, true);
-						preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData, 
+						preContext = PluginContext.createPreProcessPluginContext(allFactLists, namedObjects, globals, supportingData,
 							knowledgeRepository.getPluginDataCacheService().getPluginDataCache(pluginId));
 					}
 					else {
@@ -311,9 +314,9 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Plugin processing done.");
 		}
-		
+
 		if (lSchedule == null) {
-			// Immunization schedule not loaded 
+			// Immunization schedule not loaded
 			String lErrStr = "Immunization schedule not loaded; something went wrong. Incorrect configuration or requested knowledge module ID likely: " + requestedKmId;
 			logger.error(_METHODNAME + lErrStr);
 			throw new ICECoreError(lErrStr);
@@ -335,6 +338,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		cmds.add(CommandFactory.newSetGlobal(EVAL_TIME, evalTime));
 		cmds.add(CommandFactory.newSetGlobal(CLIENT_LANG, clientLanguage));
 		cmds.add(CommandFactory.newSetGlobal(CLIENT_TZ_OFFSET, clientTimeZoneOffset));
+		cmds.add(CommandFactory.newSetGlobal(ICE_VERSION, iceVersion));
 
 		// following global used to store flags for inter-task communication in a JBPM Process
 		cmds.add(CommandFactory.newSetGlobal(ASSERTIONS, assertions));
@@ -344,13 +348,13 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		cmds.add(CommandFactory.newSetGlobal(NAMED_OBJECTS, namedObjects));
 
 		if (requestedKmId == null || requestedKmId.length() == 0) {
-			// This shouldn't happen 
+			// This shouldn't happen
 			String lErrStr = "knowledge module ID not supplied to drools adapter cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("patientAgeTimeOfInterest", null));
-		
+
 		// Initialize the schedule
 		if (this.baseRulesScopingKmId == null || this.baseRulesScopingKmId.isEmpty()) {
 			String lErrStr = "An error occurred: knowledge module not properly initialized: base rules Scoping Km Id not set; cannot continue";
@@ -361,28 +365,28 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		if (lSchedule == null || lSchedule.isScheduleInitialized() == false) {
 			String lErrStr = "Schedule has not been fully initialized; something went wrong; cannot process request";
 			logger.error(_METHODNAME + lErrStr);
-			throw new RuntimeException(lErrStr);			
+			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("schedule", lSchedule));
-		
+
 		if (outputEarliestOverdueDates == null) {
 			String lErrStr = "An error occurred: knowledge module not properly initialized: output earliest/overdue flag not set; this should not happen. Cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("outputEarliestOverdueDates", outputEarliestOverdueDates));
-		
+
 		if (doseOverrideFeatureEnabled == null) {
 			String lErrStr = "An error occurred: knowledge module not properly initialized: dose override flag not set; this should not happen. Cannot continue";
 			logger.error(_METHODNAME + lErrStr);
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("doseOverrideFeatureEnabled", doseOverrideFeatureEnabled));
-		
+
 		if (outputSupplementalText == null) {
 			String lErrStr = "An error occurred: knowledge module not properly initialized: output supplemental text flag not set; this should not happen. Cannot continue";
 			logger.error(_METHODNAME + lErrStr);
-			throw new RuntimeException(lErrStr);			
+			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("outputSupplementalText", outputSupplementalText));
 
@@ -483,14 +487,14 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			}
 			results = knowledgeSession.execute(CommandFactory.newBatchExecution((cmds)));
 			/////// knowledgeSession.fireAllRules();
-			
+
 			if (logger.isInfoEnabled()) {
 				logger.info(_METHODNAME + "Drools Execution Duration: " + (System.nanoTime() - d0) / 1e6 + " ms");
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("KM (Drools) execution done.");
 			}
-		} 
+		}
 		catch (Exception e) {
 			String err = "OpenCDS call to Drools.execute failed with error: " + e.getMessage();
 			logger.error(err, e);
@@ -511,7 +515,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		/**
 		 ********************************************************************************
 		 * END Drools
-		 * 
+		 *
 		 */
 
 		// update original entries from allFactLists to capture any new or updated elements
@@ -553,7 +557,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		 * Retrieve the Results for this requested KM and stack them in the DSS
 		 * fkmResponse NOTE: Each additional requested KM will have a separate
 		 * output payload
-		 * 
+		 *
 		 * For now (ICE): not executing post-process plugins
         List<PluginId> allPostProcessPluginIds = knowledgeModule.getPostProcessPluginIds();
         if (allPostProcessPluginIds != null) {
@@ -619,7 +623,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 
 		ICEPropertiesDataConfiguration iceconfig = new ICEPropertiesDataConfiguration();
 		Properties lProps = iceconfig.getProperties();
-		
+
 		/////// Get the ICE knowledge repository directory location
 		String baseConfigurationLocation = lProps.getProperty("ice_knowledge_repository_location");
 		if (baseConfigurationLocation == null) {
@@ -636,7 +640,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 
 		////////////////////////////////////////////////////////////////////////////////////
 		// START - Get the ICE knowledge modules subdirectory location
-		////////////////////////////////////////////////////////////////////////////////////		
+		////////////////////////////////////////////////////////////////////////////////////
 		String knowledgeModulesSubDirectory = lProps.getProperty("ice_knowledge_modules_subdirectory");
 		if (knowledgeModulesSubDirectory == null) {
 			String lErrStr = "ICE knowledge modules subdirectory location not specified in properties file";
@@ -649,11 +653,11 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 				logger.info(lInfoStr);
 			}
 		}
-		
+
 		////////////////////////////////////////////////////////////////////////////////////
 		// Determine Knowledge Modules Directory Location
 		////////////////////////////////////////////////////////////////////////////////////
-		File lKnowledgeModulesDirectory = new File(new File(baseConfigurationLocation, knowledgeModulesSubDirectory), 
+		File lKnowledgeModulesDirectory = new File(new File(baseConfigurationLocation, knowledgeModulesSubDirectory),
 				KnowledgeModuleUtils.returnPackageNameForKnowledgeModule(lKMId.getScopingEntityId(), lKMId.getBusinessId(), lKMId.getVersion()));
 		if (! lKnowledgeModulesDirectory.exists()) {
 			String lErrStr = "Requested ICE knowledge module does not exist: " + lKnowledgeModulesDirectory.getAbsolutePath() + " for knowledge module " + lRequestedKmId;
@@ -665,7 +669,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		}
 		////////////////////////////////////////////////////////////////////////////////////
 		// END - Get the ICE knowledge modules subdirectory location
-		////////////////////////////////////////////////////////////////////////////////////		
+		////////////////////////////////////////////////////////////////////////////////////
 
 		////////////////////////////////////////////////////////////////////////////////////
 		// START - Get the ICE Common rules subdirectory location
@@ -681,9 +685,9 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 				String lInfoStr = "ICE common knowledge data location specified in properties file: " + knowledgeCommonSubDirectory;
 				logger.info(lInfoStr);
 			}
-		}		
-		String lBaseRulesScopingKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceconfig.getBaseRulesScopingEntityId(), lKMId.getBusinessId(), iceconfig.getBaseRulesVersion());		
-		File lKnowledgeCommonDirectory = new File(new File(baseConfigurationLocation, knowledgeCommonSubDirectory), 
+		}
+		String lBaseRulesScopingKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceconfig.getBaseRulesScopingEntityId(), lKMId.getBusinessId(), iceconfig.getBaseRulesVersion());
+		File lKnowledgeCommonDirectory = new File(new File(baseConfigurationLocation, knowledgeCommonSubDirectory),
 				KnowledgeModuleUtils.returnPackageNameForKnowledgeModule(iceconfig.getBaseRulesScopingEntityId(), lKMId.getBusinessId(), iceconfig.getBaseRulesVersion()));
 		if (! lKnowledgeCommonDirectory.exists()) {
 			String lErrStr = "Base ICE knowledge module does not exist" + lKnowledgeCommonDirectory.getAbsolutePath() + "for common logic: " + lBaseRulesScopingKmId;;
@@ -695,8 +699,8 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		}
 		////////////////////////////////////////////////////////////////////////////////////
 		// END - Get the ICE Common rules subdirectory location
-		////////////////////////////////////////////////////////////////////////////////////		
-		
+		////////////////////////////////////////////////////////////////////////////////////
+
 		///////
 		// Load knowledge from pkg file?
 		String loadRulesFromPkgFile = lProps.getProperty("load_knowledge_from_pkg_file");
@@ -711,7 +715,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			String lInfoStr = "ICE rules will be _not_ be loaded from pkg file, as per properties file setting";
 			logger.info(_METHODNAME + lInfoStr);
 		}
-				
+
 		// Output earliest and overdue dates for each series recommendation?
 		String lOutputEarliestOverdueDates = lProps.getProperty("output_earliest_and_overdue_dates");
 		if (lOutputEarliestOverdueDates != null && lOutputEarliestOverdueDates.equals("Y")) {
@@ -723,7 +727,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		if (logger.isInfoEnabled()) {
 			logger.info(_METHODNAME + "output_earliest_and_overdue_dates set to " + outputEarliestOverdueDates);
 		}
-		
+
 		// Permit Dose Override by client?
 		String lEnableDoseOverrideFeature = lProps.getProperty("enable_dose_override_feature");
 		if (lEnableDoseOverrideFeature != null && lEnableDoseOverrideFeature.equals("Y")) {
@@ -735,7 +739,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		if (logger.isInfoEnabled()) {
 			logger.info(_METHODNAME + "enable_dose_override_feature set to " + doseOverrideFeatureEnabled);
 		}
-		
+
 		// Output Supplemental Text, when available?
 		String lOutputSupplementalText = lProps.getProperty("output_supplemental_text");
 		if (lOutputSupplementalText != null && lOutputSupplementalText.equals("Y")) {
@@ -759,7 +763,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		if (logger.isInfoEnabled()) {
 			logger.info(_METHODNAME + "output_rule_name set to " + outputRuleName);
 		}
-		
+
 		/////// Set up knowledge base
 		KieServices kieServices = KieServices.Factory.get();
 		KieBase kieBase = null;
@@ -798,7 +802,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			}
 
 			logger.info(_METHODNAME + "Loading knowledge base BPMN, DSL, DRL and DSLR rules");
-			KieFileSystem kfs = kieServices.newKieFileSystem();			
+			KieFileSystem kfs = kieServices.newKieFileSystem();
 			// BPMN file
 			if (bpmnFile != null) {
 				Resource bpmnResource = kieServices.getResources().newFileSystemResource(bpmnFile);
@@ -883,7 +887,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 					lErrStr += "\n(" + i + "): " + lMessage.getLevel().toString() + " " + lMessage.getText();
 				}
 				throw new RuntimeException(lErrStr);
-			}	
+			}
 			//////////////////////////////////////////////////////////////////////
 			KieContainer kieContainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
 			kieBase = kieContainer.getKieBase();
@@ -903,11 +907,11 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 				throw new RuntimeException("Failed to write serialized pkg file", e);
 			}
 		}
-		
+
 		List<KieBase> knowledgeBases = new ArrayList<KieBase>(count);
 		for (int i = 0; i < count; i++)
 			knowledgeBases.add(kieBase);
-		
+
 		/////// knowledgePackageService.putPackage(knowledgeModule, kieBase);
 
 		this.baseRulesScopingKmId = lBaseRulesScopingKmId;
@@ -919,9 +923,9 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 
 
 	private static List<File> retrieveCollectionOfDSLRsToAddToKnowledgeBase(String pRequestedKmId, File pDSLRFileDirectory, List<File> pFilesToExcludeFromKB) {
-		
+
 		String _METHODNAME = "retrieveCollectionOfDSLRsToAddToKnowledgeBase(): ";
-		
+
 		if (pDSLRFileDirectory == null || pDSLRFileDirectory.exists() == false || pDSLRFileDirectory.isDirectory() == false) {
 			String lErrStr = "Knowledge module specific directory does not exist; cannot continue. Directory: " + pDSLRFileDirectory.getAbsolutePath();
 			logger.error(_METHODNAME + lErrStr);
@@ -971,9 +975,9 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 					}
 				}
 			}
-			
+
 		}
-		
+
 		return drlFilesToAddToKB;
 	}
 

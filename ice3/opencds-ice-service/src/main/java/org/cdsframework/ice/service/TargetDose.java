@@ -66,10 +66,12 @@ public class TargetDose {
 	private HashSet<String> notEvaluatedReasons;
 	private HashSet<String> doseRulesProcessed;
 	private HashSet<String> supplementalTextsForValidShots;
-	
+	private HashSet<String> supplementalTextsForAcceptedShots;
+	private HashSet<String> supplementalTextsForInvalidShots;
+
 	private static final Logger logger = LogManager.getLogger();
 
-	
+
 	/**
 	 * Initialize a TargetDose.
 	 * @param pDoseId
@@ -78,8 +80,8 @@ public class TargetDose {
 	 * @throws IllegalArgumentException if the Dose ID, vaccine or administration date is not populated
 	 */
 	public TargetDose(Vaccine pAdministeredVaccine, VaccineComponent pVaccineComponentToBeEvaluated, Date pAdministrationDate, TargetSeries pEncompassingTargetSeries,
-			SubstanceAdministrationEvent pAssociatedSAE) {	
-		
+			SubstanceAdministrationEvent pAssociatedSAE) {
+
 		if (pAdministeredVaccine == null || pVaccineComponentToBeEvaluated == null || pAdministrationDate == null || pEncompassingTargetSeries == null || pAssociatedSAE == null) {
 			logger.error("TargetDose(): Dose ID, Vaccine, Vaccine Component to be Evaluated, Administration Date not supplied, Associated SubstanceAdministrationEvent and/or Encompassing TargetSeries not supplied");
 			throw new IllegalArgumentException("TargetDose(): Dose ID, Vaccine Component to be Evaluated, Vaccine, Administration Date not supplied and/or Encompassing TargetSeries not supplied");
@@ -101,6 +103,8 @@ public class TargetDose {
 		notEvaluatedReasons = new HashSet<String>();
 		doseRulesProcessed = new HashSet<String>();
 		supplementalTextsForValidShots = new HashSet<String>();
+		supplementalTextsForAcceptedShots = new HashSet<String>();
+		supplementalTextsForInvalidShots = new HashSet<String>();
 		isPrimarySeriesShot = false;
 		isValid = false;
 		isShotIgnored = false;
@@ -117,17 +121,17 @@ public class TargetDose {
 			doseRulesProcessed.add(ruleName);
 		}
 	}
-	
+
 	public boolean containsRuleProcessed(String ruleName) {
-		
+
 		return doseRulesProcessed.contains(ruleName);
 	}
-	
+
 	public boolean containsInvalidReason(String openCdsConceptCode) {
-		
+
 		return invalidReasons.contains(openCdsConceptCode);
 	}
-	
+
 	public boolean containsAcceptedReason(String openCdsConceptCode) {
 
 		return acceptedReasons.contains(openCdsConceptCode);
@@ -137,19 +141,19 @@ public class TargetDose {
 
 		return validReasons.contains(openCdsConceptCode);
 	}
-	
+
 	public boolean containsNotEvaluatedReason(String openCdsConceptCode) {
 
 		return notEvaluatedReasons.contains(openCdsConceptCode);
 	}
-	
+
 	public boolean containsReason(String openCdsConceptCode) {
-		
+
 		return getAllEvaluationReasonsFromAllReasonSets().contains(openCdsConceptCode);
 	}
-	
+
 	public Collection<String> getAllEvaluationReasonsFromAllReasonSets() {
-	
+
 		List<String> allReasons = new ArrayList<String>();
 		allReasons.addAll(invalidReasons);
 		allReasons.addAll(acceptedReasons);
@@ -157,15 +161,15 @@ public class TargetDose {
 		allReasons.addAll(notEvaluatedReasons);
 		return allReasons;
 	}
-	
+
 	public void removeAllEvaluationReasonsFromAllReasonSets() {
 		validReasons = new HashSet<String>();
 		acceptedReasons = new HashSet<String>();
 		invalidReasons = new HashSet<String>();
 	}
-	
+
 	public void removeEvaluationReasonFromAllReasonSets(String openCdsConceptCode) {
-		
+
 		if (openCdsConceptCode != null) {
 			invalidReasons.remove(openCdsConceptCode);
 			acceptedReasons.remove(openCdsConceptCode);
@@ -173,40 +177,60 @@ public class TargetDose {
 			notEvaluatedReasons.remove(openCdsConceptCode);
 		}
 	}
-	
+
 	public void removeAllSupplementalTextsForValidShot() {
 		supplementalTextsForValidShots = new HashSet<String>();
 	}
-	
+
 	public void removeSupplementalTextForValidShot(String supplementalText) {
 		if (supplementalText != null) {
 			supplementalTextsForValidShots.remove(supplementalText);
 		}
 	}
 
+	public void removeAllSupplementalTextsForAcceptedShot() {
+		supplementalTextsForAcceptedShots = new HashSet<String>();
+	}
+
+	public void removeSupplementalTextForAcceptedShot(String supplementalText) {
+		if (supplementalText != null) {
+			supplementalTextsForAcceptedShots.remove(supplementalText);
+		}
+	}
+
+	public void removeAllSupplementalTextsForInvalidShot() {
+		supplementalTextsForInvalidShots = new HashSet<String>();
+	}
+
+	public void removeSupplementalTextForInvalidShot(String supplementalText) {
+		if (supplementalText != null) {
+			supplementalTextsForInvalidShots.remove(supplementalText);
+		}
+	}
+
 	public void removeValidReason(String openCdsConceptCode) {
-		
+
 		if (openCdsConceptCode != null) {
 			validReasons.remove(openCdsConceptCode);
 		}
 	}
-	
+
 	public void removeAcceptedReason(String openCdsConceptCode) {
-		
+
 		if (openCdsConceptCode != null) {
 			acceptedReasons.remove(openCdsConceptCode);
 		}
 	}
-	
+
 	public void removeInvalidReason(String openCdsConceptCode) {
-		
+
 		if (openCdsConceptCode != null) {
 			invalidReasons.remove(openCdsConceptCode);
 		}
 	}
 
 	public void removeNotEvaluatedReason(String openCdsConceptCode) {
-		
+
 		if (openCdsConceptCode != null) {
 			notEvaluatedReasons.remove(openCdsConceptCode);
 		}
@@ -217,12 +241,12 @@ public class TargetDose {
 	}
 
 	public TargetSeries getAssociatedTargetSeries() {
-		
+
 		return associatedTargetSeries;
 	}
-	
+
 	public TargetSeries getTargetSeries() {
-		
+
 		return associatedTargetSeries;
 	}
 
@@ -233,7 +257,7 @@ public class TargetDose {
 	public String getAssociatedSeriesName() {
 		return getAssociatedTargetSeries().getSeriesName();
 	}
-		
+
 	/**
 	 * Return ID of this TargetDose, which matches the ID of the associated SubstanceAdministrationEvent when this TargetDose was created
 	 */
@@ -250,7 +274,7 @@ public class TargetDose {
 	}
 
 	/**
-	 * Return administered shot number in series, which is ordered by increasing administration date relative to all other shots in the series, 
+	 * Return administered shot number in series, which is ordered by increasing administration date relative to all other shots in the series,
 	 * not whether it is valid or not
 	 * @return administered shot number in series, regardless of whether it is a valid shot or not.
 	 */
@@ -265,15 +289,15 @@ public class TargetDose {
 	public void setAdministeredShotNumberInSeries(int administeredShotNumber) {
 		this.administeredShotNumberInSeries = administeredShotNumber;
 	}
-	
+
 	/**
-	 * Returns the valid shot number in the series (relative to all other valid shots). 
+	 * Returns the valid shot number in the series (relative to all other valid shots).
 	 * @return valid dose number in series
 	 */
 	public int getDoseNumberInSeries() {
 		return doseNumberInSeries;
 	}
-	
+
 	/**
 	 * Likely to only be called by the TargetSeries that contains this administered dose
 	 * @param pDoseNumber
@@ -283,13 +307,13 @@ public class TargetDose {
 	}
 
 	/**
-	 * Returns the valid shot number in the series (relative to all other valid shots). 
+	 * Returns the valid shot number in the series (relative to all other valid shots).
 	 * @return valid dose number in series
 	 */
 	public int getDoseNumberCount() {
 		return doseNumberCount;
 	}
-	
+
 	/**
 	 * Likely to only be called by the TargetSeries that contains this administered dose
 	 * @param pDoseNumber
@@ -297,20 +321,20 @@ public class TargetDose {
 	public void setDoseNumberCount(int pDoseNumber) {
 		this.doseNumberCount = pDoseNumber;
 	}
-	
+
 	/**
 	 * Returns whether or not this shot is a part of the primary series
 	 */
 	public boolean isPrimarySeriesShot() {
 		return isPrimarySeriesShot;
 	}
-	
+
 	public void setIsPrimarySeriesShot(boolean yesno) {
 		isPrimarySeriesShot = yesno;
 	}
-	
+
 	/**
-	 * Returns whether this is a valid dose or not. 
+	 * Returns whether this is a valid dose or not.
 	 * @return true of the DoseStatus is either DoseStatus.VALID, false if not
 	 */
 	public boolean getIsValid() {
@@ -344,39 +368,39 @@ public class TargetDose {
 	public boolean isPreEvaluationCheckCompleted() {
 		return preEvaluationCheckCompleted;
 	}
-	
+
 	public void setPreEvaluationCheckCompleted(boolean truefalse) {
 		this.preEvaluationCheckCompleted = truefalse;
 	}
-	
+
 	public boolean isPostEvaluationCheckCompleted() {
 		return postEvaluationCheckCompleted;
 	}
-	
+
 	public void setPostEvaluationCheckCompleted(boolean truefalse) {
 		this.postEvaluationCheckCompleted = truefalse;
 	}
-	
+
 	public boolean isDuplicateShotSameDayEvaluationOrderCompleted() {
 		return duplicateShotSameDayEvaluationOrderCompleted;
 	}
-	
+
 	public void setDuplicateShotSameDayEvaluationOrderCompleted(boolean truefalse) {
 		this.duplicateShotSameDayEvaluationOrderCompleted = truefalse;
 	}
-	
+
 	public boolean isDuplicateShotSameDayCheckCompleted() {
 		return duplicateShotSameDayCheckCompleted;
 	}
-	
+
 	public void setDuplicateShotSameDayCheckCompleted(boolean truefalse) {
 		this.duplicateShotSameDayCheckCompleted = truefalse;
 	}
-	
+
 	public boolean isDoseStatusOverridden() {
 		return this.doseStatusOverridden;
 	}
-	
+
 	public void setDoseStatusOverridden(boolean truefalse) {
 		this.doseStatusOverridden = truefalse;
 	}
@@ -384,7 +408,7 @@ public class TargetDose {
 	public Vaccine getAdministeredVaccine() {
 		return administeredVaccine;
 	}
-	
+
 	public VaccineComponent getVaccineComponent() {
 		return vaccineComponent;
 	}
@@ -392,7 +416,7 @@ public class TargetDose {
 	public void setVaccineComponent(VaccineComponent vaccine) {
 		this.vaccineComponent = vaccine;
 	}
-	
+
 	public DoseStatus getStatus() {
 		return status;
 	}
@@ -401,7 +425,7 @@ public class TargetDose {
 
 		this.status = status;
 		setHasBeenEvaluated(false);
-		
+
 		if (status != null) {
 			if (status == DoseStatus.ACCEPTED || status == DoseStatus.INVALID || status == DoseStatus.VALID)
 				setHasBeenEvaluated(true);
@@ -431,7 +455,7 @@ public class TargetDose {
 	 * @param administrationDate The administration date of the shot
 	 */
 	public void setAdministrationDate(Date administrationDate) {
-		
+
 		String _METHODNAME = "setAdministrationDate(): ";
 		if (administrationDate == null) {
 			String errStr = "Administration Date not supplied";
@@ -444,7 +468,7 @@ public class TargetDose {
 	public Collection<String> getValidReasons() {
 		return validReasons;
 	}
-	
+
 	/**
 	 * Adds the valid reason, if not already present
 	 * @param reason null reasons are permitted
@@ -457,13 +481,13 @@ public class TargetDose {
 	public Collection<String> getAcceptedReasons() {
 		return acceptedReasons;
 	}
-	
+
 	/**
 	 * Adds the accepted reason, if not already present
 	 * @param reason
 	 */
 	public void addAcceptedReason(String reason) {
-		
+
 		if (reason != null && ! acceptedReasons.contains(reason))
 			acceptedReasons.add(reason);
 	}
@@ -471,7 +495,7 @@ public class TargetDose {
 	public Collection<String> getInvalidReasons() {
 		return invalidReasons;
 	}
-	
+
 	/**
 	 * Adds the invalid reason, if not already present
 	 * @param reason
@@ -484,7 +508,7 @@ public class TargetDose {
 	public Collection<String> getNotEvaluatedReasons() {
 		return notEvaluatedReasons;
 	}
-	
+
 	/**
 	 * Adds the invalid reason, if not already present
 	 * @param reason
@@ -493,7 +517,7 @@ public class TargetDose {
 		if (reason != null && ! notEvaluatedReasons.contains(reason))
 			notEvaluatedReasons.add(reason);
 	}
-	
+
 	/**
 	 * Add the supplemental text, if not already present
 	 */
@@ -502,11 +526,31 @@ public class TargetDose {
 			supplementalTextsForValidShots.add(supplementalTextForValidShots);
 		}
 	}
-	
+
 	public Collection<String> getSupplementalTextsForValidShot() {
 		return supplementalTextsForValidShots;
 	}
-	
+
+	public void addSupplementalTextForAcceptedShot(String supplementalTextForAcceptedShots) {
+		if (supplementalTextForAcceptedShots != null && ! supplementalTextsForAcceptedShots.contains(supplementalTextForAcceptedShots)) {
+			supplementalTextsForAcceptedShots.add(supplementalTextForAcceptedShots);
+		}
+	}
+
+	public Collection<String> getSupplementalTextsForAcceptedShot() {
+		return supplementalTextsForAcceptedShots;
+	}
+
+	public void addSupplementalTextForInvalidShot(String supplementalTextForInvalidShots) {
+		if (supplementalTextForInvalidShots != null && ! supplementalTextsForInvalidShots.contains(supplementalTextForInvalidShots)) {
+			supplementalTextsForInvalidShots.add(supplementalTextForInvalidShots);
+		}
+	}
+
+	public Collection<String> getSupplementalTextsForInvalidShot() {
+		return supplementalTextsForInvalidShots;
+	}
+
 	@Override
 	public String toString() {
 		
@@ -573,7 +617,7 @@ public class TargetDose {
 			s += "}";
 		}
 		s+= "]";
-		
+
 		return s;
 	}
 
