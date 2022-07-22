@@ -10,6 +10,7 @@
 	<artifactId>opencds-ice-service</artifactId>
 	<packaging>jar</packaging>
 	<name>Immunization Calculation Engine</name>
+	<version>1.35.2.0</version>
 	<description>ICE Implementation of DSS Evaluation Operation using Drools 7</description>
 	
 	<build>
@@ -62,7 +63,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<revision>1.35.2.0</revision>
+
 	</properties>
 
 	<distributionManagement>
@@ -110,12 +111,12 @@
 		<dependency>
 			<groupId>org.opencds</groupId>
 			<artifactId>dss-java-stub</artifactId>
-			<version>${project.version}</version>
+			<version>${parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opencds</groupId>
 			<artifactId>opencds-dss-evaluation</artifactId>
-			<version>${project.version}</version>
+			<version>${parent.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.servlet</groupId>
@@ -126,22 +127,22 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>opencds-common</artifactId>
-			<version>${project.version}</version>
+			<version>${parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>opencds-vmr-1_0-internal</artifactId>
-			<version>${project.version}</version>
+			<version>${parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>opencds-vmr-1_0-schema</artifactId>
-			<version>${project.version}</version>
+			<version>${parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>opencds-vmr-1_0-mappings</artifactId>
-			<version>${project.version}</version>
+			<version>${parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.cdsframework</groupId>
@@ -156,12 +157,12 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>opencds-config-api</artifactId>
-			<version>${project.version}</version>
+			<version>${parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>opencds-plugin-api</artifactId>
-			<version>${project.version}</version>
+			<version>${parent.version}</version>
 		</dependency>
 		<!--  ***Drools 7 artifacts START*** -->
 		<dependency>

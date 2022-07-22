@@ -26,7 +26,7 @@ build-ice:
 upload-ice-repo:
   image: maven:3-jdk-8-slim
   stage: upload
-  script: "mvn -f ice3/opencds-ice-service/pom.xml deploy -DskipTests -Drevision=1.35.2.0 -B -Dmaven.wagon.http.ssl.insecure=true"
+  script: "mvn -f ice3/opencds-ice-service/pom.xml deploy -DskipTests -B -Dmaven.wagon.http.ssl.insecure=true"
   only:
     - deployment
     - tags
