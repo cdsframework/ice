@@ -787,7 +787,7 @@ end
 // Logic currently incorporates Moderna, Pfizer, Janssen and WHO-approved vaccine series.
 //////////////
 
-rule "SeriesSelection(COVID-19): Select the Pfizer Series by default if no valid NOS shots on record"
+rule "SeriesSelection(COVID-19): Select the Mixed Series by default if no valid NOS shots on record"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	when
@@ -795,7 +795,7 @@ rule "SeriesSelection(COVID-19): Select the Pfizer Series by default if no valid
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries"),
 			vaccineComponent.isUnspecifiedFormulation() == false) 
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries")
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19MixedProductSeries")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -810,11 +810,12 @@ end
 rule "SeriesSelection(COVID-19): If the Mixed Product Series was selected but all (Valid) doses are a Pfizer vaccine, select the Pfizer Series instead"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
 		$tsmixed : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, seriesRules.seriesName == "COVID19MixedProductSeries")
 		not TargetDose(associatedTargetSeries == $tsmixed, isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219"))
-		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries")
+		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries",  seriesComplete == true || $tsmixed.seriesComplete == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		$tsmixed.setSelectedSeries(false);
@@ -832,11 +833,12 @@ end
 rule "SeriesSelection(COVID-19): If the Mixed Product Series was selected but all (Valid) doses are a Moderna vaccine, select the Moderna Series instead"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	no-loop true
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
 		$tsmixed : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, seriesRules.seriesName == "COVID19MixedProductSeries")
 		not TargetDose(associatedTargetSeries == $tsmixed, isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228"))
-		$tsmoderna : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries")
+		$tsmoderna : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries", seriesComplete == true || $tsmixed.seriesComplete == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		$tsmixed.setSelectedSeries(false);
@@ -902,7 +904,7 @@ end
 rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were all administered doses a Moderna or Pfizer vaccine (i.e.- neither Moderna nor Pfizer series were selected), but (Valid) doses exist in the Mixed Product Series, then select the Mixed Product Series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 30
+	salience 28
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
@@ -970,6 +972,8 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine,
 end
 
 
+// Select the Janssen series if it has the earliest (Valid) dose administered to it. Mark the series for post-processing so that series selection catch-all rules will be activated; in the case that the Janssen vaccine
+// was administered after a Pfizer, Moderna or non-FDA series and the Pfizer/Moderna/non-FDA series is not complete, the catch all selection rule that examines for earliest completed series will override this rule.
 rule "SeriesSelection(COVID-19): If the first dose administered is the Janssen vaccine, then the Janssen Series applies"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
@@ -1531,7 +1535,7 @@ end
 
 
 rule "SeriesSelection.SelectHibOMPSeriesIfFirstDoseHibOMPBefore7MonthsAndOnlyOneValidDoseTotal"
-	dialect "mvel"
+	dialect "java"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 200
 	activation-group "HibSeriesSelectionCheck"
@@ -1542,12 +1546,11 @@ rule "SeriesSelection.SelectHibOMPSeriesIfFirstDoseHibOMPBefore7MonthsAndOnlyOne
 		$td : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate, vaccineComponent.cdsConceptName == "ICE49", $td1UniqueId : uniqueId)
 		$ts: TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", $sn : seriesRules.seriesName == "HibOMPSeries", selectedSeries == false, 
 			containsTargetDose($td), $effectiveDoses : determineEffectiveNumberOfDosesInSeries, numberOfShotsAdministeredInSeries == 1)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesRules.seriesName != $sn, 
-			getValidShotByDoseNumber(1) != null && getValidShotByDoseNumber(1).getAdministrationDate() < $administrationDate)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesRules.seriesName != $sn, $validShotByDoseNumber : getValidShotByDoseNumber(1), $validShotByDoseNumber != null, $validShotByDoseNumber.getAdministrationDate() < $administrationDate)
 		$person : EvaluatedPerson($birthDate : demographics.birthTime)
 		eval($effectiveDoses == 1 && TimePeriod.calculateElapsedTimePeriod($birthDate, $administrationDate, DurationType.MONTHS).isLessThan(new TimePeriod(7, DurationType.MONTHS)))
 	then
-		String _RULENAME = kcontext.rule.name;
+		String _RULENAME = drools.getRule().getName();
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts.getSeriesName());
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.getSeriesName());
@@ -1556,7 +1559,7 @@ end
 
 
 rule "SeriesSelection.SelectHibOMPSeriesIfTwoDosesHibOMPOneBefore7MonthsOtherBefore12Months"
-	dialect "mvel"
+	dialect "java"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 300
 	activation-group "HibSeriesSelectionCheck"
@@ -1566,18 +1569,16 @@ rule "SeriesSelection.SelectHibOMPSeriesIfTwoDosesHibOMPOneBefore7MonthsOtherBef
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", selectedSeries == true)
 		$td1 : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate1 : administrationDate, vaccineComponent.cdsConceptName == "ICE49")
 		$td2 : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate2 : administrationDate, vaccineComponent.cdsConceptName == "ICE49", $td2UniqueId : uniqueId)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", $sn : seriesRules.seriesName == "HibOMPSeries",	selectedSeries == false, 
-			containsTargetDose($td1), containsTargetDose($td2))
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesRules.seriesName != $sn, 
-			getValidShotByDoseNumber(2) != null && getValidShotByDoseNumber(2).getAdministrationDate() < $administrationDate2)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", $sn : seriesRules.seriesName == "HibOMPSeries",	selectedSeries == false, containsTargetDose($td1), containsTargetDose($td2))
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesRules.seriesName != $sn, $validShotByDoseNumber : getValidShotByDoseNumber(2), $validShotByDoseNumber != null, $validShotByDoseNumber.getAdministrationDate() < $administrationDate2)
 		$person : EvaluatedPerson($birthDate : demographics.birthTime)
 		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, $administrationDate1, DurationType.MONTHS).isLessThan(new TimePeriod(7, DurationType.MONTHS)) && 
 			TimePeriod.calculateElapsedTimePeriod($birthDate, $administrationDate2, DurationType.MONTHS).isLessThan(new TimePeriod(12, DurationType.MONTHS)))
 	then
-		String _RULENAME = kcontext.rule.name;
+		String _RULENAME = drools.getRule().getName();
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSelectedSeriesName($ts.getSeriesName());
 		update($ts);	
 end
 
@@ -1625,7 +1626,7 @@ end
 ///////////////////////////////////////////////////////////// Hep B-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
 rule "SeriesSelection: Select already completed series that was completed on the same date and with the most doses if different completed series was previously selected"
-	dialect "mvel"
+	dialect "java"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", $ssvg : seriesSelectionVaccineGroup,
@@ -1637,10 +1638,10 @@ rule "SeriesSelection: Select already completed series that was completed on the
 		eval($seriesComplete1 == true && $seriesComplete2 == true && $lastNecessaryShotAdministered1 != null && $lastNecessaryShotAdministered2 != null && 
 			TimePeriod.differenceInDays($lastNecessaryShotAdministered1.getAdministrationDate(), $lastNecessaryShotAdministered2.getAdministrationDate()) == 0)
 	then
-		String _RULENAME = kcontext.rule.name;
+		String _RULENAME = drools.getRule().getName();
 		$ts1.setSelectedSeries(false);
 		$ts2.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts2.seriesName);
+		$tss.setSelectedSeriesName($ts2.getSeriesName());
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($ts1);
 		update($ts2);

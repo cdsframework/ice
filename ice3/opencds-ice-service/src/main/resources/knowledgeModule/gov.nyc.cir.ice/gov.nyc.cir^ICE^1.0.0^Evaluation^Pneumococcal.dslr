@@ -234,7 +234,7 @@ end
 
 
 // Evaluate CVX 109 or CVX 152 as INVALID / VACCINE_NOT_ALLOWED along with supplemental text if administered in the Adult series.
-rule "Pneumococcal Adult: If CVX 109 or CVX 152 has been evaluated as INVALID / VACCINE_NOT_ALLOWED_FOR_THIS_DOSE in the Adult Series, add supplemental text"
+rule "Pneumococcal Adult: If CVX 109 or CVX 152 has been evaluated as INVALID / VACCINE_NOT_ALLOWED_FOR_THIS_DOSE in the Adult Series, remove all other reason codes and add supplemental text"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
