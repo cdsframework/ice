@@ -807,6 +807,32 @@ rule "SeriesSelection(COVID-19): Select the Mixed Series by default if no valid 
 end
 
 
+/////// ****
+// If a series was selected but another series was marked complete with fewer doses, select the series with fewer doses
+/////// ****
+rule "SeriesSelect(COVID-19): If a series was selected but another series was marked complete earlier, select the series that was complete earlier"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, isSeriesComplete() == true, $dcts1 : doseAfterWhichSeriesWasMarkedComplete)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == false, isSeriesComplete() == true, $dcts2: doseAfterWhichSeriesWasMarkedComplete)
+		$td1 : TargetDose(associatedTargetSeries == $ts1, isValid == true, doseNumberInSeries == $dcts1)
+		exists TargetDose(associatedTargetSeries == $ts2, doseNumberInSeries == $dcts2, isValid == true, administrationDate < $td1.administrationDate)  
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts1.setSelectedSeries(false);
+		$ts2.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2.seriesName);
+		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries " + $ts1 + " reverted ==> Newly selected series: " + $ts2);
+		update($tss);
+		update($ts1);
+		update($ts2);
+end
+
+
 rule "SeriesSelection(COVID-19): If the Mixed Product Series was selected but all (Valid) doses are a Pfizer vaccine, select the Pfizer Series instead"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
