@@ -663,7 +663,7 @@ rule "SeriesSelection.SelectOnlyZosterSeries"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.620-", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.620", selectedSeries == true))		
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", $tsid : targetSeriesIdentifier)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.620", $tsid : targetSeriesIdentifier)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -788,6 +788,22 @@ end
 //    + Orthopoxvirus 2-Dose Series
 ///////
 
+rule "SeriesSelection(Orthopoxvirus): If no other series was selected, the Orthopoxvirus 2-dose series applies"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesRules.seriesName == "Orthopoxvirus2DoseSeries")
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
 
 /////// ****
 // If a series was selected but another series was marked complete with fewer doses, select the series with fewer doses
@@ -795,6 +811,7 @@ end
 rule "SeriesSelect(Orthopoxvirus): If a series was selected but another series was marked complete earlier, select the series that was complete earlier"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true, isSeriesComplete() == true, $dcts1 : doseAfterWhichSeriesWasMarkedComplete)
@@ -821,6 +838,7 @@ end
 rule "SeriesSelection(Orthopoxvirus): Select already _completed_ series if a different, _incomplete_ series was previously selected"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true, isSeriesComplete() == false) 
@@ -842,6 +860,7 @@ end
 rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 1-dose series was administered and no other doses were administered in another series prior to this shot, the Orthopoxvirus 1-dose series applies"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)		
@@ -861,6 +880,7 @@ end
 rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 2-dose series was administered and no other doses were administered in another series on the same day or prior to this shot, the Orthopoxvirus 2-dose series applies"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)		
