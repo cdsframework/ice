@@ -97,6 +97,7 @@ global org.cdsframework.ice.service.Schedule schedule
 global java.lang.Boolean outputEarliestOverdueDates
 global java.lang.Boolean doseOverrideFeatureEnabled
 global java.lang.Boolean outputSupplementalText
+global java.util.List<String> vaccineGroupExclusions
 global java.lang.String iceVersion
 
 // global org.drools.runtime.KnowledgeContext kcontext
@@ -210,7 +211,7 @@ rule "InitializeSeriesAndSeasons: Load SeriesRules and TargetDoseInitializationT
 		not SeriesRules()
 	then
 		String _RULENAME = drools.getRule().getName();
-		List<SeriesRules> allCandidates = schedule.getCandidateSeries();
+		List<SeriesRules> allCandidates = schedule.getSeriesRulesExcludingVaccineGroupExclusions(vaccineGroupExclusions);
 		if (allCandidates != null) {
 			Iterator<SeriesRules> iter = allCandidates.iterator();
 			if (iter == null) {

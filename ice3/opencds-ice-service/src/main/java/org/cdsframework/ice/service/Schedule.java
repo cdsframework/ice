@@ -27,8 +27,10 @@
 package org.cdsframework.ice.service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
@@ -49,12 +51,12 @@ public class Schedule {
 	private String scheduleId;
 	private ICESupportingDataConfiguration iceSupportingDataConfiguration;
 	private boolean scheduleHasBeenInitialized;
-	
+
 	private static final Logger logger = LogManager.getLogger();
 
 
 	/**
-	 * Initialize the Immunization Schedule. Throws an ImproperUsageException if any data (including supporting data) is improperly specified. Throws an 
+	 * Initialize the Immunization Schedule. Throws an ImproperUsageException if any data (including supporting data) is improperly specified. Throws an
 	 * InconsistentConfigurationException if the supporting data is "inconsistent" in some manner
 	 * @param pScheduleId The ID of the schedule
 	 * @param pKnowledgeModules The CDS versions supported by this schedule
@@ -62,9 +64,9 @@ public class Schedule {
 	 * @throws ImproperUsageException
 	 * @throws InconsistentConfigurationException If supporting data is inconsistent
 	 */
-	public Schedule(String pScheduleId, String pCommonLogicModule, File pCommonLogicModuleLocation, List<String> pKnowledgeModules, File pKnowledgeRepositoryLocation) 
+	public Schedule(String pScheduleId, String pCommonLogicModule, File pCommonLogicModuleLocation, List<String> pKnowledgeModules, File pKnowledgeRepositoryLocation)
 		throws ImproperUsageException, InconsistentConfigurationException {
-		
+
 		String _METHODNAME = "ScheduleImpl(): ";
 
 		this.scheduleHasBeenInitialized = false;
@@ -86,7 +88,7 @@ public class Schedule {
 		this.scheduleHasBeenInitialized = true;
 	}
 
-	
+
 	/**
 	 * Get SupportedCdsConcepts associated with this schedule
 	 */
@@ -95,7 +97,7 @@ public class Schedule {
 		return this.iceSupportingDataConfiguration.getSupportedCdsConcepts();
 	}
 
-	
+
 	/**
 	 * Get SupportedCdsLists associated with this schedule
 	 */
@@ -108,7 +110,7 @@ public class Schedule {
 	 * Get SupportedVaccineGroups associated with this schedule
 	 */
 	public SupportedVaccineGroups getSupportedVaccineGroups() {
-		
+
 		return this.iceSupportingDataConfiguration.getSupportedVaccineGroups();
 	}
 
@@ -116,37 +118,37 @@ public class Schedule {
 	 * Get SupportedVaccines associated with this schedule
 	 */
 	public SupportedVaccines getSupportedVaccines() {
-		
+
 		return this.iceSupportingDataConfiguration.getSupportedVaccines();
 	}
-	
+
 	public boolean isScheduleInitialized() {
-		
+
 		return this.scheduleHasBeenInitialized;
 	}
-	
-	
+
+
 	public String getScheduleId() {
 		return scheduleId;
 	}
 
-	
+
 	public void setScheduleId(String scheduleName) {
 		this.scheduleId = scheduleName;
 	}
 
-	
+
 	public ICESupportingDataConfiguration getICESupportingDataConfiguration() {
-		
+
 		return this.iceSupportingDataConfiguration;
 	}
-	
+
 
 	/**
 	 * Get SeriesRules based on vaccine group and series name. Returns the SeriesRules representing the specified series by name, or null if not found
 	 */
 	public SeriesRules getScheduleSeriesByName(String svg, String seriesName) {
-		
+
 		if (svg == null || seriesName == null) {
 			return null;
 		}
@@ -155,7 +157,7 @@ public class Schedule {
 		if (lcvgi == null) {
 			return null;
 		}
-		
+
 		List<SeriesRules> lSRs = this.iceSupportingDataConfiguration.getSupportedSeries().getCopyOfSeriesRulesForVaccineGroup(lcvgi);
 		if (lSRs == null || lSRs.isEmpty()) {
 			return null;
@@ -167,7 +169,7 @@ public class Schedule {
 		}
 		return null;
 	}
-	
+
 
 	/**
 	 * Utilizing supporting data. Return the Vaccine associated with its OpenCDS concept code value
@@ -181,63 +183,63 @@ public class Schedule {
 		}
 
 		LocallyCodedCdsListItem lVaccineCdsItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().
-			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.OPENCDS, new CdsConcept(openCdsConceptValue)); 
+			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.OPENCDS, new CdsConcept(openCdsConceptValue));
 		if (lVaccineCdsItem == null) {
 			return null;
 		}
-		
+
 		// Supporting data restrictions ensure all of the values are non-null
 		LocallyCodedVaccineItem lcvi = this.iceSupportingDataConfiguration.getSupportedVaccines().getVaccineItem(lVaccineCdsItem.getCdsListItemName());
 		if (lcvi == null) {
 			return null;
 		}
-		
+
 		return lcvi.getVaccine();
 	}
 
-	
+
 	/**
-	 * Utilizing supporting data. Obtain the list of diseases targeted by the specified vaccine group. Both the String supplied as the parameter and String returned  
+	 * Utilizing supporting data. Obtain the list of diseases targeted by the specified vaccine group. Both the String supplied as the parameter and String returned
 	 * are compliant to LocallyCodedCdsListItem.getSupportedListConceptItemName().
 	 * @param String specifying the vaccine group by _concept_ name
-	 * @return Collection of Strings representing the diseases targeted by the vaccine group; empty collection if none. If the specified vaccine group is  
+	 * @return Collection of Strings representing the diseases targeted by the vaccine group; empty collection if none. If the specified vaccine group is
 	 * 		either null or not a vaccine group tracked in the supporting data, null is returned.
 	 */
 	public Collection<String> getDiseasesTargetedByVaccineGroup(String pVaccineGroupConceptName) {
-		
+
 		if (pVaccineGroupConceptName == null) {
 			return null;
 		}
-		
+
 		return getDiseasesTargetedByVaccineGroup(new CdsConcept(pVaccineGroupConceptName));
 	}
-	
-	
+
+
 	/**
-	 * Utilizing supporting data. Obtain the list of diseases targeted by the specified vaccine group. Both the String supplied as the parameter and String returned  
+	 * Utilizing supporting data. Obtain the list of diseases targeted by the specified vaccine group. Both the String supplied as the parameter and String returned
 	 * are compliant to LocallyCodedCdsListItem.getSupportedListConceptItemName().
 	 * @param String specifying the vaccine group by _concept_ name
-	 * @return Collection of Strings representing the diseases targeted by the vaccine group; empty collection if none. If the specified vaccine group is  
+	 * @return Collection of Strings representing the diseases targeted by the vaccine group; empty collection if none. If the specified vaccine group is
 	 * 		either null or not a vaccine group tracked in the supporting data, null is returned.
 	 */
 	public Collection<String> getDiseasesTargetedByVaccineGroup(CdsConcept pVaccineGroupConcept) {
-		
+
 		if (pVaccineGroupConcept == null) {
 			return null;
 		}
-		
+
 		LocallyCodedCdsListItem lCodedCdsListItem = this.iceSupportingDataConfiguration.getSupportedCdsConcepts().
 			getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE_GROUP, pVaccineGroupConcept);
 		LocallyCodedVaccineGroupItem lCodedVaccineGroupItem = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getVaccineGroupItem(lCodedCdsListItem.getCdsListItemName());
 		if (lCodedVaccineGroupItem == null) {
 			return null;
 		}
-		
-		// It's okay to simply return the list of cdsListItemNames directly; all these have been added as ICEConcepts too during supporting data initialization, and 
+
+		// It's okay to simply return the list of cdsListItemNames directly; all these have been added as ICEConcepts too during supporting data initialization, and
 		// verified that they are indeed DISEASE ice concepts at that point in the process
 		return lCodedVaccineGroupItem.getCopyOfRelatedDiseasesCdsListItemNames();
 	}
-	
+
 
 	/**
 	 * Return true if the vaccine targets one or more of the specified diseases, false if it does not.
@@ -245,33 +247,33 @@ public class Schedule {
 	 * @param diseases the list of diseases in question; see supporting data file that has the ICEConceptType.DISEASE codes specified for a list of diseases
 	 */
 	public boolean vaccineTargetsOneOrMoreOfSpecifiedDiseases(Vaccine vaccine, Collection<String> diseases) {
-		
+
 		if (diseases == null || vaccine == null || diseases.isEmpty() == true) {
 			return false;
 		}
-		
+
 		Collection<String> sds = vaccine.getAllDiseasesTargetedForImmunity();
 		for (String sdc : sds) {
 			if (diseases.contains(sdc)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Utilizing supporting data. Get the number of vaccine groups across which the specified diseases are handled.
 	 * @param pSDCs The list of diseases in question; see supporting data file that has the ICEConceptType.DISEASE codes specified for a list of diseases
 	 * @return int specifying number of vaccine groups encompassing the union of the specified diseases
 	 */
 	private int getCountOfVaccineGroupsEncompassingDiseases(List<String> pSDCs) {
-		
+
 		if (pSDCs == null) {
 			return 0;
 		}
-		
+
 		int i=0;
 		Collection<LocallyCodedVaccineGroupItem> lAllVaccineGroups = this.iceSupportingDataConfiguration.getSupportedVaccineGroups().getAllVaccineGroupItems();
 		for (LocallyCodedVaccineGroupItem lVaccineGroup : lAllVaccineGroups) {
@@ -285,8 +287,25 @@ public class Schedule {
 				}
 			}
 		}
-		
+
 		return i;
+	}
+
+
+	// Get a List of all SeriesRules supported by this Schedule excluding vaccine group exlusions
+	public List<SeriesRules> getSeriesRulesExcludingVaccineGroupExclusions(List<String> vgExclusions) {
+
+		if (vgExclusions == null || vgExclusions.isEmpty()) {
+			return getAllSeries();
+		}
+		List<SeriesRules> lSeriesRulesWithoutExclusions = new ArrayList<SeriesRules>();
+		for (SeriesRules lSeriesRule : this.iceSupportingDataConfiguration.getSupportedSeries().getCopyOfAllSeriesRules()) {
+			if (! vgExclusions.contains(lSeriesRule.getVaccineGroup())) {
+				lSeriesRulesWithoutExclusions.add(lSeriesRule);
+			}
+		}
+
+		return lSeriesRulesWithoutExclusions;
 	}
 
 
@@ -296,15 +315,14 @@ public class Schedule {
 		return this.iceSupportingDataConfiguration.getSupportedSeries().getCopyOfAllSeriesRules();
 	}
 
-	
+
 	/**
-	 * This is deprecated; simply returns all series 
+	 * This is deprecated; simply returns all series
 	 */
 	@Deprecated
 	public List<SeriesRules> getCandidateSeries() {
 
 		return getAllSeries();
 	}
-
 
 }
