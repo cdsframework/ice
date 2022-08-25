@@ -632,16 +632,6 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			}
 		}
 
-		// Determine vaccine group exclusions
-		String vaccineGroupExclusionsProp = lProps.getProperty("vaccine_group_exclusions");
-		if (vaccineGroupExclusionsProp == null) {
-			this.vaccineGroupExclusions = new ArrayList<>();
-		}
-		else {
-			this.vaccineGroupExclusions = Arrays.asList(vaccineGroupExclusionsProp.replaceAll("\\s+", "").split("\\,"));
-		}
-		logger.info("Vaccine Group Exclusions: " + ((this.vaccineGroupExclusions == null) ? "None" : this.vaccineGroupExclusions.toString()));
-
 		////////////////////////////////////////////////////////////////////////////////////
 		// START - Get the ICE knowledge modules subdirectory location
 		////////////////////////////////////////////////////////////////////////////////////
@@ -908,6 +898,17 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 
 		this.baseRulesScopingKmId = lBaseRulesScopingKmId;
 		logger.info("Date/Time " + lRequestedKmId + "; Base Rules Scoping Km Id: " + this.baseRulesScopingKmId + "; Initialized: " + new Date());
+
+		// Determine vaccine group exclusions
+		String vaccineGroupExclusionsProp = lProps.getProperty("vaccine_group_exclusions");
+		if (vaccineGroupExclusionsProp == null) {
+			this.vaccineGroupExclusions = new ArrayList<>();
+		}
+		else {
+			this.vaccineGroupExclusions = Arrays.asList(vaccineGroupExclusionsProp.replaceAll("\\s+", "").split("\\,"));
+		}
+		logger.info("Vaccine Group Exclusions: " + ((this.vaccineGroupExclusions == null) ? "None" : this.vaccineGroupExclusions.toString()));
+
 
 		//// return kieBase;
 		return knowledgeBases;
