@@ -115,6 +115,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private Boolean outputEarliestOverdueDates = null;
 	private Boolean doseOverrideFeatureEnabled = null;
 	private Boolean outputSupplementalText = null;
+	private List<String> vaccineGroupExclusions = null;
 
 	private static final Logger logger = LogManager.getLogger();
 
@@ -389,6 +390,8 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		}
 		cmds.add(CommandFactory.newSetGlobal("outputSupplementalText", outputSupplementalText));
 
+		cmds.add(CommandFactory.newSetGlobal("vaccineGroupExclusions", vaccineGroupExclusions));
+
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
 		 */
@@ -628,6 +631,16 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 				logger.info(lErrStr);
 			}
 		}
+
+		// Determine vaccine group exclusions
+		String vaccineGroupExclusionsProp = lProps.getProperty("vaccine_group_exclusions");
+		if (vaccineGroupExclusionsProp == null) {
+			this.vaccineGroupExclusions = new ArrayList<>();
+		}
+		else {
+			this.vaccineGroupExclusions = Arrays.asList(vaccineGroupExclusionsProp.replaceAll("\\s+", "").split("\\,"));
+		}
+		logger.info("Vaccine Group Exclusions: " + ((this.vaccineGroupExclusions == null) ? "None" : this.vaccineGroupExclusions.toString()));
 
 		////////////////////////////////////////////////////////////////////////////////////
 		// START - Get the ICE knowledge modules subdirectory location
