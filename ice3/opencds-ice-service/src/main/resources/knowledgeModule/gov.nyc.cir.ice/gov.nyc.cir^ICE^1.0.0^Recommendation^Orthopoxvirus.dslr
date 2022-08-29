@@ -70,8 +70,8 @@ rule "Orthopoxvirus: If no shots have been administered, recommended CONDITIONAL
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-
-rule "Orthopoxvirus: If the patient has completed an Orthopoxvirus Series and no extra doses have been administered, then recommend CONDTIIONAL / BOOSTER_DOSE"
+/*
+rule "Orthopoxvirus: If the patient has completed an Orthopoxvirus Series and no extra doses have been administered, then recommend CONDTIIONAL / HIGH_RISK and BOOSTER_DOSE"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -81,11 +81,14 @@ rule "Orthopoxvirus: If the patient has completed an Orthopoxvirus Series and no
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.BOOSTER_DOSE"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Create a Recommendation as $recommendationBooster with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendationBooster to "RECOMMENDATION_REASON_CONCEPT.BOOSTER_DOSE"
+		Include the Recommendation $recommendationBooster for Consideration in the final Forecast of the Series
+		Create a Recommendation as $recommendationHighRisk with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendationHighRisk to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendationHighRisk for Consideration in the final Forecast of the Series
 		Mark forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
-
+*/
