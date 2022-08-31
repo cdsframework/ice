@@ -1,4 +1,4 @@
-FROM tomcat:9-jre8-alpine AS build
+FROM tomcat:9-jre8-temurin AS build
 
 # Metadata
 LABEL organization="HLN Consulting, LLC"
@@ -9,6 +9,8 @@ ENV KM_THREADS="8"
 ENV OUTPUT_EARLIEST_OVERDUE_DATES="Y"
 ENV ENABLE_DOSE_OVERRIDE_FEATURE="Y"
 ENV OUTPUT_SUPPLEMENTAL_TEXT="Y"
+ENV ENABLE_UNSUPPORTED_VACCINE_GROUPS="N"
+ENV VACCINE_GROUP_EXCLUSIONS="VACCINE_GROUP_CONCEPT.860"
 ENV REMOTE_CONFIG_ENABLED="N"
 ENV REMOTE_CONFIG_USER="remote_admin"
 ENV REMOTE_CONFIG_PASSWORD="password"
@@ -16,9 +18,7 @@ ENV REMOTE_CONFIG_PASSWORD="password"
 # Tomcat Server
 EXPOSE 8080
 
-RUN adduser -u 1000 -D appuser && \
-    apk --no-cache -U upgrade --available && \
-    apk --no-cache add openjdk8-jre openjdk8-jre-lib curl --upgrade && \
+RUN adduser --system --home /home/appuser --disabled-login appuser && \
     rm -rf /usr/local/tomcat/webapps/docs /usr/local/tomcat/webapps/ROOT /usr/local/tomcat/webapps/examples /usr/local/tomcat/webapps/host-manager /usr/local/tomcat/webapps/manager && \
     mkdir -p /home/appuser/.opencds
 
