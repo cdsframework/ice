@@ -115,6 +115,8 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private Boolean outputEarliestOverdueDates = null;
 	private Boolean doseOverrideFeatureEnabled = null;
 	private Boolean outputSupplementalText = null;
+	private List<String> vaccineGroupExclusions = null;
+	private Boolean enableUnsupportedVaccinesGroup = null;
 	private Boolean outputRuleName = null;
 
 	private static final Logger logger = LogManager.getLogger();
@@ -389,6 +391,15 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("outputSupplementalText", outputSupplementalText));
+
+		cmds.add(CommandFactory.newSetGlobal("vaccineGroupExclusions", vaccineGroupExclusions));
+
+		if (enableUnsupportedVaccinesGroup == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: unsupported vaccine group flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		cmds.add(CommandFactory.newSetGlobal("enableUnsupportedVaccinesGroup", enableUnsupportedVaccinesGroup));
 
 		if (outputRuleName == null) {
 			String lErrStr = "An error occurred: knowledge module not properly initialized: output rule name flag not set; this should not happen. Cannot continue";
@@ -916,6 +927,27 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 
 		this.baseRulesScopingKmId = lBaseRulesScopingKmId;
 		logger.info("Date/Time " + lRequestedKmId + "; Base Rules Scoping Km Id: " + this.baseRulesScopingKmId + "; Initialized: " + new Date());
+
+		// Determine vaccine group exclusions
+		String vaccineGroupExclusionsProp = lProps.getProperty("vaccine_group_exclusions");
+		if (vaccineGroupExclusionsProp == null) {
+			this.vaccineGroupExclusions = new ArrayList<>();
+		}
+		else {
+			this.vaccineGroupExclusions = Arrays.asList(vaccineGroupExclusionsProp.replaceAll("\\s+", "").split("\\,"));
+		}
+		logger.info("Vaccine Group Exclusions: " + ((this.vaccineGroupExclusions == null) ? "None" : this.vaccineGroupExclusions.toString()));
+
+		// Enable/Disable unsupported vaccines group
+		String enableUnsupportedVaccinesGroup = lProps.getProperty("enable_unsupported_vaccines_group");
+		if (enableUnsupportedVaccinesGroup != null && enableUnsupportedVaccinesGroup.equals("Y")) {
+			this.enableUnsupportedVaccinesGroup = new Boolean(true);
+		}
+		else {
+			this.enableUnsupportedVaccinesGroup = new Boolean(false);
+		}
+		logger.info("Enable Unsupported Vaccines Group: " + this.enableUnsupportedVaccinesGroup);
+
 
 		//// return kieBase;
 		return knowledgeBases;

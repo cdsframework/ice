@@ -661,9 +661,9 @@ rule "SeriesSelection.SelectOnlyZosterSeries"
 	salience 100
 	activation-group "ZosterSeriesSelectionCheck"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true))		
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", $tsid : targetSeriesIdentifier)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.620-", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.620", selectedSeries == true))		
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.620", $tsid : targetSeriesIdentifier)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -778,7 +778,122 @@ rule "SeriesSelection.SelectChildPneumococcalSeries"
 		$tss.setSelectedSeriesName($ts.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($tss);
-		update($ts);	
+		update($ts);
+end
+
+
+///////////////////////////////////////////////////////////// Orthopoxvirus Specific Series Selection Rules Start Here ////////////////////////////////////////////////////////////////////
+// These series selection rules assume the existence of the following series only:
+//    + Orthopoxvirus 1-Dose Series
+//    + Orthopoxvirus 2-Dose Series
+///////
+
+rule "SeriesSelection(Orthopoxvirus): If no other series was selected, the Orthopoxvirus 2-dose series applies"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesRules.seriesName == "Orthopoxvirus2DoseSeries")
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+/////// ****
+// If a series was selected but another series was marked complete with fewer doses, select the series with fewer doses
+/////// ****
+rule "SeriesSelect(Orthopoxvirus): If a series was selected but another series was marked complete earlier, select the series that was complete earlier"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true, isSeriesComplete() == true, $dcts1 : doseAfterWhichSeriesWasMarkedComplete)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == false, isSeriesComplete() == true, $dcts2: doseAfterWhichSeriesWasMarkedComplete)
+		$td1 : TargetDose(associatedTargetSeries == $ts1, isValid == true, doseNumberInSeries == $dcts1)
+		exists TargetDose(associatedTargetSeries == $ts2, doseNumberInSeries == $dcts2, isValid == true, administrationDate < $td1.administrationDate)  
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts1.setSelectedSeries(false);
+		$ts2.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2.seriesName);
+		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries " + $ts1 + " reverted ==> Newly selected series: " + $ts2);
+		update($tss);
+		update($ts1);
+		update($ts2);
+end
+
+
+///////// ***
+// If one series is complete but another has been selected, select an already completed one. 
+///////// ***
+rule "SeriesSelection(Orthopoxvirus): Select already _completed_ series if a different, _incomplete_ series was previously selected"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true, isSeriesComplete() == false) 
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == false, isSeriesComplete() == true) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts1.setSelectedSeries(false);
+		$ts2.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2.seriesName);
+		// Do not mark it complete, in case there is another a series that was completed earlier than this one - rather, place it into post-processing
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts2);
+		update($tss);
+		update($ts1);
+		update($ts2);
+end
+
+
+rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 1-dose series was administered and no other doses were administered in another series prior to this shot, the Orthopoxvirus 1-dose series applies"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)		
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, doseNumberInSeries == 1, associatedTargetSeries.seriesRules.seriesName == "Orthopoxvirus1DoseSeries", $ts : associatedTargetSeries)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate < $td.administrationDate) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+
+rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 2-dose series was administered and no other doses were administered in another series on the same day or prior to this shot, the Orthopoxvirus 2-dose series applies"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)		
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, doseNumberInSeries == 1, associatedTargetSeries.seriesRules.seriesName == "Orthopoxvirus2DoseSeries", $ts : associatedTargetSeries)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate <= $td.administrationDate) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
 end
 
 

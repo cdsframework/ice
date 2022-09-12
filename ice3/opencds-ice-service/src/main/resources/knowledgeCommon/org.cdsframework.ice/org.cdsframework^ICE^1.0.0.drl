@@ -98,6 +98,8 @@ global java.lang.Boolean outputEarliestOverdueDates
 global java.lang.Boolean doseOverrideFeatureEnabled
 global java.lang.Boolean outputSupplementalText
 global java.lang.Boolean outputRuleName
+global java.util.List<String> vaccineGroupExclusions
+global java.lang.Boolean enableUnsupportedVaccinesGroup
 global java.lang.String iceVersion
 
 // global org.drools.runtime.KnowledgeContext kcontext
@@ -173,7 +175,7 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "ImmunizationReferenceData: Initialize Dose Override Feature Enabled Fact Object" ruleflow-group "ImmunizationReferenceData"
+rule "ImmunizationReferenceData: Initialize Dose Override Feature Fact Object" ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
 	when
 		not ICEFactTypeFinding(iceResultFinding == "DOSE_OVERRIDE_FEATURE_ENABLED")
@@ -181,7 +183,23 @@ rule "ImmunizationReferenceData: Initialize Dose Override Feature Enabled Fact O
 	then
 		String _RULENAME = kcontext.rule.name;		
 		ICEFactTypeFinding ift = new ICEFactTypeFinding("DOSE_OVERRIDE_FEATURE_ENABLED");
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Dose Override Feature Enabled Fact Object Initialized");
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Dose Override Feature Fact Object Initialized");
+		insert(ift);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "ImmunizationReferenceData: Initialize Unsupported Vaccines Group Feature Fact Object" ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+	when
+		not ICEFactTypeFinding(iceResultFinding == "UNSUPPORTED_VACCINES_GROUP_FEATURE_ENABLED")
+		eval(enableUnsupportedVaccinesGroup != null && enableUnsupportedVaccinesGroup.booleanValue() == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICEFactTypeFinding ift = new ICEFactTypeFinding("UNSUPPORTED_VACCINES_GROUP_FEATURE_ENABLED");
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Unsupported Vaccines Group Feature Fact Object Initialized");
 		insert(ift);
 end
 
@@ -211,7 +229,7 @@ rule "InitializeSeriesAndSeasons: Load SeriesRules and TargetDoseInitializationT
 		not SeriesRules()
 	then
 		String _RULENAME = drools.getRule().getName();
-		List<SeriesRules> allCandidates = schedule.getCandidateSeries();
+		List<SeriesRules> allCandidates = schedule.getSeriesRulesExcludingVaccineGroupExclusions(vaccineGroupExclusions);
 		if (allCandidates != null) {
 			Iterator<SeriesRules> iter = allCandidates.iterator();
 			if (iter == null) {
@@ -2475,6 +2493,7 @@ rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported" ruleflow-
 	lock-on-active true
 	salience 10
 	when
+		exists ICEFactTypeFinding(iceResultFinding == "UNSUPPORTED_VACCINES_GROUP_FEATURE_ENABLED")
 		ImmunizationConcept($ctid : conceptTargetId)
 		$sae : SubstanceAdministrationEvent(id == $ctid)
 		not TargetDose(doseId == $sae.id)

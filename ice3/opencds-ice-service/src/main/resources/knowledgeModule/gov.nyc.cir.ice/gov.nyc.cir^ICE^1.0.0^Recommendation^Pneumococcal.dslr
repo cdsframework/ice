@@ -262,6 +262,7 @@ rule "Pneumococcal Adult: If the patient >= 19 years and < 65 years of age and t
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the Series is not complete
+			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
 			- the effective dose number in the Series is >= 6
 		The patient information $patientInformation must be known to complete writing this rule
@@ -275,6 +276,35 @@ rule "Pneumococcal Adult: If the patient >= 19 years and < 65 years of age and t
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series	
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "If the patient is < 65 years of age, received a valid dose 1 in an Adult Series at < 65 years old and has not yet reached 65 years of age, and the series is not complete, recommend Conditional/HIGH_RISK and supplemental text"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	salience 100
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the Series is not complete
+			- a forecast for the Series has been made and a shot is recommended
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is >= 7
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge65 when the patient is "65y" of age
+			- the date evalTime < $dtDateAtAge65
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final forecast of the Series
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $oRecommendation to "The Pneumococcal evaluations and recommendations in ICE primarily target the routine series. Adults ages 19-64 with underlying medical conditions or other risk factors who have not previously received PCV or whose previous vaccination history is unknown should receive 1 dose of PCV (either PCV20 or PCV15). When PCV15 is used, it should be followed by a dose of PPSV23 at the appropriate interval(s). For patients who previously received a PCV13 should receive PPSV23 as recommended for them before the introduction of PCV15 and PCV20, based on age or risk factors. Refer to ACIP for additional information.The vaccine administered should be a single dose of a Pfizer COVID-19 vaccine."
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Refresh all facts in the Series $targetSeries for forecasting
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
 end
 
 /*************************************************************************************************************************************************************************************

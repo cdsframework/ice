@@ -53,6 +53,18 @@ then
     sed -i "s/output_supplemental_text=.*/output_supplemental_text=$OUTPUT_SUPPLEMENTAL_TEXT/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
 fi
 
+if [[ -v ENABLE_UNSUPPORTED_VACCINE_GROUPS ]]
+then
+    echo "Setting enable_unsupported_vaccines_group in ice.properties to: $ENABLE_UNSUPPORTED_VACCINE_GROUPS"
+    sed -i "s/enable_unsupported_vaccines_group=.*/enable_unsupported_vaccines_group=$ENABLE_UNSUPPORTED_VACCINE_GROUPS/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
+fi
+
+if [[ -v VACCINE_GROUP_EXCLUSIONS ]]
+then
+    echo "Setting output_supplemental_text in ice.properties to: $VACCINE_GROUP_EXCLUSIONS"
+    sed -i "s/vaccine_group_exclusions=.*/vaccine_group_exclusions=$VACCINE_GROUP_EXCLUSIONS/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
+fi
+
 if [[ -v REMOTE_CONFIG_ENABLED ]]; then
     echo "REMOTE_CONFIG_ENABLED is set to: $REMOTE_CONFIG_ENABLED"
     if [ "$REMOTE_CONFIG_ENABLED" == "Y" ]; then
