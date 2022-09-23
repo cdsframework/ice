@@ -172,7 +172,7 @@ rule "COVID-19: If the patient >= 12y has completed a WHO-approved series along 
 			- the date evalTime >= $dtAtAge12y
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
-		Add "5m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
+		Add "2m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
 		Set the recommendation Earliest Forecast Date for $r_interval to $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
@@ -205,17 +205,17 @@ rule "COVID-19: If the patient >= 18y has completed the Moderna Series along wit
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
-			- the date evalTime >= $dtAtAge18y
+			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
+			- the date evalTime >= $dtAtAge12y
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
-		Add "5m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
+		Add "2m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
 		Set the recommendation Earliest Forecast Date for $r_interval to $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
-		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge18y
-		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
+		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge12y
+		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge12y
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -355,7 +355,7 @@ end
 //////////////
 // Janssen 1st booster / additional dose recommendations for patients >= 12yrs
 //////////////
-rule "COVID-19: If the patient >= 12y has completed the Janssen Series and no extra doses have been administered, then recommend the _1st_ booster dose at earliest age 12y/recommended age 12y or recommended interval of 8 weeks, whichever is later"
+rule "COVID-19: If the patient >= 18y has completed the Janssen Series and no extra doses have been administered, then recommend the _1st_ booster dose at earliest age 12y/recommended age 12y or recommended interval of 8 weeks, whichever is later"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -374,17 +374,17 @@ rule "COVID-19: If the patient >= 12y has completed the Janssen Series and no ex
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
-			- the date evalTime >= $dtAtAge12y
+			- make note of the date as $dtAtAge12y when the Patient is "18y" of age
+			- the date evalTime >= $dtAtAge18y
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
-		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
+		Add "2m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
 		Set the recommendation Earliest Forecast Date for $r_interval to $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
 		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge12y
-		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge12y
+		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -418,9 +418,9 @@ end
 
 
 //////////////
-// Janssen 2nd booster dose recommendations for patients whose first booster was not an mRNA vaccine => recommend at 18 years of age
+// Janssen 2nd booster dose recommendations for patients whose first booster was not a BIVALENT => recommend at 18 years of age
 //////////////
-rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 extra dose of a non-mRNA vaccine, then recommend the _2nd_ booster dose at earliest age 18y/recommended age 18y or recommended interval of 4 months, whichever is later"
+rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 extra dose of a non-bivalent booster, then recommend the _2nd_ booster dose at earliest age 18y/recommended age 18y or recommended interval of 2 months, whichever is later"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -434,7 +434,7 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 ext
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose Shot Validity Status is VALID
 			- the dose number in the Series is == $numberOfDosesRequired+1
-			- the vaccine administered not a member of ("ICE207", "ICE208", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228")
+			- the vaccine administered not a member of ("ICE229", "ICE300")
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
@@ -448,7 +448,7 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 ext
 			- the date evalTime >= $dtAtAge18y
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
-		Add "4m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
+		Add "2m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
 		Set the recommendation Earliest Forecast Date for $r_interval to $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
@@ -458,7 +458,7 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and 1 ext
 		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_reason for the Series $targetSeries
-		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_COVID19_mRNA_VACCINE"
+		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_COVID19_BIVALENT_BOOSTER"
 		Include the Recommendation $r_reason for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
