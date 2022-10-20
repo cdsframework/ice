@@ -114,7 +114,6 @@ rule "COVID-19: If the series is complete, override allowable vaccine check, as 
 end
 
 
-
 rule "COVID-19: If the patient is >= 6 yrs of age and an Additional Dose and/or 1st Booster Dose is administered in the __Moderna Series__, the shot is permitted"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -300,9 +299,6 @@ rule "COVID-19: If an extra dose is administered to an already completed __Pfize
 		Record that this dose rule was Processed for the TargetDose $administeredShot
         Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////
