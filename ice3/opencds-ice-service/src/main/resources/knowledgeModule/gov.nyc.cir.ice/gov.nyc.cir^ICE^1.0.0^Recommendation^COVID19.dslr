@@ -337,7 +337,7 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and no ex
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge12y when the Patient is "18y" of age
+			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
 			- the date evalTime >= $dtAtAge18y
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
@@ -346,7 +346,7 @@ rule "COVID-19: If the patient >= 18y has completed the Janssen Series and no ex
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
-		Set the recommendation Earliest Forecast Date for $r_age to $dtAtAge12y
+		Set the recommendation Earliest Forecast Date for $r_age to 8
 		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
