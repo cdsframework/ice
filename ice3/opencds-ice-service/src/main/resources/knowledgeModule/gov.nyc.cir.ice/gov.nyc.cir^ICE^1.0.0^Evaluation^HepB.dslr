@@ -98,7 +98,7 @@ rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the C
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the name of the Series is "HepBChildAdultSeries"
+			- the name of the Series is "HepBChildAdolescentSeries"
 			- the Series is not complete
 		There is an Administered Shot $previousDose
 			- the Shot belongs to the Series $associatedTargetSeries
@@ -303,7 +303,6 @@ rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots
 end
 
 
-// In the Hep B Adult series, remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE 
 rule "Hep B: In Adult Series, remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"

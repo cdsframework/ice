@@ -47,7 +47,7 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
  
 
 // Overrides routine recommendationAgeCheck
-rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 19 Years and No Previously Administered Doses"
+rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 60 Years and No Previously Administered Doses"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationAgeCheck"
     when
@@ -56,7 +56,7 @@ rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 19 Years and No
         	- the number of Administered Shots is == 0
         The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- make note of the patient's birthdate as $dtBirthDate
-        Confirm elapsed time between $dtBirthDate and evalTime >= 19 DurationType.YEARS
+        Confirm elapsed time between $dtBirthDate and evalTime >= 60 DurationType.YEARS
     then
         Add "19y" to $dtBirthDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
