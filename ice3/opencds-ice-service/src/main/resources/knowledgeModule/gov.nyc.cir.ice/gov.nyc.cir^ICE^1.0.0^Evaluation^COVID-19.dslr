@@ -114,6 +114,7 @@ rule "COVID-19: If the series is complete, override allowable vaccine check, as 
 end
 
 
+
 rule "COVID-19: If the patient is >= 6 yrs of age and an Additional Dose and/or 1st Booster Dose is administered in the __Moderna Series__, the shot is permitted"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -122,13 +123,13 @@ rule "COVID-19: If the patient is >= 6 yrs of age and an Additional Dose and/or
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the shot belongs to the Series with name "COVID19ModernaSeries"
-			- the vaccine administered is "ICE229"
+			- the vaccine administered a member of ("ICE207", "ICE221", "ICE229")
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
+			- the effective number of doses administered in the Series is >= $doseNumberAfterWhichComplete+1
 		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
 			- make note of the date as $dateAt6yOfAge when the patient is "6y" of age
 			- the date $currentShotDate >= $dateAt6yOfAge
@@ -207,7 +208,7 @@ rule "COVID-19: If the patient is >= 5 yrs of age and an Additional Dose and/or
 end
 
 
-rule "COVID-19: If the patient is >= 12 yrs of age and a 2nd Booster Dose that is Pfizer bivalent is administered in Pfizer, Mixed, or WHO_approved series,, the shot is permitted"
+rule "COVID-19: If the patient is >= 12 yrs of age and a 2nd Booster Dose that is Pfizer bivalent is administered in Pfizer, Mixed, or WHO_approved series, the shot is permitted"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -236,7 +237,7 @@ rule "COVID-19: If the patient is >= 12 yrs of age and a 2nd Booster Dose that i
 end
 
 
-rule "COVID-19: If the patient is >= 12 yrs of age and a 2nd Booster Dose that is bivalent is administered in Novavax series, the shot is permitted"
+rule "COVID-19: If the patient is >= 12 yrs of age and a 1st Booster Dose that is bivalent is administered in Novavax series, the shot is permitted"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -254,7 +255,7 @@ rule "COVID-19: If the patient is >= 12 yrs of age and a 2nd Booster Dose that i
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose Shot Validity Status is VALID
 			- the vaccine administered a member of ("ICE229", "ICE300")
-			- the dose number in the Series is > $doseNumberAfterWhichComplete + 1
+			- the dose number in the Series is == $doseNumberAfterWhichComplete + 1
 		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
 			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
 			- the date $currentShotDate >= $dateAt12yOfAge
@@ -427,10 +428,10 @@ rule "COVID-19: If 2 or more doses were administered >= 6 months of age in the M
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
-		There is a Series $targetSeries that needs forecasting
+		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is not complete
 			- the name of the Series a member of ("COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19NovavaxSeries")
+			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge6m when the Patient is "6m" of age
 		There is an Administered Shot $firstDose
@@ -443,6 +444,10 @@ rule "COVID-19: If 2 or more doses were administered >= 6 months of age in the M
 			- that has already been evaluated and whose shot validity is VALID
 			- the dose number in the Series is == 2
 			- the administration date of the shot is >= $dtAtAge6m
+		There does not exist an administered shot
+			- the Shot belongs to the Series $targetSeries
+			- that has already been evaluated
+			- the dose number in the Series is > 3
 	then
 		Mark the Series $targetSeries complete
 		Refresh all facts in the Series $targetSeries
@@ -473,7 +478,7 @@ rule "COVID-19: If 2 or more doses were administered >= 5 years of age in the Pf
 		There does not exist an administered shot
 			- the Shot belongs to the Series $targetSeries
 			- that has already been evaluated
-			- the dose number in the Series is > 2
+			- the dose number in the Series is > 3
 	then
 		Mark the Series $targetSeries complete
 		Refresh all facts in the Series $targetSeries
