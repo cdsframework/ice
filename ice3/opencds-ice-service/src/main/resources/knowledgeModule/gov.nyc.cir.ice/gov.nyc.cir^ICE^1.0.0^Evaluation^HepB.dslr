@@ -87,18 +87,18 @@ rule "Hep B: Verify Adherence to the Maximum Valid Age for the Vaccine if Hep B 
 end 
 
 
-// Abolute minimum interval between doses 1 and 3 in Child Adult Series is 108 days
-rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the Child Adult Series is >= 108d"
+// Abolute minimum interval between doses 1 and 3 in Child/Adolescent Series and Adult 3-Dose Series is 108 days
+rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the Child/Adolescent or 3-dose Adult Series is >= 108d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when  
 		There is an Administered Shot $currentDose that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the shot belongs to the series with name a member of ("HepBChildAdolescentSeries", "HepBAdult3DoseSeries")
 			- the Dose Number in the Series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the name of the Series is "HepBChildAdolescentSeries"
 			- the Series is not complete
 		There is an Administered Shot $previousDose
 			- the Shot belongs to the Series $associatedTargetSeries
@@ -124,6 +124,7 @@ rule "Hep B: Enough is Enough Rule"
 	when		
 		There is an Administered Shot $currentDose that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the shot belongs to the series with name a member of ("HepBNewbornSeries", "HepBChildAdolescentSeries")
 			- the dose number in the series is == 3
 			- the administered shot number is >= 4
 			- make note of the administered shot number as $nAdministeredShotNumber
@@ -158,6 +159,7 @@ rule "Hep B: Mark Series Complete if Two Adult Doses Given to Patient between >=
 	when
 		There is an Administered Shot $doseTwo
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the shot belongs to the series with name "HepBChildAdolescentSeries"
 			- the dose number in the series is == 2
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered is "ICE43"
