@@ -877,21 +877,21 @@ rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 1
 end
 
 
-rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 2-dose series was administered and no other doses were administered in another series on the same day or prior to this shot, the Orthopoxvirus 2-dose series applies"
+rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 2-dose series was administered and no other doses were administered in another series prior to this shot, the Orthopoxvirus 2-dose series applies"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 10
+	salience 20
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)		
 		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, doseNumberInSeries == 1, associatedTargetSeries.seriesRules.seriesName == "Orthopoxvirus2DoseSeries", $ts : associatedTargetSeries)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate <= $td.administrationDate) 
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate < $td.administrationDate) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($tss);
 		update($ts);
 end
