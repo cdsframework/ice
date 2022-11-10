@@ -1042,7 +1042,7 @@ rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not
 end
 
 
-rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were all administered doses a Moderna or Pfizer vaccine (i.e.- neither Moderna nor Pfizer series were selected), but (Valid) doses exist in the Mixed Product Series, then select the Mixed Product Series"
+rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were all administered doses a Moderna, Pfizer or Novavax vaccine (i.e.- none of Moderna-only, Pfizer-only or Novavax-only Series are applicable), but (Valid) doses exist in the Mixed Product Series, then select the Mixed Product Series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 28
@@ -1051,13 +1051,20 @@ rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19MixedProductSeries")
 		(
+			// Moderna-only check
 			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE221", "ICE227", "ICE228"))
 			and 
 			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228"))
 			or
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219"))
+			// Pfizer-only check
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301"))
 			and
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219"))
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301"))
+			or
+			// Novavax-only check
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName == "ICE211")
+			and
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName != "ICE211")
 		)
 		$tsmixedproduct : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19MixedProductSeries")
 	then
@@ -1100,7 +1107,7 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine,
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301"))
 		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries")
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1110,6 +1117,27 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine,
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
 		update($tss);
 		update($tspfizer);
+end
+
+
+rule "SeriesSelection(COVID-19): If all administered doses are a Novavax vaccine, then the Novavax Series applies"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName != "ICE211")
+		$tsnovavax : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries")
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsnovavax);
+		$tsnovavax.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsnovavax.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($tsnovavax);
 end
 
 
