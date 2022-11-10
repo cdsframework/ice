@@ -102,6 +102,7 @@
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:([0-9]+)([\\.][0-9]+)?}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:([0-9]+)([\\.][0-9]+)?}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
+[condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 
 
@@ -194,7 +195,12 @@
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:([0-9]+)([\\.][0-9]+)?}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Ss]tring {strObject} {aOp}  {strValue}={strObject} != null && {strObject} {aOp} {strValue} || {strObject} == null && {strValue} == null
-[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
+[condition][]- [Tt]he [Ee]xecution [Dd]ate is on the same date or before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={strDateTwo} != null && evalTime.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) <= 0
+[condition][]- [Tt]he [Ee]xecution [Dd]ate is on the same date or after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={strDateTwo} != null && evalTime.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) >= 0
+[condition][]- [Tt]he [Ee]xecution [Dd]ate is before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={strDateTwo} != null && evalTime.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) < 0
+[condition][]- [Tt]he [Ee]xecution [Dd]ate is after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={strDateTwo} != null && evalTime.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) > 0
+[condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
+[condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=\\<\\>]+}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
  
 //
 // TargetDose accumulates
@@ -219,7 +225,7 @@
 [condition][][Tt]he [Dd]ate {dtDateOne} is after {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.after({dtDateTwo})
 [condition][][Tt]he [Dd]ate {dtDateOne} is before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.before(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))
 [condition][][Tt]he [Dd]ate {dtDateOne} is before {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.before({dtDateTwo})
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) <= 0
+[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) <= 0
 [condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or before {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) <= 0
 [condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) >= 0
 [condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or after {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) >= 0
@@ -323,6 +329,7 @@
 [consequence][][Cc]reate a [Rr]ecommendation as {assign_oRecommendation} for the [Ss]eries {refer_oTargetSeries}=Recommendation {assign_oRecommendation} = new Recommendation({refer_oTargetSeries});
 [consequence][][Ss]et the [Rr]ecommendation [Ss]tatus for {refer_oRecommendation} to {enum_RecommendationStatus}={refer_oRecommendation}.setRecommendationStatus({enum_RecommendationStatus});
 [consequence][][Ss]et the [Rr]ecommendation [Ee]arliest [Ff]orecast [Dd]ate for {refer_oRecommendation} to {dtForecastDate}={refer_oRecommendation}.setEarliestDate({dtForecastDate});
+[consequence][][Ss]et the [Rr]ecommendation [Rr]ecommended [Ff]orecast [Dd]ate for {refer_oRecommendation} to {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={refer_oRecommendation}.setRecommendationDate(TimePeriod.generateDateFromStringInDroolsDateFormat({strDate}));
 [consequence][][Ss]et the [Rr]ecommendation [Rr]ecommended [Ff]orecast [Dd]ate for {refer_oRecommendation} to {dtForecastDate}={refer_oRecommendation}.setRecommendationDate({dtForecastDate});
 [consequence][][Ss]et the [Rr]ecommendation [Oo]verdue [Ff]orecast [Dd]ate for {refer_oRecommendation} to {dtForecastDate}={refer_oRecommendation}.setOverdueDate({dtForecastDate});
 [consequence][][Ss]et the [Rr]ecommendation [Rr]eason for {refer_oRecommendation} to {oCD}={refer_oRecommendation}.setRecommendationReason({oCD});

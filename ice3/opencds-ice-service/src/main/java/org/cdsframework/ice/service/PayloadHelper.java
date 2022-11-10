@@ -565,7 +565,9 @@ public class PayloadHelper {
 							if (lSupplementalTextFound && outputSupplementalText) {
 								localCDInterp.setOriginalText(rec.getRecommendationSupplementalText());
 							}
-							interpretations.add(localCDInterp);
+							if (! interpretations.contains(localCDInterp)) {
+								interpretations.add(localCDInterp);
+							}
 						}
 					}
 				}
