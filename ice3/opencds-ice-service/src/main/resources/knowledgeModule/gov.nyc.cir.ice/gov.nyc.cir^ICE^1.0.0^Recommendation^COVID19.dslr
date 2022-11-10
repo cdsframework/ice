@@ -196,6 +196,10 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y has 
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
@@ -230,6 +234,10 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
@@ -310,6 +318,10 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y has 
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
@@ -388,6 +400,10 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y has 
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
@@ -466,6 +482,10 @@ rule "COVID-19: If the execution date is >= 9/2/2022, the patient >= 12y has com
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
@@ -490,7 +510,7 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the execution date is on the same date or after "02-Sep-2022"
+			- the execution date is on the same date or after "10-Oct-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -501,6 +521,10 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
@@ -669,6 +693,10 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
@@ -705,6 +733,10 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y and 
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime > $dtAtAge12y
@@ -914,10 +946,15 @@ rule "COVID-19: If the execution date is >= 9/2/2022, the patient is >= 18 yrs o
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- make note of the date this shot was administered as $lastShotAdministeredDate
+			- the administration date of the shot is < "02-Sep-2022"
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
 			- the administration date of the shot is > $lastShotAdministeredDate
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
 			- the date evalTime >= $dtAtAge18y
@@ -1059,7 +1096,7 @@ end
 /************************************************************************************************************************************************************************************/
 
 // If a prior booster dose was administered in the Pfizer, Moderna, Mixed Product or WHO-approved series >= 10/12/2022 and the patient is >= 5 years of age, recommend Not Recommended / COMPLETE_HIGH_RISK.
-rule "COVID-19: If a prior booster dose was administered in the Pfizer, Moderna, Mixed Product or WHO-approved Series on or after 10/12/2022 and the patient is >= 5 yrs, recommend Not Recommended / COMPLETE_HIGH_RISK"
+rule "COVID-19: If a prior booster dose was administered in the Pfizer, Moderna, Mixed Product or WHO-approved Series on or after 10/12/2022 and the patient is >= 5 yrs, recommend Not Recommended / COMPLETE"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 20
@@ -1093,7 +1130,7 @@ end
 
 
 // If a prior booster dose was administered in the Pfizer, Moderna, Mixed Product or WHO-approved series >= 9/2/2022 and the patient is >= 12 years of age, recommend Not Recommended / COMPLETE_HIGH_RISK.
-rule "COVID-19: If a prior booster dose was administered in the Pfizer, Moderna, Mixed Product or WHO-approved Series on or after 9/2/2022 and the patient is >= 12 yrs of age, recommend Not Recommended / COMPLETE_HIGH_RISK"
+rule "COVID-19: If a prior booster dose was administered in the Pfizer, Moderna, Mixed Product or WHO-approved Series on or after 9/2/2022 and the patient is >= 12 yrs of age, recommend Not Recommended / COMPLETE"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 10
@@ -1126,7 +1163,7 @@ rule "COVID-19: If a prior booster dose was administered in the Pfizer, Moderna,
 end
 
 // If a prior booster dose was administered >= 9/2/2022 in the Janssen series and the patient is >= 18 years of age, recommend Not Recommended / COMPLETE_HIGH_RISK.
-rule "COVID-19: If a prior booster dose was administered in the Janssen on or after 9/2/2022 and the patient is >= 18 yrs of age, recommend Not Recommended / COMPLETE_HIGH_RISK"
+rule "COVID-19: If a prior booster dose was administered in the Janssen on or after 9/2/2022 and the patient is >= 18 yrs of age, recommend Not Recommended / COMPLETE"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 10
