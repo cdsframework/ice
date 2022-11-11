@@ -74,7 +74,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y and < 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19ModernaSeries"			
 			- the Series is complete
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -82,6 +81,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y and < 
 			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
 			- the date evalTime >= $dtAtAge5y
 			- the date evalTime < $dtAtAge18y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
@@ -103,7 +103,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y has c
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19ModernaSeries"
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -117,6 +116,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y has c
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
 			- the date evalTime >= $dtAtAge18y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "5m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -144,7 +144,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y has co
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -158,6 +157,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y has co
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 			- the date evalTime >= $dtAtAge5y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "5m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -185,7 +185,6 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y has 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries")
-			- the execution date is on the same date or after "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -203,6 +202,7 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y has 
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
+		Confirm the date evalTime is on the same date or after "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -221,9 +221,8 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries")
-			- the execution date is on the same date or after "12-Oct-2022"
+			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -243,6 +242,7 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge5y
 			- the date evalTime < $dtAtAge12y
+		Confirm the date evalTime is on the same date or after "12-Oct-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -270,9 +270,8 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 12y has c
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- the execution date is before "02-Sep-2022"			
+			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -286,6 +285,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 12y has c
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -305,9 +305,8 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y has 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- the execution date is on the same date or after "02-Sep-2022"			
+			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -325,6 +324,7 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y has 
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
+		Confirm the date evalTime is on the same date or after "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -354,7 +354,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 12y of ag
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19Novavax2DoseSeries"
 			- the Series is complete
-			- the date evalTime before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -368,6 +367,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 12y of ag
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "5m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -387,11 +387,10 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y has 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
 			- the name of the Series is "COVID19Novavax2DoseSeries"
+			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
-			- the execution date is on the same date or after "02-Sep-2022"
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
@@ -407,6 +406,7 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y has 
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
+		Confirm the date evalTime is on the same date or after "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -435,7 +435,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y has co
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -449,6 +448,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y has co
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 			- the date evalTime >= $dtAtAge5y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "5m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -471,7 +471,6 @@ rule "COVID-19: If the execution date is >= 9/2/2022, the patient >= 12y has com
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the execution date is on the same date or after "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -489,6 +488,7 @@ rule "COVID-19: If the execution date is >= 9/2/2022, the patient >= 12y has com
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge12y
+		Confirm the date evalTime is on the same date or after "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -510,7 +510,6 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the execution date is on the same date or after "10-Oct-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -530,6 +529,7 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge5y
 			- the date evalTime < $dtAtAge12y
+		Confirm the date evalTime is on the same date or after "10-Oct-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -570,9 +570,8 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y and <
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
 			- the name of the Series is "COVID19ModernaSeries"
-			- the execution date is before "02-Sep-2022"
+			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		There is an administered shot $lastShotAdministered
@@ -588,6 +587,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y and <
 			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
 			- the date evalTime >= $dtAtAge18y
 			- the date evalTime < $dtAtAge50y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
@@ -611,7 +611,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y and < 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -619,6 +618,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y and < 
 			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
 			- the date evalTime >= $dtAtAge5y
 			- the date evalTime < $dtAtAge50y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
@@ -642,7 +642,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 50y has c
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		There is an administered shot $lastShotAdministered
@@ -656,6 +655,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 50y has c
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
 			- the date evalTime >= $dtAtAge50y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "4m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -682,7 +682,6 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the execution date is on the same date or after "10-Oct-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		There is an administered shot $lastShotAdministered
@@ -702,6 +701,7 @@ rule "COVID-19: If the execution date is >= 10/12/2022, the patient >= 5y and < 
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime >= $dtAtAge5y
 			- the date evalTime < $dtAtAge12y
+		Confirm the date evalTime is on the same date or after "12-Oct-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -722,7 +722,6 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y and 
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the execution date is on the same date or after "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		There is an administered shot $lastShotAdministered
@@ -740,6 +739,7 @@ rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y and 
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
 			- the date evalTime > $dtAtAge12y
+		Confirm the date evalTime is on the same date or after "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -800,7 +800,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y has c
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
@@ -819,6 +818,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y has c
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
 			- the date evalTime >= $dtAtAge18y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "4m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -826,10 +826,9 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y has c
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
 		Set the recommendation Recommended Forecast Date for $r_age to $dtAtAge18y
-		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_reason for the Series $targetSeries
-		Set the Recommendation Reason for $r_age to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_COVID19_mRNA_VACCINE"
+		Set the Recommendation Reason for $r_reason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_COVID19_mRNA_VACCINE"
 		Include the Recommendation $r_reason for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -848,7 +847,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y and <
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
@@ -869,6 +867,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y and <
 			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
 			- the date evalTime >= $dtAtAge18y
 			- the date evalTime < $dtAtAge50y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
@@ -890,7 +889,6 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 50y has c
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series is "COVID19Janssen1DoseSeries"
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
@@ -909,6 +907,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 50y has c
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge50y when the Patient is "50y" of age
 			- the date evalTime >= $dtAtAge50y
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "4m" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -939,7 +938,6 @@ rule "COVID-19: If the execution date is >= 9/2/2022, the patient is >= 18 yrs o
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19Janssen1DoseSeries"
 			- the Series is complete
-			- the execution date is on the same date or after "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		There is an administered shot $lastShotAdministered
@@ -958,6 +956,7 @@ rule "COVID-19: If the execution date is >= 9/2/2022, the patient is >= 18 yrs o
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge18y when the Patient is "18y" of age
 			- the date evalTime >= $dtAtAge18y
+		Confirm the date evalTime is on the same date or after "02-Sep-2022"
 	then
 		Create a Recommendation as $r_interval for the Series $targetSeries
 		Add "8w" to $lastShotAdministeredDate and make note of the newly calculated date as $dtCalculated
@@ -1001,9 +1000,9 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient has complete
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the execution date is before "02-Sep-2022"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+2
+		Confirm the date evalTime is before "02-Sep-2022"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
