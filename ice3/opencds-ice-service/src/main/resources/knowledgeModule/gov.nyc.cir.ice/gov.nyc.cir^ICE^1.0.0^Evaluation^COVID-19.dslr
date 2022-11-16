@@ -289,7 +289,7 @@ end
  START >= 9/2/2022
 /************************************************************************************************/
 
-// rule "COVID-19: If the execution date is >= 9/2/2022 and 4 extra doses (additional doses and/or 3 booster doses) have been administered, 
+// rule "COVID-19: If the execution date is >= 9/2/2022 and 3 extra doses (additional doses and/or 3 booster doses) have been administered, 
 
 rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 12 yr of age and have had an Additional Dose and/or 3 Booster Dose is administered in the __Pfizer, Moderna, Mixed Product, Janssen, Novavax or WHO-approved Series__, the shot is permitted"
 	dialect "mvel"
@@ -298,7 +298,6 @@ rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 12 yr of ag
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			///// ADD Pfizer and Mixed Product Janssen, Novavax, and WHO-aprooved series
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19Novavax2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301")
 			- make note of the date this shot was administered as $currentShotDate
@@ -307,17 +306,17 @@ rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 12 yr of ag
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-			- the effective number of doses administered in the Series is < $doseNumberAfterWhichComplete+4
+			- the effective number of doses administered in the Series is < $doseNumberAfterWhichComplete+3
 		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
-			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
-			- the date $currentShotDate >= $dateAt12yOfAge
+			- make note of the date as $dateAt5yOfAge when the patient is "5y" of age
+			- the date $currentShotDate >= $dateAt5yOfAge
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-
+/*
 rule "COVID-19: If the shot administration date is >= 10/12/2022 at >= 5 yr of age and have had an Additional Dose and/or 3 Booster Dose is administered in the __Pfizer, Moderna, Mixed Product, Janssen, Novavax or WHO-approved Series__, the shot is permitted"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -333,7 +332,7 @@ rule "COVID-19: If the shot administration date is >= 10/12/2022 at >= 5 yr of a
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-			- the effective number of doses administered in the Series is < $doseNumberAfterWhichComplete+4
+			- the effective number of doses administered in the Series is < $doseNumberAfterWhichComplete+3
 		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
 			- make note of the date as $dateAt5yOfAge when the patient is "5y" of age
 			- the date $currentShotDate >= $dateAt5yOfAge
@@ -342,6 +341,7 @@ rule "COVID-19: If the shot administration date is >= 10/12/2022 at >= 5 yr of a
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
+*/
 
 /*************************************************************************************************
  END >= 9/2/2022
