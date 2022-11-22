@@ -339,11 +339,11 @@ public class TargetDose {
 		this.isValid = isValid;
 	}
 
-	public boolean isShotIgnoredForCompletionOfSeries() {
+	public boolean isShotIgnored() {
 		return isShotIgnored;
 	}
 
-	public void setIsShotIgnoredForCompletionOfSeries(boolean ignoredForCompletionOfSeries) {
+	public void setIsShotIgnored(boolean ignoredForCompletionOfSeries) {
 		this.isShotIgnored = ignoredForCompletionOfSeries;
 	}
 

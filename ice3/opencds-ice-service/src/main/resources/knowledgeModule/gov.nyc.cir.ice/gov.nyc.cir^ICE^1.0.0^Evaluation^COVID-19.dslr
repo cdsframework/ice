@@ -400,6 +400,7 @@ end
 rule "COVID-19: If CVX 218 was evaluated and Not Valid due to ABOVE_MAXIMUM_AGE_VACCINE, ignore the shot when calculating intervals"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	no-loop true
 	when
 		There is an administered shot $administeredShot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
@@ -410,6 +411,7 @@ rule "COVID-19: If CVX 218 was evaluated and Not Valid due to ABOVE_MAXIMUM_AGE_
 			- make note of the Associated Series as $associatedTargetSeries
 	then
 		Mark the shot $administeredShot as Ignored
+		Refresh all facts in the shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
 end
@@ -447,6 +449,26 @@ rule "COVID-19: If 2 or more doses were administered >= 5 years of age in the Pf
 		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $secondDose
 		Log that this dose rule fired for the dose $secondDose in the Series $targetSeries
+end
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Novavax 2-dose limit logic in Mixed Product Series
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19: If 2 or more doses of CVX 211 (Novavax) were administered in the Mixed Product series, then the 3rd dose is not required and the series is complete"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19MixedProductSeries"
+			- the series is not complete
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "ICE211" is == 2
+	then
+		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
+		Log that this series rule fired for the Series $targetSeries
 end
 
 
