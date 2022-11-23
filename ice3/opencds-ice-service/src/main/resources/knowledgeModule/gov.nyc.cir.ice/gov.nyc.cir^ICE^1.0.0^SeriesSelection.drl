@@ -1088,6 +1088,7 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Moderna vaccine
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228"))
 		$tsmoderna : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries")
+		not TargetDose(associatedTargetSeries == $tsmoderna, isValid == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsmoderna);
@@ -1109,6 +1110,7 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine,
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301"))
 		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries")
+		not TargetDose(associatedTargetSeries == $tspfizer, isValid == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tspfizer);
@@ -1120,7 +1122,7 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine,
 end
 
 
-rule "SeriesSelection(COVID-19): If all administered doses are a Novavax vaccine, then the Novavax Series applies"
+rule "SeriesSelection(COVID-19): If all administered doses are a Novavax vaccine and the valid shot(s) are in the Novavax series, then the Novavax Series applies"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -1130,6 +1132,7 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Novavax vaccine
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName != "ICE211")
 		$tsnovavax : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries")
+		not TargetDose(associatedTargetSeries == $tsnovavax, isValid == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsnovavax);
@@ -2221,7 +2224,7 @@ rule "SeriesSelection.SelectRotavirus3DoseSeriesIfCertainVaccinesAdministered"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.820", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", selectedSeries == true))		
-		$td : TargetDose(isValid == true, isShotIgnoredForCompletionOfSeries() == false, 
+		$td : TargetDose(isValid == true, isShotIgnored() == false, 
 			(vaccineComponent.cdsConceptName == "ICE116" || 
 			  vaccineComponent.cdsConceptName == "ICE122" || 
 			  vaccineComponent.cdsConceptName == "ICE74"))
