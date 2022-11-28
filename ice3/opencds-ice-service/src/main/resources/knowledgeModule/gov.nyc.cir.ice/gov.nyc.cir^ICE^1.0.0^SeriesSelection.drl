@@ -1052,9 +1052,9 @@ rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19MixedProductSeries")
 		(
 			// Moderna-only check
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE221", "ICE227", "ICE228"))
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229"))
 			and 
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228"))
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229"))
 			or
 			// Pfizer-only check
 			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301"))
@@ -1085,10 +1085,10 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Moderna vaccine
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228"))
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19ModernaSeries")
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229"))
 		$tsmoderna : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries")
-		not TargetDose(associatedTargetSeries == $tsmoderna, isValid == false)
+		/////// not TargetDose(associatedTargetSeries == $tsmoderna, isValid == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsmoderna);
@@ -1107,10 +1107,10 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine,
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19PfizerSeries")
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301"))
 		$tspfizer : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries")
-		not TargetDose(associatedTargetSeries == $tspfizer, isValid == false)
+		/////// not TargetDose(associatedTargetSeries == $tspfizer, isValid == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tspfizer);
@@ -1129,10 +1129,10 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Novavax vaccine
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19Novavax2DoseSeries")
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName != "ICE211")
 		$tsnovavax : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries")
-		not TargetDose(associatedTargetSeries == $tsnovavax, isValid == false)
+		/////// not TargetDose(associatedTargetSeries == $tsnovavax, isValid == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsnovavax);
