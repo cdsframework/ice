@@ -194,7 +194,6 @@
 [condition][]- [Tt]he [Ss]ize of the [Cc]ollection {oCollection} is {aOp}  {nNumeric:([0-9]+)([\\.][0-9]+)?}={oCollection}.size() {aOp} {nNumeric}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:([0-9]+)([\\.][0-9]+)?}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:([0-9]+)([\\.][0-9]+)?}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
-[condition][]- [Tt]he [Nn]umeric  {oNumericOne0:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Ss]tring {strObject} {aOp}  {strValue}={strObject} != null && {strObject} {aOp} {strValue} || {strObject} == null && {strValue} == null
 [condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=\\<\\>]+}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
