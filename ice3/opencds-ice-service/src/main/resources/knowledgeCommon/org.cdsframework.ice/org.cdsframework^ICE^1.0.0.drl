@@ -643,14 +643,15 @@ end
 // General Design rule... Do not Edit
 ///////// ***
 rule "HistoryEvaluation.setNextTargetDoseNonNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
-	dialect "mvel"
+	dialect "java"
 	when
-		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false, isPreEvaluationCheckCompleted() == false)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
-		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		not TargetDose(getStatus() == DoseStatus.EVALUATION_IN_PROCESS || getStatus() == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$td : TargetDose(getStatus() == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false, isPreEvaluationCheckCompleted() == false)
+		not TargetDose(getStatus() == DoseStatus.EVALUATION_NOT_STARTED, getAssociatedTargetSeries() == $td.getAssociatedTargetSeries(), getAdministrationDate() < $td.getAdministrationDate())
+		$ts : TargetSeries(this == $td.getAssociatedTargetSeries())
 	then
-		String _RULENAME = kcontext.rule.name;
+		/////// String _RULENAME = kcontext.rule.name;
+		String _RULENAME = drools.getRule().getName();
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "BEFORE: " + $td.toString() + " in TargetSeries " + $ts);
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
