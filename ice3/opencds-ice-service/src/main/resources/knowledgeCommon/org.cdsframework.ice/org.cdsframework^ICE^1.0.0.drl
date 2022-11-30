@@ -646,7 +646,7 @@ rule "HistoryEvaluation.setNextTargetDoseNonNOSInSeriesForEvaluation" ruleflow-g
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false, isPreEvaluationCheckCompleted() == false)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
