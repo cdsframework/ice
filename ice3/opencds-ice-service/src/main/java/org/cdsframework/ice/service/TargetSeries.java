@@ -3896,11 +3896,19 @@ public class TargetSeries {
 
 	@Override
 	public String toString() {
-		return "TargetSeries [getSeriesName()=" + getSeriesName()
+		String s = "TargetSeries [getSeriesName()=" + getSeriesName()
 		+ ", getVaccineGroup()=" + getVaccineGroup()
 		+ ", getTargetSeason()=" + getTargetSeason()
 		+ ", isSeriesComplete()=" + isSeriesComplete()
-		+ "]";
+		+ ", doseAfterWhichSeriesWasMarkedComplete()=" + getDoseAfterWhichSeriesWasMarkedComplete();
+		int i=1;
+		for (TargetDose targetDose : this.targetDoses) {
+			s += "\n    TargetDose " + i + "={" + targetDose + "}";
+			i++;
+		}
+		s += "\n]";
+
+		return s;
 	}
 
 
