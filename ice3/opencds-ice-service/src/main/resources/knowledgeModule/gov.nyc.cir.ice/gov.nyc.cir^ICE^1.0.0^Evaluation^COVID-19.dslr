@@ -481,7 +481,7 @@ rule "COVID-19: If 2 or more doses were administered >= 5 years of age in the Pf
 			- the dose number in the Series is > 2
 	then
 		Mark the Series $targetSeries complete
-		Refresh all facts in the Series $targetSeries
+		/////// Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $secondDose
 		Log that this dose rule fired for the dose $secondDose in the Series $targetSeries
 end
@@ -502,7 +502,7 @@ rule "COVID-19: If 2 or more doses of CVX 211 (Novavax) were administered in the
 		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "ICE211" is == 2
 	then
 		Mark the Series $targetSeries complete
-		Refresh all facts in the Series $targetSeries
+		/////// Refresh all facts in the Series $targetSeries
 		Log that this series rule fired for the Series $targetSeries
 end
 
