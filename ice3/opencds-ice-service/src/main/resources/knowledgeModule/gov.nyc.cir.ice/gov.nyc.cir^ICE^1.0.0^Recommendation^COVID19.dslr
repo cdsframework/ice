@@ -1083,7 +1083,7 @@ rule "COVID-19(Abstract): Recommend for completed the Pfizer, Moderna, Mixed Pro
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- make note of the effective dose number in the series as $effectiveDoseNumber
-			- the numeric $effectiveDoseNumber is <= $doseNumberAfterWhichComplete+3
+			- the numeric $effectiveDoseNumber is <= $doseNumberAfterWhichComplete+4
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated
@@ -1275,7 +1275,7 @@ end
 // postCustomRecommendation checks for FDA-approved or WHO-approved series
 //////////////
 
-// Because the Pfizer 2-dose, Moderna 2-dose and Janssen series have been configured as a recurring dose series; if a recommendation date is forecasted after the either of those series is already complete, add the recommendation reason "BOOSTER_DOSE"
+// Because the COVID-19 series have been configured as a recurring dose series; if a recommendation date is forecasted after the either of those series is already complete, add the recommendation reason "BOOSTER_DOSE"
 rule "COVID-19: If a dose is recommended in the Pfizer, Moderna, Mixed Product, Janssen or FDA-authorized/WHO series and the series is complete, add the recommendation reason BOOSTER_DOSE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
@@ -1293,7 +1293,7 @@ rule "COVID-19: If a dose is recommended in the Pfizer, Moderna, Mixed Product, 
 end
 
 
-// Because the Pfizer 2-dose, Moderna 2-dose, and Janssen series have been configured as a recurring dose series, if the recommendation reason for the Pfizer 2-dose series is NOT_RECOMMENDED, the reason has to manually be set to COMPLETE
+// Because the COVID-19 series have been configured as a recurring dose series, if the recommendation reason for the Pfizer 2-dose series is NOT_RECOMMENDED, the reason has to manually be set to COMPLETE
 rule "COVID-19: If Pfizer, Moderna, Mixed Product, Janssen or FDA-authorized/WHO Series is complete and a dose is NOT_RECOMMENDED (i.e. - 2 or more doses for Janseen; 3 or more doses for Pfizer/Moderna), add the recommendation reason to COMPLETE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when

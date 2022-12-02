@@ -1065,6 +1065,9 @@ rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were
 			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName == "ICE211")
 			and
 			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName != "ICE211")
+			or
+			// NOS administered for dose 1
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName == "ICE213", doseNumberInSeries == 1)
 		)
 		$tsmixedproduct : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19MixedProductSeries")
 	then
