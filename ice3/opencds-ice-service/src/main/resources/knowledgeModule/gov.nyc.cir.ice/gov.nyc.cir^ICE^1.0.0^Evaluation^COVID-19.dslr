@@ -82,7 +82,7 @@ rule "COVID-19: If an FDA-approved, NOS or WHO-approved vaccine, the vaccine is 
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE502", "ICE510", "ICE511", "ICE512")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301", "ICE502", "ICE510", "ICE511", "ICE512")
 			- the series that the shot belongs to is not complete
 			- make note of the administered vaccine as $vaccineAdministered
 			- make note of the dose number as $doseNumber
@@ -101,6 +101,30 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // END ACCEPTED vaccines in a wrong FDA-approved series
 //////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an administered shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that has already been evaluated
+			- make note of the administered shot number as $shotNumber
+			- make note of the associated series as $associatedTargetSeries
+		There is an IceFact $iceFact
+			- that has associated series $associatedTargetSeries
+			- that has associated administered shot $currentShot
+			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue
+		There does not exist an administered shot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is > $shotNumber
+	then
+		Remove Evaluation Reason "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" from Shot $currentShot
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
 
 
 /*************************************************************************************************************************************************************************************
@@ -246,7 +270,7 @@ rule "COVID-19: If the shot administration date is < 9/2/2022 and an extra dose 
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
