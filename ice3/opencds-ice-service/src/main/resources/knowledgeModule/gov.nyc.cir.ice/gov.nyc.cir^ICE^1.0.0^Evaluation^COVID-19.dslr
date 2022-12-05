@@ -275,12 +275,38 @@ end
 /************************************************************************************************/
 
 /*************************************************************************************************
- START >= 9/2/2022
+ START Boosters >= 9/2/2022
 /************************************************************************************************/
 
-// rule "COVID-19: If the execution date is >= 9/2/2022 and 3 extra doses (additional doses and/or 3 booster doses) have been administered, 
+rule "COVID-19(Abstract): Determination if additional dose and/or up to 3 booster dose(s) is permitted when adminstered >= 9/2/22 for >= 12 yrs of age, or when administered >= 10/12/2022 for >=5 yrs of age and < 12 yrs of age"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19Novavax2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
+			- the series that the shot belongs to is complete
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301")
+			- make note of the date this shot was administered as $currentShotDate
+			- the date $currentShotDate >= "02-Sep-2022"
+			- make note of the dose number as $doseNumberCurrentShot
+			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
+			- the numeric $doseNumberAfterWhichComplete is >= $doseNumberCurrentShot-4
+		There does not exist another administered shot
+			- the shot belongs to the series $targetSeries
+			- that is not the same shot as $currentShot
+			- make note of the date this shot was administered as $otherShotDate
+			- the date $otherShotDate >= "02-Sep-2022"
+			- that has already been evaluated and whose shot validity is VALID
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+ 
 
-rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 5 yr of age and have had an Additional Dose and/or 3 Booster Doses is administered in the __Pfizer, Moderna, Mixed Product, Janssen, Novavax or WHO-approved Series__, with not more than 1 booster after 9/2/2022, the shot is permitted"
+rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 12 yr of age and have had an Additional Dose and/or 3 Booster Doses is administered in the __Pfizer, Moderna, Mixed Product, Janssen, Novavax or WHO-approved Series__, with not more than 1 booster after 9/2/2022, the shot is permitted"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -288,15 +314,14 @@ rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 5 yr of age
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19Novavax2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
+			- the series that the shot belongs to is complete
 			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301")
 			- make note of the date this shot was administered as $currentShotDate
 			- the date $currentShotDate >= "02-Sep-2022"
 			- make note of the dose number as $doseNumberCurrentShot
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-			- the numeric $doseNumberAfterWhichComplete is < $doseNumberCurrentShot-2
 			- the numeric $doseNumberAfterWhichComplete is >= $doseNumberCurrentShot-4
 		There does not exist another administered shot
 			- the shot belongs to the series $targetSeries
@@ -305,8 +330,8 @@ rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 5 yr of age
 			- the date $otherShotDate >= "02-Sep-2022"
 			- that has already been evaluated and whose shot validity is VALID
 		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
-			- make note of the date as $dateAt5yOfAge when the patient is "5y" of age
-			- the date $currentShotDate >= $dateAt5yOfAge
+			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
+			- the date $currentShotDate >= $dateAt12yOfAge
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -314,7 +339,7 @@ rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 5 yr of age
 end
 
 
-rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 5 yr of age and have had an Additional Dose and/or 1st Booster Dose in the __Pfizer, Moderna, Mixed Product, Janssen, Novavax or WHO-approved Series__, the shot is permitted"
+rule "COVID-19: If the shot administration date is >= 10/12/2022 at >= 5 yrs of age and < 12 yrs of age, and has had an Additional Dose and/or 3 Booster Dose in the __Pfizer, Moderna, Mixed Product, Janssen, Novavax or WHO-approved Series__, with not more than 1 booster after 10/12/2022, the shot is permitted"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -322,24 +347,26 @@ rule "COVID-19: If the shot administration date is >= 9/2/2022 at >= 5 yr of age
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19Novavax2DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
+			- the series that the shot belongs to is complete
 			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301")
 			- make note of the date this shot was administered as $currentShotDate
-			- the date $currentShotDate >= "02-Sep-2022"
+			- the date $currentShotDate >= "12-Oct-2022"
 			- make note of the dose number as $doseNumberCurrentShot
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-			- the numeric $doseNumberAfterWhichComplete is >= $doseNumberCurrentShot-2
+			- the numeric $doseNumberAfterWhichComplete is >= $doseNumberCurrentShot-4
 		There does not exist another administered shot
 			- the shot belongs to the series $targetSeries
 			- that is not the same shot as $currentShot
 			- make note of the date this shot was administered as $otherShotDate
-			- the date $otherShotDate >= "02-Sep-2022"
+			- the date $otherShotDate >= "12-Oct-2022"
 			- that has already been evaluated and whose shot validity is VALID
 		The patient information $oEvaluatedPersonAbstract must be known to complete writing this rule
 			- make note of the date as $dateAt5yOfAge when the patient is "5y" of age
+			- make note of the date as $dateAt12yOfAge when the patient is "12y" of age
 			- the date $currentShotDate >= $dateAt5yOfAge
+			- the date $currentShotDate < $dateAt12yOfAge
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
