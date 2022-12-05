@@ -3900,12 +3900,13 @@ public class TargetSeries {
 		+ ", getVaccineGroup()=" + getVaccineGroup()
 		+ ", getTargetSeason()=" + getTargetSeason()
 		+ ", isSeriesComplete()=" + isSeriesComplete()
-		+ ", doseAfterWhichSeriesWasMarkedComplete()=" + getDoseAfterWhichSeriesWasMarkedComplete();
-		int i=1;
-		for (TargetDose targetDose : this.targetDoses) {
-			s += "; TargetDose " + i + "={" + targetDose + "}";
-			i++;
-		}
+		+ ", doseAfterWhichSeriesWasMarkedComplete()=" + getDoseAfterWhichSeriesWasMarkedComplete()
+		+ ", number of targetDose(s)=" + this.targetDoses.size();
+		/////// int i=1;
+		/////// for (TargetDose targetDose : this.targetDoses) {
+		///////	s += "; TargetDose " + i + "={" + targetDose + "}";
+		///////	i++;
+		/////// }
 		s += " ]";
 
 		return s;

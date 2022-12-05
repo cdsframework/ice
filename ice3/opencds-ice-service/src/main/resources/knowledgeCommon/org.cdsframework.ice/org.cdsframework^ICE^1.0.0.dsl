@@ -39,7 +39,7 @@
 [condition][]There is {entity:an |another |}[Aa]dministered [Ss]hot {assign_oTargetDose} that needs to be [Ee]valuated={assign_oTargetDose} : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS)
 [condition][]There is {entity:an |}[Aa]dministered [Ss]hot {assign_oTargetDose} distinct from {assign_oOtherTargetDose}={assign_oTargetDose} : TargetDose(uniqueId != {assign_oOtherTargetDose}.uniqueId)
 [condition][]There is {entity:an |}[Aa]dministered [Ss]hot {assign_oTargetDose}={assign_oTargetDose} : TargetDose()
-[condition][]- [Tt]he [Uu]nique [Ii]dentifier of the [Ss]hot is {aOp} {sUniqueId}={sUniqueId} {aOp} uniqueId 
+[condition][]- [Tt]he [Uu]nique [Ii]dentifier of the [Ss]hot is {aOp} {sUniqueId}={sUniqueId} {aOp} uniqueId
 [condition][]- [Tt]hat is the [Ss]ame [Ss]hot as {refer_oTargetDose}=this == {refer_oTargetDose} 
 [condition][]- [Tt]hat is [Nn]ot the [Ss]ame [Ss]hot as {refer_oTargetDose}=this != {refer_oTargetDose} 
 [condition][]- [Tt]he [Ss]hot has [Nn]ot been [Ee]valuated yet=status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.EVALUATION_NOT_STARTED
@@ -189,6 +189,7 @@
 [condition][]- [Mm]ake [Nn]ote of [Aa]ll [Vv]accines [Pp]ermitted for [Dd]ose {nDoseNumber} in the [Ss]eries as {assign_oListVaccines}={assign_oListVaccines} : getAllPermittedVaccinesForTargetDose({nDoseNumber})
 [condition][]- [Mm]ake [Nn]ote of the [Aa]llowable [Vv]accines for [Dd]ose {nDoseNumber} in the [Ss]eries as {assign_oListVaccines}={assign_oListVaccines} : getAllowableVaccinesForTargetDose({nDoseNumber})
 [condition][]- [Mm]ake [Nn]ote of the [Pp]referable [Vv]accines for [Dd]ose {nDoseNumber} in the [Ss]eries as {assign_oListVaccines}={assign_oListVaccines} : getPreferableVaccinesForTargetDose({nDoseNumber})
+[condition][]- [Mm]ake [Nn]ote of the [Ff]inal [Rr]ecommendations as {assign_oRecommendations}={assign_oRecommendations} : finalRecommendations, {assign_oRecommendations} != null
 [condition][]- [Tt]he [Cc]ollection {oCollection} contains {oCollectionElement}={oCollection} contains {oCollectionElement}
 [condition][]- [Tt]he [Cc]ollection {oCollection} does not contain {oCollectionElement}={oCollection} not contains {oCollectionElement}
 [condition][]- [Tt]he [Ss]ize of the [Cc]ollection {oCollection} is {aOp}  {nNumeric:([0-9]+)([\\.][0-9]+)?}={oCollection}.size() {aOp} {nNumeric}
@@ -197,13 +198,19 @@
 [condition][]- [Tt]he [Ss]tring {strObject} {aOp}  {strValue}={strObject} != null && {strObject} {aOp} {strValue} || {strObject} == null && {strValue} == null
 [condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=\\<\\>]+}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
- 
+
+
 //
 // TargetDose accumulates
 //
 [condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 [condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine {dd_oVaccineCdsListItem} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || $td.administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 [condition][]Verify that the [Uu]nique [Cc]ount of [Ss]hots [Aa]dministered in Series {refer_oTargetSeries} by [Dd]ate is {aOp_num}  {nNumberOfShots}=Set(size {aOp_num} {nNumberOfShots}) from accumulate(TargetDose($shotDate : administrationDate) from {refer_oTargetSeries}.targetDoses, collectSet($shotDate))
+
+//
+// TargetSeries accumulates
+//
+[condition][]Verify that the [Cc]ount of [Rr]ecommendations in Series {refer_oTargetSeries} with [Rr]ecommendation [Ss]tatus {oRecommendationStatus} and a populated [Rr]eason is {aOp_num}  {nNumberOfRecommendations}=accumulate($recommendations : Recommendation(recommendationStatus == {oRecommendationStatus}, recommendationReason != null) from {refer_oTargetSeries}.finalRecommendations; $countNum : count($recommendations); $countNum {aOp_num}  {nNumberOfRecommendations})
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
