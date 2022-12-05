@@ -36,19 +36,19 @@ import org.cdsframework.ice.util.TimePeriod.DurationType;
 import org.kie.api.definition.type.ClassReactive;
 
 /**
- * Interim recommendation class to store information that is used to determine a final recommendation. All information stored in instantiated Recommendation objects are utilized to determine 
+ * Interim recommendation class to store information that is used to determine a final recommendation. All information stored in instantiated Recommendation objects are utilized to determine
  * the recommended status, recommended vaccine, recommendation (i.e.- forecast) dates, and recommendation reasons. Note, however, that this class only stores one forecast date. If additional dates are
- * to be considered for the forecast, it must be added to a separate instantiated object. Various forecast dates are taken into consideration by different rules (e.g. - age and interval rules) and by 
- * the type of forecast (e.g. - earliest, recommended, and latest recommended). 
+ * to be considered for the forecast, it must be added to a separate instantiated object. Various forecast dates are taken into consideration by different rules (e.g. - age and interval rules) and by
+ * the type of forecast (e.g. - earliest, recommended, and latest recommended).
  */
 @ClassReactive
 public class Recommendation {
-	
+
 	public enum RecommendationDateType { EARLIEST, EARLIEST_RECOMMENDED, LATEST_RECOMMENDED }
-	
+
 	private String recommendationIdentifier;
 	private String targetSeriesIdentifier;
-	private RecommendationStatus recommendationStatus;	
+	private RecommendationStatus recommendationStatus;
 	private Vaccine recommendedVaccine;
 	private Date earliestDate;
 	private Date recommendationDate;
@@ -57,16 +57,16 @@ public class Recommendation {
 	private String recommendationSupplementalText;
 
 	private static final Logger logger = LogManager.getLogger();
-	
+
 	/**
-	 * Initializes a Recommendation object; recommendationReason is set to empty (it is never null), TargetSeriesIdentifier to the supplied 
+	 * Initializes a Recommendation object; recommendationReason is set to empty (it is never null), TargetSeriesIdentifier to the supplied
 	 * TargetSeries tSeriesIdentifier, and all other attributes to null
 	 * @param pTargetSeriesIdentifier unique identifier of series that is populated in this objects TargetSeriesIdentifier
 	 * @throws IllegalArgumentException if supplied identifier is null
 	 */
-	public Recommendation(TargetSeries pTS) 
+	public Recommendation(TargetSeries pTS)
 		throws IllegalArgumentException {
-		
+
 		String _METHODNAME = "Recommendation(): ";
 		if (pTS == null) {
 			String errStr = "Supplied target series identifier is null";
@@ -84,7 +84,7 @@ public class Recommendation {
 		recommendationReason = null;
 		recommendationSupplementalText = null;
 	}
-	
+
 	public String getRecommendationIdentifier() {
 		return recommendationIdentifier;
 	}
@@ -107,7 +107,7 @@ public class Recommendation {
 		}
 		this.recommendationStatus = recommendationStatus;
 	}
-	
+
 	public Vaccine getRecommendedVaccine() {
 		return recommendedVaccine;
 	}
@@ -139,7 +139,7 @@ public class Recommendation {
 	public void setLatestRecommendationDate(Date latestRecommendationDate) {
 		this.latestRecommendationDate = latestRecommendationDate;
 	}
-	
+
 	/**
 	 * Sets the latest recommendation date to the overdue date - 1 days
 	 */
@@ -165,29 +165,29 @@ public class Recommendation {
 			this.recommendationReason = recommendationReason;
 		}
 	}
-	
+
 	public String getRecommendationSupplementalText() {
 		return recommendationSupplementalText;
 	}
 
 	public void setRecommendationSupplementalText(String pRecommendationSupplementalText) {
 		this.recommendationSupplementalText = pRecommendationSupplementalText;
-	}	
-	
+	}
+
 	/**
-	 * Return a subset of the supplied Recommendation List with a List of those Recommendations that have the same RecommendationStatuses as the ones 
-	 * supplied. If the supplied recommendation list is null or is empty, return an empty list. If there are no recommendations in the list with the 
-	 * supplied RecommendsationStatuses, 
+	 * Return a subset of the supplied Recommendation List with a List of those Recommendations that have the same RecommendationStatuses as the ones
+	 * supplied. If the supplied recommendation list is null or is empty, return an empty list. If there are no recommendations in the list with the
+	 * supplied RecommendsationStatuses,
 	 * return an empty list.
 	 * @param recList
 	 * @param recStatusOfInterest
 	 */
 	public static List<Recommendation> getRecommendationListSubsetWithSpecifiedStatuses(List<Recommendation> recList, List<RecommendationStatus> recStatusListOfInterest) {
-		
+
 		if (recList == null || recList.size() == 0 || recStatusListOfInterest == null || recStatusListOfInterest.size() == 0) {
 			return new ArrayList<Recommendation>();
 		}
-		
+
 		List<Recommendation> lSubset = new ArrayList<Recommendation>();
 		for (Recommendation lRec : recList) {
 			RecommendationStatus lRecStatus = lRec.getRecommendationStatus();
@@ -197,10 +197,10 @@ public class Recommendation {
 				}
 			}
 		}
-		
+
 		return lSubset;
 	}
-	
+
 	public static Date obtainMostRecentEarliestDateFromRecommendationsList(List<Recommendation> recommendationsList) {
 
 		if (recommendationsList == null) {
@@ -266,7 +266,7 @@ public class Recommendation {
 
 		return latestDate;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -303,5 +303,5 @@ public class Recommendation {
 				+ recommendationReason + ", supplementalTest="
 				+ recommendationSupplementalText + " ]";
 	}
-	
+
 }
