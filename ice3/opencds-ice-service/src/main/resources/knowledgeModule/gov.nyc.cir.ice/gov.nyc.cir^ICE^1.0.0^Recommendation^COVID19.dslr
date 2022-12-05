@@ -723,14 +723,13 @@ end
 // START Pfizer, Moderna, Mixed Product, Janssen, WHO - >= 9/2/2022
 ////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19(Abstract): If the execution date is >= 9/2/2022, recommend for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
+rule "COVID-19(Abstract): If the execution date is >= 9/2/2022, determine recommendation for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the Series is complete
-			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- make note of the effective dose number in the series as $effectiveDoseNumber
 			- the numeric $effectiveDoseNumber is <= $doseNumberAfterWhichComplete+4
@@ -758,7 +757,7 @@ end
 
 // Pfizer, Moderna, Mixed Product or WHO-approved Series - 10/12/2022 for ages >= 5 yrs and < 12 yrs
 rule "COVID-19: If the execution date is >= 10/12/2022 and the patient >= 5y and < 12y has completed the Pfizer, Moderna, Mixed Product or WHO-approved Series along with up to 3 extra doses, then recommend a booster dose at earliest/recommended age of 5y & 10/12/2022 w/ earliest/recommended interval of 8 weeks"
-		extends "COVID-19(Abstract): If the execution date is >= 9/2/2022, recommend for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
+		extends "COVID-19(Abstract): If the execution date is >= 9/2/2022, determine recommendation for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -785,7 +784,7 @@ end
 
 // Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series - 9/2/2022 for >= 12 yrs
 rule "COVID-19: If the execution date is >= 9/2/2022 and the patient >= 12y and has completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series with up to 3 extra doses, then recommend a booster dose at earliest/recommended age of 5y & 9/2/2022 w/ earliest/recommended interval of 8 weeks"
-		extends "COVID-19(Abstract): If the execution date is >= 9/2/2022, recommend for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
+		extends "COVID-19(Abstract): If the execution date is >= 9/2/2022, determine recommendation for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
