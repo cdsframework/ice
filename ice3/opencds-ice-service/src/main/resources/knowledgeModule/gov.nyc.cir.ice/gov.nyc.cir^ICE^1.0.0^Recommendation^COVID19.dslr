@@ -226,7 +226,7 @@ end
 ////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////
-// START - 1st Booster Dose - < 9/2 - Novavax
+// START - 1st Booster Dose - < 9/2 - Novavax - 5 month interval
 ////////////////////////////////////////////////////////////////////////////////////
 
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 12y of age and has completed the Novavax Series along with no extra doses, then recommend a booster dose at earliest/recommended age of 12y w/ earliest/recommended interval of 5 months"
@@ -266,7 +266,7 @@ rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 12y of ag
 end
 
 ////////////////////////////////////////////////////////////////////////////////////
-// END - 1st Booster Dose - < 9/2 - Novavax
+// END - 1st Booster Dose - < 9/2 - Novavax - 5 month interval
 ////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -677,64 +677,6 @@ rule "COVID-19: If the execution date is anytime (before, on, or after 9/2/2022)
        	Log that this Series Rule fired for the Series $targetSeries
        	/////// Log debugging information about object named "doseNumberAfterWhichComplete" and value $doseNumberAfterWhichComplete
 end
-
-
-////////////////////////////////////////////////////////////////////////////////////
-// Novavax - Anytime - recommendation of NOT_RECOMMENDED when < 12 years of age
-////////////////////////////////////////////////////////////////////////////////////
-
-rule "COVID-19: If the patient is >= 5 yrs and < 12 years of age and has completed any Series with all Novavax doses, then recommend Not Recommended / COMPLETE_HIGH_RISK"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
-			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
-		There does not exist an administered shot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered is not "ICE211"
-			- the dose number in the series is <= $doseNumberAfterWhichComplete
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-			- make note of the date as $dtAtAge12y when the Patient is "12y" of age
-			- the date evalTime >= $dtAtAge5y
-			- the date evalTime < $dtAtAge12y
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "COVID-19: If the patient is < 5 yrs of age and has completed any Series with all Novavax doses, then recommend Not Recommended / COMPLETE"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the Series is complete
-			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-		There does not exist an administered shot
-			- the shot belongs to the series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered is not "ICE211"
-			- the dose number in the series is <= $doseNumberAfterWhichComplete
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-			- the date evalTime < $dtAtAge5y
-	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Novavax - >= 9/2/2022 - Only one booster dose recommended, after which recommendation is NOT_RECOMMENDED / COMPLETE
