@@ -803,7 +803,7 @@ public class TargetSeries {
 					// BEGIN: Determine if the disease tally should be incremented or not - based on whether (1) this shot is valid; (2) it counts towards completion of the series,
 					// and/or (3) it is a duplicate shot, taking into account targeted diseases if this series bases its dose count on the count of targeted diseases
 					boolean lIncrementDoseNumber = false;
-					if (statusThisTD == DoseStatus.VALID && td.isShotIgnoredForCompletionOfSeries() == false) {
+					if (statusThisTD == DoseStatus.VALID && td.isShotIgnored() == false) {
 						boolean lDoseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered();
 						if (lDuplicateShotSameDayValidDoseFoundDate != null) {
 							// If duplicate shot same day valid dose found date is not null, then it is equal to this shot date or it would have been null'd above
@@ -1049,7 +1049,7 @@ public class TargetSeries {
 			Iterator<TargetDose> tdIter = targetDoses.descendingIterator();
 			while (tdIter.hasNext()) {
 				TargetDose td = tdIter.next();
-				if (! td.isShotIgnoredForCompletionOfSeries()) {
+				if (! td.isShotIgnored()) {
 					lastDoseAdministered = td;
 					break;
 				}
@@ -3896,11 +3896,20 @@ public class TargetSeries {
 
 	@Override
 	public String toString() {
-		return "TargetSeries [getSeriesName()=" + getSeriesName()
+		String s = "TargetSeries [ getSeriesName()=" + getSeriesName()
 		+ ", getVaccineGroup()=" + getVaccineGroup()
 		+ ", getTargetSeason()=" + getTargetSeason()
 		+ ", isSeriesComplete()=" + isSeriesComplete()
-		+ "]";
+		+ ", doseAfterWhichSeriesWasMarkedComplete()=" + getDoseAfterWhichSeriesWasMarkedComplete()
+		+ ", number of targetDose(s)=" + this.targetDoses.size();
+		/////// int i=1;
+		/////// for (TargetDose targetDose : this.targetDoses) {
+		///////	s += "; TargetDose " + i + "={" + targetDose + "}";
+		///////	i++;
+		/////// }
+		s += " ]";
+
+		return s;
 	}
 
 

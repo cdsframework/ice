@@ -1,5 +1,8 @@
 substitutions:
+  _CONTAINER_NAME: ice
+  _GCR_HOSTNAME: gcr.io
   _GCS_CACHE_BUCKET: ice-mvn-cache
+  _GCP_VM_HOSTNAME: ice-01-redux
 
 steps:
   # load the cache from GCS if it exists
@@ -18,6 +21,9 @@ steps:
       - name: m2
         path: /root/.m2/
 
+  - name: gcr.io/cloud-builders/git
+    args: ["fetch", "--unshallow"]
+
   # build opencds-knowledge-repository-data dep first
   - name: "maven:3-jdk-8-slim"
     entrypoint: "mvn"
@@ -33,8 +39,8 @@ steps:
     entrypoint: "mvn"
     args:
       [
-        "-P drools-7",
         "-DskipTests",
+        "-DskipITs",
         "-Dmaven.compiler.source=1.8",
         "-Dmaven.compiler.target=1.8",
         "install",
@@ -96,16 +102,64 @@ steps:
     args:
       [
         "build",
-        "--tag=gcr.io/$PROJECT_ID/ice:$BRANCH_NAME",
+        "--tag=${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}:$BRANCH_NAME",
+        "--tag=${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}:$SHORT_SHA",
         "-f",
         ".gcp.config/Dockerfile",
         ".",
       ]
     dir: "."
 
-  # update the vm instance image
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['compute','instances','update-container','ice-01','--zone','us-central1-c','--project', 'cdsframework', '--container-image=gcr.io/cdsframework/ice:cds']
+  - name: "gcr.io/cloud-builders/docker"
+    id: docker-push
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        docker push ${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}:$BRANCH_NAME
+        docker push ${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}:$SHORT_SHA
 
-images: ["gcr.io/$PROJECT_ID/ice"]
+  # stop the vm instance
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "compute",
+        "instances",
+        "stop",
+        "${_GCP_VM_HOSTNAME}",
+        "--zone",
+        "us-central1-c",
+        "--project",
+        "${PROJECT_ID}",
+      ]
+
+  # update the vm instance image
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "compute",
+        "instances",
+        "update-container",
+        "${_GCP_VM_HOSTNAME}",
+        "--zone",
+        "us-central1-c",
+        "--project",
+        "${PROJECT_ID}",
+        "--container-image=${_GCR_HOSTNAME}/${PROJECT_ID}/${_CONTAINER_NAME}:${SHORT_SHA}",
+      ]
+
+  # start the vm instance
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "compute",
+        "instances",
+        "start",
+        "${_GCP_VM_HOSTNAME}",
+        "--zone",
+        "us-central1-c",
+        "--project",
+        "${PROJECT_ID}",
+      ]
+
 timeout: 900s

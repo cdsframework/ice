@@ -47,7 +47,7 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
  
 
 // Overrides routine recommendationAgeCheck
-rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 19 Years and No Previously Administered Doses"
+rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 60 Years and No Previously Administered Doses"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationAgeCheck"
     when
@@ -56,7 +56,7 @@ rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 19 Years and No
         	- the number of Administered Shots is == 0
         The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- make note of the patient's birthdate as $dtBirthDate
-        Confirm elapsed time between $dtBirthDate and evalTime >= 19 DurationType.YEARS
+        Confirm elapsed time between $dtBirthDate and evalTime >= 60 DurationType.YEARS
     then
         Add "19y" to $dtBirthDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
@@ -65,11 +65,12 @@ rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 19 Years and No
 end
 
 // The interval between dose 1 & 3 of HepB needs to be at least 112 days for Recommendation. Routine interval rule still runs
-rule "HepB: Recommend both an earliest interval and recommended interval of at least 112 days between doses 1 & 3"
+rule "HepB: Recommend both an earliest interval and recommended interval of 112 days between doses 1 & 3 for Child/Adolescent Series"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the name of the series is "HepBChildAdolescentSeries"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
 		There is an Administered Shot $dose1
@@ -86,6 +87,33 @@ rule "HepB: Recommend both an earliest interval and recommended interval of at l
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+// The interval between dose 1 & 3 of HepB needs to be at least 112 days for Recommendation. Routine interval rule still runs
+rule "HepB: Recommend both an earliest interval of 112 days and recommended interval of 6 months between doses 1 & 3 for Adult 3-dose Series"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the name of the series is "HepBAdult3DoseSeries"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "112d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculatedMinimum
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculatedRecommended
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculatedMinimum
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculatedRecommended
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
 
 // Recommend at the vaccine level, CVX 189 (Hep B adjuvanted) vaccine, when recommending for the Hep B 2-dose Adult Series
 rule "Hep B: Recommend CVX 189 (Hep B adjuvanted) for the Hep B 2-dose Adult Series"

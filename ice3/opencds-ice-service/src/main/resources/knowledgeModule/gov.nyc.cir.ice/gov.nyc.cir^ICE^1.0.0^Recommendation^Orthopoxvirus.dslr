@@ -60,7 +60,7 @@ rule "Orthopoxvirus: If no shots have been administered, recommended CONDITIONAL
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.860"
-			- the number of administered shots is == 0
+			- the number of doses administered is == 0
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
@@ -69,6 +69,25 @@ rule "Orthopoxvirus: If no shots have been administered, recommended CONDITIONAL
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+rule "Orthopoxvirus: If one dose has been administered in 2-dose Orthopoxvirus series (and the series is therefore not complete), recommend CVX 206 at the vaccine level"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.860"
+			- the name of the Series is "Orthopoxvirus2DoseSeries"
+			- the Series is not complete
+			- the number of doses administered is == 1
+	then
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $recommendation to "ICE206"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
 
 /*
 rule "Orthopoxvirus: If the patient has completed an Orthopoxvirus Series and no extra doses have been administered, then recommend CONDTIIONAL / HIGH_RISK and BOOSTER_DOSE"

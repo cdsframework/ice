@@ -75,7 +75,7 @@ end
 
 
 // If a (valid) PCV15 dose has been administered and a (valid) PPSV23 dose in the Adult series, the series is complete.
-rule "Pneumococcal Adult: if a (valid) PCV15 dose and (valid) PPSV23 dose has been in administered in the Adult series, the series is complete"
+rule "Pneumococcal Adult: if a (valid) PCV15 dose and (valid) PPSV23 dose has been administered in the Adult series, the series is complete"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
@@ -264,7 +264,7 @@ General Pneumococcal Adult Rules - Series Evaluation Rule for Pneumococcal Adult
  Otherwise, if a PCV is administered for dose 1 of the Adult series, then a PPSV must be administered for dose 2 of the adult series.  
 /************************************************************************************************************************************************************************************/
 
-rule "If a PPSV is administered for dose 1 of the Adult series, then a PCV15, PCV20 or PCV13 must be administered for the 2nd dose in the Adult series"
+rule "If a PPSV is administered for dose 1 of the Adult series and the patient < 65 years of age, then a PCV15, PCV20 or PCV13 must be administered for the 2nd dose in the Adult series"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -283,6 +283,9 @@ rule "If a PPSV is administered for dose 1 of the Adult series, then a PCV15, PC
 			- the dose number in the Series is == 6
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE33", "ICE216")
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $birthdate
+		Confirm elapsed time between $birthdate and $currentShotDate < "65y"
 	then
 		Include the reason for shot $currentShot Invalid due to "Vaccine not Permitted for this Dose"
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -314,6 +317,31 @@ rule "If a PCV15, PCV20 or PCV13 dose is administered for dose 1 of the Adult se
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+
+rule "If only PPSV23 has been administered for dose 1 or dose 2 of the Adult series, then a PCV15, PCV20 or PCV13 must be administered for the 3rd dose in the Adult series"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
+			- the series that the shot belongs to is not complete
+			- the dose number in the Series is == 8
+			- the vaccine administered not a member of ("ICE215", "ICE216", "ICE133")
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an administered shot
+			- the shot belongs to the series $associatedTargetSeries
+			- the dose number in the series is one of (6, 7)
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered a member of ("ICE215", "ICE216", "ICE133")
+	then
+		Include the reason for shot $currentShot Invalid due to "Vaccine not Permitted for this Dose"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
 /*************************************************************************************************************************************************************************************
  END If a PPSV is administered for dose 1 of the Adult series, then a PCV must be administered for dose 2 of the adult series.
  Otherwise, if a PCV is administered for dose 1 of the Adult series, then a PPSV must be administered for dose 2 of the adult series.  
@@ -324,7 +352,7 @@ end
 /************************************************************************************************************************************************************************************/
 
 // If a Valid of Accepted PCV shot was previously administered before target dose 1 of the Adult Series, target dose 1 is not required; skip to target dose 2.
-rule "Pneumococcal Adult: If a Valid or Accepted PCV13 (CVX 133) shot was previously administered before Adult target dose 1, skip to Adult target dose 2"
+rule "Pneumococcal Adult: If a Valid or Accepted PCV13 or PCV15 (CVX 133 or CVX 215) shot was previously administered before Adult target dose 1, skip to Adult target dose 2"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	salience 200
@@ -340,7 +368,7 @@ rule "Pneumococcal Adult: If a Valid or Accepted PCV13 (CVX 133) shot was previo
 			- the administration date of the shot is <= $currentShotDate
 			- the dose number in the Series is < 6
 			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- the vaccine administered is "ICE133"
+			- the vaccine administered a member of ("ICE133", "ICE215")
 	then
 		Set Dose Number of $currentShot to 7
 		Skip Series Dose Number to 7 from 6 for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $associatedTargetSeries
@@ -348,7 +376,7 @@ rule "Pneumococcal Adult: If a Valid or Accepted PCV13 (CVX 133) shot was previo
 end
 
 
-rule "Pneumococcal Adult: If an Accepted PCV13 (CVX 133) shot was previously administered as Adult target dose 1, skip to Adult target dose 2"
+rule "Pneumococcal Adult: If an Accepted PCV13 or PCV15 (CVX 133 or CVX 215) shot was previously administered as Adult target dose 1, skip to Adult target dose 2"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	no-loop true
@@ -357,7 +385,7 @@ rule "Pneumococcal Adult: If an Accepted PCV13 (CVX 133) shot was previously adm
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with Name "PneumococcalSeries"
 			- the dose number in the Series is <= 6
 			- that has already been evaluated and whose shot validity is ACCEPTED
-			- the vaccine administered is "ICE133"
+			- the vaccine administered a member of ("ICE133", "ICE215")
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the effective dose number in the Series is == 6
@@ -563,13 +591,13 @@ then a dose of PCV 13 (CVX 133) is recommended. Recommended interval is 8 weeks
 /************************************************************************************************************************************************************************************/
 
 // Abstract rule for PCV13 rule: patient < 5yrs of age, series is complete and no prior PCV shots until the current shot under evaluation
-rule "Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs where Child Series is otherwise complete but there are no prior PCV doses"
+rule "Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs where Child Series is otherwise complete but there are no prior PCV13 or PCV15 doses"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the vaccine administered is "ICE133"
+			- the vaccine administered a member of ("ICE133", "ICE215")
 			- make note of the administered shot number as $nShotNumber
 			- make note of the Date this Shot was Administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
@@ -583,7 +611,7 @@ rule "Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs 
 			- the effective dose number in the series is == 5
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "ICE133" is == 0
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("ICE133", "ICE215") is == 0
 		Confirm elapsed time between $dtBirthDate and $administrationDate < "5y"
 	then
 		Record that this dose rule was processed for the TargetDose $currentShot
@@ -594,7 +622,7 @@ end
 // If a child is already complete for the series, has not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old in the Child Series, then this PCV 13 shot 
 // is evaluated to VALID as long as an interval of 52 days has elapsed since last shot.
 rule "Pneumococcal Child Series: Evaluate PCV Shot as Valid if Patient < 5yrs, interval is >= 52 days and Series is Complete" extends 
-		"Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs where Child Series is otherwise complete but there are no prior PCV doses"
+		"Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs where Child Series is otherwise complete but there are no prior PCV13 or PCV15 doses"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
@@ -611,7 +639,7 @@ end
 // If a child is already complete for the series, and this shot is PCV 13 (CVX 133), is currently < 5 yrs old, then this PCV 13 shot is evaluated to INVALID if an interval 
 // of 52 days has not elapsed since last shot.
 rule "Pneumococcal Child Series: Evaluate PCV Shot as Invalid if Patient < 5yrs, interval is < 52 days and Series is Complete" extends 
-		"Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs where Child Series is otherwise complete but there are no prior PCV doses"
+		"Pneumococcal(Abstract): Child Series- PCV Shot is need for patient < 5yrs where Child Series is otherwise complete but there are no prior PCV13 or PCV15 doses"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
