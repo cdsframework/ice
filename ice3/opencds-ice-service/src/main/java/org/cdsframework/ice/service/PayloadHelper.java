@@ -574,15 +574,16 @@ public class PayloadHelper {
 							if (lSupplementalTextFound && outputSupplementalText) {
 								localCDInterp.setOriginalText(rec.getRecommendationSupplementalText());
 							}
-							if ((localCDInterp != null) && (outputRuleName == true) && (rec.getRuleName() != null)) {
-								localCDInterp.setAny(rec.getRuleName());
-							}
 							if (! interpretations.contains(localCDInterp)) {
 								interpretations.add(localCDInterp);
+							}
+							if ((localCDInterp != null) && (outputRuleName == true) && (rec.getRuleName() != null)) {
+								localCDInterp.setAny(rec.getRuleName());
 							}
 						}
 					}
 				}
+			}
 			if (interpretations.size() > 0)
 				childObs.setInterpretation(interpretations);
 		}
