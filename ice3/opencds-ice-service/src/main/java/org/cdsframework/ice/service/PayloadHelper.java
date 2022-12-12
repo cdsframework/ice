@@ -577,11 +577,12 @@ public class PayloadHelper {
 							if ((localCDInterp != null) && (outputRuleName == true) && (rec.getRuleName() != null)) {
 								localCDInterp.setAny(rec.getRuleName());
 							}
-							interpretations.add(localCDInterp);
+							if (! interpretations.contains(localCDInterp)) {
+								interpretations.add(localCDInterp);
+							}
 						}
 					}
 				}
-			}
 			if (interpretations.size() > 0)
 				childObs.setInterpretation(interpretations);
 		}

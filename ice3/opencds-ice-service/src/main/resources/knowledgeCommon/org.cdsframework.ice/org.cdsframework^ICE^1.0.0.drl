@@ -799,8 +799,8 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 	agenda-group "HistoryEvaluation^makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval(// $tdprev.isShotIgnoredForCompletionOfSeries() == false || 
-			$tdprev.isShotIgnoredForCompletionOfSeries() == false && 
+		eval(// $tdprev.isShotIgnored() == false || 
+			$tdprev.isShotIgnored() == false && 
 			($doseNumber > $targetSeries.getSeriesRules().getNumberOfDosesInSeries() && $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false) || 
 			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null && 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() != null &&
@@ -826,7 +826,7 @@ rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 d
 	agenda-group "HistoryEvaluation^makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
 	when
-		eval($tdprev.isShotIgnoredForCompletionOfSeries() == true || 
+		eval($tdprev.isShotIgnored() == true || 
 			(($doseNumber <= $targetSeries.getSeriesRules().getNumberOfDosesInSeries() || $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == true) &&
 			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) == null || 
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() == null ||
@@ -941,7 +941,7 @@ rule "HistoryEvaluation.setDoseEvaluationStatusValid" ruleflow-group "HistoryEva
 		modify($td) {
 			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
 			addDoseRuleProcessed(_RULENAME),
-			setStatus(DoseStatus.VALID);					// Also sets hasBeenEvaluated flag to true
+			setStatus(DoseStatus.VALID);
 		}
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
@@ -1082,8 +1082,8 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval" ruleflow-group "His
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $admindose: administeredShotNumberInSeries >= 2, $doseNumber : doseNumberInSeries, $tddate : administrationDate, 
 			$tdAssociatedTargetSeries : associatedTargetSeries)
 		$tdprev : TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administeredShotNumberInSeries < $admindose, administrationDate < $tddate, 
-			isShotIgnoredForCompletionOfSeries() == false, $tdprevdate : administrationDate)
-		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate, isShotIgnoredForCompletionOfSeries() == false)
+			isShotIgnored() == false, $tdprevdate : administrationDate)
+		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate, isShotIgnored() == false)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, this == $tdprev.associatedTargetSeries, seriesRules.numberOfDosesInSeries >= $doseNumber)
 		not (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1, 
 			associatedTargetDose.administeredShotNumberInSeries == $admindose-1))
@@ -1115,8 +1115,8 @@ rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasona
 		not TargetSeries(targetSeriesIdentifier != $tsprev.targetSeriesIdentifier, targetSeason != null, vaccineGroup == $vaccineGroup,
 			targetDoses.size() > 0, targetSeason.fullySpecifiedSeasonStartDate.isAfter($tseasonPrev.getFullySpecifiedSeasonStartDate()) && 
 			targetSeason.fullySpecifiedSeasonStartDate.isBefore($tseason.getFullySpecifiedSeasonStartDate()))
-		$lastFromPrev: TargetDose(associatedTargetSeries == $tsprev, isShotIgnoredForCompletionOfSeries() == false, $shotNumber: administeredShotNumberInSeries)
-		not TargetDose(associatedTargetSeries == $tsprev, isShotIgnoredForCompletionOfSeries() == false, administeredShotNumberInSeries > $shotNumber)
+		$lastFromPrev: TargetDose(associatedTargetSeries == $tsprev, isShotIgnored() == false, $shotNumber: administeredShotNumberInSeries)
+		not TargetDose(associatedTargetSeries == $tsprev, isShotIgnored() == false, administeredShotNumberInSeries > $shotNumber)
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, $lastFromPrev);
