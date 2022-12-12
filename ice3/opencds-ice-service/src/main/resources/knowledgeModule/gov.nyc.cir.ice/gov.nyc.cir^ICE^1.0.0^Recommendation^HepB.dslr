@@ -58,7 +58,7 @@ rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 60 Years and No
         	- make note of the patient's birthdate as $dtBirthDate
         Confirm elapsed time between $dtBirthDate and evalTime >= 60 DurationType.YEARS
     then
-        Add "19y" to $dtBirthDate and make note of the newly calculated date as $dtCalculated
+        Add "60y" to $dtBirthDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries

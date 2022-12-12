@@ -149,9 +149,9 @@ rule "Duplicate Shots/Same Day (COVID-19): If an FDA-approved vaccine and a WHO-
 	auto-focus true
 	salience 10
 	when
-		$tdfda: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE207", "ICE221", "ICE227", "ICE228"))
+		$tdfda: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE207", "ICE208", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301"))
 		$tdwho : TargetDose(this != $tdfda, associatedTargetSeries == $tdfda.associatedTargetSeries, doseNumberInSeries == $tdfda.doseNumberInSeries, administrationDate == $tdfda.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, 
-			administeredVaccine.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE207", "ICE221", "ICE227", "ICE228"), isDuplicateShotSameDayCheckCompleted() == false || $tdfda.isDuplicateShotSameDayCheckCompleted() == false)
+			administeredVaccine.cdsConceptName not in ("ICE207", "ICE208", "ICE211", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301"), isDuplicateShotSameDayCheckCompleted() == false || $tdfda.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdwho) {
