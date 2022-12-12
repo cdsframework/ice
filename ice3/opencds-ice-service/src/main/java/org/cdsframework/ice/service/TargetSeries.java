@@ -3900,8 +3900,8 @@ public class TargetSeries {
 		+ ", getVaccineGroup()=" + getVaccineGroup()
 		+ ", getTargetSeason()=" + getTargetSeason()
 		+ ", isSeriesComplete()=" + isSeriesComplete()
-		+ ", doseAfterWhichSeriesWasMarkedComplete()=" + getDoseAfterWhichSeriesWasMarkedComplete()
 		+ ", number of targetDose(s)=" + this.targetDoses.size();
+		/////// + ", doseAfterWhichSeriesWasMarkedComplete()=" + getDoseAfterWhichSeriesWasMarkedComplete()
 		/////// int i=1;
 		/////// for (TargetDose targetDose : this.targetDoses) {
 		///////	s += "; TargetDose " + i + "={" + targetDose + "}";
