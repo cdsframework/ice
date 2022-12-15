@@ -50,6 +50,29 @@ import org.cdsframework.ice.service.Vaccine
 global java.util.Date evalTime
 
 
+rule "Duplicate Shots/Same Day (COVID-19): If a Janssen is administered on the same day as a Pfizer, Moderna or Novavax vaccine, evaluate the Pfizer/Moderna/Novavax shot first"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"	
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", vaccineComponent.cdsConceptName == "ICE212")
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, 
+			vaccineComponent.cdsConceptName in ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301"))
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
+		}
+		modify($tdother) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + "will be evaluted before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
 rule "Duplicate Shots/Same Day (COVID-19): For shots prior to 10/25/2021, bypass Duplicate Shot/Same Day Processing by not setting the target dose number of the shot to be evaluated shot to the prior dose number"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customMakeNoteOfDuplicateShotSameDayIfAny"
