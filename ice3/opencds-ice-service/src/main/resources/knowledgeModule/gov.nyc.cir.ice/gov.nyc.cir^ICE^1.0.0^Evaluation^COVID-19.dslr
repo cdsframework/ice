@@ -702,7 +702,7 @@ end
 // ignore the bivalent vaccine (CVX 229) when determining the recommended due date for the next target dose due and when evaluating the next shot based on the absolute minimum interval for that target dose.
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19: If CVX 229 was evaluated as Not Valid due to VACCINE_NOT_ALLOWED_FOR_THIS_DOSE in the Pfizer or Mixed Product Series, Ignore the shot when calculating intervals"
+rule "COVID-19: If CVX 229 was evaluated as Not Valid due to VACCINE_NOT_ALLOWED_FOR_THIS_DOSE in the Pfizer, Moderna or Mixed Product Series, Ignore the shot when calculating intervals"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
@@ -821,7 +821,7 @@ end
 // Moderna: absolute minimum interval from a prior Moderna shot to the current shot is 24 days
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19: For patients >= 18y, enforce absolute minimum interval of 24 days from any prior Moderna shots (in any Series) if after 10/25/2021"
+rule "COVID-19: For patients >= 18y, enforce absolute minimum interval of 24 days *from* any prior Moderna or CVX 213 shots (in any Series) if after 10/25/2021"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -835,7 +835,7 @@ rule "COVID-19: For patients >= 18y, enforce absolute minimum interval of 24 day
 			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated
 			- the dose number in the series is < $doseNumberCurrentShot
-			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229")
+			- the vaccine administered a member of ("ICE207", "ICE213", "ICE221", "ICE227", "ICE228", "ICE229")
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
 		There is an Administered Shot $priorShot
@@ -850,7 +850,38 @@ rule "COVID-19: For patients >= 18y, enforce absolute minimum interval of 24 day
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
-rule "COVID-19: For patients < 18y, always enforce absolute minimum interval of 24 days from any prior Moderna shots (in any Series)"
+
+rule "COVID-19: For patients >= 18y, enforce absolute minimum interval of 24 days *to* any Moderna or CVX 213 shots (in any Series) if after 10/25/2021"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the series that the shot belongs to is not complete
+			- the vaccine administered a member of ("ICE207", "ICE213", "ICE221", "ICE227", "ICE228", "ICE229")
+			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
+			- make note of the dose number as $doseNumberCurrentShot
+			- make note of the Associated Series as $associatedTargetSeries
+		There is an administered shot $priorOtherShot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated
+			- the dose number in the series is < $doseNumberCurrentShot
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
+		There is an Administered Shot $priorShot
+			- that is the same shot as $priorOtherShot
+			- the administration date of the shot is >= $dtDateAtAge18y
+			- make note of the date this shot was administered as $dtAdministrationDatePriorCVXdose
+		Confirm the date $dtAdministrationDateCurrentShot is on the same date or after "25-Oct-2021"
+		Confirm Elapsed time between $dtAdministrationDatePriorCVXdose and $dtAdministrationDateCurrentShot < "24d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19: For patients < 18y, always enforce absolute minimum interval of 24 days *from* any prior Moderna or CVX 213 shots (in any Series)"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -864,7 +895,7 @@ rule "COVID-19: For patients < 18y, always enforce absolute minimum interval of 
 			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated
 			- the dose number in the series is < $doseNumberCurrentShot
-			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229")
+			- the vaccine administered a member of ("ICE207", "ICE213", "ICE221", "ICE227", "ICE228", "ICE229")
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
 		There is an Administered Shot $priorShot
@@ -877,6 +908,36 @@ rule "COVID-19: For patients < 18y, always enforce absolute minimum interval of 
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
+
+
+rule "COVID-19: For patients < 18y, always enforce absolute minimum interval of 24 days *to* any prior Moderna or CVX 213 shots (in any Series)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the series that the shot belongs to is not complete
+			- the vaccine administered a member of ("ICE207", "ICE213", "ICE221", "ICE227", "ICE228", "ICE229")
+			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
+			- make note of the dose number as $doseNumberCurrentShot
+			- make note of the Associated Series as $associatedTargetSeries
+		There is an administered shot $priorOtherShot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated
+			- the dose number in the series is < $doseNumberCurrentShot
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
+		There is an Administered Shot $priorShot
+			- that is the same shot as $priorOtherShot
+			- the administration date of the shot is < $dtDateAtAge18y
+			- make note of the date this shot was administered as $dtAdministrationDatePriorCVXdose
+		Confirm Elapsed time between $dtAdministrationDatePriorCVXdose and $dtAdministrationDateCurrentShot < "24d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
 
 /*************************************************************************************************************************************************************************************
  END If the patient receives a shot below the absolute minimum age, or below the absolute minimum interval prior to 10/25/2021, override vaccine minimum age and series intervals 
