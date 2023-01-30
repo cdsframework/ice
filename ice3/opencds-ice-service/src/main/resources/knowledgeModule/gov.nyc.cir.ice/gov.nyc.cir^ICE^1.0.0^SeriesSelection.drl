@@ -1918,7 +1918,33 @@ rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at
 end
 
 
-rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y-4d, 1 dose, and no additional shots on record" 
+rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.YEARS).isLessThan(new TimePeriod(19, DurationType.YEARS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts);
+end
+
+
+rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.YEARS).isGreaterThanEqualTo(new TimePeriod(19, DurationType.YEARS)))
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts);
+end
+
+
+rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y-4d and < 19 years of age, 1 dose, and no additional shots on record" 
 		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
@@ -1936,26 +1962,32 @@ rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y-4d, 1
 end
 
 
-rule "ABSTRACT SeriesSelection(Hep B): (valid ) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >= 19 years of age, and no additional shots on records, select the 3-dose Adult Series"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 100
+	salience 110
 	when
-		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.YEARS).isLessThan(new TimePeriod(19, DurationType.YEARS)))
+		TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries == 1)
+		$tsAdult3Dose : TargetSeries(seriesRules.seriesName == "HepBAdult3DoseSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries == 1)
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsAdult3Dose);
+		$tsAdult3Dose.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsAdult3Dose.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($tsAdult3Dose);
 end
 
 
 rule "SeriesSelection(Hep B): For patient with CVX 189 dose at >= 18y-4d and < 19 years of age, and >= 1 dose and additional shots on record, select the Child/Adolescent Series if it has more doses than the Adult Series" 
-		extends "ABSTRACT SeriesSelection(Hep B): (valid ) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
 	when
-		$tsAdult : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
+		$tsAdult2Dose : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
 		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepBChildAdolescentSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, determineNumberOfDosesAdministeredInSeries() > $number2DoseAdultDoses)
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -1969,78 +2001,65 @@ end
 
 
 rule "SeriesSelection(Hep B): For patient with CVX 189 at >= 18y-4d and < 19 years of age, and >= 1 dose and additional shots on record, select the 2-dose Adult Series if it has greater than or equal the number of doses as the Child/Adolescent Series" 
-		extends "ABSTRACT SeriesSelection(Hep B): (valid ) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
 	when
-		$tsAdult : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
+		$tsAdult2Dose : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
 		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepBChildAdolescentSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1,	determineNumberOfDosesAdministeredInSeries() <= $number2DoseAdultDoses)
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsAdult);
-		$tsAdult.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($tsAdult.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsAdult2Dose);
+		$tsAdult2Dose.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsAdult2Dose.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($tss);
-		update($tsAdult);
-end
-
-
-rule "ABSTRACT SeriesSelection(Hep B): (valid ) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 100
-	when
-		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.YEARS).isGreaterThanEqualTo(new TimePeriod(19, DurationType.YEARS)))
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts);
+		update($tsAdult2Dose);
 end
 
 
 rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >= 19 years of age, and >= 1 dose and additional shots on record, select the 3-dose Adult Series if it has more doses than the 2-dose Adult Series" 
-		extends "ABSTRACT SeriesSelection(Hep B): (valid ) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
 	when
-		$tsAdult : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
-		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepAAdult3DoseSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, determineNumberOfDosesAdministeredInSeries() > $number2DoseAdultDoses)
+		$tsAdult2Dose : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
+		$tsAdult3Dose : TargetSeries(seriesRules.seriesName == "HepBAdult3DoseSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, determineNumberOfDosesAdministeredInSeries() > $number2DoseAdultDoses)
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsChildAdult);
-		$tsChildAdult.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($tsChildAdult.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsAdult3Dose);
+		$tsAdult3Dose.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsAdult3Dose.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($tss);
-		update($tsChildAdult);
+		update($tsAdult3Dose);
 end
 
 
 rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >= 19 years of age, and >= 1 dose and additional shots on record, select the 2-dose Adult Series if it has greater than or equal the number of doses as the Child/Adolescent Series" 
-		extends "ABSTRACT SeriesSelection(Hep B): (valid ) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
 	when
-		$tsAdult : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
-		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepAAdult3DoseSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, determineNumberOfDosesAdministeredInSeries() <= $number2DoseAdultDoses)
+		$tsAdult2Dose : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
+		$tsAdult3Dose : TargetSeries(seriesRules.seriesName == "HepBAdult3DoseSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, determineNumberOfDosesAdministeredInSeries() <= $number2DoseAdultDoses)
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsAdult);
-		$tsAdult.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($tsAdult.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsAdult2Dose);
+		$tsAdult2Dose.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsAdult2Dose.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($tss);
-		update($tsAdult);
+		update($tsAdult2Dose);
 end
 
 
 // Select the Child/Adult 3-dose series if it and it is complete - 2-dose series will be re-selected by general selection rules if it completed first
 rule "SeriesSelection(Hep B): Select Child/Adult Series if it is complete" 
-		extends "ABSTRACT SeriesSelection(Hep B): (valid ) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 110
