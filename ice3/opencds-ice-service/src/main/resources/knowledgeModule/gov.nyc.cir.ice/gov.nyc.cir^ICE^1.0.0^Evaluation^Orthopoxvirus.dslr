@@ -145,3 +145,25 @@ rule "Orthopoxvirus: If a shot is evaluated as Invalid due to being below the li
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
 end
+
+
+rule "Orthopoxvirus: If a shot is evaluated as Invalid due to being below the live virus interval and the series is an extra dose, mark the shot Accepted / EXTRA_DOSE"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an administered shot $administeredShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.860"
+			- that has already been evaluated and whose Shot Validity Status is INVALID
+			- make note of invalid evaluation reasons for this shot as $collectionOfInvalidReasons
+			- the size of the collection $collectionOfInvalidReasons is == 1
+			- the collection $collectionOfInvalidReasons contains "EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS"
+			- make note of accepted evaluation reasons for this shot as $collectionOfAcceptedReasons
+			- the collection $collectionOfAcceptedReasons contains "EVALUATION_REASON_CONCEPT.EXTRA_DOSE"
+			- make note of the Associated Series as $associatedTargetSeries
+	then
+		Set the shot status of $administeredShot to Accepted
+		Remove evaluation reason "EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS" from shot $administeredShot
+		Mark that evaluation of shot $administeredShot is complete and therefore should not be reevaluated by any other rules
+		Record that this dose rule was Processed for the TargetDose $administeredShot
+		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
+end
