@@ -82,7 +82,7 @@ rule "COVID-19: If an FDA-approved, NOS or WHO-approved vaccine, the vaccine is 
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE300", "ICE301", "ICE302", "ICE502", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE502", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520")
 			- the series that the shot belongs to is not complete
 			- make note of the administered vaccine as $vaccineAdministered
 			- make note of the dose number as $doseNumber
@@ -103,7 +103,7 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for shots administered before the series is complete (excluding CVX 229 and CVX 230)"
+rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for shots administered before the series is complete"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
@@ -112,7 +112,6 @@ rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for s
 			- that has already been evaluated
 			- make note of the administered shot number as $shotNumber
 			- make note of the associated series as $associatedTargetSeries
-			- the vaccine administered not a member of ("ICE229", "ICE230")
 		There is an IceFact $iceFact
 			- that has associated series $associatedTargetSeries
 			- that has associated administered shot $currentShot
