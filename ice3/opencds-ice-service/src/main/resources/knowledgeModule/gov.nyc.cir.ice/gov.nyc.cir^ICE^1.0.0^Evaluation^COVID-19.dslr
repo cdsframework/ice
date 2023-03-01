@@ -663,17 +663,15 @@ end
 
 rule "COVID-19: If 1 or more doses of CVX 208, CVX 217, CVX 218, CVX 300 or CVX 301 were previously administered , target dose 3 is not needed and the series is complete"
 	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
-		There is an administered shot $administeredShot that needs to be evaluated
+		There is an administered shot $administeredShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19PfizerSeries"
+			- that has already been evaluated and whose Shot Validity Status is not VALID
 			- the series that the shot belongs to is not complete
-			- the dose number in the Series is == 3
-			- make note of the Associated Series as $associatedTargetSeries
-		There exists another administered shot
-			- the shot belongs to the series $associatedTargetSeries
-			- that has already been evaluated and whose Shot Validity is VALID
+			- the dose number in the Series is == 2
 			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE300", "ICE301")
+			- make note of the Associated Series as $associatedTargetSeries
 	then
 		Mark the Series $associatedTargetSeries complete
 		Record that this dose rule was Processed for the TargetDose $administeredShot
