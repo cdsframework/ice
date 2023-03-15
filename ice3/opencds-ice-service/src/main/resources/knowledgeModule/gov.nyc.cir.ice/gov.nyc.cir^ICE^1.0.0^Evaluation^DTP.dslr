@@ -591,7 +591,7 @@ rule "DTP: If Absolute Vaccine Minimum Age for Td is not met (7y-4d), shot shoul
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200"
-			- the vaccine administered a member of ("ICE09", "ICE113", "ICE138", "ICE139")
+			- the vaccine administered a member of ("ICE09", "ICE113", "ICE138", "ICE139", "ICE196")
 			- make note of the minimum vaccine age for this shot as $strValidMinimumAge
 			- make note of the Date this Shot was Administered as $administrationDate
 			- make note of the Associated Series as $associatedTargetSeries
@@ -617,7 +617,7 @@ rule "If a patient is in the DTP 5-dose series and a Valid Td is administered, r
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.200" and the Series with name "DTP5DoseSeries"
 			- that has already been evaluated and whose Shot Validity is VALID
 			- the Shot belongs to the Primary Series 
-			- the vaccine administered a member of ("ICE09", "ICE113", "ICE138", "ICE139")
+			- the vaccine administered a member of ("ICE09", "ICE113", "ICE138", "ICE139", "ICE196")
 			- make note of the minimum vaccine age for this shot as $strValidMinimumAge
 			- make note of the Date this Shot was Administered as $administrationDate
 			- make note of the Administered Shot Number as $administeredShotNumber
