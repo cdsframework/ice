@@ -421,11 +421,10 @@ Rules for Recommending at the CVX Code vs. Vaccine Group Level
     + If the patient is >= 19 years old, then always recommend at the CVX level: recommend PPSV (CVX 33) for adult dose 1. 
 /************************************************************************************************************************************************************************************/
 
-rule "Pneumococcal Child Series: Recommend at the vaccine level in child series; vaccine recommended should be PCV 13 (CVX 133)"
+rule "Pneumococcal Child Series: Recommend PCV13 or PCV15 at the vaccine group in child series with supplemental text: Administer either PCV13 or PCV15"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	salience 100
-	no-loop true
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
@@ -439,8 +438,9 @@ rule "Pneumococcal Child Series: Recommend at the vaccine level in child series;
 			- make note of the Patient's birthdate as $birthDate
 		Confirm elapsed time between $birthDate and evalTime < "5y" && elapsed time between $birthDate and $recommendationDate < "5y"
 	then
-		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE133"
-		Refresh all facts in the Series $targetSeries
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $oRecommendation to "Administer either PCV13 or PCV15."
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -458,7 +458,7 @@ then a dose of PCV 13 (CVX 133) is recommended. Recommended interval is 8 weeks
 
 // If a child is complete for the series, has had one or more doses but not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old and will be < 5 years old at the recommended due date, 
 // then a dose of PCV 13 (CVX 133) is recommended. Recommended interval = 8 weeks from the previous shot.
-rule "Pneumococcal Child Series: Recommend PCV13 dose if series complete if no prior VALID PCV13 or PCV15 doses, is <5 yrs old and will be less than 5yrs old upon recommendation date"
+rule "Pneumococcal Child Series: Recommend PCV13 or PCV15 at the vaccine group level with supplemental text if the series complete, no prior VALID PCV13 or PCV15 doses were administered, and the child is <5 yrs old and will be less than 5yrs old upon recommendation date"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 450
@@ -469,7 +469,7 @@ rule "Pneumococcal Child Series: Recommend PCV13 dose if series complete if no p
 			- the effective dose number in the Series is == 5
 			- the Number of Administered Shots is > 0
 			- make note of the date that the most recent shot was administered as $shotDate			
-		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("ICE133","ICE215") is == 0 
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("ICE133", "ICE215") is == 0 
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
@@ -477,7 +477,9 @@ rule "Pneumococcal Child Series: Recommend PCV13 dose if series complete if no p
 	then
 		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
 		Include a recommendation as $recommendation with recommended forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
-		Set the Recommendation Vaccine for $recommendation to "ICE133"
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $oRecommendation to "Administer either PCV13 or PCV15."
+		Include the Recommendation $oRecommendation for consideration in the final forecast of the Series $targetSeries
 		Mark forecasting of the Series $targetSeries Complete
 		Insert an IceFact SupportedFactConcept._PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE.getConceptCodeValue() with TargetSeries $targetSeries into working memory
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
