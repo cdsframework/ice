@@ -70,20 +70,48 @@ General Vaccine Recommendation rules START
 //         + Recommended interval follows table rules
 *************************************************************************************************************************************************************************************/
 
-// If the patient is < 7 years, always recommend DTaP NOS (CVX 107).
-rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs and series is not complete, always recommend DTaP NOS (CVX 107)"
+// If the patient is < 7 years or the recommendation date is < 7 years, always recommend DTaP NOS (CVX 107).
+rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, the series is not complete and the recommendation date is at < 7yrs of age, recommend DTaP NOS (CVX 107)"
 	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
-		There is a Series $targetSeries that needs forecasting
+		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- a forecast for the Series has been made and a recommendation date has been determined
 			- the Series is not complete
-		The Patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthdate
-		Confirm elapsed time between $dtBirthdate and evalTime < "7y"
+			- a forecast for the Series has been made and a specific vaccine is not recommended
+			- make note of the recommendation date as $recommendationDate
+			- post processing on the Series forecast has not already been run
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and evalTime < "7y" && elapsed time between $birthDate and $recommendationDate < "7y"	
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE107"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// If the patient is < 7 years and the recommendation date is >= 7 years, always recommend Tdap (CVX 115).
+rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, the series is not complete and the recommendation date is at >= 7yrs of age, recommend Tdap (CVX 115)"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- a forecast for the Series has been made and a recommendation date has been determined
+			- the Series is not complete
+			- a forecast for the Series has been made and a specific vaccine is not recommended
+			- make note of the recommendation date as $recommendationDate
+			- post processing on the Series forecast has not already been run
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and evalTime < "7y" && elapsed time between $birthDate and $recommendationDate >= "7y"	
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE115"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -144,6 +172,9 @@ rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) at age 7yrs if 
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+// If the 
 
 /*************************************************************************************************************************************************************************************
 General Vaccine Recommendation rules END
