@@ -99,8 +99,9 @@ rule "Pneumococcal Adult: if a (valid) PCV15 dose and (valid) PPSV23 dose has be
 end
 
 
-// If a PCV15 or PCV20 is administered, do not check the absolute minimum age for the Series, as PCV15 and PCV20 doses may be administered prior to 19 years of age
-rule "If a PCV15 or PCV20 is administered, do not check the absolute minimum age for the Series, as PCV15 and PCV20 doses may be administered prior to 19 years of age"
+// If a PCV15 or PCV20 is administered, do not check the absolute minimum age for the Series, as PCV15 and PCV20 doses may be administered prior to 19 years of age,
+// at 18y-4d as per the absolute minimum age for the vaccine.
+rule "If a PCV20 is administered, do not check the absolute minimum age for the Series, as a PCV20 dose may be administered prior to 19 years of age"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseAgeCheck"
@@ -109,10 +110,10 @@ rule "If a PCV15 or PCV20 is administered, do not check the absolute minimum age
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
 			- the series that the shot belongs to is not complete
 			- the dose number in the Series is >= 6
-			- the vaccine administered a member of ("ICE215", "ICE216")
+			- the vaccine administered is "ICE216"
 			- make note of the associated series as $associatedTargetSeries	
 	then
-	// Do nothing
+		// Do nothing
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -151,15 +152,16 @@ rule "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of
 end
 
 
-rule "Pneumococcal Adult: if INVALID shot administered >= 5 yrs and < 19 yrs is not a PCV15 or PCV20, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
-		extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"
+rule "Pneumococcal Adult: if a VALID PCV15 shot administered at >= 5 yrs and < 18 yrs-4 days, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
+		extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"	 
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an Administered Shot $otherPneumococcalShot
 			- that is the same shot as $currentShot
 			- that has already been evaluated and whose shot validity is INVALID
-			- the vaccine administered not a member of ("ICE215", "ICE216")	
+			- the vaccine administered is "ICE215"
+		Confirm elapsed time between $dtBirthDate and $administrationDate < "18y-4d"
 	then
 		Remove all evaluation reasons from shot $otherPneumococcalShot
 		Set the Shot Status of $otherPneumococcalShot to Accepted
@@ -170,7 +172,26 @@ rule "Pneumococcal Adult: if INVALID shot administered >= 5 yrs and < 19 yrs is 
 end
 
 
-rule "Pneumococcal Adult: if ACCEPTED shot administered >= 5 yrs and < 19 yrs is not a PCV15 or PCV20, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
+rule "Pneumococcal Adult: if INVALID shot administered >= 5 yrs and < 19 yrs is not a PCV20, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
+		extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an Administered Shot $otherPneumococcalShot
+			- that is the same shot as $currentShot
+			- that has already been evaluated and whose shot validity is INVALID
+			- the vaccine administered is not "ICE216"	
+	then
+		Remove all evaluation reasons from shot $otherPneumococcalShot
+		Set the Shot Status of $otherPneumococcalShot to Accepted
+		Include the reason for shot $otherPneumococcalShot Accepted due to "Shot Administered Outside of a Routine Series"
+		Refresh all facts in the shot $otherPneumococcalShot
+		Record that this dose rule was processed for the TargetDose $otherPneumococcalShot
+		Log that this dose rule fired for the dose $otherPneumococcalShot in the Series $associatedTargetSeries	
+end
+
+
+rule "Pneumococcal Adult: if ACCEPTED shot administered >= 5 yrs and < 19 yrs is not a PCV20, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
 		extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
@@ -178,7 +199,7 @@ rule "Pneumococcal Adult: if ACCEPTED shot administered >= 5 yrs and < 19 yrs is
 		There is an Administered Shot $otherPneumococcalShot
 			- that is the same shot as $currentShot
 			- that has already been evaluated and whose shot validity is ACCEPTED
-			- the vaccine administered not a member of ("ICE215", "ICE216")	
+			- the vaccine administered is not "ICE216"
 	then
 		Include the reason for shot $otherPneumococcalShot Accepted due to "Shot Administered Outside of a Routine Series"	
 		Record that this dose rule was processed for the TargetDose $otherPneumococcalShot
