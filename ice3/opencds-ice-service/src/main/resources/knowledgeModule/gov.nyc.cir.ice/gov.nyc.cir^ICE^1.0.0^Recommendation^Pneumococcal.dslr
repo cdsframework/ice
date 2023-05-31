@@ -179,7 +179,7 @@ rule "Pneumococcal Adult Series: Recommend PCV vaccine via reason code ADMINISTE
 	then
 		Create a Recommendation as $recommendationReason for the Series $targetSeries
 		Set the Recommendation Reason for $recommendationReason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_OR_PCV20"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Include the Recommendation $recommendationReason for Consideration in the final Forecast of the Series
 		Create a Recommendation as $recommendationSupplemental for the Series $targetSeries
 		Set the Recommendation Supplemental text for $recommendationSupplemental to "Administer a PCV15 or PCV20. No further doses of any type of pneumococcal vaccine are recommended after PCV20 is given."
 		Include the Recommendation $recommendationSupplemental for Consideration in the final Forecast of the Series
