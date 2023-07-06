@@ -201,14 +201,15 @@
 [condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=\\<\\>]+}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 
-
 //
 // TargetDose accumulates
 //
-[condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
-[condition][]Verify that the [Cc]ount of [Dd]oses [Aa]dministered in Series {refer_oTargetSeries} with [Vv]accine {dd_oVaccineCdsListItem} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || $td.administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
-[condition][]Verify that the [Uu]nique [Cc]ount of [Ss]hots [Aa]dministered in Series {refer_oTargetSeries} by [Dd]ate is {aOp_num}  {nNumberOfShots}=Set(size {aOp_num} {nNumberOfShots}) from accumulate(TargetDose($shotDate : administrationDate) from {refer_oTargetSeries}.targetDoses, collectSet($shotDate))
-
+[condition][][Vv]erify that the [Cc]ount of [Dd]oses [Aa]dministered in [Ss]eries {refer_oTargetSeries} with [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
+[condition][][Vv]erify that the [Cc]ount of [Dd]oses [Aa]dministered in [Ss]eries {refer_oTargetSeries} with [Vv]accine {dd_oVaccineCdsListItem} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || $td.administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
+[condition][][Vv]erify that the [Uu]nique [Cc]ount of [Ss]hots [Aa]dministered in [Ss]eries {refer_oTargetSeries} by [Dd]ate is {aOp_num}  {nNumberOfShots}=Set(size {aOp_num} {nNumberOfShots}) from accumulate(TargetDose($shotDate : administrationDate) from {refer_oTargetSeries}.targetDoses, collectSet($shotDate))
+[condition][][Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Aa]dministered in [Ss]eries {refer_oTargetSeries} as {assign_nNumberOfDoses} [Ww]here [Aa]dministration [Dd]ate {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=accumulate($td : TargetDose(status == DoseStatus.VALID, administrationDate {aOp} {strDate}) from {refer_oTargetSeries}.targetDoses; {assign_nNumberOfDoses}: count($td))
+[condition][][Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Aa]dministered in [Ss]eries {refer_oTargetSeries} as {assign_nNumberOfDoses} [Ww]here [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; {assign_nNumberOfDoses}: count($td))
+// accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses) ; {assign_nCountOfDoses}: count($td); {assign_nCountOfDoses} >= 0)
 //
 // TargetSeries accumulates
 //
@@ -220,7 +221,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [keyword][][Cc]onfirm {conditions}=eval( {conditions} )
-[condition][][Tt]he [Vv]ariable {refer_oVariable} is {aOp}  {oValue}={refer_oVariable}  {aOp}  {oValue}
+[condition][][Tt]he [Vv]ariable {refer_oVariable} is {aOp}  {oValue:[\\$a-zA-Z0-9_]+}={refer_oVariable}  {aOp}  {oValue}
 [condition][][Tt]he [Aa]ge of the [Pp]atient {refer_oEvaluatedPerson} at the [Tt]ime the [Vv]accine was [Aa]dministered for [Dd]ose {refer_oTargetDose} is [Gg]reater [Tt]han the [Mm]aximum [Aa]llowable [Aa]ge for the [Vv]accine=(TimePeriod.compareElapsedTimePeriodToDateRange({refer_oEvaluatedPerson}.getDemographics().getBirthTime(), {refer_oTargetDose}.getAdministrationDate(), {refer_oTargetDose}.getVaccineComponent().getValidMaximumAgeForUse()) > 0)
 /////// [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo} {aOp:[\=\\<\\>]+} {refer_Duration:([\\$]{1})[a-zA-Z0-9_]+} plus {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}=(TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, TimePeriod.addTimePeriod({refer_Duration}, {sDuration})) {aOp} 0)
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp}  {nDuration:[0-9]+}  {enumTimePeriod_durationType:[a-zA-Z0-9\.]+}=(TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, new TimePeriod({nDuration}, {enumTimePeriod_durationType})) {aOp} 0)
@@ -238,6 +239,8 @@
 [condition][][Tt]he [Dd]ate {dtDateOne} is on the same day as {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.equals({dtDateTwo})
 [condition][]\([Cc]alculate [Dd]ate from addition of {refer_dtDate} with TimePeriod {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}\)=TimePeriod.addTimePeriod({refer_dtDate}, {sDuration})
 [condition][]\([Cc]alculate [Dd]ate from addition of {refer_dtDate} with TimePeriod {refer_oDuration:([\\$]{1})(\w)+(\s){0}}\)=TimePeriod.addTimePeriod({refer_dtDate}, {refer_oDuration})
+/////// [condition][][Tt]hat the following [Ee]xpression is true: {expression:([\\(]?.*[\\)]?)}={expression}
+[condition][][Tt]hat the following is true: {expression:([\\(]{0,1}.*[\\)]{0,1})}={expression}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
