@@ -732,6 +732,7 @@ rule "COVID-19(Administration of 1st Bivalent Dose in a non-Pfizer Series After 
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name a member of ("COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19Novavax2DoseSeries")
 			- the series that the shot belongs to is complete
 			- the administration date of the shot is >= "19-Apr-2023"
 			- make note of the date this shot was administered as $currentShotDate
@@ -776,10 +777,11 @@ end
 
 // If a shot is administered to a patient >= 65 yrs of age, and 1 bivalent vaccine dose (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, or CVX 520) was previously administered as a booster dose at >= 9/2/2023 or as a dose in the primary series, 
 // or, alternatively, any prior dose was administered on >= 4/19/2023, evaluate the shot as Accepted / EXTRA_DOSE"
-rule "COVID-19: If a shot was administered to a patient >= 65 yrs of age, and if 1 or more bivalent doses previously administered or, alternatively, 1 or more prior doses were administered on >= 4/19/2023, evaluate the shot as Valid"
+rule "COVID-19: If a shot was administered to a patient >= 65 yrs of age, and if 1 bivalent dose was previously administered or, alternatively, 1 was prior dose was administered on >= 4/19/2023, evaluate the shot as Valid"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "extraDoseCheck"
+	salience 10
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
@@ -788,12 +790,13 @@ rule "COVID-19: If a shot was administered to a patient >= 65 yrs of age, and if
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the dose number as $doseNumberCurrentShot
 			- make note of the Associated Series as $associatedTargetSeries
-		Make note of the number of doses administered in Series $associatedTargetSeries as $nNumberOfBivalentDoses where vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
-		Make note of the number of doses administered in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023"
-		Confirm that the following is true: ($nNumberOfBivalentDoses + $nDosesAdministeredAfter041923 == 1)
+		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+		Make note of the number of doses administered $doseAccumulationApr19 in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and $currentShotDate >= "65y"
+		// Confirm the variable $nNumberOfBivalentDoses is == 1 && the variable $nDosesAdministeredAfter041923  is == 0 || the variable $nNumberOfBivalentDoses is == 0 && the variable $nDosesAdministeredAfter041923  is == 1
+		Confirm that the following is true: ($nNumberOfBivalentDoses + $nDosesAdministeredAfter041923 == 1)
 	then
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -827,19 +830,18 @@ rule "COVID-19: If a 2nd bivalent dose was administered to a patient >= 65 yrs o
 			- that has already been evaluated
 			- the administration date of the shot is > $priorShotDate
 			- the administration date of the shot is < $latestShotDate
-		Make note of the number of doses administered in Series $associatedTargetSeries as $nNumberOfBivalentDoses where vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
-		Make note of the number of doses administered in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023"
-		Confirm that the following is true: $nDosesAdministeredAfter041923 >= 1 && $nDosesAdministeredAfter041923 <= 2 && ($nNumberOfBivalentDoses + $nDosesAdministeredAfter041923 >= 2)
+		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+		Make note of the number of doses administered $doseAccumulationApr19 in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and $latestShotDate >= "65y"
 		Confirm elapsed time between $priorShotDate and $latestShotDate < "4m"
+		Confirm that the following is true: $nDosesAdministeredAfter041923 >= 1 && $nDosesAdministeredAfter041923 <= 2 && ($nNumberOfBivalentDoses + $nDosesAdministeredAfter041923 >= 2)
 	then
 		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 4 months." for Valid Shot $latestShot
 		Record that this dose rule was Processed for the TargetDose $latestShot
         Log that this dose rule fired for the dose $latestShot in the Series $associatedTargetSeries
 end
-
  
 /*************************************************************************************************************************************************************************************
  END Single Bivalent Dose Logic for > 4/19/2023. Only 1 Bivalent vaccine dose required for series to be complete. 
@@ -919,6 +921,7 @@ rule "COVID-19: If the patient received a (valid) dose in the Pfizer series at >
 			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Mark the Series $targetSeries complete
+		/////// Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -928,14 +931,13 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ _bival
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
-		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series is "COVID19PfizerSeries"
-			- the series is not complete
 		There is an Administered Shot $validShot
-			- the Shot belongs to the Series $targetSeries 
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19PfizerSeries"
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE300", "ICE302")
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 		There is an Administered Shot $validShotSame
@@ -944,6 +946,7 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ _bival
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 	then
 		Mark the Series $targetSeries complete
+		/////// Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -968,6 +971,7 @@ rule "COVID-19: If the patient received a (valid) dose _any_ vaccine allowed in 
 			- the administration date of the shot is >= $dtAtAge6y
 	then
 		Mark the Series $targetSeries complete
+		/////// Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -993,6 +997,7 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ _bival
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 	then
 		Mark the Series $targetSeries complete
+		/////// Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1017,6 +1022,7 @@ rule "COVID-19: If the patient received a (valid) dose of _any_ vaccine allowed 
 			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Mark the Series $targetSeries complete
+		/////// Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1042,6 +1048,7 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ Pfizer
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 	then
 		Mark the Series $targetSeries complete
+		/////// Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1067,12 +1074,13 @@ rule "COVID-19: If the patient received a (valid) dose of a Moderna vaccine (CVX
 			- the administration date of the shot is >= $dtAtAge6y
 	then
 		Mark the Series $targetSeries complete
+		/////// Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
 
 
-rule "COVID-19: If the e patient received a (valid) dose of an _applicable_ Moderna _bivalent_ vaccine (CVX 229) in the Mixed Product primary series at >= 6 years of age, the series is not complete, and the execution date is >= 4/19/2023, mark the series is complete"
+rule "COVID-19: If the patient received a (valid) dose of an _applicable_ Moderna _bivalent_ vaccine (CVX 229) in the Mixed Product primary series at >= 6 years of age, the series is not complete, and the execution date is >= 4/19/2023, mark the series is complete"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
@@ -1092,9 +1100,11 @@ rule "COVID-19: If the e patient received a (valid) dose of an _applicable_ Mode
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 	then
 		Mark the Series $targetSeries complete
+		/////// Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1129,7 +1139,7 @@ rule "COVID-19: If 2 or more doses were administered >= 5 years of age in the Pf
 			- the dose number in the Series is > 2
 	then
 		Mark the Series $targetSeries complete
-		/////// Refresh all facts in the Series $targetSeries
+		Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $secondDose
 		Log that this dose rule fired for the dose $secondDose in the Series $targetSeries
 end
@@ -1155,6 +1165,7 @@ rule "COVID-19: If 2 doses of CVX 208, CVX 217, CVX 218, CVX 300 or CVX 301 were
 			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE300", "ICE301")
 	then
 		Mark the Series $associatedTargetSeries complete
+		Refresh all Facts in the Series $associatedTargetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries	
 end
@@ -1179,6 +1190,7 @@ rule "COVID-19: If 2 doses of CVX 207, CVX 221, CVX 227, CVX 228, or CVX 229 wer
 			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229")
 	then
 		Mark the Series $associatedTargetSeries complete
+		Refresh all Facts in the Series $associatedTargetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries	
 end
@@ -1196,7 +1208,7 @@ rule "COVID-19: If 2 or more doses of CVX 211 (Novavax) were administered in the
 		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "ICE211" is == 2
 	then
 		Mark the Series $targetSeries complete
-		/////// Refresh all facts in the Series $targetSeries
+		Refresh all Facts in the Series $targetSeries for evaluation
 		Log that this series rule fired for the Series $targetSeries
 end
 
