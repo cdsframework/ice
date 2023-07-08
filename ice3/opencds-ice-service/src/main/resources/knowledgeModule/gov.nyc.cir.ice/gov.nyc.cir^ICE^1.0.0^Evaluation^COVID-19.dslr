@@ -1139,7 +1139,7 @@ rule "COVID-19: If 2 or more doses were administered >= 5 years of age in the Pf
 			- the dose number in the Series is > 2
 	then
 		Mark the Series $targetSeries complete
-		Refresh all Facts in the Series $targetSeries for evaluation
+		/////// Refresh all Facts in the Series $targetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $secondDose
 		Log that this dose rule fired for the dose $secondDose in the Series $targetSeries
 end
@@ -1165,7 +1165,7 @@ rule "COVID-19: If 2 doses of CVX 208, CVX 217, CVX 218, CVX 300 or CVX 301 were
 			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE300", "ICE301")
 	then
 		Mark the Series $associatedTargetSeries complete
-		Refresh all Facts in the Series $associatedTargetSeries for evaluation
+		/////// Refresh all Facts in the Series $associatedTargetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries	
 end
@@ -1190,7 +1190,7 @@ rule "COVID-19: If 2 doses of CVX 207, CVX 221, CVX 227, CVX 228, or CVX 229 wer
 			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229")
 	then
 		Mark the Series $associatedTargetSeries complete
-		Refresh all Facts in the Series $associatedTargetSeries for evaluation
+		/////// Refresh all Facts in the Series $associatedTargetSeries for evaluation
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries	
 end
