@@ -674,7 +674,6 @@ rule "HistoryEvaluation.setNextTargetDoseNOSInSeriesForEvaluation" ruleflow-grou
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 		modify($td) {
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
 		}
