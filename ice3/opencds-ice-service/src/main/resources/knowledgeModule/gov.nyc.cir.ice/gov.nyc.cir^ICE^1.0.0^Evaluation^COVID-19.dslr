@@ -103,16 +103,17 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for shots administered before the series is complete (excluding CVX 230)"
+rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for shots administered before the series is complete (excluding CVX 229 and CVX 230 on < 4/19/2023)"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an administered shot $currentShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- that has already been evaluated
+			- that has already been evaluated and whose shot validity is INVALID or ACCEPTED
+			- the Series that the shot belongs to is not complete
+			- the vaccine administered not a member of ("ICE229", "ICE230")
 			- make note of the administered shot number as $shotNumber
 			- make note of the associated series as $associatedTargetSeries
-			- the vaccine administered is not "ICE230"
 		There is an IceFact $iceFact
 			- that has associated series $associatedTargetSeries
 			- that has associated administered shot $currentShot
@@ -121,11 +122,57 @@ rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for s
 			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated
 			- the administered shot number is > $shotNumber
-		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the series is not complete
+		Confirm the date evalTime is before "19-Apr-2023"
 	then
 		Remove Evaluation Reason "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" from Shot $currentShot
 		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for shots administered before the series is complete (excluding CVX 230 on >= 4/19/2023)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an administered shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that has already been evaluated and whose shot validity is INVALID or ACCEPTED
+			- the Series that the shot belongs to is not complete
+			- the vaccine administered is not "ICE230"
+			- make note of the administered shot number as $shotNumber
+			- make note of the associated series as $associatedTargetSeries
+		There is an IceFact $iceFact
+			- that has associated series $associatedTargetSeries
+			- that has associated administered shot $currentShot
+			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue
+		There does not exist an administered shot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is > $shotNumber
+		Confirm the date evalTime is on the same date or after "19-Apr-2023"
+	then
+		Remove Evaluation Reason "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" from Shot $currentShot
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19: If CVX 229 is administered < 4/19/2023 & effective date < 4/19/2023, and the series is not complete, evaluate the shot as INVALID/VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name a member of ("COVID19ModernaSeries", "COVID19MixedProductSeries")
+			- the vaccine administered is "ICE229"
+			- the administration date of the shot is < "19-Apr-2023"
+			- the Series that the shot belongs to is not complete
+			- make note of the associated series as $associatedTargetSeries
+		Confirm the date evalTime is before "19-Apr-2023"
+	then
+		Include the reason for shot $currentShot Invalid due to "Vaccine not Permitted for this Dose"
+		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
