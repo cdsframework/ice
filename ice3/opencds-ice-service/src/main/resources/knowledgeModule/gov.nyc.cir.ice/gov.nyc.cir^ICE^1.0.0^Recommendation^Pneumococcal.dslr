@@ -301,7 +301,7 @@ rule "Pneumococcal Adult: If the patient >= 19 years and < 65 years of age and t
 			- the date evalTime < $dtDateAtAge65
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $oRecommendation to "The Pneumococcal evaluations and recommendations in ICE primarily target the routine series. Adults ages 19-64 with underlying medical conditions or other risk factors who have not previously received PCV or whose previous vaccination history is unknown should receive 1 dose of PCV (either PCV20 or PCV15). When PCV15 is used, it should be followed by a dose of PPSV23 at the appropriate interval(s). Patients who previously received a PCV13 should receive PPSV23 as recommended for them before the introduction of PCV15 and PCV20, based on age or risk factors. Refer to ACIP for additional information."
+		Set the Recommendation Supplemental Text for $oRecommendation to "The Pneumococcal evaluations and recommendations in ICE primarily target the routine series. Adults ages 19-64 with underlying medical conditions or other risk factors who have not previously received PCV or whose previous vaccination history is unknown should receive 1 dose of PCV (either PCV20 or PCV15). When PCV15 is used, it should be followed by a dose of PPSV23 at the appropriate interval(s). Patients who previously received a PCV13 should receive PCV20 or PPSV23. Refer to ACIP for additional information."
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
