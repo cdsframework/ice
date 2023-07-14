@@ -54,7 +54,7 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem {
 		    <relatedVaccine code="51" codeSystem="2.16.840.1.113883.12.292" codeSystemName="CVX" displayName="Hib-Hep B"/>
 		    <diseaseImmunity code="070.30" codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICE Disease" displayName="Hepatitis B"/>
 		    <openCdsMembership code="ICE202" displayName="Immunization Evaluation (Hep B Vaccine Group)"/>
-		    <primaryOpenCdsConcept code="ICE202" displayName="Immunization Evaluation (Hep B Vaccine Group)"/>
+		    <primaryOpenCdsConcept code="ICE100" displayName="Immunization Evaluation (Hep B Vaccine Group)"/>
 		</ns2:iceVaccineGroupSpecificationFile>
 	 */
 
