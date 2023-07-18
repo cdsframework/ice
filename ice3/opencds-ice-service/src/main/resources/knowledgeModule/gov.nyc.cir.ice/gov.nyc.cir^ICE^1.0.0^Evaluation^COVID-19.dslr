@@ -165,7 +165,8 @@ end
 
 rule "COVID-19: If the series is complete, override allowable vaccine check, as the allowable vaccines for additional and booster doses are verified by each rule"
 	dialect "mvel"
-	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
