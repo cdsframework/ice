@@ -103,6 +103,32 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// START INVALID vaccines specified prior to availability datein a wrong FDA-approved series 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19: If a bivalent vaccine was administered prior to 9/2/2022, evaluate the shot as Invalid / VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the vaccine administered a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the administration date of the shot is < "02-Sep-2022"
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Include the reason for shot $currentShot Invalid due to "Vaccine Not Yet Available for Use on Specified Administration Date"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// END INVALID vaccines specified prior to availability datein a wrong FDA-approved series
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for shots administered before the series is complete"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
