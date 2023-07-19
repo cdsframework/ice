@@ -117,11 +117,13 @@ rule "COVID-19: If a bivalent vaccine was administered prior to 9/2/2022, evalua
 			- that has already been evaluated
 			- the administration date of the shot is < "02-Sep-2022"
 			- the vaccine administered a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
-			- make note of Accepted Evaluation Reasons for this shot as $assignedEvaluationReasons
-			- the collection $assignedEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.EXTRA_DOSE"
-			- the collection $assignedEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
+			- make note of all evaluation reasons for this shot as $oEvaluationReasons
+			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.EXTRA_DOSE"
+			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
 			- make note of the associated series as $associatedTargetSeries
 	then
+		Set the shot status of $currentShot to Invalid
+		Remove all evaluation reasons from shot $currentShot
 		Include the reason for shot $currentShot Invalid due to "Vaccine Not Yet Available for Use on Specified Administration Date"
 		Refresh all facts in the shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
