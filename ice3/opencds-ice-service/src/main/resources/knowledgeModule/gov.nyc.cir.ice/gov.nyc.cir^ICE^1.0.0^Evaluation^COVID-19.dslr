@@ -822,7 +822,7 @@ rule "COVID-19: If a shot was administered to a patient >= 65 yrs of age, and if
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the dose number as $doseNumberCurrentShot
 			- make note of the Associated Series as $associatedTargetSeries
-		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where administration date < "19-Apr-2023" with vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
 		Make note of the number of doses administered $doseAccumulationApr19 in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $birthdate
@@ -862,7 +862,7 @@ rule "COVID-19: If a 2nd bivalent dose was administered to a patient >= 65 yrs o
 			- that has already been evaluated
 			- the administration date of the shot is > $priorShotDate
 			- the administration date of the shot is < $latestShotDate
-		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where administration date < "19-Apr-2023" with vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
 		Make note of the number of doses administered $doseAccumulationApr19 in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $birthdate
