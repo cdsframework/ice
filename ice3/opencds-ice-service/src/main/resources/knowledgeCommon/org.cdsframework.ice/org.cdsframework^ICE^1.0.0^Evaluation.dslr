@@ -145,11 +145,9 @@ rule "Evaluate the Interval when the Shot Administered is Before the Birth Date"
 end
 
 
-// A live virus vaccine must be administered on the same day or with a minimum interval of 28 days; otherwise the vaccine that does not
-// meet the minimum interval will be considered invalid with a reason of Too Early Live Virus. This spans across all series and 
-// vaccine groups. We'll have this rule override the generic interval check since there's no point in checking that interval if this one 
-// does not pass
-rule "Check if the Shot is Too Early Due to Live Virus Conflict"
+// A live virus vaccine must be administered on the same day or with a minimum interval of 24 days if in the same vaccine group; 
+// otherwise the vaccine that does not meet the minimum interval will be considered invalid with a reason of Too Early Live Virus. 
+rule "Check if the Shot is Too Early Due to Live Virus Conflict with live virus shot < 24 days in the same vaccine group"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -157,9 +155,37 @@ rule "Check if the Shot is Too Early Due to Live Virus Conflict"
 			- the Vaccine Administered is a Live Virus Vaccine
 			- the Shot has not already been marked as a Live Virus Conflict (as we do not want this rule executing more than necessary)
 			- make note of the Date this Shot was Administered as $administrationDate
-			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the Associated Vaccine Group as $associatedVaccineGroup
+			- make note of the Associated Series as $associatedTargetSeries			
 		There is an Administered Shot $otherShot
 			- the Vaccine Administered is a Live Virus Vaccine
+			- the shot belongs to the Vaccine Group $associatedVaccineGroup
+			- the Administration Date of the shot is < $administrationDate
+			- make note of the Date this Shot was Administered as $previousShotDate
+		Confirm elapsed time between $previousShotDate and $administrationDate < "24d"
+	then
+		Include the reason for shot $targetDose Invalid due to "Too Early Live Virus"
+		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
+end
+
+
+// A live virus vaccine must be administered on the same day or with a minimum interval of 28 days if in difference vaccine groups; 
+// otherwise the vaccine that does not meet the minimum interval will be considered invalid with a reason of Too Early Live Virus. 
+// This spans across all series and vaccine groups. We'll have this rule override the generic interval check since there's no point
+// in checking that interval if this one does not pass
+rule "Check if the Shot is Too Early Due to Live Virus Conflict with live virus shot < 28 days in a different vaccine group"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an Administered Shot $targetDose that needs to be evaluated
+			- the Vaccine Administered is a Live Virus Vaccine
+			- the Shot has not already been marked as a Live Virus Conflict (as we do not want this rule executing more than necessary)
+			- make note of the Date this Shot was Administered as $administrationDate
+			- make note of the Associated Vaccine Group as $associatedVaccineGroup
+			- make note of the Associated Series as $associatedTargetSeries			
+		There is an Administered Shot $otherShot
+			- the Vaccine Administered is a Live Virus Vaccine
+			- the shot does not belong to the Vaccine Group $associatedVaccineGroup
 			- the Administration Date of the shot is < $administrationDate
 			- make note of the Date this Shot was Administered as $previousShotDate
 		Confirm elapsed time between $previousShotDate and $administrationDate < "28d"

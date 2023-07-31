@@ -52,6 +52,7 @@
 [condition][]- [Tt]he [Ss]hot does not belong to the [Ss]eries {oTargetSeries}=associatedTargetSeries != {oTargetSeries}
 [condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem} and the [Ss]eries with [Nn]ame {sSeriesName}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}, associatedSeriesName == {sSeriesName}
 [condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}
+[condition][]- [Tt]he [Ss]hot does not belong to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=associatedVaccineGroup != {dd_oVaccineGroupCdsListItem}
 [condition][]- [Tt]he [Ss]hot is [Nn]ot [Ii]gnored=isShotIgnored() == false
 [condition][]- [Tt]he [Ss]hot is [Ii]gnored=isShotIgnored() == true
 [condition][]- [Tt]he [Ss]eries that the [Ss]hot belongs to is [Cc]omplete=associatedTargetSeries.isSeriesComplete() == true
@@ -95,6 +96,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Ee]arliest [Rr]ecommended [Aa]ge of [Tt]his [Dd]ose as {assign_oTimePeriod}=getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()) != null, {assign_oTimePeriod} : getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()).getEarliestRecommendedAge(), {assign_oTimePeriod} != null
 [condition][]- [Mm]ake [Nn]ote of the [Ee]arliest [Rr]ecommended [Ii]nterval from [Tt]his [Dd]ose to the [Nn]ext [Dd]ose as {assign_oTimePeriod}=getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()) != null, {assign_oTimePeriod} : getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber(this.getDoseNumberInSeries()).getEarliestRecommendedInterval(), {assign_oTimePeriod} != null
 [condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Ss]eries as {assign_oTargetSeries}={assign_oTargetSeries} : associatedTargetSeries, {assign_oTargetSeries} != null
+[condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Vv]accine [Gg]roup as {assign_oVaccineGroup}={assign_oVaccineGroup} : associatedVaccineGroup, {assign_oVaccineGroup} != null
 [condition][]- [Mm]ake [Nn]ote of [Aa]ll [Ee]valuation [Rr]easons for this [Ss]hot as {assign_oCollectionOfReasons}={assign_oCollectionOfReasons} : allEvaluationReasonsFromAllReasonSets
 [condition][]- [Mm]ake [Nn]ote of [Aa]ccepted [Ee]valuation [Rr]easons for this [Ss]hot as {assign_oCollectionOfReasons}={assign_oCollectionOfReasons} : acceptedReasons
 [condition][]- [Mm]ake [Nn]ote of [Ii]nvalid [Ee]valuation [Rr]easons for this [Ss]hot as {assign_oCollectionOfReasons}={assign_oCollectionOfReasons} : invalidReasons
