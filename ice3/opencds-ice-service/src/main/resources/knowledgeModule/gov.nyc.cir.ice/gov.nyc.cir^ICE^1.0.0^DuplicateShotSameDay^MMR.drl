@@ -27,58 +27,47 @@
 package knowledgeModule.gov.nyc.cir.ice
 
 import java.util.Date
-import org.opencds.vmr.v1_0.internal.datatypes.CD
+import java.util.Iterator
+import java.util.List
+import java.util.Set
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
 
 global java.util.Date evalTime
 
-expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
 
-
-rule "MMR: Mark Target Dose 2 as Accepted / EXTRA_DOSE if the shot is administered when patient >= 19 yrs"
+rule "Duplicate Shots/Same Day (MMR): If a measles/mumps/rubella vaccine other than an MMR is administered on the same day as an MMR, evaluate the MMR shot first"
 	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "doseAgeCheck"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"	
+	auto-focus true
 	when
-		There is an Administered Shot $currentShot that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.500"
-			- the dose number in the Series is == 2
-			- make note of the date this Shot was Administered as $assign_dtAdministrationDate
-			- make note of the associated series as $associatedTargetSeries
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y"
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", vaccineComponent.cdsConceptName != "ICE03")
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.cdsConceptName == "ICE03") 
 	then
-		Include the reason for shot $currentShot Accepted due to "Extra Dose"
-		Mark the Series $associatedTargetSeries Complete
-		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
+		}
+		modify($tdother) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + "will be evaluted before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
-
-rule "MMR: Mark the series complete if Patient >= 19 yrs and there is 1 dose in the Series"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^postEvaluationCheck"
-	when
-		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
-			- the series is not complete
-			- the effective dose number in the series is == 2
-		There does not exist an Administered Shot
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
-			- that has not already been Evaluated
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime >= "19y"
-	then
-		Mark the Series $targetSeries Complete
-		Log that this Series Rule fired for the Series $targetSeries
-end
