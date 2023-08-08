@@ -193,3 +193,27 @@ rule "Check if the Shot is Too Early Due to Live Virus Conflict with live virus 
 		Include the reason for shot $targetDose Invalid due to "Too Early Live Virus"
 		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
 end
+
+
+rule "Check if the Shot is Too Early Due to Live Virus Conflict with live virus shot < 28 days between two combination vaccines"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an Administered Shot $targetDose that needs to be evaluated
+			- the Vaccine Administered is a Live Virus Vaccine
+			- the Vaccine Administered is a Combination Vaccine
+			- the Shot has not already been marked as a Live Virus Conflict (as we do not want this rule executing more than necessary)
+			- make note of the Date this Shot was Administered as $administrationDate
+			- make note of the Associated Vaccine Group as $associatedVaccineGroup
+			- make note of the Associated Series as $associatedTargetSeries			
+		There is an Administered Shot $otherShot
+			- the Vaccine Administered is a Live Virus Vaccine
+			- the Vaccine Administered is a Combination Vaccine
+			- the shot does not belong to the Vaccine Group $associatedVaccineGroup
+			- the Administration Date of the shot is < $administrationDate
+			- make note of the Date this Shot was Administered as $previousShotDate
+		Confirm elapsed time between $previousShotDate and $administrationDate < "28d"
+	then
+		Include the reason for shot $targetDose Invalid due to "Too Early Live Virus"
+		Log that this dose rule fired for the dose $targetDose in the Series $associatedTargetSeries
+end

@@ -59,6 +59,8 @@
 [condition][]- [Tt]he [Ss]eries that the [Ss]hot belongs to is [Nn]ot [Cc]omplete=associatedTargetSeries.isSeriesComplete() == false
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is a [Ll]ive [Vv]irus [Vv]accine=vaccineComponent.isLiveVirusVaccine == true
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is a [Ss]elect [Aa]djuvant [Pp]roduct=vaccineComponent.isSelectAdjuvantProduct == true
+[condition][]- [Tt]he [Vv]accine [Aa]dministered is not a [Cc]ombination [Vv]accine=getAdministeredVaccine().isCombinationVaccine() == false
+[condition][]- [Tt]he [Vv]accine [Aa]dministered is a [Cc]ombination [Vv]accine=getAdministeredVaccine().isCombinationVaccine() == true
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is not {dd_oVaccineCdsListItem:[a-zA-Z0-9\\.\\-\\_\\"]+}=vaccineComponent.cdsConceptName != {dd_oVaccineCdsListItem} || administeredVaccine.cdsConceptName != {dd_oVaccineCdsListItem}
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is {dd_oVaccineCdsListItem:[a-zA-Z0-9\\.\\-\\_\\"]+}=vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}
 [condition][]- [Tt]he [Vv]accine [Aa]dministered a member of {list_oVaccineCdsListItem:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+}=vaccineComponent.cdsConceptName in {list_oVaccineCdsListItem} || administeredVaccine.cdsConceptName in {list_oVaccineCdsListItem}
