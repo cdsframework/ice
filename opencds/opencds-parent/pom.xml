@@ -14,7 +14,8 @@
 		<java.version>1.8</java.version>
 
 		<!-- drools 7 -->
-		<runtime.drools7.version>7.73.0.Final</runtime.drools7.version>
+		<runtime.drools7.version>7.74.0.Final</runtime.drools7.version>
+		<maven.drools7.plugin.version>7.73.0.Final</maven.drools7.plugin.version>
 
 		<!-- maven libs -->
 		<maven.assembly.plugin.version>2.4</maven.assembly.plugin.version>
@@ -44,14 +45,14 @@
 		<!-- spring -->
 		<!--  <spring.version>5.2.19.RELEASE</spring.version> -->
 		<!-- <spring.security.version>5.2.13.RELEASE</spring.security.version> -->
-		<spring.version>5.3.22</spring.version>
+		<spring.version>5.3.28</spring.version>
 		<spring.security.version>5.3.13.RELEASE</spring.security.version>
 		<!-- <spring.ws.core.version>2.4.7.RELEASE</spring.ws.core.version> -->
 		<!-- <spring.ws.core.version>3.0.12.RELEASE</spring.ws.core.version> -->
 		<spring.ws.core.version>3.1.3</spring.ws.core.version>
 
 		<!-- google -->
-		<google.guava.version>30.1-jre</google.guava.version>
+		<google.guava.version>32.1.1-jre</google.guava.version>
 
 		<!-- logging libs -->
 		<log4j2.version>2.18.0</log4j2.version>
@@ -110,7 +111,7 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
-						<version>8.1.2</version>
+						<version>8.3.1</version>
 						<executions>
 							<execution>
 								<goals>
@@ -508,7 +509,7 @@
 				<version>${maven.compiler.plugin.version}</version>
 				<configuration>
 					<source>${java.version}</source>
-					<compile>${java.version}</compile>
+					<!-- <compile>${java.version}</compile> -->
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>

@@ -1176,7 +1176,7 @@ rule "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recom
 			- that has already been evaluated
 			- the shot is not ignored
 			- the administration date of the shot is > $lastShotAdministeredDate
-		Make note of the number of doses administered $doseAccumulationBivalent in Series $targetSeries as $nNumberOfBivalentDoses where vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+		Make note of the number of doses administered $doseAccumulationBivalent in Series $targetSeries as $nNumberOfBivalentDoses where administration date < "19-Apr-2023" with vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
 		Make note of the number of doses administered $doseAccumulation0419 in Series $targetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023"
 		Confirm the date evalTime is on the same date or after "17-Mar-2023"
 	then
@@ -1294,7 +1294,7 @@ rule "COVID-19: If the execution date is >= 4/19/2023 for the Pfizer COVID-19 se
 		Set the recommendation Recommended Forecast Date for $r_interval to $dtCalculated
 		Include the Recommendation $r_interval for Consideration in the final forecast of the Series
 		Create a Recommendation as $r_age for the Series $targetSeries
-		Set the Recommendation Recommended Forecast Date for $r_age to the latter of $dtAtAge6m and "19-Apr-2023"
+		Set the Recommendation Recommended Forecast Date for $r_age to the latter of $dtAtAge6m and "02-Sep-2022"
 		Include the Recommendation $r_age for Consideration in the final forecast of the Series
 		Create a recommendation as $rReason for the Series $targetSeries
 		Set the Recommendation Reason for $rReason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_COVID19_BIVALENT_VACCINE"
@@ -1348,7 +1348,7 @@ end
 // postCustomRecommendation checks for FDA-approved or WHO-approved series
 //////////////
 
-rule "COVID-19: If a dose is recommended in the Pfizer series and the execution date is >= 3/17/2023, add the recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
+rule "COVID-19: If a dose is recommended in the Pfizer series for patient < 5 years and the execution date is >= 3/17/2023, add the recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
@@ -1356,7 +1356,10 @@ rule "COVID-19: If a dose is recommended in the Pfizer series and the execution 
 			- the name of the Series is "COVID19PfizerSeries"
 			- a forecast for the Series has been made and a shot is Recommended
 			- post processing on the Series forecast has not already been run
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
 		Confirm the date evalTime is on the same date or after "17-Mar-2023"
+		Confirm Elapsed time between $dtBirthDate and evalTime < "5y"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_COVID19_BIVALENT_VACCINE"
@@ -1366,12 +1369,34 @@ rule "COVID-19: If a dose is recommended in the Pfizer series and the execution 
 end
 
 
-rule "COVID-19: If a dose is recommended in the Mixed Product, Moderna, Janssen or Novavax series and the execution date is >= 4/19/2023, add the recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
+rule "COVID-19: If a dose is recommended in the Pfizer series for patient >= 5 years and the execution date is >= 3/17/2023 and < 4/19/2023, add the recommendation reason BOOSTER_DOSE"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the name of the Series a member of ("COVID19MixedProductSeries", "COVID19ModernaSeries", "COVID19Janssen1DoseSeries", "COVID19Novavax2DoseSeries")
+			- the name of the Series is "COVID19PfizerSeries"
+			- a forecast for the Series has been made and a shot is Recommended
+			- post processing on the Series forecast has not already been run
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm the date evalTime is on the same date or after "17-Mar-2023"
+		Confirm the date evalTime is before "19-Apr-2023"
+		Confirm Elapsed time between $dtBirthDate and evalTime >= "5y"
+	then
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.BOOSTER_DOSE"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If a dose is recommended in the Pfizer, Mixed Product, Moderna, Janssen or Novavax series and the execution date is >= 4/19/2023, add the recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries", "COVID19ModernaSeries", "COVID19Janssen1DoseSeries", "COVID19Novavax2DoseSeries")
 			- a forecast for the Series has been made and a shot is Recommended
 			- post processing on the Series forecast has not already been run
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"

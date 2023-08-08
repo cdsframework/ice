@@ -120,12 +120,12 @@ rule "Influenza: Change invalid >= maximum age reason to Insufficient Antigen fo
 end
 
 
-rule "Influenza: If CVX 194, 200, 201 or 202 is administered, evaluate the shot as Invalid / VACCINE_NOT_ALLOWED_IN_US"
+rule "Influenza: If CVX 194, 200, 201 202, or 231 is administered, evaluate the shot as Invalid / VACCINE_NOT_ALLOWED_IN_US"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
     when
     	There is an Administered Shot $oTargetDose that needs to be evaluated
     		- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
-    		- the vaccine administered a member of ("ICE194", "ICE200", "ICE201", "ICE202")
+    		- the vaccine administered a member of ("ICE194", "ICE200", "ICE201", "ICE202", "ICE231")
        		- make note of the Associated Series as $associatedTargetSeries
     then
     	Include the reason for shot $oTargetDose Invalid due to "Vaccine not Allowed in U.S."
