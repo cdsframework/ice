@@ -1158,7 +1158,7 @@ end
  START ____ Series Completion / Recommendation Rules >= 3/17/2023 or 4/17/2023, for the Pfizer/Mixed Product & Moderna Series, respectively.
 /************************************************************************************************************************************************************************************/
 
-rule "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for completed __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
+rule "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -1184,7 +1184,7 @@ rule "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recom
 end
 
 rule "COVID-19: If the execution date is >= 4/19/2023, patient is >= 65 yrs of age and has had 2 or more prior doses with a bivalent vaccine (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, CVX 520) or 2 or more doses at >= 4/19/2023, recommend Not Recommended / COMPLETE"
-		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for completed __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
+		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -1206,7 +1206,7 @@ end
 
 
 rule "COVID-19: If the execution date is >= 4/19/2023, patient is >= 65 yrs of age, and has had 1 prior dose with a bivalent vaccine (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, CVX 520) or 1 prior dose at >= 4/19/2023 in the Moderna series, recommend Not Recommended / COMPLETE_HIGH_RISK"
-		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for completed __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
+		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -1227,7 +1227,7 @@ end
 
 
 rule "COVID-19: If the execution date is >= 4/19/2023, patient is < 65 years of age and has had at least 1 prior dose with a bivalent vaccine (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, CVX 520) or at least 1 dose administered at >= 4/19/2023, recommend Not Recommended / COMPLETE"
-		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for completed __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
+		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -1248,7 +1248,7 @@ end
 
 
 rule "COVID-19: If the execution date is >= 4/19/2023 for the Mixed Product, Moderna, Janssen or Novavax COVID-19 series, the patient has not had any bivalent doses (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, CVX 520) or any doses administered at >= 4/19/2023, recommend a bivalent vaccine at age 6 months and recommended interval of 8 weeks along with recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
-		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for completed __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
+		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -1276,7 +1276,7 @@ end
 
 
 rule "COVID-19: If the execution date is >= 4/19/2023 for the Pfizer COVID-19 series, the patient is >= 5 yrs of age, and has not had any bivalent doses (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, CVX 520) or any doses administered at >= 4/19/2023, recommend a bivalent vaccine at age 6 months and recommended interval of 8 weeks along with recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
-		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for completed __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
+		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -1307,7 +1307,7 @@ end
 // If the patient completes the Pfizer or Mixed Product series, is < 5 years old, the execution date is >= 3/17/2023, and a bivalent vaccine dose has not been admininstered, recommend a dose of COVID-19 at the vaccine group level 
 // and recommended interval of 8 weeks or on 3/17/2023, whichever is latest, along with with recommendation reasons ADMINISTER_COVID19_BIVALENT_VACCINE and SUPPLEMENTAL_TEXT. 
 rule "COVID-19: If the child < 5 years of age completes the Pfizer series, the execution date is >= 3/17/2023, and neither a bivalent vaccine dose has been admininstered nor a dose administered >= 4/19/2023, recommend at the vaccine group level with recommended interval of 8 weeks or on 3/17/2023, whichever is latest, along with recommended reason ADMINISTER_COVID19_BIVALENT_VACCINE"
-		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for completed __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
+		extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -1578,18 +1578,19 @@ end
 /************************************************************************************************************************************************************************************/
 
 /*************************************************************************************************************************************************************************************
- START ____Moderna Series Table Special Rules____
+ START ____Moderna, Pfizer and Mixed Product Series Table Special Recommended Interval Rules____
 /************************************************************************************************************************************************************************************/
 
-rule "COVID-19(Abstract): If dose 1 was administered at >= 6 yrs of age and and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
+rule "COVID-19(Abstract): If dose 1 was administered at >= 6 yrs of age in the Moderna Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
-	activation-group "earliestIntervalCheck"
+	///////activation-group "earliestIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the series is "COVID19ModernaSeries"
 			- the series is not complete
+			- the number of administered shots is >= 1
 			- the effective dose number in the Series is <= 2
 			- make note of the date that the most recent shot was administered as $administrationDate
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -1603,7 +1604,7 @@ end
 
 
 rule "COVID-19: If dose 1 was administered at >= 6 yrs of age and and the execution date >= 4/19/2023, override default earliest interval and recommend earliest interval of 8 weeks"
-		extends "COVID-19(Abstract): If dose 1 was administered at >= 6 yrs of age and and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
+		extends "COVID-19(Abstract): If dose 1 was administered at >= 6 yrs of age in the Moderna Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	activation-group "earliestIntervalCheck"
@@ -1618,7 +1619,58 @@ end
 
 
 rule "COVID-19: If dose 1 was administered at >= 6 yrs of age and and the execution date >= 4/19/2023, override default recommended interval and recommend recommended interval of 8 weeks"
-		extends "COVID-19(Abstract): If dose 1 was administered at >= 6 yrs of age and and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
+		extends "COVID-19(Abstract): If dose 1 was administered at >= 6 yrs of age in the Moderna Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationIntervalCheck"
+	when
+		// Condition met for recommended interval change
+	then
+		Add 8 DurationType.WEEKS to $administrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19(Abstract): If dose 1 was administered at >= 5 yrs of age in the Pfizer or Mixed Product Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
+			- the series is not complete
+			- the number of administered shots is >= 1
+			- the effective dose number in the Series is <= 2
+			- make note of the date that the most recent shot was administered as $administrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $administrationDate >= "5y"
+		Confirm the date evalTime is on the same date or after "19-Apr-2023"
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If dose 1 was administered at >= 5 yrs of age and and the execution date >= 4/19/2023, override default earliest interval and recommend earliest interval of 8 weeks"
+		extends "COVID-19(Abstract): If dose 1 was administered at >= 5 yrs of age in the Pfizer or Mixed Product Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+	when
+		// Condition met for earliest interval change
+	then
+		Add 8 DurationType.WEEKS to $administrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19: If dose 1 was administered at >= 5 yrs of age and and the execution date >= 4/19/2023, override default recommended interval and recommend recommended interval of 8 weeks"
+		extends "COVID-19(Abstract): If dose 1 was administered at >= 5 yrs of age in the Pfizer or Mixed Product Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationIntervalCheck"
@@ -1632,6 +1684,6 @@ rule "COVID-19: If dose 1 was administered at >= 6 yrs of age and and the execut
 end
 
 /*************************************************************************************************************************************************************************************
- END ____Moderna Series Table Special Rules____
+ END ____Moderna, Pfizer and Mixed Product Series Table Special Recommended Interval Rules____
 /************************************************************************************************************************************************************************************/
 
