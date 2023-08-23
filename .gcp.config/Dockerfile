@@ -18,7 +18,9 @@ ENV REMOTE_CONFIG_PASSWORD="password"
 # Tomcat Server
 EXPOSE 8080
 
-RUN adduser --system --home /home/appuser --disabled-login appuser && \
+RUN apt-get -y update && \
+    apt-get -y dist-upgrade && \
+    adduser --system --home /home/appuser --disabled-login appuser && \
     rm -rf /usr/local/tomcat/webapps/docs /usr/local/tomcat/webapps/ROOT /usr/local/tomcat/webapps/examples /usr/local/tomcat/webapps/host-manager /usr/local/tomcat/webapps/manager && \
     mkdir -p /home/appuser/.opencds
 
