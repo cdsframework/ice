@@ -52,9 +52,11 @@ global java.util.Date evalTime
 
 rule "Duplicate Shots/Same Day(MMR): If any MMR vaccine other than MMRV is administered on the same day as MMRV, evaluate the MMRV shot first"
 	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"
 	when
 		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", administeredVaccine.cdsConceptName != "ICE94")
-		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine == "ICE94") 
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName == "ICE94") 
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -72,11 +74,11 @@ end
 rule "Duplicate Shots/Same Day(MMR): If a measles/mumps/rubella vaccine other than an MMR is administered on the same day as an MMR (excluding MMRV), evaluate the MMR shot first"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
-	activation-group "duplicateShotEvaluationOrder"	
+	activation-group "duplicateShotEvaluationOrder"
 	auto-focus true
 	when
 		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", vaccineComponent.cdsConceptName != "ICE03")
-		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine == "ICE03") 
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName == "ICE03") 
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
