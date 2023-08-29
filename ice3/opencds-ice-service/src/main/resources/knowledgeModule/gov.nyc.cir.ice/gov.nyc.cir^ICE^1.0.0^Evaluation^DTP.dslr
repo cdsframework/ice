@@ -90,8 +90,8 @@ end
 
   
 /*************************************************************************************************************************************************************************************
-Rules for Recurring Td (CVX 09)
-Once the patient has completed the primary DTP series (3-dose or 5-dose) and has received a dose of pertussis at >= 7 years of age, a Td (09) is needed every 10 years.  
+Rules for Recurring Td
+Once the patient has completed the primary DTP series (3-dose or 5-dose) and has received a dose of pertussis at >= 7 years of age, a Td is needed every 10 years.  
 
 Evaluation Rules for Recurring Td
     + All vaccines in the DTP vaccine group are allowed for the recurring Td.
@@ -99,8 +99,8 @@ Evaluation Rules for Recurring Td
     + Once the primary series is complete and the patient has a dose of pertussis at >=7, any DTP shot is evaluated as VALID for the recurring Td.
 *************************************************************************************************************************************************************************************/
 
-// Rules for Recurring Td (CVX 09) 
-// Once the patient has completed the primary DTP series (3-dose or 5-dose) and has received a dose of pertussis at >= 7 years of age, a Td (09) is needed every 10 years.
+// Rules for Recurring Td (CVX 09, CVX 196) 
+// Once the patient has completed the primary DTP series (3-dose or 5-dose) and has received a dose of pertussis at >= 7 years of age, a Td is needed every 10 years.
 // All vaccines in the DTP vaccine group are allowed for the recurring Td.
 // Once the primary series is complete and the patient has a dose of pertussis at >=7, any DTP shot is evaluated as VALID for the recurring Td.  
 rule "DTP: Evaluate recurring Td as valid if Td (age) evaluation criteria is met"
@@ -151,7 +151,7 @@ rule "DTP: Override default series rule that evaluates extra Td shots in the ser
 end
 
 /*************************************************************************************************************************************************************************************
- Rules for Recurring Td (CVX 09) END
+ Rules for Recurring Td (CVX 09, CVX 196) END
 *************************************************************************************************************************************************************************************/
 
 
@@ -579,11 +579,11 @@ end
 
 
 /*************************************************************************************************************************************************************************************
- CVX Specific Rules for Td (CVX 09, 113, 138, 139) START
+ CVX Specific Rules for Td (CVX 09, 113, 138, 139, 196) START
 /************************************************************************************************************************************************************************************/
 
-// If Td (CVX 09, 113, 138, 139) is administered below the CVX Absolute Minimum Age (< 7 years - 4 days), evaluate as Invalid/BELOW_MINIMUM_AGE_VACCINE.
-// Ignore the reported Td (CVX 09, 113, 138, 139) when determining the recommended due date for the next target dose due and when evaluating the next shot based on the 
+// If Td (CVX 09, 113, 138, 139, 196) is administered below the CVX Absolute Minimum Age (< 7 years - 4 days), evaluate as Invalid/BELOW_MINIMUM_AGE_VACCINE.
+// Ignore the reported Td (CVX 09, 113, 138, 139, 196) when determining the recommended due date for the next target dose due and when evaluating the next shot based on the 
 // minimum interval for that target dose.
 rule "DTP: If Absolute Vaccine Minimum Age for Td is not met (7y-4d), shot should be ignored when calculating intervals"
 	dialect "mvel"
@@ -606,7 +606,7 @@ end
 
 
 ///////
-// CVX-specific Rule for Td (CVX 09, 113, 138, 139) - If a patient is in the DTP 5-dose series and a Valid Td is administered, return the reason code SUPPLEMENTAL_TEXT and descriptive text 
+// CVX-specific Rule for Td (CVX 09, 113, 138, 139, 196) - If a patient is in the DTP 5-dose series and a Valid Td is administered, return the reason code SUPPLEMENTAL_TEXT and descriptive text 
 // that Pertussis is needed to complete the series
 ///////
 rule "If a patient is in the DTP 5-dose series and a Valid Td is administered, return the reason code SUPPLEMENTAL_TEXT and descriptive text that Pertussis is needed to complete the series"
@@ -636,7 +636,7 @@ rule "If a patient is in the DTP 5-dose series and a Valid Td is administered, r
 end
 
 /*************************************************************************************************************************************************************************************
- CVX Specific Rules for Td (CVX 09, 113, 138, 139) START
+ CVX Specific Rules for Td (CVX 09, 113, 138, 139, 196) END
 /************************************************************************************************************************************************************************************/
  
  
@@ -710,7 +710,7 @@ end
 /************************************************************************************************************************************************************************************/
 
 // CVX Code Minimum Interval Between Tdap/DTaP and Td/DT
-// If Tdap (CVX 115), DTaP (CVX 20, 106, or 107), or DTP (CVX 01) is given below the minimum interval from a Td (CVX 09, 113, 138, 139) or DT (CVX 28), but the shot meets the 
+// If Tdap (CVX 115), DTaP (CVX 20, 106, or 107), or DTP (CVX 01) is given below the minimum interval from a Td (CVX 09, 113, 138, 139, 196) or DT (CVX 28), but the shot meets the 
 // minimum age, then the Tdap/DTaP/DTP is evaluated as Invalid and the reason code is D_AND_T_INVALID/P_VALID  (i.e., Diphtheria and tetanus components invalid due to minimum 
 // interval violation, pertussis component valid).
 rule "DTP: Enforce Minimum Interval between Tdap/DTaP and Td/DT if the shot meets the minimum age"
@@ -919,7 +919,7 @@ end
  3-dose Series Exception Rules START:
     + If the patient has received 3 doses and none of the doses are pertussis-containing vaccines, the DTP 3-dose series is NOT complete. 
     + Recommend Tdap (CVX 115) at recommended interval = 0 days.  (*Note*: not implemented here; see Recommendation^DTP file for this rule.) 
- Example: Patient age = 10 years. CVX 09 (Td) given at 7 years, 8 years, and 10 years. Recommend final dose Tdap (CVX 115) at 10 years. 
+ Example: Patient age = 10 years. Td given at 7 years, 8 years, and 10 years. Recommend final dose Tdap (CVX 115) at 10 years. 
 /************************************************************************************************************************************************************************************/
 
 rule "DTP: (3-Dose Series Exception Rule[Series Not Complete])- If the Patient has Completed the Series but none of the Doses are pertussis-containing Vaccines, mark the 3-dose Series Not Complete"

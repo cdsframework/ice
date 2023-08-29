@@ -45,6 +45,7 @@ import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
 import org.cdsframework.ice.service.Vaccine
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
 
@@ -136,11 +137,16 @@ rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if s
 		Confirm elapsed time between $dtBirthdate and evalTime >= "7y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE09"
 		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Overdue Forecast Date for $oRecommendation to $dtDateAtAge
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Create a recommendation as $rReason for the Series $targetSeries
+		Set the Recommendation Reason for $rReason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_TDAP_OR_TD"
+		Include the Recommendation $rReason for Consideration in the final Forecast of the Series $targetSeries
+		Create a recommendation as $rSupplementalText for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $rSupplementalText to "Administer either Tdap or Td."
+		Include the Recommendation $rSupplementalText for Consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end

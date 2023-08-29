@@ -23,62 +23,49 @@
  * For more information about this software, see http://www.hln.com/ice or send
  * correspondence to ice@hln.com.
  */
- 
+
 package knowledgeModule.gov.nyc.cir.ice
 
-import java.util.Date
-import org.opencds.vmr.v1_0.internal.datatypes.CD
+import java.util.List
+import java.util.Set
 import org.opencds.vmr.v1_0.internal.EvalTime
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson
 import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
 import org.cdsframework.ice.util.TimePeriod.DurationType
-
-global java.util.Date evalTime
+import org.cdsframework.ice.service.Vaccine
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
 
+global java.util.Date evalTime
 
-rule "MMR: Mark Target Dose 2 as Accepted / EXTRA_DOSE if the shot is administered when patient >= 19 yrs"
-	dialect "mvel"
+
+rule "Polio: Modify the absolute minimum interval from dose 1 to dose 2 to 24 days if shot administered at >= 13 yrs of age"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "doseAgeCheck"
+	no-loop true
 	when
-		There is an Administered Shot $currentShot that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.500"
-			- the dose number in the Series is == 2
-			- make note of the date this Shot was Administered as $assign_dtAdministrationDate
-			- make note of the associated series as $associatedTargetSeries
+		There is an Administered Shot $currentDose that needs to be evaluated
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+			- the dose number in the series is == 2
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the Associated Series as $associatedTargetSeries
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "19y"
+			- make note of the date as $dateAt13yOfAge when the patient is "13y" of age
+			- the date $currentShotDate >= $dateAt13yOfAge
 	then
-		Include the reason for shot $currentShot Accepted due to "Extra Dose"
-		Mark the Series $associatedTargetSeries Complete
-		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
-end
-
-
-rule "MMR: Mark the series complete if Patient >= 19 yrs and there is 1 dose in the Series"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^postEvaluationCheck"
-	when
-		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
-			- the series is not complete
-			- the effective dose number in the series is == 2
-		There does not exist an Administered Shot
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
-			- that has not already been Evaluated
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and evalTime >= "19y"
-	then
-		Mark the Series $targetSeries Complete
-		Log that this Series Rule fired for the Series $targetSeries
+		Obtain the existing DoseRule for Dose Number 1 in the Series $associatedTargetSeries as $assign_oDoseRule1
+		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "24d"
+		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule1
+		Refresh all Facts in the Series $associatedTargetSeries for Evaluation
+		Record that this Series Rule was Processed for the TargetSeries $associatedTargetSeries
+		Log that this Series Rule fired for the Series $associatedTargetSeries
 end
