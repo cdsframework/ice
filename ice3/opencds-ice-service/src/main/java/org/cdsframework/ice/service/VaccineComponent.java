@@ -36,84 +36,84 @@ import org.cdsframework.cds.CdsConcept;
 public class VaccineComponent extends AbstractVaccine {
 
 	private Collection<String> diseaseImmunityList;
-	
+
 	private static final Logger logger = LogManager.getLogger();
-	
+
 
 	private VaccineComponent(VaccineComponent pVaccineComponent) {
 		super(pVaccineComponent);
 	}
-	
-	
+
+
 	/**
-	 * Instantiate a VaccineComponent object. Both arguments are mandatory. User setters to specify the valid minimum and maximum ages 
+	 * Instantiate a VaccineComponent object. Both arguments are mandatory. User setters to specify the valid minimum and maximum ages
 	 * for this vaccine component (if any)
 	 * @param pVaccineConcept Concept that represents this vaccine component
 	 * @param pDisease Disease that this vaccine component induces immunity to
 	 * @throws IllegalArgumentException If either parameter is not supplied
 	 */
 	public VaccineComponent(CdsConcept pVaccineConcept, List<String> pDiseaseImmunityList) {
-		
+
 		super(pVaccineConcept);
-		
+
 		String _METHODNAME = "VaccineComponent(): ";
-		
+
 		if (pDiseaseImmunityList == null) {
 			String errStr = "disease not specified";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		this.diseaseImmunityList = pDiseaseImmunityList;
 	}
 
-	
+
 	/**
-	 * Instantiate a VaccineComponent object. Both arguments are mandatory. User setters to specify the valid minimum and maximum ages 
+	 * Instantiate a VaccineComponent object. Both arguments are mandatory. User setters to specify the valid minimum and maximum ages
 	 * for this vaccine component (if any)
 	 * @param pVaccine Populated vaccine instance that represents this vaccine component
 	 * @throws IllegalArgumentException If vaccine object or its ICEConcept is not supplied
 	 */
 	public VaccineComponent(Vaccine pVaccine) {
-	
+
 		super(pVaccine);
-		
+
 		// String _METHODNAME = "VaccineComponent(): ";
 		this.diseaseImmunityList = pVaccine.getAllDiseasesTargetedForImmunity();
 	}
-	
-	
+
+
 	/**
 	 * Construct a deep copy of the supplied VaccineComponent object and return the newly created object to the caller
 	 */
-	public static VaccineComponent constructDeepCopyOfVaccineComponentObject(VaccineComponent pV) { 
-	
+	public static VaccineComponent constructDeepCopyOfVaccineComponentObject(VaccineComponent pV) {
+
 		if (pV == null) {
 			return null;
 		}
-		
+
 		VaccineComponent lVC = new VaccineComponent(pV);
 		List<String> lSDCList = new ArrayList<String>();
 		for (String pSD : pV.diseaseImmunityList) {
 			lSDCList.add(pSD);
 		}
 		lVC.diseaseImmunityList = lSDCList;
-		
+
 		return lVC;
 	}
-	
-	
+
+
 	public Collection<String> getDiseaseImmunityList() {
 		return diseaseImmunityList;
 	}
-	
-	
+
+
 	/**
 	 * Get list of diseases targeted for immunity by this vaccine
 	 * @return List<SupportedDiseaseConcept> of diseases targeted by this vaccine; empty list if none
 	 */
 	public Collection<String> getAllDiseasesTargetedForImmunity() {
-		
+
 		Collection<String> lImmunityList = getDiseaseImmunityList();
 		if (lImmunityList != null) {
 			return lImmunityList;

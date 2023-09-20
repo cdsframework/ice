@@ -119,7 +119,12 @@ public class PayloadHelper {
 		lSAE.setSubstanceAdministrationGeneralPurpose(subsAdmGeneralPurposeCD);
 		// Dose information
 		INT lINTDoseNumber = new INT();
-		lINTDoseNumber.setValue(d.getDoseNumberCount());
+		if (d.getDoseNumberInSeries() > d.getDoseNumberCount()) {
+			lINTDoseNumber.setValue(d.getDoseNumberCount());
+		}
+		else {
+			lINTDoseNumber.setValue(d.getDoseNumberInSeries());
+		}
 		lSAE.setDoseNumber(lINTDoseNumber);
 		// Administration Time Interval
 		lSAE.setAdministrationTimeInterval(sae.getAdministrationTimeInterval());

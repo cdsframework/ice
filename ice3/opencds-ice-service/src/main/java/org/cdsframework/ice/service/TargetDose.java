@@ -550,7 +550,8 @@ public class TargetDose {
 				"; isValid=" + isValid + "; preEvaluationCheck=" + preEvaluationCheckCompleted + "; isLiveVirus: " + this.getAdministeredVaccine().isLiveVirusVaccine() +
 				"; isCombinationVaccine: " + this.getAdministeredVaccine().isCombinationVaccine() + "; componentIsLiveVirus: " + this.getVaccineComponent().isLiveVirusVaccine() +
 				"; isAdjuvant: " + this.getAdministeredVaccine().isSelectAdjuvantProduct() + "; componentIsAdjuvant: " + this.getVaccineComponent().isSelectAdjuvantProduct() +
-				"; isDuplicateShotSameDayCheckCompleted: " + this.isDuplicateShotSameDayCheckCompleted() + ", isUnspecifiedFormulation(): " + this.getVaccineComponent().isUnspecifiedFormulation();
+				"; isDuplicateShotSameDayCheckCompleted: " + this.isDuplicateShotSameDayCheckCompleted() + ", isUnspecifiedFormulation(): " + this.getVaccineComponent().isUnspecifiedFormulation() +
+				"; hasBeenEvaluated: " + hasBeenEvaluated();
 		int i=0;
 		for (String reason : validReasons) {
 			if (i == 0)
