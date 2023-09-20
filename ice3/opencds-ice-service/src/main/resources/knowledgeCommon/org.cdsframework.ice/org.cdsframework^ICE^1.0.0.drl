@@ -780,7 +780,7 @@ rule "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
 	when
 		$td: TargetDose(isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS, $administrationDate : administrationDate, $tdAdministeredShotNumber : administeredShotNumberInSeries, 
 			$doseNumber : doseNumberInSeries)
-		$tdprev : TargetDose(administrationDate == $administrationDate, administeredShotNumberInSeries == $tdAdministeredShotNumber-1, $tdprevDoseNumber: doseNumberInSeries, $tdprevDoseNumber <= $doseNumber)
+		$tdprev : TargetDose(administrationDate == $administrationDate, hasBeenEvaluated == true, administeredShotNumberInSeries == $tdAdministeredShotNumber-1, $tdprevDoseNumber: doseNumberInSeries, $tdprevDoseNumber <= $doseNumber)
 		$targetSeries : TargetSeries(this == $td.associatedTargetSeries, this == $tdprev.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
