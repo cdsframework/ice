@@ -910,7 +910,7 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Mixed Series by d
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 		/////// not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries"),
 		///////	vaccineComponent.isUnspecifiedFormulation() == false) 
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19MixedProductSeries")
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023MixedProductSeries")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
