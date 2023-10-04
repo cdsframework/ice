@@ -986,7 +986,6 @@ public class ICESupportingDataConfiguration {
 		}
 	}
 
-	/**
 	public static void main(String[] args) {
 
 		List<String> lCdsVersions = new ArrayList<String>();
@@ -1004,5 +1003,4 @@ public class ICESupportingDataConfiguration {
 
 		System.out.println("\n\nmain(): END.\n\n");
 	}
-	*/
 }
