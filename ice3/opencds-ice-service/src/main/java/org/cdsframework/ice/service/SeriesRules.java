@@ -43,10 +43,10 @@ public class SeriesRules {
 	private boolean doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
 	private List<DoseRule> seriesDoseRules;
 	private List<Season> applicableSeasons;
-	
+
 	private static final Logger logger = LogManager.getLogger();
 
-	
+
 	/**
 	 * Instantiate a series rules instance. SeriesDoseRules and applicableSeasons set to empty. Set flag to calculate dose number based on disease tally to true by default.
 	 * @param pSeriesName Series name, must be provided
@@ -73,7 +73,7 @@ public class SeriesRules {
 		recurringDosesAfterSeriesComplete = false;
 	}
 
-	
+
 	/**
 	 * Instantiate a series rules instance with the specified Seasons. If seasons are not specified, then the series is not treated as a Seasonal series.
 	 * @param pSeriesName
@@ -82,24 +82,24 @@ public class SeriesRules {
 	 */
 	/////// public SeriesRules(String pSeriesName, String pVaccineGroup, List<Season> pApplicableSeasons) {
 	public SeriesRules(String pSeriesName, CdsConcept pVaccineGroup, List<Season> pApplicableSeasons) {
-	
+
 		this(pSeriesName, pVaccineGroup);
 		if (pApplicableSeasons != null && pApplicableSeasons.isEmpty() == false) {
 			applicableSeasons = pApplicableSeasons;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Construct a copy of this object and return i
 	 * @return
 	 */
 	public static SeriesRules constructDeepCopyOfSeriesRulesObject(SeriesRules pSR) {
-		
+
 		if (pSR == null) {
 			return null;
 		}
-		
+
 		SeriesRules lSR = new SeriesRules(pSR.getSeriesName(), pSR.getVaccineGroupConcept());
 		lSR.seriesId = ICELogicHelper.generateUniqueString();
 		lSR.seriesName = pSR.seriesName;
@@ -107,7 +107,7 @@ public class SeriesRules {
 		lSR.recurringDosesAfterSeriesComplete = pSR.recurringDosesAfterSeriesComplete;
 		lSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = pSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
 		lSR.applicableSeasons = new ArrayList<Season>();
-		
+
 		// Copy Doses
 		List<DoseRule> lDoseRules = new ArrayList<DoseRule>();
 		List<DoseRule> pDoseRules = pSR.getSeriesDoseRules();
@@ -116,7 +116,7 @@ public class SeriesRules {
 			lDoseRules.add(lDR);
 		}
 		lSR.setSeriesDoseRules(lDoseRules);
-		
+
 		// Copy Seasons
 		List<Season> lSeasons = new ArrayList<Season>();
 		List<Season> pSeasons = pSR.getSeasons();
@@ -125,22 +125,22 @@ public class SeriesRules {
 			lSeasons.add(lS);
 		}
 		lSR.applicableSeasons = lSeasons;
-		
+
 		return lSR;
 	}
-	
-	
+
+
 	public String getSeriesId() {
-		return seriesId;		
+		return seriesId;
 	}
 
-	
+
 	public String getSeriesName() {
 		return seriesName;
 	}
 
 	/**
-	 * Set the Series Name. Cannot be null. 	 
+	 * Set the Series Name. Cannot be null.
 	 * @param seriesName
 	 */
 	public void setSeriesName(String seriesName) {
@@ -149,15 +149,15 @@ public class SeriesRules {
 		}
 		this.seriesName = seriesName;
 	}
-	
+
 	private CdsConcept getVaccineGroupConcept() {
 		return vaccineGroupConcept;
 	}
-	
+
 	public String getVaccineGroup() {
 		return vaccineGroupConcept.getOpenCdsConceptCode();
 	}
-	
+
 	public int getNumberOfDosesInSeries() {
 		return numberOfDosesInSeries;
 	}
@@ -165,20 +165,20 @@ public class SeriesRules {
 	public void setNumberOfDosesInSeries(int numberOfDosesInSeries) {
 		this.numberOfDosesInSeries = numberOfDosesInSeries;
 	}
-	
+
 	public boolean isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered() {
 		return doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
 	}
-	
+
 	public void setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(boolean yesno) {
 		doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = yesno;
 	}
-	
-	public boolean recurringDosesOccurAfterSeriesComplete() {
+
+	public boolean jobs() {
 		return recurringDosesAfterSeriesComplete;
 	}
 
-	public void setRecurringDosesAfterSeriesComplete(boolean yesno) {
+	public void setRecurringDosesAfterSeriesComplete(boolean yesno) {jpojp
 		this.recurringDosesAfterSeriesComplete = yesno;
 	}
 
@@ -190,24 +190,24 @@ public class SeriesRules {
 	public List<DoseRule> getSeriesDoseRules() {
 		return seriesDoseRules;
 	}
-	
-	
+
+
 	/**
 	 * Get DoseRule by dose number
 	 * @param doseNumber
 	 * @return DoseRule, or NULL if there is no such DoseRule in this series
 	 */
 	public DoseRule getSeriesDoseRuleByDoseNumber(int doseNumber) {
-		
+
 		for (DoseRule dr : seriesDoseRules) {
 			if (dr.getDoseNumber() == doseNumber) {
 				return dr;
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Return relevant Seasons for Series, or empty set if there are none
 	 * @return
@@ -222,33 +222,33 @@ public class SeriesRules {
 	 * @return
 	 */
 	public void addFullySpecifiedSeason(Season pS) {
-		
+
 		String _METHODNAME = "addSeason(Season): ";
 		if (pS == null) {
 			return;
 		}
-		
+
 		if (pS.isDefaultSeason()) {
 			String errStr = "a default Season was supplied as a Season parameter to this series when one already exists";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		applicableSeasons.add(pS);
 	}
 
 	public boolean vaccineIsAllowableInOneOrMoreDoseRules(Vaccine v) {
-		
-		return isAllowableVaccineForDoseRule(v, true, 0);	
+
+		return isAllowableVaccineForDoseRule(v, true, 0);
 	}
-	
-	
+
+
 	public boolean isAllowableVaccineForDoseRule(Vaccine v, int doseNumber) {
-		
+
 		return isAllowableVaccineForDoseRule(v, false, doseNumber);
 	}
 
-	
+
 	private boolean isAllowableVaccineForDoseRule(Vaccine v, boolean allowableForAnyDose, int doseNumber) {
 
 		String _METHODNAME = "isAllowableVaccineForDoseRule(): ";
@@ -266,7 +266,7 @@ public class SeriesRules {
 
 		for (DoseRule dr : seriesDoseRules) {
 			int drDoseNumber = dr.getDoseNumber();
-			if (logger.isDebugEnabled()) { 
+			if (logger.isDebugEnabled()) {
 				logger.debug(_METHODNAME + "dose number: " + drDoseNumber);
 			}
 			if (! allowableForAnyDose && drDoseNumber < doseNumber) {
@@ -293,7 +293,7 @@ public class SeriesRules {
 				break;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -301,42 +301,42 @@ public class SeriesRules {
 	 * Add a DoseRule to the Series. Doses must be added to the SeriesRules in sequential order (1...n), or an IllegalArgumentException is thrown.
 	 */
 	public void addSeriesDoseRule(DoseRule pDoseRule) {
-	
+
 		String _METHODNAME = "addSeriesDoseRule(): ";
 		if (pDoseRule == null) {
 			return;
 		}
-		
+
 		int lDoseRuleDoseNumber = pDoseRule.getDoseNumber();
 		if (lDoseRuleDoseNumber <= 0) {
 			String errStr = "No dose number is supplied for the specified DoseRule";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		int lCurrentNumberOfDoses = this.seriesDoseRules.size();
 		if (lDoseRuleDoseNumber != lCurrentNumberOfDoses+1) {
 			String errStr = "Dose number supplied for the specified DoseRule is not the next dose number for this SeriesRules. Doses must be added in sequential order by dose number";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		this.seriesDoseRules.add(pDoseRule);
 		setNumberOfDosesInSeries(lDoseRuleDoseNumber);
 	}
-	
-	
+
+
 	/**
 	 * Modify an existing DoseRule in the Series. If the dose number (via specifide DoseRule) does not exist in the SeriesRules, then an IllegalArgumentException
-	 * is thrown. 
+	 * is thrown.
 	 */
 	public void modifySeriesDoseRule(DoseRule pDoseRule) {
-		
+
 		String _METHODNAME = "modifySeriesDoseRule(): ";
 		if (pDoseRule == null) {
 			return;
 		}
-		
+
 		int lDoseRuleDoseNumber = pDoseRule.getDoseNumber();
 		if (lDoseRuleDoseNumber <= 0 || lDoseRuleDoseNumber > getNumberOfDosesInSeries()) {
 			String errStr = "DoseRule specified does not have a dose number that is valid for this SeriesRules. SeriesDose DoseRule was not modified.";
@@ -355,16 +355,16 @@ public class SeriesRules {
 		}
 		this.seriesDoseRules = lSeriesDoseRules;
 	}
-	
-	
+
+
 	/**
-	 * Set the List of DoseRules for this series. Update the numberOfDosesInSeries based on the provided number of DoseRules. There must be a dose number  
+	 * Set the List of DoseRules for this series. Update the numberOfDosesInSeries based on the provided number of DoseRules. There must be a dose number
 	 * that matches the size of the List. If the size does not match with each dose number accounted for, an IllegalArgumentException is thrown.
 	 * @param pDoseRules
 	 */
 	public void setSeriesDoseRules(List<DoseRule> pDoseRules) {
 
-		String _METHODNAME = "setSeriesDoseRules(List<DoseRule>): "; 
+		String _METHODNAME = "setSeriesDoseRules(List<DoseRule>): ";
 		if (pDoseRules == null) {
 			this.seriesDoseRules = new ArrayList<DoseRule>();
 			setNumberOfDosesInSeries(0);
@@ -385,10 +385,10 @@ public class SeriesRules {
 					lDoseNumbers.add(lDRDoseNumberInt);
 				}
 			}
-			
+
 			this.seriesDoseRules = pDoseRules;
 			setNumberOfDosesInSeries(lNumberOfDoses);
-		}		
+		}
 	}
 
 
@@ -427,12 +427,12 @@ public class SeriesRules {
 
 	@Override
 	public String toString() {
-		
+
 		String toStr = "SeriesRules [seriesId = " + seriesId + "; Series Name = " + seriesName + "; vaccineGroupConcept name = " + vaccineGroupConcept.getOpenCdsConceptCode()
 				+ "; Number of Doses In Series = " + numberOfDosesInSeries + "; Recurring Doses (After Series Complete)? = "
-				+ recurringDosesAfterSeriesComplete + "; Dose Number Calculated By Diseases Targeted By Each Vaccine = " 
-				+ doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered; 
-		
+				+ recurringDosesAfterSeriesComplete + "; Dose Number Calculated By Diseases Targeted By Each Vaccine = "
+				+ doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
+
 		int i=1;
 		toStr += "\nDose Rules [[ ";
 		for (DoseRule dr : seriesDoseRules) {
@@ -448,8 +448,8 @@ public class SeriesRules {
 		}
 		toStr += "\t]]";
 		toStr += "\n]\n";
-		
+
 		return toStr;
 	}
-	
+
 }
