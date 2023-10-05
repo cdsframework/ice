@@ -1011,7 +1011,7 @@ rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "History
 	salience 100
 	activation-group "minimumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $doseNumber : doseNumberInSeries)
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null)
 		$ts : TargetSeries(this == $td.associatedTargetSeries) ///////, $doseNumber <= seriesRules.numberOfDosesInSeries) // , seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
@@ -1033,7 +1033,7 @@ rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "History
 	salience 100
 	activation-group "maximumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null, $doseNumber : doseNumberInSeries)
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null)
 		$ts : TargetSeries(this == $td.associatedTargetSeries) ///////, $doseNumber <= seriesRules.numberOfDosesInSeries)
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) > 0)

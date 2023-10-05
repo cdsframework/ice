@@ -174,11 +174,11 @@ public class SeriesRules {
 		doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = yesno;
 	}
 
-	public boolean jobs() {
+	public boolean recurringDosesOccurAfterSeriesComplete() {
 		return recurringDosesAfterSeriesComplete;
 	}
 
-	public void setRecurringDosesAfterSeriesComplete(boolean yesno) {jpojp
+	public void setRecurringDosesAfterSeriesComplete(boolean yesno) {
 		this.recurringDosesAfterSeriesComplete = yesno;
 	}
 
