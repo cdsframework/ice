@@ -1006,13 +1006,14 @@ end
 ///////// ***
 // Series Table rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.checkMinimumAgeVaccine" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	salience 100
 	activation-group "minimumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null)
-		$ts : TargetSeries(this == $td.associatedTargetSeries) ///////, $doseNumber <= seriesRules.numberOfDosesInSeries) // , seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $tdVaccineComponent : vaccineComponent)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		not DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMinimumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
 	then
@@ -1028,15 +1029,61 @@ end
 ///////// ***
 // Series Table rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.checkMinimumAgeVaccineDoseRule" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 100
+	activation-group "minimumAgeVaccineCheck"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $tdVaccineComponent : vaccineComponent)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		$dr : DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMinimumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMinimumAge($tdVaccineComponent)) < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
+		insert(hef);
+		$td.addInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_AGE_VACCINE_REASON.getCdsListItemName());
+		$td.addDoseRuleProcessed(_RULENAME);	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
+// Series Table rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.checkMaximumAgeVaccine" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	salience 100
 	activation-group "maximumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null)
-		$ts : TargetSeries(this == $td.associatedTargetSeries) ///////, $doseNumber <= seriesRules.numberOfDosesInSeries)
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null, $tdVaccineComponent : vaccineComponent)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		not DoseRule(this == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($td.vaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) > 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
+		insert(hef)		
+		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_VACCINE.getCdsListItemName());
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
+// Series Table rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.checkMaximumAgeVaccineDoseRuleDoseRule" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 100
+	activation-group "maximumAgeVaccineCheck"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $tdVaccineComponent : vaccineComponent)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		$dr : DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMaximumAge($tdVaccineComponent)) > 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);

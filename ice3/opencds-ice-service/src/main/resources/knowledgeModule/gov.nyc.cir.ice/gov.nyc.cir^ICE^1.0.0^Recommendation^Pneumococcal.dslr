@@ -420,8 +420,8 @@ Rules for Recommending at the CVX Code vs. Vaccine Group Level
     + If the patient is < 65 years old, then recommend at the vaccine group level.
     + If the patient is >= 19 years old, then always recommend at the CVX level: recommend PPSV (CVX 33) for adult dose 1. 
 /************************************************************************************************************************************************************************************/
-
-rule "Pneumococcal Child Series: Recommend at the vaccine level in child series; vaccine recommended should be PCV 13 (CVX 133)"
+/*
+rule "Pneumococcal Child Series: Recommend at the vaccine group level in child series with supplemental test; vaccine recommended should be PCV13, PCV15 or PCV20"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	salience 100
@@ -444,6 +444,7 @@ rule "Pneumococcal Child Series: Recommend at the vaccine level in child series;
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+*/
 
 /*************************************************************************************************************************************************************************************
  END Rules for Recommending at the Vaccine vs. Vaccine Group Level
@@ -458,7 +459,7 @@ then a dose of PCV 13 (CVX 133) is recommended. Recommended interval is 8 weeks
 
 // If a child is complete for the series, has had one or more doses but not had a dose of PCV 13 (CVX 133), is currently < 5 yrs old and will be < 5 years old at the recommended due date, 
 // then a dose of PCV 13 (CVX 133) is recommended. Recommended interval = 8 weeks from the previous shot.
-rule "Pneumococcal Child Series: Recommend PCV13 dose if series complete if no prior VALID PCV13 or PCV15 doses, is <5 yrs old and will be less than 5yrs old upon recommendation date"
+rule "Pneumococcal Child Series: Recommend PCV13/PCV15/PCV20 dose if series complete if no prior VALID PCV13 or PCV15 doses, is <5 yrs old and will be less than 5yrs old upon recommendation date"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 450
@@ -469,7 +470,7 @@ rule "Pneumococcal Child Series: Recommend PCV13 dose if series complete if no p
 			- the effective dose number in the Series is == 5
 			- the Number of Administered Shots is > 0
 			- make note of the date that the most recent shot was administered as $shotDate			
-		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("ICE133","ICE215") is == 0 
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("ICE133","ICE215","ICE216") is == 0 
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
@@ -477,7 +478,7 @@ rule "Pneumococcal Child Series: Recommend PCV13 dose if series complete if no p
 	then
 		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
 		Include a recommendation as $recommendation with recommended forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
-		Set the Recommendation Vaccine for $recommendation to "ICE133"
+		/////// Set the Recommendation Vaccine for $recommendation to "ICE133"
 		Mark forecasting of the Series $targetSeries Complete
 		Insert an IceFact SupportedFactConcept._PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE.getConceptCodeValue() with TargetSeries $targetSeries into working memory
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -512,7 +513,7 @@ rule "Pneumococcal Child Series: if patient < 5yrs completed the Child series (i
 			- the effective dose number in the Series is > 4
 		There is an administered shot $shot
 			- the shot belongs to the Series $targetSeries
-			- the vaccine administered a member of ("ICE133", "ICE215")
+			- the vaccine administered a member of ("ICE133", "ICE215", "ICE216")
 			- that has already been evaluated and whose Shot Validity is VALID
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -791,7 +792,7 @@ end
 
 
 // Exception 4
-rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to dose 6 (Adult Series target dose 1) if Patient >= 5y and no prior PCV13 or PCV15 dose"
+rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to dose 6 (Adult Series target dose 1) if Patient >= 5y and no prior PCV13, PCV15 or PCV20 dose"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 500
@@ -806,7 +807,7 @@ rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to
 			- the shot belongs to the Series $targetSeries
 			- the dose number in the Series is <= 6
 			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- the vaccine administered a member of ("ICE133", "ICE215")
+			- the vaccine administered a member of ("ICE133", "ICE215", "ICE216")
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeSixtyFiveYears when the Patient is "65y" of age					
@@ -821,7 +822,7 @@ end
 
 
 // Exception 5
-rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to dose 7 (Adult Series target dose 2) if Patient >= 5y and prior PCV13 or PCV15 dose"
+rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to dose 7 (Adult Series target dose 2) if Patient >= 5y and prior PCV13, PCV15, or PCV20 dose"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 500
@@ -836,7 +837,7 @@ rule "Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to
 			- the shot belongs to the Series $targetSeries
 			- the dose number in the Series is <= 6
 			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- the vaccine administered a member of ("ICE133", "ICE215")
+			- the vaccine administered a member of ("ICE133", "ICE215", "ICE216")
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dtDateAtAgeSixtyFiveYears when the Patient is "65y" of age					
