@@ -78,8 +78,7 @@ public class TargetDose {
 	 * @param pAdministrationDate
 	 * @throws IllegalArgumentException if the Dose ID, vaccine or administration date is not populated
 	 */
-	public TargetDose(Vaccine pAdministeredVaccine, VaccineComponent pVaccineComponentToBeEvaluated, Date pAdministrationDate, TargetSeries pEncompassingTargetSeries,
-			SubstanceAdministrationEvent pAssociatedSAE) {
+	public TargetDose(Vaccine pAdministeredVaccine, VaccineComponent pVaccineComponentToBeEvaluated, Date pAdministrationDate, TargetSeries pEncompassingTargetSeries, SubstanceAdministrationEvent pAssociatedSAE) {
 
 		if (pAdministeredVaccine == null || pVaccineComponentToBeEvaluated == null || pAdministrationDate == null || pEncompassingTargetSeries == null || pAssociatedSAE == null) {
 			logger.error("TargetDose(): Dose ID, Vaccine, Vaccine Component to be Evaluated, Administration Date not supplied, Associated SubstanceAdministrationEvent and/or Encompassing TargetSeries not supplied");
