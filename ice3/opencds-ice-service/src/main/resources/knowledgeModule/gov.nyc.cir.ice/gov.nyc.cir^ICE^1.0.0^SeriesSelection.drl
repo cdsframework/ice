@@ -902,31 +902,12 @@ end
 // Logic currently incorporates Moderna, Pfizer, Janssen and WHO-approved vaccine series.
 //////////////
 
-rule "SeriesSelection(COVID-19): In Sep2023 season, select the Mixed Series by default if no valid NOS shots on record"
+rule "SeriesSelection(COVID-19): Select the Mixed Series by default if no valid NOS shots on record"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Sep2023OnwardSeason")
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
-		/////// not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries"),
-		///////	vaccineComponent.isUnspecifiedFormulation() == false) 
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023MixedProductSeries")
-	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
-		update($tss);
-		update($ts);
-end
-		
-rule "SeriesSelection(COVID-19): In Dec2020 season, select the Mixed Series by default if no valid NOS shots on record"
-	dialect "mvel"
-	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Sep2023Season")
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries"),
 			vaccineComponent.isUnspecifiedFormulation() == false) 
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19MixedProductSeries")
@@ -952,8 +933,8 @@ rule "SeriesSelection(COVID-19): Select already _completed_ series if a differen
 	salience 5
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
-		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, isSeriesComplete() == false, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
-		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == false, isSeriesComplete() == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, isSeriesComplete() == false) 
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == false, isSeriesComplete() == true) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts1.setSelectedSeries(false);
@@ -973,11 +954,11 @@ rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 25
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Sep2023Season")
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)		
-		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.isUnspecifiedFormulation() == false)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, getPreferableVaccinesForTargetDose($td.doseNumberInSeries) contains $td.administeredVaccine)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -994,29 +975,29 @@ rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 28
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Sep2023Season")
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19MixedProductSeries", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19MixedProductSeries")
 		(
 			// Moderna-only check
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"))
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"))
 			and 
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"))
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"))
 			or
 			// Pfizer-only check
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
 			and
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
 			or
 			// Novavax-only check
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName == "ICE211")
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName == "ICE211")
 			and
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName != "ICE211")
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName != "ICE211")
 			or
 			// NOS administered
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", vaccineComponent.isUnspecifiedFormulation() == true)
 		)
-		$tsmixedproduct : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19MixedProductSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$tsmixedproduct : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19MixedProductSeries")
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsmixedproduct);
@@ -1033,21 +1014,21 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Moderna vaccine
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Sep2023Season")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		and
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
 		and
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19ModernaSeries", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason)
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19ModernaSeries")
 		and
 		(
-			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == true)
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries", isSeriesComplete() == true)
 			or
-			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == false)
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries", isSeriesComplete() == false)
 			and			
-			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"))
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"))
 		)
 		and		
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", vaccineComponent.isUnspecifiedFormulation() == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -1064,21 +1045,21 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine 
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Sep2023Season")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		and
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
 		and
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19PfizerSeries", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason)
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19PfizerSeries")
 		and
 		(
-			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == true)
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries", isSeriesComplete() == true)
 			or
-			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == false)
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries", isSeriesComplete() == false)
 			and			
-			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
 		)
 		and		
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", vaccineComponent.isUnspecifiedFormulation() == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -1095,21 +1076,21 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Novavax vaccine
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Sep2023Season")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		and
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)
 		and
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19Novavax2DoseSeries")
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19Novavax2DoseSeries")
 		and
 		(
-			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == true)
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries", isSeriesComplete() == true)
 			or
-			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == false)
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries", isSeriesComplete() == false)
 			and			
-			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName != "ICE211")
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName != "ICE211")
 		)
 		and		
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", vaccineComponent.isUnspecifiedFormulation() == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -1128,12 +1109,10 @@ rule "SeriesSelection(COVID-19): If the first dose administered is the Janssen v
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Sep2023Season")
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)		
-		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName == "ICE212", 
-			associatedTargetSeries.seriesRules.seriesName == "COVID19Janssen1DoseSeries", $ts : associatedTargetSeries)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.cdsConceptName != "ICE212", isValid == true, 
-			vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true)		
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, vaccineComponent.cdsConceptName == "ICE212", associatedTargetSeries.seriesRules.seriesName == "COVID19Janssen1DoseSeries", $ts : associatedTargetSeries)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", vaccineComponent.cdsConceptName != "ICE212", isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
