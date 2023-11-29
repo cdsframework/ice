@@ -1,0 +1,91 @@
+/* Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package knowledgeModule.gov.nyc.cir.ice
+
+import java.util.Date
+import java.util.Iterator
+import java.util.List
+import java.util.Set
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.SeriesDisplaySelection
+import org.cdsframework.ice.service.SeriesDisplaySelection.SeriesDisplaySelectionType
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+
+global java.util.Date evalTime
+
+
+rule "Series Display(COVID-19): If the COVID-19 Mixed Product Series is selected as a best guess display and no (valid) doses have been administered in any COVID-19 series, retract the mixed product series for display"
+	dialect "mvel"
+	agenda-group "ProcessResults^customSeriesDisplayLogic"
+	when
+		$ss : SeriesDisplaySelection(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesDisplaySelectionType == SeriesDisplaySelectionType.SERIES_DISPLAY_BEST_GUESS, seriesName == "COVID19MixedProductSeries")
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($ss) {
+			setSeriesDisplaySelectionType(SeriesDisplaySelectionType.SERIES_DISPLAY_NONE);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "custom series display logic invoked for: " + $ss);
+end
+
+
+/*
+rule "Series Display(COVID-19): If no series have been selected for display, mark the Pfizer, Moderna and Novavax series as display alternatives"
+	dialect "mvel"
+	agenda-group "ProcessResults^customSeriesDisplayLogic"
+	when
+		not SeriesDisplaySelection(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesDisplaySelectionType == SeriesDisplaySelectionType.SERIES_DISPLAY_BEST_GUESS || seriesDisplaySelectionType == SeriesDisplaySelectionType.SERIES_DISPLAY_UNAMBIGUOUS)
+		$ss : SeriesDisplaySelection(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesName in ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19Novavax2DoseSeries"), seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_ALTERNATIVE)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($ss) {
+			setSeriesDisplaySelectionType(SeriesDisplaySelectionType.SERIES_DISPLAY_ALTERNATIVE);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "custom series display logic invoked for: " + $ss);
+end
+*/
+
+
+rule "Series Display(DTP): If the DTP series display is specified as SERIES_DISPLAY_BEST_GUESS, change it to SERIES_DISPLAY_UNAMBIGUOUS"
+	dialect "mvel"
+	agenda-group "ProcessResults^customSeriesDisplayLogic"
+	when
+		$ss : SeriesDisplaySelection(vaccineGroup == "VACCINE_GROUP_CONCEPT.200", seriesDisplaySelectionType == SeriesDisplaySelectionType.SERIES_DISPLAY_BEST_GUESS)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($ss) {
+			setSeriesDisplaySelectionType(SeriesDisplaySelectionType.SERIES_DISPLAY_UNAMBIGUOUS);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "custom series display logic invoked for: " + $ss);
+end
+

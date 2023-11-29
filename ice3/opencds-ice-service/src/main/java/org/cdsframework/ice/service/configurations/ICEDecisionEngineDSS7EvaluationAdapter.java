@@ -117,6 +117,8 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private Boolean outputSupplementalText = null;
 	private List<String> vaccineGroupExclusions = null;
 	private Boolean enableUnsupportedVaccinesGroup = null;
+	private Boolean outputNumberOfDosesRemaining = null;
+
 
 	private static final Logger logger = LogManager.getLogger();
 
@@ -399,6 +401,13 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("enableUnsupportedVaccinesGroup", enableUnsupportedVaccinesGroup));
+
+		if (outputNumberOfDosesRemaining == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: output number of doses remaining flag not set; cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		cmds.add(CommandFactory.newSetGlobal("outputNumberOfDosesRemaining", outputNumberOfDosesRemaining));
 
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -754,6 +763,18 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			logger.info(_METHODNAME + "output_supplemental_text set to " + outputSupplementalText);
 		}
 
+		// Output doses remaining for each series recommendation?
+		String lOutputDosesRemaining = lProps.getProperty("series_display_selection");
+		if (lOutputDosesRemaining != null && lOutputDosesRemaining.equals("Y")) {
+			outputNumberOfDosesRemaining = new Boolean(true);
+		}
+		else {
+			outputNumberOfDosesRemaining = new Boolean(false);
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info(_METHODNAME + "output_number_of_doses_remaining set to " + outputNumberOfDosesRemaining);
+		}
+
 		/////// Set up knowledge base
 		KieServices kieServices = KieServices.Factory.get();
 		KieBase kieBase = null;
@@ -927,6 +948,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		}
 		logger.info("Enable Unsupported Vaccines Group: " + this.enableUnsupportedVaccinesGroup);
 
+		logger.info("Output Selected Series and Number of Doses Remaining in Series: " + ((this.outputNumberOfDosesRemaining == null || this.outputNumberOfDosesRemaining.equals(Boolean.FALSE)) ? "No" : "Yes"));
 
 		//// return kieBase;
 		return knowledgeBases;
