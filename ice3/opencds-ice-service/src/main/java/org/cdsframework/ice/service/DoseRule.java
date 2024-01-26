@@ -211,7 +211,7 @@ public class DoseRule {
 		if (pAllowableVaccineMaximumAges == null || pAllowableVaccineMaximumAges.isEmpty() == true) {
 			return;
 		}
-		this.allowableVaccineMinimumAges.putAll(pAllowableVaccineMaximumAges);
+		this.allowableVaccineMaximumAges.putAll(pAllowableVaccineMaximumAges);
 	}
 
 

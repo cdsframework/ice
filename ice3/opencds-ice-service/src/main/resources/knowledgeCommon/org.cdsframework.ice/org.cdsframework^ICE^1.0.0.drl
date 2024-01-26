@@ -647,6 +647,7 @@ rule "HistoryEvaluation.setNextTargetDoseNonNOSInSeriesForEvaluation" ruleflow-g
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, this != $td.associatedTargetSeries, associatedTargetSeries!.seasonStartDate < $td.associatedTargetSeries!.seasonStartDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
@@ -669,6 +670,7 @@ rule "HistoryEvaluation.setNextTargetDoseNOSInSeriesForEvaluation" ruleflow-grou
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, this != $td.associatedTargetSeries, associatedTargetSeries!.seasonStartDate < $td.associatedTargetSeries!.seasonStartDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
@@ -1038,7 +1040,8 @@ rule "HistoryEvaluation.checkMinimumAgeVaccineDoseRule" ruleflow-group "HistoryE
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 		$dr : DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMinimumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMinimumAge($tdVaccineComponent)) < 0)
+		eval(! TimePeriod.isTimePeriodANegativeDuration($dr.getAllowableVaccineMinimumAge($tdVaccineComponent).getTimePeriodStringRepresentation()) && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMinimumAge($tdVaccineComponent)) < 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
@@ -1059,7 +1062,7 @@ rule "HistoryEvaluation.checkMaximumAgeVaccine" ruleflow-group "HistoryEvaluatio
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null, $tdVaccineComponent : vaccineComponent)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
-		not DoseRule(this == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($td.vaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
+		not DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) > 0)
 	then
@@ -1083,7 +1086,8 @@ rule "HistoryEvaluation.checkMaximumAgeVaccineDoseRuleDoseRule" ruleflow-group "
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 		$dr : DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMaximumAge($tdVaccineComponent)) > 0)
+		eval(! TimePeriod.isTimePeriodANegativeDuration($dr.getAllowableVaccineMaximumAge($tdVaccineComponent).getTimePeriodStringRepresentation()) && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMaximumAge($tdVaccineComponent)) > 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
