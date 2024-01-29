@@ -68,14 +68,14 @@ rule "COVID-19(any Sept 2023 COVID-19 Series): If a prior formulation is adminis
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
 			- the dose number in the series is == 1
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520", "ICE521")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520", "ICE521")
 			- make note of the Date this Shot was Administered as $previousShotDate
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
 			- the dose number in the series is == 1
 			- the administration date of the shot is > $previousShotDate
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520", "ICE521")
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520", "ICE521")
 	then
 		Create a Recommendation as $r for the Series $targetSeries
 		Add "28d" to $previousShotDate and make note of the newly calculated date as $dtCalculatedMinimum
