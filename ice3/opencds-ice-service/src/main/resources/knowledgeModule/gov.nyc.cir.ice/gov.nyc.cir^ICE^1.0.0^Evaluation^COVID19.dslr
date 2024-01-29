@@ -50,27 +50,6 @@ global java.util.Date evalTime
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// Evaluation of vaccines not authorized by the FDA or WHO
-// If the patient has received a COVID-19 vaccine not authorized by the FDA or WHO, then evaluate the shot as Invalid/VACCINE_NOT_APPROVED_IN_US_OR_BY_WHO
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-rule "COVID-19: If the vaccine administered is authorized neither by the FDA nor WHO, evaluate the shot as INVALID/VACCINE_NOT_APPROVED_IN_US_OR_BY_WHO"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE500", "ICE501", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517", "ICE518", "ICE521")
-			- make note of the associated series as $targetSeries
-	then
-		Include the reason for shot $currentShot Invalid due to "Vaccine Not Approved for Use in the U.S. or by the WHO"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
 // CVX 218, CVX 219, CVX 227, CVX 228, CVX 301, CVX 302, CVX 308, CVX 310, CVX 311 - if evaluated as Invalid due to being above the maximum age for that vaccine, should be ignored for purposes of recommendations
 //////////////////////////////////////////////////////////////////////////////////////////////////
 

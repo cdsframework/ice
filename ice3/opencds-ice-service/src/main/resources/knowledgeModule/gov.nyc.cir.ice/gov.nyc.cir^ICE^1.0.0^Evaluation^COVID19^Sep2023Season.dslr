@@ -58,7 +58,7 @@ global java.util.Date evalTime
     If the prior formulation of Novavax (CVX 211) is administered on or after 10/4/2023, then the Evaluation is Invalid and reason code is VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.
 /************************************************************************************************************************************************************************************/
 
-rule "COVID-19(any Sept2023 Series): If a prior formulation is administered as target dose 1 (for any Sept 2023 COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 24 days"
+rule "COVID-19(Sep2023): If a prior formulation is administered as target dose 1 (for any Sept 2023 COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 24 days"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 	when
@@ -99,9 +99,53 @@ rule "COVID-19(Sep2023): For any vaccine administered in a COVID-19 series, over
         Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+
+rule "COVID-19(Sep2023): If a prior formulation is administered, mark the shot Invalid / VACCINE_NOT_ALLOWED (overrides VACCINE_NOT_ALLOWED_FOR_THIS_DOSE rules)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "allowableVaccineCheck"
+	salience 10
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the series that the shot belongs to is not complete
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE513", "ICE514", "ICE515",  "ICE516", "ICE517", "ICE518", "ICE519", "ICE520", "ICE521")
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Include the reason for shot $currentShot Invalid due to "Vaccine Not Allowed"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
 /*************************************************************************************************************************************************************************************
  END - PRIOR FORMULATION of COVID-19 Vaccine Administered on or after 9/12/2023   
 /************************************************************************************************************************************************************************************/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// If an extra dose (2 doses or more) is required for the >= 5y Series, then verify for that the vaccine is allowed
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19(Sep2023 >= 5yrs Series): If the target dose number is >= the number of doses required to complete the series, verify that the vaccine is allowed"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023gte5Series"
+			- the series that the shot belongs to is not complete
+			- make note of the dose number as $targetDoseNumber
+			- make note of the administered vaccine as $vaccineAdministered
+			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the number of doses required to complete this Series is < $targetDoseNumber
+			- the vaccine $vaccineAdministered is not permitted for dose number 1 in this Series
+	then
+		Include the reason for shot $currentShot Invalid due to "Vaccine not Permitted for this Dose"
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -564,7 +608,7 @@ end
 // If a CVX 211 is administered >= 10/4/2023 or CVX 313 is administered < 10/4/2023, then the vaccine is not allowed.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19(Sep2023 Novavax Series): If CVX 211 is administered on or after 10/4/2023, mark the shot Invalid / VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
+rule "COVID-19(Sep2023 Novavax Series): If CVX 211 is administered on or after 10/4/2023, mark the shot Invalid / VACCINE_NOT_ALLOWED"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 	activation-group "allowableVaccineCheck"
@@ -579,7 +623,7 @@ rule "COVID-19(Sep2023 Novavax Series): If CVX 211 is administered on or after 1
 			- that has associated administered shot $currentShot
 			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue
 	then
-		Include the reason for shot $currentShot Invalid due to "Vaccine not Permitted for this Dose"
+		Include the reason for shot $currentShot Invalid due to "Vaccine Not Allowed"
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -713,16 +757,18 @@ rule "COVID-19(Sep2023): For patients < 18y, always enforce absolute minimum int
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
-/*
-rule "COVID-19(Sep2023): Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
+
+rule "COVID-19(Sep2023): Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE if there are other evaluation reason codes"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	no-loop true
 	when
 		There is an administered shot $notAllowedShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- that has already been evaluated
 			- make note of all evaluation reasons for this shot as $oEvaluationReasons
 			- the size of the collection $oEvaluationReasons is > 1
+			- the collection $oEvaluationReasons contains "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
 			- make note of the associated series as $associatedTargetSeries
 		There is an IceFact $iceFact
 			- that has associated series $associatedTargetSeries
@@ -733,7 +779,30 @@ rule "COVID-19(Sep2023): Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_D
 		Record that this dose rule was processed for the TargetDose $notAllowedShot
 		Log that this dose rule fired for the dose $notAllowedShot in the Series $associatedTargetSeries
 end
-*/
+
+
+rule "COVID-19(Sep2023): If an Invalid shot includes VACCINE_NOT_ALLOWED is one of the reason codes, remove all of the other evaluation reason codes"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	no-loop true
+	when
+		There is an administered shot $notAllowedShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that has already been Evaluated and whose Shot Validity is INVALID 
+			- make note of all evaluation reasons for this shot as $oEvaluationReasons
+			- the size of the collection $oEvaluationReasons is > 1
+			- the collection $oEvaluationReasons contains "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED"
+			- make note of the associated series as $associatedTargetSeries
+		There is an IceFact $iceFact
+			- that has associated series $associatedTargetSeries
+			- that has associated administered shot $notAllowedShot
+			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue	
+	then
+		Remove all evaluation reasons from Shot $notAllowedShot
+		Include the reason for shot $notAllowedShot Invalid due to "Vaccine Not Allowed"
+		Record that this dose rule was processed for the TargetDose $notAllowedShot
+		Log that this dose rule fired for the dose $notAllowedShot in the Series $associatedTargetSeries
+end
 
 /*************************************************************************************************************************************************************************************
  END Other, cross-cutting rules rules
