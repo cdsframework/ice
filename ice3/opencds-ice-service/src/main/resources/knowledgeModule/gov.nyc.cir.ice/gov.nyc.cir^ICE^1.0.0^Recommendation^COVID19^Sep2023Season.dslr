@@ -57,8 +57,8 @@ global org.cdsframework.ice.service.Schedule schedule
 rule "COVID-19(any Sept 2023 COVID-19 Series): If a prior formulation is administered for target dose 1, recommend interval of 28 days to the next dose"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "doseIntervalCheck"
-	salience 10
+	/////// activation-group "recommendationIntervalCheck"
+	/////// salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
@@ -90,6 +90,49 @@ rule "COVID-19(any Sept 2023 COVID-19 Series): If a prior formulation is adminis
 end
 
 
+// In the >= 5 yrs series, if the patient is >= 5 years of age as of the evaluation date, but the (8 week) interval from the prior shot is < the age at which patient became 5 years old, the recommendation date is 8 week after the last shot administered
+rule "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elapsed prior to the patient turning 5 years of age, recommend recommended interval of 8w from the last administered shot"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
+	activation-group "recommendationAgeCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Sep2023gte5Series"
+			- the Series is not complete
+		There is an administered shot $mostRecentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the date this shot was administered as $mostRecentShotDate
+		There does not exist an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is > $mostRecentShotDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+        	- make note of the date as $dtDateAtAge5y when the patient is "5y" of age
+        There exists an administered shot
+        	- that is the same shot as $mostRecentShot
+        	- the administration date of the shot is < $dtDateAtAge5y
+        Confirm elapsed time between $mostRecentShotDate and evalTime > "8w"
+	then
+		Create a Recommendation as $rRecommended for the Series $targetSeries
+		Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculatedRecommended
+		Set the recommendation Recommended Forecast Date for $rRecommended to $dtCalculatedRecommended
+end
+
+
+rule "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elapsed prior to the patient turning 5 years of age, recommend earliest interval of 8w from the last administered shot"
+		extends "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elapsed prior to the patient turning 5 years of age, recommend recommended interval of 8w from the last administered shot"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
+	activation-group "earliestAgeCheck"
+	when
+		// No condition necessary
+	then
+		Create a Recommendation as $rEarliest for the Series $targetSeries
+		Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculatedMinimum
+		Set the recommendation Earliest Forecast Date for $rEarliest to $dtCalculatedMinimum
+end
+
+
 /*************************************************************************************************************************************************************************************
  ===> Series: >= 5 yrs, Pfizer < 5 yrs, Moderna < 5 yrs or Mixed Product < 5 yrs
  ===> Recommendation Interval Rules
@@ -101,7 +144,7 @@ end
      + Recommended Interval = 8 weeks
 /************************************************************************************************************************************************************************************/
 
-rule "COVID-19(Sep2023 Pfizer >= 5yrs): If a shot was administered for >= target dose 2 (regardless of whether it is in the past season or present season) but the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
+rule "COVID-19(Sep2023 >= 5yrs): If a shot was administered (regardless of whether it is in the past season or present season) but the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	activation-group "recommendationIntervalCheck"
@@ -113,7 +156,7 @@ rule "COVID-19(Sep2023 Pfizer >= 5yrs): If a shot was administered for >= target
 		There is an administered shot $mostRecentShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the shot is not ignored
-			- the dose number in the series is >= 2
+			/////// - the dose number in the series is >= 2
 			- make note of the date this shot was administered as $mostRecentShotDate
 		There does not exist an administered shot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
@@ -130,8 +173,8 @@ rule "COVID-19(Sep2023 Pfizer >= 5yrs): If a shot was administered for >= target
 end
 
 
-rule "COVID-19(Sep2023 Pfizer >= 5yrs): activation-group extension => if a shot was administered (regardless of whether it is in the past season or present season) but the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
-		extends "COVID-19(Sep2023 Pfizer >= 5yrs): If a shot was administered for >= target dose 2 (regardless of whether it is in the past season or present season) but the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
+rule "COVID-19(Sep2023 >= 5yrs): activation-group extension => if a shot was administered (regardless of whether it is in the past season or present season) but the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
+		extends "COVID-19(Sep2023 >= 5yrs): If a shot was administered (regardless of whether it is in the past season or present season) but the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	activation-group "earliestIntervalCheck"
@@ -176,19 +219,6 @@ rule "COVID-19(Sep2023 Pfizer/Moderna/Mixed Product < 5yrs): For target dose 1 o
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-/*
-rule "COVID-19(Sep2023 Pfizer/Moderna/Mixed Product < 5yrs): activation-group extension => For target dose 1 of the Sep2023 series, if a shot was administered in the prior season but none of the shots are (valid) doses, recommend earliest and recommended interval of 8w from the most recent shot in the previous season"
-		extends "COVID-19(Sep2023 Pfizer/Moderna/Mixed Product < 5yrs): For target dose 1 of the Sep2023 series, if a shot was administered in the prior season but none of the shots are (valid) doses, recommend earliest and recommended interval of 8w from the most recent shot in the previous season"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "earliestIntervalCheck"
-	when
-		// No condition required for this extension	
-	then
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-*/
 
 // AI: Consolidate this with the rule above
 rule "COVID-19(Sep2023 Pfizer/Moderna/Mixed Product < 5yrs Series): If the effective dose number in the Series is > 1 but no shots have been administered in the current season, enforce the earliest/recommended recommendation interval for the current series dose from the most recent shot in the prior season"
@@ -284,7 +314,6 @@ rule "COVID-19(Sep2023 __Pfizer/Mixed Product__ < 5yrs Series): if the patient h
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
-			/////// - the name of the Series a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries", "COVID19Sep2023ModernaLT5ySeries")
 			- the name of the Series a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries")
 			- the Series is not complete
 			- make note of the effective dose number in the Series as $effectiveDoseNumber
