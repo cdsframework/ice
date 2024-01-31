@@ -78,24 +78,25 @@ rule "COVID-19(any Sept 2023 COVID-19 Series): If a prior formulation is adminis
 			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520", "ICE521")
 	then
 		Create a Recommendation as $r for the Series $targetSeries
-		Add "28d" to $previousShotDate and make note of the newly calculated date as $dtCalculatedMinimum
-		Add "28d" to $previousShotDate and make note of the newly calculated date as $dtCalculatedRecommended
-		Set the recommendation Earliest Forecast Date for $r to $dtCalculatedMinimum
-		Set the recommendation Recommended Forecast Date for $r to $dtCalculatedRecommended
+		Add "28d" to $previousShotDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
 		Include the Recommendation $r for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
-       	/////// Log Debugging Information about Object named "previousShotDate" and Value $previousShotDate
-       	/////// Log Debugging Information about Object named "dtCalculatedMinimum" and Value $dtCalculatedMinimum
 end
 
 
+///////
+// START
 // In the >= 5 yrs series, if the patient is >= 5 years of age as of the evaluation date, but the (8 week) interval from the prior shot is < the age at which patient became 5 years old, the recommendation date is 8 week after the last shot administered
-rule "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elapsed prior to the patient turning 5 years of age, recommend recommended interval of 8w from the last administered shot"
+///////
+rule "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elapsed prior to the patient turning 5 years of age, set the earliest and recommended age to 8w from the last administered shot (*recommendationAgeCheck*)"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	activation-group "recommendationAgeCheck"
 	when
+		// Series Table Recommended Age will be overridden by this rule and not be enforced
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19Sep2023gte5Series"
@@ -103,9 +104,11 @@ rule "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elap
 		There is an administered shot $mostRecentShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- make note of the date this shot was administered as $mostRecentShotDate
+			- the shot is not ignored
 		There does not exist an administered shot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is > $mostRecentShotDate
+			- the shot is not ignored
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- make note of the date as $dtDateAtAge5y when the patient is "5y" of age
         There exists an administered shot
@@ -113,24 +116,77 @@ rule "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elap
         	- the administration date of the shot is < $dtDateAtAge5y
         Confirm elapsed time between $mostRecentShotDate and evalTime > "8w"
 	then
-		Create a Recommendation as $rRecommended for the Series $targetSeries
-		Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculatedRecommended
-		Set the recommendation Recommended Forecast Date for $rRecommended to $dtCalculatedRecommended
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculated
+		// Set the earliest date here to avoid an extra calculation in earliestAgeCheck rule
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
 end
 
 
-rule "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elapsed prior to the patient turning 5 years of age, recommend earliest interval of 8w from the last administered shot"
-		extends "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elapsed prior to the patient turning 5 years of age, recommend recommended interval of 8w from the last administered shot"
+rule "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elapsed prior to the patient turning 5 years of age, set earliest and recommended age to 8w from the last administered shot (*earliestAgeCheck*)"
+		extends "COVID-19(Sep2023 >= 5yrs): If 8 weeks from the last administered shot elapsed prior to the patient turning 5 years of age, set the earliest and recommended age to 8w from the last administered shot (*recommendationAgeCheck*)"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	activation-group "earliestAgeCheck"
 	when
-		// No condition necessary
+		// Series Table Earliest Age will be overridden by this rule and will not be enforced
 	then
-		Create a Recommendation as $rEarliest for the Series $targetSeries
-		Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculatedMinimum
-		Set the recommendation Earliest Forecast Date for $rEarliest to $dtCalculatedMinimum
+		// Nothing to do; earliest forecast date set in parent rule
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
 end
+
+
+rule "COVID-19(Sep2023 >= 5yrs): If there are no shots in the current season and only ignored shots in the prior season, set the earlest and recommended age date to 9/12/2023 (*recommendationAgeCheck*)"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
+	activation-group "recommendationAgeCheck"
+	when
+		// Series Table Recommended Age will be overridden by this rule and will not be enforced
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Sep2023gte5Series"
+			- the Series is not complete
+		There is an administered shot $mostRecentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the date this shot was administered as $mostRecentShotDate
+			- the administration date of the shot is < "12-Sep-2023"
+			- the shot is ignored
+		There does not exist an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- the administration date of the shot is > $mostRecentShotDate
+			- the shot is not ignored
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Set the recommendation Earliest Forecast Date for $r to "12-Sep-2023"
+		Set the recommendation Recommended Forecast Date for $r to "12-Sep-2023"
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 >= 5yrs): If there are no shots in the current season and only ignored shots in the prior season, set the earlest and recommended age date to 9/12/2023 (*earliestAgeCheck*)"
+		extends "COVID-19(Sep2023 >= 5yrs): If there are no shots in the current season and only ignored shots in the prior season, set the earlest and recommended age date to 9/12/2023 (*recommendationAgeCheck*)"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
+	activation-group "earliestAgeCheck"
+	when
+		// Series Table Recommended Age will be overridden by this rule and will not be enforced
+	then
+		// Nothing to do; earliest forecast date set in parent rule
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+///////
+// END
+///////
 
 
 /*************************************************************************************************************************************************************************************
@@ -144,7 +200,7 @@ end
      + Recommended Interval = 8 weeks
 /************************************************************************************************************************************************************************************/
 
-rule "COVID-19(Sep2023 >= 5yrs): If a shot was administered (regardless of whether it is in the past season or present season) but the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
+rule "COVID-19(Sep2023 >= 5yrs): If an unignored shot was administered (regardless of whether it is in the past season or present season) and the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	activation-group "recommendationIntervalCheck"
@@ -152,21 +208,22 @@ rule "COVID-19(Sep2023 >= 5yrs): If a shot was administered (regardless of wheth
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19Sep2023gte5Series"
-			- the Series is not complete
+			- the Series is not complete		
 		There is an administered shot $mostRecentShot
+			- that is the same shot as $mostRecentShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the shot is not ignored
 			/////// - the dose number in the series is >= 2
+			- the shot is not ignored
 			- make note of the date this shot was administered as $mostRecentShotDate
 		There does not exist an administered shot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is > $mostRecentShotDate
+			- the shot is not ignored
 	then
 		Create a Recommendation as $r for the Series $targetSeries
-		Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculatedMinimum
-		Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculatedRecommended
-		Set the recommendation Earliest Forecast Date for $r to $dtCalculatedMinimum
-		Set the recommendation Recommended Forecast Date for $r to $dtCalculatedRecommended
+		Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
 		Include the Recommendation $r for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -174,7 +231,7 @@ end
 
 
 rule "COVID-19(Sep2023 >= 5yrs): activation-group extension => if a shot was administered (regardless of whether it is in the past season or present season) but the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
-		extends "COVID-19(Sep2023 >= 5yrs): If a shot was administered (regardless of whether it is in the past season or present season) but the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
+		extends "COVID-19(Sep2023 >= 5yrs): If an unignored shot was administered (regardless of whether it is in the past season or present season) and the series is not complete, recommend earliest and recommended interval of 8w to the next target dose"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	activation-group "earliestIntervalCheck"
