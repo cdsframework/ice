@@ -986,9 +986,9 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Mixed Product < 5
 			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE308", "ICE309", "ICE310"))
 			or
 			// Novavax-only check
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName == "ICE313")
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName in ("ICE211", "ICE313"))
 			and
-			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName != "ICE313")
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE211", "ICE313"))
 			or
 			// NOS administered
 			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
@@ -998,7 +998,7 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Mixed Product < 5
 		String _RULENAME = kcontext.rule.name;
 		$tsmixedproduct.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($tsmixedproduct.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
 		update($tss);
 		update($tsmixedproduct);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $tsmixedproduct);
@@ -1085,7 +1085,7 @@ rule "SeriesSelection(COVID-19): In the Sep2023 season, if the first dose admini
 		String _RULENAME = kcontext.rule.name;
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
 		update($tss);
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
