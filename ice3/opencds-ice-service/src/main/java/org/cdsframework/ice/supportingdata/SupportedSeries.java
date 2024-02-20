@@ -450,7 +450,7 @@ public class SupportedSeries implements SupportingData {
 				String lInfoStr = "Absolute minimum age and/or minimum age not specified in a dose: " + lDoseNumber + "; Series " + lSeriesCode;
 				logger.warn(_METHODNAME + lInfoStr);
 			}
-			String maximumAge = isds.getMaximumAge();
+			String maximumAge = isds.getAbsoluteMaximumAge();
 			String latestRecommendedAge = isds.getLatestRecommendedAge();
 			String absoluteMinimumInterval = null;
 			String minimumInterval = null;
@@ -522,7 +522,7 @@ public class SupportedSeries implements SupportingData {
 			}
 			if (maximumAge != null) {
 				// Only if specified
-				dr.setMaximumAge(new TimePeriod(maximumAge));
+				dr.setAbsoluteMaximumAge(new TimePeriod(maximumAge));
 			}
 			if (latestRecommendedAge != null) {
 				// Only if specified

@@ -2237,6 +2237,18 @@ public class TargetSeries {
 	}
 
 
+	public void evaluateVaccineGroupMinimumAgeandRecordReason(Date pEvalPersonBirthTime, TargetDose pTD)
+		throws ImproperUsageException, InconsistentConfigurationException {
+
+		evaluateVaccineGroupMinimumAgeOrMaximumAgeandRecordReason(pEvalPersonBirthTime, pTD, EvaluationType.MINIMUM_AGE);
+	}
+
+	public void evaluateVaccineGroupMaximumAgeandRecordReason(Date pEvalPersonBirthTime, TargetDose pTD)
+		throws ImproperUsageException, InconsistentConfigurationException {
+
+		evaluateVaccineGroupMinimumAgeOrMaximumAgeandRecordReason(pEvalPersonBirthTime, pTD, EvaluationType.MAXIMUM_AGE);
+	}
+
 	/**
 	 * Check age for the supplied dose and record evaluation reason in supplied TargetDose's validReasons, acceptedReasons and/or invalidReasons list.
 	 *
@@ -2245,7 +2257,7 @@ public class TargetSeries {
 	 * @throws ImproperUsageException
 	 * @throws InconsistentConfigurationException
 	 */
-	public void evaluateVaccineGroupMinimumAgeandRecordReason(Date pEvalPersonBirthTime, TargetDose pTD)
+	private void evaluateVaccineGroupMinimumAgeOrMaximumAgeandRecordReason(Date pEvalPersonBirthTime, TargetDose pTD, EvaluationType minimumOrMaximumAgeChoice)
 		throws ImproperUsageException, InconsistentConfigurationException {
 
 		String _METHODNAME = "evaluateVaccineGroupMinimumAgeandRecordReason(): ";
@@ -2286,18 +2298,35 @@ public class TargetSeries {
 			pTD.addInvalidReason(BaseDataEvaluationReason._PRIOR_TO_DOB.getCdsListItemName());
 		}
 
-		TimePeriod minimumAge = seriesDoseRule.getAbsoluteMinimumAge();
-		if (minimumAge == null) {
-			// There is no required age for this dose.
-			if (logger.isDebugEnabled()) {
-				logger.debug(_METHODNAME + "No minimum age specified for dose: " + pTD);
+		if (minimumOrMaximumAgeChoice == EvaluationType.MINIMUM_AGE) {
+			TimePeriod minimumAge = seriesDoseRule.getAbsoluteMinimumAge();
+			if (minimumAge == null) {
+				// There is no required age for this dose.
+				if (logger.isDebugEnabled()) {
+					logger.debug(_METHODNAME + "No minimum age specified for dose: " + pTD);
+				}
+				return;
 			}
-			return;
-		}
 
-		int compareTo = TimePeriod.compareElapsedTimePeriodToDateRange(pEvalPersonBirthTime, administrationDate, minimumAge);
-		if (compareTo < 0) {
-			pTD.addInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_AGE_EVALUATION_REASON.getCdsListItemName());
+			int compareTo = TimePeriod.compareElapsedTimePeriodToDateRange(pEvalPersonBirthTime, administrationDate, minimumAge);
+			if (compareTo < 0) {
+				pTD.addInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_AGE_EVALUATION_REASON.getCdsListItemName());
+			}
+		}
+		else if (minimumOrMaximumAgeChoice == EvaluationType.MAXIMUM_AGE) {
+			TimePeriod maximumAge = seriesDoseRule.getAbsoluteMaximumAge();
+			if (maximumAge == null) {
+				// There is no required age for this dose.
+				if (logger.isDebugEnabled()) {
+					logger.debug(_METHODNAME + "No maximum age specified for dose: " + pTD);
+				}
+				return;
+			}
+
+			int compareTo = TimePeriod.compareElapsedTimePeriodToDateRange(pEvalPersonBirthTime, administrationDate, maximumAge);
+			if (compareTo > 0) {
+				pTD.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_EVALUATION_REASON.getCdsListItemName());
+			}
 		}
 
 	}
@@ -3086,7 +3115,7 @@ public class TargetSeries {
 	/**
 	 * Return the dose rule for the dose number in question in this target series
 	 *
-	 * @param doseNumber
+	 * @param doseNumber If 0 is passed in, it is assumed that dose 1 is desured.
 	 * @return Dose containing rules for that dose, or null if there is no DoseRule for the specified dose number
 	 */
 	public DoseRule obtainDoseRuleForSeriesByDoseNumber(int doseNumber) {
@@ -3094,9 +3123,10 @@ public class TargetSeries {
 		if (seriesRules == null) {
 			return null;
 		}
+		int lDoseNumber = (doseNumber == 0) ? 1 : doseNumber;
 		List<DoseRule> seriesVaccineGroupDoseRules = seriesRules.getSeriesDoseRules();
 		for (DoseRule d : seriesVaccineGroupDoseRules) {
-			if (d.getDoseNumber() == doseNumber) {
+			if (d.getDoseNumber() == lDoseNumber) {
 				return d;
 			}
 		}
@@ -3848,6 +3878,12 @@ public class TargetSeries {
 
 	public void setImmunityToAllDiseasesRecorded(boolean immunityToAllDiseasesRecorded) {
 		this.immunityToAllDiseasesRecorded = immunityToAllDiseasesRecorded;
+	}
+
+
+	private enum EvaluationType {
+	    MINIMUM_AGE,
+	    MAXIMUM_AGE
 	}
 
 

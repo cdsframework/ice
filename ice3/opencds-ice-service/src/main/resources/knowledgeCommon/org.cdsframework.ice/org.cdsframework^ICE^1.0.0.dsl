@@ -148,6 +148,7 @@
 [condition][]- [Tt]he [Ee]ffective [Nn]umber of [Dd]oses in the [Ss]eries on or before {dtDate} is {aOp}  {nNumberOfValidAcceptedDoses}=determineEffectiveNumberOfDosesInSeriesByDate({dtDate}, true) {aOp}  {nNumberOfValidAcceptedDoses}
 [condition][]- [Tt]he [Ee]ffective [Nn]umber of [Dd]oses [Aa]dministered in the [Ss]eries is {aOp}  {nEffectiveNumberOfDosesInSeries}=determineEffectiveNumberOfDosesInSeries {aOp} {nEffectiveNumberOfDosesInSeries}
 [condition][]- [Tt]he [Nn]umber of [Dd]oses [Aa]dministered is {aOp}  {nNumberOfDoses}=determineNumberOfDosesAdministeredInSeries() {aOp}  {nNumberOfDoses}
+[condition][]- [Tt]he [Nn]umber of [Dd]oses [Aa]dministered before {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}} is {aOp}  {nNumberOfDoses}={strDate} != null && determineNumberOfDosesAdministeredInSeriesByDate(TimePeriod.generateDateFromStringInDroolsDateFormat({strDate}), false) {aOp}  {nNumberOfDoses}
 [condition][]- [Tt]he [Nn]umber of [Dd]oses [Aa]dministered before {dtDate} is {aOp}  {nNumberOfDoses}=determineNumberOfDosesAdministeredInSeriesByDate({dtDate}, false) {aOp}  {nNumberOfDoses}
 [condition][]- [Tt]he [Nn]umber of [Dd]oses [Aa]dministered on or before {dtDate} is {aOp}  {nNumberOfDoses}=determineNumberofDosesAdministeredInSeriesByDate({dtDate}, true) {aOp}  {nNumberOfDoses}
 [condition][]- [Tt]he [Vv]accine {oVaccine} is [Pp]ermitted for [Dd]ose [Nn]umber {nDoseNumber} in this [Ss]eries=seriesRules.isAllowableVaccineForDoseRule({oVaccine}, {nDoseNumber}) == true
@@ -380,6 +381,7 @@
 [consequence][][Oo]btain the existing DoseRule for [Dd]ose [Nn]umber {nDoseNumber} in the [Ss]eries {refer_oTargetSeries} as {assign_oDoseRule}=DoseRule {assign_oDoseRule} = DoseRule.constructDeepCopyOfDoseRuleObject({refer_oTargetSeries}.obtainDoseRuleForSeriesByDoseNumber({nDoseNumber})); if ({assign_oDoseRule} == null) \{ {assign_oDoseRule} = new DoseRule({refer_oTargetSeries}.getSeriesRules()); \}
 [consequence][][Oo]btain the [Mm]inimum [Ii]nterval from the existing DoseRule {refer_oDoseRule} as {assign_oTimePeriod}={assign_oTimePeriod} = {refer_oDoseRule}.getMinimumInterval();
 [consequence][][Oo]btain the [Rr]ecommended [Ii]nterval from the existing DoseRule {refer_oDoseRule} as {assign_oTimePeriod}={assign_oTimePeriod} = {refer_oDoseRule}.getEarliestRecommendedInterval();
+[consequence][][Oo]btain the [Ll]atest [Rr]ecommended [Ii]nterval from the existing DoseRule {refer_oDoseRule} as {assign_oTimePeriod}={assign_oTimePeriod} = {refer_oDoseRule}.getLatestRecommendedInterval();
 /////// [consequence][][Ss]et the [Dd]ose [Nn]umber for [Dd]oseRule {assign_oDoseRule} to {nDoseNumber}={assign_oDoseRule}.setDoseNumber({nDoseNumber});
 [consequence][][Ss]et the [Aa]bsolute [Mm]inimum [Aa]ge for [Dd]oseRule {assign_oDoseRule} to TimePeriod {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}={assign_oDoseRule}.setAbsoluteMinimumAge(new TimePeriod({sDuration}));
 [consequence][][Ss]et the [Aa]bsolute [Mm]inimum [Aa]ge for [Dd]oseRule {assign_oDoseRule} to TimePeriod {refer_oTimePeriod}={assign_oDoseRule}.setAbsoluteMinimumAge({refer_oTimePeriod});

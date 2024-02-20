@@ -1100,6 +1100,30 @@ end
 ///////// ***
 // Series Table rule... Do not Edit
 ///////// ***
+rule "HistoryEvaluation.evaluateVaccineGroupMaximumAge" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	activation-group "doseMaximumAgeCheck"
+	salience 100
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $doseNumber : doseNumberInSeries) 
+		$ts : TargetSeries(this == $td.associatedTargetSeries, seriesRules.numberOfDosesInSeries >= $doseNumber)
+		$person : EvaluatedPerson()
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.evaluateVaccineGroupMaximumAgeandRecordReason($person.demographics.birthTime, $td);
+		if ($td.containsInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_EVALUATION_REASON.getCdsListItemName()) || 
+			$td.containsInvalidReason(BaseDataEvaluationReason._INVALID_AGE_EVALUATION_REASON.getCdsListItemName())) {
+			ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._ABOVE_MAXIMUM_AGE.getConceptCodeValue(), $td);
+			insert(hef)				
+		}
+		$td.addDoseRuleProcessed(_RULENAME);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+end 
+
+
+///////// ***
+// Series Table rule... Do not Edit
+///////// ***
 rule "HistoryEvaluation.evaluateVaccineGroupMinimumAge" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	activation-group "doseAgeCheck"
