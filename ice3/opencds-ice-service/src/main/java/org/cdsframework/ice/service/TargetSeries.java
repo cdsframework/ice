@@ -3007,6 +3007,19 @@ public class TargetSeries {
 	}
 
 
+	public int getDoseNumberToRecommend() {
+
+		int doseNumberToRecommend = 0;
+		if (this.manuallySetDoseNumberToRecommend != 0) {
+			doseNumberToRecommend = this.manuallySetDoseNumberToRecommend;
+		}
+		else {
+			doseNumberToRecommend = determineEffectiveNumberOfDosesInSeries() + 1;
+		}
+
+		return doseNumberToRecommend;
+	}
+
 	/**
 	 * Return true if this TargetSeries contains the specified TargetDose; false
 	 * if not

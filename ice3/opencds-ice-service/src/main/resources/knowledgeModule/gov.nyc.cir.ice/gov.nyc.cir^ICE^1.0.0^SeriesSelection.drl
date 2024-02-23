@@ -1111,6 +1111,12 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Mixed Product Ser
 			exists TargetDose(associatedTargetSeries == $ts, administrationDate < $dateAt5yrs)
 			or
 			(
+				not TargetDose(associatedTargetSeries == $ts, administrationDate >= $dateAt5yrs)
+				and
+				eval(evalTime.compareTo($dateAt5yrs) < 0)
+			)
+			or
+			(
 				$tspriorseason : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", targetSeason != null, isSeriesComplete() == false, targetSeason.startsBeforeStartDate($ts.targetSeason, false))
 				and
 				exists TargetDose(associatedTargetSeries == $tspriorseason, isValid == true, administrationDate < $dateAt5yrs)
@@ -1142,6 +1148,12 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Pfizer < 5 yrs se
 		and
 		(
 			exists TargetDose(associatedTargetSeries == $ts, administrationDate < $dateAt5yrs)
+			or
+			(
+				not TargetDose(associatedTargetSeries == $ts, administrationDate >= $dateAt5yrs)
+				and
+				eval(evalTime.compareTo($dateAt5yrs) < 0)
+			)
 			or
 			(
 				$tspriorseasonseries : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", targetSeason != null, isSeriesComplete() == false, targetSeason.startsBeforeStartDate($ts.targetSeason, false))
@@ -1179,6 +1191,12 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Moderna < 5 yrs s
 			exists TargetDose(associatedTargetSeries == $ts, administrationDate < $dateAt5yrs)
 			or
 			(
+				not TargetDose(associatedTargetSeries == $ts, administrationDate >= $dateAt5yrs)
+				and
+				eval(evalTime.compareTo($dateAt5yrs) < 0)
+			)
+			or
+			(
 				$tspriorseasonseries : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", targetSeason != null, isSeriesComplete() == false, targetSeason.startsBeforeStartDate($ts.targetSeason, false))
 				and
 				exists TargetDose(associatedTargetSeries == $tspriorseasonseries, isValid == true, administrationDate < $dateAt5yrs)
@@ -1186,6 +1204,7 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Moderna < 5 yrs s
 				not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $tspriorseasonseries, targetSeason != null, targetSeason.startsAfterStartDate($tspriorseasonseries!.targetSeason, false), targetSeason.startsBeforeStartDate($ts!.targetSeason, false))
 			)
 		)
+		and
 		not TargetDose(associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.cdsConceptName not in ("ICE311", "ICE312", "ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE519"))
 	then
 		String _RULENAME = kcontext.rule.name;
