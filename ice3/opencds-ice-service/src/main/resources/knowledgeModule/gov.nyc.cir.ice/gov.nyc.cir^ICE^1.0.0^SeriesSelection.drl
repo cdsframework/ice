@@ -1381,7 +1381,7 @@ end
 rule "SeriesSelection(COVID-19): If the first dose administered is the Janssen vaccine, then the Janssen Series applies"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 30
+	salience 40
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Season")
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)		

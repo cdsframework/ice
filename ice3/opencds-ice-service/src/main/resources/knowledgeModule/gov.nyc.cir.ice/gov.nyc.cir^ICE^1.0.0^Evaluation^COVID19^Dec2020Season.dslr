@@ -978,6 +978,7 @@ rule "COVID-19: If the patient received a (valid) dose of _any_ vaccine allowed 
 			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1002,6 +1003,7 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ _bival
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 	then
 		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1026,6 +1028,7 @@ rule "COVID-19: If the patient received a (valid) dose _any_ vaccine allowed in 
 			- the administration date of the shot is >= $dtAtAge6y
 	then
 		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1051,6 +1054,7 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ _bival
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 	then
 		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1076,6 +1080,7 @@ rule "COVID-19: If the patient received a (valid) dose of _any_ vaccine allowed 
 			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1101,6 +1106,7 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ Pfizer
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 	then
 		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1125,6 +1131,7 @@ rule "COVID-19: If the patient received a (valid) dose of _any_ Moderna vaccine 
 			- the administration date of the shot is >= $dtAtAge6y
 	then
 		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1150,6 +1157,7 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ Modern
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 	then
 		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $validShot
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
@@ -1188,6 +1196,7 @@ rule "COVID-19: If 2 or more doses were administered >= 5 years of age in the Pf
 			- the dose number in the Series is > 2
 	then
 		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
 		Record that this dose rule was Processed for the TargetDose $secondDose
 		Log that this dose rule fired for the dose $secondDose in the Series $targetSeries
 end
@@ -1213,6 +1222,7 @@ rule "COVID-19: If 2 doses of CVX 208, CVX 217, CVX 218, CVX 300 or CVX 301 were
 			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE300", "ICE301")
 	then
 		Mark the Series $associatedTargetSeries complete
+		Refresh all facts in the Series $associatedTargetSeries
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries	
 end
@@ -1237,6 +1247,7 @@ rule "COVID-19: If 2 doses of CVX 207, CVX 221, CVX 227, CVX 228, or CVX 229 wer
 			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229")
 	then
 		Mark the Series $associatedTargetSeries complete
+		Refresh all facts in the Series $associatedTargetSeries
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries	
 end
