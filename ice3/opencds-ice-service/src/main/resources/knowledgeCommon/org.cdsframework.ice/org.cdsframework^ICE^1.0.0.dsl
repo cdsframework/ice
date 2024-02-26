@@ -220,6 +220,7 @@
 [condition][][Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Aa]dministered {accumulate_oTargetDoses} in [Ss]eries {refer_oTargetSeries} as {assign_nNumberOfDoses} [Ww]here [Aa]dministration [Dd]ate {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}} with [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]}=accumulate({accumulate_oTargetDoses} : TargetDose(status == DoseStatus.VALID, administrationDate {aOp} {strDate}, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; {assign_nNumberOfDoses}: count({accumulate_oTargetDoses}))
 [condition][][Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Aa]dministered {accumulate_oTargetDoses} in [Ss]eries {refer_oTargetSeries} as {assign_nNumberOfDoses} [Ww]here [Aa]dministration [Dd]ate {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=accumulate({accumulate_oTargetDoses} : TargetDose(status == DoseStatus.VALID, administrationDate {aOp} {strDate}) from {refer_oTargetSeries}.targetDoses; {assign_nNumberOfDoses}: count({accumulate_oTargetDoses}))
 // accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses) ; {assign_nCountOfDoses}: count($td); {assign_nCountOfDoses} >= 0)
+
 //
 // TargetSeries accumulates
 //
