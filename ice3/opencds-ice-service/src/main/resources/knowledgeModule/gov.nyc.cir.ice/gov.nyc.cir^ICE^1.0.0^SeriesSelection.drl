@@ -1099,7 +1099,7 @@ end
  *   and neither of the above two conditions are true, then the Sept 2023 Mixed Product COVID-19 Series (< 5 years) applies.
  */
 
-rule "SeriesSelection(COVID-19): In Sep2023 season, select the Mixed Product Series < 5 yrs if at least one dose (if any) in the prior season doses was administered at < 5 yrs of age, all shots (if any) in the prior season are a mix of vaccines, and all shots (if any) in the current season are a mix of 2023 vaccines"
+rule "SeriesSelection(COVID-19): In Sep2023 season, select the Mixed Product Series < 5 yrs if at least one dose (if any) in the prior season doses was administered at < 5 yrs of age, all doses (if any) in the prior season are a mix of vaccines, and all shots (if any) in the current season are a mix of 2023 vaccines"
 		extends "SeriesSelection(COVID-19 Abstract): In Sep2023 season, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
@@ -1129,7 +1129,7 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Mixed Product Ser
 end
 
 
-rule "SeriesSelection(COVID-19): In Sep2023 season, select the Pfizer < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all shots (if any) in the prior season are Pfizer vaccines, and all shots (if any) are in the current season are a Pfizer vaccine"
+rule "SeriesSelection(COVID-19): In Sep2023 season, select the Pfizer < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all doses (if any) in the prior season are Pfizer vaccines, and all shots (if any) are in the current season are a Pfizer vaccine"
 		extends "SeriesSelection(COVID-19 Abstract): In Sep2023 season, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
@@ -1164,7 +1164,7 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Pfizer < 5 yrs se
 end
 
 
-rule "SeriesSelection(COVID-19): In Sep2023 season, select the Moderna < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all shots (if any) in the prior season are Moderna vaccines, and all shots (if any) in the current season are a Moderna vaccine"
+rule "SeriesSelection(COVID-19): In Sep2023 season, select the Moderna < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all doses (if any) in the prior season are Moderna vaccines, and all shots (if any) in the current season are a Moderna vaccine"
 		extends "SeriesSelection(COVID-19 Abstract): In Sep2023 season, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"

@@ -520,7 +520,6 @@ end
 
 
 /*************************************************************************************************************************************************************************************
- 
  ___SKIP DOSE___
  __SKIP DOSE__ Rules FOR < 5 yrs of age series: Pfizer < 5ys, Moderna < 5yrs, Mixed Product < 5yrs
  + Target Dose 1
@@ -564,13 +563,6 @@ rule "COVID-19(Sep2023 __Pfizer/Mixed Product__ < 5yrs Series): if the patient h
 			- the administration date of the shot is < "12-Sep-2023"
 			- the administration date of the shot is != $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-		// Ensure there are no other shots in the prior season administered at >= 5 years of age 
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $targetSeries but do not refresh series facts
 		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries
@@ -613,16 +605,7 @@ rule "COVID-19(Sep2023 __Pfizer/Mixed Product__ < 5yrs Series): if the patient h
 			- that is not the same shot as $previousShot
 			- the shot belongs to the series $priorSeasonSeries
 			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is != $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-		// Ensure there are no other shots in the prior season administered at >= 5 years of age 
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the shot belongs to the series $priorSeasonSeries
-			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $targetSeries but do not refresh series facts
 		Set the Dose Number of Recommendation Forecast to 3 in Series $targetSeries
@@ -659,14 +642,6 @@ rule "COVID-19(Sep2023 __Moderna__ < 5yrs Series): if the patient has >= 1 doses
 			- the administration date of the shot is < "12-Sep-2023"
 			- the administration date of the shot is > $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-		// Ensure there are no other shots in the prior season administered at >= 5 years of age 			
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the shot belongs to the series $priorSeasonSeries
-			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $targetSeries but do not refresh series facts
 		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries

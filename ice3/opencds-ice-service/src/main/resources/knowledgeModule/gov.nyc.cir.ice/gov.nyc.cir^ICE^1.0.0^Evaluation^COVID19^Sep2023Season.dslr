@@ -479,12 +479,6 @@ rule "COVID-19(Sep2023 __Pfizer/Mixed Product__ < 5yrs Series): If the patient h
 			- the administration date of the shot is < "12-Sep-2023"
 			- the administration date of the shot is != $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -515,12 +509,6 @@ rule "COVID-19 (Sep2023 __Pfizer/Mixed Product__ < 5yrs Series): If the patient 
 			- the administration date of the shot is < "12-Sep-2023"
 			- the administration date of the shot is != $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -551,12 +539,6 @@ rule "COVID-19(Sep2023 __Pfizer / Mixed Product__ < 5yrs Series): If the patient
 			- the administration date of the shot is < "12-Sep-2023"
 			- the administration date of the shot is != $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Set Dose Number of $currentShot to 2
 		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $associatedTargetSeries
@@ -588,12 +570,6 @@ rule "COVID-19(Sep2023 __Pfizer/Mixed Product__ < 5yrs Series): If the patient h
 			- the administration date of the shot is < "12-Sep-2023"
 			- the administration date of the shot is != $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Set Dose Number of $currentShot to 3
 		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $associatedTargetSeries
@@ -619,12 +595,6 @@ rule "COVID-19 (Sep2023 __Moderna__ < 5yrs Series): If the patient has *0* shots
 			- the administration date of the shot is < "12-Sep-2023"
 			- that has already been evaluated and whose shot validity is VALID
 			- make note of the date this shot was administered as $administrationDate
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -648,12 +618,6 @@ rule "COVID-19(Sep2023 __Moderna__ < 5yrs Series): if the patient has shots in t
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is < "12-Sep-2023"
 			- that has already been evaluated and whose shot validity is VALID
-		The patient information $oEvaluatedPerson must be known to complete writing this rule
-			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
-		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the administration date of the shot is < "12-Sep-2023"
-			- the administration date of the shot is >= $dtAtAge5y
 	then
 		Set Dose Number of $currentShot to 2
 		Skip Series Dose Number to 2 from $currentDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $associatedTargetSeries
