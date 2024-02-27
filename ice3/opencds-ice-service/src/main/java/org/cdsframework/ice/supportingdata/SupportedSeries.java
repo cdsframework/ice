@@ -37,7 +37,6 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.ConceptUtils;
-import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.ice.service.DoseRule;
@@ -413,6 +412,10 @@ public class SupportedSeries implements SupportingData {
 				if (! lcvi.getVaccine().isCombinationVaccine()) {
 					boolean lMinimumVaccineAgeDoseRuleSpecified = lIDVS.getAllowableMinimumAgeOfUse() != null ? true : false;
 					boolean lMaximumVaccineAgeDoseRuleSpecified = lIDVS.getAllowableMaximumAgeOfUse() != null ? true : false;
+					if (logger.isDebugEnabled()) {
+						logger.debug(_METHODNAME + "minimum for series " + pIceSeriesSpecificationFile.getName() + "; dose number: " + isds.getDoseNumber() + " vaccine: " + lcvi.getVaccine() + "; DoseRule allowable minimum age: " + lIDVS.getAllowableMinimumAgeOfUse());
+						logger.debug(_METHODNAME + "maximum for series " + pIceSeriesSpecificationFile.getName() + "; dose number: " + isds.getDoseNumber() + " vaccine: " + lcvi.getVaccine() + "; DoseRule allowable maximum age: " + lIDVS.getAllowableMaximumAgeOfUse());
+					}
 					if (lMinimumVaccineAgeDoseRuleSpecified || lMaximumVaccineAgeDoseRuleSpecified) {
 						VaccineComponent lVaccineComponentForVaccine = this.supportedVaccines.getVaccineComponent(ConceptUtils.toInternalCD(lVaccineCD));
 						if (lVaccineComponentForVaccine == null) {
@@ -447,7 +450,7 @@ public class SupportedSeries implements SupportingData {
 				String lInfoStr = "Absolute minimum age and/or minimum age not specified in a dose: " + lDoseNumber + "; Series " + lSeriesCode;
 				logger.warn(_METHODNAME + lInfoStr);
 			}
-			String maximumAge = isds.getMaximumAge();
+			String maximumAge = isds.getAbsoluteMaximumAge();
 			String latestRecommendedAge = isds.getLatestRecommendedAge();
 			String absoluteMinimumInterval = null;
 			String minimumInterval = null;
@@ -519,7 +522,7 @@ public class SupportedSeries implements SupportingData {
 			}
 			if (maximumAge != null) {
 				// Only if specified
-				dr.setMaximumAge(new TimePeriod(maximumAge));
+				dr.setAbsoluteMaximumAge(new TimePeriod(maximumAge));
 			}
 			if (latestRecommendedAge != null) {
 				// Only if specified

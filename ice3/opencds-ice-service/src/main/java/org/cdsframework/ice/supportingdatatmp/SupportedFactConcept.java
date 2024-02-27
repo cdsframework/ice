@@ -6,6 +6,7 @@ import org.opencds.vmr.v1_0.internal.datatypes.CD;
 public enum SupportedFactConcept {
 
 	_ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION("ICE_FACT_ADOLESCENT_TDAP_5_DOSE_SERIES_RECOMMENDATION_EXCEPTION", "Adolescent Tdap 5 Dose Series Recommendation"),
+	_ABOVE_MAXIMUM_AGE("ICE_FACT-ABOVE_MAXIMUM_AGE", "Above Minimum Age"),
 	_BELOW_MINIMUM_AGE("ICE_FACT-BELOW_MINIMUM_AGE", "Below Minimum Age"),
 	_BELOW_MINIMUM_INTERVAL("ICE_FACT-BELOW_MINIMUM_INTERVAL", "Below Minimum Interval"),
 	_DOSE_OF_PERTUSSIS("ICE_FACT-DOSE_OF_PERTUSSIS", "Dose of Pertussis"),
