@@ -39,6 +39,8 @@
         <xs:sequence>
             <xs:element name="preferred" type="xs:boolean" default="false" minOccurs="1" maxOccurs="1"/>
             <xs:element name="vaccine" type="dt:CD" minOccurs="1" maxOccurs="1"/>
+            <xs:element name="allowableMinimumAgeOfUse" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="allowableMaximumAgeOfUse" type="xs:string" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="iceDoseIntervalSpecification">
@@ -56,9 +58,9 @@
             <xs:element name="doseNumber" type="xs:integer" minOccurs="1" maxOccurs="1"/>
             <xs:element name="absoluteMinimumAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <xs:element name="minimumAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
-            <xs:element name="maximumAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <xs:element name="earliestRecommendedAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <xs:element name="latestRecommendedAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="absoluteMaximumAge" type="xs:string" minOccurs="0" maxOccurs="1"/>
             <xs:element name="doseVaccine" type="is:iceDoseVaccineSpecification" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>

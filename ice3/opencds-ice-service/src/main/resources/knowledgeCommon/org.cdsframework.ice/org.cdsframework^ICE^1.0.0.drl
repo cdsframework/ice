@@ -647,6 +647,7 @@ rule "HistoryEvaluation.setNextTargetDoseNonNOSInSeriesForEvaluation" ruleflow-g
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, this != $td.associatedTargetSeries, associatedTargetSeries!.seasonStartDate < $td.associatedTargetSeries!.seasonStartDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
@@ -669,6 +670,7 @@ rule "HistoryEvaluation.setNextTargetDoseNOSInSeriesForEvaluation" ruleflow-grou
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, this != $td.associatedTargetSeries, associatedTargetSeries!.seasonStartDate < $td.associatedTargetSeries!.seasonStartDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
@@ -1006,13 +1008,14 @@ end
 ///////// ***
 // Series Table rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.checkMinimumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.checkMinimumAgeVaccine" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	salience 100
 	activation-group "minimumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $doseNumber : doseNumberInSeries)
-		$ts : TargetSeries(this == $td.associatedTargetSeries) ///////, $doseNumber <= seriesRules.numberOfDosesInSeries) // , seriesRules.isAllowableVaccineForDoseRule($vaccine, $doseNumber) == true)
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMinimumAgeForUse != null, $tdVaccineComponent : vaccineComponent)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		not DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMinimumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) < 0)
 	then
@@ -1028,13 +1031,38 @@ end
 ///////// ***
 // Series Table rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.checkMinimumAgeVaccineDoseRule" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 100
+	activation-group "minimumAgeVaccineCheck"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $tdVaccineComponent : vaccineComponent)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		$dr : DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMinimumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
+		$person : EvaluatedPerson()
+		eval(! TimePeriod.isTimePeriodANegativeDuration($dr.getAllowableVaccineMinimumAge($tdVaccineComponent).getTimePeriodStringRepresentation()) && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMinimumAge($tdVaccineComponent)) < 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
+		insert(hef);
+		$td.addInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_AGE_VACCINE_REASON.getCdsListItemName());
+		$td.addDoseRuleProcessed(_RULENAME);	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
+// Series Table rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.checkMaximumAgeVaccine" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	salience 100
 	activation-group "maximumAgeVaccineCheck"
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null, $doseNumber : doseNumberInSeries)
-		$ts : TargetSeries(this == $td.associatedTargetSeries) ///////, $doseNumber <= seriesRules.numberOfDosesInSeries)
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null, $tdVaccineComponent : vaccineComponent)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		not DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) > 0)
 	then
@@ -1044,6 +1072,53 @@ rule "HistoryEvaluation.checkMaximumAgeVaccinePermitted" ruleflow-group "History
 		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_VACCINE.getCdsListItemName());
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
+
+
+///////// ***
+// Series Table rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.checkMaximumAgeVaccineDoseRuleDoseRule" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 100
+	activation-group "maximumAgeVaccineCheck"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $tdVaccineComponent : vaccineComponent)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		$dr : DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
+		$person : EvaluatedPerson()
+		eval(! TimePeriod.isTimePeriodANegativeDuration($dr.getAllowableVaccineMaximumAge($tdVaccineComponent).getTimePeriodStringRepresentation()) && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMaximumAge($tdVaccineComponent)) > 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
+		insert(hef)		
+		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_VACCINE.getCdsListItemName());
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+
+///////// ***
+// Series Table rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.evaluateVaccineGroupMaximumAge" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	activation-group "doseMaximumAgeCheck"
+	salience 100
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $doseNumber : doseNumberInSeries) 
+		$ts : TargetSeries(this == $td.associatedTargetSeries, seriesRules.numberOfDosesInSeries >= $doseNumber)
+		$person : EvaluatedPerson()
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.evaluateVaccineGroupMaximumAgeandRecordReason($person.demographics.birthTime, $td);
+		if ($td.containsInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_EVALUATION_REASON.getCdsListItemName()) || 
+			$td.containsInvalidReason(BaseDataEvaluationReason._INVALID_AGE_EVALUATION_REASON.getCdsListItemName())) {
+			ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._ABOVE_MAXIMUM_AGE.getConceptCodeValue(), $td);
+			insert(hef)				
+		}
+		$td.addDoseRuleProcessed(_RULENAME);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+end 
 
 
 ///////// ***
@@ -2241,7 +2316,7 @@ rule "RecommendationForecast: Recommend Earliest Recommended Age Date in Next Se
 	salience 110
 	activation-group "recommendationAgeCheck"
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, $vg : vaccineGroup, targetSeason.dateIsApplicableToOffSeason(evalTime),
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, $vg : vaccineGroup, targetSeason.dateIsApplicableToOffSeason(evalTime),
 			$offSeasonEndDate : targetSeason.fullySpecifiedSeasonOffSeasonEndDate)
 		not Season(isDefaultSeason() == false, vaccineGroup == $vg, fullySpecifiedSeasonStartDate.toDate() == $offSeasonEndDate.plusDays(1).toDate())
 		$defaultSeason : Season(isDefaultSeason() == true, vaccineGroup == $vg)
@@ -2270,7 +2345,7 @@ rule "RecommendationForecast: Recommend at Earliest Recommended Age Date in Next
 	salience 110
 	activation-group "recommendationAgeCheck"
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, targetSeason.dateIsApplicableToOffSeason(evalTime), 
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, targetSeason.dateIsApplicableToOffSeason(evalTime), 
 			$offSeasonEndDate : targetSeason.fullySpecifiedSeasonOffSeasonEndDate, $offSeasonEndDate != null)
 		$fullySpecifiedNextseason : Season(isDefaultSeason() == false, vaccineGroup == $ts.vaccineGroup, fullySpecifiedSeasonStartDate.toDate() == $offSeasonEndDate.plusDays(1).toDate())
 		$sr : SeriesRules(vaccineGroup == $ts.vaccineGroup, $fullySpecifiedNextseason memberOf seasons, getSeriesDoseRuleByDoseNumber(1) != null,
@@ -2299,7 +2374,7 @@ rule "RecommendationForecast: Recommend Next Season Earliest Start Date if durin
 	salience 110
 	activation-group "earliestIntervalCheck"	
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, targetSeason.dateIsApplicableToOffSeason(evalTime))
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, targetSeason.dateIsApplicableToOffSeason(evalTime))
 	then
 		String _RULENAME = kcontext.rule.name;
 		Recommendation recommendation = new Recommendation($ts);
@@ -2321,7 +2396,7 @@ rule "RecommendationForecast: Recommend Next Season Recommended Start Date if du
 	salience 110
 	activation-group "recommendationIntervalCheck"	
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, targetSeason.dateIsApplicableToOffSeason(evalTime)) 
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, targetSeason.dateIsApplicableToOffSeason(evalTime)) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		Recommendation recommendation = new Recommendation($ts);
@@ -2341,8 +2416,7 @@ rule "RecommendationForecast: Recommend Next Season Start Date if Current Season
 	dialect "mvel"
 	salience 100
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, isSeriesComplete() == true, targetSeason != null, 
-			targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null)
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, isSeriesComplete() == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		Recommendation recommendation = new Recommendation($ts);
@@ -2364,7 +2438,7 @@ rule "RecommendationForecast/Post Recommendation Check: Recommend Next Season St
 	agenda-group "RecommendationForecast^postRecommendationCheck"
 	when
 		$ts : TargetSeries(isPostForecastCheckCompleted() == false, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null, $pcvRecommendationDate : finalRecommendationDate, 
-			targetSeason != null, finalRecommendationDate != null, targetSeason.fullySpecifiedSeasonOffSeasonStartDate != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null) 
+			targetSeason != null, finalRecommendationDate != null, targetSeason.fullySpecifiedSeasonOffSeasonStartDate != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false) 
 		eval($ts.getFinalRecommendationDate().compareTo($ts.getTargetSeason().getFullySpecifiedSeasonEndDate().toDate()) > 0 && 
 			$ts.getFinalRecommendationDate().compareTo($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate().toDate()) <= 0)
 	then
