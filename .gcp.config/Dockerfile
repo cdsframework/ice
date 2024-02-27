@@ -1,4 +1,4 @@
-FROM tomcat:9-jre8-temurin-focal AS build
+FROM tomcat:9-jre8-temurin-jammy AS build
 
 # Metadata
 LABEL organization="HLN Consulting, LLC"
