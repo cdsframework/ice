@@ -211,7 +211,7 @@ public class DoseRule {
 		if (pAllowableVaccineMaximumAges == null || pAllowableVaccineMaximumAges.isEmpty() == true) {
 			return;
 		}
-		this.allowableVaccineMinimumAges.putAll(pAllowableVaccineMaximumAges);
+		this.allowableVaccineMaximumAges.putAll(pAllowableVaccineMaximumAges);
 	}
 
 
@@ -354,11 +354,11 @@ public class DoseRule {
 		this.minimumAge = minimumAge;
 	}
 
-	public TimePeriod getMaximumAge() {
+	public TimePeriod getAbsoluteMaximumAge() {
 		return maximumAge;
 	}
 
-	public void setMaximumAge(TimePeriod maximumAge) {
+	public void setAbsoluteMaximumAge(TimePeriod maximumAge) {
 		this.maximumAge = maximumAge;
 	}
 

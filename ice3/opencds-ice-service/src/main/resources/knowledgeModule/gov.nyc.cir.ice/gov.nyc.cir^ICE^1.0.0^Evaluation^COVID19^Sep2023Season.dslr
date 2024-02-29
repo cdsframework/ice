@@ -1,0 +1,987 @@
+/**
+ * Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+
+package knowledgeModule.gov.nyc.cir.ice
+
+import java.util.List
+import java.util.Set
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
+
+global java.util.Date evalTime
+
+
+/*************************************************************************************************************************************************************************************
+===> PRIOR FORMULATION of COVID-19 Vaccine Administered on or after 9/12/2023   
+    If a prior formulation of a COVID-19 vaccine, excluding CVX 211, is administered on or after 9/12/2023, then the Evaluation is Invalid and the reason code is 
+    VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.
+        + If administered as target dose 1 (for any Sept 2023 COVID-19 Series), recommended target dose 1 at shot date + 28 days, absolute minimum interval = 24 days.
+        + If administered as other than target dose 1 (for any Sept 2023 COVID-19 Series), follow series intervals.
+    If the prior formulation of Novavax (CVX 211) is administered on or after 10/4/2023, then the Evaluation is Invalid and reason code is VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.
+/************************************************************************************************************************************************************************************/
+
+rule "COVID-19(Sep2023): If a prior formulation is administered as target dose 1 (for any Sept 2023 COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 24 days"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the associated series as $associatedTargetSeries
+		There is an administered shot $previousShot distinct from $currentShot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administration date of the shot is <= $currentShotDate
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE513", "ICE514", "ICE515",  "ICE516", "ICE517", "ICE518", "ICE519", "ICE520", "ICE521")
+			- make note of the date this shot was administered as $previousShotDate
+		There does not exist another administered shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administration date of the shot is > $previousShotDate
+		Confirm Elapsed time between $previousShotDate and $currentShotDate < "24d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sep2023): For any vaccine administered in a COVID-19 series, override the absolute vaccine minimum age check for all prior season's (and now deprecated) formulations"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "minimumAgeVaccineCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE502", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520", "ICE521")
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sep2023): If a prior formulation is administered, mark the shot Invalid / VACCINE_NOT_ALLOWED (overrides VACCINE_NOT_ALLOWED_FOR_THIS_DOSE rules)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "allowableVaccineCheck"
+	salience 10
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the series that the shot belongs to is not complete
+			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE513", "ICE514", "ICE515",  "ICE516", "ICE517", "ICE518", "ICE519", "ICE520", "ICE521")
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Include the reason for shot $currentShot Invalid due to "Vaccine Not Allowed"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ END - PRIOR FORMULATION of COVID-19 Vaccine Administered on or after 9/12/2023   
+/************************************************************************************************************************************************************************************/
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// START ACCEPTED vaccines in a wrong FDA-approved series
+// FDA-approved vaccines in the wrong FDA-approved series that is not complete always get evaluated as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN rather than Invalid. 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19(Sep2023): If an FDA-approved, NOS or WHO-approved vaccine, the vaccine is not permitted by default for the Sep2023 seasonal series and there are other shots following it, and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the vaccine administered a member of ("ICE211", "ICE213", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312", "ICE313")
+			- the series that the shot belongs to is not complete
+			- make note of the administered vaccine as $vaccineAdministered
+			- make note of the dose number as $doseNumber
+			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the vaccine $vaccineAdministered is not permitted for dose number $doseNumber in this series
+		There exists another administered shot
+			- the shot belongs to the series $targetSeries
+			- that has not already been evaluated
+	then
+		Include the reason for shot $currentShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 >= 5yrs Series): If CVX 211 is administered in the >= 5 yrs series, the vaccine is not permitted by default (should not be!), and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_PART_OF_THIS_SERIES"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "allowableVaccineCheck"
+	salience 10
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023gte5Series"
+			- the vaccine administered is "ICE211"
+			- the series that the shot belongs to is not complete
+			- make note of the administered vaccine as $vaccineAdministered
+			- make note of the dose number as $doseNumber
+			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the vaccine $vaccineAdministered is not permitted for dose number $doseNumber in this series
+		There exists another administered shot
+			- the shot belongs to the series $targetSeries
+			- that has not already been evaluated
+	then
+		Include the reason for shot $currentShot Accepted due to "Vaccine Not Part of This Series"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// If an extra dose (2 doses or more) is required for the >= 5y Series,
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19(Sep2023 >= 5yrs Series): If the target dose number is >= the number of doses required to complete the series, verify if the vaccine is allowed"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023gte5Series"
+			- the series that the shot belongs to is not complete
+			- make note of the dose number as $targetDoseNumber
+			- make note of the administered vaccine as $vaccineAdministered
+			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the number of doses required to complete this Series is < $targetDoseNumber
+			- the vaccine $vaccineAdministered is not permitted for dose number 1 in this Series
+	then
+		Include the reason for shot $currentShot Invalid due to "Vaccine not Permitted for this Dose"
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 >= 5yrs Series): If the number of doses administered is >= 2 and the series is not complete, mark the series complete"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Sep2023gte5Series"
+			- the Series is not complete
+			- the effective number of doses administered in the Series is >= 2
+	then
+		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries 
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ===> Series: >= 5y Series and Mixed Product Series
+// If a Novavax dose was administered and there are no mRNA doses in the current season's series, then the series is not complete even if 
+// the number of effective doses to complete theseries has been reached. Therefore, another dose should be recommended 8 weeks later.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19(Sep2023 >= 5yrs Series): If a CVX 313 dose was administered in the >= 5 yrs of age series, no doses in the prior season was administered, and no mRNA vaccines have been administered in the current season, mark series is NOT complete"
+ 	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Sep2023gte5Series"
+			- the Series is Complete
+		There does not exist an administered shot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE313"
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered a member of ("ICE213", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312")
+	then
+		Manually mark the Series $targetSeries Not Complete
+		Refresh all facts in the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 >= 5yrs Series): If a CVX 313 dose was administered in the >= 5 yrs of age series, no doses in the prior season was administered, no mRNA vaccines have been administered in the current season and the series is not complete, override extraDoseCheck logic"
+ 	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "extraDoseCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023gte5Series"
+			- the series that the shot belongs to is not complete
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an administered shot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+		There exists an administered shot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE313"
+		There does not exist an administered shot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered a member of ("ICE213", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312")
+	then
+		Record that this Series Rule was Processed for the TargetSeries $associatedTargetSeries
+		Log that this Series Rule fired for the Series $associatedTargetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ ===> Series: >= 5 yrs, Pfizer < 5 yrs, Moderna < 5 yrs or Mixed Product < 5 yrs
+ ===> Evaluation Interval Rules
+ If the patient has >= 1 COVID-19 shot(s) on record prior to target dose 1, evaluate and recommend using the following intervals from the last season's most recent shot 
+ in the >= 5 yrs series, Pfizer < 5 yrs, Moderna < 5 yrs or Mixed Product < 5 yrs.
+    + Absolute Minimum Interval = 8 weeks - 4 days
+ 
+ ===> Series: Mixed Product  < 5 yrs --- Evaluation/Recommendation Rules for CVX 313 shot administered for target dose 1 or target dose 2 
+/************************************************************************************************************************************************************************************/
+
+rule "COVID-19(Sep2023 >= 5yrs Series): If a shot was administered for any dose number and the series is not complete, the absolute minimum interval from the prior shot to the current target dose is 8w-4d"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023gte5Series"
+			- the series that the shot belongs to is not complete
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an IceFact
+			- that has associated administered shot $currentShot
+			- that has finding SupportedFactConcept._BELOW_MINIMUM_INTERVAL.conceptCodeValue
+		There is an administered shot $previousShot
+			- the administration date of the shot is < $currentShotDate
+			- make note of the date this shot was administered as $previousShotDate
+		There does not exist an administered shot
+			- the administration date of the shot is > $previousShotDate
+			- the administration date of the shot is < $currentShotDate
+		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sept 2023 >= 5yrs Series): If a CVX 211 is administered between prior to 10/4/23, evaluate the shot as ACCEPTED / VACCINE_NOT_PART_OF_THIS_SERIES (override allowableVaccineCheck)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023gte5Series"
+			- the vaccine administered is "ICE211"
+			- the administration date of the shot is < "04-Oct-2023"
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Include the reason for shot $currentShot Accepted due to "Vaccine Not Part of This Series"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sep2023 Pfizer/Moderna/Mixed Product < 5yrs Series): If a shot was administered prior to target dose 1 (prior season) but has never received any (valid) doses, the absolute minimum interval from the prior shot to the current shot is 8w-4d"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "doseIntervalCheckFromPreviousSeason"
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023ModernaLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries")
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an IceFact
+			- that has associated administered shot $currentShot
+			- that has finding SupportedFactConcept._BELOW_MINIMUM_INTERVAL.conceptCodeValue
+		There does not exist an administered shot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+		There is an administered shot $previousShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- make note of the date this shot was administered as $previousShotDate
+		There does not exist an administered shot
+			- the administration date of the shot is > $previousShotDate
+			- the administration date of the shot is < "12-Sep-2023"
+		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sep2023 Pfizer/Moderna/Mixed Product < 5yrs Series): If a shot was administered prior to target dose 1 (prior season) and the prior season's series is complete, the absolute minimum interval from the prior shot to the current shot is 8w-4d"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "doseIntervalCheckFromPreviousSeason"
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023ModernaLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries")
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an IceFact
+			- that has associated administered shot $currentShot
+			- that has finding SupportedFactConcept._BELOW_MINIMUM_INTERVAL.conceptCodeValue
+		There is a Series $priorSeasonSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Season with Name "COVID19Dec2020Season"
+			- the Series is complete
+		There is an administered shot $previousShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- make note of the date this shot was administered as $previousShotDate
+		There does not exist an administered shot
+			- the administration date of the shot is > $previousShotDate
+			- the administration date of the shot is < "12-Sep-2023"
+		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+/////////////////////
+// ===> Mixed Product < 5yrs Series - Intervals from admininstered Novavax (CVX 313) Vaccine  
+// If CVX 313 is administered as target dose 1 or target dose 2, intervals from the CVX 313 shot to the next target dose are: Absolute Minimum Interval = 17 days, Minimum/Recommended Interval = 8 weeks
+/////////////////////
+
+rule "COVID-19(Sep 2023 Mixed Product < 5yrs Series): If a CVX 313 shot is administered for target dose 1 or target dose 2, the absolute minimum, minimum and recommended are 17 days, 8 weeks and 8 weeks, respectively"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "doseIntervalCheckFromPreviousSeason"	
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023MixedProductLT5ySeries"
+			- the dose number in the Series is <= 2
+			- the vaccine administered is "ICE313"
+			- make note of the dose number as $currentDoseNumber
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Obtain the existing DoseRule for Dose Number $currentDoseNumber-1 in the Series $associatedTargetSeries as $assign_oDoseRule
+		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule to TimePeriod "17d"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule to TimePeriod "8w"
+		Set the Earliest Recommended Interval for DoseRule $assign_oDoseRule to TimePeriod "8w"
+		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule
+		Refresh all Facts in the Series $associatedTargetSeries for Evaluation
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ END Series: >= 5 yrs, Pfizer < 5 yrs, Moderna < 5 yrs or Mixed Product < 5 yrs ==> Evaluation Interval Rules
+/************************************************************************************************************************************************************************************/
+
+
+/*************************************************************************************************************************************************************************************
+ ___SKIP DOSE RULES___
+ ===> Series: Pfizer < 5ys, Moderna < 5yrs, Mixed Product < 5yrs
+ ===> __SKIP DOSE__ Rules FOR patients < 5 yrs of age in series
+
+ * Target Dose 1
+    + If the patient has 1 dose of any of the following prior formulations vaccines (CVX 207, CVX 208, CVX 217, CVX 218, CVX 219, CVX 221, CVX 227, CVX 228, CVX 229, CVX 230, 
+      CVX 300, CVX 301, CVX 302, or CVX 520) administered prior to 9/12/2023, target dose 1 is not needed. Skip to target dose 2. 
+    + For the Moderna series, if skipped to target dose 2 and there are 2 or doses in the prior season, the following intervals apply:
+        = Absolute minimum interval = 8 weeks - 4 days
+        = Minimum interval = 8 weeks 
+        = Recommended interval = 8 weeks  
+
+ * Target Dose 1 and Target Dose 2
+    + If the patient has >= 2 doses of any of the following following prior formulations vaccines (CVX 207, CVX 208, CVX 217, CVX 218, CVX 219, CVX 221, CVX 227, CVX 228, CVX 229, 
+      CVX 230, CVX 300, CVX 301, CVX 302, or CVX 520) administered prior to 9/12/2023, target dose 1 and target dose 2 are not needed. Skip to target dose 3.    
+/************************************************************************************************************************************************************************************/
+
+rule "COVID-19(Sep2023 __Pfizer/Mixed Product__ < 5yrs Series): If the patient has *0* shots in the current season has *1* dose of a prior formulation administered prior to 9/12/2023 at < 5yrs of age, skip to target dose 2"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	salience 999
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries")
+			- the Series is not complete
+			- the number of administered shots is == 0
+			- make note of the effective dose number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 2
+		There is an administered shot $previousShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+			- make note of the date this shot was administered as $administrationDate
+		There does not exist an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that is not the same shot as $previousShot
+			- the administration date of the shot is < "12-Sep-2023"
+			- the administration date of the shot is != $administrationDate
+			- that has already been evaluated and whose shot validity is VALID
+	then
+		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19 (Sep2023 __Pfizer/Mixed Product__ < 5yrs Series): If the patient has *0* shots in the current season but has *2 or more* doses of a prior formulation administered prior to 9/12/2023 at < 5yrs of age, skip to target dose 3"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	salience 999
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries")
+			- the Series is not complete
+			- the number of administered shots is == 0
+			- make note of the effective dose number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 3
+		There is an administered shot $previousShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+			- make note of the date this shot was administered as $administrationDate
+		There exists an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that is not the same shot as $previousShot
+			- the administration date of the shot is < "12-Sep-2023"
+			- the administration date of the shot is != $administrationDate
+			- that has already been evaluated and whose shot validity is VALID
+	then
+		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 __Pfizer / Mixed Product__ < 5yrs Series): If the patient has shots in the current season and *1* dose of a prior formulation administered prior to 9/12/2023 at < 5yrs of age, dose 1 is not needed; skip to target dose 2."
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	salience 999
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries")
+			- the Series that the shot belongs to is not complete
+			- make note of the dose number as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 2
+			- make note of the associated series as $associatedTargetSeries
+		There is an administered shot $previousShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+			- make note of the date this shot was administered as $administrationDate
+		There does not exist an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that is not the same shot as $previousShot
+			- the administration date of the shot is < "12-Sep-2023"
+			- the administration date of the shot is != $administrationDate
+			- that has already been evaluated and whose shot validity is VALID
+	then
+		Set Dose Number of $currentShot to 2
+		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $associatedTargetSeries
+		Log that this Series Rule fired for the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sep2023 __Pfizer/Mixed Product__ < 5yrs Series): If the patient has shots in the current season and *2 or more* doses of a prior formulation administered prior to 9/12/2023 at < 5yrs of age, skip to target dose 3."
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	salience 999
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries")
+			- the Series that the shot belongs to is not complete
+			- make note of the dose number as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 3
+			- make note of the associated series as $associatedTargetSeries
+		There is an administered shot $previousShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+			- make note of the date this shot was administered as $administrationDate
+		There exists another administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that is not the same shot as $previousShot
+			- the administration date of the shot is < "12-Sep-2023"
+			- the administration date of the shot is != $administrationDate
+			- that has already been evaluated and whose shot validity is VALID
+	then
+		Set Dose Number of $currentShot to 3
+		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $associatedTargetSeries
+		Log that this Series Rule fired for the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19 (Sep2023 __Moderna__ < 5yrs Series): If the patient has *0* shots in the current season but *1 or more* doses of a prior formulation administered prior to 9/12/2023 at < 5yrs of age, skip to target dose 2"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	salience 999
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Sep2023ModernaLT5ySeries"
+			- the Series is not complete
+			- the number of administered shots is == 0
+			- make note of the effective dose number in the Series as $effectiveDoseNumber
+			- the numeric $effectiveDoseNumber is < 2
+		There is an administered shot $previousShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+			- make note of the date this shot was administered as $administrationDate
+	then
+		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 __Moderna__ < 5yrs Series): if the patient has shots in the current season and *1 or more* doses of a prior formulation administered prior to 9/12/2023 at < 5yrs of age, skip to target dose 2."
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	salience 999
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023ModernaLT5ySeries"
+			- the Series that the shot belongs to is not complete
+			- make note of the dose number as $currentDoseNumber
+			- the numeric $currentDoseNumber is < 2
+			- make note of the associated series as $associatedTargetSeries
+		There is an administered shot $previousShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+	then
+		Set Dose Number of $currentShot to 2
+		Skip Series Dose Number to 2 from $currentDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $associatedTargetSeries
+		Log that this Series Rule fired for the Series $associatedTargetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ END __SKIP DOSE__ Logic for patients < 5 yrs Series for Series: Pfizer < 5yrs, Moderna < 5yrs, Mixed Product < 5yrs
+/************************************************************************************************************************************************************************************/
+
+
+/*************************************************************************************************************************************************************************************
+ ===> Series: Pfizer < 5yrs Series, Mixed Product < 5yrs Series
+ ===> Series Completion Logic for doses administered with vaccines intended for patients >= 5 years
+/************************************************************************************************************************************************************************************/
+
+rule "COVID-19(Sep2023 Sep2023 Pfizer < 5yrs Series): If the patient has 1 dose of updated Sept 2023 Pfizer COVID-19 vaccine intended for patients age >= 5 years (CVX 309, CVX 310) at age >= 5 years, then the series is complete."
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	when
+		There is an Administered Shot $validShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Sep2023PfizerLT5ySeries"
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered a member of ("ICE309", "ICE310")
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series is not complete
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
+		There is an Administered Shot $validShotSame
+			- that is the same shot as $validShot
+			- the administration date of the shot is >= $dtAtAge5y
+	then
+		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
+		Record that this dose rule was Processed for the TargetDose $validShot
+		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 Mixed Product < 5 yrs Series): If the patient has 1 dose of updated Sept 2023 Pfizer or Moderna COVID-19 vaccine intended for patients age >= 5 years (CVX 309, CVX 310, CVX 311, CVX 312) at age >= 5 years, then the series is complete"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	when
+		There is an Administered Shot $validShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Sep2023MixedProductLT5ySeries"
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered a member of ("ICE309", "ICE310", "ICE311", "ICE312")
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series is not complete
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
+		There is an Administered Shot $validShotSame
+			- that is the same shot as $validShot
+			- the administration date of the shot is >= $dtAtAge5y
+	then
+		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
+		Record that this dose rule was Processed for the TargetDose $validShot
+		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 Mixed Product < 5 yrs Series): If the patient has >= 1 dose of COVID-19 vaccine at age < 5 years and has 1 dose of updated Novavax Sept 2023 COVID-19 vaccine (CVX 313) at age >= 5 years, then the series is complete"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	when
+		There is an Administered Shot $validShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Sep2023MixedProductLT5ySeries"
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered a member of ("ICE213", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312", "ICE313")
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series is not complete
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
+		There is an administered shot $validShotSame
+			- that is the same shot as $validShot
+			- the administration date of the shot is < $dtAtAge5y
+		There is administered shot $validNovavaxShot distinct from $validShot
+			- the shot belongs to the series $associatedTargetSeries
+			- the vaccine administered is "ICE313"
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is >= $dtAtAge5y
+	then
+		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries
+		Record that this dose rule was Processed for the TargetDose $validShot
+		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 Mixed Product < 5 yrs Series): If the patient has 2 doses of CVX 313, then the series is complete"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	when
+		There is an Administered Shot $validShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Sep2023MixedProductLT5ySeries"
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE313"
+			- the Series that the shot belongs to is not complete
+			- make note of the associated series as $associatedTargetSeries
+		There is administered shot $validNovavaxShot distinct from $validShot
+			- the shot belongs to the series $associatedTargetSeries
+			- the vaccine administered is "ICE313"
+			- that has already been evaluated and whose shot validity is VALID
+	then
+		Mark the Series $associatedTargetSeries complete
+		Refresh all facts in the Series $associatedTargetSeries
+		Record that this dose rule was Processed for the TargetDose $validShot
+		Log that this dose rule fired for the dose $validShot in the Series $associatedTargetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ END Series Completion Logic for doses administered; Series: Pfizer < 5y, Mixedx Product < 5y
+/************************************************************************************************************************************************************************************/
+
+
+/*************************************************************************************************************************************************************************************
+ ===> Series: Novavax Series Special Rules
+/************************************************************************************************************************************************************************************/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// If a CVX 313 is administered for dose 1 in the Novavax 2023 series, then the absolute minimum age for dose 1 of the series is 5 years
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19(Sep2023 Novavax Series): If a CVX 313 is administered for dose 1, then the absolute minimum age for dose 1 of the series if 5 years of age"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "doseAgeCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023NovavaxSeries"
+			- the dose number in the series is == 1
+			- the vaccine administered is "ICE313"
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+		The Patient Information $patientInfo must be known to complete writing this rule
+			- make note of the date as $dateAt5yOfAge when the patient is "5y" of age
+			- the date $administrationDate >= $dateAt5yOfAge
+	then
+		Set the Shot Status of $currentShot to Valid
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// If a CVX 211 is administered >= 10/4/2023 or CVX 313 is administered < 10/4/2023, then the vaccine is not allowed.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19(Sep2023 Novavax Series): If CVX 211 is administered on or after 10/4/2023, mark the shot Invalid / VACCINE_NOT_ALLOWED"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			/////// - the shot belongs to the Series with name "COVID19Sep2023NovavaxSeries"
+			- the vaccine administered is "ICE211"
+			- the administration date of the shot is >= "04-Oct-2023" 
+			- the series that the shot belongs to is not complete
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an IceFact
+			- that has associated administered shot $currentShot
+			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue
+	then
+		Include the reason for shot $currentShot Invalid due to "Vaccine Not Allowed"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sep2023 Novavax Series): If the series is completed with no doses of CVX 313, mark series is NOT complete"
+ 	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	activation-group "extraDoseCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Sep2023NovavaxSeries"
+			- the Series is Complete
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the vaccine administered is "ICE313"
+			- that has already been evaluated and whose shot validity is VALID
+	then
+		Manually mark the Series $targetSeries Not Complete
+		Refresh all facts in the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 Novavax Series): If no CVX 313 doses were administered and the series is not complete, override extraDoseCheck logic"
+ 	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	activation-group "extraDoseCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023NovavaxSeries"
+			- the series that the shot belongs to is not complete
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an administered shot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE313"
+	then
+		Record that this Series Rule was Processed for the TargetSeries $associatedTargetSeries
+		Log that this Series Rule fired for the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sep2023 >= 5yrs Series): If the number of doses administered is >= 2, the series is not complete, and at least one of the doses is CVX 313, mark the series complete"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Sep2023NovavaxSeries"
+			- the Series is not complete
+			- make note of the number of doses required to complete this Series as $numberOfDosesInSeries
+			- the effective number of doses administered in the Series is >= $numberOfDosesInSeries+1
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the vaccine administered is "ICE313"
+			- that has already been evaluated and whose shot validity is VALID
+	then
+		Mark the Series $targetSeries complete
+		Refresh all facts in the Series $targetSeries 
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// If the series has not been completed but the number of doses to complete the Novavax series has been met, then the series must
+// have been completed with all CVX 211 vaccine. The absolute minimum interval to the next dose (which should be a CVX 311) is 8w-4d 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19(Sep2023 Novavax Series): If there have been >= 2 doses administered and the series is not complete, the absolute minimum interval from the prior shot to the current target dose is 8w-4d"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Series with name "COVID19Sep2023NovavaxSeries"
+			- the series that the shot belongs to is not complete
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the number of administered shots is >= 1
+			- make note of the number of doses required to complete this Series as $numberOfDosesInSeries
+			- the effective number of doses administered in the Series is >= $numberOfDosesInSeries
+		There is an administered shot $previousShot
+			- the shot belongs to the Series $associatedTargetSeries
+			- the administration date of the shot is < $currentShotDate
+			- make note of the date this shot was administered as $previousShotDate
+		There does not exist an administered shot
+			- the shot belongs to the Series $associatedTargetSeries
+			- the administration date of the shot is > $previousShotDate
+			- the administration date of the shot is < $currentShotDate
+		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// If the patient is age >= 5 years and < 12 years and CVX 313 is administered as dose 1, evaluate and recommend using the following intervals:  
+//     Absolute Minimum Interval = 17 days
+//     Minimum Interval = 8 weeks
+//     Recommended Interval = 8 weeks
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////// Nothing to do for evaluation. Taken care of by Series Table Rules
+
+/*************************************************************************************************************************************************************************************
+ END Novavax Series Special Rules
+/************************************************************************************************************************************************************************************/
+
+/*************************************************************************************************************************************************************************************
+ Other, cross-cutting rules rules
+/************************************************************************************************************************************************************************************/
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Moderna: absolute minimum interval from a prior Moderna shot to the current shot is 24 days
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19(Sep2023): Always enforce absolute minimum interval of 24 days *from* any prior Moderna or CVX 213 shots (in any Series)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the series that the shot belongs to is not complete
+			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
+			- make note of the dose number as $doseNumberCurrentShot
+			- make note of the Associated Series as $associatedTargetSeries
+		There is an administered shot $priorModernaShot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated
+			- the dose number in the series is < $doseNumberCurrentShot
+			- the vaccine administered a member of ("ICE213", "ICE311", "ICE312")
+			- make note of the date this shot was administered as $dtAdministrationDatePriorCVXdose
+		Confirm Elapsed time between $dtAdministrationDatePriorCVXdose and $dtAdministrationDateCurrentShot < "24d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sep2023): For patients < 18y, always enforce absolute minimum interval of 24 days *to* any Moderna or CVX 213 shots (in any Series)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the series that the shot belongs to is not complete
+			- the vaccine administered a member of ("ICE213", "ICE311", "ICE312")
+			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
+			- make note of the dose number as $doseNumberCurrentShot
+			- make note of the Associated Series as $associatedTargetSeries
+		There is an administered shot $priorOtherShot
+			- the shot belongs to the Series $associatedTargetSeries
+			- that has already been evaluated
+			- the dose number in the series is < $doseNumberCurrentShot
+			- make note of the date this shot was administered as $dtAdministrationDatePriorCVXdose
+		Confirm Elapsed time between $dtAdministrationDatePriorCVXdose and $dtAdministrationDateCurrentShot < "24d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+rule "COVID-19(Sep2023): Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE if there are other evaluation reason codes"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+	no-loop true
+	when
+		There is an administered shot $notAllowedShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that has already been evaluated
+			- make note of all evaluation reasons for this shot as $oEvaluationReasons
+			- the size of the collection $oEvaluationReasons is > 1
+			- the collection $oEvaluationReasons contains "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
+			- make note of the associated series as $associatedTargetSeries
+		There is an IceFact $iceFact
+			- that has associated series $associatedTargetSeries
+			- that has associated administered shot $notAllowedShot
+			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue	
+	then
+		Remove Evaluation Reason "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" from Shot $notAllowedShot
+		Record that this dose rule was processed for the TargetDose $notAllowedShot
+		Log that this dose rule fired for the dose $notAllowedShot in the Series $associatedTargetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ END Other, cross-cutting rules rules
+/************************************************************************************************************************************************************************************/
+

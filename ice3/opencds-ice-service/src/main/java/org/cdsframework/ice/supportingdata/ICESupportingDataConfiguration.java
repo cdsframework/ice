@@ -599,7 +599,7 @@ public class ICESupportingDataConfiguration {
 				i=1;
 				for (IceSeriesDoseSpecification isds : lIceSeriesDoses) {
 					lDebugStrb += "\n\t(" + i + "): absolute minimum age: " + isds.getAbsoluteMinimumAge() + "; earliest recommended age: " + isds.getEarliestRecommendedAge() +
-						"; latest recommended age: " + isds.getLatestRecommendedAge() + "; minimum age: " + isds.getMinimumAge() + "; maximum age: " + isds.getMaximumAge();
+						"; latest recommended age: " + isds.getLatestRecommendedAge() + "; minimum age: " + isds.getMinimumAge() + "; maximum age: " + isds.getAbsoluteMaximumAge();
 					i++;
 				}
 			}
