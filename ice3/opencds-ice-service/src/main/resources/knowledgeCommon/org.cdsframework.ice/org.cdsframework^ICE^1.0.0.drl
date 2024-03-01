@@ -620,15 +620,14 @@ end
 // 															Evaluation of doses
 /*****************************************************************************************************************************************************************************/
 
-
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.evaluateSeriesWhenNoTargetDosesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.evaluateNonSeasonalSeriesWhenNoTargetDosesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$ts : TargetSeries(numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false)
+		$ts : TargetSeries(targetSeasonExists() == false, numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($ts) {
@@ -642,12 +641,11 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.setNextTargetDoseNonNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNonNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, this != $td.associatedTargetSeries, associatedTargetSeries!.seasonStartDate < $td.associatedTargetSeries!.seasonStartDate)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false, associatedTargetSeries.targetSeasonExists() == false)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
@@ -665,15 +663,82 @@ end
 ///////// ***
 // General Design rule... Do not Edit - for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
 ///////// ***
-rule "HistoryEvaluation.setNextTargetDoseNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, this != $td.associatedTargetSeries, associatedTargetSeries!.seasonStartDate < $td.associatedTargetSeries!.seasonStartDate)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true, associatedTargetSeries.targetSeasonExists() == false)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
+		}
+		modify($ts) {
+			setHistoryEvaluationInitiated(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.evaluateSeasonalSeriesWhenNoTargetDosesForEvaluation" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false, targetSeasonExists() == true)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify ($ts) {
+			setHistoryEvaluationInitiated(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "in TargetSeries " + $ts);
+		setFocus("HistoryEvaluation^customEvaluationRule");		
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.setNextSeasonalTargetDoseNonNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(targetSeasonExists() == true)
+		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
+		}
+		modify($ts) {
+			setHistoryEvaluationInitiated(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit - for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
+///////// ***
+rule "HistoryEvaluation.setNextSeasonalTargetDoseNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(targetSeasonExists() == true)
+		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
