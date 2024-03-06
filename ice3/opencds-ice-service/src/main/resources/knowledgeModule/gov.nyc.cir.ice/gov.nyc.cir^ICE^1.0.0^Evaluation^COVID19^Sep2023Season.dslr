@@ -306,8 +306,8 @@ rule "COVID-19(Sep2023 >= 5yrs Series): If a shot was administered for any dose 
 			- that has associated administered shot $currentShot
 			- that has finding SupportedFactConcept._BELOW_MINIMUM_INTERVAL.conceptCodeValue
 		There is an administered shot $previousShot
-			- the administration date of the shot is < $currentShotDate
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is < $currentShotDate
 			- make note of the date this shot was administered as $previousShotDate
 		There does not exist an administered shot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
