@@ -76,7 +76,8 @@ public class PayloadHelper {
 	}
 
 
-	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d,  boolean outputSupplementalText) {
+	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d,  boolean outputSupplementalText,
+			boolean outputDoseCountInsteadOfDoseNumber) {
 
 		String _METHODNAME = "OutputNestedImmEvaluationResult: ";
 		if (k == null || pNamedObjects == null || evalTime == null || sae == null || d == null) {
@@ -86,8 +87,7 @@ public class PayloadHelper {
 		}
 
 		if (logger.isDebugEnabled()) {
-			String str = "focalPersonId " + focalPersonId + ", sae: " + sae.getId() + ", VG: " + vg + ", Dose unique ID: " + d.getUniqueId() + ", Dose ID " + d.getDoseId() +
-					", Dose all: " + d.toString();
+			String str = "focalPersonId " + focalPersonId + ", sae: " + sae.getId() + ", VG: " + vg + ", Dose unique ID: " + d.getUniqueId() + ", Dose ID " + d.getDoseId() + ", Dose all: " + d.toString();
 			logger.debug(str);
 		}
 		String conceptTargetId = sae.getId();
@@ -119,7 +119,7 @@ public class PayloadHelper {
 		lSAE.setSubstanceAdministrationGeneralPurpose(subsAdmGeneralPurposeCD);
 		// Dose information
 		INT lINTDoseNumber = new INT();
-		if (d.getDoseNumberInSeries() > d.getDoseNumberCount()) {
+		if (outputDoseCountInsteadOfDoseNumber && d.getDoseNumberInSeries() > d.getDoseNumberCount()) {
 			lINTDoseNumber.setValue(d.getDoseNumberCount());
 		}
 		else {
