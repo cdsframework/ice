@@ -691,7 +691,8 @@ rule "HistoryEvaluation.evaluateSeasonalSeriesWhenNoTargetDosesForEvaluation" ru
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$ts : TargetSeries(numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false, targetSeasonExists() == true)
-		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate) 
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($ts) {
@@ -712,6 +713,7 @@ rule "HistoryEvaluation.setNextSeasonalTargetDoseNonNOSInSeriesForEvaluation" ru
 		$ts : TargetSeries(targetSeasonExists() == true)
 		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
 		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
 		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 	then
@@ -736,6 +738,7 @@ rule "HistoryEvaluation.setNextSeasonalTargetDoseNOSInSeriesForEvaluation" rulef
 		$ts : TargetSeries(targetSeasonExists() == true)
 		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
 		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
 		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
