@@ -1317,6 +1317,11 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Moderna vaccine
 		and
 		(
 			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == true)
+			and
+			$tdts : TargetDose(associatedTargetSeries == $ts, isValid == true, doseNumberInSeries == $ts.doseAfterWhichSeriesWasMarkedComplete)
+			and 
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"),
+				administrationDate < $tdts.administrationDate)
 			or
 			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == false)
 			and			
@@ -1348,6 +1353,11 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine 
 		and
 		(
 			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == true)
+			and
+			$tdts : TargetDose(associatedTargetSeries == $ts, isValid == true, doseNumberInSeries == $ts.doseAfterWhichSeriesWasMarkedComplete)
+			and 
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"),
+				administrationDate < $tdts.administrationDate)
 			or
 			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == false)
 			and			

@@ -544,7 +544,7 @@ public class TargetDose {
 	public String toString() {
 
 		String s = "TargetDose [uniqueId=" + uniqueId + ", doseId=" + doseId + ", administeredShotNumber=" + administeredShotNumberInSeries +
-				"; doseNumber=" + doseNumberInSeries + ", doseNumberCount=" + doseNumberCount + "vaccine=" + administeredVaccine.getCdsConceptName() + ", isPrimarySeriesShot=" + isPrimarySeriesShot() +
+				"; doseNumber=" + doseNumberInSeries + ", doseNumberCount=" + doseNumberCount + ", vaccine=" + administeredVaccine.getCdsConceptName() + ", isPrimarySeriesShot=" + isPrimarySeriesShot() +
 				"; vaccineComponent=" + vaccineComponent.getCdsConceptName() + ", administrationDate=" + administrationDate + ", status=" + status +
 				"; isValid=" + isValid + "; preEvaluationCheck=" + preEvaluationCheckCompleted + "; isLiveVirus: " + this.getAdministeredVaccine().isLiveVirusVaccine() +
 				"; isCombinationVaccine: " + this.getAdministeredVaccine().isCombinationVaccine() + "; componentIsLiveVirus: " + this.getVaccineComponent().isLiveVirusVaccine() +

@@ -226,7 +226,7 @@ end
 // the number of effective doses to complete theseries has been reached. Therefore, another dose should be recommended 8 weeks later.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19(Sep2023 >= 5yrs Series): If a CVX 313 dose was administered in the >= 5 yrs of age series, no doses in the prior season was administered, and no mRNA vaccines have been administered in the current season, mark series is NOT complete"
+rule "COVID-19(Sep2023 >= 5yrs Series): If a CVX 313 dose was administered for target dose 1 in the >= 5 yrs of age series, no doses in the prior season was administered, and no mRNA vaccines have been administered in the current season, mark series is NOT complete"
  	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
 	when
@@ -234,6 +234,7 @@ rule "COVID-19(Sep2023 >= 5yrs Series): If a CVX 313 dose was administered in th
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19Sep2023gte5Series"
 			- the Series is Complete
+			- the number of doses administered is == 1
 		There does not exist an administered shot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is < "12-Sep-2023"
@@ -306,9 +307,11 @@ rule "COVID-19(Sep2023 >= 5yrs Series): If a shot was administered for any dose 
 			- that has associated administered shot $currentShot
 			- that has finding SupportedFactConcept._BELOW_MINIMUM_INTERVAL.conceptCodeValue
 		There is an administered shot $previousShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is < $currentShotDate
 			- make note of the date this shot was administered as $previousShotDate
 		There does not exist an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is > $previousShotDate
 			- the administration date of the shot is < $currentShotDate
 		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
@@ -360,6 +363,7 @@ rule "COVID-19(Sep2023 Pfizer/Moderna/Mixed Product < 5yrs Series): If a shot wa
 			- the administration date of the shot is < "12-Sep-2023"
 			- make note of the date this shot was administered as $previousShotDate
 		There does not exist an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is > $previousShotDate
 			- the administration date of the shot is < "12-Sep-2023"
 		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
@@ -393,6 +397,7 @@ rule "COVID-19(Sep2023 Pfizer/Moderna/Mixed Product < 5yrs Series): If a shot wa
 			- the administration date of the shot is < "12-Sep-2023"
 			- make note of the date this shot was administered as $previousShotDate
 		There does not exist an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is > $previousShotDate
 			- the administration date of the shot is < "12-Sep-2023"
 		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
