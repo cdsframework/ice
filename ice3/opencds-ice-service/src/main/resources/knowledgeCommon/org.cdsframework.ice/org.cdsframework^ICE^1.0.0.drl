@@ -691,7 +691,8 @@ rule "HistoryEvaluation.evaluateSeasonalSeriesWhenNoTargetDosesForEvaluation" ru
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$ts : TargetSeries(numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false, targetSeasonExists() == true)
-		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate) 
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($ts) {
@@ -712,6 +713,7 @@ rule "HistoryEvaluation.setNextSeasonalTargetDoseNonNOSInSeriesForEvaluation" ru
 		$ts : TargetSeries(targetSeasonExists() == true)
 		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
 		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
 		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 	then
@@ -736,6 +738,7 @@ rule "HistoryEvaluation.setNextSeasonalTargetDoseNOSInSeriesForEvaluation" rulef
 		$ts : TargetSeries(targetSeasonExists() == true)
 		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
 		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
 		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
@@ -2607,18 +2610,45 @@ function void setShotValidity(SubstanceAdministrationEvent sae, TargetDose td) {
 ///////// ***
 rule "ProcessResults: Return Evaluations" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	lock-on-active true
+	/////// lock-on-active true
 	salience 10
 	when
 		$sae : SubstanceAdministrationEvent()	
 		$td : TargetDose(doseId == $sae.id)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true)
+		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
 		$evalTime: EvalTime()
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText);
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true);
 		$sae.setToBeReturned(true);
+		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
+		insert(saeEvaluation);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $td);	
+end
+
+
+///////// ***
+// Supplementary rule... To be migrated to custom rule
+///////// ***
+rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations" ruleflow-group "ProcessResults"
+	dialect "mvel"
+	/////// lock-on-active true
+	salience 11
+	when
+		$sae : SubstanceAdministrationEvent()
+		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == "COVID19Sep2023Season")
+		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
+		$evalTime: EvalTime()
+	then
+		String _RULENAME = kcontext.rule.name;
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, false);
+		$sae.setToBeReturned(true);
+		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
+		insert(saeEvaluation);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $td);	
 end
 
@@ -2628,7 +2658,7 @@ end
 ///////// ***
 rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	lock-on-active true
+	/////// lock-on-active true
 	salience 10
 	when
 		exists ICEFactTypeFinding(iceResultFinding == "UNSUPPORTED_VACCINES_GROUP_FEATURE_ENABLED")
