@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -544,7 +544,7 @@ public class TargetDose {
 	public String toString() {
 
 		String s = "TargetDose [uniqueId=" + uniqueId + ", doseId=" + doseId + ", administeredShotNumber=" + administeredShotNumberInSeries +
-				"; doseNumber=" + doseNumberInSeries + ", doseNumberCount=" + doseNumberCount + "vaccine=" + administeredVaccine.getCdsConceptName() + ", isPrimarySeriesShot=" + isPrimarySeriesShot() +
+				"; doseNumber=" + doseNumberInSeries + ", doseNumberCount=" + doseNumberCount + ", vaccine=" + administeredVaccine.getCdsConceptName() + ", isPrimarySeriesShot=" + isPrimarySeriesShot() +
 				"; vaccineComponent=" + vaccineComponent.getCdsConceptName() + ", administrationDate=" + administrationDate + ", status=" + status +
 				"; isValid=" + isValid + "; preEvaluationCheck=" + preEvaluationCheckCompleted + "; isLiveVirus: " + this.getAdministeredVaccine().isLiveVirusVaccine() +
 				"; isCombinationVaccine: " + this.getAdministeredVaccine().isCombinationVaccine() + "; componentIsLiveVirus: " + this.getVaccineComponent().isLiveVirusVaccine() +

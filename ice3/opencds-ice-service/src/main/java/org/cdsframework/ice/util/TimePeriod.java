@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -41,28 +41,28 @@ import org.opencds.common.exceptions.ImproperUsageException;
 
 
 public class TimePeriod {
-	
+
 	private static final String TimePeriodStringFormat = "([-|+]?[ ]*[0-9]+[Yy])?([ ]*[-|+]?[ ]*[0-9]+[Mm])?([ ]*[-|+]?[ ]*[0-9]+[Ww])?([ ]*[-|+]?[ ]*[0-9]+[Dd])?";
 	private static final Logger logger = LogManager.getLogger();
 
 	public enum DurationType {
 		DAYS, MONTHS, WEEKS, YEARS
 	}
-	
+
 	private DurationType durationType;
 	private int duration;
 	// private boolean isInclusive;
-	private boolean timePeriodSet = false; 
+	private boolean timePeriodSet = false;
 	private String timePeriodRepresentation;
-	
-	
+
+
 	private TimePeriod() {
 		// Privately available
 	}
 
 	/**
 	 * Create a new TimePeriod by specifying duration value and type. By using this, it is not possible to specify a combination TimePeriod with more than one duration type. i.e. -
-	 * to specify a TimePeriod of 1 year, 5 months and 4 days, use TimePeriod(String). TimePeriods are immutable; once set, it is not possible to change it. 
+	 * to specify a TimePeriod of 1 year, 5 months and 4 days, use TimePeriod(String). TimePeriods are immutable; once set, it is not possible to change it.
 	 * @param pDuration
 	 * @param pDurationType
 	 */
@@ -73,30 +73,30 @@ public class TimePeriod {
 		timePeriodSet = true;
 		setTimePeriod(determineTimePeriodStringRepresentationFromDurationValues());
 	}
-	
+
 
 	/**
 	 * Create a TimePeriod. TimePeriod is expressed as years, months and days. Each unit is optional.  Examples: "1y", "1m", "1d", "1y1m" "1y+5m+4d" is the same as "1y5m4d".
 	 * Months and days can be subtracted, as follows: 1y-4m-4d. TimePeriods can be negative: "-4d", "-1y+4d", etc. No spaces between units.
-	 * TimePeriods are immutable; once set, it is not possible to change it. 
+	 * TimePeriods are immutable; once set, it is not possible to change it.
 	 * @param pTimePeriodStr
 	 * @throws IllegalArgumentException if the TimePeriod argument is not in the correct format.
 	 */
 	public TimePeriod(String pTimePeriodStr) {
-				
+
 		setTimePeriod(pTimePeriodStr);
 	}
-	
+
 	/**
 	 * Construct deep copy of TimePeriod object and return it to the caller
 	 * @return duplicated TimePeriod object
 	 */
 	public static TimePeriod constructDeepCopyOfTimePeriodObject(TimePeriod pTP) {
-		
+
 		if (pTP == null) {
 			return pTP;
 		}
-		
+
 		TimePeriod lTP = new TimePeriod();
 		lTP.durationType = pTP.durationType;
 		lTP.duration = pTP.duration;
@@ -104,12 +104,12 @@ public class TimePeriod {
 		lTP.timePeriodRepresentation = pTP.timePeriodRepresentation;
 		return lTP;
 	}
-	
+
 	private int getDuration() {
 		return duration;
 	}
-	
-	
+
+
 	private DurationType getDurationType() {
 		return durationType;
 	}
@@ -125,7 +125,7 @@ public class TimePeriod {
 	 * Returns true if the String argument is in the correct TimePeriod string format, false if it is not.
 	 */
 	public static boolean isTimePeriodStringInCorrectFormat(String pTimePeriodStr) {
-		
+
 		if (pTimePeriodStr == null) {
 			return false;
 		}
@@ -138,13 +138,13 @@ public class TimePeriod {
 	}
 
 	/**
-	 * Returns true if the time period is a negative duration (i.e.- prefixed with a minus sign); false if not. Throws an IllegalArgumentException if the TimePeriod 
-	 * argument passed in is not in the correct TimePeriod string format. 
+	 * Returns true if the time period is a negative duration (i.e.- prefixed with a minus sign); false if not. Throws an IllegalArgumentException if the TimePeriod
+	 * argument passed in is not in the correct TimePeriod string format.
 	 * @param pTimePeriod
 	 * @return
 	 */
 	public static boolean isTimePeriodANegativeDuration(String pTimePeriodStr) {
-		
+
 		String _METHODNAME = "isTimePeriodANegativeDuration(): ";
 		if (isTimePeriodStringInCorrectFormat(pTimePeriodStr) == false) {
 			String lWarnStr = "TimePeriod argument is in the incorrect format: " + pTimePeriodStr;
@@ -153,7 +153,7 @@ public class TimePeriod {
 			}
 			throw new IllegalArgumentException(lWarnStr);
 		}
-		
+
 		if (pTimePeriodStr.startsWith("-")) {
 			return true;
 		}
@@ -161,33 +161,33 @@ public class TimePeriod {
 			return false;
 		}
 	}
-	
+
 	public String getTimePeriodStringRepresentation() {
-		
+
 		return this.timePeriodRepresentation;
 	}
-	
-	
+
+
 	private void setTimePeriod(String pTimePeriodStr) {
-		
+
 		String _METHODNAME = "setTimePeriod()";
 		if (isTimePeriodStringInCorrectFormat(pTimePeriodStr) == false) {
 			String str = "TimePeriod string \"" + pTimePeriodStr + "\" does not match correct pattern: e.g. - 1y10m12d";
 			logger.error(_METHODNAME + str);
 			throw new IllegalArgumentException(str);
 		}
-		
+
 		this.timePeriodRepresentation = pTimePeriodStr;
 		this.timePeriodSet = true;
 	}
 
-	
+
 	/**
-	 * Return TimePeriod in string format year, month, or day. e.g. - "4y", "5m", "6d". 
+	 * Return TimePeriod in string format year, month, or day. e.g. - "4y", "5m", "6d".
 	 * @return String If DurationType is not of type DAYS, MONTHS, WEEKS or YEARS, null is returned.
 	 */
 	private String determineTimePeriodStringRepresentationFromDurationValues() {
-		
+
 		String durationTypeStr = null;
 		switch(durationType) {
 		case DAYS:
@@ -205,10 +205,10 @@ public class TimePeriod {
 		default:
 			return null;
 		}
-		
+
 		return duration + durationTypeStr;
 	}
-	
+
 	public static boolean isValidMonth(int month) {
 		if (month > 0 && month < 13) {
 			return true;
@@ -217,12 +217,12 @@ public class TimePeriod {
 			return false;
 		}
 	}
-	
+
 	public static int numberOfDaysInMonth(int year, int month) {
 		DateTime dateTime = new DateTime(year, month, 14, 12, 0, 0, 000);
 		return dateTime.dayOfMonth().getMaximumValue();
 	}
-	
+
 	public static int differenceInDays(Date startDate, Date endDate) {
 
 		if (startDate == null || endDate == null) {
@@ -231,9 +231,9 @@ public class TimePeriod {
 		DateTime dtStart = new DateTime(startDate);
 		DateTime dtEnd = new DateTime(endDate);
 		Days d = Days.daysBetween(dtStart, dtEnd);
-		return d.getDays();	
+		return d.getDays();
 	}
-	
+
 	public static int differenceInMonths(Date startDate, Date endDate) {
 
 		if (startDate == null || endDate == null) {
@@ -270,7 +270,7 @@ public class TimePeriod {
 	/**
 	 * Adds the specified amount of time to the supplied date and returns a new date the TimePeriod duration to the supplied date
 	 * @param startDate
-	 * @param pTP a TimePeriod where DurationType is either DAYS, WEEKS, MONTHS or YEARS. If the durationType is not set, this method returns the startDate. 
+	 * @param pTP a TimePeriod where DurationType is either DAYS, WEEKS, MONTHS or YEARS. If the durationType is not set, this method returns the startDate.
 	 * If TimePeriod has a negative duration, it is substracted from the startDate
 	 * @return a new data representing the supplied date plus the TimePeriod; startDate if the supplied TimePeriod is null
 	 * @throws IllegalArgumentException if DurationType is not one of the above
@@ -282,7 +282,7 @@ public class TimePeriod {
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Start date: " + startDate + "; TimePeriod: " + pTP);
 		}
-		
+
 		if (startDate == null) {
 			return null;
 		}
@@ -290,7 +290,7 @@ public class TimePeriod {
 			return startDate;
 		}
 
-		int duration = pTP.getDuration();		
+		int duration = pTP.getDuration();
 		LocalDate startLD = new LocalDate(startDate);
 		DurationType tpType = pTP.getDurationType();
 
@@ -319,11 +319,11 @@ public class TimePeriod {
 			logger.warn(_METHODNAME + str);
 			throw new IllegalArgumentException(str);
 		}
-		
+
 		return startLD.toDate();
 	}
-	
-	
+
+
 	/**
 	 * Add the TimePeriod to the supplied Date. If TimePeriod is negative for any unit, that unit is subtracted
 	 * @param startDate
@@ -331,28 +331,31 @@ public class TimePeriod {
 	 * @return a new date representing the supplied date plus the TimePeriod; startDate if the supplied TimePeriod is null
 	 */
 	public static Date addTimePeriod(Date startDate, TimePeriod pTP) {
-		
+
+		if (pTP == null || startDate == null) {
+			return null;
+		}
 		return addTimePeriod(startDate, pTP.getTimePeriodStringRepresentation());
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Add the TimePeriod duration to the supplied date
 	 * @param startDate
-	 * @param pTimePeriodStr in the format ymd (e.g. "5y", "1m", "4d", "5y4m1d" is the same as "5y+4m+1d", "5y-4d" is allowed, etc.). If TimePeriod is negative, 
+	 * @param pTimePeriodStr in the format ymd (e.g. "5y", "1m", "4d", "5y4m1d" is the same as "5y+4m+1d", "5y-4d" is allowed, etc.). If TimePeriod is negative,
 	 * it is subtracted from the startDate
 	 * @return a new date representing the supplied date plus the TimePeriod; startDate if the supplied TimePeriod is null
 	 * @throws IllegalArgumentException if TimePeriod representation has format errors
 	 */
 	public static Date addTimePeriod(Date startDate, String pTimePeriodStr) {
-		
+
 		String _METHODNAME = "addTimePeriod(Date, String): ";
-		
+
 		if (logger.isDebugEnabled()) {
 			logger.debug(_METHODNAME + "Start date: " + startDate + "; TimePeriod Str: " + pTimePeriodStr);
 		}
-		
+
 		if (startDate == null) {
 			return null;
 		}
@@ -367,7 +370,7 @@ public class TimePeriod {
 		if (logger.isDebugEnabled()) {
 			logger.debug("TimePeriod String Supplied: " + pTimePeriodStr);
 		}
-		
+
 		TimePeriod tp = null;
 		Date interimDate = startDate;
 		StringBuffer token = new StringBuffer();
@@ -448,7 +451,7 @@ public class TimePeriod {
 				token.append(c);
 			}
 		}
-		
+
 		return interimDate;
 	}
 
@@ -460,39 +463,39 @@ public class TimePeriod {
 	 * @return
 	 * @throws ImproperUsageException
 	 */
-	public static TimePeriod calculateElapsedTimePeriod(Date pD1, Date pD2, DurationType pDurationType) 
+	public static TimePeriod calculateElapsedTimePeriod(Date pD1, Date pD2, DurationType pDurationType)
 		throws TimePeriodException {
-		
+
 		return calculateElapsedTimePeriod(pD1, pD2, pDurationType, false);
 	}
-	
+
 
 	/**
-	 * 
+	 *
 	 * @param pD1
 	 * @param pD2
 	 * @param pDurationType
 	 * @param absoluteValue If true, will ensure that the elapsed time returned is always positive; that is, a TimePeriod with a negative elapsed time value will not be returned
 	 * if pD1 is a later date than pD2
-	 * @return TimePeriod representing elapsed time period in the specified 
+	 * @return TimePeriod representing elapsed time period in the specified
 	 * @throws IllegalArgumentException if one or more of the supplied date parameters are invalid (e.g. - null)
 	 * @throws TimePeriodException if elapsed time period could not be calculated due to an internal error
 	 */
-	public static TimePeriod calculateElapsedTimePeriod(Date pD1, Date pD2, DurationType pDurationType, boolean absoluteValue) 
+	public static TimePeriod calculateElapsedTimePeriod(Date pD1, Date pD2, DurationType pDurationType, boolean absoluteValue)
 		throws TimePeriodException {
-	
+
 		String _METHODNAME = "calculateTimePeriod(): ";
 		if (pD1 == null || pD2 == null) {
 			String str = "One or more date parameters is null";
 			logger.error(_METHODNAME + str);
 			throw new IllegalArgumentException(str);
 		}
-		
+
 		if (logger.isDebugEnabled()) {
 			String str = _METHODNAME + "Date 1 is " + pD1 + ", Date 2 is " + pD2;
 			logger.debug(str);
 		}
-		
+
 		Date d1 = pD1;
 		Date d2 = pD2;
 		if (absoluteValue) {
@@ -521,16 +524,16 @@ public class TimePeriod {
 		}
 		return tp;
 	}
-	
-	
+
+
 	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, TimePeriod tp) {
-		
+
 		return compareElapsedTimePeriodToDateRange(pD1, pD2, tp, false);
 	}
-	
-	
+
+
 	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, TimePeriod tp, boolean absoluteValue) {
-		
+
 		String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, TimePeriod): ";
 		if (tp == null) {
 			String str = "TimePeriod supplied is null";
@@ -541,13 +544,13 @@ public class TimePeriod {
 		return compareElapsedTimePeriodToDateRange(pD1, pD2, tp.timePeriodRepresentation, absoluteValue);
 	}
 
-	
+
 	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, String pTimePeriodStr) {
-	
+
 		return compareElapsedTimePeriodToDateRange(pD1, pD2, pTimePeriodStr, false);
 	}
-	
-	
+
+
 	/**
 	 * If the elapsed time between the supplied dates is greater than that specified by the TimePeriod string starting from the specified start date pD1,
 	 * return 1; -1 if elapsed time is less than that specified by the TimePeriod string, and 0 if they are the same
@@ -559,7 +562,7 @@ public class TimePeriod {
 	 * @return
 	 */
 	public static int compareElapsedTimePeriodToDateRange(Date pD1, Date pD2, String pTimePeriodStr, boolean absoluteValue) {
-		
+
 		String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, String, boolean): ";
 		if (pTimePeriodStr == null || pTimePeriodStr.length() == 0) {
 			String str = "TimePeriod string supplied not supplied";
@@ -571,7 +574,7 @@ public class TimePeriod {
 			logger.error(_METHODNAME + str);
 			throw new IllegalArgumentException(str);
 		}
-		
+
 		Date d1 = null;
 		Date d2 = null;
 		if (absoluteValue == true && pD2.before(pD1)) {
@@ -594,7 +597,7 @@ public class TimePeriod {
 		if (logger.isDebugEnabled()) {
 			logger.debug("TimePeriod String Supplied: " + pTimePeriodStr);
 		}
-		
+
 		Date interimDate = d1;
 		interimDate = addTimePeriod(d1, pTimePeriodStr);
 		if (interimDate.before(d2)) {
@@ -607,30 +610,30 @@ public class TimePeriod {
 			return 0;
 		}
 	}
-	
-	
+
+
 
 	/**
 	 * Compare two time periods of the same type
 	 * @param pTD
 	 * @param orEqualTo
 	 * @throws IllegalArgumentException if TimePeriod is of a different DurationType than this one
-	 * @return true if the TimePeriod is less than [or equal to] the supplied parameter, false if it is not. If supplied TimePeriod is set to null, then it is treated as a 
+	 * @return true if the TimePeriod is less than [or equal to] the supplied parameter, false if it is not. If supplied TimePeriod is set to null, then it is treated as a
 	 * TimePeriod with of zero days
 	 */
 	public boolean isLessThan(TimePeriod pTD, boolean orEqualTo) {
-		
+
 		// String _METHODNAME = "isLessThan_old(): ";
-		
+
 		TimePeriod lTimePeriod = pTD;
 		if (pTD == null) {
 			lTimePeriod = new TimePeriod("0d");
 		}
-		
+
 		Date lReferenceDate = new Date();
 		Date lTPDate1 = addTimePeriod(lReferenceDate, this);
 		Date lTPDate2 = addTimePeriod(lReferenceDate, lTimePeriod);
-		
+
 		int compareTo = lTPDate1.compareTo(lTPDate2);
 		if (orEqualTo) {
 			if (compareTo <= 0)
@@ -639,43 +642,43 @@ public class TimePeriod {
 				return false;
 		}
 		else {
-			if (compareTo < 0) 
+			if (compareTo < 0)
 				return true;
 			else
 				return false;
 		}
 	}
-	
+
 	public boolean isLessThan(TimePeriod pTD) {
-		
+
 		return isLessThan(pTD, false);
 	}
-	
+
 	public boolean isLessThanEqualTo(TimePeriod pTD) {
-		
+
 		return isLessThan(pTD, true);
 	}
-	
+
 	/**
 	 * Compare two time periods of the same type. Return true if this TimePeriod is greater than (greater than/equal to) the supplied TimePeriod.
 	 * @param pTD
 	 * @param orEqualTo
-	 * @return true if the TimePeriod is less than [or equal to] the supplied parameter, false if it is not. If supplied TimePeriod is set to null, then it is treated as a 
+	 * @return true if the TimePeriod is less than [or equal to] the supplied parameter, false if it is not. If supplied TimePeriod is set to null, then it is treated as a
 	 * TimePeriod with of zero days
 	 */
 	public boolean isGreaterThan(TimePeriod pTD, boolean orEqualTo) {
-		
+
 		// String _METHODNAME = "isGreaterThan(TimePeriod, boolean): ";
-		
+
 		TimePeriod lTimePeriod = pTD;
 		if (pTD == null) {
 			lTimePeriod = new TimePeriod("0d");
 		}
-		
+
 		Date lReferenceDate = new Date();
 		Date lTPDate1 = addTimePeriod(lReferenceDate, this);
 		Date lTPDate2 = addTimePeriod(lReferenceDate, lTimePeriod);
-		
+
 		int compareTo = lTPDate1.compareTo(lTPDate2);
 		if (orEqualTo) {
 			if (compareTo >= 0)
@@ -684,30 +687,30 @@ public class TimePeriod {
 				return false;
 		}
 		else {
-			if (compareTo > 0) 
+			if (compareTo > 0)
 				return true;
 			else
 				return false;
 		}
 	}
-	
+
 	public boolean isGreaterThan(TimePeriod pTD) {
-		
+
 		return isGreaterThan(pTD, false);
-		
+
 	}
 
 	public boolean isGreaterThanEqualTo(TimePeriod pTD) {
-		
+
 		return isGreaterThan(pTD, true);
 	}
-	
+
 	/**
 	 * Return a Date from a string. String provided must be in format used by Drools: dd-MMM-yyyy. e.g. - "04-Jul-1999")
 	 * If no string is provided, null is returned;
 	 */
 	public static Date generateDateFromStringInDroolsDateFormat(String pDateAsString) {
-		
+
         if (pDateAsString == null || pDateAsString.isEmpty()) {
         	return null;
         }
@@ -725,11 +728,11 @@ public class TimePeriod {
 
         return lDateToReturn;
 	}
-	
+
 	/**
 	 * Compare two time periods of the same type. Return true if this TimePeriod is equal to the supplied TimePeriod.
 	 * @param pTD
-	 * @return true if the TimePeriod is less than [or equal to] the supplied parameter, false if it is not. If supplied TimePeriod is set to null, then it is treated as a 
+	 * @return true if the TimePeriod is less than [or equal to] the supplied parameter, false if it is not. If supplied TimePeriod is set to null, then it is treated as a
 	 * TimePeriod with of zero days
 	 */
 	public boolean isEqualTo(TimePeriod pTD) {
@@ -738,11 +741,11 @@ public class TimePeriod {
 		if (pTD == null) {
 			lTimePeriod = new TimePeriod("0d");
 		}
-		
+
 		Date lReferenceDate = new Date();
 		Date lTPDate1 = addTimePeriod(lReferenceDate, this);
 		Date lTPDate2 = addTimePeriod(lReferenceDate, lTimePeriod);
-		
+
 		int compareTo = lTPDate1.compareTo(lTPDate2);
 		if (compareTo == 0) {
 			return true;
@@ -751,7 +754,7 @@ public class TimePeriod {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return "TimePeriod [timePeriodStringRepresentation=" + this.timePeriodRepresentation + "]";

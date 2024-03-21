@@ -1,0 +1,213 @@
+/**
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+
+package knowledgeModule.gov.nyc.cir.ice
+
+import java.util.List
+import java.util.Set
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
+
+global java.util.Date evalTime
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// CVX 218, CVX 219, CVX 227, CVX 228, CVX 301, CVX 302, CVX 308, CVX 310, CVX 311 - if evaluated as Invalid due to being above the maximum age for that vaccine, should be ignored for purposes of recommendations
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "COVID-19: If CVX 218, CVX 219, CVX 227, CVX 228, CVX 229, CVX 230, CVX 301, CVX 302, CVX 308, CVX 310, CVX 311 was evaluated and Not Valid due to ABOVE_MAXIMUM_AGE_VACCINE, ignore the shot when calculating intervals"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an administered shot $administeredShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the vaccine administered a member of  ("ICE218", "ICE219", "ICE227", "ICE228", "ICE229", "ICE230", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312", "ICE313")
+			- that has already been evaluated and whose Shot Validity Status is not VALID
+			- the shot is not ignored
+			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
+			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_VACCINE"
+			- make note of the Associated Series as $associatedTargetSeries
+	then
+		Mark the shot $administeredShot as Ignored
+		Refresh all facts in the shot $administeredShot
+		Record that this dose rule was Processed for the TargetDose $administeredShot
+		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
+end
+
+
+// If an updated Sept 2023 Pfizer or Moderna COVID-19 vaccine (CVX 308, CVX 309, CVX 310, CVX 311, CVX 312) is administered prior to 9/12/2023, 
+// evaluate as Invalid with reason code VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED. 
+rule "COVID-19: If CVX 308, CVX 309, CVX 310, CVX 311 or CVX 312 was administered < 9/12/2023, evaluate the shot as Invalid / VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
+	dialect"mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the vaccine administered a member of ("ICE308", "ICE309", "ICE310", "ICE311", "ICE312")
+			- the administration date of the shot is < "12-Sep-2023"
+			- make note of the Associated Series as $associatedTargetSeries
+	then
+		Set the shot status of $currentShot to Invalid
+		Remove all evaluation reasons from shot $currentShot
+		Include the reason for shot $currentShot Invalid due to "Vaccine Not Yet Available for Use on Specified Administration Date"
+		Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries	
+end
+
+
+rule "COVID-19: If CVX 313 was administered < 10/4/2023, evaluate the shot as Invalid / VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
+	dialect"mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the vaccine administered is "ICE313"
+			- the administration date of the shot is < "04-Oct-2023"
+			- make note of the Associated Series as $associatedTargetSeries
+	then
+		Set the shot status of $currentShot to Invalid
+		/////// Remove all evaluation reasons from shot $currentShot
+		Include the reason for shot $currentShot Invalid due to "Vaccine Not Yet Available for Use on Specified Administration Date"
+		/////// Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries	
+end
+
+
+/*************************************************************************************************************************************************************************************
+ Invoke Seasonal Agenda Group Logic START
+/************************************************************************************************************************************************************************************/
+
+rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVID19Dec2020 Season"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the unique ID of the shot as $uniqueShotId		
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name "COVID19Dec2020Season"
+		There does not exist an IceFact
+			- that has finding $uniqueShotId
+			- that has associated administered shot $currentShot
+	then
+		Logically insert an IceFact $uniqueShotId with TargetDose $currentShot into Working Memory
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
+end
+
+
+rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVID19Sep2023 Season"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the unique ID of the shot as $uniqueShotId		
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name "COVID19Sep2023Season"
+		There does not exist an IceFact
+			- that has finding $uniqueShotId
+			- that has associated administered shot $currentShot
+	then
+		Logically insert an IceFact $uniqueShotId with TargetDose $currentShot into Working Memory
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+end
+
+
+rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in the COVID19Dec2020 Season"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	salience 999
+	when
+		There is an administered shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that has already been evaluated
+			- make note of the administered shot number as $administeredShotNumberFocus
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an administered shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is > $administeredShotNumberFocus
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name "COVID19Dec2020Season"
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
+end
+
+
+rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in the COVID19Sep2023 Season"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	salience 999
+	when
+		There is an administered shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that has already been evaluated
+			- make note of the administered shot number as $administeredShotNumberFocus
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an administered shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is > $administeredShotNumberFocus
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name "COVID19Sep2023Season"
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+end
+
+/*************************************************************************************************************************************************************************************
+ END Invoke Seasonal Agenda Group Logic
+/************************************************************************************************************************************************************************************/

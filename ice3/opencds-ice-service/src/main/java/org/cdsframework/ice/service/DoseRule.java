@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -211,7 +211,7 @@ public class DoseRule {
 		if (pAllowableVaccineMaximumAges == null || pAllowableVaccineMaximumAges.isEmpty() == true) {
 			return;
 		}
-		this.allowableVaccineMinimumAges.putAll(pAllowableVaccineMaximumAges);
+		this.allowableVaccineMaximumAges.putAll(pAllowableVaccineMaximumAges);
 	}
 
 
@@ -354,11 +354,11 @@ public class DoseRule {
 		this.minimumAge = minimumAge;
 	}
 
-	public TimePeriod getMaximumAge() {
+	public TimePeriod getAbsoluteMaximumAge() {
 		return maximumAge;
 	}
 
-	public void setMaximumAge(TimePeriod maximumAge) {
+	public void setAbsoluteMaximumAge(TimePeriod maximumAge) {
 		this.maximumAge = maximumAge;
 	}
 

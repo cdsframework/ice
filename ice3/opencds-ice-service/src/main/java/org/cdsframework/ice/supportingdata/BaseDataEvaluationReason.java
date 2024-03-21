@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -30,6 +30,7 @@ public enum BaseDataEvaluationReason implements BaseData {
 
 	_ABOVE_REC_AGE_SERIES("EVALUATION_REASON_CONCEPT.ABOVE_REC_AGE_SERIES"),
 	_ABOVE_MAXIMUM_AGE_VACCINE("EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_VACCINE"),
+	_ABOVE_MAXIMUM_AGE_EVALUATION_REASON("EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_SERIES"),
 	_BELOW_MINIMUM_AGE_EVALUATION_REASON("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_SERIES"),
 	_BELOW_MINIMUM_INTERVAL_EVALUATION_REASON("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_INTERVAL"),
 	_BELOW_MINIMUM_AGE_FINAL_DOSE_REASON("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_FINAL_DOSE"),
@@ -53,19 +54,19 @@ public enum BaseDataEvaluationReason implements BaseData {
 	_VACCINE_NOT_PART_OF_THIS_SERIES("EVALUATION_REASON_CONCEPT.VACCINE_NOT_PART_OF_THIS_SERIES"),
 	_VACCINE_NOT_SUPPORTED_REASON("EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED"),
 	_UNSPECIFIED_REASON("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
-	
+
 	private String cdsListItemName;
-	
+
 	private BaseDataEvaluationReason() {
 		this.cdsListItemName = null;
 	}
-	
+
 	private BaseDataEvaluationReason(String pEvaluationReasonCdsListItem) {
 		this.cdsListItemName = pEvaluationReasonCdsListItem;
 	}
-	
+
 	public String getCdsListItemName() {
 		return this.cdsListItemName;
 	}
-	
+
 }

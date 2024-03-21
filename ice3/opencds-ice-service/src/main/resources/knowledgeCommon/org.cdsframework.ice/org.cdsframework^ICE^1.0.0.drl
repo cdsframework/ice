@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -620,15 +620,14 @@ end
 // 															Evaluation of doses
 /*****************************************************************************************************************************************************************************/
 
-
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.evaluateSeriesWhenNoTargetDosesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.evaluateNonSeasonalSeriesWhenNoTargetDosesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$ts : TargetSeries(numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false)
+		$ts : TargetSeries(targetSeasonExists() == false, numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify ($ts) {
@@ -642,11 +641,11 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
-rule "HistoryEvaluation.setNextTargetDoseNonNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNonNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false, associatedTargetSeries.targetSeasonExists() == false)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
@@ -664,14 +663,85 @@ end
 ///////// ***
 // General Design rule... Do not Edit - for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
 ///////// ***
-rule "HistoryEvaluation.setNextTargetDoseNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true, associatedTargetSeries.targetSeasonExists() == false)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
+		}
+		modify($ts) {
+			setHistoryEvaluationInitiated(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.evaluateSeasonalSeriesWhenNoTargetDosesForEvaluation" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(numberOfShotsAdministeredInSeries == 0, isHistoryEvaluationInitiated() == false, targetSeasonExists() == true)
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify ($ts) {
+			setHistoryEvaluationInitiated(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "in TargetSeries " + $ts);
+		setFocus("HistoryEvaluation^customEvaluationRule");		
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.setNextSeasonalTargetDoseNonNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(targetSeasonExists() == true)
+		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
+		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS);
+		}
+		modify($ts) {
+			setHistoryEvaluationInitiated(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit - for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
+///////// ***
+rule "HistoryEvaluation.setNextSeasonalTargetDoseNOSInSeriesForEvaluation" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
+		$ts : TargetSeries(targetSeasonExists() == true)
+		exists TargetDose(associatedVaccineGroup == $ts.vaccineGroup, status == DoseStatus.EVALUATION_NOT_STARTED) from $ts.targetDoses
+		not TargetSeries(isHistoryEvaluationInitiated() == false, targetSeasonExists() == true, seasonStartDate < $ts.seasonStartDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries != $ts, associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.seasonStartDate < $ts.seasonStartDate)
+		$td : TargetDose(associatedTargetSeries == $ts, status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -1038,7 +1108,8 @@ rule "HistoryEvaluation.checkMinimumAgeVaccineDoseRule" ruleflow-group "HistoryE
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 		$dr : DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMinimumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMinimumAge($tdVaccineComponent)) < 0)
+		eval(! TimePeriod.isTimePeriodANegativeDuration($dr.getAllowableVaccineMinimumAge($tdVaccineComponent).getTimePeriodStringRepresentation()) && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMinimumAge($tdVaccineComponent)) < 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
@@ -1059,7 +1130,7 @@ rule "HistoryEvaluation.checkMaximumAgeVaccine" ruleflow-group "HistoryEvaluatio
 	when
 		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminage : vaccineComponent.validMaximumAgeForUse != null, $tdVaccineComponent : vaccineComponent)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
-		not DoseRule(this == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($td.vaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
+		not DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $adminage) > 0)
 	then
@@ -1083,7 +1154,8 @@ rule "HistoryEvaluation.checkMaximumAgeVaccineDoseRuleDoseRule" ruleflow-group "
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 		$dr : DoseRule(encompassingSeriesRules == $ts.seriesRules, doseNumber == $td.doseNumberInSeries, getAllowableVaccineMaximumAge($tdVaccineComponent) != null) from $ts.seriesRules.seriesDoseRules
 		$person : EvaluatedPerson()
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMaximumAge($tdVaccineComponent)) > 0)
+		eval(! TimePeriod.isTimePeriodANegativeDuration($dr.getAllowableVaccineMaximumAge($tdVaccineComponent).getTimePeriodStringRepresentation()) && 
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.getDemographics().getBirthTime(), $td.getAdministrationDate(), $dr.getAllowableVaccineMaximumAge($tdVaccineComponent)) > 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
@@ -1091,6 +1163,30 @@ rule "HistoryEvaluation.checkMaximumAgeVaccineDoseRuleDoseRule" ruleflow-group "
 		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_VACCINE.getCdsListItemName());
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
+
+
+///////// ***
+// Series Table rule... Do not Edit
+///////// ***
+rule "HistoryEvaluation.evaluateVaccineGroupMaximumAge" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	activation-group "doseMaximumAgeCheck"
+	salience 100
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $doseNumber : doseNumberInSeries) 
+		$ts : TargetSeries(this == $td.associatedTargetSeries, seriesRules.numberOfDosesInSeries >= $doseNumber)
+		$person : EvaluatedPerson()
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.evaluateVaccineGroupMaximumAgeandRecordReason($person.demographics.birthTime, $td);
+		if ($td.containsInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_EVALUATION_REASON.getCdsListItemName()) || 
+			$td.containsInvalidReason(BaseDataEvaluationReason._INVALID_AGE_EVALUATION_REASON.getCdsListItemName())) {
+			ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._ABOVE_MAXIMUM_AGE.getConceptCodeValue(), $td);
+			insert(hef)				
+		}
+		$td.addDoseRuleProcessed(_RULENAME);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+end 
 
 
 ///////// ***
@@ -2514,18 +2610,45 @@ function void setShotValidity(SubstanceAdministrationEvent sae, TargetDose td) {
 ///////// ***
 rule "ProcessResults: Return Evaluations" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	lock-on-active true
+	/////// lock-on-active true
 	salience 10
 	when
 		$sae : SubstanceAdministrationEvent()	
 		$td : TargetDose(doseId == $sae.id)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true)
+		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
 		$evalTime: EvalTime()
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText);
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true);
 		$sae.setToBeReturned(true);
+		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
+		insert(saeEvaluation);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $td);	
+end
+
+
+///////// ***
+// Supplementary rule... To be migrated to custom rule
+///////// ***
+rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations" ruleflow-group "ProcessResults"
+	dialect "mvel"
+	/////// lock-on-active true
+	salience 11
+	when
+		$sae : SubstanceAdministrationEvent()
+		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == "COVID19Sep2023Season")
+		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
+		$evalTime: EvalTime()
+	then
+		String _RULENAME = kcontext.rule.name;
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, false);
+		$sae.setToBeReturned(true);
+		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
+		insert(saeEvaluation);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $td);	
 end
 
@@ -2535,7 +2658,7 @@ end
 ///////// ***
 rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	lock-on-active true
+	/////// lock-on-active true
 	salience 10
 	when
 		exists ICEFactTypeFinding(iceResultFinding == "UNSUPPORTED_VACCINES_GROUP_FEATURE_ENABLED")

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -193,14 +193,15 @@ public class SeriesRules {
 
 
 	/**
-	 * Get DoseRule by dose number
+	 * Get DoseRule by dose number. If 0 is passed in, it is assumed that dose 1 is desired.
 	 * @param doseNumber
 	 * @return DoseRule, or NULL if there is no such DoseRule in this series
 	 */
 	public DoseRule getSeriesDoseRuleByDoseNumber(int doseNumber) {
 
+		int lDoseNumber = (doseNumber == 0) ? 1 : doseNumber;
 		for (DoseRule dr : seriesDoseRules) {
-			if (dr.getDoseNumber() == doseNumber) {
+			if (dr.getDoseNumber() == lDoseNumber) {
 				return dr;
 			}
 		}

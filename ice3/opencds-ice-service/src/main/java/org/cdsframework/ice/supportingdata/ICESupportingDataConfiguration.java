@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -599,7 +599,7 @@ public class ICESupportingDataConfiguration {
 				i=1;
 				for (IceSeriesDoseSpecification isds : lIceSeriesDoses) {
 					lDebugStrb += "\n\t(" + i + "): absolute minimum age: " + isds.getAbsoluteMinimumAge() + "; earliest recommended age: " + isds.getEarliestRecommendedAge() +
-						"; latest recommended age: " + isds.getLatestRecommendedAge() + "; minimum age: " + isds.getMinimumAge() + "; maximum age: " + isds.getMaximumAge();
+						"; latest recommended age: " + isds.getLatestRecommendedAge() + "; minimum age: " + isds.getMinimumAge() + "; maximum age: " + isds.getAbsoluteMaximumAge();
 					i++;
 				}
 			}

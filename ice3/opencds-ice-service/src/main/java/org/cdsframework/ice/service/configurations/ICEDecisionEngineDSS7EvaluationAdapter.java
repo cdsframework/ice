@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2023 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -61,6 +61,12 @@ import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
 import org.kie.api.builder.Message;
 import org.kie.api.command.Command;
+import org.kie.api.event.rule.AfterMatchFiredEvent;
+import org.kie.api.event.rule.AgendaGroupPoppedEvent;
+import org.kie.api.event.rule.AgendaGroupPushedEvent;
+import org.kie.api.event.rule.BeforeMatchFiredEvent;
+import org.kie.api.event.rule.DefaultAgendaEventListener;
+import org.kie.api.event.rule.RuleFlowGroupActivatedEvent;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.ExecutionResults;
@@ -453,13 +459,9 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			}
 			knowledgeSession = kieBase.newStatelessKieSession();
 
-			/**
+			/*
 			// Log events START
 			knowledgeSession.addEventListener( new DefaultAgendaEventListener() {
-				public void agendaGroupPushed(AgendaGroupPushedEvent event) {
-					super.agendaGroupPushed( event );
-			        logger.info("Agenda Group Pushed: " + event);
-				}
 				public void beforeMatchFired(BeforeMatchFiredEvent event) {
 					super.beforeMatchFired(event);
 					logger.info("Before Match Fired: " + event);
@@ -468,13 +470,21 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			        super.afterMatchFired( event );
 			        logger.info("After Match Fired: " + event);
 			    }
+			    public void agendaGroupPushed(AgendaGroupPushedEvent event) {
+					super.agendaGroupPushed( event );
+			        logger.info("Agenda Group Pushed: " + event);
+			    }
 			    public void agendaGroupPopped(AgendaGroupPoppedEvent event) {
 					super.agendaGroupPopped( event );
 			        logger.info("Agenda Group Popped: " + event);
 			    }
+			    public void beforeRuleFlowGroupActivated(RuleFlowGroupActivatedEvent event) {
+					super.beforeRuleFlowGroupActivated( event );
+			       logger.info("RuleFlow Group Activated: " + event);
+				}
 			    public void afterRuleFlowGroupActivated(RuleFlowGroupActivatedEvent event) {
 					super.afterRuleFlowGroupActivated( event );
-			        logger.info("RuleFlow Group Popped: " + event);
+			       logger.info("RuleFlow Group Popped: " + event);
 				}
 			});
 			// Log events END
