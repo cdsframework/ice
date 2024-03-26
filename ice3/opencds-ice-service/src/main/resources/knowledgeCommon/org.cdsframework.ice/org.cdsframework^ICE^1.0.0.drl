@@ -2646,7 +2646,7 @@ rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations" ruleflow-gr
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $numberOfPreviousDoses.intValue());
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $numberOfPreviousDoses.intValue()+1);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
 		insert(saeEvaluation);
