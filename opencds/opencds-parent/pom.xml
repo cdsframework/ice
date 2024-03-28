@@ -48,8 +48,8 @@
 		<!-- <spring.security.version>5.3.13.RELEASE</spring.security.version> -->
 
 		<!-- ICE version 1.42.1 -->
-		<spring.version>5.3.32</spring.version>
-		<spring.security.version>5.8.10</spring.security.version>
+		<spring.version>5.3.33</spring.version>
+		<spring.security.version>5.8.11</spring.security.version>
 
 		<!-- <spring.ws.core.version>2.4.7.RELEASE</spring.ws.core.version> -->
 		<!-- <spring.ws.core.version>3.0.12.RELEASE</spring.ws.core.version> -->
@@ -66,7 +66,7 @@
 		<jersey-ext.version>2.36</jersey-ext.version>
 
 		<!-- xml libs -->
-		<cxf.version>3.4.10</cxf.version>
+		<cxf.version>3.5.8</cxf.version>
 		<jaxb.api.version>2.2.12</jaxb.api.version>
 		<xerces.impl.version>2.12.2</xerces.impl.version> <!-- Needs this specific version -->
 
@@ -115,7 +115,8 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
-						<version>9.0.9</version>
+						<!-- <version>9.0.10</version> -->
+						<version>8.4.3</version>
 						<executions>
 							<execution>
 								<goals>
@@ -124,6 +125,18 @@
 							</execution>
 						</executions>
 					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>maven-dependency-check</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+				        <artifactId>maven-dependency-plugin</artifactId>
+				        <version>3.6.1</version>
+				      </plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -604,6 +617,7 @@
 		-->
 		<!-- <repository> <id>java.net</id> <name>java.net Maven Repository</name> 
 			<url>https://maven-repository.dev.java.net/nonav/repository</url> </repository> -->
+		<!-- AI: Pending Removal
 		<repository>
 			<id>java.net2</id>
 			<name>Repository hosting the jee6 artifacts</name>
@@ -622,6 +636,7 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		-->
         <repository>
             <id>hlnconsulting.jfrog.io-release</id>
             <name>hlnconsulting.jfrog.io</name>
