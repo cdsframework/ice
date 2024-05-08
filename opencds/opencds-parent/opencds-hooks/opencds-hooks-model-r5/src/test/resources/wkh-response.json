@@ -1,0 +1,165 @@
+{
+  "cards": [
+    {
+      "indicator": "warning",
+      "summary": "Medication Guideline: Inappropriate",
+      "detail": " Based on CDC Guideline for Prescribing Opioids for Chronic Pain, this patient is at high risk for opioid overdose, and tapering dosage should be considered. Patient is currently at 240 morphine milligram equivalents (MME)/day which is more than 90 morphine milligram equivalents (MME)/day. ",
+      "source": {
+        "label": "UpToDate Advanced CDS (Powered by Clinical Drug Information)",
+        "url": "http://www.uptodate.com/contents/search"
+      },
+      "suggestions": [
+        {
+          "label": "Receipt and Alternative Order",
+          "create": [
+            {
+              "resourceType": "Basic",
+              "occurrenceDateTime": "20170507.092355",
+              "meta": {
+                "profile": [
+                  "http://hl7.org/fhir/StructureDefinition/gao-result"
+                ]
+              },
+              "code": {
+                "coding": [
+                  {
+                    "code": "outside",
+                    "display": "Outside Guidelines",
+                    "system": "http://hl7.org/fhir/evaluation-result-code"
+                  }
+                ]
+              },
+              "requester": {
+                "display": "UpToDate Appropriateness",
+                "reference": "Organization/uptodate"
+              },
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/gao-extension-device",
+                  "valueReference": {
+                    "reference": "dss"
+                  }
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/gao-extension-guideline",
+                  "valueURI": {
+                    "value": "guideline uri placeholder"
+                  }
+                }
+              ],
+              "identifier": [
+                {
+                  "value": "56db0968-a5b0-4ac6-a36a-4e7c3d9089e4",
+                  "system": "http://uptodate.com/dss"
+                }
+              ]
+            },
+            {
+              "resourceType": "MedicationOrder",
+              "id": "TM78VvhSy5YcmrSUKfJcDjQB",
+              "identifier": [
+                {
+                  "use": "usual",
+                  "system": "urn:oid:1.2.840.114350.1.13.90.3.7.2.798268",
+                  "value": "33654"
+                },
+                {
+                  "use": "usual",
+                  "system": "urn:oid:1.2.840.114350.1.13.90.3.7.3.798268.801",
+                  "value": "33654:0673505332"
+                }
+              ],
+              "dateWritten": "2017-05-04",
+              "status": "stopped",
+              "reasonEnded": {
+                "text": "Change to alternative therapy"
+              },
+              "patient": {
+                "reference": "/api/FHIR/DSTU2/Patient/T0W89OlMuDRQ-BalAzcAIsOgBAYhJUUjFhTNbDxtiXXcB",
+                "display": "Woman Pregnant"
+              },
+              "prescriber": {
+                "reference": "/api/FHIR/DSTU2/Practitioner/TP7HF5z-lKcH0qLGnzaxXWgB",
+                "display": "Michael Flynn, MD"
+              },
+              "medicationReference": {
+                "reference": "/api/FHIR/DSTU2/Medication/TDDm9B8iBS17AUhORwkctcQB",
+                "display": "oxyCODONE (ROXICODONE) 5 MG immediate release tablet"
+              },
+              "dosageInstruction": [
+                {
+                  "text": "Take 1 tablet by mouth Every 4 hours as needed for pain.",
+                  "timing": {
+                    "repeat": {
+                      "boundsPeriod": {
+                        "start": "2017-05-04T00:00:00Z",
+                        "end": "2017-05-04T00:00:00Z"
+                      },
+                      "frequency": 1,
+                      "period": 4,
+                      "periodUnits": "h"
+                    }
+                  },
+                  "asNeededBoolean": true,
+                  "route": {
+                    "coding": [
+                      {
+                        "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.698288.330",
+                        "code": "19",
+                        "display": "Oral"
+                      }
+                    ],
+                    "text": "Oral"
+                  },
+                  "method": {
+                    "coding": [
+                      {
+                        "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.798268.8600",
+                        "code": "11",
+                        "display": "Take"
+                      }
+                    ],
+                    "text": "Take"
+                  },
+                  "doseQuantity": {
+                    "value": 5,
+                    "unit": "mg",
+                    "system": "http://unitsofmeasure.org",
+                    "code": "mg"
+                  }
+                }
+              ],
+              "dispenseRequest": {
+                "validityPeriod": {
+                  "start": "2017-05-04T00:00:00Z",
+                  "end": "2017-05-04T00:00:00Z"
+                },
+                "numberOfRepeatsAllowed": 0,
+                "quantity": {
+                  "value": 60,
+                  "unit": "tablet"
+                },
+                "expectedSupplyDuration": {
+                  "value": 10,
+                  "unit": "days",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "d"
+                }
+              },
+              "medicationCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "1049621",
+                    "display": "OXYCODONE HCL 5 MG PO TABS"
+                  }
+                ]
+              }
+            }
+          ],
+          "uuid": "SuggestionUUID-e1b44a3b-553e-498d-8d82-c15d7737ed06"
+        }
+      ]
+    }
+  ]
+}

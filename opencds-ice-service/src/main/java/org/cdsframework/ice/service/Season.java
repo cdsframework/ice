@@ -740,10 +740,10 @@ public class Season {
 		int rangeEndMonth = rangeEnd.getMonthOfYear();
 		int rangeEndDay = rangeEnd.getDayOfMonth();
 		if (rangeStartMonth > rangeEndMonth) {
-			relevantMonthsOfPS.add(new Integer(rangeEndMonth));
+			relevantMonthsOfPS.add(rangeEndMonth);
 			int i = rangeStartMonth;
 			while (i != rangeEndMonth) {
-				relevantMonthsOfPS.add(new Integer(i));
+				relevantMonthsOfPS.add(i);
 				if (i < 12) {
 					i++;
 				}
@@ -755,7 +755,7 @@ public class Season {
 		else if (rangeStartMonth <= rangeEndMonth) {
 			int i = rangeStartMonth;
 			while (i <= rangeEndMonth) {
-				relevantMonthsOfPS.add(new Integer(i));
+				relevantMonthsOfPS.add(i);
 				i++;
 			}
 		}
@@ -764,7 +764,7 @@ public class Season {
 		// both of the start/end months are on the same month, check that the start day is on/after pS or the end day is on/before pS's end day
 		boolean fallsWithinStartRange = false;
 		boolean fallsWithinEndRange = false;
-		if (relevantMonthsOfPS.contains(new Integer(month))) {
+		if (relevantMonthsOfPS.contains(month)) {
 			if (month == rangeStartMonth) {
 				if (day >= rangeStartDay) {
 					fallsWithinStartRange = true;
@@ -830,10 +830,10 @@ public class Season {
 			int pSEndMonth = pS.getSeasonEndMonth();
 			Set<Integer> relevantMonthsOfPS = new HashSet<Integer>();
 			if (pSStartMonth > pSEndMonth) {
-				relevantMonthsOfPS.add(new Integer(pSEndMonth));
+				relevantMonthsOfPS.add(pSEndMonth);
 				int i = pSStartMonth;
 				while (i != pSEndMonth) {
-					relevantMonthsOfPS.add(new Integer(i));
+					relevantMonthsOfPS.add(i);
 					if (i < 12) {
 						i++;
 					}
@@ -845,13 +845,13 @@ public class Season {
 			else if (pSStartMonth <= pSEndMonth) {
 				int i = pSStartMonth;
 				while (i <= pSEndMonth) {
-					relevantMonthsOfPS.add(new Integer(i));
+					relevantMonthsOfPS.add(i);
 					i++;
 				}
 			}
 			// If both the start and end months fall outside of the list of relevant months, then return false (seasons do not overlap). If either or 
 			// both of the start/end months are on the same month, check that the start day is on/after pS or the end day is on/before pS's end day
-			if (relevantMonthsOfPS.contains(new Integer(this.getSeasonStartMonth()))) {
+			if (relevantMonthsOfPS.contains(this.getSeasonStartMonth())) {
 				if (this.getSeasonStartMonth() == pS.getSeasonStartMonth()) {
 					if (this.getSeasonStartDay() >= pS.getSeasonStartDay()) {
 						return true;
@@ -861,7 +861,7 @@ public class Season {
 					return true;
 				}
 			}
-			if (relevantMonthsOfPS.contains(new Integer(this.getSeasonEndMonth()))) {
+			if (relevantMonthsOfPS.contains(this.getSeasonEndMonth())) {
 				if (this.getSeasonEndMonth() == pS.getSeasonEndMonth()) {
 					if (this.getSeasonEndDay() <= pS.getSeasonEndDay()) {
 						return true;

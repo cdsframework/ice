@@ -1,24 +1,39 @@
+/*
+ * Copyright 2011-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.omg.dss.query.requests;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 import org.omg.dss.common.EntityIdentifier;
 
 
 /**
  * The DataRequirementCriterion is an object representing a knowledge module search criterion about Data Requirement Items. It contains a semantic signifier of the data information model and a list of allowed query information models. Each information model, data or query, is identfied using its semantic signifier identifier.   A knowledge module is considered to have satisfied the criterion if both of the following are true: (i) at least one of the Data Requirement Items belonging to the KM uses the specified information model, and (ii) the Data Requirement Item does not use a query model, or it uses one of the query information models specified.
- * 
- * 
+ *
+ *
  * <p>Java class for DataRequirementCriterion complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="DataRequirementCriterion">
  *   &lt;complexContent>
@@ -31,8 +46,8 @@ import org.omg.dss.common.EntityIdentifier;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DataRequirementCriterion", propOrder = {
@@ -49,11 +64,11 @@ public class DataRequirementCriterion
 
     /**
      * Gets the value of the dataInformationModelSSId property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link EntityIdentifier }
-     *     
+     *
      */
     public EntityIdentifier getDataInformationModelSSId() {
         return dataInformationModelSSId;
@@ -61,11 +76,11 @@ public class DataRequirementCriterion
 
     /**
      * Sets the value of the dataInformationModelSSId property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link EntityIdentifier }
-     *     
+     *
      */
     public void setDataInformationModelSSId(EntityIdentifier value) {
         this.dataInformationModelSSId = value;
@@ -73,25 +88,25 @@ public class DataRequirementCriterion
 
     /**
      * Gets the value of the queryInformationModelSSId property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the queryInformationModelSSId property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getQueryInformationModelSSId().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link EntityIdentifier }
-     * 
-     * 
+     *
+     *
      */
     public List<EntityIdentifier> getQueryInformationModelSSId() {
         if (queryInformationModelSSId == null) {

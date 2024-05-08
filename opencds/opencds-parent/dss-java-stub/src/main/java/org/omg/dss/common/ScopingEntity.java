@@ -1,23 +1,38 @@
+/*
+ * Copyright 2011-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.omg.dss.common;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
- * A scoping entity has a unique, fully-qualified identifier, which must start with lowercase English representations of one of the top-level Internet domain names, currently com, edu, gov, mil, net, org, or one of the English two-letter codes identifying countries as specified in ISO Standard 3166-1.  Subsequently, the id must start by defining the domain name that is associated with the scoping entity (e.g., com.clinica, com.dbmotion, edu.duke, org.hl7).  Subsequent identification within the domain associated with the scoping entity, if any, may be specified as is appropriate for the internal naming conventions by the scoping entity.  
- * 
+ * A scoping entity has a unique, fully-qualified identifier, which must start with lowercase English representations of one of the top-level Internet domain names, currently com, edu, gov, mil, net, org, or one of the English two-letter codes identifying countries as specified in ISO Standard 3166-1.  Subsequently, the id must start by defining the domain name that is associated with the scoping entity (e.g., com.clinica, com.dbmotion, edu.duke, org.hl7).  Subsequent identification within the domain associated with the scoping entity, if any, may be specified as is appropriate for the internal naming conventions by the scoping entity.
+ *
  * A scoping entity may create hierarchical structures.
- * 
+ *
  * <p>Java class for ScopingEntity complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ScopingEntity">
  *   &lt;complexContent>
@@ -31,8 +46,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ScopingEntity", propOrder = {
@@ -50,25 +65,25 @@ public class ScopingEntity
 
     /**
      * Gets the value of the childScopingEntity property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the childScopingEntity property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getChildScopingEntity().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ScopingEntity }
-     * 
-     * 
+     *
+     *
      */
     public List<ScopingEntity> getChildScopingEntity() {
         if (childScopingEntity == null) {
@@ -79,11 +94,11 @@ public class ScopingEntity
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getId() {
         return id;
@@ -91,11 +106,11 @@ public class ScopingEntity
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setId(String value) {
         this.id = value;
@@ -103,11 +118,11 @@ public class ScopingEntity
 
     /**
      * Gets the value of the parentSEId property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getParentSEId() {
         return parentSEId;
@@ -115,11 +130,11 @@ public class ScopingEntity
 
     /**
      * Sets the value of the parentSEId property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setParentSEId(String value) {
         this.parentSEId = value;

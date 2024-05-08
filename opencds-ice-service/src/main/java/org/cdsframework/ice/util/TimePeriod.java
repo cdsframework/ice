@@ -26,6 +26,8 @@
 
 package org.cdsframework.ice.util;
 
+import static java.lang.Integer.parseInt;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -386,7 +388,7 @@ public class TimePeriod {
 				if (token.charAt(0) == '+') {
 					token.deleteCharAt(0);
 				}
-				tp = new TimePeriod(new Integer(new String(token)).intValue(), DurationType.DAYS);
+				tp = new TimePeriod(parseInt(token.toString()), DurationType.DAYS);
 				if (logger.isDebugEnabled()) {
 					logger.debug("TimePeriod: " + tp.toString() + " to be added to interimDate: " + interimDate);
 				}
@@ -403,7 +405,7 @@ public class TimePeriod {
 				if (token.charAt(0) == '+') {
 					token.deleteCharAt(0);
 				}
-				tp = new TimePeriod(new Integer(new String(token)).intValue(), DurationType.WEEKS);
+				tp = new TimePeriod(parseInt(token.toString()), DurationType.WEEKS);
 				if (logger.isDebugEnabled()) {
 					logger.debug(_METHODNAME + "TimePeriod: " + tp.toString() + " to be added to interimDate: " + interimDate);
 				}
@@ -420,7 +422,8 @@ public class TimePeriod {
 				if (token.charAt(0) == '+') {
 					token.deleteCharAt(0);
 				}
-				tp = new TimePeriod(new Integer(new String(token)).intValue(), DurationType.MONTHS);
+				token.toString();
+				tp = new TimePeriod(parseInt(token.toString()), DurationType.MONTHS);
 				if (logger.isDebugEnabled()) {
 					logger.debug(_METHODNAME + "TimePeriod: " + tp.toString() + " to be added to interimDate: " + interimDate);
 				}
@@ -437,7 +440,7 @@ public class TimePeriod {
 				if (token.charAt(0) == '+') {
 					token.deleteCharAt(0);
 				}
-				tp = new TimePeriod(new Integer(new String(token)).intValue(), DurationType.YEARS);
+				tp = new TimePeriod(parseInt(token.toString()), DurationType.YEARS);
 				if (logger.isDebugEnabled()) {
 					logger.debug(_METHODNAME + "TimePeriod: " + tp.toString() + " to be added to interimDate: " + interimDate);
 				}

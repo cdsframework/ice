@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:knowledgeModules xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xmlns:ns2="org.opencds.dss.config_rest.v1_0" xmlns:ns3="org.opencds.dss.config.v1_0"
+                      xsi:schemaLocation="org.opencds.dss.config_rest.v1_0 ../schema/OpenCDSConfigRest.xsd">
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="opencds-test" version="1.0"/>
+        <status>DRAFT</status>
+        <cdsHook>
+            <hook>patient-view</hook>
+            <title>Test CDS Service</title>
+            <description>Test CDS Service</description>
+            <id>cds-hooks-test</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{context.patientId}}</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>R4</fhirVersion>
+        </cdsHook>
+        <executionEngine>CDS Hooks Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks-fhir-r4" version="1.0"/>
+        <package>
+            <packageType>CLASSPATH</packageType>
+            <packageId>org.opencds.war.cdshooks.test.TestCdsHooksExecutionEngine</packageId>
+        </package>
+        <timestamp>2022-09-29T12:00:00.000-07:00</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+</ns2:knowledgeModules>

@@ -1,0 +1,54 @@
+{
+  "hookInstance": "c768e064-ea4f-44c5-a75e-e879cb5d327b",
+  "hook": "medication-prescribe",
+  "fhirServer": "https://api.hspconsortium.org/cdshooksdstu2/open",
+  "patient": "SMART-1288992",
+  "context": {
+    "patientId": "SMART-1288992",
+    "medications": {
+      "resourceType": "Bundle",
+      "entry": [
+        {
+          "resource": {
+            "resourceType": "MedicationOrder",
+            "dateWritten": "2018-05-17",
+            "status": "draft",
+            "patient": {
+              "reference": "Patient/SMART-1288992"
+            },
+            "dosageInstruction": [
+              {
+                "doseQuantity": {
+                  "value": 3,
+                  "system": "http://unitsofmeasure.org",
+                  "code": "{pill}"
+                },
+                "timing": {
+                  "repeat": {
+                    "frequency": 1,
+                    "period": 1,
+                    "periodUnits": "d",
+                    "boundsPeriod": {
+                      "start": "2018-05-01",
+                      "end": "2018-07-31"
+                    }
+                  }
+                }
+              }
+            ],
+            "medicationCodeableConcept": {
+              "text": "12 HR Oxycodone Hydrochloride 160 MG Extended Release Oral Tablet",
+              "coding": [
+                {
+                  "display": "12 HR Oxycodone Hydrochloride 160 MG Extended Release Oral Tablet",
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "1049557"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

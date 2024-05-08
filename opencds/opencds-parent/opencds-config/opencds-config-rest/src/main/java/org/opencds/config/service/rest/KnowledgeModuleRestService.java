@@ -1,29 +1,44 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.service.rest;
 
-import java.io.InputStream;
-import java.util.List;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.xml.bind.JAXBElement;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotSupportedException;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.xml.bind.JAXBElement;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.config.api.ConfigurationService;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.KnowledgeModule;
 import org.opencds.config.api.model.SupportingData;
+import org.opencds.config.api.model.impl.KMIdImpl;
+import org.opencds.config.api.util.URIUtil;
 import org.opencds.config.mapper.KMIdMapper;
 import org.opencds.config.mapper.KnowledgeModuleMapper;
 import org.opencds.config.mapper.SupportingDataMapper;
@@ -31,13 +46,16 @@ import org.opencds.config.schema.KnowledgeModules;
 import org.opencds.config.schema.Link;
 import org.opencds.config.schema.ObjectFactory;
 import org.opencds.config.schema.SupportingDataList;
+import org.opencds.config.service.rest.util.KMIdUtil;
 import org.opencds.config.service.rest.util.Responses;
-import org.opencds.config.util.URIUtil;
+
+import java.io.InputStream;
+import java.util.List;
 
 @Path("knowledgemodules")
 public class KnowledgeModuleRestService {
     private static final String SELF = "self";
-	private static final Logger log = LogManager.getLogger();
+    private static final Log log = LogFactory.getLog(KnowledgeModuleRestService.class);
     private ConfigurationService configurationService;
 
     public KnowledgeModuleRestService(ConfigurationService configurationService) {
@@ -83,7 +101,8 @@ public class KnowledgeModuleRestService {
     @PUT
     @Consumes(MediaType.APPLICATION_XML)
     public Response putKnowledgeModules(@Context UriInfo uriInfo,
-            org.opencds.config.schema.KnowledgeModules knowledgeModules) {
+    		JAXBElement<org.opencds.config.schema.KnowledgeModules> jaxKMs) {
+    		KnowledgeModules knowledgeModules = jaxKMs.getValue();
         try {
             configurationService.getKnowledgeRepository().getKnowledgeModuleService()
                     .persist(KnowledgeModuleMapper.internal(knowledgeModules));
@@ -165,7 +184,12 @@ public class KnowledgeModuleRestService {
     @Path("{kmid}/package")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public InputStream getKnowledgePackage(@PathParam("kmid") String kmidString) throws Exception {
+
         KMId kmId = URIUtil.getKMId(kmidString);
+        KnowledgeModule km = configurationService.getKnowledgeRepository().getKnowledgeModuleService().find(kmId);
+        if (km.getPackageType().equals("MAVEN")){
+            throw new NotSupportedException("get knowledge package operation is not supported on MAVEN knowledge modules, kmid: " + kmidString);
+        }
         if (!found(kmId)) {
             throw new NotFoundException("KnowledgeModule not found: id= " + kmidString);
         }
@@ -183,9 +207,9 @@ public class KnowledgeModuleRestService {
 
     /**
      * Updates or creates...
-     * 
+     *
      * TODO: Provide size, and other metadata?
-     * 
+     *
      * @param kmidString
      * @param knowledgePackage
      * @return
@@ -228,6 +252,7 @@ public class KnowledgeModuleRestService {
 
     // /knowledgemodules/<KMId>/supportingdata
 
+    @Deprecated
     @GET
     @Path("{kmid}/supportingdata")
     @Produces(MediaType.APPLICATION_XML)
@@ -248,6 +273,7 @@ public class KnowledgeModuleRestService {
         return sdList;
     }
 
+    @Deprecated
     @POST
     @Path("{kmid}/supportingdata")
     @Consumes(MediaType.APPLICATION_XML)
@@ -258,7 +284,8 @@ public class KnowledgeModuleRestService {
             return Responses.notFound("KnowledgeModule not found: id= " + kmidString);
         }
         org.opencds.config.schema.SupportingData supportingData = jaxSD.getValue();
-        if (!kmId.equals(supportingData.getKmId())) {
+        KMId sdKMId = KMIdImpl.create(supportingData.getKmId().getScopingEntityId(), supportingData.getKmId().getBusinessId(), supportingData.getKmId().getVersion());
+        if (!kmId.equals(sdKMId)) {
             return Responses.badRequest("SupportingData Identifier of request and document do not match");
         }
         if (found(kmId, supportingData.getIdentifier())) {
@@ -276,6 +303,7 @@ public class KnowledgeModuleRestService {
 
     // /knowledgemodules/<KMId>/supportingdata/<SupportingDataId>
 
+    @Deprecated
     @GET
     @Path("/{kmid}/supportingdata/{supportingDataId}")
     @Produces(MediaType.APPLICATION_XML)
@@ -298,6 +326,7 @@ public class KnowledgeModuleRestService {
         return new ObjectFactory().createSupportingData(sd);
     }
 
+    @Deprecated
     @PUT
     @Path("/{kmid}/supportingdata/{supportingDataId}")
     @Consumes(MediaType.APPLICATION_XML)
@@ -329,6 +358,7 @@ public class KnowledgeModuleRestService {
         }
     }
 
+    @Deprecated
     @DELETE
     @Path("{kmid}/supportingdata/{supportingDataId}")
     public Response deleteSupportingData(@PathParam("kmid") String kmidString,
@@ -351,6 +381,7 @@ public class KnowledgeModuleRestService {
 
     // /config/knowledgemodules/<KMId>/supportingdata/<SupportingDataId>/package
 
+    @Deprecated
     @GET
     @Path("{kmid}/supportingdata/{supportingDataId}/package")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -375,12 +406,13 @@ public class KnowledgeModuleRestService {
 
     /**
      * Creates or updates the supporting data package.
-     * 
+     *
      * @param kmidString
      * @param supportingDataId
      * @param supportingDataPackage
      * @return
      */
+    @Deprecated
     @PUT
     @Path("{kmid}/supportingdata/{supportingDataId}/package")
     @Consumes(MediaType.APPLICATION_OCTET_STREAM)
@@ -411,6 +443,7 @@ public class KnowledgeModuleRestService {
         }
     }
 
+    @Deprecated
     @DELETE
     @Path("{kmid}/supportingdata/{supportingDataId}/package")
     public Response deleteSupportingDataPackage(@PathParam("kmid") String kmidString,
@@ -441,20 +474,22 @@ public class KnowledgeModuleRestService {
     }
 
     private KnowledgeModule find(KMId kmId) {
-        return configurationService.getKnowledgeRepository().getKnowledgeModuleService().find(kmId);
+        return KMIdUtil.find(configurationService.getKnowledgeRepository().getKnowledgeModuleService(), kmId);
     }
 
+    @Deprecated
     private boolean found(KMId kmId, String identifier) {
         return find(kmId, identifier) != null;
     }
 
+    @Deprecated
     private SupportingData find(KMId kmId, String identifier) {
         return configurationService.getKnowledgeRepository().getSupportingDataService().find(kmId, identifier);
     }
 
+    @Deprecated
     private boolean packageExists(KMId kmId, String supportingDataId) {
         return configurationService.getKnowledgeRepository().getSupportingDataService()
                 .packageExists(kmId, supportingDataId);
     }
-
 }

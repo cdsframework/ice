@@ -1,31 +1,50 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.cli
 
-import java.nio.file.Paths
-
-import javax.ws.rs.client.Client
-import javax.ws.rs.client.ClientBuilder
-
+import groovy.cli.picocli.CliBuilder
+import groovy.cli.picocli.OptionAccessor
+import groovy.util.logging.Commons
+import jakarta.ws.rs.client.Client
+import jakarta.ws.rs.client.ClientBuilder
 import org.opencds.config.cli.commands.CDMCommands
 import org.opencds.config.cli.commands.Commands
 import org.opencds.config.cli.commands.EECommands
 import org.opencds.config.cli.commands.KMCommands
 import org.opencds.config.cli.commands.PPCommands
+import org.opencds.config.cli.commands.SDCommands
 import org.opencds.config.cli.commands.SSCommands
 import org.opencds.config.cli.commands.TransferCommand
 import org.opencds.config.cli.util.ResourceUtil
 import org.opencds.config.client.rest.RestClient
 
-import groovy.util.logging.Log4j2
+import java.nio.file.Paths
 
-@Log4j2
+@Commons
 class RestCli {
 
-    public void run(Closure command, String outfile) {
-        def result = command()
-        if (outfile && (result instanceof String || result instanceof InputStream)) {
-            File file = new File(outfile)
-            file.delete()
-            file << result
+    public void run(Closure command, List<String> urls, String username, String password, OutputStream out) {
+        for (String url : urls) {
+            Client c = ClientBuilder.newClient()
+            RestClient restClient = new RestClient(c.target(url), username, password)
+            def result = command(restClient)
+            if (out && (result instanceof String || result instanceof InputStream)) {
+                out << result
+            }
         }
     }
 
@@ -33,23 +52,57 @@ class RestCli {
         def cli = buildCli(args)
         try {
             OptionAccessor options = cli.options()
-            if (!options.url) {
+            def config = null
+            if (options.config) {
+                config = new ConfigSlurper().parse(Paths.get(options.config).toUri().toURL())
+            }
+            println config
+            // TODO: Override config with command-line options.
+            List<String> urls = []
+            String username = ''
+            String password = ''
+
+            if (config?.cli?.url) {
+                urls << config.cli.url
+            }
+            if (config?.cli?.urls) {
+                urls.addAll(config.cli.urls)
+            }
+            username = config?.cli?.username
+            password = config?.cli?.password
+
+            if (options.url) {
+                urls << options.url
+            }
+            if (options.username) {
+                username = options.username
+            }
+            if (options.password) {
+                password = options.password
+            }
+
+            if (!urls) {
                 error('url option required')
             }
-            if (!options.username) {
+            if (!username) {
                 error('username option required')
             }
-            if (!options.password) {
+            if (!password) {
                 error('password option required')
             }
-            String outfile = '' 
+            def outfile
             if (options.outfile) {
-                outfile = options.outfile
+                File file = null
+                file = new File(options.outfile)
+                file.delete()
+                outfile = new FileOutputStream(file)
+            } else {
+                outfile = System.out
             }
 
             RestCli client = new RestCli()
 
-            client.run(buildCommand(options), outfile)
+            client.run(buildCommand(options), urls, username, password, outfile)
         } catch (Exception e) {
             e.printStackTrace()
             log.error(e.message, e)
@@ -59,6 +112,7 @@ class RestCli {
 
     static Map buildCli(String[] args) {
         def cli = new CliBuilder()
+        cli._(longOpt: 'config', args: 1, 'File containing basic configuration (url, urls, username, password.')
         cli._(longOpt: 'url', args: 1, 'Base URL to OpenCDS Configuration Rest Service')
         cli._(longOpt: 'username', args: 1, "Username")
         cli._(longOpt: 'password', args: 1, "Password")
@@ -111,9 +165,7 @@ class RestCli {
         if (command == null) {
             throw new RuntimeException("Unknown command.")
         }
-        Client c = ClientBuilder.newClient()
-        RestClient restClient = new RestClient(c.target(options.url), options.username, options.password)
-        command.curry(restClient)
+        command
     }
 
     static Closure buildGet(OptionAccessor options) {
@@ -130,16 +182,16 @@ class RestCli {
         } else if (options.kmid) {
             if (options.kmp) {
                 return KMCommands.getPackage.curry(options.kmid) // returns an InputStream
-            } else if (options.sd) {
-                return KMCommands.getSDCollection.curry(options.kmid)
-            } else if (options.sdid) {
-                if (options.sdp) {
-                    return KMCommands.getSDPackage.curry(options.kmid, options.sdid)
-                } else {
-                    return KMCommands.getSD.curry(options.kmid, options.sdid)
-                }
             } else {
                 return KMCommands.get.curry(options.kmid)
+            }
+        } else if (options.sd) {
+            return SDCommands.getCollection
+        } else if (options.sdid) {
+            if (options.sdp) {
+                return SDCommands.getPackage.curry(options.sdid)
+            } else {
+                return SDCommands.get.curry(options.sdid)
             }
         } else if (options.ss) {
             return SSCommands.getCollection
@@ -158,10 +210,10 @@ class RestCli {
             if (options.kmid) {
                 if (options.kmp) {
                     KMCommands.uploadPackage.curry(options.kmid, resource.input)
-                } else if (options.sdid) {
-                    if (options.sdp) {
-                        KMCommands.uploadSDPackage.curry(options.kmid, options.sdid, resource.input)
-                    }
+                }
+            } else if (options.sdid) {
+                if (options.sdp) {
+                    SDCommands.uploadPackage.curry(options.sdid, resource.input)
                 }
             }
         } else {
@@ -177,14 +229,14 @@ class RestCli {
         } else if (options.kmid) {
             if (options.kmp) {
                 return KMCommands.deletePackage.curry(options.kmid)
-            } else if (options.sdid) {
-                if (options.sdp) {
-                    return KMCommands.deleteSDPackage.curry(options.kmid, options.sdid)
-                } else {
-                    return KMCommands.deleteSD.curry(options.kmid, options.sdid)
-                }
             } else {
                 return KMCommands.delete.curry(options.kmid)
+            }
+        } else if (options.sdid) {
+            if (options.sdp) {
+                return SDCommands.deletePackage.curry(options.kmid, options.sdid)
+            } else {
+                return SDCommands.delete.curry(options.kmid, options.sdid)
             }
         } else if (options.ssid) {
             return SSCommands.delete.curry(options.ssid)
@@ -192,7 +244,7 @@ class RestCli {
             return PPCommands.delete.curry(options.ppid)
         }
     }
-    
+
     static Closure buildTransfer(OptionAccessor options) {
         if (options.folder) {
             return TransferCommand.transfer.curry(Paths.get(options.folder))

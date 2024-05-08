@@ -23,35 +23,35 @@
  * For more information about this software, see http://www.hln.com/ice or send
  * correspondence to ice@hln.com.
  */
- 
 
-ICE is open source software and in active development. Please check in to http://www.cdsframework.org/ for the latest status, or e-mail questions to ice@hln.com. 
 
-An overview of the capabilities of ICE is available http://www.hln.com/ice/. This distribution comes bundled with OpenCDS 2.0.5, which was released on August 2015. The ICE software will continually update to the latest versions of OpenCDS as they become available. The out of the box (default) immunization rules documentation, as well as technical documentation for ICE and CAT, can be found at http://www.cdsframework.org/.
+ICE is open source software and in active development. Please check in to http://www.cdsframework.org/ for the latest status, or e-mail questions to ice@hln.com.
 
-This version of ICE requires Java 8, and has been tested under the latest version of Tomcat 7 and Tomcat 9. 
+An overview of the capabilities of ICE is available http://www.hln.com/ice/. This distribution comes bundled with OpenCDS 6.2.0, which was released in May 2024. The ICE software will continually update to the latest versions of OpenCDS as they become available. The out of the box (default) immunization rules documentation, as well as technical documentation for ICE and CAT, can be found at http://www.cdsframework.org/.
+
+This version of ICE requires Java 17, and has been tested under the latest version of Tomcat 10.
 
 It is recommended that at least 1GB of memory be allocated to the Tomcat instance, though in our internal performance tests, we have noted a significant performance increase when allocating 2GB of memory.
 
 To install the software, please follow the directions at https://cdsframework.atlassian.net/wiki/display/ICE/Installing+ICE to configure and interact with the service. The out-of-the-box working ICE service executable is available at this location.
 
 Alternatively, to build the software via source:
-1) Edit opencds/opencds-parent/opencds.properties to suit your installation.
+1) Edit .gcp.config/opencds.properties to suit your installation.
     + Set km.threads to specify the number of threads allocated to each knowledgeModule. Recommended setting: twice the number of CPU cores available to this instance for Linux; equal to the number of CPU cores for Windows
-    + Set knowledge-repository.path to the location of the ICE knowledge repository as follows: /path/to/opencds-ice-service-data/src/main/resources
-    + Set the log4j.logfile property
+    + Set knowledge-repository.path to the location of the ICE knowledge repository as follows: /path/to/opencds-ice-service/src/main/resources
 
-2) Copy opencds.properties to the $HOME/.opencds/, where $HOME is the "home" directory of the application server instance.
+2) Copy opencds.properties to $HOME/.opencds/, where $HOME is the "home" directory of the application server instance.
 
-3) Edit opencds/opencds-parent/opencds-decision-support-service/src/main/resources/ice.properites: 
+3) Edit opencds-ice-service/src/main/resources/ice.properties:
     + Set ice_knowledge_repository_location to the same location as knowledge-repository.path of opencds.properties file
 
-4) Edit opencds/opencds-parent/opencds-decision-support-service/src/main/resources/log4j.properties to suit your installation
+4) Edit opencds-ice-service/src/main/resources/log4j2.xml to suit your installation.
 
 5) Compile the software:
-    $ cd opencds/opencds-knowledge-repository-data
-    $ mvn clean install
-    $ cd opencds/opencds-parent
+    $ cd opencds
+    $ mvn clean
+    $ mvn -DskipTests -DskipITs install
+    $ cd ..
     $ mvn clean
     $ mvn -DskipTests -DskipITs install
 

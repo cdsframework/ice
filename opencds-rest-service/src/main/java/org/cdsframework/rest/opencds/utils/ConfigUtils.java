@@ -6,9 +6,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -229,11 +230,10 @@ public class ConfigUtils {
                 log.debug(METHODNAME + "defaultPrimaryProcess: " + defaultPrimaryProcess);
             }
 
-            final KnowledgeModuleImpl knowledgeModule = KnowledgeModuleImpl.create(kmId, KMStatus.APPROVED,
+            final KnowledgeModuleImpl knowledgeModule = KnowledgeModuleImpl.create(kmId, KMStatus.APPROVED, null,
                     defaultCdmExecutionEngine, defaultSsId, defaultCdmId, new ArrayList<SecondaryCDM>(), "PKG",
                     kmId.getScopingEntityId() + "^" + kmId.getBusinessId() + "^" + kmId.getVersion() + ".pkg", true,
-                    defaultPrimaryProcess, new ArrayList<TraitId>(), new ArrayList<PluginId>(),
-                    new ArrayList<PluginId>(), new Date(), "system");
+                    defaultPrimaryProcess, List.of(), List.of(), List.of(), new Date(), "system");
             configurationService.getKnowledgeRepository().getKnowledgeModuleService().persist(knowledgeModule);
         }
         configurationService.getKnowledgeRepository().getKnowledgeModuleService().persistKnowledgePackage(kmId,
