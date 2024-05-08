@@ -1,48 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.cdsframework</groupId>
+    <parent>
+        <groupId>org.cdsframework</groupId>
+        <artifactId>ice</artifactId>
+        <version>2.43.1-SNAPSHOT</version>
+    </parent>
+    
     <artifactId>rules-packager</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <dependencies>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.17.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.17.1</version>
-		</dependency>		
+		</dependency>
         <dependency>
-            <groupId>org.opencds</groupId>
+            <groupId>org.cdsframework</groupId>
             <artifactId>opencds-ice-service</artifactId>
-            <version>2.0.5</version>
+            <version>${project.parent.version}</version>
+            <type>jar</type>
+            <classifier>classes</classifier>
         </dependency>
 		<!--  Drools 7 artifacts START -->
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-compiler</artifactId>
-			<version>7.49.0.Final</version>
+			<version>${drools.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jbpm</groupId>
 			<artifactId>jbpm-bpmn2</artifactId>
-			<version>7.49.0.Final</version>
+			<version>${jbpm.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.kie</groupId>
 			<artifactId>kie-api</artifactId>
-			<version>7.49.0.Final</version>
+			<version>${drools.version}</version>
 		</dependency>
-		<!--  end of Drools 7 artifacts -->        
+		<!--  end of Drools 7 artifacts -->
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
     </properties>
     <build>
         <plugins>

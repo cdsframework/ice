@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+    <Properties>
+        <Property name="log-path">logs/</Property>
+        <Property name="pattern-layout">%d{yyyy-MM-ddTHH:mm:ss} %-5level %logger{36} - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <RollingFile name="opencds"
+                     filePattern="opencds-%d{yyyy-MM-dd}.log"
+                     fileName="logs/opencds.log">
+            <PatternLayout pattern="${pattern-layout}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+        <Console name="stdout">
+            <PatternLayout pattern="${pattern-layout}"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.opencds" level="debug" additivity="false">
+            <AppenderRef ref="opencds"/>
+        </Logger>
+        <Root level="debug">
+            <AppenderRef ref="opencds"/>
+        </Root>
+    </Loggers>
+</Configuration>

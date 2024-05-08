@@ -1,24 +1,39 @@
+/*
+ * Copyright 2011-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.omg.dss.metadata.semanticsignifier;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
  * A computable information model based on the use of an XML Schema Definition (XSD), zero or more Schematrons, an optional narrative guide to further restrict the model, and the name of the global element that serves as the root element of the information model.  Note that an XSD used in this context must have the root element defined as a global element so that it can be directly used for automated instance validation.
- * 
- * Other potential approaches to defining computable information models are possible (e.g., using Document Type Definitions), but this is the computable information model required for the DSS's XML Web Service Platform Specific Model. 
- * 
- * 
+ *
+ * Other potential approaches to defining computable information models are possible (e.g., using Document Type Definitions), but this is the computable information model required for the DSS's XML Web Service Platform Specific Model.
+ *
+ *
  * <p>Java class for XSDComputableDefinition complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="XSDComputableDefinition">
  *   &lt;complexContent>
@@ -33,8 +48,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "XSDComputableDefinition", propOrder = {
@@ -56,11 +71,11 @@ public class XSDComputableDefinition
 
     /**
      * Gets the value of the xsdRootGlobalElementName property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getXsdRootGlobalElementName() {
         return xsdRootGlobalElementName;
@@ -68,11 +83,11 @@ public class XSDComputableDefinition
 
     /**
      * Sets the value of the xsdRootGlobalElementName property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setXsdRootGlobalElementName(String value) {
         this.xsdRootGlobalElementName = value;
@@ -80,11 +95,11 @@ public class XSDComputableDefinition
 
     /**
      * Gets the value of the xsdURL property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getXsdURL() {
         return xsdURL;
@@ -92,11 +107,11 @@ public class XSDComputableDefinition
 
     /**
      * Sets the value of the xsdURL property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setXsdURL(String value) {
         this.xsdURL = value;
@@ -104,25 +119,25 @@ public class XSDComputableDefinition
 
     /**
      * Gets the value of the schematronURL property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the schematronURL property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getSchematronURL().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getSchematronURL() {
         if (schematronURL == null) {
@@ -133,11 +148,11 @@ public class XSDComputableDefinition
 
     /**
      * Gets the value of the narrativeModelRestrictionGuideURL property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getNarrativeModelRestrictionGuideURL() {
         return narrativeModelRestrictionGuideURL;
@@ -145,11 +160,11 @@ public class XSDComputableDefinition
 
     /**
      * Sets the value of the narrativeModelRestrictionGuideURL property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setNarrativeModelRestrictionGuideURL(String value) {
         this.narrativeModelRestrictionGuideURL = value;

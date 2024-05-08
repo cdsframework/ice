@@ -1,0 +1,83 @@
+{
+  "hook": "medication-prescribe",
+  "hookInstance": "d422555d-9ee7-4709-b415-bcef2bb791c9",
+  "fhirServer": "http://hooks.smarthealthit.org:9080",
+  "redirect": "http://demo.cds-hooks.org/service-done.html",
+  "user": "Practitioner/example",
+  "patient": "1288992",
+  "prefetch": {
+    "medicationOrders": {
+      "resource": "<html><head><title>Apache Tomcat/7.0.53 - Error report</title><style><!--H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}HR {color : #525D76;}--></style> </head><body><h1>HTTP Status 404 - </h1><HR size=\"1\" noshade=\"noshade\"><p><b>type</b> Status report</p><p><b>message</b> <u></u></p><p><b>description</b> <u>The requested resource is not available.</u></p><HR size=\"1\" noshade=\"noshade\"><h3>Apache Tomcat/7.0.53</h3></body></html>",
+      "response": {
+        "status": "404Not Found"
+      }
+    },
+    "patient": {
+      "resource": "<html><head><title>Apache Tomcat/7.0.53 - Error report</title><style><!--H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}HR {color : #525D76;}--></style> </head><body><h1>HTTP Status 404 - &quot;/WEB-INF/grails-app/views/api/read.gsp&quot; not found.</h1><HR size=\"1\" noshade=\"noshade\"><p><b>type</b> Status report</p><p><b>message</b> <u>&quot;/WEB-INF/grails-app/views/api/read.gsp&quot; not found.</u></p><p><b>description</b> <u>The requested resource is not available.</u></p><HR size=\"1\" noshade=\"noshade\"><h3>Apache Tomcat/7.0.53</h3></body></html>",
+      "response": {
+        "status": "404 Not Found"
+      }
+    }
+  },
+  "context": {
+    "resourceType": "Bundle",
+    "type": "message",
+    "total": 2,
+    "link": [
+      {
+        "relation": "self",
+        "url": "/api/FHIR/DSTU2/Procedure"
+      }
+    ],
+    "entry": [
+      {
+        "resourceType": "MedicationOrder",
+        "dateWritten": "2017-05-06",
+        "status": "draft",
+        "patient": {
+          "reference": "Patient/1288992"
+        },
+        "dosageInstruction": [
+          {
+            "doseQuantity": {
+              "value": 1,
+              "system": "http://unitsofmeasure.org",
+              "code": "{pill}"
+            },
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 1,
+                "periodUnits": "d",
+                "boundsPeriod": {
+                  "start": "2017-05-06",
+                  "end": "2017-06-06"
+                }
+              }
+            }
+          }
+        ],
+        "medicationCodeableConcept": {
+          "text": "Morphine Sulfate 10 MG Extended Release Oral Capsule",
+          "coding": [
+            {
+              "display": "Morphine Sulfate 10 MG Extended Release Oral Capsule",
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "892494"
+            }
+          ]
+        },
+        "reasonCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "26929004",
+              "display": "Alzheimer's disease"
+            }
+          ],
+          "text": "Alzheimer's disease"
+        }
+      }
+    ]
+  }
+}

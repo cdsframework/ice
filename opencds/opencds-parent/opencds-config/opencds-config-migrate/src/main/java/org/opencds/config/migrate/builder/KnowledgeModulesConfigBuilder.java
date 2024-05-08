@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.migrate.builder;
 
 import java.io.File;
@@ -8,8 +24,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.common.cache.OpencdsCache;
 import org.opencds.common.xml.XmlEntity;
 import org.opencds.config.api.model.ExecutionEngine;
@@ -27,7 +43,7 @@ import org.opencds.config.migrate.utilities.ConfigResourceUtility;
 import org.opencds.config.migrate.utilities.XmlUtility;
 
 public class KnowledgeModulesConfigBuilder {
-	private static final Logger log = LogManager.getLogger();
+    private static final Log log = LogFactory.getLog(KnowledgeModulesConfigBuilder.class);
     private XmlUtility xmlUtility = new XmlUtility();
 
     private ConfigResourceUtility configResourceUtility = new ConfigResourceUtility();
@@ -79,6 +95,7 @@ public class KnowledgeModulesConfigBuilder {
             kms.add(KnowledgeModuleImpl.create(
                     kmId,
                     KMStatus.APPROVED,
+                    null,
                     ee.getIdentifier(),
                     SSIdImpl.create(dataModel.getEntityId().getScopingEntityId(), dataModel.getEntityId().getBusinessId(), dataModel.getEntityId().getVersion()),
                     null,

@@ -1,0 +1,1470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:dss="http://www.omg.org/spec/CDSS/201105/dss" targetNamespace="http://www.omg.org/spec/CDSS/201105/dss">
+	<!--<< Metadata Discovery Interface Requests and Responses >>-->
+	<xs:element name="describeProfile" type="dss:describeProfile"/>
+	<xs:complexType name="describeProfile">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="profileId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="describeProfileResponse" type="dss:describeProfileResponse"/>
+	<xs:complexType name="describeProfileResponse">
+		<xs:sequence>
+			<xs:element name="serviceProfile" type="dss:ServiceProfile"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="describeScopingEntity" type="dss:describeScopingEntity"/>
+	<xs:complexType name="describeScopingEntity">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="scopingEntityId" type="xs:string"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="describeScopingEntityResponse" type="dss:describeScopingEntityResponse"/>
+	<xs:complexType name="describeScopingEntityResponse">
+		<xs:sequence>
+			<xs:element name="scopingEntity" type="dss:ScopingEntity"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="describeScopingEntityHierarchy" type="dss:describeScopingEntityHierarchy"/>
+	<xs:complexType name="describeScopingEntityHierarchy">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="scopingEntityId" type="xs:string"/>
+					<xs:element name="maximumDescendantDepth" type="xs:positiveInteger">
+						<xs:annotation>
+							<xs:documentation>Maximum depth of search (e.g., 2 could result in the inclusion of descendant scoping entities up to the grand children)</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="describeScopingEntityHierarchyResponse" type="dss:describeScopingEntityHierarchyResponse"/>
+	<xs:complexType name="describeScopingEntityHierarchyResponse">
+		<xs:sequence>
+			<xs:element name="scopingEntity" type="dss:ScopingEntity"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="describeSemanticRequirement" type="dss:describeSemanticRequirement"/>
+	<xs:complexType name="describeSemanticRequirement">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="semanticRequirementId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="describeSemanticRequirementResponse" type="dss:describeSemanticRequirementResponse"/>
+	<xs:complexType name="describeSemanticRequirementResponse">
+		<xs:sequence>
+			<xs:element name="semanticRequirement" type="dss:SemanticRequirement"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="describeSemanticSignifier" type="dss:describeSemanticSignifier"/>
+	<xs:complexType name="describeSemanticSignifier">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="semanticSignifierId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="describeSemanticSignifierResponse" type="dss:describeSemanticSignifierResponse"/>
+	<xs:complexType name="describeSemanticSignifierResponse">
+		<xs:sequence>
+			<xs:element name="semanticSignifier" type="dss:SemanticSignifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="describeTrait" type="dss:describeTrait"/>
+	<xs:complexType name="describeTrait">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="traitId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="describeTraitResponse" type="dss:describeTraitResponse"/>
+	<xs:complexType name="describeTraitResponse">
+		<xs:sequence>
+			<xs:element name="trait" type="dss:Trait"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="listProfiles" type="dss:listProfiles"/>
+	<xs:complexType name="listProfiles">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="listProfilesResponse" type="dss:listProfilesResponse"/>
+	<xs:complexType name="listProfilesResponse">
+		<xs:sequence>
+			<xs:element name="profilesByType" type="dss:ProfilesByType"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--<< Query Interface Requests and Responses >>-->
+	<xs:element name="findKMs" type="dss:findKMs"/>
+	<xs:complexType name="findKMs">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="clientLanguage" type="dss:Language"/>
+					<xs:element name="kmSearchCriteria" type="dss:KMSearchCriteria"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="findKMsResponse" type="dss:findKMsResponse"/>
+	<xs:complexType name="findKMsResponse">
+		<xs:sequence>
+			<xs:element name="rankedKMList" type="dss:RankedKMList"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="getKMDataRequirements" type="dss:getKMDataRequirements"/>
+	<xs:complexType name="getKMDataRequirements">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="kmId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="getKMDataRequirementsResponse" type="dss:getKMDataRequirementsResponse"/>
+	<xs:complexType name="getKMDataRequirementsResponse">
+		<xs:sequence>
+			<xs:element name="kmDataRequirements" type="dss:KMDataRequirements"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="getKMDataRequirementsForEvaluationAtSpecifiedTime" type="dss:getKMDataRequirementsForEvaluationAtSpecifiedTime"/>
+	<xs:complexType name="getKMDataRequirementsForEvaluationAtSpecifiedTime">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="specifiedTime" type="xs:dateTime"/>
+					<xs:element name="kmId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse" type="dss:getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse"/>
+	<xs:complexType name="getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse">
+		<xs:sequence>
+			<xs:element name="kmDataRequirements" type="dss:KMDataRequirements"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="getKMDescription" type="dss:getKMDescription"/>
+	<xs:complexType name="getKMDescription">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="kmId" type="dss:EntityIdentifier"/>
+					<xs:element name="clientLanguage" type="dss:Language"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="getKMDescriptionResponse" type="dss:getKMDescriptionResponse"/>
+	<xs:complexType name="getKMDescriptionResponse">
+		<xs:sequence>
+			<xs:element name="extendedKMDescription" type="dss:ExtendedKMDescription"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="getKMEvaluationResultSemantics" type="dss:getKMEvaluationResultSemantics"/>
+	<xs:complexType name="getKMEvaluationResultSemantics">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="kmId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="getKMEvaluationResultSemanticsResponse" type="dss:getKMEvaluationResultSemanticsResponse"/>
+	<xs:complexType name="getKMEvaluationResultSemanticsResponse">
+		<xs:sequence>
+			<xs:element name="kmEvaluationResultSemanticsList" type="dss:KMEvaluationResultSemanticsList"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="listKMs" type="dss:listKMs"/>
+	<xs:complexType name="listKMs">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="clientLanguage" type="dss:Language"/>
+					<xs:element name="kmTraitInclusionSpecification" type="dss:KMTraitInclusionSpecification"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="listKMsResponse" type="dss:listKMsResponse"/>
+	<xs:complexType name="listKMsResponse">
+		<xs:sequence>
+			<xs:element name="kmList" type="dss:KMList"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--<< Evaluation Interface Requests and Responses >>-->
+	<xs:element name="evaluate" type="dss:evaluate"/>
+	<xs:complexType name="evaluate">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="evaluationRequest" type="dss:EvaluationRequest"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="evaluateResponse" type="dss:evaluateResponse"/>
+	<xs:complexType name="evaluateResponse">
+		<xs:sequence>
+			<xs:element name="evaluationResponse" type="dss:EvaluationResponse"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="evaluateAtSpecifiedTime" type="dss:evaluateAtSpecifiedTime"/>
+	<xs:complexType name="evaluateAtSpecifiedTime">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="specifiedTime" type="xs:dateTime"/>
+					<xs:element name="evaluationRequest" type="dss:EvaluationRequest"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="evaluateAtSpecifiedTimeResponse" type="dss:evaluateAtSpecifiedTimeResponse"/>
+	<xs:complexType name="evaluateAtSpecifiedTimeResponse">
+		<xs:sequence>
+			<xs:element name="evaluationResponse" type="dss:EvaluationResponse"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="evaluateIteratively" type="dss:evaluateIteratively"/>
+	<xs:complexType name="evaluateIteratively">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="iterativeEvaluationRequest" type="dss:IterativeEvaluationRequest"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="evaluateIterativelyResponse" type="dss:evaluateIterativelyResponse"/>
+	<xs:complexType name="evaluateIterativelyResponse">
+		<xs:sequence>
+			<xs:element name="iterativeEvaluationResponse" type="dss:IterativeEvaluationResponse"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="evaluateIterativelyAtSpecifiedTime" type="dss:evaluateIterativelyAtSpecifiedTime"/>
+	<xs:complexType name="evaluateIterativelyAtSpecifiedTime">
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceRequestBase">
+				<xs:sequence>
+					<xs:element name="specifiedTime" type="xs:dateTime"/>
+					<xs:element name="iterativeEvaluationRequest" type="dss:IterativeEvaluationRequest"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="evaluateIterativelyAtSpecifiedTimeResponse" type="dss:evaluateIterativelyAtSpecifiedTimeResponse"/>
+	<xs:complexType name="evaluateIterativelyAtSpecifiedTimeResponse">
+		<xs:sequence>
+			<xs:element name="iterativeEvaluationResponse" type="dss:IterativeEvaluationResponse"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--<< Common >>-->
+	<xs:simpleType name="base64EncodedContent">
+		<xs:list itemType="xs:base64Binary"/>
+	</xs:simpleType>
+	<xs:element name="DescribedDO" type="dss:DescribedDO"/>
+	<xs:complexType name="DescribedDO" abstract="true">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string"/>
+			<xs:element name="description" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="EntityIdentifier" type="dss:EntityIdentifier"/>
+	<xs:complexType name="EntityIdentifier">
+		<xs:annotation>
+			<xs:documentation>A unique identifier characterized by 3 attributes: the identifier of the scoping entity; the business identifier within the scoping entity; and the version.  Two identifiers are the same when these 3 attributes are equal. An EntityIdentifier must be globally unique.
+</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="scopingEntityId" type="xs:string" use="required"/>
+		<xs:attribute name="businessId" type="xs:string" use="required"/>
+		<xs:attribute name="version" type="xs:string" use="required"/>
+	</xs:complexType>
+	<xs:simpleType name="EntityType">
+		<xs:annotation>
+			<xs:documentation>Enumeration of all concrete Entity types.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="SEMANTIC_SIGNIFIER"/>
+			<xs:enumeration value="TRAIT"/>
+			<xs:enumeration value="PROFILE"/>
+			<xs:enumeration value="SEMANTIC_REQUIREMENT"/>
+			<xs:enumeration value="KNOWLEDGE_MODULE"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="InteractionIdentifier" type="dss:InteractionIdentifier"/>
+	<xs:complexType name="InteractionIdentifier">
+		<xs:annotation>
+			<xs:documentation>InteractionIdentifier represents information that is transmitted as a part of an interaction to identify that interaction for logging and debugging purposes.  The InteractionIdentifier consists of a scopingEntityId and an interactionId unique within the scopingEntityId.  A submissionTime is also provided to help find the interaction.
+		
+</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="scopingEntityId" type="xs:string" use="required"/>
+		<xs:attribute name="interactionId" type="xs:string" use="required"/>
+		<xs:attribute name="submissionTime" type="xs:dateTime" use="required"/>
+	</xs:complexType>
+	<xs:element name="ItemIdentifier" type="dss:ItemIdentifier"/>
+	<xs:complexType name="ItemIdentifier">
+		<xs:annotation>
+			<xs:documentation>The Item Identifier (ItemIdentifier) consists of the Entity Identifier of its containing entity, as well as a String "itemId."  The "itemId" attribute must be unique within the scope of the containing entity, and the complete ItemIdentifier (i.e., combination of containingEntityId + itemId) must be globally unique.
+</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="containingEntityId" type="dss:EntityIdentifier"/>
+		</xs:sequence>
+		<xs:attribute name="itemId" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>Must be unique in context of containing entity.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:simpleType name="Language">
+		<xs:annotation>
+			<xs:documentation>Language shall be specifiied as either a 2-character ISO 639-1 language code or a combination of a 2-character ISO 639-1 language code and a 2-character ISO 3166-1 geographical code, concatenated with a hyphen.  Example valid language specifications include: "en", "en-US", "en-GB", and "fr".  ISO 639-1 codes are available at http://www.loc.gov/standards/iso639-2/php/English_list.php, and ISO 3166-1 codes are available at http://www.iso.org/iso/english_country_names_and_code_elements.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string"/>
+	</xs:simpleType>
+	<xs:element name="ScopedDO" type="dss:ScopedDO"/>
+	<xs:complexType name="ScopedDO" abstract="true">
+		<xs:complexContent>
+			<xs:extension base="dss:DescribedDO">
+				<xs:sequence>
+					<xs:element name="entityId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="ScopingEntity" type="dss:ScopingEntity"/>
+	<xs:complexType name="ScopingEntity">
+		<xs:annotation>
+			<xs:documentation>A scoping entity has a unique, fully-qualified identifier, which must start with lowercase English representations of one of the top-level Internet domain names, currently com, edu, gov, mil, net, org, or one of the English two-letter codes identifying countries as specified in ISO Standard 3166-1.  Subsequently, the id must start by defining the domain name that is associated with the scoping entity (e.g., com.clinica, com.dbmotion, edu.duke, org.hl7).  Subsequent identification within the domain associated with the scoping entity, if any, may be specified as is appropriate for the internal naming conventions by the scoping entity.  
+
+A scoping entity may create hierarchical structures.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DescribedDO">
+				<xs:sequence>
+					<xs:element name="childScopingEntity" type="dss:ScopingEntity" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+				<xs:attribute name="id" type="xs:string" use="required"/>
+				<xs:attribute name="parentSEId" type="xs:string" use="optional"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="SemanticPayload" type="dss:SemanticPayload"/>
+	<xs:complexType name="SemanticPayload">
+		<xs:annotation>
+			<xs:documentation>SemanticPayload is identified by a semantic signifier and has a value that is expressed using the semantics defined by the semantic signifier.
+</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="informationModelSSId" type="dss:EntityIdentifier"/>
+			<xs:element name="base64EncodedPayload" type="dss:base64EncodedContent"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ServiceRequestBase" type="dss:ServiceRequestBase"/>
+	<xs:complexType name="ServiceRequestBase">
+		<xs:annotation>
+			<xs:documentation>This is the base class for all service requests and contains an InteractionIdentifier.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="interactionId" type="dss:InteractionIdentifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--<< Exception >>-->
+	<xs:element name="DSSException" type="dss:DSSException"/>
+	<xs:complexType name="DSSException" abstract="true">
+		<xs:annotation>
+			<xs:documentation>The abstract superclass for exceptions</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="errorMessage" type="dss:ErrorMessage" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DSSRuntimeException" type="dss:DSSRuntimeException"/>
+	<xs:complexType name="DSSRuntimeException">
+		<xs:annotation>
+			<xs:documentation>The DSSRuntimeException is thrown when the DSS encounters an error at runtime.  A DSSRuntimeException should generally be used only when another, more specific DSSException does not cover the error in question.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:simpleType name="ErrorMessage">
+		<xs:restriction base="xs:string"/>
+	</xs:simpleType>
+	<xs:element name="EvaluationException" type="dss:EvaluationException"/>
+	<xs:complexType name="EvaluationException">
+		<xs:annotation>
+			<xs:documentation>A EvaluationException is thrown when an exception occurred while trying to evaluate a KM.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException">
+				<xs:sequence>
+					<xs:element name="kmId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="InvalidDataFormatException" type="dss:InvalidDataFormatException"/>
+	<xs:complexType name="InvalidDataFormatException">
+		<xs:annotation>
+			<xs:documentation>The InvalidDataFormatException is thrown when data are not consistent with the information model defined by a semantic signifier.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException">
+				<xs:sequence>
+					<xs:element name="informationModelSSId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="InvalidDriDataFormatException" type="dss:InvalidDriDataFormatException"/>
+	<xs:complexType name="InvalidDriDataFormatException">
+		<xs:annotation>
+			<xs:documentation>A InvalidDriDataFormatException is thrown when trying to evaluate a KM but data provided for one of its Data Requirement Items has an invalid format.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:InvalidDataFormatException">
+				<xs:sequence>
+					<xs:element name="driId" type="dss:ItemIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="InvalidTimeZoneOffsetException" type="dss:InvalidTimeZoneOffsetException"/>
+	<xs:complexType name="InvalidTimeZoneOffsetException">
+		<xs:annotation>
+			<xs:documentation>The InvalidTimeZoneOffsetException is thrown when the time zone offset specified is unrecognized.  The time zone offset represents the offset from Universal Coordinated Time (UTC).  The offset should be expressed as +/- hh:mm, e.g., 00:00, -05:00, +07:00</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException">
+				<xs:sequence>
+					<xs:element name="invalidTimeZoneOffset" type="xs:string"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="InvalidTraitCriterionDataFormatException" type="dss:InvalidTraitCriterionDataFormatException"/>
+	<xs:complexType name="InvalidTraitCriterionDataFormatException">
+		<xs:annotation>
+			<xs:documentation>An InvalidTraitCriterionDataFormatException is thrown when a trait criterion is inconsistent with the information model specified for the trait criterion through the use of a semantic signifier.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:InvalidDataFormatException">
+				<xs:sequence>
+					<xs:element name="traitCriterionId" type="dss:ItemIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="RequiredDataNotProvidedException" type="dss:RequiredDataNotProvidedException"/>
+	<xs:complexType name="RequiredDataNotProvidedException">
+		<xs:annotation>
+			<xs:documentation>A RequiredDataNotProvidedException is thrown when trying to evaluate a KM but one of the required data requirement groups is not provided.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException">
+				<xs:sequence>
+					<xs:element name="drgId" type="dss:ItemIdentifier" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="UnrecognizedLanguageException" type="dss:UnrecognizedLanguageException"/>
+	<xs:complexType name="UnrecognizedLanguageException">
+		<xs:annotation>
+			<xs:documentation>The UnrecognizedLanguageException is thrown when the language is unrecognized.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException">
+				<xs:sequence>
+					<xs:element name="unrecognizedLanguage" type="dss:Language"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="UnrecognizedScopedEntityException" type="dss:UnrecognizedScopedEntityException"/>
+	<xs:complexType name="UnrecognizedScopedEntityException">
+		<xs:annotation>
+			<xs:documentation>The UnrecognizedScopedEntityException is an exception that is thrown when the service receives a request regarding a scoped entity that is not recognized using the its specified entity identifier object. A scoped entity identifier consists of the triplet of business identifier, version, and scoping entity identifier. 
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException">
+				<xs:sequence>
+					<xs:element name="entityId" type="dss:EntityIdentifier"/>
+					<xs:element name="entityType" type="dss:EntityType"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="UnrecognizedScopingEntityException" type="dss:UnrecognizedScopingEntityException"/>
+	<xs:complexType name="UnrecognizedScopingEntityException">
+		<xs:annotation>
+			<xs:documentation>The UnrecognizedScopingEntityException is an exception that is thrown when the service receives a request regarding a scoping entity that is not recognized using its specified identifier.
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException">
+				<xs:attribute name="scopingEntityId" type="xs:string" use="required"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="UnrecognizedTraitCriterionException" type="dss:UnrecognizedTraitCriterionException"/>
+	<xs:complexType name="UnrecognizedTraitCriterionException">
+		<xs:annotation>
+			<xs:documentation>The UnrecognizedTraitCriterionException is an exception that is thrown when the service receives a request regarding a trait criterion that is not recognized using the its specified item identifier object.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException">
+				<xs:sequence>
+					<xs:element name="itemId" type="dss:ItemIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="UnsupportedLanguageException" type="dss:UnsupportedLanguageException"/>
+	<xs:complexType name="UnsupportedLanguageException">
+		<xs:annotation>
+			<xs:documentation>The UnsupportedLanguageException is thrown when the language is recognized but not supported.
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DSSException">
+				<xs:sequence>
+					<xs:element name="unsupportedLanguage" type="dss:Language"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--<< Metadata - Semantic Requirement >>-->
+	<xs:element name="AllowedDataRequirement" type="dss:AllowedDataRequirement"/>
+	<xs:complexType name="AllowedDataRequirement">
+		<xs:complexContent>
+			<xs:extension base="dss:DataRequirementBase">
+				<xs:sequence>
+					<xs:element name="allowedQueryModelSSId" type="dss:EntityIdentifier" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="InformationModelRequirement" type="dss:InformationModelRequirement"/>
+	<xs:complexType name="InformationModelRequirement">
+		<xs:annotation>
+			<xs:documentation>The InformationModelRequirement specifies the information models that (a) can or (b) must be used by DSS knowledge modules claiming conformance to this requirement.
+
+This information model requirement consists of one or more of the following:
+(i) allowedDataRequirement - specifies the superset of data requirement models and associated query models that can be used
+(ii) requiredDataRequirement - specifies the data requirement models and associated query models, if any, that must be used
+(iii) allowedWarningModelSSId - specifies the superset of models that can be used by the service to provide warnings regarding evaluations
+(iv) allowedEvaluationResultModelSSId - specifies the superset of evaluation result models that can be used
+(v) requiredEvaluationResultModelSSId - specifies the evaluation result models that must be used</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:SemanticRequirement">
+				<xs:sequence>
+					<xs:element name="allowedWarningModelSSId" type="dss:EntityIdentifier" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="allowedEvaluationResultModelSSId" type="dss:EntityIdentifier" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="allowedDataRequirement" type="dss:AllowedDataRequirement" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="requiredDataRequirement" type="dss:RequiredDataRequirement" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="requiredEvaluationResultModelSSId" type="dss:EntityIdentifier" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="LanguageSupportRequirement" type="dss:LanguageSupportRequirement"/>
+	<xs:complexType name="LanguageSupportRequirement">
+		<xs:complexContent>
+			<xs:extension base="dss:SemanticRequirement">
+				<xs:sequence>
+					<xs:element name="supportedLanguage" type="dss:Language" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="OtherSemanticRequirement" type="dss:OtherSemanticRequirement"/>
+	<xs:complexType name="OtherSemanticRequirement">
+		<xs:annotation>
+			<xs:documentation>A DSS claiming conformance to this requirement must fulfill the semantic restrictions defined in the narrative specification.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:SemanticRequirement">
+				<xs:sequence>
+					<xs:element name="requirementSpecification" type="xs:string"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="RequiredDataRequirement" type="dss:RequiredDataRequirement"/>
+	<xs:complexType name="RequiredDataRequirement">
+		<xs:complexContent>
+			<xs:extension base="dss:DataRequirementBase">
+				<xs:sequence>
+					<xs:element name="requiredQueryModelSSId" type="dss:EntityIdentifier" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="SemanticRequirement" type="dss:SemanticRequirement"/>
+	<xs:complexType name="SemanticRequirement" abstract="true">
+		<xs:annotation>
+			<xs:documentation>The superclass of all DSS semantic requirement sub-types.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:ScopedDO">
+				<xs:sequence>
+					<xs:element name="type" type="dss:SemanticRequirementType"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:simpleType name="SemanticRequirementType">
+		<xs:annotation>
+			<xs:documentation>Enumerates concrete semantic requirement types.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="INFORMATION_MODEL_REQUIREMENT"/>
+			<xs:enumeration value="LANGUAGE_SUPPORT_REQUIREMENT"/>
+			<xs:enumeration value="TRAIT_SET_REQUIREMENT"/>
+			<xs:enumeration value="OTHER_SEMANTIC_REQUIREMENT"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="TraitRequirement" type="dss:TraitRequirement"/>
+	<xs:complexType name="TraitRequirement">
+		<xs:annotation>
+			<xs:documentation>It specifies the a specific knowledge module trait requirement. Trait is identified by a scoping entity, the trait identifier (unique within the scoping entity), and the trait version. The requirement also specifies if the trait is required or optional for knowledge modules claiming conformance to the requirement.
+</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="isMandatory" type="xs:boolean"/>
+			<xs:element name="traitId" type="dss:EntityIdentifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="TraitSetRequirement" type="dss:TraitSetRequirement"/>
+	<xs:complexType name="TraitSetRequirement">
+		<xs:annotation>
+			<xs:documentation>It specifies the list of the knowledge module traits that will or may be associated with all knowledge modules claiming conformance to the requirement. Traits are identified by the identifier of the scoping entity for the trait, the trait identifier, and the trait version. The requirement also specifies if the trait is required or optional for knowledge modules claiming conformance to the requirement.
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:SemanticRequirement">
+				<xs:sequence>
+					<xs:element name="traitRequirement" type="dss:TraitRequirement" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--<< Metadata - Semantic Signifier >>-->
+	<xs:element name="ComputableDefinition" type="dss:ComputableDefinition"/>
+	<xs:complexType name="ComputableDefinition" abstract="true"/>
+	<xs:simpleType name="URL">
+		<xs:restriction base="xs:string"/>
+	</xs:simpleType>
+	<xs:element name="SemanticSignifier" type="dss:SemanticSignifier"/>
+	<xs:complexType name="SemanticSignifier">
+		<xs:annotation>
+			<xs:documentation>A SemanticSignifier uniquely specifies an information model</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:ScopedDO">
+				<xs:sequence>
+					<xs:element name="xsdComputableDefinition" type="dss:XSDComputableDefinition"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="XSDComputableDefinition" type="dss:XSDComputableDefinition"/>
+	<xs:complexType name="XSDComputableDefinition">
+		<xs:annotation>
+			<xs:documentation>A computable information model based on the use of an XML Schema Definition (XSD), zero or more Schematrons, an optional narrative guide to further restrict the model, and the name of the global element that serves as the root element of the information model.  Note that an XSD used in this context must have the root element defined as a global element so that it can be directly used for automated instance validation.
+
+Other potential approaches to defining computable information models are possible (e.g., using Document Type Definitions), but this is the computable information model required for the DSS's XML Web Service Platform Specific Model. 
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:ComputableDefinition">
+				<xs:sequence>
+					<xs:element name="xsdRootGlobalElementName" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>The name of the global element that serves as the root element for the information model.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="xsdURL" type="dss:URL">
+						<xs:annotation>
+							<xs:documentation>Location of the XML Schema Definition</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="schematronURL" type="dss:URL" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="narrativeModelRestrictionGuideURL" type="dss:URL" minOccurs="0"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--<< Metadata - Profile >>-->
+	<xs:element name="ConformanceProfile" type="dss:ConformanceProfile"/>
+	<xs:complexType name="ConformanceProfile">
+		<xs:annotation>
+			<xs:documentation>A ConformanceProfile consists of one or more supported functional profiles and one or more supported semantic profiles.
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceProfile">
+				<xs:sequence>
+					<xs:element name="supportedFunctionalProfile" type="dss:FunctionalProfile" maxOccurs="unbounded"/>
+					<xs:element name="supportedSemanticProfile" type="dss:SemanticProfile" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="FunctionalProfile" type="dss:FunctionalProfile"/>
+	<xs:complexType name="FunctionalProfile">
+		<xs:annotation>
+			<xs:documentation>A FunctionalProfile represents a list of supported service operations.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceProfile">
+				<xs:sequence>
+					<xs:element name="supportedOperation" type="dss:OperationType" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:simpleType name="OperationType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="EVALUATION.EVALUATE"/>
+			<xs:enumeration value="EVALUATION.EVALUATE_AT_SPECIFIED_TIME"/>
+			<xs:enumeration value="EVALUATION.EVALUATE_ITERATIVELY"/>
+			<xs:enumeration value="EVALUATION.EVALUATE_ITERATIVELY_AT_SPECIFIED_TIME"/>
+			<xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_PROFILE"/>
+			<xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_SCOPING_ENTITY"/>
+			<xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_SCOPING_ENTITY_HIERARCHY"/>
+			<xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_SEMANTIC_REQUIREMENT"/>
+			<xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_SEMANTIC_SIGNIFIER"/>
+			<xs:enumeration value="METADATA_DISCOVERY.DESCRIBE_TRAIT"/>
+			<xs:enumeration value="METADATA_DISCOVERY.LIST_PROFILES"/>
+			<xs:enumeration value="QUERY.FIND_KMS"/>
+			<xs:enumeration value="QUERY.GET_KM_DATA_REQUIREMENTS"/>
+			<xs:enumeration value="QUERY.GET_KM_DATA_REQUIREMENTS_FOR_EVALUATION_AT_SPECIFIED_TIME"/>
+			<xs:enumeration value="QUERY.GET_KM_DESCRIPTION"/>
+			<xs:enumeration value="QUERY.GET_KM_EVALUATION_RESULT_SEMANTICS"/>
+			<xs:enumeration value="QUERY.LIST_KMS"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="ProfilesByType" type="dss:ProfilesByType"/>
+	<xs:complexType name="ProfilesByType">
+		<xs:annotation>
+			<xs:documentation>Service profiles grouped by type.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="profilesOfType" type="dss:ProfilesOfType" minOccurs="3" maxOccurs="3"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ProfilesOfType" type="dss:ProfilesOfType"/>
+	<xs:complexType name="ProfilesOfType">
+		<xs:annotation>
+			<xs:documentation>This object groups service profiles of a given type.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="type" type="dss:ProfileType"/>
+			<xs:element name="profileId" type="dss:EntityIdentifier" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="ProfileType">
+		<xs:annotation>
+			<xs:documentation>Enumeration of all concrete Profile types.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CONFORMANCE_PROFILE"/>
+			<xs:enumeration value="FUNCTIONAL_PROFILE"/>
+			<xs:enumeration value="SEMANTIC_PROFILE"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="SemanticProfile" type="dss:SemanticProfile"/>
+	<xs:complexType name="SemanticProfile">
+		<xs:annotation>
+			<xs:documentation>A SemanticProfile represents a list of the semantic requirements to which the service conforms.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:ServiceProfile">
+				<xs:sequence>
+					<xs:element name="fulfilledSemanticRequirement" type="dss:SemanticRequirement" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="ServiceProfile" type="dss:ServiceProfile"/>
+	<xs:complexType name="ServiceProfile" abstract="true">
+		<xs:annotation>
+			<xs:documentation>The superclass of all profile sub-types.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:ScopedDO"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--<< Metadata - Trait >>-->
+	<xs:element name="Trait" type="dss:Trait"/>
+	<xs:complexType name="Trait">
+		<xs:annotation>
+			<xs:documentation>Traits represent attributes of objects.  In the DSS context, traits are used to describe knowledge modules.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:ScopedDO">
+				<xs:sequence>
+					<xs:element name="traitValueIsLanguageDependent" type="xs:boolean">
+						<xs:annotation>
+							<xs:documentation>Whether a trait's values are language-dependent.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="informationModelSSId" type="dss:EntityIdentifier"/>
+					<xs:element name="allowedTraitCriterion" type="dss:TraitCriterion" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="TraitCriterion" type="dss:TraitCriterion"/>
+	<xs:complexType name="TraitCriterion">
+		<xs:annotation>
+			<xs:documentation>The TraitCriterion object represents a criterion that can be applied to a knowledge module trait value.  The identifier of a trait criterion consists of the EntityIdentifier of the parent trait plus an itemId that is unique within the scope of the EntityIdentifier of the parent trait.
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DescribedDO">
+				<xs:sequence>
+					<xs:element name="traitCriterionId" type="dss:ItemIdentifier"/>
+					<xs:element name="criterionModelSSId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--<< Knowledge Module >>-->
+	<xs:element name="CPQPInUse" type="dss:CPQPInUse"/>
+	<xs:complexType name="CPQPInUse">
+		<xs:annotation>
+			<xs:documentation>This object contains information about Consumer Provided Query Parameter objects that are used within a specific Data Requirement Item in its query instance. It contains the identifier of the Consumer Provided Query parameter and its path within the query instance. </xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="specificationPath" type="xs:string">
+				<xs:annotation>
+					<xs:documentation>An unambiguous specification of the path to the CPQP in the query model. For XML Web service implementations, an XPath 1.0 expression shall be used for specifying the path.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="cpqpItemId" type="dss:ItemIdentifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DataRequirementBase" type="dss:DataRequirementBase"/>
+	<xs:complexType name="DataRequirementBase" abstract="true">
+		<xs:sequence>
+			<xs:element name="informationModelSSId" type="dss:EntityIdentifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ExtendedKMDescription" type="dss:ExtendedKMDescription"/>
+	<xs:complexType name="ExtendedKMDescription">
+		<xs:annotation>
+			<xs:documentation>The response object of the getKMDescription operation in the Query interface. It contains different sections, each describing an aspect of the knowledge module. The knowledge module sections include traits and related knowledge modules.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMDescriptionBase">
+				<xs:sequence>
+					<xs:element name="relatedKM" type="dss:RelatedKM" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="InformationModelAlternative" type="dss:InformationModelAlternative"/>
+	<xs:complexType name="InformationModelAlternative">
+		<xs:annotation>
+			<xs:documentation>This object represents one of potentially several alternative information models for a KM data requirement item.  This object specifies the expected information model for the data using a semantic signifier. Optionally, it may specify the semantic signifier of the query model and its instance. In addition, it may also specify one or more Consumer Provided Query Parameters that are used in the query. For each query parameter in use, it specifies its identifier and its path in the query.
+</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="informationModelSSId" type="dss:EntityIdentifier"/>
+			<xs:element name="query" type="dss:SemanticPayload" minOccurs="0"/>
+			<xs:element name="cpqpInUse" type="dss:CPQPInUse" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="KMConsumerProvidedQueryParameter" type="dss:KMConsumerProvidedQueryParameter"/>
+	<xs:complexType name="KMConsumerProvidedQueryParameter">
+		<xs:annotation>
+			<xs:documentation>A KMConsumerProvidedQueryParameter defines a parameter within the query instance of a data requirement item which is unknown at design time and must be set by the consumer at runtime before knowledge module evaluation. It extends KMItem for common knowledge module item data like name and description.
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMItem">
+				<xs:sequence>
+					<xs:element name="informationModelSSId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMDataRequirementGroup" type="dss:KMDataRequirementGroup"/>
+	<xs:complexType name="KMDataRequirementGroup">
+		<xs:annotation>
+			<xs:documentation>A KM Data Requirement Group consists of one or more data requirement items.  </xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMItem">
+				<xs:sequence>
+					<xs:element name="dataRequirementItem" type="dss:KMDataRequirementItem" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMDataRequirements" type="dss:KMDataRequirements"/>
+	<xs:complexType name="KMDataRequirements">
+		<xs:annotation>
+			<xs:documentation>The response object of the getKMDataRequirements operation in the Query interface. This object specifies the data requirement groups initially required for an iterative evaluation interaction, as well as any additional data requirement groups that may be needed depending on the results of the initial interaction.  In addition, it extends its superclass for a list of Consumer Provided Query Parameter objects defined for the data requirement items of the knowledge module.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="initialDataRequirementGroup" type="dss:KMDataRequirementGroup" maxOccurs="unbounded"/>
+			<xs:element name="additionalDataRequirementGroup" type="dss:KMDataRequirementGroup" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="consumerProvidedQueryParameter" type="dss:KMConsumerProvidedQueryParameter" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="KMDataRequirementItem" type="dss:KMDataRequirementItem"/>
+	<xs:complexType name="KMDataRequirementItem">
+		<xs:annotation>
+			<xs:documentation>A KMDataRequirementItem represents the specification of knowledge module required data from the external world.  A data requirement item is specified in terms of one or more alternative information models.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMItem">
+				<xs:sequence>
+					<xs:element name="informationModelAlternative" type="dss:InformationModelAlternative" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMDescription" type="dss:KMDescription"/>
+	<xs:complexType name="KMDescription">
+		<xs:complexContent>
+			<xs:extension base="dss:KMDescriptionBase"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMDescriptionBase" type="dss:KMDescriptionBase"/>
+	<xs:complexType name="KMDescriptionBase" abstract="true">
+		<xs:sequence>
+			<xs:element name="kmId" type="dss:EntityIdentifier"/>
+			<xs:element name="status" type="dss:KMStatus"/>
+			<xs:element name="traitValue" type="dss:KMTraitValue" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="KMEvaluationResultSemantics" type="dss:KMEvaluationResultSemantics"/>
+	<xs:complexType name="KMEvaluationResultSemantics">
+		<xs:annotation>
+			<xs:documentation>The semantics of a knowledge module evaluation result.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMItem">
+				<xs:sequence>
+					<xs:element name="informationModelSSId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMItem" type="dss:KMItem"/>
+	<xs:complexType name="KMItem" abstract="true">
+		<xs:annotation>
+			<xs:documentation>The superclass of all knowledge module sub-items. For example, Data Requirement Group or Item. It contains the item identifier, which consists of the identifier of the scoping entity as well as a unique identifier within the scoping entity.  The scoping entity may be the knowledge module within which the KMItem resides, a different knowledge module, or an entity other than the knowledge module.  This approach enables items such as data requirements to be decoupled from specific knowledge modules and reused across knowledge modules.  This class inherits its name and description information from DescribedDO.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:DescribedDO">
+				<xs:sequence>
+					<xs:element name="id" type="dss:ItemIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMLocalizedTraitValue" type="dss:KMLocalizedTraitValue"/>
+	<xs:complexType name="KMLocalizedTraitValue">
+		<xs:complexContent>
+			<xs:extension base="dss:KMTraitValue">
+				<xs:sequence>
+					<xs:element name="language" type="dss:Language"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:simpleType name="KMStatus">
+		<xs:annotation>
+			<xs:documentation>Allowed values for Knowledge Module status.  See technical specification for details.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="APPROVED">
+				<xs:annotation>
+					<xs:documentation>The KM successfully passed the QA tests.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="DEFINED">
+				<xs:annotation>
+					<xs:documentation>Can be executed. Precondition: the KM is syntactically valid. When a defined KM changes, a new version should be created.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="DRAFT">
+				<xs:annotation>
+					<xs:documentation>Draft KM.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="PROMOTED">
+				<xs:annotation>
+					<xs:documentation>The KM can be used in the production environment.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="REJECTED">
+				<xs:annotation>
+					<xs:documentation>The KM definition doesn't match the KM specification.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="RETIRED">
+				<xs:annotation>
+					<xs:documentation>The KM was historically promoted, but should not be used any more.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="KMTraitValue" type="dss:KMTraitValue"/>
+	<xs:complexType name="KMTraitValue">
+		<xs:annotation>
+			<xs:documentation>A Knowledge Module trait value</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="traitId" type="dss:EntityIdentifier"/>
+			<xs:element name="value" type="dss:SemanticPayload"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--<< Query - Requests >>-->
+	<xs:element name="DataRequirementCriterion" type="dss:DataRequirementCriterion"/>
+	<xs:complexType name="DataRequirementCriterion">
+		<xs:annotation>
+			<xs:documentation>The DataRequirementCriterion is an object representing a knowledge module search criterion about Data Requirement Items. It contains a semantic signifier of the data information model and a list of allowed query information models. Each information model, data or query, is identfied using its semantic signifier identifier.   A knowledge module is considered to have satisfied the criterion if both of the following are true: (i) at least one of the Data Requirement Items belonging to the KM uses the specified information model, and (ii) the Data Requirement Item does not use a query model, or it uses one of the query information models specified.
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMCriterion">
+				<xs:sequence>
+					<xs:element name="dataInformationModelSSId" type="dss:EntityIdentifier"/>
+					<xs:element name="queryInformationModelSSId" type="dss:EntityIdentifier" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="EvaluationResultCriterion" type="dss:EvaluationResultCriterion"/>
+	<xs:complexType name="EvaluationResultCriterion">
+		<xs:annotation>
+			<xs:documentation>If all of the specified evaluation result semantics are supported by a knowledge module, then the knowledge module is considered to have satisfied the criterion.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMCriterion">
+				<xs:sequence>
+					<xs:element name="informationModelSSId" type="dss:EntityIdentifier"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMCriterion" type="dss:KMCriterion"/>
+	<xs:complexType name="KMCriterion" abstract="true">
+		<xs:annotation>
+			<xs:documentation>The abstract base class for a KM criterion.</xs:documentation>
+		</xs:annotation>
+	</xs:complexType>
+	<xs:simpleType name="KMRelationshipType">
+		<xs:annotation>
+			<xs:documentation>Type of a relationship between two Knowledge Modules.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="PROVIDES_EVALUATION_RESULT_FOR_USE_BY">
+				<xs:annotation>
+					<xs:documentation>The source KM provides one or more of its evaluation results to the target KM for usage as an evaluation input.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="PROVIDES_EVALUATION_RESULT_FOR_PASS_THROUGH_BY">
+				<xs:annotation>
+					<xs:documentation>The source KM provides one or more of its evaluation results to the target KM for passing the evaluation result through to the consumer.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="USES_EVALUATION_RESULT_FROM">
+				<xs:annotation>
+					<xs:documentation>The source KM uses one or more of the evaluation results from the traget KM as an evaluation input.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="PASSES_THROUGH_EVALUATION_RESULT_FROM">
+				<xs:annotation>
+					<xs:documentation>The source KM passes through to the consumer one or more of the evaluation results obtained from the target KM.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="SUPERCEDED_BY">
+				<xs:annotation>
+					<xs:documentation>The source KM was superceded by the target KM. That is, the target KM should be used instead of the source KM if possible.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+			<xs:enumeration value="SUPERCEDES">
+				<xs:annotation>
+					<xs:documentation>The source KM supercedes the target KM. That is, the source KM should be used instead of the target KM if possible.</xs:documentation>
+				</xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="KMSearchCriteria" type="dss:KMSearchCriteria"/>
+	<xs:complexType name="KMSearchCriteria">
+		<xs:annotation>
+			<xs:documentation>The KMSearchCriteria is an object containing knowledge module search criteria. </xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="inclusionCriterion" type="dss:KMCriterion" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A criterion used to include KMs into the search result list and/or increase the KMs' search score.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="exclusionCriterion" type="dss:KMCriterion" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>A criterion used to exclude KMs from the search result list and/or reduce the KMs' search score.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="maximumKMsToReturn" type="dss:MaximumKMsToReturn"/>
+			<xs:element name="minimumKMSearchScore" type="dss:KMSearchScore"/>
+			<xs:element name="kmTraitInclusionSpecification" type="dss:KMTraitInclusionSpecification"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="KMSearchScore">
+		<xs:annotation>
+			<xs:documentation>The score resulting from a search for relevant KMs.  Must be an integer from 1 to 100.  A KM meeting all client search criteria shall have a score of 100, while a KM that does not meet all client search criteria shall not have a score of 100.  Implementations of the scoring mechanism are vendor-specific.  One suggestion is to make the score the % of criteria that match.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:positiveInteger">
+			<xs:maxInclusive value="100"/>
+			<xs:minInclusive value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="KMStatusCriterion" type="dss:KMStatusCriterion"/>
+	<xs:complexType name="KMStatusCriterion">
+		<xs:annotation>
+			<xs:documentation>If a KM has one of the specified statuses, then the knowledge module is considered to have satisfied the criterion.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMCriterion">
+				<xs:sequence>
+					<xs:element name="kmStatus" type="dss:KMStatus" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMTraitCriterion" type="dss:KMTraitCriterion"/>
+	<xs:complexType name="KMTraitCriterion">
+		<xs:annotation>
+			<xs:documentation>If the trait criterion is satisfied, then the knowledge module is considered to have satisfied the criterion.
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMCriterion">
+				<xs:sequence>
+					<xs:element name="kmTraitCriterionValue" type="dss:KMTraitCriterionValue"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMTraitCriterionValue" type="dss:KMTraitCriterionValue"/>
+	<xs:complexType name="KMTraitCriterionValue">
+		<xs:sequence>
+			<xs:element name="traitCriterionId" type="dss:ItemIdentifier"/>
+			<xs:element name="value" type="dss:SemanticPayload"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="KMTraitInclusionSpecification" type="dss:KMTraitInclusionSpecification"/>
+	<xs:complexType name="KMTraitInclusionSpecification">
+		<xs:annotation>
+			<xs:documentation>Specification of which KM traits to include in the the search result.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="idOfTraitToIncludeInSearchResult" type="dss:EntityIdentifier" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:simpleType name="MaximumKMsToReturn">
+		<xs:annotation>
+			<xs:documentation>Specifies the maximum number of KMs to return in the search result.  Must be greater than or equal to 1.</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:positiveInteger">
+			<xs:minInclusive value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="RelatedKMSearchCriterion" type="dss:RelatedKMSearchCriterion"/>
+	<xs:complexType name="RelatedKMSearchCriterion">
+		<xs:annotation>
+			<xs:documentation>The RelatedKMSearchCriterion is an object representing a criterion on the relation type between knowledge modules. A knowledge module satisfies this criterion if it has a relation of type relationType to at least one of the specified knowledge modules.  For the purpose of searching, the specified KMs shall be considered the target of the relationship. In other words, the DSS shall look for KMs that fulfill the following pattern: [the KMs returned by the search] [relationship type statement] [target KMs].  For example, if the relationship target KMs are KM A and KM B, and the search relationshipType is SUPERCEDES, then the DSS must look for KMs that supercede KM A and/or KM B.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMCriterion">
+				<xs:sequence>
+					<xs:element name="relationType" type="dss:KMRelationshipType">
+						<xs:annotation>
+							<xs:documentation>Must be specified</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="targetKMId" type="dss:EntityIdentifier" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<!--<< Query - Responses >>-->
+	<xs:element name="KMEvaluationResultSemanticsList" type="dss:KMEvaluationResultSemanticsList"/>
+	<xs:complexType name="KMEvaluationResultSemanticsList">
+		<xs:annotation>
+			<xs:documentation>Specification of the semantics used to convey the evaluation result(s) of a knowledge module.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="kmEvaluationResultSemantics" type="dss:KMEvaluationResultSemantics" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="KMList" type="dss:KMList"/>
+	<xs:complexType name="KMList">
+		<xs:annotation>
+			<xs:documentation>A list of knowledge modules.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="kmDescription" type="dss:KMDescription" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="RankedKM" type="dss:RankedKM"/>
+	<xs:complexType name="RankedKM">
+		<xs:sequence>
+			<xs:element name="kmSearchScore" type="dss:KMSearchScore"/>
+			<xs:element name="kmDescription" type="dss:KMDescription"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="RankedKMList" type="dss:RankedKMList"/>
+	<xs:complexType name="RankedKMList">
+		<xs:annotation>
+			<xs:documentation>List of KMs, ranked by relevant (most relevant KM listed first).  Note that KMs fully matching client search criteria (i.e., with a score of 100) may still have relative relevance expressed through the order used.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="rankedKM" type="dss:RankedKM" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="RelatedKM" type="dss:RelatedKM"/>
+	<xs:complexType name="RelatedKM">
+		<xs:annotation>
+			<xs:documentation>This object contains information about the identifier of the related knowledge module and the relation type.  The direction of the relationship uses the following pattern: [this KM] [relationship type] [related KM].  E.g., if this KM = KM A, related KM = KM B, and relationship type = USES_EVALUATION_RESULTS_FROM, then KM A uses evaluation results from KM B.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="relationshipType" type="dss:KMRelationshipType"/>
+			<xs:element name="relatedKmId" type="dss:EntityIdentifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!--<< Evaluation >>-->
+	<xs:element name="DataRequirementItemData" type="dss:DataRequirementItemData"/>
+	<xs:complexType name="DataRequirementItemData">
+		<xs:annotation>
+			<xs:documentation>The DataRequirementItemData is an object containing data for a particular data requirement item passed as input for a KM evaluation request.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="driId" type="dss:ItemIdentifier"/>
+			<xs:element name="data" type="dss:SemanticPayload"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="EvaluationRequest" type="dss:EvaluationRequest"/>
+	<xs:complexType name="EvaluationRequest">
+		<xs:annotation>
+			<xs:documentation>The EvaluationRequest is an object containing evaluation request of one or more knowledge modules in a non-iterative fashion. 
+</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:EvaluationRequestBase">
+				<xs:sequence>
+					<xs:element name="kmEvaluationRequest" type="dss:KMEvaluationRequest" maxOccurs="unbounded"/>
+					<xs:element name="dataRequirementItemData" type="dss:DataRequirementItemData" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="EvaluationRequestBase" type="dss:EvaluationRequestBase"/>
+	<xs:complexType name="EvaluationRequestBase" abstract="true">
+		<xs:annotation>
+			<xs:documentation>The EvaluationRequestBase is the superclass of all knowledge modules evaluation requests. It contains the data passed as input for evaluating one or more knowledge modules.
+</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="clientLanguage" type="dss:Language" use="required"/>
+		<xs:attribute name="clientTimeZoneOffset" type="xs:string" use="required">
+			<xs:annotation>
+				<xs:documentation>The client's time zone offset from Universal Coordinated Time (UTC).  This offset is expressed as +/- hh:mm, e.g., 00:00, -05:00, +07:00.  Note that the client's time zone offset cannot be used to determine a geographical time zone.  Unless otherwise specified, all time-stamped data provided by the client will be assumed to have this time zone offset.</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:element name="EvaluationResponse" type="dss:EvaluationResponse"/>
+	<xs:complexType name="EvaluationResponse">
+		<xs:annotation>
+			<xs:documentation>The EvaluationResponse is an object containing responses of evaluating knowledge modules in a non-iterative fashion. It contains a list of knowledge module evaluation responses reaching final conclusions as well as a list of knowledge module evaluations with intermediate conclusions due to insufficient data.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:EvaluationResponseBase">
+				<xs:sequence>
+					<xs:element name="intermediateKMEvaluationResponse" type="dss:IntermediateKMEvaluationResponse" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="EvaluationResponseBase" type="dss:EvaluationResponseBase"/>
+	<xs:complexType name="EvaluationResponseBase" abstract="true">
+		<xs:annotation>
+			<xs:documentation>The EvaluationResponseBase is the superclass of all evaluation responses. It contains a list of knowledge module evaluation responses reaching final conclusions.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="finalKMEvaluationResponse" type="dss:FinalKMEvaluationResponse" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="FinalKMEvaluationResponse" type="dss:FinalKMEvaluationResponse"/>
+	<xs:complexType name="FinalKMEvaluationResponse">
+		<xs:annotation>
+			<xs:documentation>The FinalKMEvaluationResponse is an object containing final conclusions of a single knowledge module evaluation response. </xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMEvaluationResponse">
+				<xs:sequence>
+					<xs:element name="kmEvaluationResultData" type="dss:KMEvaluationResultData" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="IntermediateKMEvaluationResponse" type="dss:IntermediateKMEvaluationResponse"/>
+	<xs:complexType name="IntermediateKMEvaluationResponse">
+		<xs:annotation>
+			<xs:documentation>The IntermediateKMEvaluationResponse is an object that identifies what further data requirement groups were needed for reaching a final conclusion through the knowledge module evaluation.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMEvaluationResponse">
+				<xs:sequence>
+					<xs:element name="requiredDRGId" type="dss:ItemIdentifier" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="IntermediateState" type="dss:IntermediateState"/>
+	<xs:complexType name="IntermediateState">
+		<xs:annotation>
+			<xs:documentation>The IntermediateState contains contextual information regarding previous evaluation iterations for a knowledge module. The class implementations are vendor-specific.
+</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="base64EncodedStateData" type="xs:base64Binary"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="IterativeEvaluationRequest" type="dss:IterativeEvaluationRequest"/>
+	<xs:complexType name="IterativeEvaluationRequest">
+		<xs:annotation>
+			<xs:documentation>The IterativeEvaluationRequest is an object containing evaluation request of one or more knowledge modules in an iterative fashion.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:EvaluationRequestBase">
+				<xs:sequence>
+					<xs:element name="iterativeKMEvaluationRequest" type="dss:IterativeKMEvaluationRequest" maxOccurs="unbounded"/>
+					<xs:element name="dataRequirementItemData" type="dss:DataRequirementItemData" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="IterativeEvaluationResponse" type="dss:IterativeEvaluationResponse"/>
+	<xs:complexType name="IterativeEvaluationResponse">
+		<xs:annotation>
+			<xs:documentation>The IterativeEvaluationResponse represents the responses from knowledge module evaluations conducted in an iterative fashion. It contains a list of knowledge module evaluation responses reaching final conclusions, as well as a list of knowledge module evaluations responses reaching intermediate conclusions due to insufficient data.  This object differs from the EvaluationResponse object in that it also provides intermediate state data in the case that a final conclusion could not be reached for a knowledge module.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:EvaluationResponseBase">
+				<xs:sequence>
+					<xs:element name="iterativeKMEvaluationResponse" type="dss:IterativeKMEvaluationResponse" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="IterativeKMEvaluationRequest" type="dss:IterativeKMEvaluationRequest"/>
+	<xs:complexType name="IterativeKMEvaluationRequest">
+		<xs:annotation>
+			<xs:documentation>The IterativeKMEvaluationRequest is an object containing information of a single knowledge module evaluation request in an iterative fashion. It contains information from a previous evaluation iteration.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMEvaluationRequestBase">
+				<xs:sequence>
+					<xs:element name="previousState" type="dss:IntermediateState"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="IterativeKMEvaluationResponse" type="dss:IterativeKMEvaluationResponse"/>
+	<xs:complexType name="IterativeKMEvaluationResponse">
+		<xs:annotation>
+			<xs:documentation>The IterativeKMEvaluationResponse is an object containing intermediate state of a single knowledge module iterative evaluation response. It contains contextual information of the evaluation process so far. 
+@see IntermediateKMEvaluationResponse</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:IntermediateKMEvaluationResponse">
+				<xs:sequence>
+					<xs:element name="intermediateState" type="dss:IntermediateState"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMEvaluationRequest" type="dss:KMEvaluationRequest"/>
+	<xs:complexType name="KMEvaluationRequest">
+		<xs:annotation>
+			<xs:documentation>The KMEvaluationRequest is an object containing information of a single knowledge module evaluation request in a non-iterative fashion.</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="dss:KMEvaluationRequestBase"/>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="KMEvaluationRequestBase" type="dss:KMEvaluationRequestBase"/>
+	<xs:complexType name="KMEvaluationRequestBase" abstract="true">
+		<xs:annotation>
+			<xs:documentation>The KMEvaluationRequestBase is the superclass of a single knowledge module evaluation request. It contains information about the knowledge module identifier to evaluate.  
+
+The following are valid ways of specifying the version number of a knowledge module to run: (i) the specific version number (e.g., 2.1.0): this will result in the evaluation of version 2.1.0; (ii) the specific major and minor version, with * as the revision number (e.g., 2.1.*): this will result in the evaluation of the highest revision with the specified major and minor version number (e.g., 2.1.0, 2.1.1, or 2.1.2, depending on the latest available revision); and (iii) the specific major version, with * as the minor version and * as the revision number (e.g., 2.*.*): this will result in the evaluation of the highest minor version, and the highest revision within that minor version (e.g., 2.3.1, if the highest minor version within major version 2 is 3, and the highest revision within version 2.3 is revision 1, then 2.3.1 would be used).</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="kmId" type="dss:EntityIdentifier"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="KMEvaluationResponse" type="dss:KMEvaluationResponse"/>
+	<xs:complexType name="KMEvaluationResponse" abstract="true">
+		<xs:annotation>
+			<xs:documentation>The KMEvaluationResponse is the superclass of a single knowledge module evaluation response. It contains the knowledge module identifier as well as warnings.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="kmId" type="dss:EntityIdentifier"/>
+			<xs:element name="warning" type="dss:Warning" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="KMEvaluationResultData" type="dss:KMEvaluationResultData"/>
+	<xs:complexType name="KMEvaluationResultData">
+		<xs:annotation>
+			<xs:documentation>The KMEvaluationResultData is an object containing a knowledge module's evaluation result data.</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="evaluationResultId" type="dss:ItemIdentifier"/>
+			<xs:element name="data" type="dss:SemanticPayload"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="Warning" type="dss:Warning"/>
+	<xs:complexType name="Warning">
+		<xs:sequence>
+			<xs:element name="value" type="dss:SemanticPayload"/>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

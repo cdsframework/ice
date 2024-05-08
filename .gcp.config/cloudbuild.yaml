@@ -24,40 +24,45 @@ steps:
   - name: gcr.io/cloud-builders/git
     args: ["fetch", "--unshallow"]
 
-  # build opencds-knowledge-repository-data dep first
-  - name: "maven:3-jdk-8-slim"
-    entrypoint: "mvn"
-    args:
-      ["-Dmaven.compiler.source=1.7", "-Dmaven.compiler.target=1.7", "install"]
-    dir: "opencds/opencds-knowledge-repository-data"
-    volumes:
-      - name: "m2"
-        path: /root/.m2
-
-  # build main project
-  - name: "maven:3-jdk-8-slim"
+  # build opencds dep first
+  - name: "maven:3-openjdk-17-slim"
     entrypoint: "mvn"
     args:
       [
         "-DskipTests",
         "-DskipITs",
-        "-Dmaven.compiler.source=1.8",
-        "-Dmaven.compiler.target=1.8",
+        "-Djetty.skip=true",
+        "-Dmaven.compiler.release=17",
         "install",
       ]
-    dir: "opencds/opencds-parent"
+    dir: "opencds"
+    volumes:
+      - name: "m2"
+        path: /root/.m2
+
+  # build main project
+  - name: "maven:3-openjdk-17-slim"
+    entrypoint: "mvn"
+    args:
+      [
+        "-DskipTests",
+        "-DskipITs",
+        "-Djetty.skip=true",
+        "-Dmaven.compiler.release=17",
+        "install",
+      ]
+    dir: "."
     volumes:
       - name: "m2"
         path: /root/.m2
 
   # build the rules packager
-  - name: "maven:3-jdk-8-slim"
+  - name: "maven:3-openjdk-17-slim"
     id: build
     entrypoint: "mvn"
     args:
       [
-        "-Dmaven.compiler.source=1.8",
-        "-Dmaven.compiler.target=1.8",
+        "-Dmaven.compiler.release=17",
         "compile",
         "assembly:single",
       ]

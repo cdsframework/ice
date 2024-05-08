@@ -1,0 +1,209 @@
+{
+  "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
+  "fhirServer": "http://localhost:8080/fhir-wrapper/fhirServer",
+  "hook": "encounter-view",
+  "redirect": "http://localhost:8080/fhir-wrapper/service-done.html",
+  "user": "Practitioner/phillip",
+  "context": {
+    "patientId": "pat_id_1",
+    "medications": [
+      {
+        "resourceType": "MedicationOrder",
+        "id": "medorder_id_bup_patch_draft",
+        "identifier": [
+          {
+            "system": "Order Number",
+            "value": "1"
+          }
+        ],
+        "status": "draft",
+        "patient": {
+          "reference": "/api/FHIR/DSTU2/Patient/pat_id_1"
+        },
+        "medicationCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "388508"
+            }
+          ]
+        },
+        "dosageInstruction": [
+          {
+            "text": "1 patch Transdermal Every 72 hours",
+            "timing": {
+              "repeat": {
+                "boundsPeriod": {
+                  "start": "2017-04-01T00:00:00-06:00"
+                },
+                "frequency": 1,
+                "period": 72,
+                "periodUnits": "h"
+              }
+            },
+            "asNeededBoolean": false,
+            "route": {
+              "text": "Transdermal"
+            },
+            "doseQuantity": {
+              "value": 1,
+              "unit": "patch"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "prefetch": {
+    "med2": {
+      "resource": {
+        "resourceType": "Medication",
+        "id": "med_id_methadone_oral",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "864708"
+            }
+          ]
+        }
+      }
+    },
+    "med3": {
+      "resource": {
+        "resourceType": "Medication",
+        "id": "med_id_oxycontin_oral",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "1049543"
+            }
+          ]
+        }
+      }
+    },
+    "med4": {
+      "resource": {
+        "resourceType": "Medication",
+        "id": "med_id_percocet_oral",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "1037259"
+            }
+          ]
+        }
+      }
+    },
+    "order2": {
+      "resource": {
+        "resourceType": "MedicationOrder",
+        "id": "medorder_id_percocet_oral_active",
+        "status": "active",
+        "patient": {
+          "reference": "/api/FHIR/DSTU2/Patient/pat_id_1"
+        },
+        "medicationReference": {
+          "reference": "/api/FHIR/DSTU2/Medication/med_id_percocet_oral"
+        },
+        "dosageInstruction": [
+          {
+            "text": "Take 1 tablet by mouth Every 4 hours as needed for pain.",
+            "asNeededBoolean": true,
+            "route": {
+              "text": "Oral"
+            },
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 4,
+                "periodUnits": "h",
+                "boundsPeriod": {
+                  "start": "2017-03-01T00:00:00-06:00"
+                }
+              }
+            },
+            "doseQuantity": {
+              "value": 1,
+              "unit": "tablet"
+            }
+          }
+        ]
+      }
+    },
+    "order3": {
+      "resource": {
+        "resourceType": "MedicationOrder",
+        "id": "medorder_id_oxycontin_oral_active",
+        "status": "active",
+        "patient": {
+          "reference": "/api/FHIR/DSTU2/Patient/pat_id_1"
+        },
+        "medicationReference": {
+          "reference": "/api/FHIR/DSTU2/Medication/med_id_oxycontin_oral"
+        },
+        "dosageInstruction": [
+          {
+            "text": "Take 1 tablet by mouth Every 12 hours for 30 days.",
+            "asNeededBoolean": false,
+            "route": {
+              "text": "Oral"
+            },
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 12,
+                "periodUnits": "h",
+                "boundsPeriod": {
+                  "start": "2017-03-01T00:00:00-06:00"
+                }
+              }
+            },
+            "doseQuantity": {
+              "value": 15,
+              "unit": "mg"
+            }
+          }
+        ]
+      }
+    },
+    "order4": {
+      "resource": {
+        "resourceType": "MedicationOrder",
+        "id": "medorder_id_methadone_oral_active",
+        "status": "active",
+        "patient": {
+          "reference": "/api/FHIR/DSTU2/Patient/pat_id_1"
+        },
+        "medicationReference": {
+          "reference": "/api/FHIR/DSTU2/Medication/med_id_methadone_oral"
+        },
+        "dosageInstruction": [
+          {
+            "text": "Take 1 tablet by mouth Every 12 hours for 30 days.",
+            "asNeededBoolean": false,
+            "route": {
+              "text": "Oral"
+            },
+            "timing": {
+              "repeat": {
+                "frequency": 1,
+                "period": 12,
+                "periodUnits": "h",
+                "boundsPeriod": {
+                  "start": "2017-01-01T00:00:00-06:00"
+                }
+              }
+            },
+            "doseQuantity": {
+              "value": 1,
+              "unit": "tablet"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

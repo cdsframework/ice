@@ -61,7 +61,7 @@ fi
 
 if [[ -v VACCINE_GROUP_EXCLUSIONS ]]
 then
-    echo "Setting output_supplemental_text in ice.properties to: $VACCINE_GROUP_EXCLUSIONS"
+    echo "Setting vaccine_group_exclusions in ice.properties to: $VACCINE_GROUP_EXCLUSIONS"
     sed -i "s/vaccine_group_exclusions=.*/vaccine_group_exclusions=$VACCINE_GROUP_EXCLUSIONS/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
 fi
 

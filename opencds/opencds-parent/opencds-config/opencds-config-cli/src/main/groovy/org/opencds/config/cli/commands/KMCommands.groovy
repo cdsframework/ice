@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.cli.commands
 
 import org.opencds.config.client.rest.KnowledgeModuleRestClient
@@ -26,24 +42,9 @@ class KMCommands {
         return client.getKnowledgePackage(kmId, InputStream.class)
     }
     
-    static def getSDCollection = {String kmId, RestClient restClient ->
-        def client = getClient(restClient)
-        return client.getSupportingData(kmId, String.class)
-    }
-    
-    static def getSD = {String kmId, String sdId, RestClient restClient ->
-        def client = getClient(restClient)
-        return client.getSupportingData(kmId, sdId, String.class)
-    }
-    
     /**
      * Returns an InputStream
      */
-    static def getSDPackage = {String kmId, String sdId, RestClient restClient ->
-        def client = getClient(restClient)
-        return client.getSupportingDataPackage(kmId, sdId, InputStream.class)
-    }
-    
     static def uploadCollection = {String coll, RestClient restClient ->
         def client = getClient(restClient)
         return client.putKnowledgeModules(coll)
@@ -54,19 +55,14 @@ class KMCommands {
         return client.putKnowledgeModule(kmId, km)
     }
     
-    static def uploadPackage = {String kmId, InputStream inputStream, RestClient restClient ->
+    static def uploadPackage = {String kmId, Closure<InputStream> input, RestClient restClient ->
         def client = getClient(restClient)
-        return client.putKnowledgePackage(kmId, inputStream)
-    }
-    
-    static def uploadSD = {String kmId, String sdId, String sd, RestClient restClient ->
-        def client = getClient(restClient)
-        return client.putSupportingData(kmId, sdId, sd)
-    }
-    
-    static def uploadSDPackage = {String kmId, String sdId, InputStream inputStream, RestClient restClient ->
-        def client = getClient(restClient)
-        return client.putSupportingDataPackage(kmId, sdId, inputStream)
+        InputStream inputStream = input()
+        try {
+            return client.putKnowledgePackage(kmId, inputStream)
+        } finally {
+            inputStream.close()
+        }
     }
     
     static def delete = {String kmId, RestClient restClient ->
@@ -77,16 +73,6 @@ class KMCommands {
     static def deletePackage = {String kmId, RestClient restClient ->
         def client = getClient(restClient)
         return client.deleteKnowledgePackage(kmId)
-    }
-    
-    static def deleteSD = {String kmId, String sdId, RestClient restClient ->
-        def client = getClient(restClient)
-        return client.deleteSupportingData(kmId, sdId)
-    }
-    
-    static def deleteSDPackage = {String kmId, String sdId, RestClient restClient ->
-        def client = getClient(restClient)
-        return client.deleteSupportingDataPackage(kmId, sdId)
     }
     
 }
