@@ -1,0 +1,256 @@
+{
+  "hook": "medication-prescribe",
+  "hookInstance": "44c71fff-3aec-44db-a3e4-be02bd647d81",
+  "user": "Practitioner/example",
+  "context": {
+    "patientId": "pt-1121"
+  },
+  "prefetch": {
+    "patient": {
+      "resourceType": "Patient",
+      "id": "pt-1121",
+      "meta": {
+        "versionId": "1",
+        "lastUpdated": "2018-04-16T15:56:43.000+00:00"
+      },
+      "text": {
+        "status": "generated",
+        "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td></td></tr><tr><td>Date of birth</td><td><span>25 June 1951</span></td></tr></tbody></table></div>"
+      },
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/us-core-race",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "2.16.840.1.113883.5.104",
+                "code": "2106-3",
+                "display": "White"
+              }
+            ],
+            "text": "White"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/us-core-ethnicity",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "2.16.840.1.113883.5.50",
+                "code": "2186-5",
+                "display": "Not Hispanic or Latino"
+              }
+            ],
+            "text": "Not Hispanic or Latino"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/us-core-birth-sex",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/v3/AdministrativeGender",
+                "code": "M",
+                "display": "Male"
+              }
+            ],
+            "text": "Male"
+          }
+        }
+      ],
+      "identifier": [
+        {
+          "use": "usual",
+          "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.0"
+        },
+        {
+          "use": "usual",
+          "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.1"
+        },
+        {
+          "use": "usual",
+          "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.11"
+        },
+        {
+          "use": "usual",
+          "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.2"
+        },
+        {
+          "use": "usual",
+          "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.3"
+        },
+        {
+          "use": "usual",
+          "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.35"
+        },
+        {
+          "use": "usual",
+          "system": "urn:oid:1.2.840.114350.1.13.90.3.7.5.737384.16418000000"
+        }
+      ],
+      "active": true,
+      "gender": "male",
+      "birthDate": "1951-06-25",
+      "deceasedBoolean": false,
+      "maritalStatus": {
+        "text": "Married"
+      },
+      "communication": [
+        {
+          "language": {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.6.99",
+                "code": "en",
+                "display": "English"
+              }
+            ],
+            "text": "English"
+          },
+          "preferred": true
+        }
+      ]
+    },
+    "medOrders": {
+      "resourceType": "Bundle",
+      "id": "f38a62aa-80a9-409b-b3a9-7a00b671aaa5",
+      "meta": {
+        "lastUpdated": "2018-04-16T16:38:29.647+00:00"
+      },
+      "type": "searchset",
+      "total": 1,
+      "link": [
+        {
+          "relation": "self",
+          "url": "http://docker.bmi.utah.edu:8081/hapi-fhir-server/dstu2/MedicationOrder/_search?_format=json&patient=pt-1121"
+        }
+      ],
+      "entry": [
+        {
+          "fullUrl": "http://docker.bmi.utah.edu:8081/hapi-fhir-server/dstu2/MedicationOrder/f0787b18-3825-4d73-bf59-3d31775d6987",
+          "resource": {
+            "resourceType": "MedicationOrder",
+            "id": "f0787b18-3825-4d73-bf59-3d31775d6987",
+            "meta": {
+              "versionId": "3",
+              "lastUpdated": "2018-04-16T15:56:43.000+00:00"
+            },
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/extension-MedicationStatement.category",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/medication-request-category",
+                      "code": "community",
+                      "display": "Community"
+                    }
+                  ],
+                  "text": "Community"
+                }
+              }
+            ],
+            "dateWritten": "2017-12-02",
+            "status": "active",
+            "patient": {
+              "reference": "Patient/pt-1121"
+            },
+            "prescriber": {
+              "reference": "Practitioner/9c7081b4-730b-42d2-a18e-ae16658a946d",
+              "display": "Heidi Ann Nielson, APRN"
+            },
+            "medicationReference": {
+              "reference": "Medication/27b045c7-f62d-4252-8423-a1f6525e4a75",
+              "display": "MORPHINE INJ DOSE RANGE RECORD"
+            },
+            "dosageInstruction": [
+              {
+                "extension": [
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/ordered-dose",
+                    "valueQuantity": {
+                      "value": 5,
+                      "unit": "mg",
+                      "system": "http://unitsofmeasure.org",
+                      "code": "mg"
+                    }
+                  },
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/admin-amount",
+                    "valueQuantity": {
+                      "value": 1,
+                      "unit": "tablet"
+                    }
+                  }
+                ],
+                "text": "Community",
+                "timing": {
+                  "repeat": {
+                    "boundsPeriod": {
+                      "start": "2017-12-02T00:00:00Z"
+                    },
+                    "period": 6,
+                    "periodUnits": "h"
+                  },
+                  "code": {
+                    "text": "Community"
+                  }
+                },
+                "asNeededBoolean": true,
+                "route": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.698288.330",
+                      "code": "19",
+                      "display": "Oral"
+                    }
+                  ],
+                  "text": "Community"
+                },
+                "method": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.798268.8600",
+                      "code": "11",
+                      "display": "Take"
+                    }
+                  ],
+                  "text": "Community"
+                },
+                "doseQuantity": {
+                  "value": 5,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ],
+            "dispenseRequest": {
+              "validityPeriod": {
+                "start": "2017-12-02T00:00:00Z"
+              },
+              "numberOfRepeatsAllowed": 0,
+              "quantity": {
+                "value": 60,
+                "unit": "tablet"
+              },
+              "expectedSupplyDuration": {
+                "value": 15,
+                "unit": "days",
+                "system": "http://unitsofmeasure.org",
+                "code": "d"
+              }
+            },
+            "priorPrescription": {
+              "reference": "MedicationOrder/90e19c88-56b0-4e7f-b441-04093deb27f9",
+              "display": "FENTANYL CITRATE 0.05 MG/ML IJ SOLN"
+            }
+          },
+          "search": {
+            "mode": "match"
+          }
+        }
+      ]
+    }
+  }
+}

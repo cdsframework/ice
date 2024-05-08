@@ -376,14 +376,13 @@ public class SeriesRules {
 			HashSet<Integer> lDoseNumbers = new HashSet<Integer>();
 			for (DoseRule lDR : pDoseRules) {
 				int lDRDoseNumber = lDR.getDoseNumber();
-				int lDRDoseNumberInt = new Integer(lDRDoseNumber);
-				if (lDRDoseNumber > lNumberOfDoses || lDoseNumbers.contains(lDRDoseNumberInt)) {
+                if (lDRDoseNumber > lNumberOfDoses || lDoseNumbers.contains(lDRDoseNumber)) {
 					String lErrStr = "Invalid Dose Number supplied for DoseRule; either a duplicate dose number or greater than the number of Doses for the Series";
 					logger.warn(_METHODNAME + lErrStr);
 					throw new IllegalArgumentException(lErrStr);
 				}
 				else {
-					lDoseNumbers.add(lDRDoseNumberInt);
+					lDoseNumbers.add(lDRDoseNumber);
 				}
 			}
 

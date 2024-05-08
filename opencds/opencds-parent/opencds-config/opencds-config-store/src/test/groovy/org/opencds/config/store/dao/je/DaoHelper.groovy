@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.store.dao.je
 
 import org.opencds.config.api.model.Concept
@@ -8,6 +24,7 @@ import org.opencds.config.api.model.ExecutionEngine
 import org.opencds.config.api.model.KMStatus
 import org.opencds.config.api.model.KnowledgeModule
 import org.opencds.config.api.model.PluginId
+import org.opencds.config.api.model.PrePostProcessPluginId
 import org.opencds.config.api.model.SemanticSignifier
 import org.opencds.config.api.model.SupportMethod
 import org.opencds.config.api.model.SupportingData
@@ -18,7 +35,8 @@ import org.opencds.config.api.model.impl.ConceptMappingImpl
 import org.opencds.config.api.model.impl.ExecutionEngineImpl
 import org.opencds.config.api.model.impl.KMIdImpl
 import org.opencds.config.api.model.impl.KnowledgeModuleImpl
-import org.opencds.config.api.model.impl.PluginIdImpl;
+import org.opencds.config.api.model.impl.PluginIdImpl
+import org.opencds.config.api.model.impl.PrePostProcessPluginIdImpl
 import org.opencds.config.api.model.impl.SSIdImpl
 import org.opencds.config.api.model.impl.SecondaryCDMImpl
 import org.opencds.config.api.model.impl.SemanticSignifierImpl
@@ -70,7 +88,9 @@ class DaoHelper {
         generateId(),
         generateId(),
         generateId(),
-        generateId())
+        generateId(),
+		generateId(),
+		null)
     }
 
     static SemanticSignifier createSemanticSignifier() {
@@ -93,6 +113,7 @@ class DaoHelper {
         return KnowledgeModuleImpl.create(
         KMIdImpl.create(generateId(), generateId(), generateId()),
         KMStatus.APPROVED,
+		null,
         generateId(),
         SSIdImpl.create(generateId(), generateId(), generateId()),
         CDMIdImpl.create(generateId(), generateId(), generateId()),
@@ -106,15 +127,15 @@ class DaoHelper {
         [
             TraitIdImpl.create(generateId(), generateId(), generateId())
         ],
-        [generatePluginId()],
-        [generatePluginId()],
+        [generatePrePostProcessPluginId()],
+        [generatePrePostProcessPluginId()],
         new Date(),
         generateId()
         )
     }
 
     static ExecutionEngine createExecutionEngine() {
-        return ExecutionEngineImpl.create(generateId(), generateId(), new Date(), generateId(), [
+        return ExecutionEngineImpl.create(generateId(), generateId(), generateId(), generateId(), generateId(), new Date(), generateId(), [
             DssOperation.EVALUATION_EVALUATE
         ])
     }
@@ -134,6 +155,10 @@ class DaoHelper {
        PluginIdImpl.create(generateId(), generateId(), generateId()) 
     }
 
+    static PrePostProcessPluginId generatePrePostProcessPluginId() {
+    	PrePostProcessPluginIdImpl.create(generateId(), generateId(), generateId(), null) 
+    }
+    
     static String generateId() {
         return UUID.randomUUID()
     }

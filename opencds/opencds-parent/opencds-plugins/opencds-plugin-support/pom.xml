@@ -3,7 +3,7 @@
     <parent>
         <artifactId>opencds-plugins</artifactId>
         <groupId>org.opencds</groupId>
-        <version>2.0.5</version>
+        <version>6.2.0</version>
     </parent>
     <artifactId>opencds-plugin-support</artifactId>
     <name>OpenCDS Plugin Support</name>
@@ -20,7 +20,23 @@
         </dependency>
     </dependencies>
     <build>
-        <plugins>
-        </plugins>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>org.codehaus.gmavenplus</groupId>
+              <artifactId>gmavenplus-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-surefire-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-enforcer-plugin</artifactId>
+          </plugin>
+      </plugins>
     </build>
 </project>

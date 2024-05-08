@@ -4,28 +4,28 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.TimeZone;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.JAXBException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.xml.bind.JAXBException;
+
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -67,8 +67,8 @@ import org.opencds.config.api.ConfigurationService;
 import org.opencds.config.api.model.CDMId;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.impl.KMIdImpl;
-import org.opencds.dss.evaluate.EvaluationService;
-import org.opencds.dss.util.DssUtil;
+import org.opencds.dss.evaluate.impl.DSSEvaluation;
+import org.opencds.dss.evaluate.util.DssUtil;
 import org.springframework.util.StopWatch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -94,7 +94,7 @@ public class EvaluateResource {
         }
     };
 
-    private final EvaluationService evaluationService;
+    private final DSSEvaluation evaluationService;
     private final ConfigurationService configurationService;
 
     @Context
@@ -114,7 +114,7 @@ public class EvaluateResource {
      * @param evaluationService
      * @param configurationService
      */
-    public EvaluateResource(final EvaluationService evaluationService,
+    public EvaluateResource(final DSSEvaluation evaluationService,
             final ConfigurationService configurationService) {
         this.evaluationService = evaluationService;
         this.configurationService = configurationService;
@@ -237,7 +237,7 @@ public class EvaluateResource {
      * @throws org.omg.dss.EvaluationExceptionFault
      * @throws org.omg.dss.InvalidTimeZoneOffsetExceptionFault
      * @throws org.omg.dss.DSSRuntimeExceptionFault
-     * @throws javax.xml.bind.JAXBException
+     * @throws jakarta.xml.bind.JAXBException
      * @throws javax.xml.transform.TransformerException
      */
     @POST

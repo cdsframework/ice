@@ -1,23 +1,23 @@
-/**
- * Copyright 2011 OpenCDS.org
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
+/*
+ * Copyright 2012-2020 OpenCDS.org
  *
- *		http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- *	
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.opencds.vmr.v1_0.mappings.mappers;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
@@ -36,7 +36,7 @@ import org.opencds.vmr.v1_0.mappings.in.FactLists;
 import org.opencds.vmr.v1_0.mappings.out.structures.OrganizedResults;
 import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
 
-/**
+/*
  * @author David Shields
  * 
  * @date
@@ -44,7 +44,7 @@ import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
  */
 public abstract class NestedObjectsMapper extends Object {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static Log logger = LogFactory.getLog(NestedObjectsMapper.class);
 	
 	/**
 	 * Pull in the lists of RelatedEntities and RelatedClinicalStatements found in each source 
@@ -459,11 +459,11 @@ public abstract class NestedObjectsMapper extends Object {
 		throws ImproperUsageException, DataFormatException, InvalidDataException
 	{
 		String _METHODNAME = "pullInRelatedEntityNestedObjects: ";
+		final String externalClassName = external.getClass().getSimpleName();
 		if (logger.isTraceEnabled())
-        logger.trace(_METHODNAME + external.getClass().getSimpleName() + ", " + parentId);
+        	logger.trace(_METHODNAME + externalClassName + ", " + parentId);
 
-        final String externalClassName = external.getClass().getSimpleName();
-    if ("AdministrableSubstance".equals(externalClassName)) {
+        if ("AdministrableSubstance".equals(externalClassName)) {
 			org.opencds.vmr.v1_0.schema.AdministrableSubstance typedSource = (org.opencds.vmr.v1_0.schema.AdministrableSubstance)external;
 			if (typedSource.getRelatedEntity() != null) {
 				for (org.opencds.vmr.v1_0.schema.RelatedEntity oneRelatedEntity : typedSource.getRelatedEntity()) {
@@ -552,8 +552,8 @@ public abstract class NestedObjectsMapper extends Object {
 				 */
 				if (logger.isTraceEnabled())
 					logger.trace(_METHODNAME + "push out source Entity or Clinical Statement Id " + oneInternalEntityRelationship.getSourceId()
-							+ ", targetEntityId " + oneInternalEntityRelationship.getTargetEntityId()
-							+ ", with relationship " + oneInternalEntityRelationship.getTargetRole().toString());
+						+ ", targetEntityId " + oneInternalEntityRelationship.getTargetEntityId() 
+						+ ", with relationship " + oneInternalEntityRelationship.getTargetRole().toString());
 				org.opencds.vmr.v1_0.schema.RelatedEntity oneSchemaNestedEntity = new org.opencds.vmr.v1_0.schema.RelatedEntity();
 				
 				oneSchemaNestedEntity = OneObjectMapper.pushOutRelatedEntityToClinicalStatement(oneInternalEntityRelationship, target, organizedResults);
@@ -743,22 +743,24 @@ public abstract class NestedObjectsMapper extends Object {
 	{
 		
 		String _METHODNAME = "pushOutRelatedEntityNestedObjects(): ";
-
+		final String externalClassName = external.getClass().getSimpleName();
+		
 		//look for related entities to this entity
 		if ( organizedResults.getEntityChildren().get(sourceId) == null ) {
 			return null;
-		}
+		} 
 
-		final String externalClassName = external.getClass().getSimpleName();
-		logger.trace(_METHODNAME + "Entity children of " + sourceId);
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + "Entity children of " + sourceId);
 		for ( EntityRelationship oneInternalEntityRelationship : organizedResults.getEntityChildren().get(sourceId)) {
 			/*
 			 * At this point oneInternalEntityRelationship is one member of the List 
 			 * 		of EntityRelationships that are nested in this one entity specified by sourceId
 			 */
 			String targetEntityId = oneInternalEntityRelationship.getTargetEntityId();
-			
-			logger.trace(_METHODNAME + "push out source Entity Id " + sourceId
+
+			if (logger.isTraceEnabled())
+				logger.trace(_METHODNAME + "push out source Entity Id " + sourceId
 					+ ", targetEntityId " + targetEntityId 
 					+ ", with relationship " + oneInternalEntityRelationship.getTargetRole().toString());
 			
@@ -768,7 +770,7 @@ public abstract class NestedObjectsMapper extends Object {
 			oneSchemaRelatedEntity.setRelationshipTimeInterval(MappingUtility.iVLDateInternal2IVLTS(oneInternalEntityRelationship.getRelationshipTimeInterval()));
 			
             EntityBase thisInternalNestedEntity = organizedResults.getEntityList().get(targetEntityId);
-            final String thisInternalNestedEntityClassName = thisInternalNestedEntity.getClass().getSimpleName();
+			final String thisInternalNestedEntityClassName = thisInternalNestedEntity.getClass().getSimpleName();
 
             if ("AdministrableSubstance".equals(thisInternalNestedEntityClassName)) {
 				org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance schemaNestedEntity = 
@@ -784,7 +786,7 @@ public abstract class NestedObjectsMapper extends Object {
 				schemaRelatedEntity.setTargetRole(MappingUtility.cDInternal2CD(oneInternalEntityRelationship.getTargetRole()));
 				schemaRelatedEntity.setRelationshipTimeInterval(MappingUtility.iVLDateInternal2IVLTS(oneInternalEntityRelationship.getRelationshipTimeInterval()));	
 				schemaRelatedEntity.setAdministrableSubstance(schemaNestedEntity);
-
+				
 				if ("AdministrableSubstance".equals(externalClassName)) {
 					if ("org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance".equals(external.getClass().getName())) {
 						((org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance)external).getRelatedEntity().add(schemaRelatedEntity);

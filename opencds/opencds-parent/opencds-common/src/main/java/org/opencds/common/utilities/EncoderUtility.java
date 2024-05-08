@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.common.utilities;
 
 /**
@@ -8,17 +24,12 @@ package org.opencds.common.utilities;
  * @version 1.00
  */
 
-//import org.apache.commons.*;
-//import org.apache.commons.codec.binary.Base64;
-import sun.misc.BASE64Encoder;
-
-import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
+import java.util.Base64;
 
 public abstract class EncoderUtility
 {
@@ -106,7 +117,7 @@ public abstract class EncoderUtility
         }
 
         byte raw[] = md.digest(); //step 4
-        String hash = (new BASE64Encoder()).encode(raw); //step 5
+        String hash = Base64.getEncoder().encodeToString(raw); //step 5
         return hash; //step 6
     }
 

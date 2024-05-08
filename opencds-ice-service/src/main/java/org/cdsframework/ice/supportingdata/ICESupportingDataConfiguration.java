@@ -33,10 +33,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.logging.log4j.LogManager;
@@ -475,7 +475,7 @@ public class ICESupportingDataConfiguration {
 				continue;
 			}
 			try {
-				JAXBContext jc = JAXBContext.newInstance(pSupportingDataXMLClass.getPackage().getName());
+				JAXBContext jc = JAXBContext.newInstance(pSupportingDataXMLClass.getPackage().getName(), getClass().getClassLoader());
 				Unmarshaller lUnmarshaller = jc.createUnmarshaller();
 				FilenameFilter lFF = new XMLSupportingDataFilenameFilterImpl();
 				String[] lSDFiles = lSDDirectory.list(lFF);
@@ -994,8 +994,8 @@ public class ICESupportingDataConfiguration {
 		lCdsVersions.add("gov.nyc.cir^ICE^1.0.0");
 
 		try {
-			ICESupportingDataConfiguration icdh = new ICESupportingDataConfiguration("org.cdsframework^ICE^1.0.0", new File("/usr/local/projects/ice/ice3/opencds-ice-service/src/main/resources/knowledgeCommon"),
-					lCdsVersions, new File("/usr/local/projects/ice/ice3/opencds-ice-service/src/main/resources/knowledgeModule"));
+			ICESupportingDataConfiguration icdh = new ICESupportingDataConfiguration("org.cdsframework^ICE^1.0.0", new File("/usr/local/projects/ice/opencds-ice-service/src/main/resources/knowledgeCommon"),
+					lCdsVersions, new File("/usr/local/projects/ice/opencds-ice-service/src/main/resources/knowledgeModule"));
 		}
 		catch (Exception e) {
 			System.out.print("An unexpected error occurred :" + e.toString());

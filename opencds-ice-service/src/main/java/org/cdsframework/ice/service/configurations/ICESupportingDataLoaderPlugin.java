@@ -28,12 +28,14 @@ package org.cdsframework.ice.service.configurations;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
+import org.cdsframework.ice.supportingdata.IceSupportingDataProperties;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.config.api.model.KMId;
@@ -45,129 +47,142 @@ import org.opencds.plugin.SupportingData;
 public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
 	private static final Logger logger = LogManager.getLogger();
 
-    // AI: determine supportingData.identifier dynamically (fix upon OpenCDS upgrade)
-    private static final String SD_ICE = "ice-supporting-data";
-    
-    public static boolean supportingDataAlreadyLoadedInContext(PreProcessPluginContext context) {
+	// AI: determine supportingData.identifier dynamically (fix upon OpenCDS upgrade)
+	private static final String SD_ICE = "ice-supporting-data";
 
-    	String _METHODNAME = "supportingDataAlreadyLoadedForContext(): ";
-    	if (context == null) {
-    		if (logger.isDebugEnabled()) {
-    			logger.debug(_METHODNAME + "context provided is null");
-    		}
-    		return false;
-    	}    	
-        SupportingData sd = context.getSupportingData().get(SD_ICE);
-        if (sd == null) {
-        	if (logger.isDebugEnabled()) {
-        		logger.debug(_METHODNAME + "supporting data populated in context for " + SD_ICE);
-        	}
-        	return false;
-        }
-        String lKmId = sd.getKmId();
-    	if (logger.isDebugEnabled()) {
-    		logger.debug(_METHODNAME + "supporting data populated in context for " + SD_ICE + "; KmID is: " + lKmId);
-    	}
+	private static final IceSupportingDataProperties iceProps = IceSupportingDataProperties.create(new ICEPropertiesDataConfiguration().getProperties());
 
-        PluginDataCache cache = context.getCache();            	
-    	if (cache == null || cache.get(lKmId) == null) {
-    		if (logger.isDebugEnabled()) {
-        		logger.debug(_METHODNAME + "No cache in context; returning false");
-        	}
-    		return false;
-    	}
+	@Override
+	public void execute(PreProcessPluginContext context) {
+		String _METHODNAME = "execute(PreProcessPluginContext): ";
+		if (context == null) {
+			String lErrStr = "PreProcessPluginContext not specified";
+			logger.error(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
+		PluginDataCache cache = context.getCache();
 
-    	return true;
-    }
+		SupportingData sd = getSupportingData(context);
+		if (sd == null) {
+			String lErrStr = "SupportingData not found";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
 
-    
-    @Override 
-    public void execute(PreProcessPluginContext context) {
-    	
-    	String _METHODNAME = "execute(): ";
-    	if (context == null) {
-    		String lErrStr = "PreProcessPluginContext not specified";
-    		logger.error(_METHODNAME + lErrStr);
-    		throw new IllegalArgumentException(lErrStr);
-    	}
-    	Map<String, SupportingData> supportingData = context.getSupportingData();
-        PluginDataCache cache = context.getCache();
-        SupportingData sd = supportingData.get(SD_ICE);
-        if (sd == null) {
-        	String lErrStr = "SupportingData not found";
-    		logger.error(_METHODNAME + lErrStr);
-    		throw new RuntimeException(lErrStr);
-        }
-    	String lKMId = sd.getKmId();
-        Schedule schedule = cache.get(lKMId); 
-        if (schedule == null) {
-        	// Schedule has not been stored in supporting data - load it - This should only happen once.
-        	logger.info("Loading immunization schedule for Knowledge Module: " + lKMId);
-        	loadImmunizationSchedule(lKMId, cache);
-        	logger.info(_METHODNAME + "Immunization schedule loaded for knowledge module: " + lKMId);
-        }
-        else if (logger.isDebugEnabled()) {
-        	logger.debug(_METHODNAME + "Immunization schedule previously loaded");
-        }
-    }
-    
-    public void execute(PreProcessPluginContext context, String pKMId) {
-    	
-    	String _METHODNAME = "execute(PreProcessPluginContext, String): ";
-    	if (context == null || pKMId == null) {
-    		String lErrStr = "PreProcessPluginContext or Knowledge Module ID not specified";
-    		logger.error(_METHODNAME + lErrStr);
-    		throw new IllegalArgumentException(lErrStr);
-    	}
-        PluginDataCache cache = context.getCache();
-        Schedule schedule = cache.get(pKMId); 
-        if (schedule == null) {
-        	// Schedule has not been stored in supporting data - load it - This should only happen once.
-        	logger.info("Loading immunization schedule for Knowledge Module: " + pKMId);
-        	loadImmunizationSchedule(pKMId, cache);
-        	logger.info(_METHODNAME + "Immunization schedule loaded for knowledge module: " + pKMId);
-        }
-        else if (logger.isDebugEnabled()) {
-        	logger.debug(_METHODNAME + "Immunization schedule previously loaded");
-        }
-    }
-    
-    /**
-     * Given an ICE knowledge module identifier in the correct format, load its corresponding Schedule into the provided cache
-     */
-    private synchronized void loadImmunizationSchedule(String pRequestedKMIdStr, PluginDataCache pCache) {
-    	
-    	String _METHODNAME = "loadImmunizationSchedule(): ";
-    	
-    	if (pCache == null) {
-    		String lErrStr = "PluginDataCache parameter not specified";
-    		logger.error(_METHODNAME + lErrStr);
-    		throw new RuntimeException(lErrStr);
-    	}
-    	
-    	Schedule s = pCache.get(pRequestedKMIdStr);
-    	if (s != null) {
-    		if (logger.isDebugEnabled()) {
-    			logger.debug(_METHODNAME + "Immunization schedule already loaded");
-    		}
-    		// Schedule is already loaded
-    		return;
-    	}
-    	
-    	// Determine requested KM ID Object
-    	KMId lRequestedKMIdObject = KnowledgeModuleUtils.returnKMIdRepresentationOfKnowledgeModule(pRequestedKMIdStr);
-    	if (lRequestedKMIdObject == null) {
-    		String lErrStr = "Invalid knowledge module provided; cannot continue";
-    		logger.error(_METHODNAME + lErrStr);
-    		throw new RuntimeException(lErrStr);
-    	}
-    	
-    	// Determine base rules KM ID in String format
-    	ICEPropertiesDataConfiguration iceProps = new ICEPropertiesDataConfiguration();
-    	String lBaseRulesScopingKmId = KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceProps.getBaseRulesScopingEntityId(), lRequestedKMIdObject.getBusinessId(), 
-    		iceProps.getBaseRulesVersion());
-    	
-		// Initialize schedule 
+		String lKMId = sd.getKmId();
+		Schedule schedule = cache.get(sd);
+		if (schedule == null) {
+			// Schedule has not been stored in supporting data - load it - This should only happen once.
+			logger.info("Loading immunization schedule for Knowledge Module: " + lKMId);
+			loadImmunizationSchedule(sd, cache);
+			logger.info(_METHODNAME + "Immunization schedule loaded for knowledge module: " + lKMId);
+
+			schedule = cache.get(sd);
+		}
+		else
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "Immunization schedule previously loaded");
+			}
+
+		if (schedule == null) {
+			// Immunization schedule not loaded
+			String lErrStr = "Immunization schedule not loaded; something went wrong. Incorrect configuration or requested knowledge module ID likely: " + lKMId;
+			logger.error(_METHODNAME + lErrStr);
+			throw new ICECoreError(lErrStr);
+		}
+		if (!schedule.isScheduleInitialized()) {
+			String lErrStr = "Schedule has not been fully initialized; something went wrong; cannot process request";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		context.getGlobals().put("schedule", schedule);
+
+		context.getGlobals().put("patientAgeTimeOfInterest", null);
+
+		if (iceProps.outputEarliestOverdueDates() == null) {
+			String lErrStr =
+					"An error occurred: knowledge module not properly initialized: output earliest/overdue flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		context.getGlobals().put("outputEarliestOverdueDates", iceProps.outputEarliestOverdueDates());
+
+		if (iceProps.doseOverrideFeatureEnabled() == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: dose override flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		context.getGlobals().put("doseOverrideFeatureEnabled", iceProps.doseOverrideFeatureEnabled());
+
+		if (iceProps.outputSupplementalText() == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: dose override flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		context.getGlobals().put("outputSupplementalText", iceProps.outputSupplementalText());
+
+		context.getGlobals().put("vaccineGroupExclusions", iceProps.vaccineGroupExclusions());
+
+		if (iceProps.enableUnsupportedVaccinesGroup() == null) {
+			String lErrStr =
+					"An error occurred: knowledge module not properly initialized: unsupported vaccine group flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		context.getGlobals().put("enableUnsupportedVaccinesGroup", iceProps.enableUnsupportedVaccinesGroup());
+
+		if (iceProps.disableCovid19DoseNumberReset() == null) {
+			String lErrStr =
+					"An error occurred: knowledge module not properly initialized: enableCovid19DoseNumberReset flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		context.getGlobals().put("disableCovid19DoseNumberReset", iceProps.disableCovid19DoseNumberReset());
+	}
+
+	public static SupportingData getSupportingData(PreProcessPluginContext context) {
+		return context.getSupportingData().get(SD_ICE);
+	}
+
+	/**
+	 * Given an ICE knowledge module identifier in the correct format, load its corresponding Schedule into the provided cache
+	 */
+	private synchronized void loadImmunizationSchedule(SupportingData supportingData, PluginDataCache pCache) {
+
+		String _METHODNAME = "loadImmunizationSchedule(): ";
+
+		if (pCache == null) {
+			String lErrStr = "PluginDataCache parameter not specified";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+
+		Schedule s = pCache.get(supportingData);
+		if (s != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "Immunization schedule already loaded");
+			}
+			// Schedule is already loaded
+			return;
+		}
+
+		String pRequestedKMIdStr = supportingData.getKmId();
+
+		// Determine requested KM ID Object
+		KMId lRequestedKMIdObject = KnowledgeModuleUtils.returnKMIdRepresentationOfKnowledgeModule(pRequestedKMIdStr);
+		if (lRequestedKMIdObject == null) {
+			String lErrStr = "Invalid knowledge module provided; cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+
+		// Determine base rules KM ID in String format
+		ICEPropertiesDataConfiguration iceProps = new ICEPropertiesDataConfiguration();
+		String lBaseRulesScopingKmId =
+				KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceProps.getBaseRulesScopingEntityId(), lRequestedKMIdObject.getBusinessId(),
+						iceProps.getBaseRulesVersion());
+
+		// Initialize schedule
 		logger.info("Initializing Schedule");
 		List<String> cdsVersions = new ArrayList<String>();
 		String lRequestedKmIdStr = (pRequestedKMIdStr != null && pRequestedKMIdStr.equals("org.nyc.cir^ICE^1.0.0")) ? "gov.nyc.cir^ICE^1.0.0" : pRequestedKMIdStr;
@@ -183,53 +198,6 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
 		logger.info("Schedule Initialization complete");
 
 		// Store Schedule into cache
-    	pCache.put(pRequestedKMIdStr, s);
-    }
-    
-    
-    /*
-    @Override
-    public void execute(PreProcessPluginContext context) {
-
-    	String _METHODNAME = "execute(): ";
-    	Map<String, SupportingData> supportingData = context.getSupportingData();
-        PluginDataCache cache = context.getCache();
-        SupportingData sd = supportingData.get(SD_ICE);
-        if (logger.isDebugEnabled()) {
-        	logger.debug(_METHODNAME + "SD: " + sd);
-        }
-        Properties concepts = new Properties();
-        if (sd != null) {
-        	String lKmId = sd.getKmId();
-        	if (logger.isDebugEnabled()) {
-        		logger.debug(_METHODNAME + "supportingData KmID: " + lKmId);
-        	}
-            concepts = cache.get(lKmId);
-            if (concepts == null) {
-            	if (logger.isDebugEnabled()) {
-            		logger.debug(_METHODNAME + "supporting data not previously stored in cache. Loading it in now");
-            	}
-                Map<String, SupportingData> sdMap = context.getSupportingData();
-                sd = sdMap.get(SD_ICE);
-                byte[] data = sd.getData();
-                try {
-                    concepts = new Properties();
-                    concepts.load(new ByteArrayInputStream(data));
-                    cache.put(lKmId, concepts);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                // how do we know which supporting data is the one?
-            }
-            else {
-            	if (logger.isDebugEnabled()) {
-            		logger.debug(_METHODNAME + "supporting data found in cache.");
-            	}
-
-            }
-        }
-        
-        concepts.list(System.out);
-    }
-	*/
+		pCache.put(supportingData, s);
+	}
 }

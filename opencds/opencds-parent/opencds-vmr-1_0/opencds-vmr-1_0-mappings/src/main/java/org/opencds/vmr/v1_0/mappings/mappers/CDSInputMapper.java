@@ -1,17 +1,17 @@
-/**
- * Copyright 2011 OpenCDS.org
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
+/*
+ * Copyright 2011-2020 OpenCDS.org
  *
- *		http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- *	
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.opencds.vmr.v1_0.mappings.mappers;
@@ -24,7 +24,7 @@ import org.opencds.vmr.v1_0.internal.CDSInput;
 import org.opencds.vmr.v1_0.internal.CDSResource;
 import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
 
-/**
+/*
  * Mapper classes provide mapping in both directions between the external schema structure of the vMR
  * 		and the internal javabeans used by the rules.
  * 
@@ -57,16 +57,17 @@ public class CDSInputMapper {
 			templateIds.add(MappingUtility.iI2Root("templateId", source.getTemplateId().get(i)));
 		}
 		if (templateIds.size() > 0) target.setTemplateId(templateIds);
-		List<CDSResource> CdsResources = new ArrayList<CDSResource>();
+		List<CDSResource> cdsResources = new ArrayList<CDSResource>();
 		for (org.opencds.vmr.v1_0.schema.CDSResource thisCdsResource : (List<org.opencds.vmr.v1_0.schema.CDSResource>)source.getCdsResource()) {
 			if (thisCdsResource != null) {
 				CDSResource targetCDSResource = new CDSResource();
 //				CDSResourceMapper.pullIn(thisCdsResource, targetCDSResource, mu);
 				if (thisCdsResource.getCdsResourceType() != null) targetCDSResource.setCdsResourceType(MappingUtility.cD2CDInternal(thisCdsResource.getCdsResourceType()));
 				if (thisCdsResource.getResourceContents() != null) targetCDSResource.setResourceContents(thisCdsResource.getResourceContents());
-				CdsResources.add(targetCDSResource);
+				cdsResources.add(targetCDSResource);
 			}
 		}
+		target.setCdsResource(cdsResources);
 		target.setFocalPersonId(MappingUtility.iI2FlatId(source.getVmrInput().getPatient().getId()));
 		if (source.getCdsContext() != null) {
 			CDSContext internalCDSContext = new CDSContext();

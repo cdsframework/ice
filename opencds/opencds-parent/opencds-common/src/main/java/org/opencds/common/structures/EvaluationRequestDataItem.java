@@ -1,9 +1,22 @@
-/**
- * 
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.opencds.common.structures;
 
-import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.Date;
 
 /**
@@ -13,16 +26,23 @@ import java.util.Date;
  *
  */
 public class EvaluationRequestDataItem {
+	protected String    focalPersonId;
 	protected Date 		evalTime; 
 	protected String 	clientLanguage;
 	protected String 	clientTimeZoneOffset;
 	protected String 	externalFactModelSSId;
-	protected String	inputItemName;
-	protected String	inputContainingEntityId;
-	protected byte[]  inputPayload;
-	private String 	inputPayloadString;
-	protected String	interactionId;
-	protected Object	cdsInput; 	//must be cast to a JAXB object when used...
+	protected String    inputItemName;
+	protected String    inputContainingEntityId;
+	protected String    interactionId;
+	protected URI       serverUri;
+	
+	public String getFocalPersonId() {
+		return focalPersonId;
+	}
+	
+	public void setFocalPersonId(String focalPersonId) {
+		this.focalPersonId = focalPersonId;
+	}
 
 	/**
 	 * @return the evalTime
@@ -110,37 +130,6 @@ public class EvaluationRequestDataItem {
 	}
 
 	/**
-	 * Calling this method should be discouraged as it is expensive to convert a large byte[] to a String
-	 * @return the inputPayloadString
-	 */
-	public String getInputPayloadString() {
-		if (inputPayload != null && inputPayloadString == null)
-		{
-			try
-			{
-				inputPayloadString = new String(inputPayload, "UTF-8");
-			}
-			catch (UnsupportedEncodingException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-		return inputPayloadString;
-	}
-
-	/**
-	 * @param inputPayload the inputPayload to set
-	 */
-	public void setInputPayload(byte[] inputPayload) {
-		this.inputPayload = inputPayload;
-	}
-
-	public byte[] getInputPayload()
-	{
-		return inputPayload;
-	}
-
-	/**
 	 * @return the interactionId
 	 */
 	public String getInteractionId() {
@@ -153,20 +142,14 @@ public class EvaluationRequestDataItem {
 	public void setInteractionId(String interactionId) {
 		this.interactionId = interactionId;
 	}
+	
+    public URI getServerBaseUri() {
+        return serverUri;
+    }
 
-	/**
-	 * @return the cdsInput
-	 */
-	public Object getCdsInput() {
-		return cdsInput;
-	}
-
-	/**
-	 * @param cdsInput the cdsInput to set
-	 */
-	public void setCdsInput(Object cdsInput) {
-		this.cdsInput = cdsInput;
-	}
+    public void setServerBaseUri(URI serverUri) {
+        this.serverUri = serverUri;
+    }
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -179,9 +162,9 @@ public class EvaluationRequestDataItem {
 				+ ", externalFactModelSSId=" + externalFactModelSSId
 				+ ", inputItemName=" + inputItemName
 				+ ", inputContainingEntityId=" + inputContainingEntityId
-				+ ", inputPayloadString=" + inputPayloadString
 				+ ", interactionId=" + interactionId 
-				+ ", cdsInput=" + cdsInput
+				+ ", serverUri=" + serverUri
 				+ "]";
 	}
+
 }

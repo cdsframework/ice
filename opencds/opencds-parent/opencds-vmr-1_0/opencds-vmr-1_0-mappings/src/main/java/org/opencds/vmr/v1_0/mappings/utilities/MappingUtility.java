@@ -1,30 +1,25 @@
-/**
- * Copyright 2011 OpenCDS.org
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
+/*
+ * Copyright 2011-2020 OpenCDS.org
  *
- *		http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- *	
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.opencds.vmr.v1_0.mappings.utilities;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.InvalidDataException;
 import org.opencds.common.utilities.DateUtility;
@@ -58,7 +53,7 @@ import org.opencds.vmr.v1_0.internal.datatypes.TEL;
 import org.opencds.vmr.v1_0.internal.datatypes.TelecommunicationAddressUse;
 import org.opencds.vmr.v1_0.internal.datatypes.TelecommunicationCapability;
 
-/**
+/*
  * <p>MappingUtility is used to perform mapping functions between external and internal
  * data structures.  In this class, internal datatypes are always fully specified, and
  * the schema datatypes are imported from the schema.
@@ -89,12 +84,14 @@ import org.opencds.vmr.v1_0.internal.datatypes.TelecommunicationCapability;
 
 public class MappingUtility extends java.lang.Object {
 
+	private static Log logger = LogFactory.getLog(MappingUtility.class);
+
 	/**
 	 * Stores the dates that have been parsed during the evaluation process. This cache was added because, large vMRs
-	 * are known to contain thousands of date strings that must be parsed into Date objects, and the large majority of the values
-	 * appear numerous (even hundreds) of times throughout the vMR. For example, in one very large vMR, there were > 24,000
-	 * dates in the file that needed to be parsed, but only about 5% were unique values. Using a cache, instead of re-parsing,
-	 * saves a large amount of memory allocations and improves performance.
+	 * are known to contain thousands of date strings that must be parsed into Date objects, and the large majority of
+	 * the values appear numerous (even hundreds) of times throughout the vMR. For example, in one very large vMR,
+	 * there were > 24,000 dates in the file that needed to be parsed, but only about 5% were unique values. Using a
+	 * cache, instead of re-parsing, saves a large amount of memory allocations and improves performance.
 	 *
 	 * The ThreadLocal is being used because the calls to parse dates (ts2DateInternal()) occur throughout the various "mapper"
 	 * classes. In this way, those mappers can call the normal MappingUtility.ts2DateInternal() method without knowledge of the
@@ -116,7 +113,7 @@ public class MappingUtility extends java.lang.Object {
 		 */
 		static void init()
 		{
-			parsedDates.set(new HashMap<String, Date>());
+			parsedDates.set(new HashMap<>());
 		}
 
 		static void clear()
@@ -140,8 +137,7 @@ public class MappingUtility extends java.lang.Object {
 				parsedDates.get().put(key, date);
 		}
 	}
-
-	private static final Logger logger = LogManager.getLogger();
+	
 	
 	protected static CD noInformation = setNoInfo();
 	
@@ -165,7 +161,7 @@ public class MappingUtility extends java.lang.Object {
 	{
 		parsedDatesCache.clear();
 	}
-
+	
 	public MappingUtility()
 	{
 	}
@@ -764,14 +760,12 @@ public class MappingUtility extends java.lang.Object {
 
 	public static java.util.Date tS2DateInternal(org.opencds.vmr.v1_0.schema.TS pTS) {
 		//changed to use java.util.Date for internal format des 20111119
-
 		String _METHODNAME = "tS2TSInternal(): ";
-
 //		if (pTS == null) {
 //			return null;
 //		}
 //	above changed to below, des 2012-10-05
-		
+
 		if ((pTS == null) || ("".equals(pTS.getValue())) || ("null".equalsIgnoreCase(pTS.getValue()))) {
 			return null;
 		}
@@ -1019,6 +1013,7 @@ public class MappingUtility extends java.lang.Object {
 
 	/**
 	 * Translate from internal EN object to external EN object
+	 * @param pENInt external EN object
 	 * @return EN external EN object
 	 */
 	public static org.opencds.vmr.v1_0.schema.EN eNInternal2EN(EN pENInt) 
@@ -1060,7 +1055,7 @@ public class MappingUtility extends java.lang.Object {
 
 		// Now transfer over internal to external List<EntityNameUse> (optional in vmr spec)
 		List<EntityNameUse> lEntityNameUseListInt = pENInt.getUse();
-		if (lEntityNameUseListInt != null) {
+		if (lEntityNameUseListInt != null && !lEntityNameUseListInt.isEmpty()) {
 			Iterator<EntityNameUse> lEntityNameUseIntIter = lEntityNameUseListInt.iterator();
 			EntityNameUse lEntityNameUseInt = lEntityNameUseIntIter.next();
 			org.opencds.vmr.v1_0.schema.EntityNameUse lEntityNameUseExt = eNNameUseInternal2ENNameUse(lEntityNameUseInt);
@@ -1219,7 +1214,7 @@ public class MappingUtility extends java.lang.Object {
 
 		// Now transfer over external to internal List<EntityNameUse> (optional in vmr spec)
 		List<org.opencds.vmr.v1_0.schema.EntityNameUse> lEntityNameUseListExt = pENExt.getUse();
-		if (lEntityNameUseListExt != null) {
+		if (lEntityNameUseListExt != null && !lEntityNameUseListExt.isEmpty()) {
 			Iterator<org.opencds.vmr.v1_0.schema.EntityNameUse> lEntityNameUseExtIter = lEntityNameUseListExt.iterator();
 			org.opencds.vmr.v1_0.schema.EntityNameUse lEntityNameUseExt = lEntityNameUseExtIter.next();
 			EntityNameUse lEntityNameUseInt = eNNameUse2eNNameUseInternal(lEntityNameUseExt);
@@ -1275,24 +1270,26 @@ public class MappingUtility extends java.lang.Object {
 		org.opencds.vmr.v1_0.schema.EntityNamePartType lEntityNamePartTypeExt = pENXP.getType();
 		if (lEntityNamePartTypeExt == null) {
 			String errStr = _METHODNAME + "EntityPartType of external ENXP datatype not populated; required by vmr spec";
-			throw new DataFormatException(errStr);
+			logger.warn(errStr);
+//			throw new DataFormatException(errStr);
+		} else {
+			String lEntityNamePartTypeStrExt = lEntityNamePartTypeExt.toString();
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "External EntityNamePartType value: " + lEntityNamePartTypeStrExt);
+			}
+			EntityNamePartType lEntityNamePartTypeInt = null;
+			try {
+				lEntityNamePartTypeInt = EntityNamePartType.valueOf(lEntityNamePartTypeStrExt);
+			}
+			catch (IllegalArgumentException iae) {
+				String errStr = _METHODNAME + "there was no direct value mapping from the external to internal enumeration";
+				throw new InvalidDataException(errStr);
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug(_METHODNAME + "Internal EntityNamePartType value: " + lEntityNamePartTypeInt);
+			}
+			lENXPInt.setType(lEntityNamePartTypeInt);
 		}
-		String lEntityNamePartTypeStrExt = lEntityNamePartTypeExt.toString();
-		if (logger.isDebugEnabled()) {
-			logger.debug(_METHODNAME + "External EntityNamePartType value: " + lEntityNamePartTypeStrExt);
-		}
-		EntityNamePartType lEntityNamePartTypeInt = null;
-		try {
-			lEntityNamePartTypeInt = EntityNamePartType.valueOf(lEntityNamePartTypeStrExt);
-		}
-		catch (IllegalArgumentException iae) {
-			String errStr = _METHODNAME + "there was no direct value mapping from the external to internal enumeration";
-			throw new InvalidDataException(errStr);
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug(_METHODNAME + "Internal EntityNamePartType value: " + lEntityNamePartTypeInt);
-		}
-		lENXPInt.setType(lEntityNamePartTypeInt);
 
 		// Finally create the list of internal EntityNamePartQualifiers (optional in spec)
 		List<org.opencds.vmr.v1_0.schema.EntityNamePartQualifier> lPartQualifierListExt = pENXP.getQualifier();

@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:tns="http://evaluate.dss.opencds.org/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+                  xmlns:ns3="http://schemas.xmlsoap.org/soap/http"
+                  xmlns:ns1="http://www.omg.org/spec/CDSS/201105/dssWsdl" name="EvaluationSoapServiceService"
+                  targetNamespace="http://evaluate.dss.opencds.org/">
+    <wsdl:import location="http://localhost:38180/opencds-test/evaluate?wsdl=Evaluation.wsdl"
+                 namespace="http://www.omg.org/spec/CDSS/201105/dssWsdl">
+    </wsdl:import>
+    <wsdl:binding name="EvaluationSoapServiceServiceSoapBinding" type="ns1:Evaluation">
+        <soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="evaluateIteratively">
+            <soap12:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:evaluateIteratively"
+                              style="document"/>
+            <wsdl:input name="evaluateIteratively">
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="evaluateIterativelyResponse">
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UnrecognizedLanguageExceptionFault">
+                <soap12:fault name="UnrecognizedLanguageExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="EvaluationExceptionFault">
+                <soap12:fault name="EvaluationExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="RequiredDataNotProvidedExceptionFault">
+                <soap12:fault name="RequiredDataNotProvidedExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="UnsupportedLanguageExceptionFault">
+                <soap12:fault name="UnsupportedLanguageExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="InvalidTimeZoneOffsetExceptionFault">
+                <soap12:fault name="InvalidTimeZoneOffsetExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="UnrecognizedScopedEntityExceptionFault">
+                <soap12:fault name="UnrecognizedScopedEntityExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="InvalidDriDataFormatExceptionFault">
+                <soap12:fault name="InvalidDriDataFormatExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="DSSRuntimeExceptionFault">
+                <soap12:fault name="DSSRuntimeExceptionFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="evaluate">
+            <soap12:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:evaluate"
+                              style="document"/>
+            <wsdl:input name="evaluate">
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="evaluateResponse">
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UnrecognizedLanguageExceptionFault">
+                <soap12:fault name="UnrecognizedLanguageExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="EvaluationExceptionFault">
+                <soap12:fault name="EvaluationExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="RequiredDataNotProvidedExceptionFault">
+                <soap12:fault name="RequiredDataNotProvidedExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="UnsupportedLanguageExceptionFault">
+                <soap12:fault name="UnsupportedLanguageExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="InvalidTimeZoneOffsetExceptionFault">
+                <soap12:fault name="InvalidTimeZoneOffsetExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="UnrecognizedScopedEntityExceptionFault">
+                <soap12:fault name="UnrecognizedScopedEntityExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="InvalidDriDataFormatExceptionFault">
+                <soap12:fault name="InvalidDriDataFormatExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="DSSRuntimeExceptionFault">
+                <soap12:fault name="DSSRuntimeExceptionFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="evaluateAtSpecifiedTime">
+            <soap12:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:evaluateAtSpecifiedTime"
+                              style="document"/>
+            <wsdl:input name="evaluateAtSpecifiedTime">
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="evaluateAtSpecifiedTimeResponse">
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UnrecognizedLanguageExceptionFault">
+                <soap12:fault name="UnrecognizedLanguageExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="EvaluationExceptionFault">
+                <soap12:fault name="EvaluationExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="RequiredDataNotProvidedExceptionFault">
+                <soap12:fault name="RequiredDataNotProvidedExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="UnsupportedLanguageExceptionFault">
+                <soap12:fault name="UnsupportedLanguageExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="InvalidTimeZoneOffsetExceptionFault">
+                <soap12:fault name="InvalidTimeZoneOffsetExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="UnrecognizedScopedEntityExceptionFault">
+                <soap12:fault name="UnrecognizedScopedEntityExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="InvalidDriDataFormatExceptionFault">
+                <soap12:fault name="InvalidDriDataFormatExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="DSSRuntimeExceptionFault">
+                <soap12:fault name="DSSRuntimeExceptionFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="evaluateIterativelyAtSpecifiedTime">
+            <soap12:operation
+                    soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:evaluateIterativelyAtSpecifiedTime"
+                    style="document"/>
+            <wsdl:input name="evaluateIterativelyAtSpecifiedTime">
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="evaluateIterativelyAtSpecifiedTimeResponse">
+                <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="UnrecognizedLanguageExceptionFault">
+                <soap12:fault name="UnrecognizedLanguageExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="EvaluationExceptionFault">
+                <soap12:fault name="EvaluationExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="RequiredDataNotProvidedExceptionFault">
+                <soap12:fault name="RequiredDataNotProvidedExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="UnsupportedLanguageExceptionFault">
+                <soap12:fault name="UnsupportedLanguageExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="InvalidTimeZoneOffsetExceptionFault">
+                <soap12:fault name="InvalidTimeZoneOffsetExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="UnrecognizedScopedEntityExceptionFault">
+                <soap12:fault name="UnrecognizedScopedEntityExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="InvalidDriDataFormatExceptionFault">
+                <soap12:fault name="InvalidDriDataFormatExceptionFault" use="literal"/>
+            </wsdl:fault>
+            <wsdl:fault name="DSSRuntimeExceptionFault">
+                <soap12:fault name="DSSRuntimeExceptionFault" use="literal"/>
+            </wsdl:fault>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="EvaluationSoapServiceService">
+        <wsdl:port binding="tns:EvaluationSoapServiceServiceSoapBinding" name="EvaluationSoapServicePort">
+            <soap12:address location="http://localhost:38180/opencds-test/evaluate"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

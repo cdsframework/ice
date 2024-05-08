@@ -1,0 +1,79 @@
+{
+  "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
+  "fhirServer": "http://hooks.smarthealthit.org:9080",
+  "hook": "medication-prescribe",
+  "redirect": "http://hooks2.smarthealthit.org/service-done.html",
+  "user": "Practitioner/example",
+  "context": {
+    "patientId": "1288992",
+    "encounterId": "982734678",
+    "medications": [
+      {
+        "resourceType": "MedicationOrder",
+        "id": "medorder_id_bup_patch_draft",
+        "identifier": [
+          {
+            "system": "Order Number",
+            "value": "1"
+          }
+        ],
+        "status": "draft",
+        "patient": {
+          "reference": "/api/FHIR/DSTU2/Patient/pat_id_1"
+        },
+        "medicationReference": {
+          "reference": "/api/FHIR/DSTU2/Medication/med_id_bup_patch"
+        },
+        "dosageInstruction": [
+          {
+            "text": "1 patch Transdermal Every 72 hours",
+            "timing": {
+              "repeat": {
+                "boundsPeriod": {
+                  "start": "2017-04-01T00:00:00-06:00"
+                },
+                "frequency": 72,
+                "period": 1,
+                "periodUnits": "h"
+              }
+            },
+            "asNeededBoolean": false,
+            "route": {
+              "text": "Transdermal"
+            },
+            "doseQuantity": {
+              "value": 1,
+              "unit": "patch"
+            }
+          }
+        ]
+      },
+      {
+        "resourceType": "Medication",
+        "id": "med_id_bup_patch",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "code": "388508"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "prefetch": {
+    "patientToGreet": {
+      "response": {
+        "status": "200 OK"
+      },
+      "resource": {
+        "resourceType": "Patient",
+        "gender": "male",
+        "birthDate": "1925-12-23",
+        "id": "1288992",
+        "active": true
+      }
+    }
+  }
+}

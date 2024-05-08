@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.service;
 
 import java.io.InputStream;
@@ -6,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.common.cache.OpencdsCache.CacheRegion;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.api.cache.CacheService;
@@ -23,6 +41,7 @@ import org.opencds.plugin.PluginContext;
 import com.google.common.collect.ImmutableList;
 
 public class PluginPackageServiceImpl implements PluginPackageService {
+    private static final Log log = LogFactory.getLog(PluginPackageServiceImpl.class);
 
     private final PluginPackageDao pluginPackageDao;
     private final FileDao fileDao;
@@ -53,11 +72,11 @@ public class PluginPackageServiceImpl implements PluginPackageService {
                 try {
                     Plugin plugin = pp.getPlugin(pluginId);
                     if (plugin == null) {
-                        throw new OpenCDSRuntimeException("Plugin not found in configuration: " + pluginId);
+                        log.error("Plugin not found in configuration: " + pluginId);
                     }
                     op = OpencdsPlugin.class.cast(Class.forName(plugin.getClassName()).newInstance());
                 } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                    throw new OpenCDSRuntimeException("Unable to load plugin '" + pluginId + "' due to exception: "
+                    log.error("Unable to load plugin '" + pluginId + "' due to exception: "
                             + e.getMessage(), e);
                 }
             }
@@ -130,9 +149,9 @@ public class PluginPackageServiceImpl implements PluginPackageService {
         return cachables;
     }
 
-    private Map<PluginId, PluginPackage> buildPairs(Set<Object> pluginPackages) {
+    private Map<PluginId, PluginPackage> buildPairs(Set<Object> pluginPacakges) {
         Map<PluginId, PluginPackage> pluginsToPackage = new HashMap<>();
-        for (Object obj : pluginPackages) {
+        for (Object obj : pluginPacakges) {
             PluginPackage pp = PluginPackage.class.cast(obj);
             for (Plugin plugin : pp.getPlugins()) {
                 pluginsToPackage.put(plugin.getIdentifier(), pp);

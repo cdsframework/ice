@@ -3,7 +3,7 @@
     <parent>
         <artifactId>opencds-dss-components</artifactId>
         <groupId>org.opencds</groupId>
-        <version>2.0.5</version>
+        <version>6.2.0</version>
     </parent>
     <artifactId>opencds-dss-evaluation</artifactId>
     <packaging>jar</packaging>
@@ -11,14 +11,38 @@
     <description>Implementation of DSS Evaluation operation</description>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>opencds-config-api</artifactId>
+            <groupId>org.opencds</groupId>
+            <artifactId>opencds-evaluation</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opencds</groupId>
             <artifactId>dss-java-stub</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
     </dependencies>
+    <build>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>org.codehaus.gmavenplus</groupId>
+              <artifactId>gmavenplus-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-surefire-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-enforcer-plugin</artifactId>
+          </plugin>
+      </plugins>
+    </build>
 </project>

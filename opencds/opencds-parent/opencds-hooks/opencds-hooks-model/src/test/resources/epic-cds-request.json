@@ -1,0 +1,247 @@
+{
+  "hookInstance": "6ae0aa00-2e15-11e8-a7e6-0050568b2116",
+  "fhirServer": "https://ic-fhirworks.epic.com/interconnect-fhirworks-oauth/api/FHIR/STU3",
+  "hook": "medication-prescribe",
+  "fhirAuthorization": {
+    "access_token": "50QzAzIH03qKXZ6TSW0JIjFSYpLEO6-Rc1ye_VRasgZEYF8YOAD7D37QXpbYEEEP86ynb2VQI-sRziFZOfTLOcY3P08rzdLjeFNZ5tG_lSfkOdrTNVHn6N6LFJnI7pYY",
+    "token_type": "Bearer",
+    "expires_in": "3600",
+    "subject": "bba2e44e-50cd-4c82-b538-f2d74b8842ab"
+  },
+  "user": "exfo6E4EXjWsnhA1OGVElgw3",
+  "context": {
+    "patientId": "e8scloivabeN5lwWFohnJgQ3",
+    "encounterId": "eq-9fY.xUY-pHKlwej.hg9Q3"
+  },
+  "prefetch": {
+    "patient": {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "e8scloivabeN5lwWFohnJgQ3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.0",
+            "value": "E3962"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPI"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            "value": "203670"
+          },
+          {
+            "use": "usual",
+            "system": "urn:oid:2.16.840.1.113883.4.1",
+            "value": "000-00-0000"
+          }
+        ],
+        "active": "true",
+        "name": [
+          {
+            "use": "usual",
+            "text": "Vmatt Patient",
+            "family": "Patient",
+            "given": [
+              "Vmatt"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1976-03-21",
+        "managingOrganization": {
+          "reference": "https://ic-fhirworks.epic.com/interconnect-fhirworks-oauth/api/FHIR/STU3/Organization/enRyWnSP963FYDpoks4NHOA3",
+          "display": "Epic Hospital System"
+        }
+      }
+    },
+    "user": {
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "exfo6E4EXjWsnhA1OGVElgw3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "PROVID"
+            },
+            "system": "PROVID",
+            "value": "1000"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.7",
+            "value": "207Q00000X"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "NPI"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.60",
+            "value": "1627363736"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "Epic"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.63",
+            "value": "6011"
+          }
+        ],
+        "active": "true",
+        "name": [
+          {
+            "use": "usual",
+            "text": "Family Medicine Physician, MD",
+            "family": "Family Medicine",
+            "given": [
+              "Physician"
+            ]
+          }
+        ],
+        "gender": "male"
+      }
+    },
+    "medications": {
+      "resource": {
+        "resourceType": "Bundle",
+        "entry": [
+          {
+            "resource": {
+              "resourceType": "MedicationRequest",
+              "id": "ef8q01-a.LLMUWk09XG7xJwQCHRCR7Mii5NHHe0DdvRiHP31eLUkWlFX1IqBLo6OO3",
+              "identifier": [
+                {
+                  "use": "usual",
+                  "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+                  "value": "EPT-     Z6086-56802-CLISUP-23640-1"
+                }
+              ],
+              "status": "draft",
+              "intent": "order",
+              "category": {
+                "coding": [
+                  {
+                    "code": "1",
+                    "display": "OutPatient"
+                  }
+                ],
+                "text": "OutPatient"
+              },
+              "medicationCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "urn:oid:2.16.840.1.113883.6.253",
+                    "code": "10518"
+                  },
+                  {
+                    "system": "urn:oid:2.16.840.1.113883.6.68",
+                    "code": "66100020000320"
+                  },
+                  {
+                    "system": "urn:oid:2.16.840.1.113883.6.162",
+                    "code": "03714"
+                  },
+                  {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "5640"
+                  },
+                  {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "197805"
+                  }
+                ],
+                "text": "ibuprofen (ADVIL,MOTRIN) tablet 400 mg"
+              },
+              "subject": {
+                "reference": "https://ic-fhirworks.epic.com/interconnect-fhirworks-oauth/api/FHIR/STU3/Patient/e8scloivabeN5lwWFohnJgQ3",
+                "display": "Patient, Vmatt"
+              },
+              "authoredOn": "2018-03-22T21:10:15Z",
+              "recorder": {
+                "reference": "https://ic-fhirworks.epic.com/interconnect-fhirworks-oauth/api/FHIR/STU3/Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+                "display": "Physician Family Medicine, MD"
+              }
+            }
+          },
+          {
+            "resource": {
+              "resourceType": "MedicationRequest",
+              "id": "ekx7vhpXEq-fJTQWIINdQPjXenyiM9bG3Cy08USeCSzTGma9ha9l0sstV9RplvQiN3",
+              "identifier": [
+                {
+                  "use": "usual",
+                  "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+                  "value": "EPT-     Z6086-56802-CLISUP-23640-2"
+                }
+              ],
+              "status": "draft",
+              "intent": "order",
+              "category": {
+                "coding": [
+                  {
+                    "code": "1",
+                    "display": "OutPatient"
+                  }
+                ],
+                "text": "OutPatient"
+              },
+              "medicationCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "urn:oid:2.16.840.1.113883.6.253",
+                    "code": "4706"
+                  },
+                  {
+                    "system": "urn:oid:2.16.840.1.113883.6.68",
+                    "code": "41200020400305"
+                  },
+                  {
+                    "system": "urn:oid:2.16.840.1.113883.6.162",
+                    "code": "01495"
+                  },
+                  {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "2578"
+                  },
+                  {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "142430"
+                  },
+                  {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "857416"
+                  },
+                  {
+                    "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                    "code": "857420"
+                  }
+                ],
+                "text": "clemastine 1.34 MG tablet"
+              },
+              "subject": {
+                "reference": "https://ic-fhirworks.epic.com/interconnect-fhirworks-oauth/api/FHIR/STU3/Patient/e8scloivabeN5lwWFohnJgQ3",
+                "display": "Patient, Vmatt"
+              },
+              "authoredOn": "2018-03-22T21:10:15Z",
+              "recorder": {
+                "reference": "https://ic-fhirworks.epic.com/interconnect-fhirworks-oauth/api/FHIR/STU3/Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+                "display": "Physician Family Medicine, MD"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.store.strategy;
 
 import java.io.File;
@@ -13,12 +29,13 @@ import org.opencds.config.api.cache.CacheService;
 import org.opencds.config.api.dao.FileDao;
 import org.opencds.config.api.dao.file.FileDaoImpl;
 import org.opencds.config.api.dao.util.FileUtil;
+import org.opencds.config.api.strategy.AbstractConfigStrategy;
+import org.opencds.config.api.strategy.ConfigCapability;
 import org.opencds.config.service.ConceptDeterminationMethodServiceImpl;
 import org.opencds.config.service.ConceptServiceImpl;
 import org.opencds.config.service.ExecutionEngineServiceImpl;
 import org.opencds.config.service.KnowledgeModuleServiceImpl;
 import org.opencds.config.service.KnowledgePackageServiceImpl;
-import org.opencds.config.service.PluginDataCacheServiceImpl;
 import org.opencds.config.service.PluginPackageServiceImpl;
 import org.opencds.config.service.SemanticSignifierServiceImpl;
 import org.opencds.config.service.SupportingDataPackageServiceImpl;
@@ -30,8 +47,8 @@ import org.opencds.config.store.dao.je.PluginPackageJeDao;
 import org.opencds.config.store.dao.je.SemanticSignifierJeDao;
 import org.opencds.config.store.dao.je.SupportingDataJeDao;
 import org.opencds.config.store.je.OpenCDSConfigStore;
-import org.opencds.config.strategy.AbstractConfigStrategy;
-import org.opencds.config.strategy.ConfigCapability;
+import org.opencds.plugin.PluginDataCache;
+import org.opencds.plugin.support.PluginDataCacheImpl;
 
 public class BDBConfigStrategy extends AbstractConfigStrategy {
     private static final String STORE_DIR = "store";
@@ -72,19 +89,18 @@ public class BDBConfigStrategy extends AbstractConfigStrategy {
 
         FileUtil fileUtil = new FileUtil();
         FileDao fileDao = new FileDaoImpl(fileUtil, kpDir);
-        KnowledgePackageServiceImpl kpService = new KnowledgePackageServiceImpl(configData, eeService, fileDao,
+        KnowledgePackageServiceImpl kpService = new KnowledgePackageServiceImpl(eeService, fileDao,
                 cacheService);
-        
+
         FileDao ppFileDao = new FileDaoImpl(fileUtil, pgDir);
         PluginPackageServiceImpl ppService = new PluginPackageServiceImpl(new PluginPackageJeDao(configStore),
                 ppFileDao, cacheService);
-        PluginDataCacheServiceImpl pdcService = new PluginDataCacheServiceImpl(cacheService, ppService.getAllPluginIds());
-        
+
         FileDao sdFileDao = new FileDaoImpl(fileUtil, sdDir);
         SupportingDataPackageServiceImpl sdpService = new SupportingDataPackageServiceImpl(sdFileDao, cacheService);
         SupportingDataServiceImpl sdService = new SupportingDataServiceImpl(new SupportingDataJeDao(configStore),
                 sdpService, ppService, cacheService);
-        
+
         KnowledgeModuleServiceImpl kmService = new KnowledgeModuleServiceImpl(new KnowledgeModuleJeDao(configStore),
                 kpService, sdService, cacheService);
 
@@ -96,8 +112,10 @@ public class BDBConfigStrategy extends AbstractConfigStrategy {
         SemanticSignifierServiceImpl ssService = new SemanticSignifierServiceImpl(new SemanticSignifierJeDao(
                 configStore), cacheService);
 
+        PluginDataCache pluginDataCache = new PluginDataCacheImpl();
+
         return new KnowledgeRepositoryService(cdmService, conceptService, eeService, kmService, kpService, ppService,
-                ssService, sdService, sdpService, pdcService);
+                ssService, sdService, sdpService, cacheService, pluginDataCache);
     }
 
     public void shutdown() {

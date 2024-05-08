@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.file;
 
 import java.io.File;
@@ -13,6 +29,8 @@ import org.opencds.config.api.cache.CacheService;
 import org.opencds.config.api.dao.FileDao;
 import org.opencds.config.api.dao.file.ReadOnlyFileDaoImpl;
 import org.opencds.config.api.dao.util.FileUtil;
+import org.opencds.config.api.strategy.AbstractConfigStrategy;
+import org.opencds.config.api.strategy.ConfigCapability;
 import org.opencds.config.file.dao.ConceptDeterminationMethodFileDao;
 import org.opencds.config.file.dao.ExecutionEngineFileDao;
 import org.opencds.config.file.dao.KnowledgeModuleFileDao;
@@ -24,13 +42,12 @@ import org.opencds.config.service.ConceptServiceImpl;
 import org.opencds.config.service.ExecutionEngineServiceImpl;
 import org.opencds.config.service.KnowledgeModuleServiceImpl;
 import org.opencds.config.service.KnowledgePackageServiceImpl;
-import org.opencds.config.service.PluginDataCacheServiceImpl;
 import org.opencds.config.service.PluginPackageServiceImpl;
 import org.opencds.config.service.SemanticSignifierServiceImpl;
 import org.opencds.config.service.SupportingDataPackageServiceImpl;
 import org.opencds.config.service.SupportingDataServiceImpl;
-import org.opencds.config.strategy.AbstractConfigStrategy;
-import org.opencds.config.strategy.ConfigCapability;
+import org.opencds.plugin.PluginDataCache;
+import org.opencds.plugin.support.PluginDataCacheImpl;
 
 public class FileConfigStrategy extends AbstractConfigStrategy {
 
@@ -70,14 +87,13 @@ public class FileConfigStrategy extends AbstractConfigStrategy {
 
         PluginPackageServiceImpl ppService = new PluginPackageServiceImpl(new PluginPackageFileDao(fileUtil, Paths
                 .get(path.toString(), PLUGIN_DIR).toAbsolutePath().toString()), ppFileDao, cacheService);
-        PluginDataCacheServiceImpl pdcService = new PluginDataCacheServiceImpl(cacheService, ppService.getAllPluginIds());
-        
+
         SupportingDataPackageServiceImpl sdpService = new SupportingDataPackageServiceImpl(sdFileDao, cacheService);
         SupportingDataServiceImpl sdService = new SupportingDataServiceImpl(new SupportingDataFileDao(fileUtil, Paths
                 .get(path.toString(), SUPPORTING_DATA_DIR).toAbsolutePath().toString()), sdpService, ppService,
                 cacheService);
-        
-        KnowledgePackageServiceImpl kpService = new KnowledgePackageServiceImpl(configData, eeService, kpFileDao, cacheService);
+
+        KnowledgePackageServiceImpl kpService = new KnowledgePackageServiceImpl(eeService, kpFileDao, cacheService);
         KnowledgeModuleServiceImpl kmService = new KnowledgeModuleServiceImpl(new KnowledgeModuleFileDao(fileUtil,
                 Paths.get(path.toString(), KNOWLEDGE_MODULES).toAbsolutePath().toString()), kpService, sdService, cacheService);
 
@@ -86,7 +102,9 @@ public class FileConfigStrategy extends AbstractConfigStrategy {
 
         ConceptServiceImpl conceptService = new ConceptServiceImpl(cdmService, kmService, cacheService);
 
+        PluginDataCache pluginDataCache = new PluginDataCacheImpl();
+
         return new KnowledgeRepositoryService(cdmService, conceptService, eeService, kmService, kpService, ppService,
-                ssService, sdService, sdpService, pdcService);
+                ssService, sdService, sdpService, cacheService, pluginDataCache);
     }
 }

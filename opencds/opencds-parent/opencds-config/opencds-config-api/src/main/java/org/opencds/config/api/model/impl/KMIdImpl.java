@@ -1,7 +1,24 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.api.model.impl;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.opencds.config.api.model.EntityIdentifier;
 import org.opencds.config.api.model.KMId;
 
 public class KMIdImpl implements KMId {
@@ -11,13 +28,13 @@ public class KMIdImpl implements KMId {
     private String version;
 
     public static KMIdImpl create(String scopingEntityId, String businessId, String version) {
-        KMIdImpl ssid = new KMIdImpl();
-        ssid.scopingEntityId = scopingEntityId;
-        ssid.businessId = businessId;
-        ssid.version = version;
-        return ssid;
+        KMIdImpl kmid = new KMIdImpl();
+        kmid.scopingEntityId = scopingEntityId;
+        kmid.businessId = businessId;
+        kmid.version = version;
+        return kmid;
     }
-    
+
     public static KMIdImpl create(KMId kmid) {
         if (kmid == null) {
             return null;
@@ -27,7 +44,11 @@ public class KMIdImpl implements KMId {
         }
         return create(kmid.getScopingEntityId(), kmid.getBusinessId(), kmid.getVersion());
     }
-    
+
+    public static KMId create(EntityIdentifier ei) {
+        return create(ei.getScopingEntityId(), ei.getBusinessId(), ei.getVersion());
+    }
+
     @Override
     public String getScopingEntityId() {
         return scopingEntityId;
@@ -42,7 +63,7 @@ public class KMIdImpl implements KMId {
     public String getVersion() {
         return version;
     }
-    
+
     @Override
     public String toString() {
         return "KMIdImpl [scopingEntityId= " + scopingEntityId + ", businessId= " + businessId + ", version= " + version

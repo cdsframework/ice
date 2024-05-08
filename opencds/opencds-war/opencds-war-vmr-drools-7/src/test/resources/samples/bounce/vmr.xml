@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<in:cdsInput xmlns:in="org.opencds.vmr.v1_0.schema.cdsinput"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dt="org.opencds.vmr.v1_0.schema.datatypes"
+	xsi:schemaLocation="org.opencds.vmr.v1_0.schema.cdsinput ..\schema\cdsInput.xsd">
+	<templateId root="2.16.840.1.113883.3.1829.11.1.1.1" />
+	<vmrInput>
+		<templateId root="2.16.840.1.113883.3.1829.11.1.2.1" />
+		<patient>
+			<templateId root="2.16.840.1.113883.3.1829.11.2.1.1" />
+			<id root="2.16.840.1.113883.3.795.5.2" extension="996-756-495" />
+			<!--alternate form of id: <id root="aGUID"/> -->
+			<demographics>
+				<birthTime value="19690628" /> <!-- 42.5 yo at 12/31/2011 -->
+				<gender code="F" codeSystem="2.16.840.1.113883.1.11.1"
+					displayName="Female" />
+			</demographics>
+			<clinicalStatements>
+				<encounterEvents>
+					<encounterEvent>
+						<templateId root="2.16.840.1.113883.3.1829.11.2.1.1" />
+						<id root="2.16.840.1.113883.3.795.5.2" extension="Enc001" />
+						<dataSourceType code="Clinical" codeSystem="2.16.840.1.113883.3.795" />
+						<encounterType code="99201" codeSystem="2.16.840.1.113883.6.12"
+							displayName="Outpatient encounter" />
+						<encounterEventTime low="20110101" high="20110101" />
+					</encounterEvent>
+				</encounterEvents>
+				<procedureEvents>
+					<procedureEvent>
+						<templateId root="2.16.840.1.113883.3.795" />
+						<id root="2.16.840.1.113883.3.795.5.2" extension="Proc001" />
+						<dataSourceType code="Clinical" codeSystem="2.16.840.1.113883.3.795" />
+						<procedureCode code="77056" codeSystem="2.16.840.1.113883.6.12"
+							displayName="Mammography; bilateral" />
+						<procedureTime low="20100601" high="20100601" />
+					</procedureEvent>
+				</procedureEvents>
+			</clinicalStatements>
+		</patient>
+	</vmrInput>
+</in:cdsInput>

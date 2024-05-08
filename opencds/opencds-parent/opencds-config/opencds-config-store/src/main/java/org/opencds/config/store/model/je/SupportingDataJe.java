@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.store.model.je;
 
 import java.util.ArrayList;
@@ -11,10 +27,11 @@ import org.opencds.config.api.model.SupportingData;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-@Entity
-public class SupportingDataJe implements SupportingData, ConfigEntity<SDIdJe> {
+@Entity(version=1)
+public class SupportingDataJe implements SupportingData, ConfigEntity<String> {
     @PrimaryKey
-    private SDIdJe sdId;
+    private String identifier;
+    private KMIdJe kmId;
     private String packageType;
     private String packageId;
     private PluginIdJe loadedBy;
@@ -27,7 +44,8 @@ public class SupportingDataJe implements SupportingData, ConfigEntity<SDIdJe> {
     public static SupportingDataJe create(String identifier, KMId kmId, String packageType, String packageId,
             PluginId loadedBy, Date timestamp, String userId) {
         SupportingDataJe sdj = new SupportingDataJe();
-        sdj.sdId = SDIdJe.create(KMIdJe.create(kmId), identifier);
+        sdj.identifier = identifier;
+        sdj.kmId = KMIdJe.create(kmId);
         sdj.packageType = packageType;
         sdj.packageId = packageId;
         sdj.loadedBy = PluginIdJe.create(loadedBy);
@@ -59,18 +77,18 @@ public class SupportingDataJe implements SupportingData, ConfigEntity<SDIdJe> {
     }
 
     @Override
-    public SDIdJe getPrimaryKey() {
-        return sdId;
+    public String getPrimaryKey() {
+        return identifier;
     }
 
     @Override
     public String getIdentifier() {
-        return sdId.getIdentifier();
+        return identifier;
     }
 
     @Override
     public KMId getKMId() {
-        return sdId.getKMId();
+        return kmId;
     }
 
     @Override

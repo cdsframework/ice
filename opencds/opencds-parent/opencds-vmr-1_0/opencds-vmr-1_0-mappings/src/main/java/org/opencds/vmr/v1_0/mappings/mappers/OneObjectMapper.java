@@ -1,17 +1,17 @@
-/**
- * Copyright 2011 OpenCDS.org
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
+/*
+ * Copyright 2011-2020 OpenCDS.org
  *
- *		http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- *	
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.opencds.vmr.v1_0.mappings.mappers;
@@ -19,8 +19,8 @@ package org.opencds.vmr.v1_0.mappings.mappers;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
@@ -68,7 +68,7 @@ import org.opencds.vmr.v1_0.mappings.in.FactLists;
 import org.opencds.vmr.v1_0.mappings.out.structures.OrganizedResults;
 import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
 
-/**
+/*
  * Mapper classes provide mapping in both directions between the external schema structure of the vMR
  * 		and the internal javabeans used by the rules.
  * 
@@ -80,7 +80,7 @@ import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
  */
 public abstract class OneObjectMapper extends Object {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static Log logger = LogFactory.getLog(OneObjectMapper.class);
 	
 	/**
 	 * Populate internal vMR object from corresponding external vMR object;
@@ -114,7 +114,6 @@ public abstract class OneObjectMapper extends Object {
 			logger.error(errStr);
 			throw new ImproperUsageException(errStr);
 		}
-
 		final String sourceClassName = source.getClass().getSimpleName();
 		
 		if ("AdverseEvent".equals(sourceClassName)) {
@@ -223,8 +222,9 @@ public abstract class OneObjectMapper extends Object {
 //                    "root and/or extension of source and target IDs of the (post-processed) relationship may not be the same: source (root^extension)= "
 //                            + sourceId + ", target (root^extension)= " + external.getId());
 //        }
-		
-		logger.trace(_METHODNAME + sourceRelatedEntity.getClass().getSimpleName() + ", " + parentId );
+
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + sourceRelatedEntity.getClass().getSimpleName() + ", " + parentId );
 		
 		if (sourceRelatedEntity.getAdministrableSubstance() != null) {
 			AdministrableSubstanceMapper.pullIn(
@@ -487,6 +487,7 @@ public abstract class OneObjectMapper extends Object {
 			logger.error(errStr);
 			throw new ImproperUsageException(errStr);
 		}
+		final String sourceClassName = source.getClass().getSimpleName();
 		
 		/*
 		 * If this ClinicalStatement is a root clinical statement that is not flagged as output, then ignore it...
@@ -494,12 +495,11 @@ public abstract class OneObjectMapper extends Object {
 		 */
 		if (( !((ClinicalStatement)source).isToBeReturned() ) 							//if not flagged then ignore it
 				|| ( ((ClinicalStatement)source).isClinicalStatementToBeRoot() != true ))	//if not a root clinical statement then ignore it
-			return;
-
-
-		final String sourceClassName = source.getClass().getSimpleName();
-		logger.trace(_METHODNAME + sourceClassName);
-
+			return;		
+		
+		if (logger.isTraceEnabled())
+			logger.trace(_METHODNAME + sourceClassName);
+		
 		if ("AdverseEvent".equals(sourceClassName)) {
 			org.opencds.vmr.v1_0.schema.AdverseEvent rootClinicalStatement = new org.opencds.vmr.v1_0.schema.AdverseEvent();
 			rootClinicalStatement = AdverseEventMapper.pushOut(
@@ -659,7 +659,6 @@ public abstract class OneObjectMapper extends Object {
 	 * commonly observations, but this code will handle any clinical statement.
 	 * 
 	 * @param internalVMR
-	 * @param externalVMR
 	 * @param organizedResults
 	 * @return
 	 * @throws ImproperUsageException
@@ -691,7 +690,7 @@ public abstract class OneObjectMapper extends Object {
 			logger.trace(_METHODNAME + internalVMRClassName + ", " + ((ClinicalStatement)internalVMR).getId() + ": " + ((ClinicalStatement)internalVMR).getEvaluatedPersonId());
 
 		org.opencds.vmr.v1_0.schema.RelatedClinicalStatement relatedClinicalStatement = null; 
-
+		
 		if ("AdverseEvent".equals(internalVMRClassName)) {
 			relatedClinicalStatement = new org.opencds.vmr.v1_0.schema.RelatedClinicalStatement();
 			org.opencds.vmr.v1_0.schema.AdverseEvent nestedClinicalStatement = AdverseEventMapper.pushOut(
@@ -880,9 +879,9 @@ public abstract class OneObjectMapper extends Object {
 
 		if (logger.isTraceEnabled())
 			logger.trace(_METHODNAME + "push out " + oneInternalEntityObjectClassName + ", sourceEntity Id " + internal.getSourceId()
-					+ ", targetEntityId " + internal.getTargetEntityId()
-					+ ", relationshipTimeInterval " + internal.getRelationshipTimeInterval()
-					+ ", with relationship " + internal.getTargetRole().toString());
+				+ ", targetEntityId " + internal.getTargetEntityId() 
+				+ ", relationshipTimeInterval " + internal.getRelationshipTimeInterval()
+				+ ", with relationship " + internal.getTargetRole().toString());
 		
 		if (internal.getSourceId().equals(internal.getTargetEntityId())) {
             throw new OpenCDSRuntimeException(

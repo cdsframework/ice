@@ -1,46 +1,50 @@
-/**
- * Copyright 2011 OpenCDS.org
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
+/*
+ * Copyright 2011-2020 OpenCDS.org
  *
- *		http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- *	
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.opencds.common;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-/**
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+/*
  * An Adaptor that allows us to log to Console
  * @author 
  *
  */
 public class ConsoleLogger implements ILogger {
 
-	private static final Logger logger = LogManager.getLogger();
+	
+	private Log log = LogFactory.getLog(getClass());
+	
+
 	
 	public ConsoleLogger(){
 		
 	}
 	
 	public void debug(String output){
-		logger.debug(output);
+		log.debug(output);
 	}
 	
 	public void info(String output){
-		logger.info(output);
+		log.info(output);
 	}
 	
 	public void exception(String output, Throwable t){
-		logger.error(output,t);
+		log.error(output,t);
 	}
 
 

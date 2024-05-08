@@ -13,7 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.zip.GZIPInputStream;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import javax.xml.transform.TransformerException;
 
 import org.apache.commons.logging.Log;

@@ -1,16 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>opencds-config</artifactId>
         <groupId>org.opencds</groupId>
-        <version>2.0.5</version>
+        <version>6.2.0</version>
     </parent>
     <artifactId>opencds-config-api</artifactId>
     <name>OpenCDS Configuration API</name>
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>org.opencds</groupId>
             <artifactId>opencds-common</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -21,17 +20,10 @@
         </dependency>
         <dependency>
             <groupId>org.opencds</groupId>
+            <!-- Could be -api, except that PluginDataCacheImpl only exists in -support -->
             <artifactId>opencds-plugin-support</artifactId>
             <version>${project.version}</version>
         </dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-		</dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
@@ -45,24 +37,8 @@
             <artifactId>spring-security-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.spockframework</groupId>
-            <artifactId>spock-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
-    <build>
-        <plugins>
-        </plugins>
-    </build>
 </project>

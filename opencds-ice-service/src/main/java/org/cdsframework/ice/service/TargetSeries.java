@@ -164,7 +164,7 @@ public class TargetSeries {
 		Collection<String> targetedDiseases = pScheduleBackingSeries.getDiseasesTargetedByVaccineGroup(pSeriesRules.getVaccineGroup());
 		if (targetedDiseases != null) {
 			for (String disease : targetedDiseases) {
-				interimEvaluationValidityCountByDisease.put(disease, new Integer(0));
+				interimEvaluationValidityCountByDisease.put(disease, 0);
 				interimDosesToSkipByDisease.put(disease, new HashMap<Integer, Integer>());
 			}
 		}
@@ -599,7 +599,7 @@ public class TargetSeries {
 
 		Map<Integer, Integer> skipDoseEntry = interimDosesToSkipByDisease.get(pDisease);
 		if (skipDoseEntry != null) {
-			skipDoseEntry.put(new Integer(pDoseNumberToSkipFrom), new Integer(pDoseNumberToSkipTo));
+			skipDoseEntry.put(pDoseNumberToSkipFrom, pDoseNumberToSkipTo);
 		}
 
 		/////// Integer lInterimValidityCountForDisease = interimEvaluationValidityCountByDisease.get(pDisease);
@@ -612,7 +612,7 @@ public class TargetSeries {
 	public int determineDoseNumberInSeries() {
 
 		int lEffectiveNumberOfDoses = determineEffectiveNumberOfDosesInSeries();
-		Integer lEffectiveDoseNumberPlus1Int = new Integer(lEffectiveNumberOfDoses+1);
+		Integer lEffectiveDoseNumberPlus1Int = lEffectiveNumberOfDoses+1;
 
 		//////////////
 		// If dose number determined by disease count and there is a skip dose from the (next) target dose for all other diseases in this target series, take that into account
@@ -748,12 +748,12 @@ public class TargetSeries {
 		// Initialize tally for supported diseases
 		Collection<String> allSupportedDiseases = antigensToIncludeInDetermination;
 		for (String disease : allSupportedDiseases) {
-			tallyOfDoseNumberByDisease.put(disease, new Integer(0));
+			tallyOfDoseNumberByDisease.put(disease, 0);
 		}
 
 		// Record tally for disease immunity
 		Date targetDoseDate = pTD.getAdministrationDate();
-		Integer numberOfDosesInSeriesInt = new Integer(getSeriesRules().getNumberOfDosesInSeries());
+		Integer numberOfDosesInSeriesInt = getSeriesRules().getNumberOfDosesInSeries();
 		for (String sdc : this.diseaseImmunityDate.keySet()) {
 			Date lDiseaseImmunityDate = this.diseaseImmunityDate.get(sdc);
 			if (targetDoseDate != null && lDiseaseImmunityDate != null && targetDoseDate.compareTo(lDiseaseImmunityDate) >= 0) {
@@ -864,7 +864,7 @@ public class TargetSeries {
 					// END: determining whether or not disease tally should be tracked for this shot
 					if (takeSkipDoseEntriesIntoAccount == false) {
 						if (lIncrementDoseNumber) {
-							tallyOfDoseNumberByDisease.put(diseaseTargeted,	new Integer(doseNumberForDisease));
+							tallyOfDoseNumberByDisease.put(diseaseTargeted,	doseNumberForDisease);
 							if (doseNumberForDisease > highestNonSkipDoseNumberToEntry) {
 								highestNonSkipDoseNumberToEntry = doseNumberForDisease;
 							}
@@ -872,13 +872,13 @@ public class TargetSeries {
 					}
 					else {
 						Map<Integer, Integer> skipDoseEntriesForDisease = interimDosesToSkipByDisease.get(diseaseTargeted);
-						Integer skipDoseEntryFromInt = new Integer(doseNumberForDisease);
+						Integer skipDoseEntryFromInt = doseNumberForDisease;
 						if (skipDoseEntriesForDisease != null && skipDoseEntriesForDisease.containsKey(skipDoseEntryFromInt)) {
 							Integer skipDoseToInt = skipDoseEntriesForDisease.get(skipDoseEntryFromInt);
 							int skipDoseTo = skipDoseToInt.intValue();
 							if (statusThisTD != DoseStatus.VALID) {
 								skipDoseTo = skipDoseTo-1;
-								skipDoseToInt = new Integer(skipDoseTo);
+								skipDoseToInt = skipDoseTo;
 							}
 							if (skipDoseTo > highestSkipDoseNumberToEntry)
 								highestSkipDoseNumberToEntry = skipDoseTo;
@@ -889,7 +889,7 @@ public class TargetSeries {
 								logger.debug(_METHODNAME + "dosenumber for disease: " + diseaseTargeted + "; dose number " + doseNumberForDisease + "; else: " + td);
 							}
 							if (lIncrementDoseNumber) {
-								tallyOfDoseNumberByDisease.put(diseaseTargeted,	new Integer(doseNumberForDisease));
+								tallyOfDoseNumberByDisease.put(diseaseTargeted,	doseNumberForDisease);
 								if (doseNumberForDisease > highestNonSkipDoseNumberToEntry) {
 									highestNonSkipDoseNumberToEntry = doseNumberForDisease;
 								}
@@ -948,7 +948,7 @@ public class TargetSeries {
 
 		for (String sdc : diseaseImmunityDate.keySet()) {
 			if (!tallyOfDoseNumberByDisease.containsKey(sdc)) {
-				tallyOfDoseNumberByDisease.put(sdc, new Integer(leastDoseNumberAcrossDiseases));
+				tallyOfDoseNumberByDisease.put(sdc, leastDoseNumberAcrossDiseases);
 			}
 		}
 
@@ -957,7 +957,7 @@ public class TargetSeries {
 				if (tallyOfDoseNumberByDisease.containsKey(sdc)) {
 					Integer diseaseTally = tallyOfDoseNumberByDisease.get(sdc);
 					int newTally = diseaseTally.intValue();
-					diseaseTally = new Integer(newTally);
+					diseaseTally = newTally;
 					this.interimEvaluationValidityCountByDisease.put(sdc, diseaseTally);
 				}
 			}
@@ -3076,6 +3076,7 @@ public class TargetSeries {
 	/**
 	 * @deprecated This routine will be retired
 	 */
+	@Deprecated
 	public boolean areNoEarlierAdministeredShotsNotEvaluated(TargetDose pTD) {
 
 		String _METHODNAME = "noEarlierAdministeredShotNotEvaluated() ";
@@ -3757,7 +3758,7 @@ public class TargetSeries {
 
 
 	public void setManuallySetAccountForLiveVirusIntervalsInRecommendation(boolean yesno) {
-		manuallySetAccountForLiveVirusIntervalsInRecommendation = new Boolean(yesno);
+		manuallySetAccountForLiveVirusIntervalsInRecommendation = yesno;
 	}
 
 

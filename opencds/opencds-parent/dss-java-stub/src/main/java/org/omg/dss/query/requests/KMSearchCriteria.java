@@ -1,22 +1,37 @@
+/*
+ * Copyright 2011-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.omg.dss.query.requests;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
- * The KMSearchCriteria is an object containing knowledge module search criteria. 
- * 
+ * The KMSearchCriteria is an object containing knowledge module search criteria.
+ *
  * <p>Java class for KMSearchCriteria complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="KMSearchCriteria">
  *   &lt;complexContent>
@@ -32,8 +47,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "KMSearchCriteria", propOrder = {
@@ -56,25 +71,25 @@ public class KMSearchCriteria {
 
     /**
      * Gets the value of the inclusionCriterion property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the inclusionCriterion property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getInclusionCriterion().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link KMCriterion }
-     * 
-     * 
+     *
+     *
      */
     public List<KMCriterion> getInclusionCriterion() {
         if (inclusionCriterion == null) {
@@ -85,25 +100,25 @@ public class KMSearchCriteria {
 
     /**
      * Gets the value of the exclusionCriterion property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the exclusionCriterion property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getExclusionCriterion().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link KMCriterion }
-     * 
-     * 
+     *
+     *
      */
     public List<KMCriterion> getExclusionCriterion() {
         if (exclusionCriterion == null) {
@@ -114,11 +129,11 @@ public class KMSearchCriteria {
 
     /**
      * Gets the value of the maximumKMsToReturn property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public BigInteger getMaximumKMsToReturn() {
         return maximumKMsToReturn;
@@ -126,11 +141,11 @@ public class KMSearchCriteria {
 
     /**
      * Sets the value of the maximumKMsToReturn property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link BigInteger }
-     *     
+     *
      */
     public void setMaximumKMsToReturn(BigInteger value) {
         this.maximumKMsToReturn = value;
@@ -138,7 +153,7 @@ public class KMSearchCriteria {
 
     /**
      * Gets the value of the minimumKMSearchScore property.
-     * 
+     *
      */
     public int getMinimumKMSearchScore() {
         return minimumKMSearchScore;
@@ -146,7 +161,7 @@ public class KMSearchCriteria {
 
     /**
      * Sets the value of the minimumKMSearchScore property.
-     * 
+     *
      */
     public void setMinimumKMSearchScore(int value) {
         this.minimumKMSearchScore = value;
@@ -154,11 +169,11 @@ public class KMSearchCriteria {
 
     /**
      * Gets the value of the kmTraitInclusionSpecification property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link KMTraitInclusionSpecification }
-     *     
+     *
      */
     public KMTraitInclusionSpecification getKmTraitInclusionSpecification() {
         return kmTraitInclusionSpecification;
@@ -166,11 +181,11 @@ public class KMSearchCriteria {
 
     /**
      * Sets the value of the kmTraitInclusionSpecification property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link KMTraitInclusionSpecification }
-     *     
+     *
      */
     public void setKmTraitInclusionSpecification(KMTraitInclusionSpecification value) {
         this.kmTraitInclusionSpecification = value;

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.store.dao.je;
 
 import org.opencds.config.api.model.SupportingData
@@ -42,24 +58,25 @@ class SupportingDataJeDaoSpec extends Specification {
         dao.persist(sd)
         
         and:
-        def persistedSD = dao.find(KMIdImpl.create(sd.getKMId()))
+        SupportingData persistedSD = dao.find(sd.getIdentifier())
+        System.err.println "persistedSD : " + persistedSD
         
         and:
-        dao.delete(persistedSD[0])
+        dao.delete(persistedSD)
         
         and:
-        def found = dao.find(KMIdImpl.create(sd.getKMId()))
+        SupportingData found = dao.find(sd.identifier)
         
         then:
         persistedSD != null
         !sd.is(persistedSD)
         !found
-        sd.identifier == persistedSD[0].identifier
-        sd.kmId == persistedSD[0].kmId
-        sd.packageId == persistedSD[0].packageId
-        sd.packageType == persistedSD[0].packageType
-        sd.timestamp == persistedSD[0].timestamp
-        sd.userId == persistedSD[0].userId
+        sd.identifier == persistedSD.identifier
+        sd.kmId == persistedSD.kmId
+        sd.packageId == persistedSD.packageId
+        sd.packageType == persistedSD.packageType
+        sd.timestamp == persistedSD.timestamp
+        sd.userId == persistedSD.userId
     }
     
 }

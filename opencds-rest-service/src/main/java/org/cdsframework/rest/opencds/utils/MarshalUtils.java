@@ -23,14 +23,14 @@ package org.cdsframework.rest.opencds.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.util.JAXBResult;
+import java.util.concurrent.ConcurrentHashMap;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.util.JAXBResult;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -40,7 +40,7 @@ import javax.xml.validation.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.omg.dss.evaluation.requestresponse.EvaluationResponse;
-import org.omg.dss.evaluation.requestresponse.ObjectFactory;
+import org.omg.dss.ObjectFactory;
 import org.xml.sax.ContentHandler;
 
 /**
@@ -54,27 +54,36 @@ public class MarshalUtils {
      * static logger
      */
     private static final Log log = LogFactory.getLog(MarshalUtils.class);
-    private static final Map<String, JAXBContext> jaxbContextMap = new HashMap<String, JAXBContext>();
+    private static final ConcurrentHashMap<String, JAXBContext> jaxbContextMap = new ConcurrentHashMap<>();
+    private static final String dssObjectFactoryPackageName = ObjectFactory.class.getPackageName();
+    private static final String dssObjectFactoryPackageNamePrefix = dssObjectFactoryPackageName + ".";
 
     /**
-     * Get the jaxb context for the package name.
+     * Get the jaxb context for the supplied context path.
      *
-     * @param classPackageName
+     * @param contextPath
      * @return
-     * @throws CdsException
+     * @throws jakarta.xml.bind.JAXBException
      */
-    private static JAXBContext getJAXBContext(final String classPackageName) throws JAXBException {
-        JAXBContext jaxbContext;
-        if (classPackageName == null) {
-            throw new IllegalArgumentException("classPackageName cannot be null.");
+    private static JAXBContext getJAXBContext(final String contextPath) throws JAXBException {
+        if (contextPath == null) {
+            throw new IllegalArgumentException("contextPath cannot be null.");
         }
-        if (!jaxbContextMap.containsKey(classPackageName)) {
-            jaxbContext = JAXBContext.newInstance(classPackageName);
-            jaxbContextMap.put(classPackageName, jaxbContext);
-        } else {
-            jaxbContext = jaxbContextMap.get(classPackageName);
+        try {
+            return jaxbContextMap.computeIfAbsent(contextPath, key -> {
+                try {
+                    return JAXBContext.newInstance(contextPath);
+                }
+                catch (final JAXBException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (final RuntimeException e) {
+            final Throwable cause = e.getCause();
+            if (cause instanceof JAXBException)
+                throw (JAXBException) cause;
+            throw e;
         }
-        return jaxbContext;
     }
 
     private static Marshaller getMarshaller(final Object jaxbElement) throws JAXBException {
@@ -89,9 +98,9 @@ public class MarshalUtils {
         if (klass == null) {
             throw new IllegalArgumentException("klass cannot be null.");
         }
-        final String classPackageName = getClassPackageName(klass);
-        log.debug("classPackageName=" + classPackageName);
-        result = getJAXBContext(classPackageName).createMarshaller();
+        final String contextPath = getContextPath(klass);
+        log.debug("contextPath=" + contextPath);
+        result = getJAXBContext(contextPath).createMarshaller();
         result.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         return result;
     }
@@ -101,8 +110,8 @@ public class MarshalUtils {
         if (klass == null) {
             throw new IllegalArgumentException("klass cannot be null.");
         }
-        final String classPackageName = getClassPackageName(klass);
-        result = getJAXBContext(classPackageName).createUnmarshaller();
+        final String contextPath = getContextPath(klass);
+        result = getJAXBContext(contextPath).createUnmarshaller();
         return result;
     }
 
@@ -112,7 +121,7 @@ public class MarshalUtils {
      * @param jaxbElement
      * @param dst
      * @param schema
-     * @throws javax.xml.bind.JAXBException
+     * @throws jakarta.xml.bind.JAXBException
      */
     public static void marshal(Object jaxbElement, final Object dst, final Schema schema) throws JAXBException {
         final Marshaller marshaller = getMarshaller(jaxbElement);
@@ -134,7 +143,7 @@ public class MarshalUtils {
      *
      * @param jaxbElement
      * @param os
-     * @throws javax.xml.bind.JAXBException
+     * @throws jakarta.xml.bind.JAXBException
      */
     public static void marshal(final Object jaxbElement, final OutputStream os) throws JAXBException {
         marshal(jaxbElement, os, null);
@@ -147,7 +156,7 @@ public class MarshalUtils {
      * @param inputStream
      * @param returnType
      * @return
-     * @throws javax.xml.bind.JAXBException
+     * @throws jakarta.xml.bind.JAXBException
      * @throws javax.xml.transform.TransformerException
      */
     public static <S> S unmarshal(final InputStream inputStream, final Class<S> returnType)
@@ -164,7 +173,7 @@ public class MarshalUtils {
      * @param xslInputStream
      * @param returnType
      * @return
-     * @throws javax.xml.bind.JAXBException
+     * @throws jakarta.xml.bind.JAXBException
      * @throws javax.xml.transform.TransformerException
      */
     public static <S> S unmarshal(final InputStream inputStream, final InputStream xslInputStream,
@@ -181,7 +190,7 @@ public class MarshalUtils {
      * @param namespaceAware
      * @param returnType
      * @return
-     * @throws javax.xml.bind.JAXBException
+     * @throws jakarta.xml.bind.JAXBException
      * @throws javax.xml.transform.TransformerException
      */
     public static <S> S unmarshal(final InputStream inputStream, final boolean namespaceAware,
@@ -199,7 +208,7 @@ public class MarshalUtils {
      * @param xslInputStream
      * @param returnType
      * @return
-     * @throws javax.xml.bind.JAXBException
+     * @throws jakarta.xml.bind.JAXBException
      * @throws javax.xml.transform.TransformerConfigurationException
      */
     public static <S> S unmarshal(final InputStream inputStream, final boolean namespaceAware,
@@ -236,7 +245,7 @@ public class MarshalUtils {
      *
      * @param dataObject
      * @return
-     * @throws javax.xml.bind.JAXBException
+     * @throws jakarta.xml.bind.JAXBException
      */
     public static byte[] marshalObject(final Object dataObject) throws JAXBException {
         byte[] result;
@@ -257,7 +266,7 @@ public class MarshalUtils {
      * @param inputStream
      * @param cdsObjectClass
      * @return
-     * @throws javax.xml.bind.JAXBException
+     * @throws jakarta.xml.bind.JAXBException
      */
     public static <S> S unmarshalObject(final InputStream inputStream, final Class<S> cdsObjectClass)
             throws JAXBException {
@@ -268,18 +277,18 @@ public class MarshalUtils {
     }
 
     /**
-     * Returns the package name of a class.
+     * Returns the context path to be used for creating the jaxb context.
      *
      * @param klass
      * @return
      */
-    public static String getClassPackageName(final Class klass) {
-        String result;
+    public static String getContextPath(final Class klass) {
         if (klass == null) {
             throw new IllegalArgumentException("The class cannot be null.");
         }
-        final String canonicalName = klass.getCanonicalName();
-        result = canonicalName.substring(0, canonicalName.lastIndexOf("."));
-        return result;
+        final String packageName = klass.getPackageName();
+        if (packageName.equals(dssObjectFactoryPackageName) || packageName.startsWith(dssObjectFactoryPackageNamePrefix))
+            return dssObjectFactoryPackageName;
+        return packageName;
     }
 }

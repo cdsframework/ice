@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:knowledgeModules
+    xsi:schemaLocation="org.opencds.dss.config_rest.v1_0 ../../../../../../opencds-parent/opencds-config/opencds-config-schema/src/main/resources/schema/OpenCDSConfigRest.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ns2="org.opencds.dss.config_rest.v1_0"
+    xmlns:ns3="org.opencds.dss.config.v1_0">
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="opioid" version="1.0" />
+        <status>APPROVED</status>
+        <cdsHook>
+            <!-- hook is the channel -->
+            <hook>medication-prescribe</hook>
+            <!-- id is the ID of this service -->
+            <title>Opioid CDS Service</title>
+            <description>Opioid CDS Service.</description>
+            <id>opioid-mme</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{Patient.id}}</query>
+                </resource>
+                <resource>
+                    <name>medOrders</name>
+                    <query>MedicationOrder/_search?patient={{Patient.id}}</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>DSTU2</fhirVersion>
+        </cdsHook>
+        <executionEngine>Drools 6.5 Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks" version="1.0" />
+        <package>
+            <packageType>MAVEN_SELF_CONTAINED_JAR</packageType>
+            <packageId>org.opencds.opioid^opioid-mme^1.0.jar</packageId>
+            <preload>true</preload>
+        </package>
+        <primaryProcess>opioidcds.mme.PrimaryProcess</primaryProcess>
+        <preProcessPlugins>
+            <preProcessPlugin version="0.1" businessId="ValueSetTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>ValueSetArchive</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="RxNavTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>RXNAV_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="UmlsTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>UMLS_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="OpioidSupportingDataPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>OPIOID_MME_SUPPORTING_DATA</supportingDataIdentifier>
+            </preProcessPlugin>
+        </preProcessPlugins>
+        <timestamp>2018-03-14T21:30:30</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="opioid-mme" version="1.0" />
+        <status>APPROVED</status>
+        <cdsHook>
+            <!-- hook is the channel -->
+            <hook>medication-prescribe</hook>
+            <!-- id is the ID of this service -->
+            <title>Opioid CDS Service</title>
+            <description>Opioid CDS Service.</description>
+            <id>opioid-mme</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{Patient.id}}</query>
+                </resource>
+                <resource>
+                    <name>medOrders</name>
+                    <query>MedicationOrder/_search?patient={{Patient.id}}</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>DSTU2</fhirVersion>
+        </cdsHook>
+        <executionEngine>Drools 6.5 Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks" version="1.0" />
+        <package>
+            <packageType>MAVEN_SELF_CONTAINED_JAR</packageType>
+            <packageId>org.opencds.opioid^opioid-mme^1.0.jar</packageId>
+            <preload>true</preload>
+        </package>
+        <primaryProcess>opioidcds.mme.PrimaryProcess</primaryProcess>
+        <preProcessPlugins>
+            <preProcessPlugin version="0.1" businessId="RxNavTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>RXNAV_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="UmlsTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>UMLS_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="OpioidSupportingDataPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>OPIOID_MME_SUPPORTING_DATA</supportingDataIdentifier>
+            </preProcessPlugin>
+        </preProcessPlugins>
+        <timestamp>2018-01-26T10:11:00</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="opioid-immediaterelease" version="1.0" />
+        <status>APPROVED</status>
+        <cdsHook>
+            <!-- hook is the channel -->
+            <hook>medication-prescribe</hook>
+            <!-- id is the ID of this service -->
+            <title>Opioid CDS Service</title>
+            <description>Opioid CDS Service.</description>
+            <id>opioid-immediaterelease</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{Patient.id}}</query>
+                </resource>
+                <resource>
+                    <name>medOrders</name>
+                    <query>MedicationOrder/_search?patient={{Patient.id}}</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>DSTU2</fhirVersion>
+        </cdsHook>
+        <executionEngine>Drools 6.5 Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks" version="1.0" />
+        <package>
+            <packageType>MAVEN_SELF_CONTAINED_JAR</packageType>
+            <packageId>org.opencds.opioid^opioid-immediatereleaseopioid^1.0.jar</packageId>
+            <preload>true</preload>
+        </package>
+        <primaryProcess>opioidcds.mme.PrimaryProcess</primaryProcess>
+        <preProcessPlugins>
+            <preProcessPlugin version="0.1" businessId="RxNavTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>RXNAV_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="UmlsTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>UMLS_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="OpioidSupportingDataPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>OPIOID_IMMEDIATE_RELEASE_SUPPORTING_DATA</supportingDataIdentifier>
+            </preProcessPlugin>
+        </preProcessPlugins>
+        <timestamp>2018-01-26T10:11:00</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="naloxone" version="1.0" />
+        <status>APPROVED</status>
+        <cdsHook>
+            <!-- hook is the channel -->
+            <hook>medication-prescribe</hook>
+            <!-- id is the ID of this service -->
+            <title>Opioid CDS Service</title>
+            <description>Opioid CDS Service.</description>
+            <id>opioid-naloxone</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{Patient.id}}</query>
+                </resource>
+                <resource>
+                    <name>medOrders</name>
+                    <query>MedicationOrder/_search?patient={{Patient.id}}</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>DSTU2</fhirVersion>
+        </cdsHook>
+        <executionEngine>Drools 6.5 Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks" version="1.0" />
+        <package>
+            <packageType>MAVEN_SELF_CONTAINED_JAR</packageType>
+            <packageId>org.opencds.opioid^opioid-naloxone^1.0.jar</packageId>
+            <preload>true</preload>
+        </package>
+        <primaryProcess>opioidcds.mme.PrimaryProcess</primaryProcess>
+        <preProcessPlugins>
+            <preProcessPlugin version="0.1" businessId="RxNavTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>RXNAV_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="UmlsTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>UMLS_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="OpioidSupportingDataPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>OPIOID_NALOXONE_RELEASE_SUPPORTING_DATA</supportingDataIdentifier>
+            </preProcessPlugin>
+        </preProcessPlugins>
+        <timestamp>2018-01-26T10:11:00</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="periodicassessment" version="1.0" />
+        <status>APPROVED</status>
+        <cdsHook>
+            <!-- hook is the channel -->
+            <hook>medication-prescribe</hook>
+            <!-- id is the ID of this service -->
+            <title>Opioid CDS Service</title>
+            <description>Opioid CDS Service.</description>
+            <id>opioid-periodicassessment</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{Patient.id}}</query>
+                </resource>
+                <resource>
+                    <name>medOrders</name>
+                    <query>MedicationOrder/_search?patient={{Patient.id}}</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>DSTU2</fhirVersion>
+        </cdsHook>
+        <executionEngine>Drools 6.5 Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks" version="1.0" />
+        <package>
+            <packageType>MAVEN_SELF_CONTAINED_JAR</packageType>
+            <packageId>org.opencds.opioid^opioid-periodicassessment^1.0.jar</packageId>
+            <preload>true</preload>
+        </package>
+        <primaryProcess>opioidcds.mme.PrimaryProcess</primaryProcess>
+        <preProcessPlugins>
+            <preProcessPlugin version="0.1" businessId="RxNavTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>RXNAV_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="UmlsTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>UMLS_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="OpioidSupportingDataPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>OPIOID_PERIODICASSESSMENT_RELEASE_SUPPORTING_DATA</supportingDataIdentifier>
+            </preProcessPlugin>
+        </preProcessPlugins>
+        <timestamp>2018-01-26T10:11:00</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="benzodiazepine" version="1.0" />
+        <status>APPROVED</status>
+        <cdsHook>
+            <!-- hook is the channel -->
+            <hook>medication-prescribe</hook>
+            <!-- id is the ID of this service -->
+            <title>Opioid CDS Service</title>
+            <description>Opioid CDS Service.</description>
+            <id>opioid-benzodiazepine</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{Patient.id}}</query>
+                </resource>
+                <resource>
+                    <name>medOrders</name>
+                    <query>MedicationOrder/_search?patient={{Patient.id}}</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>DSTU2</fhirVersion>
+        </cdsHook>
+        <executionEngine>Drools 6.5 Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks" version="1.0" />
+        <package>
+            <packageType>MAVEN_SELF_CONTAINED_JAR</packageType>
+            <packageId>org.opencds.opioid^opioid-benzodiazepine^1.0.jar</packageId>
+            <preload>true</preload>
+        </package>
+        <primaryProcess>opioidcds.mme.PrimaryProcess</primaryProcess>
+        <preProcessPlugins>
+            <preProcessPlugin version="0.1" businessId="RxNavTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>RXNAV_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="UmlsTerminologyPreProcessPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>UMLS_DB</supportingDataIdentifier>
+            </preProcessPlugin>
+            <preProcessPlugin version="0.1" businessId="OpioidSupportingDataPlugin"
+                scopingEntityId="org.opencds.plugin">
+                <supportingDataIdentifier>OPIOID_BENZODIAZEPINE_RELEASE_SUPPORTING_DATA</supportingDataIdentifier>
+            </preProcessPlugin>
+        </preProcessPlugins>
+        <timestamp>2018-01-26T10:11:00</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+</ns2:knowledgeModules>

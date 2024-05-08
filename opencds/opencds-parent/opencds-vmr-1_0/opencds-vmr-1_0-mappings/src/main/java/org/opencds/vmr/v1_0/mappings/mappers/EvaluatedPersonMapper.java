@@ -1,17 +1,17 @@
-/**
- * Copyright 2011 OpenCDS.org
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
+/*
+ * Copyright 2011-2020 OpenCDS.org
  *
- *		http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.opencds.vmr.v1_0.mappings.mappers;
@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
@@ -35,7 +35,7 @@ import org.opencds.vmr.v1_0.mappings.in.FactLists;
 import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
 
 
-/**
+/*
  * A person who is the subject of evaluation by a CDS system.  May be the focal patient or some other relevant person (e.g., a relative 
  * or a sexual contact). Includes demographic attributes, clinical statements, and related entities.
  * 			
@@ -43,7 +43,7 @@ import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
  * nesting of content and/or through the use of the relationship entities directly attached to the EvaluatedPersonMapper.
  */
 
-/**
+/*
  * Mapper classes provide mapping in both directions between the external schema structure of the vMR
  * 		and the internal javabeans used by the rules.
  * 
@@ -52,7 +52,7 @@ import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
  */
 public class EvaluatedPersonMapper extends EntityBaseMapper {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static Log logger = LogFactory.getLog(EntityMapper.class);
 	
 	/**
 	 * @param external

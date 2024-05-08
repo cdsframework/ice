@@ -3,16 +3,11 @@
     <parent>
         <artifactId>opencds-config</artifactId>
         <groupId>org.opencds</groupId>
-        <version>2.0.5</version>
+        <version>6.2.0</version>
     </parent>
     <artifactId>opencds-config-file</artifactId>
     <name>OpenCDS File-based Configuration Implementation</name>
     <dependencies>
-        <dependency>
-            <groupId>org.opencds</groupId>
-            <artifactId>opencds-config-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.opencds</groupId>
             <artifactId>opencds-config-service</artifactId>
@@ -22,38 +17,25 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib-nodep</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.spockframework</groupId>
-            <artifactId>spock-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <!-- tests are (transitively) dependent upon these being built -->
-        <dependency>
-            <groupId>org.opencds</groupId>
-            <artifactId>opencds-vmr-1_0-schema</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.opencds</groupId>
-            <artifactId>opencds-vmr-1_0-mappings</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <build>
-        <plugins>
-        </plugins>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>org.codehaus.gmavenplus</groupId>
+              <artifactId>gmavenplus-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-surefire-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-enforcer-plugin</artifactId>
+          </plugin>
+      </plugins>
     </build>
 </project>

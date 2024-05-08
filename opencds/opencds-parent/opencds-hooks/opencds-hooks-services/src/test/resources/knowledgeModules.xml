@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:knowledgeModules xsi:schemaLocation="org.opencds.dss.config_rest.v1_0 ../../../../../../opencds-parent/opencds-config/opencds-config-schema/src/main/resources/schema/OpenCDSConfigRest.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ns2="org.opencds.dss.config_rest.v1_0" xmlns:ns3="org.opencds.dss.config.v1_0">
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="opioid-mme" version="1.0" />
+        <status>APPROVED</status>
+        <cdsHook>
+            <!-- hook is the channel -->
+            <hook>medication-prescribe</hook>
+            <!-- id is the ID of this service -->
+            <title>Opioid MME CDS Service</title>
+            <description>Opioid MME CDS Service.</description>
+            <id>opioid-mme</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{patient.id}}</query>
+                </resource>
+                <resource>
+                    <name>pregnancyObservation</name>
+                    <query>MedicationOrder/_search?patient={{patient.id}}</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>DSTU2</fhirVersion>
+        </cdsHook>
+        <executionEngine>Drools 6.5 Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks" version="1.0" />
+        <package>
+            <packageType>MAVEN_SELF_CONTAINED_JAR</packageType>
+            <packageId>org.opencds.hook^opioid-mme^1.0.jar</packageId>
+            <preload>true</preload>
+        </package>
+        <primaryProcess>opioidcds.mme.PrimaryProcess</primaryProcess>
+        <preProcessPlugins>
+            <preProcessPlugin version="0.1" businessId="OpioidTerminologyPreProcessPlugin" scopingEntityId="org.opencds.plugin" />
+        </preProcessPlugins>
+        <timestamp>2017-05-02T14:26:44.650-06:00</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="opioid-drugtesting" version="1.0" />
+        <status>APPROVED</status>
+        <cdsHook>
+            <!-- hook is the channel -->
+            <hook>medication-prescribe</hook>
+            <!-- id is the ID of this service -->
+            <title>Opioid Drug Testing CDS Service</title>
+            <description>Opioid CDS Service.</description>
+            <id>opioid-drugtesting</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{patient.id}}</query>
+                </resource>
+                <resource>
+                    <name>medicationOrders</name>
+                    <query>MedicationOrder/patient={{patient.id}}&amp;status=active,completed,stopped</query>
+                </resource>
+                <resource>
+                    <name>urineDrugScreenLabs</name>
+                    <query>Observation/patient={{patient.id}}&amp;code=10998-3,12286-1,19295-5,19300-3,19645-1</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>DSTU2</fhirVersion>
+        </cdsHook>
+        <executionEngine>Drools 6.5 Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks" version="1.0" />
+        <package>
+            <packageType>MAVEN_SELF_CONTAINED_JAR</packageType>
+            <packageId>org.opencds.hook^opioid-drugtesting^1.0.jar</packageId>
+            <preload>true</preload>
+        </package>
+        <primaryProcess>opioidcds.drugtesting.PrimaryProcess</primaryProcess>
+        <preProcessPlugins>
+            <preProcessPlugin version="0.1" businessId="OpioidTerminologyPreProcessPlugin" scopingEntityId="org.opencds.plugin" />
+        </preProcessPlugins>
+        <timestamp>2017-05-02T14:26:44.650-06:00</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+    <knowledgeModule>
+        <identifier scopingEntityId="org.opencds.hook" businessId="opioid" version="1.0" />
+        <status>APPROVED</status>
+        <cdsHook>
+            <!-- hook is the channel -->
+            <hook>medication-prescribe</hook>
+            <!-- id is the ID of this service -->
+            <title>Opioid CDS Service</title>
+            <description>Opioid CDS Service.</description>
+            <id>opioid</id>
+            <prefetch>
+                <resource>
+                    <name>patient</name>
+                    <query>Patient/{{patient.id}}</query>
+                </resource>
+                <resource>
+                    <name>pregnancyObservation</name>
+                    <query>MedicationOrder/_search?patient={{patient.id}}</query>
+                </resource>
+            </prefetch>
+            <fhirVersion>DSTU2</fhirVersion>
+        </cdsHook>
+        <executionEngine>Drools 6.5 Adapter</executionEngine>
+        <semanticSignifierId scopingEntityId="org.hl7.fhir" businessId="cds-hooks" version="1.0" />
+        <package>
+            <packageType>MAVEN_SELF_CONTAINED_JAR</packageType>
+            <packageId>org.opencds.hook^opioid^1.0.jar</packageId>
+            <preload>true</preload>
+        </package>
+        <primaryProcess>opioidcds.PrimaryProcess</primaryProcess>
+        <preProcessPlugins>
+            <preProcessPlugin version="0.1" businessId="OpioidTerminologyPreProcessPlugin" scopingEntityId="org.opencds.plugin" />
+        </preProcessPlugins>
+        <timestamp>2017-05-02T14:26:44.650-06:00</timestamp>
+        <userId>phillip</userId>
+    </knowledgeModule>
+</ns2:knowledgeModules>

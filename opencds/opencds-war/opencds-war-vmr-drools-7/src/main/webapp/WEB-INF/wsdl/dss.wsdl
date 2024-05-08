@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:dss="http://www.omg.org/spec/CDSS/201105/dss" xmlns:dssWsdl="http://www.omg.org/spec/CDSS/201105/dssWsdl" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns="http://schemas.xmlsoap.org/soap/encoding/" name="DSS_WSDL" targetNamespace="http://www.omg.org/spec/CDSS/201105/dssWsdl">
+	<wsdl:import namespace="http://www.omg.org/spec/CDSS/201105/dssWsdl" location="baseWsdl/dssBaseComponents.wsdl"/>
+	<wsdl:portType name="MetadataDiscovery">
+		<wsdl:documentation>The MetadataDiscovery Interface enables the identification of service capabilities.</wsdl:documentation>
+		<wsdl:operation name="describeProfile">
+			<wsdl:documentation>Throws UnrecognizedScopedEntityException if the specified profile EntityIdentifier is not recognized by the service.  If specified EntityIdentifier is recognized by the service, returns a description of the profile as a ServiceProfile object.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:describeProfileRequest"/>
+			<wsdl:output message="dssWsdl:describeProfileResponse"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="describeScopingEntity">
+			<wsdl:documentation>Throws UnrecognizedScopingEntityException if the specified scoping entity identifier is not recognized by the service.  If specified scoping entity identifier is recognized by the service, returns a description of the scoping entity as a ScopingEntity object.  Returned ScopingEntity object does not include any children scoping entities.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:describeScopingEntityRequest"/>
+			<wsdl:output message="dssWsdl:describeScopingEntityResponse"/>
+			<wsdl:fault name="unrecognizedScopingEntityException" message="dssWsdl:UnrecognizedScopingEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="describeScopingEntityHierarchy">
+			<wsdl:documentation>Throws UnrecognizedScopingEntityException if the specified scoping entity identifier is not recognized by the service.  If specified scoping entity identifier is recognized by the service, returns a description of the scoping entity as a ScopingEntity object.  Returned ScopingEntity object includes any descendant scoping entities, up to and including the depth specified.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:describeScopingEntityHierarchyRequest"/>
+			<wsdl:output message="dssWsdl:describeScopingEntityHierarchyResponse"/>
+			<wsdl:fault name="unrecognizedScopingEntityException" message="dssWsdl:UnrecognizedScopingEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="describeSemanticRequirement">
+			<wsdl:documentation>Throws UnrecognizedScopedEntityException if the specified semantic signifier EntityIdentifier is not recognized by the service.  If specified EntityIdentifier is recognized by the service, returns a description of the semantic signifier as a SemanticSignifier object.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:describeSemanticRequirementRequest"/>
+			<wsdl:output message="dssWsdl:describeSemanticRequirementResponse"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="describeSemanticSignifier">
+			<wsdl:documentation>Throws UnrecognizedScopedEntityException if the specified semantic signifier EntityIdentifier is not recognized by the service.  If specified EntityIdentifier is recognized by the service, returns a description of the semantic signifier as a SemanticSignifier object.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:describeSemanticSignifierRequest"/>
+			<wsdl:output message="dssWsdl:describeSemanticSignifierResponse"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="describeTrait">
+			<wsdl:documentation>Throws UnrecognizedScopedEntityException if the specified trait EntityIdentifier is not recognized by the service.  If specified EntityIdentifier is recognized by the service, returns a description of the trait used for describing knowledge modules as a Trait object.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:describeTraitRequest"/>
+			<wsdl:output message="dssWsdl:describeTraitResponse"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="listProfiles">
+			<wsdl:documentation>Returns a list of all of the profiles supported by the service as a ProfilesByType object. </wsdl:documentation>
+			<wsdl:input message="dssWsdl:listProfilesRequest"/>
+			<wsdl:output message="dssWsdl:listProfilesResponse"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:portType name="Evaluation">
+		<wsdl:documentation>The Evaluation Interface enables data evaluation using knowledge modules.</wsdl:documentation>
+		<wsdl:operation name="evaluate">
+			<wsdl:documentation>Throws one of the exceptions if an exception condition is present.  If none of the exception conditions are present, evaluates in a non-iterative fashion one or more knowledge modules using the data provided as an EvaluationRequest object and returns the result(s) of the evaluation as an EvaluationResponse object. 
+All time-stamped data are considered to have the time zone offset specified by the client, unless otherwise noted.
+The provision of excessive data (i.e., unrequired DataRequirementItemData) shall be ignored without leading to an exception.  However, a warning may be provided.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:evaluateRequest"/>
+			<wsdl:output message="dssWsdl:evaluateResponse"/>
+			<wsdl:fault name="invalidSpecifiedTimeZoneOffsetException" message="dssWsdl:InvalidTimeZoneOffsetExceptionFault"/>
+			<wsdl:fault name="unrecognizedLanguageException" message="dssWsdl:UnrecognizedLanguageExceptionFault"/>
+			<wsdl:fault name="unsupportedLanguageException" message="dssWsdl:UnsupportedLanguageExceptionFault"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="requiredDataNotProvidedException" message="dssWsdl:RequiredDataNotProvidedExceptionFault"/>
+			<wsdl:fault name="invalidDriDataFormatException" message="dssWsdl:InvalidDriDataFormatExceptionFault"/>
+			<wsdl:fault name="evaluationException" message="dssWsdl:EvaluationExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="evaluateAtSpecifiedTime">
+			<wsdl:documentation>Throws one of the exceptions if an exception condition is present.  If none of the exception conditions are present, evaluates in a non-iterative fashion one or more knowledge modules using the data provided as an EvaluationRequest object and returns the result(s) of the evaluation as an EvaluationResponse object. 
+Conducts evaluation as if it was currently the specified date and time.
+All time-stamped data are considered to have the time zone offset specified by the client, unless otherwise noted.
+The provision of excessive data (i.e., unrequired DataRequirementItemData) shall be ignored without leading to an exception.  However, a warning may be provided.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:evaluateAtSpecifiedTimeRequest"/>
+			<wsdl:output message="dssWsdl:evaluateAtSpecifiedTimeResponse"/>
+			<wsdl:fault name="invalidSpecifiedTimeZoneOffsetException" message="dssWsdl:InvalidTimeZoneOffsetExceptionFault"/>
+			<wsdl:fault name="unrecognizedLanguageException" message="dssWsdl:UnrecognizedLanguageExceptionFault"/>
+			<wsdl:fault name="unsupportedLanguageException" message="dssWsdl:UnsupportedLanguageExceptionFault"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="requiredDataNotProvidedException" message="dssWsdl:RequiredDataNotProvidedExceptionFault"/>
+			<wsdl:fault name="invalidDriDataFormatException" message="dssWsdl:InvalidDriDataFormatExceptionFault"/>
+			<wsdl:fault name="evaluationException" message="dssWsdl:EvaluationExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="evaluateIteratively">
+			<wsdl:documentation>Throws one of the exceptions if an exception condition is present.  If none of the exception conditions are present, evaluates the data provided by the client using one or more knowledge modules and returns the result(s) of the evaluation.  Conducts evaluation iteratively, returning intermediate state data and specification of additional required data if final conclusions cannot be initially reached.
+All time-stamped data are considered to have the time zone offset specified by the client, unless otherwise noted.
+The provision of excessive data (i.e., unrequired DataRequirementItemData) shall be ignored without leading to an exception.  However, a warning may be provided.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:evaluateIterativelyRequest"/>
+			<wsdl:output message="dssWsdl:evaluateIterativelyResponse"/>
+			<wsdl:fault name="invalidSpecifiedTimeZoneOffsetException" message="dssWsdl:InvalidTimeZoneOffsetExceptionFault"/>
+			<wsdl:fault name="unrecognizedLanguageException" message="dssWsdl:UnrecognizedLanguageExceptionFault"/>
+			<wsdl:fault name="unsupportedLanguageException" message="dssWsdl:UnsupportedLanguageExceptionFault"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="requiredDataNotProvidedException" message="dssWsdl:RequiredDataNotProvidedExceptionFault"/>
+			<wsdl:fault name="invalidDriDataFormatException" message="dssWsdl:InvalidDriDataFormatExceptionFault"/>
+			<wsdl:fault name="evaluationException" message="dssWsdl:EvaluationExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="evaluateIterativelyAtSpecifiedTime">
+			<wsdl:documentation>Throws one of the exceptions if an exception condition is present.  If none of the exception conditions are present, evaluates the data provided by the client using one or more knowledge modules and returns the result(s) of the evaluation.  Conducts evaluation iteratively, returning intermediate state data and specification of additional required data if final conclusions cannot be initially reached.
+Conducts evaluation as if it was currently the specified date and time.
+All time-stamped data are considered to have the time zone offset specified by the client, unless otherwise noted.
+The provision of excessive data (i.e., unrequired DataRequirementItemData) shall be ignored without leading to an exception.  However, a warning may be provided.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:evaluateIterativelyAtSpecifiedTimeRequest"/>
+			<wsdl:output message="dssWsdl:evaluateIterativelyAtSpecifiedTimeResponse"/>
+			<wsdl:fault name="invalidSpecifiedTimeZoneOffsetException" message="dssWsdl:InvalidTimeZoneOffsetExceptionFault"/>
+			<wsdl:fault name="unrecognizedLanguageException" message="dssWsdl:UnrecognizedLanguageExceptionFault"/>
+			<wsdl:fault name="unsupportedLanguageException" message="dssWsdl:UnsupportedLanguageExceptionFault"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="requiredDataNotProvidedException" message="dssWsdl:RequiredDataNotProvidedExceptionFault"/>
+			<wsdl:fault name="invalidDriDataFormatException" message="dssWsdl:InvalidDriDataFormatExceptionFault"/>
+			<wsdl:fault name="evaluationException" message="dssWsdl:EvaluationExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:portType name="Query">
+		<wsdl:documentation>The Query Interfaces enables the discovery and characterization of knowledge modules.</wsdl:documentation>
+		<wsdl:operation name="findKMs">
+			<wsdl:documentation>Throws one of the exceptions if an exception condition is present.  If none of the exception conditions are present, returns knowledge modules fulfilling client search criteria as a RankedKMList object.  
+A search may identify KMs that fulfill search criteria perfectly or partially.  Search results are provided in a ranked list, with more relevant KMs listed first.  KMs included in the search result must have a relevance score of 1 to 100.  A KM meeting all client search criteria shall have a score of 100, while a KM that does not meet all client search criteria shall not have a score of 100.  Implementations of the scoring mechanism are vendor-specific.  One suggestion is to make the score the % of criteria that match.  For KMs with the same score, relative ordering in the result list denotes their relative relevance.
+Consumers can specify which traits, if any, to include in the KM descriptions returned.  Trait values are provided according to the client’s specified language.  Note that the language specified by the client must exactly match a language supported by the service.  Each KM description includes the status of the KM and its trait values as requested by the consumer.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:findKMsRequest"/>
+			<wsdl:output message="dssWsdl:findKMsResponse"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="unrecognizedTraitCriterionException" message="dssWsdl:UnrecognizedTraitCriterionExceptionFault"/>
+			<wsdl:fault name="invalidTraitCriterionDataFormatException" message="dssWsdl:InvalidTraitCriterionDataFormatExceptionFault"/>
+			<wsdl:fault name="unrecognizedLanguageException" message="dssWsdl:UnrecognizedLanguageExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="getKMDataRequirements">
+			<wsdl:documentation>Throws UnrecognizedScopedEntityException if the specified knowledge module EntityIdentifier is not recognized by the service.  If specified EntityIdentifier is recognized by the service, returns a specification of the data required by the knowledge module for conducting an evaluation as a KMDataRequirements object.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:getKMDataRequirementsRequest"/>
+			<wsdl:output message="dssWsdl:getKMDataRequirementsResponse"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="getKMDataRequirementsForEvaluationAtSpecifiedTime">
+			<wsdl:documentation>Throws UnrecognizedScopedEntityException if the specified knowledge module EntityIdentifier is not recognized by the service.  If specified EntityIdentifier is recognized by the service, returns a specification of the data required by the knowledge module for conducting an evaluation as a KMDataRequirements object.   
+If there are any query parameters that use absolute date-times (e.g., search 1/1/09 to 7/1/09) instead of relative date-times (e.g., search past 6 months), then these absolute date-time parameters will be populated to be appropriate for an evaluation at the specified date-time.
+Note that if a DSS provider does not use absolute date-time query parameters, then the DSS provider can implement this operation by simply calling the getKMDataRequirements operation.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:getKMDataRequirementsForEvaluationAtSpecifiedTimeRequest"/>
+			<wsdl:output message="dssWsdl:getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="getKMDescription">
+			<wsdl:documentation>Throws one of the exceptions if an exception condition is present.  If none of the exception conditions are present, returns a description of the specified knowledge module as an ExtendedKMDescription object.
+When language-dependent trait values are available, returns trait values using the client's specified language.  Note that the language specified by the client must exactly match a language supported by the service.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:getKMDescriptionRequest"/>
+			<wsdl:output message="dssWsdl:getKMDescriptionResponse"/>
+			<wsdl:fault name="unrecognizedLanguageException" message="dssWsdl:UnrecognizedLanguageExceptionFault"/>
+			<wsdl:fault name="unsupportedLanguageException" message="dssWsdl:UnsupportedLanguageExceptionFault"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="getKMEvaluationResultSemantics">
+			<wsdl:documentation>Throws UnrecognizedScopedEntityException if the specified knowledge module EntityIdentifier is not recognized by the service.  If specified EntityIdentifier is recognized by the service, returns a specification of the information model(s) that will be used by the knowledge module when returning an evaluation result as a KMEvaluationResultSemanticsList object.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:getKMEvaluationResultSemanticsRequest"/>
+			<wsdl:output message="dssWsdl:getKMEvaluationResultSemanticsResponse"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+		<wsdl:operation name="listKMs">
+			<wsdl:documentation>Throws one of the exceptions if an exception condition is present.  If none of the exception conditions are present, returns a list of all knowledge modules hosted by the service as a KMList object.  
+Consumers can specify which traits, if any, to include in the KM descriptions returned.  Trait values are provided according to the client’s specified language.  Note that the language specified by the client must exactly match a language supported by the service.  Each KM description includes the status of the KM and its trait values as requested by the consumer.</wsdl:documentation>
+			<wsdl:input message="dssWsdl:listKMsRequest"/>
+			<wsdl:output message="dssWsdl:listKMsResponse"/>
+			<wsdl:fault name="unrecognizedLanguageException" message="dssWsdl:UnrecognizedLanguageExceptionFault"/>
+			<wsdl:fault name="unsupportedLanguageException" message="dssWsdl:UnsupportedLanguageExceptionFault"/>
+			<wsdl:fault name="unrecognizedScopedEntityException" message="dssWsdl:UnrecognizedScopedEntityExceptionFault"/>
+			<wsdl:fault name="dssRuntimeException" message="dssWsdl:DSSRuntimeExceptionFault"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="querySOAPBinding" type="dssWsdl:Query">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="findKMs">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:findKMs" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedTraitCriterionException">
+				<soap:fault name="unrecognizedTraitCriterionException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="invalidTraitCriterionDataFormatException">
+				<soap:fault name="invalidTraitCriterionDataFormatException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedLanguageException">
+				<soap:fault name="unrecognizedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getKMDataRequirements">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:getKMDataRequirements" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getKMDataRequirementsForEvaluationAtSpecifiedTime">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:getKMDataRequirementsForEvaluationAtSpecifiedTime" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getKMDescription">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:getKMDescription" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedLanguageException">
+				<soap:fault name="unrecognizedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unsupportedLanguageException">
+				<soap:fault name="unsupportedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="getKMEvaluationResultSemantics">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:getKMEvaluationResultSemantics" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="listKMs">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:listKMs" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedLanguageException">
+				<soap:fault name="unrecognizedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unsupportedLanguageException">
+				<soap:fault name="unsupportedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:binding name="evaluationSOAPBinding" type="dssWsdl:Evaluation">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="evaluate">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:evaluate" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="invalidSpecifiedTimeZoneOffsetException">
+				<soap:fault name="invalidSpecifiedTimeZoneOffsetException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedLanguageException">
+				<soap:fault name="unrecognizedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unsupportedLanguageException">
+				<soap:fault name="unsupportedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="requiredDataNotProvidedException">
+				<soap:fault name="requiredDataNotProvidedException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="invalidDriDataFormatException">
+				<soap:fault name="invalidDriDataFormatException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="evaluationException">
+				<soap:fault name="evaluationException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="evaluateAtSpecifiedTime">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:evaluateAtSpecifiedTime" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="invalidSpecifiedTimeZoneOffsetException">
+				<soap:fault name="invalidSpecifiedTimeZoneOffsetException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedLanguageException">
+				<soap:fault name="unrecognizedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unsupportedLanguageException">
+				<soap:fault name="unsupportedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="requiredDataNotProvidedException">
+				<soap:fault name="requiredDataNotProvidedException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="invalidDriDataFormatException">
+				<soap:fault name="invalidDriDataFormatException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="evaluationException">
+				<soap:fault name="evaluationException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="evaluateIteratively">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:evaluateIteratively" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="invalidSpecifiedTimeZoneOffsetException">
+				<soap:fault name="invalidSpecifiedTimeZoneOffsetException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedLanguageException">
+				<soap:fault name="unrecognizedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unsupportedLanguageException">
+				<soap:fault name="unsupportedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="requiredDataNotProvidedException">
+				<soap:fault name="requiredDataNotProvidedException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="invalidDriDataFormatException">
+				<soap:fault name="invalidDriDataFormatException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="evaluationException">
+				<soap:fault name="evaluationException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="evaluateIterativelyAtSpecifiedTime">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:evaluateIterativelyAtSpecifiedTime" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="invalidSpecifiedTimeZoneOffsetException">
+				<soap:fault name="invalidSpecifiedTimeZoneOffsetException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedLanguageException">
+				<soap:fault name="unrecognizedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unsupportedLanguageException">
+				<soap:fault name="unsupportedLanguageException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="requiredDataNotProvidedException">
+				<soap:fault name="requiredDataNotProvidedException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="invalidDriDataFormatException">
+				<soap:fault name="invalidDriDataFormatException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="evaluationException">
+				<soap:fault name="evaluationException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:binding name="metadataSOAPBinding" type="dssWsdl:MetadataDiscovery">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="describeProfile">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:describeProfile" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="describeScopingEntity">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:describeScopingEntity" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopingEntityException">
+				<soap:fault name="unrecognizedScopingEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="describeScopingEntityHierarchy">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:describeScopingEntityHierarchy" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopingEntityException">
+				<soap:fault name="unrecognizedScopingEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="describeSemanticRequirement">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:describeScopingEntity" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="describeSemanticSignifier">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:describeSemanticSignifier" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="describeTrait">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:describeTrait" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="unrecognizedScopedEntityException">
+				<soap:fault name="unrecognizedScopedEntityException" use="literal"/>
+			</wsdl:fault>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+		<wsdl:operation name="listProfiles">
+			<soap:operation soapAction="http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:listProfiles" soapActionRequired="false" style="document"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+			<wsdl:fault name="dssRuntimeException">
+				<soap:fault name="dssRuntimeException" use="literal"/>
+			</wsdl:fault>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="DecisionSupportService">
+		<wsdl:port name="metadata" binding="dssWsdl:metadataSOAPBinding">
+			<soap:address location="www.exampleLocation.com/metadata"/>
+		</wsdl:port>
+		<wsdl:port name="query" binding="dssWsdl:querySOAPBinding">
+			<soap:address location="www.exampleLocation.com/query"/>
+		</wsdl:port>
+		<wsdl:port name="evaluate" binding="dssWsdl:evaluationSOAPBinding">
+			<soap:address location="www.exampleLocation.com/evaluation"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

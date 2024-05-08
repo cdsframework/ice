@@ -1,0 +1,747 @@
+{
+  "hook": "medication-compare",
+  "hookInstance": "0e39ec2b-87eb-4a46-95b4-ffa0efca967f",
+  "user": "U0770443",
+  "context": {
+    "patientId": "T324EgIHWDO.VXGww8ts7Z-Rvud2ki34yUGh.h.NFciMB",
+    "medicationsToCompare": [
+      {
+        "resourceType": "MedicationRequest",
+        "id": "1"
+      },
+      {
+        "resourceType": "MedicationRequest",
+        "id": "2"
+      }
+    ],
+    "inputParameters": {
+      "resourceType": "Parameters",
+      "options": [
+
+      ]
+    }
+  },
+  "prefetch": {
+    "patient": {
+      "resourceType": "Patient",
+      "id": "T324EgIHWDO.VXGww8ts7Z-Rvud2ki34yUGh.h.NFciMB",
+      "identifier": [
+        {
+          "system": "1.2.840.114350.1.13.90.3.7.3.688884.100",
+          "value": "UUC3079480"
+        }
+      ]
+    }
+  },
+  "medOrders": {
+    "resource": {
+      "resourceType": "Bundle",
+      "type": "searchset",
+      "total": 5,
+      "link": [
+        {
+          "relation": "self",
+          "url": "/api/FHIR/DSTU2/MedicationRequest?patient=T324EgIHWDO.VXGww8ts7Z-Rvud2ki34yUGh.h.NFciMB&status=active%2Ccompleted%2Cstopped"
+        }
+      ],
+      "entry": [
+        {
+          "link": [
+            {
+              "relation": "self",
+              "url": "/api/FHIR/DSTU2/MedicationRequest/Tz5hPGozw9L6d--i2V-7ZbIOBtj71hftyrSfbYFqiGxkB"
+            }
+          ],
+          "fullUrl": "/api/FHIR/DSTU2/MedicationRequest/Tz5hPGozw9L6d--i2V-7ZbIOBtj71hftyrSfbYFqiGxkB",
+          "resource": {
+            "resourceType": "MedicationRequest",
+            "id": "Tz5hPGozw9L6d--i2V-7ZbIOBtj71hftyrSfbYFqiGxkB",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/extension-MedicationStatement.category",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/medication-request-category",
+                      "code": "community",
+                      "display": "Community"
+                    }
+                  ],
+                  "text": "Community"
+                }
+              }
+            ],
+            "identifier": [
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.2.798268",
+                "value": "122670388"
+              },
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.3.798268.801",
+                "value": "122670388:2639975928"
+              }
+            ],
+            "dateWritten": "2018-02-02",
+            "status": "active",
+            "patient": {
+              "reference": "/api/FHIR/DSTU2/Patient/T324EgIHWDO.VXGww8ts7Z-Rvud2ki34yUGh.h.NFciMB",
+              "display": "Opioid Test"
+            },
+            "prescriber": {
+              "reference": "/api/FHIR/DSTU2/Practitioner/T1N5LXYeiQmtDtN.ndOl4xgB",
+              "display": "Flynn, Michael"
+            },
+            "medicationCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "1049618",
+                  "display": "OXYCODONE HCL 30 MG PO TABLET"
+                }
+              ],
+              "text": "OXYCODONE HCL 30 MG PO TABLET"
+            },
+            "dosageInstruction": [
+              {
+                "extension": [
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/ordered-dose",
+                    "valueQuantity": {
+                      "value": 30,
+                      "unit": "mg",
+                      "system": "http://unitsofmeasure.org",
+                      "code": "mg"
+                    }
+                  },
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/admin-amount",
+                    "valueQuantity": {
+                      "value": 1,
+                      "unit": "tablet"
+                    }
+                  }
+                ],
+                "text": "Take 1 tablet (30 mg) by mouth every 4 hours as needed for pain Earliest Fill Date: 2/2/18.",
+                "timing": {
+                  "repeat": {
+                    "boundsPeriod": {
+                      "start": "2018-02-02T00:00:00Z",
+                      "end": "2018-03-04T00:00:00Z"
+                    },
+                    "period": 4,
+                    "periodUnits": "h"
+                  }
+                },
+                "asNeededBoolean": true,
+                "route": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.698288.330",
+                      "code": "19",
+                      "display": "Oral"
+                    }
+                  ],
+                  "text": "Oral"
+                },
+                "method": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.798268.8600",
+                      "code": "11",
+                      "display": "Take"
+                    }
+                  ],
+                  "text": "Take"
+                },
+                "doseQuantity": {
+                  "value": 30,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ],
+            "dispenseRequest": {
+              "validityPeriod": {
+                "start": "2018-02-02T00:00:00Z",
+                "end": "2018-03-04T00:00:00Z"
+              },
+              "numberOfRepeatsAllowed": 0,
+              "quantity": {
+                "value": 30,
+                "unit": "tablet"
+              },
+              "expectedSupplyDuration": {
+                "value": 5,
+                "unit": "days",
+                "system": "http://unitsofmeasure.org",
+                "code": "d"
+              }
+            }
+          },
+          "search": {
+            "mode": "match"
+          }
+        },
+        {
+          "link": [
+            {
+              "relation": "self",
+              "url": "/api/FHIR/DSTU2/MedicationRequest/TGln-5ARkVIv6u737Tcfe2WuK6dsyPMmj1Embd9.02McB"
+            }
+          ],
+          "fullUrl": "/api/FHIR/DSTU2/MedicationRequest/TGln-5ARkVIv6u737Tcfe2WuK6dsyPMmj1Embd9.02McB",
+          "resource": {
+            "resourceType": "MedicationRequest",
+            "id": "TGln-5ARkVIv6u737Tcfe2WuK6dsyPMmj1Embd9.02McB",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/extension-MedicationStatement.category",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/medication-request-category",
+                      "code": "community",
+                      "display": "Community"
+                    }
+                  ],
+                  "text": "Community"
+                }
+              }
+            ],
+            "identifier": [
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.2.798268",
+                "value": "122670389"
+              },
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.3.798268.801",
+                "value": "122670389:2656753547"
+              }
+            ],
+            "dateWritten": "2018-02-02",
+            "status": "active",
+            "patient": {
+              "reference": "/api/FHIR/DSTU2/Patient/T324EgIHWDO.VXGww8ts7Z-Rvud2ki34yUGh.h.NFciMB",
+              "display": "Opioid Test"
+            },
+            "prescriber": {
+              "reference": "/api/FHIR/DSTU2/Practitioner/T1N5LXYeiQmtDtN.ndOl4xgB",
+              "display": "Flynn, Michael"
+            },
+            "medicationCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "1049618",
+                  "display": "OXYCODONE HCL 30 MG PO TABLET"
+                }
+              ],
+              "text": "OXYCODONE HCL 30 MG PO TABLET"
+            },
+            "dosageInstruction": [
+              {
+                "extension": [
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/ordered-dose",
+                    "valueQuantity": {
+                      "value": 30,
+                      "unit": "mg",
+                      "system": "http://unitsofmeasure.org",
+                      "code": "mg"
+                    }
+                  },
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/admin-amount",
+                    "valueQuantity": {
+                      "value": 1,
+                      "unit": "tablet"
+                    }
+                  }
+                ],
+                "text": "Take 1 tablet (30 mg) by mouth every 4 hours as needed for pain Earliest Fill Date: 3/4/18.",
+                "timing": {
+                  "repeat": {
+                    "boundsPeriod": {
+                      "start": "2018-03-04T00:00:00Z",
+                      "end": "2018-04-03T00:00:00Z"
+                    },
+                    "period": 4,
+                    "periodUnits": "h"
+                  }
+                },
+                "asNeededBoolean": true,
+                "route": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.698288.330",
+                      "code": "19",
+                      "display": "Oral"
+                    }
+                  ],
+                  "text": "Oral"
+                },
+                "method": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.798268.8600",
+                      "code": "11",
+                      "display": "Take"
+                    }
+                  ],
+                  "text": "Take"
+                },
+                "doseQuantity": {
+                  "value": 30,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ],
+            "dispenseRequest": {
+              "validityPeriod": {
+                "start": "2018-03-04T00:00:00Z",
+                "end": "2018-04-03T00:00:00Z"
+              },
+              "numberOfRepeatsAllowed": 0,
+              "quantity": {
+                "value": 30,
+                "unit": "tablet"
+              },
+              "expectedSupplyDuration": {
+                "value": 5,
+                "unit": "days",
+                "system": "http://unitsofmeasure.org",
+                "code": "d"
+              }
+            }
+          },
+          "search": {
+            "mode": "match"
+          }
+        },
+        {
+          "link": [
+            {
+              "relation": "self",
+              "url": "/api/FHIR/DSTU2/MedicationRequest/TEKpy1mrgjLygnWOVxJqeOXiFqGtcR6OENWpUIZoEwZoB"
+            }
+          ],
+          "fullUrl": "/api/FHIR/DSTU2/MedicationRequest/TEKpy1mrgjLygnWOVxJqeOXiFqGtcR6OENWpUIZoEwZoB",
+          "resource": {
+            "resourceType": "MedicationRequest",
+            "id": "TEKpy1mrgjLygnWOVxJqeOXiFqGtcR6OENWpUIZoEwZoB",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/extension-MedicationStatement.category",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/medication-request-category",
+                      "code": "community",
+                      "display": "Community"
+                    }
+                  ],
+                  "text": "Community"
+                }
+              }
+            ],
+            "identifier": [
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.2.798268",
+                "value": "122670390"
+              },
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.3.798268.801",
+                "value": "122670390:2606567785"
+              }
+            ],
+            "dateWritten": "2018-02-02",
+            "status": "active",
+            "patient": {
+              "reference": "/api/FHIR/DSTU2/Patient/T324EgIHWDO.VXGww8ts7Z-Rvud2ki34yUGh.h.NFciMB",
+              "display": "Opioid Test"
+            },
+            "prescriber": {
+              "reference": "/api/FHIR/DSTU2/Practitioner/T1N5LXYeiQmtDtN.ndOl4xgB",
+              "display": "Flynn, Michael"
+            },
+            "medicationCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "1049618",
+                  "display": "OXYCODONE HCL 30 MG PO TABLET"
+                }
+              ],
+              "text": "OXYCODONE HCL 30 MG PO TABLET"
+            },
+            "dosageInstruction": [
+              {
+                "extension": [
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/ordered-dose",
+                    "valueQuantity": {
+                      "value": 30,
+                      "unit": "mg",
+                      "system": "http://unitsofmeasure.org",
+                      "code": "mg"
+                    }
+                  },
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/admin-amount",
+                    "valueQuantity": {
+                      "value": 1,
+                      "unit": "tablet"
+                    }
+                  }
+                ],
+                "text": "Take 1 tablet (30 mg) by mouth every 4 hours as needed for pain Earliest Fill Date: 4/3/18.",
+                "timing": {
+                  "repeat": {
+                    "boundsPeriod": {
+                      "start": "2018-04-03T00:00:00Z",
+                      "end": "2018-05-03T00:00:00Z"
+                    },
+                    "period": 4,
+                    "periodUnits": "h"
+                  }
+                },
+                "asNeededBoolean": true,
+                "route": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.698288.330",
+                      "code": "19",
+                      "display": "Oral"
+                    }
+                  ],
+                  "text": "Oral"
+                },
+                "method": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.798268.8600",
+                      "code": "11",
+                      "display": "Take"
+                    }
+                  ],
+                  "text": "Take"
+                },
+                "doseQuantity": {
+                  "value": 30,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ],
+            "dispenseRequest": {
+              "validityPeriod": {
+                "start": "2018-04-03T00:00:00Z",
+                "end": "2018-05-03T00:00:00Z"
+              },
+              "numberOfRepeatsAllowed": 0,
+              "quantity": {
+                "value": 30,
+                "unit": "tablet"
+              },
+              "expectedSupplyDuration": {
+                "value": 5,
+                "unit": "days",
+                "system": "http://unitsofmeasure.org",
+                "code": "d"
+              }
+            }
+          },
+          "search": {
+            "mode": "match"
+          }
+        },
+        {
+          "link": [
+            {
+              "relation": "self",
+              "url": "/api/FHIR/DSTU2/MedicationRequest/TILQYhZKvJg2jO5lTjULcnuaY7N389dZ8x9HmfHVv7ngB"
+            }
+          ],
+          "fullUrl": "/api/FHIR/DSTU2/MedicationRequest/TILQYhZKvJg2jO5lTjULcnuaY7N389dZ8x9HmfHVv7ngB",
+          "resource": {
+            "resourceType": "MedicationRequest",
+            "id": "TILQYhZKvJg2jO5lTjULcnuaY7N389dZ8x9HmfHVv7ngB",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/extension-MedicationStatement.category",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/medication-request-category",
+                      "code": "community",
+                      "display": "Community"
+                    }
+                  ],
+                  "text": "Community"
+                }
+              }
+            ],
+            "identifier": [
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.2.798268",
+                "value": "122670391"
+              },
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.3.798268.801",
+                "value": "122670391:2589790166"
+              }
+            ],
+            "dateWritten": "2018-02-02",
+            "status": "active",
+            "patient": {
+              "reference": "/api/FHIR/DSTU2/Patient/T324EgIHWDO.VXGww8ts7Z-Rvud2ki34yUGh.h.NFciMB",
+              "display": "Opioid Test"
+            },
+            "prescriber": {
+              "reference": "/api/FHIR/DSTU2/Practitioner/T1N5LXYeiQmtDtN.ndOl4xgB",
+              "display": "Flynn, Michael"
+            },
+            "medicationCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "1049618",
+                  "display": "OXYCODONE HCL 30 MG PO TABLET"
+                }
+              ],
+              "text": "OXYCODONE HCL 30 MG PO TABLET"
+            },
+            "dosageInstruction": [
+              {
+                "extension": [
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/ordered-dose",
+                    "valueQuantity": {
+                      "value": 15,
+                      "unit": "mg",
+                      "system": "http://unitsofmeasure.org",
+                      "code": "mg"
+                    }
+                  },
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/admin-amount",
+                    "valueQuantity": {
+                      "value": 0.5,
+                      "unit": "tablet"
+                    }
+                  }
+                ],
+                "text": "Take 0.5 tablets (15 mg) by mouth every 4 hours as needed for pain.",
+                "timing": {
+                  "repeat": {
+                    "boundsPeriod": {
+                      "start": "2018-02-02T00:00:00Z"
+                    },
+                    "period": 4,
+                    "periodUnits": "h"
+                  }
+                },
+                "asNeededBoolean": true,
+                "route": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.698288.330",
+                      "code": "19",
+                      "display": "Oral"
+                    }
+                  ],
+                  "text": "Oral"
+                },
+                "method": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.798268.8600",
+                      "code": "11",
+                      "display": "Take"
+                    }
+                  ],
+                  "text": "Take"
+                },
+                "doseQuantity": {
+                  "value": 15,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ],
+            "dispenseRequest": {
+              "validityPeriod": {
+                "start": "2018-02-02T00:00:00Z"
+              },
+              "numberOfRepeatsAllowed": 0,
+              "quantity": {
+                "value": 60,
+                "unit": "tablet"
+              },
+              "expectedSupplyDuration": {
+                "value": 20,
+                "unit": "days",
+                "system": "http://unitsofmeasure.org",
+                "code": "d"
+              }
+            }
+          },
+          "search": {
+            "mode": "match"
+          }
+        },
+        {
+          "link": [
+            {
+              "relation": "self",
+              "url": "/api/FHIR/DSTU2/MedicationRequest/TwCKUC71.X-UjCSsHSJuAJBkW.9DvPnKauAVHCgTljIMB"
+            }
+          ],
+          "fullUrl": "/api/FHIR/DSTU2/MedicationRequest/TwCKUC71.X-UjCSsHSJuAJBkW.9DvPnKauAVHCgTljIMB",
+          "resource": {
+            "resourceType": "MedicationRequest",
+            "id": "TwCKUC71.X-UjCSsHSJuAJBkW.9DvPnKauAVHCgTljIMB",
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/extension-MedicationStatement.category",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://hl7.org/fhir/medication-request-category",
+                      "code": "community",
+                      "display": "Community"
+                    }
+                  ],
+                  "text": "Community"
+                }
+              }
+            ],
+            "identifier": [
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.2.798268",
+                "value": "122670392"
+              },
+              {
+                "use": "usual",
+                "system": "urn:oid:1.2.840.114350.1.13.90.3.7.3.798268.801",
+                "value": "122670392:2573012547"
+              }
+            ],
+            "dateWritten": "2018-02-02",
+            "status": "active",
+            "patient": {
+              "reference": "/api/FHIR/DSTU2/Patient/T324EgIHWDO.VXGww8ts7Z-Rvud2ki34yUGh.h.NFciMB",
+              "display": "Opioid Test"
+            },
+            "prescriber": {
+              "reference": "/api/FHIR/DSTU2/Practitioner/T1N5LXYeiQmtDtN.ndOl4xgB",
+              "display": "Flynn, Michael"
+            },
+            "medicationCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+                  "code": "1049621",
+                  "display": "OXYCODONE HCL 5 MG PO TABLET"
+                }
+              ],
+              "text": "OXYCODONE HCL 5 MG PO TABLET"
+            },
+            "dosageInstruction": [
+              {
+                "extension": [
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/ordered-dose",
+                    "valueQuantity": {
+                      "value": 15,
+                      "unit": "mg",
+                      "system": "http://unitsofmeasure.org",
+                      "code": "mg"
+                    }
+                  },
+                  {
+                    "url": "https://open.epic.com/fhir/extensions/admin-amount",
+                    "valueQuantity": {
+                      "value": 3,
+                      "unit": "tablet"
+                    }
+                  }
+                ],
+                "text": "Take 3 tablets (15 mg) by mouth every 4 hours as needed for pain.",
+                "timing": {
+                  "repeat": {
+                    "boundsPeriod": {
+                      "start": "2018-02-02T00:00:00Z"
+                    },
+                    "period": 4,
+                    "periodUnits": "h"
+                  }
+                },
+                "asNeededBoolean": true,
+                "route": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.698288.330",
+                      "code": "19",
+                      "display": "Oral"
+                    }
+                  ],
+                  "text": "Oral"
+                },
+                "method": {
+                  "coding": [
+                    {
+                      "system": "urn:oid:1.2.840.114350.1.13.90.3.7.4.798268.8600",
+                      "code": "11",
+                      "display": "Take"
+                    }
+                  ],
+                  "text": "Take"
+                },
+                "doseQuantity": {
+                  "value": 15,
+                  "unit": "mg",
+                  "system": "http://unitsofmeasure.org",
+                  "code": "mg"
+                }
+              }
+            ],
+            "dispenseRequest": {
+              "validityPeriod": {
+                "start": "2018-02-02T00:00:00Z"
+              },
+              "numberOfRepeatsAllowed": 0,
+              "quantity": {
+                "value": 45,
+                "unit": "tablet"
+              },
+              "expectedSupplyDuration": {
+                "value": 3,
+                "unit": "days",
+                "system": "http://unitsofmeasure.org",
+                "code": "d"
+              }
+            }
+          },
+          "search": {
+            "mode": "match"
+          }
+        }
+      ]
+    }
+  }
+}

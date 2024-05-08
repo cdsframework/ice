@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.mapper;
 
 import java.util.ArrayList;
@@ -9,7 +25,7 @@ import org.opencds.config.api.model.CDMId;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.KMStatus;
 import org.opencds.config.api.model.KnowledgeModule;
-import org.opencds.config.api.model.PluginId;
+import org.opencds.config.api.model.PrePostProcessPluginId;
 import org.opencds.config.api.model.SSId;
 import org.opencds.config.api.model.SecondaryCDM;
 import org.opencds.config.api.model.SupportMethod;
@@ -43,31 +59,32 @@ public abstract class KnowledgeModuleMapper {
             }
         }
 
-        List<PluginId> preProcPlugins = null;
+        List<PrePostProcessPluginId> preProcPlugins = null;
         if (external.getPreProcessPlugins() != null && external.getPreProcessPlugins().getPreProcessPlugin() != null) {
-            preProcPlugins = PluginIdMapper.internal(external.getPreProcessPlugins().getPreProcessPlugin());
+            preProcPlugins = PrePostProcessPluginIdMapper.internal(external.getPreProcessPlugins().getPreProcessPlugin());
         }
-        List<PluginId> postProcPlugins = null;
+        List<PrePostProcessPluginId> postProcPlugins = null;
         if (external.getPostProcessPlugins() != null && external.getPostProcessPlugins().getPostProcessPlugin() != null) {
-            postProcPlugins = PluginIdMapper.internal(external.getPostProcessPlugins().getPostProcessPlugin());
+            postProcPlugins = PrePostProcessPluginIdMapper.internal(external.getPostProcessPlugins().getPostProcessPlugin());
         }
 
         KMId kmid = KMIdMapper.internal(external.getIdentifier());
         SSId ssid = SSIdMapper.internal(external.getSemanticSignifierId());
 
         Boolean preload = Boolean.FALSE;
-        if (external.getPackage() != null) {
+        if (external.getPackage() != null && external.getPackage().isPreload() != null) {
             preload = Boolean.valueOf(external.getPackage().isPreload());
         }
         org.opencds.config.schema.KMStatus status = external.getStatus();
         if (status == null) {
             throw new OpenCDSRuntimeException("KM requires a valid status.");
         }
-        return KnowledgeModuleImpl.create(kmid, KMStatus.valueOf(status.value()), external
-                .getExecutionEngine(), ssid, primaryCDMId, secondaryCDMs, external.getPackage().getPackageType(),
-                external.getPackage().getPackageId(), preload, external.getPrimaryProcess(), TraitIdMapper
-                        .internal(external.getTraitId()), preProcPlugins, postProcPlugins, external.getTimestamp()
-                        .toGregorianCalendar().getTime(), external.getUserId());
+        
+		return KnowledgeModuleImpl.create(kmid, KMStatus.valueOf(status.value()),
+				CDSHookMapper.internal(external.getCdsHook()), external.getExecutionEngine(), ssid, primaryCDMId,
+				secondaryCDMs, external.getPackage().getPackageType(), external.getPackage().getPackageId(), preload,
+				external.getPrimaryProcess(), TraitIdMapper.internal(external.getTraitId()), preProcPlugins,
+				postProcPlugins, external.getTimestamp().toGregorianCalendar().getTime(), external.getUserId());
     }
 
     public static List<KnowledgeModule> internal(KnowledgeModules knowledgeModules) {
@@ -90,6 +107,7 @@ public abstract class KnowledgeModuleMapper {
         org.opencds.config.schema.KMStatus intKMStatus = org.opencds.config.schema.KMStatus.fromValue(internal
                 .getStatus().name());
         external.setStatus(intKMStatus);
+        external.setCdsHook(CDSHookMapper.external(internal.getCDSHook()));
         external.setExecutionEngine(internal.getExecutionEngine());
         external.setSemanticSignifierId(SSIdMapper.external(internal.getSSId()));
         org.opencds.config.schema.KnowledgeModule.ConceptDeterminationMethods cdms = new org.opencds.config.schema.KnowledgeModule.ConceptDeterminationMethods();
@@ -122,15 +140,15 @@ public abstract class KnowledgeModuleMapper {
         }
         if (internal.getPreProcessPluginIds() != null) {
             PreProcessPlugins ppp = new PreProcessPlugins();
-            for (PluginId pid : internal.getPreProcessPluginIds()) {
-                ppp.getPreProcessPlugin().add(PluginIdMapper.external(pid));
+            for (PrePostProcessPluginId pid : internal.getPreProcessPluginIds()) {
+                ppp.getPreProcessPlugin().add(PrePostProcessPluginIdMapper.external(pid));
             }
             external.setPreProcessPlugins(ppp);
         }
         if (internal.getPostProcessPluginIds() != null) {
             PostProcessPlugins ppp = new PostProcessPlugins();
-            for (PluginId pid : internal.getPostProcessPluginIds()) {
-                ppp.getPostProcessPlugin().add(PluginIdMapper.external(pid));
+            for (PrePostProcessPluginId pid : internal.getPostProcessPluginIds()) {
+                ppp.getPostProcessPlugin().add(PrePostProcessPluginIdMapper.external(pid));
             }
             external.setPostProcessPlugins(ppp);
         }

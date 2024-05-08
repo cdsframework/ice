@@ -1,0 +1,774 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    /**
+     * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Contributions by HLN Consulting, LLC
+     *
+     * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+     * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+     * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+     * details.
+     *
+     * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+     * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+     * limitation, and warranty) complete irrevocable access and rights to this project.
+     *
+     * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+     *
+     * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+     * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+     * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+     * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+     * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     *
+     * For more information about this software, see http://www.hln.com/ice or send
+     * correspondence to ice@hln.com.
+     */
+
+-->
+<bindings xmlns="https://jakarta.ee/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" extensionBindingPrefixes="xjc" version="3.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <globalBindings>
+        <xjc:simple/>
+        <javaType name="java.util.Date" xmlType="xs:date" parseMethod="org.opencds.support.util.DateUtils.parseDate" printMethod="org.opencds.support.util.DateUtils.printDate"/>
+        <javaType name="java.util.Date" xmlType="xs:dateTime" parseMethod="org.opencds.support.util.DateUtils.parseDateTime" printMethod="org.opencds.support.util.DateUtils.printDateTime"/>
+    </globalBindings>
+    <bindings node="/xs:schema" schemaLocation="cdsVersionSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.cds.version"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="iceSeasonSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.ice.season"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="iceSeriesSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.ice.series"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="cdsListSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.cds.list"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="testcase.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.cds.testcase"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="iceVaccineGroupSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.ice.vaccinegroup"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="iceVaccineSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.ice.vaccine"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="flowGroupSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.group.flow"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="agendaGroupSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.group.agenda"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="activationGroupSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.group.activation"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="dslVarNameSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.dsl.var.name"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="dslVarGroupSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.dsl.var.group"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="dslVarSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.dsl.var"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="dslResourceSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.dsl.resource"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="ruleDslValueSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.dsl.value"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="ruleDslResourceSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.dsl"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="ruleFileSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule.file"/>
+        </schemaBindings>
+    </bindings>
+    <bindings node="/xs:schema" schemaLocation="ruleSpecificationFile.xsd">
+        <schemaBindings>
+            <package name="org.cdsframework.util.support.data.rule"/>
+        </schemaBindings>
+    </bindings>
+    <bindings scd="x-schema::tns" xmlns:tns="org.opencds.vmr.v1_0.schema.cdsinput">
+        <schemaBindings map="false">
+            <package name="org.opencds.vmr.v1_0.schema"/>
+        </schemaBindings>
+        <bindings scd="~tns:CDSInput">
+            <class ref="org.opencds.vmr.v1_0.schema.CDSInput"/>
+        </bindings>
+        <bindings scd="~tns:CDSResource">
+            <class ref="org.opencds.vmr.v1_0.schema.CDSResource"/>
+        </bindings>
+        <bindings scd="~tns:CDSContext">
+            <class ref="org.opencds.vmr.v1_0.schema.CDSContext"/>
+        </bindings>
+    </bindings>
+    <bindings scd="x-schema::tns" xmlns:tns="org.opencds.vmr.v1_0.schema.datatypes">
+        <schemaBindings map="false">
+            <package name="org.opencds.vmr.v1_0.schema"/>
+        </schemaBindings>
+        <bindings scd="~tns:XP">
+            <class ref="org.opencds.vmr.v1_0.schema.XP"/>
+        </bindings>
+        <bindings scd="~tns:ENXP">
+            <class ref="org.opencds.vmr.v1_0.schema.ENXP"/>
+        </bindings>
+        <bindings scd="~tns:IVL_REAL">
+            <class ref="org.opencds.vmr.v1_0.schema.IVLREAL"/>
+        </bindings>
+        <bindings scd="~tns:RTO">
+            <class ref="org.opencds.vmr.v1_0.schema.RTO"/>
+        </bindings>
+        <bindings scd="~tns:TS">
+            <class ref="org.opencds.vmr.v1_0.schema.TS"/>
+        </bindings>
+        <bindings scd="~tns:IVL_PQ">
+            <class ref="org.opencds.vmr.v1_0.schema.IVLPQ"/>
+        </bindings>
+        <bindings scd="~tns:ST">
+            <class ref="org.opencds.vmr.v1_0.schema.ST"/>
+        </bindings>
+        <bindings scd="~tns:INT">
+            <class ref="org.opencds.vmr.v1_0.schema.INT"/>
+        </bindings>
+        <bindings scd="~tns:TEL">
+            <class ref="org.opencds.vmr.v1_0.schema.TEL"/>
+        </bindings>
+        <bindings scd="~tns:QTY">
+            <class ref="org.opencds.vmr.v1_0.schema.QTY"/>
+        </bindings>
+        <bindings scd="~tns:IVL_RTO">
+            <class ref="org.opencds.vmr.v1_0.schema.IVLRTO"/>
+        </bindings>
+        <bindings scd="~tns:BL">
+            <class ref="org.opencds.vmr.v1_0.schema.BL"/>
+        </bindings>
+        <bindings scd="~tns:II">
+            <class ref="org.opencds.vmr.v1_0.schema.II"/>
+        </bindings>
+        <bindings scd="~tns:REAL">
+            <class ref="org.opencds.vmr.v1_0.schema.REAL"/>
+        </bindings>
+        <bindings scd="~tns:ANY">
+            <class ref="org.opencds.vmr.v1_0.schema.ANY"/>
+        </bindings>
+        <bindings scd="~tns:CS">
+            <class ref="org.opencds.vmr.v1_0.schema.CS"/>
+        </bindings>
+        <bindings scd="~tns:ADXP">
+            <class ref="org.opencds.vmr.v1_0.schema.ADXP"/>
+        </bindings>
+        <bindings scd="~tns:IVL_QTY">
+            <class ref="org.opencds.vmr.v1_0.schema.IVLQTY"/>
+        </bindings>
+        <bindings scd="~tns:IVL_TS">
+            <class ref="org.opencds.vmr.v1_0.schema.IVLTS"/>
+        </bindings>
+        <bindings scd="~tns:IVL_INT">
+            <class ref="org.opencds.vmr.v1_0.schema.IVLINT"/>
+        </bindings>
+        <bindings scd="~tns:AD">
+            <class ref="org.opencds.vmr.v1_0.schema.AD"/>
+        </bindings>
+        <bindings scd="~tns:EN">
+            <class ref="org.opencds.vmr.v1_0.schema.EN"/>
+        </bindings>
+        <bindings scd="~tns:PQ">
+            <class ref="org.opencds.vmr.v1_0.schema.PQ"/>
+        </bindings>
+        <bindings scd="~tns:CD">
+            <class ref="org.opencds.vmr.v1_0.schema.CD"/>
+        </bindings>
+        <bindings scd="~tns:TelecommunicationAddressUse">
+            <typesafeEnumClass ref="org.opencds.vmr.v1_0.schema.TelecommunicationAddressUse"/>
+        </bindings>
+        <bindings scd="~tns:TelecommunicationCapability">
+            <typesafeEnumClass ref="org.opencds.vmr.v1_0.schema.TelecommunicationCapability"/>
+        </bindings>
+        <bindings scd="~tns:UncertaintyType">
+            <typesafeEnumClass ref="org.opencds.vmr.v1_0.schema.UncertaintyType"/>
+        </bindings>
+        <bindings scd="~tns:EntityNamePartQualifier">
+            <typesafeEnumClass ref="org.opencds.vmr.v1_0.schema.EntityNamePartQualifier"/>
+        </bindings>
+        <bindings scd="~tns:EntityNameUse">
+            <typesafeEnumClass ref="org.opencds.vmr.v1_0.schema.EntityNameUse"/>
+        </bindings>
+        <bindings scd="~tns:AddressPartType">
+            <typesafeEnumClass ref="org.opencds.vmr.v1_0.schema.AddressPartType"/>
+        </bindings>
+        <bindings scd="~tns:PostalAddressUse">
+            <typesafeEnumClass ref="org.opencds.vmr.v1_0.schema.PostalAddressUse"/>
+        </bindings>
+        <bindings scd="~tns:EntityNamePartType">
+            <typesafeEnumClass ref="org.opencds.vmr.v1_0.schema.EntityNamePartType"/>
+        </bindings>
+    </bindings>
+    <bindings scd="x-schema::tns" xmlns:tns="org.opencds.vmr.v1_0.schema.cdsoutput">
+        <schemaBindings map="false">
+            <package name="org.opencds.vmr.v1_0.schema"/>
+        </schemaBindings>
+        <bindings scd="~tns:CDSOutput">
+            <class ref="org.opencds.vmr.v1_0.schema.CDSOutput"/>
+        </bindings>
+    </bindings>
+    <bindings scd="x-schema::tns" xmlns:tns="org.opencds.vmr.v1_0.schema.vmr">
+        <schemaBindings map="false">
+            <package name="org.opencds.vmr.v1_0.schema"/>
+        </schemaBindings>
+        <bindings scd="~tns:GoalBase">
+            <class ref="org.opencds.vmr.v1_0.schema.GoalBase"/>
+        </bindings>
+        <bindings scd="~tns:EvaluatedPerson">
+            <class ref="org.opencds.vmr.v1_0.schema.EvaluatedPerson"/>
+        </bindings>
+        <bindings scd="~tns:RelatedEntity">
+            <class ref="org.opencds.vmr.v1_0.schema.RelatedEntity"/>
+        </bindings>
+        <bindings scd="~tns:ObservationResult">
+            <class ref="org.opencds.vmr.v1_0.schema.ObservationResult"/>
+        </bindings>
+        <bindings scd="~tns:VMR">
+            <class ref="org.opencds.vmr.v1_0.schema.VMR"/>
+        </bindings>
+        <bindings scd="~tns:SubstanceAdministrationOrder">
+            <class ref="org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder"/>
+        </bindings>
+        <bindings scd="~tns:SubstanceDispensationEvent">
+            <class ref="org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent"/>
+        </bindings>
+        <bindings scd="~tns:ScheduledProcedure">
+            <class ref="org.opencds.vmr.v1_0.schema.ScheduledProcedure"/>
+        </bindings>
+        <bindings scd="~tns:UndeliveredSupply">
+            <class ref="org.opencds.vmr.v1_0.schema.UndeliveredSupply"/>
+        </bindings>
+        <bindings scd="~tns:Organization">
+            <class ref="org.opencds.vmr.v1_0.schema.Organization"/>
+        </bindings>
+        <bindings scd="~tns:RelatedClinicalStatement">
+            <class ref="org.opencds.vmr.v1_0.schema.RelatedClinicalStatement"/>
+        </bindings>
+        <bindings scd="~tns:ClinicalStatementRelationship">
+            <class ref="org.opencds.vmr.v1_0.schema.ClinicalStatementRelationship"/>
+        </bindings>
+        <bindings scd="~tns:ClinicalStatement">
+            <class ref="org.opencds.vmr.v1_0.schema.ClinicalStatement"/>
+        </bindings>
+        <bindings scd="~tns:ScheduledAppointment">
+            <class ref="org.opencds.vmr.v1_0.schema.ScheduledAppointment"/>
+        </bindings>
+        <bindings scd="~tns:SupplyOrder">
+            <class ref="org.opencds.vmr.v1_0.schema.SupplyOrder"/>
+        </bindings>
+        <bindings scd="~tns:ProcedureEvent">
+            <class ref="org.opencds.vmr.v1_0.schema.ProcedureEvent"/>
+        </bindings>
+        <bindings scd="~tns:SubstanceAdministrationEvent">
+            <class ref="org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent"/>
+        </bindings>
+        <bindings scd="~tns:DoseRestriction">
+            <class ref="org.opencds.vmr.v1_0.schema.DoseRestriction"/>
+        </bindings>
+        <bindings scd="~tns:AdverseEvent">
+            <class ref="org.opencds.vmr.v1_0.schema.AdverseEvent"/>
+        </bindings>
+        <bindings scd="~tns:UnconductedObservation">
+            <class ref="org.opencds.vmr.v1_0.schema.UnconductedObservation"/>
+        </bindings>
+        <bindings scd="~tns:EncounterBase">
+            <class ref="org.opencds.vmr.v1_0.schema.EncounterBase"/>
+        </bindings>
+        <bindings scd="~tns:GoalProposal">
+            <class ref="org.opencds.vmr.v1_0.schema.GoalProposal"/>
+        </bindings>
+        <bindings scd="~tns:Problem">
+            <class ref="org.opencds.vmr.v1_0.schema.Problem"/>
+        </bindings>
+        <bindings scd="~tns:ProcedureProposal">
+            <class ref="org.opencds.vmr.v1_0.schema.ProcedureProposal"/>
+        </bindings>
+        <bindings scd="~tns:ObservationOrder">
+            <class ref="org.opencds.vmr.v1_0.schema.ObservationOrder"/>
+        </bindings>
+        <bindings scd="~tns:SubstanceAdministrationProposal">
+            <class ref="org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal"/>
+        </bindings>
+        <bindings scd="~tns:Entity">
+            <class ref="org.opencds.vmr.v1_0.schema.Entity"/>
+        </bindings>
+        <bindings scd="~tns:SupplyBase">
+            <class ref="org.opencds.vmr.v1_0.schema.SupplyBase"/>
+        </bindings>
+        <bindings scd="~tns:UndeliveredProcedure">
+            <class ref="org.opencds.vmr.v1_0.schema.UndeliveredProcedure"/>
+        </bindings>
+        <bindings scd="~tns:ObservationProposal">
+            <class ref="org.opencds.vmr.v1_0.schema.ObservationProposal"/>
+        </bindings>
+        <bindings scd="~tns:SupplyEvent">
+            <class ref="org.opencds.vmr.v1_0.schema.SupplyEvent"/>
+        </bindings>
+        <bindings scd="~tns:SubstanceAdministrationBase">
+            <class ref="org.opencds.vmr.v1_0.schema.SubstanceAdministrationBase"/>
+        </bindings>
+        <bindings scd="~tns:AdministrableSubstance">
+            <class ref="org.opencds.vmr.v1_0.schema.AdministrableSubstance"/>
+        </bindings>
+        <bindings scd="~tns:EncounterEvent">
+            <class ref="org.opencds.vmr.v1_0.schema.EncounterEvent"/>
+        </bindings>
+        <bindings scd="~tns:MissedAppointment">
+            <class ref="org.opencds.vmr.v1_0.schema.MissedAppointment"/>
+        </bindings>
+        <bindings scd="~tns:EntityBase">
+            <class ref="org.opencds.vmr.v1_0.schema.EntityBase"/>
+        </bindings>
+        <bindings scd="~tns:ProcedureOrder">
+            <class ref="org.opencds.vmr.v1_0.schema.ProcedureOrder"/>
+        </bindings>
+        <bindings scd="~tns:Goal">
+            <class ref="org.opencds.vmr.v1_0.schema.Goal"/>
+        </bindings>
+        <bindings scd="~tns:ObservationBase">
+            <class ref="org.opencds.vmr.v1_0.schema.ObservationBase"/>
+        </bindings>
+        <bindings scd="~tns:BodySite">
+            <class ref="org.opencds.vmr.v1_0.schema.BodySite"/>
+        </bindings>
+        <bindings scd="~tns:ProcedureBase">
+            <class ref="org.opencds.vmr.v1_0.schema.ProcedureBase"/>
+        </bindings>
+        <bindings scd="~tns:ProblemBase">
+            <class ref="org.opencds.vmr.v1_0.schema.ProblemBase"/>
+        </bindings>
+        <bindings scd="~tns:DeniedAdverseEvent">
+            <class ref="org.opencds.vmr.v1_0.schema.DeniedAdverseEvent"/>
+        </bindings>
+        <bindings scd="~tns:AppointmentRequest">
+            <class ref="org.opencds.vmr.v1_0.schema.AppointmentRequest"/>
+        </bindings>
+        <bindings scd="~tns:SupplyProposal">
+            <class ref="org.opencds.vmr.v1_0.schema.SupplyProposal"/>
+        </bindings>
+        <bindings scd="~tns:UndeliveredSubstanceAdministration">
+            <class ref="org.opencds.vmr.v1_0.schema.UndeliveredSubstanceAdministration"/>
+        </bindings>
+        <bindings scd="~tns:Specimen">
+            <class ref="org.opencds.vmr.v1_0.schema.Specimen"/>
+        </bindings>
+        <bindings scd="~tns:DeniedProblem">
+            <class ref="org.opencds.vmr.v1_0.schema.DeniedProblem"/>
+        </bindings>
+        <bindings scd="~tns:Facility">
+            <class ref="org.opencds.vmr.v1_0.schema.Facility"/>
+        </bindings>
+        <bindings scd="~tns:EntityRelationship">
+            <class ref="org.opencds.vmr.v1_0.schema.EntityRelationship"/>
+        </bindings>
+        <bindings scd="~tns:AppointmentProposal">
+            <class ref="org.opencds.vmr.v1_0.schema.AppointmentProposal"/>
+        </bindings>
+        <bindings scd="~tns:AdverseEventBase">
+            <class ref="org.opencds.vmr.v1_0.schema.AdverseEventBase"/>
+        </bindings>
+        <bindings scd="~tns:Person">
+            <class ref="org.opencds.vmr.v1_0.schema.Person"/>
+        </bindings>
+    </bindings>
+    <bindings scd="x-schema::tns" xmlns:tns="http://www.omg.org/spec/CDSS/201105/dss">
+        <schemaBindings map="false"/>
+        <bindings scd="~tns:KMEvaluationRequestBase">
+            <class ref="org.omg.spec.cdss._201105.dss.KMEvaluationRequestBase"/>
+        </bindings>
+        <bindings scd="~tns:InvalidDriDataFormatException">
+            <class ref="org.omg.spec.cdss._201105.dss.InvalidDriDataFormatException"/>
+        </bindings>
+        <bindings scd="~tns:ServiceRequestBase">
+            <class ref="org.omg.spec.cdss._201105.dss.ServiceRequestBase"/>
+        </bindings>
+        <bindings scd="~tns:KMCriterion">
+            <class ref="org.omg.spec.cdss._201105.dss.KMCriterion"/>
+        </bindings>
+        <bindings scd="~tns:evaluateIterativelyAtSpecifiedTimeResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluateIterativelyAtSpecifiedTimeResponse"/>
+        </bindings>
+        <bindings scd="~tns:KMTraitCriterionValue">
+            <class ref="org.omg.spec.cdss._201105.dss.KMTraitCriterionValue"/>
+        </bindings>
+        <bindings scd="~tns:CPQPInUse">
+            <class ref="org.omg.spec.cdss._201105.dss.CPQPInUse"/>
+        </bindings>
+        <bindings scd="~tns:describeSemanticSignifier">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeSemanticSignifier"/>
+        </bindings>
+        <bindings scd="~tns:describeSemanticRequirement">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeSemanticRequirement"/>
+        </bindings>
+        <bindings scd="~tns:getKMDescription">
+            <class ref="org.omg.spec.cdss._201105.dss.GetKMDescription"/>
+        </bindings>
+        <bindings scd="~tns:KMTraitCriterion">
+            <class ref="org.omg.spec.cdss._201105.dss.KMTraitCriterion"/>
+        </bindings>
+        <bindings scd="~tns:ServiceProfile">
+            <class ref="org.omg.spec.cdss._201105.dss.ServiceProfile"/>
+        </bindings>
+        <bindings scd="~tns:ScopedDO">
+            <class ref="org.omg.spec.cdss._201105.dss.ScopedDO"/>
+        </bindings>
+        <bindings scd="~tns:ComputableDefinition">
+            <class ref="org.omg.spec.cdss._201105.dss.ComputableDefinition"/>
+        </bindings>
+        <bindings scd="~tns:DataRequirementCriterion">
+            <class ref="org.omg.spec.cdss._201105.dss.DataRequirementCriterion"/>
+        </bindings>
+        <bindings scd="~tns:getKMDescriptionResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.GetKMDescriptionResponse"/>
+        </bindings>
+        <bindings scd="~tns:getKMEvaluationResultSemanticsResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.GetKMEvaluationResultSemanticsResponse"/>
+        </bindings>
+        <bindings scd="~tns:RankedKMList">
+            <class ref="org.omg.spec.cdss._201105.dss.RankedKMList"/>
+        </bindings>
+        <bindings scd="~tns:InteractionIdentifier">
+            <class ref="org.omg.spec.cdss._201105.dss.InteractionIdentifier"/>
+        </bindings>
+        <bindings scd="~tns:RelatedKMSearchCriterion">
+            <class ref="org.omg.spec.cdss._201105.dss.RelatedKMSearchCriterion"/>
+        </bindings>
+        <bindings scd="~tns:SemanticProfile">
+            <class ref="org.omg.spec.cdss._201105.dss.SemanticProfile"/>
+        </bindings>
+        <bindings scd="~tns:listProfiles">
+            <class ref="org.omg.spec.cdss._201105.dss.ListProfiles"/>
+        </bindings>
+        <bindings scd="~tns:DataRequirementBase">
+            <class ref="org.omg.spec.cdss._201105.dss.DataRequirementBase"/>
+        </bindings>
+        <bindings scd="~tns:describeProfileResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeProfileResponse"/>
+        </bindings>
+        <bindings scd="~tns:DSSRuntimeException">
+            <class ref="org.omg.spec.cdss._201105.dss.DSSRuntimeException"/>
+        </bindings>
+        <bindings scd="~tns:KMDataRequirementGroup">
+            <class ref="org.omg.spec.cdss._201105.dss.KMDataRequirementGroup"/>
+        </bindings>
+        <bindings scd="~tns:UnrecognizedScopingEntityException">
+            <class ref="org.omg.spec.cdss._201105.dss.UnrecognizedScopingEntityException"/>
+        </bindings>
+        <bindings scd="~tns:getKMEvaluationResultSemantics">
+            <class ref="org.omg.spec.cdss._201105.dss.GetKMEvaluationResultSemantics"/>
+        </bindings>
+        <bindings scd="~tns:AllowedDataRequirement">
+            <class ref="org.omg.spec.cdss._201105.dss.AllowedDataRequirement"/>
+        </bindings>
+        <bindings scd="~tns:UnrecognizedLanguageException">
+            <class ref="org.omg.spec.cdss._201105.dss.UnrecognizedLanguageException"/>
+        </bindings>
+        <bindings scd="~tns:RelatedKM">
+            <class ref="org.omg.spec.cdss._201105.dss.RelatedKM"/>
+        </bindings>
+        <bindings scd="~tns:KMDataRequirementItem">
+            <class ref="org.omg.spec.cdss._201105.dss.KMDataRequirementItem"/>
+        </bindings>
+        <bindings scd="~tns:getKMDataRequirementsResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.GetKMDataRequirementsResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateIteratively">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluateIteratively"/>
+        </bindings>
+        <bindings scd="~tns:DescribedDO">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribedDO"/>
+        </bindings>
+        <bindings scd="~tns:LanguageSupportRequirement">
+            <class ref="org.omg.spec.cdss._201105.dss.LanguageSupportRequirement"/>
+        </bindings>
+        <bindings scd="~tns:describeTrait">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeTrait"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationResponseBase">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluationResponseBase"/>
+        </bindings>
+        <bindings scd="~tns:UnrecognizedTraitCriterionException">
+            <class ref="org.omg.spec.cdss._201105.dss.UnrecognizedTraitCriterionException"/>
+        </bindings>
+        <bindings scd="~tns:KMSearchCriteria">
+            <class ref="org.omg.spec.cdss._201105.dss.KMSearchCriteria"/>
+        </bindings>
+        <bindings scd="~tns:SemanticRequirement">
+            <class ref="org.omg.spec.cdss._201105.dss.SemanticRequirement"/>
+        </bindings>
+        <bindings scd="~tns:IterativeKMEvaluationRequest">
+            <class ref="org.omg.spec.cdss._201105.dss.IterativeKMEvaluationRequest"/>
+        </bindings>
+        <bindings scd="~tns:listKMsResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.ListKMsResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluateResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateAtSpecifiedTimeResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluateAtSpecifiedTimeResponse"/>
+        </bindings>
+        <bindings scd="~tns:findKMsResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.FindKMsResponse"/>
+        </bindings>
+        <bindings scd="~tns:Warning">
+            <class ref="org.omg.spec.cdss._201105.dss.Warning"/>
+        </bindings>
+        <bindings scd="~tns:KMLocalizedTraitValue">
+            <class ref="org.omg.spec.cdss._201105.dss.KMLocalizedTraitValue"/>
+        </bindings>
+        <bindings scd="~tns:evaluate">
+            <class ref="org.omg.spec.cdss._201105.dss.Evaluate"/>
+        </bindings>
+        <bindings scd="~tns:RequiredDataRequirement">
+            <class ref="org.omg.spec.cdss._201105.dss.RequiredDataRequirement"/>
+        </bindings>
+        <bindings scd="~tns:listProfilesResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.ListProfilesResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateIterativelyAtSpecifiedTime">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluateIterativelyAtSpecifiedTime"/>
+        </bindings>
+        <bindings scd="~tns:IterativeEvaluationResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.IterativeEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateAtSpecifiedTime">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluateAtSpecifiedTime"/>
+        </bindings>
+        <bindings scd="~tns:getKMDataRequirements">
+            <class ref="org.omg.spec.cdss._201105.dss.GetKMDataRequirements"/>
+        </bindings>
+        <bindings scd="~tns:ProfilesOfType">
+            <class ref="org.omg.spec.cdss._201105.dss.ProfilesOfType"/>
+        </bindings>
+        <bindings scd="~tns:describeScopingEntityResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeScopingEntityResponse"/>
+        </bindings>
+        <bindings scd="~tns:KMList">
+            <class ref="org.omg.spec.cdss._201105.dss.KMList"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationRequest">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluationRequest"/>
+        </bindings>
+        <bindings scd="~tns:KMTraitValue">
+            <class ref="org.omg.spec.cdss._201105.dss.KMTraitValue"/>
+        </bindings>
+        <bindings scd="~tns:findKMs">
+            <class ref="org.omg.spec.cdss._201105.dss.FindKMs"/>
+        </bindings>
+        <bindings scd="~tns:getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.GetKMDataRequirementsForEvaluationAtSpecifiedTimeResponse"/>
+        </bindings>
+        <bindings scd="~tns:TraitSetRequirement">
+            <class ref="org.omg.spec.cdss._201105.dss.TraitSetRequirement"/>
+        </bindings>
+        <bindings scd="~tns:FunctionalProfile">
+            <class ref="org.omg.spec.cdss._201105.dss.FunctionalProfile"/>
+        </bindings>
+        <bindings scd="~tns:SemanticPayload">
+            <class ref="org.omg.spec.cdss._201105.dss.SemanticPayload"/>
+        </bindings>
+        <bindings scd="~tns:describeTraitResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeTraitResponse"/>
+        </bindings>
+        <bindings scd="~tns:RankedKM">
+            <class ref="org.omg.spec.cdss._201105.dss.RankedKM"/>
+        </bindings>
+        <bindings scd="~tns:describeScopingEntityHierarchy">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeScopingEntityHierarchy"/>
+        </bindings>
+        <bindings scd="~tns:ItemIdentifier">
+            <class ref="org.omg.spec.cdss._201105.dss.ItemIdentifier"/>
+        </bindings>
+        <bindings scd="~tns:UnsupportedLanguageException">
+            <class ref="org.omg.spec.cdss._201105.dss.UnsupportedLanguageException"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationException">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluationException"/>
+        </bindings>
+        <bindings scd="~tns:describeScopingEntity">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeScopingEntity"/>
+        </bindings>
+        <bindings scd="~tns:listKMs">
+            <class ref="org.omg.spec.cdss._201105.dss.ListKMs"/>
+        </bindings>
+        <bindings scd="~tns:KMDescriptionBase">
+            <class ref="org.omg.spec.cdss._201105.dss.KMDescriptionBase"/>
+        </bindings>
+        <bindings scd="~tns:XSDComputableDefinition">
+            <class ref="org.omg.spec.cdss._201105.dss.XSDComputableDefinition"/>
+        </bindings>
+        <bindings scd="~tns:KMItem">
+            <class ref="org.omg.spec.cdss._201105.dss.KMItem"/>
+        </bindings>
+        <bindings scd="~tns:InformationModelAlternative">
+            <class ref="org.omg.spec.cdss._201105.dss.InformationModelAlternative"/>
+        </bindings>
+        <bindings scd="~tns:IterativeEvaluationRequest">
+            <class ref="org.omg.spec.cdss._201105.dss.IterativeEvaluationRequest"/>
+        </bindings>
+        <bindings scd="~tns:ProfilesByType">
+            <class ref="org.omg.spec.cdss._201105.dss.ProfilesByType"/>
+        </bindings>
+        <bindings scd="~tns:DataRequirementItemData">
+            <class ref="org.omg.spec.cdss._201105.dss.DataRequirementItemData"/>
+        </bindings>
+        <bindings scd="~tns:InvalidTraitCriterionDataFormatException">
+            <class ref="org.omg.spec.cdss._201105.dss.InvalidTraitCriterionDataFormatException"/>
+        </bindings>
+        <bindings scd="~tns:InvalidDataFormatException">
+            <class ref="org.omg.spec.cdss._201105.dss.InvalidDataFormatException"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationResultSemanticsList">
+            <class ref="org.omg.spec.cdss._201105.dss.KMEvaluationResultSemanticsList"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationResultSemantics">
+            <class ref="org.omg.spec.cdss._201105.dss.KMEvaluationResultSemantics"/>
+        </bindings>
+        <bindings scd="~tns:KMTraitInclusionSpecification">
+            <class ref="org.omg.spec.cdss._201105.dss.KMTraitInclusionSpecification"/>
+        </bindings>
+        <bindings scd="~tns:describeSemanticSignifierResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeSemanticSignifierResponse"/>
+        </bindings>
+        <bindings scd="~tns:IterativeKMEvaluationResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.IterativeKMEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:RequiredDataNotProvidedException">
+            <class ref="org.omg.spec.cdss._201105.dss.RequiredDataNotProvidedException"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.KMEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:ScopingEntity">
+            <class ref="org.omg.spec.cdss._201105.dss.ScopingEntity"/>
+        </bindings>
+        <bindings scd="~tns:InvalidTimeZoneOffsetException">
+            <class ref="org.omg.spec.cdss._201105.dss.InvalidTimeZoneOffsetException"/>
+        </bindings>
+        <bindings scd="~tns:KMDescription">
+            <class ref="org.omg.spec.cdss._201105.dss.KMDescription"/>
+        </bindings>
+        <bindings scd="~tns:evaluateIterativelyResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluateIterativelyResponse"/>
+        </bindings>
+        <bindings scd="~tns:ExtendedKMDescription">
+            <class ref="org.omg.spec.cdss._201105.dss.ExtendedKMDescription"/>
+        </bindings>
+        <bindings scd="~tns:KMDataRequirements">
+            <class ref="org.omg.spec.cdss._201105.dss.KMDataRequirements"/>
+        </bindings>
+        <bindings scd="~tns:TraitRequirement">
+            <class ref="org.omg.spec.cdss._201105.dss.TraitRequirement"/>
+        </bindings>
+        <bindings scd="~tns:ConformanceProfile">
+            <class ref="org.omg.spec.cdss._201105.dss.ConformanceProfile"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationResultData">
+            <class ref="org.omg.spec.cdss._201105.dss.KMEvaluationResultData"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationRequest">
+            <class ref="org.omg.spec.cdss._201105.dss.KMEvaluationRequest"/>
+        </bindings>
+        <bindings scd="~tns:Trait">
+            <class ref="org.omg.spec.cdss._201105.dss.Trait"/>
+        </bindings>
+        <bindings scd="~tns:getKMDataRequirementsForEvaluationAtSpecifiedTime">
+            <class ref="org.omg.spec.cdss._201105.dss.GetKMDataRequirementsForEvaluationAtSpecifiedTime"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationRequestBase">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluationRequestBase"/>
+        </bindings>
+        <bindings scd="~tns:TraitCriterion">
+            <class ref="org.omg.spec.cdss._201105.dss.TraitCriterion"/>
+        </bindings>
+        <bindings scd="~tns:KMConsumerProvidedQueryParameter">
+            <class ref="org.omg.spec.cdss._201105.dss.KMConsumerProvidedQueryParameter"/>
+        </bindings>
+        <bindings scd="~tns:describeProfile">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeProfile"/>
+        </bindings>
+        <bindings scd="~tns:SemanticSignifier">
+            <class ref="org.omg.spec.cdss._201105.dss.SemanticSignifier"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationResultCriterion">
+            <class ref="org.omg.spec.cdss._201105.dss.EvaluationResultCriterion"/>
+        </bindings>
+        <bindings scd="~tns:UnrecognizedScopedEntityException">
+            <class ref="org.omg.spec.cdss._201105.dss.UnrecognizedScopedEntityException"/>
+        </bindings>
+        <bindings scd="~tns:OtherSemanticRequirement">
+            <class ref="org.omg.spec.cdss._201105.dss.OtherSemanticRequirement"/>
+        </bindings>
+        <bindings scd="~tns:EntityIdentifier">
+            <class ref="org.omg.spec.cdss._201105.dss.EntityIdentifier"/>
+        </bindings>
+        <bindings scd="~tns:describeScopingEntityHierarchyResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeScopingEntityHierarchyResponse"/>
+        </bindings>
+        <bindings scd="~tns:DSSException">
+            <class ref="org.omg.spec.cdss._201105.dss.DSSException"/>
+        </bindings>
+        <bindings scd="~tns:IntermediateKMEvaluationResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.IntermediateKMEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:describeSemanticRequirementResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.DescribeSemanticRequirementResponse"/>
+        </bindings>
+        <bindings scd="~tns:IntermediateState">
+            <class ref="org.omg.spec.cdss._201105.dss.IntermediateState"/>
+        </bindings>
+        <bindings scd="~tns:InformationModelRequirement">
+            <class ref="org.omg.spec.cdss._201105.dss.InformationModelRequirement"/>
+        </bindings>
+        <bindings scd="~tns:FinalKMEvaluationResponse">
+            <class ref="org.omg.spec.cdss._201105.dss.FinalKMEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:KMStatusCriterion">
+            <class ref="org.omg.spec.cdss._201105.dss.KMStatusCriterion"/>
+        </bindings>
+    </bindings>
+</bindings>

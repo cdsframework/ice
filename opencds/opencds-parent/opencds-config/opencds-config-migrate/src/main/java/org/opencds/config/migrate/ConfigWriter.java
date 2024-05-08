@@ -1,19 +1,25 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.migrate;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.common.cache.OpencdsCache;
 import org.opencds.config.api.model.ConceptDeterminationMethod;
 import org.opencds.config.api.model.ExecutionEngine;
@@ -29,8 +35,17 @@ import org.opencds.config.schema.ExecutionEngines;
 import org.opencds.config.schema.KnowledgeModules;
 import org.opencds.config.schema.SemanticSignifiers;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
 public class ConfigWriter {
-	private static final Logger log = LogManager.getLogger();
+    private static final Log log = LogFactory.getLog(ConfigWriter.class);
 
     private static final String CONFIG_SCHEMA_URL = "org.opencds.config.schema";
     private static final String KM_FILE = "knowledgeModules.xml";
