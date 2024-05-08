@@ -1,17 +1,17 @@
-/**
- * Copyright 2011 OpenCDS.org
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
+/*
+ * Copyright 2012-2020 OpenCDS.org
  *
- *		http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- *	
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.opencds.dss.evaluate;
@@ -30,16 +30,17 @@ import org.omg.dss.common.InteractionIdentifier;
 import org.omg.dss.evaluation.requestresponse.IterativeEvaluationRequest;
 import org.omg.dss.evaluation.requestresponse.IterativeEvaluationResponse;
 
-/**
- * 
+/*
+ *
  * @author Andrew Iskander, mod by David Shields
- * 
+ *
  * @version 1.0
  */
+@Deprecated(forRemoval = true)
 public abstract class IterativeEvaluater {
 
 	/**
-	 * 
+	 *
 	 * @param ii = the interaction identifier, contains unique ID plus a timestamp identifying when it was initially submitted
 	 * @param et = evalTime, is the point in time to evaluate the submitted data.  May be future, present, or past
 	 * @param e  = evaluation request, which is the list of requested rules to evaluate, and the semantic payload which includes the data to be evaluated
@@ -54,12 +55,12 @@ public abstract class IterativeEvaluater {
 	 * @throws InvalidTimeZoneOffsetExceptionFault
 	 */
 	public abstract IterativeEvaluationResponse getResponse(InteractionIdentifier ii, XMLGregorianCalendar et, IterativeEvaluationRequest e)
-			throws InvalidDriDataFormatExceptionFault, 
-			UnrecognizedLanguageExceptionFault, 
-			RequiredDataNotProvidedExceptionFault, 
-			UnsupportedLanguageExceptionFault, 
-			UnrecognizedScopedEntityExceptionFault, 
-			EvaluationExceptionFault, 
+			throws InvalidDriDataFormatExceptionFault,
+			UnrecognizedLanguageExceptionFault,
+			RequiredDataNotProvidedExceptionFault,
+			UnsupportedLanguageExceptionFault,
+			UnrecognizedScopedEntityExceptionFault,
+			EvaluationExceptionFault,
 			InvalidTimeZoneOffsetExceptionFault;
 
 }

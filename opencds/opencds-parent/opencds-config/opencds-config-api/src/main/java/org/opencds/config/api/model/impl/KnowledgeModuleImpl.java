@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.api.model.impl;
 
 import java.util.ArrayList;
@@ -6,10 +22,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.opencds.config.api.model.CDMId;
+import org.opencds.config.api.model.CDSHook;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.KMStatus;
 import org.opencds.config.api.model.KnowledgeModule;
-import org.opencds.config.api.model.PluginId;
+import org.opencds.config.api.model.PrePostProcessPluginId;
 import org.opencds.config.api.model.SSId;
 import org.opencds.config.api.model.SecondaryCDM;
 import org.opencds.config.api.model.TraitId;
@@ -17,6 +34,7 @@ import org.opencds.config.api.model.TraitId;
 public class KnowledgeModuleImpl implements KnowledgeModule {
     private KMId kmId;
     private KMStatus status;
+    private CDSHook cdsHook;
     private String executionEngine;
     private SSId ssId;
     private CDMId primaryCDM;
@@ -26,21 +44,22 @@ public class KnowledgeModuleImpl implements KnowledgeModule {
     private boolean preload;
     private String primaryProcess;
     private List<TraitId> traitIds;
-    private List<PluginId> preProcessPluginIds;
-    private List<PluginId> postProcessPluginIds;
+    private List<PrePostProcessPluginId> preProcessPluginIds;
+    private List<PrePostProcessPluginId> postProcessPluginIds;
     private Date timestamp;
     private String userId;
 
     private KnowledgeModuleImpl() {
     }
 
-    public static KnowledgeModuleImpl create(KMId kmId, KMStatus kmStatus, String executionEngine, SSId ssId,
+    public static KnowledgeModuleImpl create(KMId kmId, KMStatus kmStatus, CDSHook cdsHook, String executionEngine, SSId ssId,
             CDMId primaryCDM, List<SecondaryCDM> secondaryCDMs, String packageType, String packageId, boolean preload,
-            String primaryProcess, List<TraitId> traitIds, List<PluginId> preProcessPluginIds,
-            List<PluginId> postProcessPluginIds, Date timestamp, String userId) {
+            String primaryProcess, List<TraitId> traitIds, List<PrePostProcessPluginId> preProcPlugins,
+            List<PrePostProcessPluginId> postProcPlugins, Date timestamp, String userId) {
         KnowledgeModuleImpl kmj = new KnowledgeModuleImpl();
         kmj.kmId = KMIdImpl.create(kmId);
         kmj.status = kmStatus;
+        kmj.cdsHook = CDSHookImpl.create(cdsHook);
         kmj.executionEngine = executionEngine;
         kmj.ssId = SSIdImpl.create(ssId);
         kmj.primaryCDM = CDMIdImpl.create(primaryCDM);
@@ -50,8 +69,8 @@ public class KnowledgeModuleImpl implements KnowledgeModule {
         kmj.preload = preload;
         kmj.primaryProcess = primaryProcess;
         kmj.traitIds = TraitIdImpl.create(traitIds);
-        kmj.preProcessPluginIds = PluginIdImpl.create(preProcessPluginIds);
-        kmj.postProcessPluginIds = PluginIdImpl.create(postProcessPluginIds);
+        kmj.preProcessPluginIds = PrePostProcessPluginIdImpl.create(preProcPlugins);
+        kmj.postProcessPluginIds = PrePostProcessPluginIdImpl.create(postProcPlugins);
         kmj.timestamp = timestamp;
         kmj.userId = userId;
         return kmj;
@@ -64,7 +83,7 @@ public class KnowledgeModuleImpl implements KnowledgeModule {
         if (km instanceof KnowledgeModuleImpl) {
             return KnowledgeModuleImpl.class.cast(km);
         }
-        return create(km.getKMId(), km.getStatus(), km.getExecutionEngine(), km.getSSId(), km.getPrimaryCDM(),
+        return create(km.getKMId(), km.getStatus(), km.getCDSHook(), km.getExecutionEngine(), km.getSSId(), km.getPrimaryCDM(),
                 km.getSecondaryCDMs(), km.getPackageType(), km.getPackageId(), km.isPreload(), km.getPrimaryProcess(),
                 km.getTraitIds(), km.getPreProcessPluginIds(), km.getPostProcessPluginIds(), km.getTimestamp(),
                 km.getUserId());
@@ -89,6 +108,11 @@ public class KnowledgeModuleImpl implements KnowledgeModule {
     @Override
     public KMStatus getStatus() {
         return status;
+    }
+    
+    @Override
+    public CDSHook getCDSHook() {
+    	return cdsHook;
     }
 
     @Override
@@ -143,12 +167,12 @@ public class KnowledgeModuleImpl implements KnowledgeModule {
     }
 
     @Override
-    public List<PluginId> getPreProcessPluginIds() {
+    public List<PrePostProcessPluginId> getPreProcessPluginIds() {
         return preProcessPluginIds;
     }
 
     @Override
-    public List<PluginId> getPostProcessPluginIds() {
+    public List<PrePostProcessPluginId> getPostProcessPluginIds() {
         return postProcessPluginIds;
     }
 
@@ -188,14 +212,14 @@ public class KnowledgeModuleImpl implements KnowledgeModule {
         }
         if (preProcessPluginIds != null) {
             sb.append(", preProcessPlugins= [");
-            for (PluginId pid : preProcessPluginIds) {
+            for (PrePostProcessPluginId pid : preProcessPluginIds) {
                 sb.append(pid + ", ");
             }
             sb.append("], ");
         }
         if (postProcessPluginIds != null) {
             sb.append(", postProcessPlugins= [");
-            for (PluginId pid : postProcessPluginIds) {
+            for (PrePostProcessPluginId pid : postProcessPluginIds) {
                 sb.append(pid + ", ");
             }
             sb.append("], ");

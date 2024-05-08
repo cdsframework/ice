@@ -1,19 +1,49 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <artifactId>opencds-parent</artifactId>
-        <groupId>org.opencds</groupId>
-        <version>2.0.5</version>
-    </parent>
-    <artifactId>opencds-vmr-evaluation</artifactId>
-    <packaging>jar</packaging>
-    <name>OpenCDS VMR Evaluation</name>
-    <description>Implementation of VMR Evaluation operation</description>
-    <dependencies>
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>opencds-parent</artifactId>
+		<groupId>org.opencds</groupId>
+		<version>6.2.0</version>
+	</parent>
+	<artifactId>opencds-vmr-evaluation</artifactId>
+	<packaging>jar</packaging>
+	<name>OpenCDS vMR Evaluation</name>
+	<description>Implementation of FHIR Evaluation operation</description>
+	<repositories>
+		<repository>
+            <id>oss-snapshots</id>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <!-- url>https://oss.sonatype.org/content/repositories/snapshots/</url -->
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
+	</repositories>
+	<dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>opencds-config-api</artifactId>
+            <groupId>org.opencds</groupId>
+            <artifactId>opencds-vmr-1_0-mappings</artifactId>
             <version>${project.version}</version>
         </dependency>
-    </dependencies>
+	</dependencies>
+  <build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+        </plugin>
+        <plugin>
+            <groupId>org.codehaus.gmavenplus</groupId>
+            <artifactId>gmavenplus-plugin</artifactId>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+        </plugin>
+    </plugins>
+  </build>
 </project>

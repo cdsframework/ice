@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.store.model.je;
 
 import java.util.ArrayList;
@@ -6,10 +22,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.opencds.config.api.model.CDMId;
+import org.opencds.config.api.model.CDSHook;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.KMStatus;
 import org.opencds.config.api.model.KnowledgeModule;
-import org.opencds.config.api.model.PluginId;
+import org.opencds.config.api.model.PrePostProcessPluginId;
 import org.opencds.config.api.model.SSId;
 import org.opencds.config.api.model.SecondaryCDM;
 import org.opencds.config.api.model.TraitId;
@@ -17,11 +34,12 @@ import org.opencds.config.api.model.TraitId;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-@Entity
+@Entity(version=1)
 public class KnowledgeModuleJe implements KnowledgeModule, ConfigEntity<KMIdJe> {
     @PrimaryKey
     private KMIdJe kmId;
     private KMStatus status;
+    private CDSHook cdsHook;
     private String executionEngine;
     private SSId ssId;
     private CDMId primaryCDM;
@@ -31,21 +49,22 @@ public class KnowledgeModuleJe implements KnowledgeModule, ConfigEntity<KMIdJe> 
     private boolean preload;
     private String primaryProcess;
     private List<TraitId> traitIds;
-    private List<PluginId> preProcessPluginIds;
-    private List<PluginId> postProcessPluginIds;
+    private List<PrePostProcessPluginId> preProcessPluginIds;
+    private List<PrePostProcessPluginId> postProcessPluginIds;
     private Date timestamp;
     private String userId;
 
     private KnowledgeModuleJe() {
     }
 
-    public static KnowledgeModuleJe create(KMId kmId, KMStatus kmStatus, String executionEngine, SSId ssId,
+    public static KnowledgeModuleJe create(KMId kmId, KMStatus kmStatus, CDSHook cdsHook, String executionEngine, SSId ssId,
             CDMId primaryCDM, List<SecondaryCDM> secondaryCDMs, String packageType, String packageId, boolean preload,
-            String primaryProcess, List<TraitId> traitIds, List<PluginId> preProcessPluginIds,
-            List<PluginId> postProcessPluginIds, Date timestamp, String userId) {
+            String primaryProcess, List<TraitId> traitIds, List<PrePostProcessPluginId> preProcessPluginIds,
+            List<PrePostProcessPluginId> postProcessPluginIds, Date timestamp, String userId) {
         KnowledgeModuleJe kmj = new KnowledgeModuleJe();
         kmj.kmId = KMIdJe.create(kmId);
         kmj.status = kmStatus;
+        kmj.cdsHook = CDSHookJe.create(cdsHook);
         kmj.executionEngine = executionEngine;
         kmj.ssId = SSIdJe.create(ssId);
         kmj.primaryCDM = CDMIdJe.create(primaryCDM);
@@ -55,8 +74,8 @@ public class KnowledgeModuleJe implements KnowledgeModule, ConfigEntity<KMIdJe> 
         kmj.preload = preload;
         kmj.primaryProcess = primaryProcess;
         kmj.traitIds = TraitIdJe.create(traitIds);
-        kmj.preProcessPluginIds = PluginIdJe.create(preProcessPluginIds);
-        kmj.postProcessPluginIds = PluginIdJe.create(postProcessPluginIds);
+        kmj.preProcessPluginIds = PrePostProcessPluginIdJe.create(preProcessPluginIds);
+        kmj.postProcessPluginIds = PrePostProcessPluginIdJe.create(postProcessPluginIds);
         kmj.timestamp = timestamp;
         kmj.userId = userId;
         return kmj;
@@ -69,7 +88,7 @@ public class KnowledgeModuleJe implements KnowledgeModule, ConfigEntity<KMIdJe> 
         if (km instanceof KnowledgeModuleJe) {
             return KnowledgeModuleJe.class.cast(km);
         }
-        return create(km.getKMId(), km.getStatus(), km.getExecutionEngine(), km.getSSId(), km.getPrimaryCDM(),
+        return create(km.getKMId(), km.getStatus(), km.getCDSHook(), km.getExecutionEngine(), km.getSSId(), km.getPrimaryCDM(),
                 km.getSecondaryCDMs(), km.getPackageType(), km.getPackageId(), km.isPreload(), km.getPrimaryProcess(),
                 km.getTraitIds(), km.getPreProcessPluginIds(), km.getPostProcessPluginIds(), km.getTimestamp(),
                 km.getUserId());
@@ -99,6 +118,11 @@ public class KnowledgeModuleJe implements KnowledgeModule, ConfigEntity<KMIdJe> 
     @Override
     public KMStatus getStatus() {
         return status;
+    }
+    
+    @Override
+    public CDSHook getCDSHook() {
+    	return cdsHook;
     }
 
     @Override
@@ -153,7 +177,7 @@ public class KnowledgeModuleJe implements KnowledgeModule, ConfigEntity<KMIdJe> 
     }
 
     @Override
-    public List<PluginId> getPreProcessPluginIds() {
+    public List<PrePostProcessPluginId> getPreProcessPluginIds() {
         if (preProcessPluginIds == null) {
             return null;
         }
@@ -161,7 +185,7 @@ public class KnowledgeModuleJe implements KnowledgeModule, ConfigEntity<KMIdJe> 
     }
 
     @Override
-    public List<PluginId> getPostProcessPluginIds() {
+    public List<PrePostProcessPluginId> getPostProcessPluginIds() {
         if (postProcessPluginIds == null) {
             return null;
         }

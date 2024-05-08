@@ -1,20 +1,23 @@
-/**
- * Copyright 2011 OpenCDS.org
- *	Licensed under the Apache License, Version 2.0 (the "License");
- *	you may not use this file except in compliance with the License.
- *	You may obtain a copy of the License at
+/*
+ * Copyright 2011-2020 OpenCDS.org
  *
- *		http://www.apache.org/licenses/LICENSE-2.0
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *	Unless required by applicable law or agreed to in writing, software
- *	distributed under the License is distributed on an "AS IS" BASIS,
- *	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *	See the License for the specific language governing permissions and
- *	limitations under the License.
- *	
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.opencds.common.utilities;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,7 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
+/*
  * <p>DateUtility is used to perform date functions.  It is thread-safe,
  * in that a new Calendar objects are created for performing an operation or
  * evaluation if one is needed.
@@ -39,14 +42,21 @@ import java.util.Map;
 public class DateUtility extends java.lang.Object
 {
 	// TODO: consider changing methods in this and other utilities that can be turned into static methods into static methods.
-	
+
 	    public final static int DATE_PRECISION_LEVEL_FORMAT_APPENDED_TEXT = 1;
 	    public final static int DATE_PRECISION_LEVEL_FORMAT_QUESTION_MARK = 2;
 	    public final static int DATE_PRECISION_LEVEL_FORMAT_IGNORE_PRECISION_LEVEL = 3;
 	    public final static double AVG_DAYS_PER_MONTH = 365.5 / 12.0;
+		private static final Log logger = LogFactory.getLog(DateUtility.class);
 
-	    private static DateUtility instance = new DateUtility();  //singleton instance
-			private static final ThreadLocal<Map<String, SimpleDateFormat>> dateFormatters = new ThreadLocal<Map<String, SimpleDateFormat>>();
+
+	private static DateUtility instance = new DateUtility();  //singleton instance
+		// Caches instances of SimpleDateFormat to avoid frequent construction of the same SDF during a single
+		// evaluation request. Since SDFs are not thread-safe, we must use a ThreadLocal.
+		// Note that there is no attempt to clear the ThreadLocal since there should be a relatively low number of
+		// unique formats being used, and it is advantageous to reuse them across evaluation requests, so we don't have
+		// to reconstruct them again and again. The impact on the heap should be minimal.
+		private static final ThreadLocal<Map<String, SimpleDateFormat>> dateFormatters = ThreadLocal.withInitial(HashMap::new);
 
 	    private DateUtility()
 	    {
@@ -57,20 +67,11 @@ public class DateUtility extends java.lang.Object
 	        return instance;
 	    }
 
-	    private SimpleDateFormat getDateFormatter(String pattern)
-			{
-				Map<String, SimpleDateFormat> formatters = dateFormatters.get();
-				if (formatters == null) {
-					formatters = new HashMap<String, SimpleDateFormat>();
-					dateFormatters.set(formatters);
-				}
-				SimpleDateFormat formatter = formatters.get(pattern);
-				if (formatter == null) {
-					formatter = new SimpleDateFormat(pattern);
-					formatters.put(pattern, formatter);
-				}
-				return formatter;
-			}
+		private SimpleDateFormat getDateFormatter(String pattern)
+		{
+			SimpleDateFormat formatter = dateFormatters.get().computeIfAbsent(pattern, SimpleDateFormat::new);
+			return formatter;
+		}
 
 	    /**
 	     * Month 1 = January (note difference from calendar).  Thus, to set as January 1, 2001,
@@ -234,32 +235,33 @@ public class DateUtility extends java.lang.Object
 	    // returns Date corresponding to the dateAsString
 	    {
 	        Date dateToReturn = null;
+
 	        try
 	        {
-	            dateToReturn = getDateFromStringOrThrow(dateAsString, formatTemplate);
+				dateToReturn = getDateFromStringOrThrow(dateAsString, formatTemplate);
 	        }
 	        catch (Exception e)
 	        {
-	            e.printStackTrace();
+	            logger.warn("Invalid input '" + dateAsString + "' for format '" + formatTemplate + "'", e);
 	        }
 
 	        return dateToReturn;
 	    }
 
-			/**
-			 * Parse a date string into a Date or throw a ParseException if the format is invalid
-			 *
-			 * @param dateAsString
-			 * @param formatTemplate
-			 * @return
-			 * @throws ParseException
-			 */
-			public Date getDateFromStringOrThrow(String dateAsString, String formatTemplate) throws ParseException
-			{
-					SimpleDateFormat formatter = getDateFormatter(formatTemplate);
-					Date date = formatter.parse(dateAsString);
-					return date;
-			}
+		/**
+		 * Parse a date string into a Date or throw a ParseException if the format is invalid
+		 *
+		 * @param dateAsString
+		 * @param formatTemplate
+		 * @return
+		 * @throws ParseException
+		 */
+		public Date getDateFromStringOrThrow(String dateAsString, String formatTemplate) throws ParseException
+		{
+			SimpleDateFormat formatter = getDateFormatter(formatTemplate);
+			Date date = formatter.parse(dateAsString);
+			return date;
+		}
 
 	    public boolean isValidDateFormat(String dateAsString, String formatTemplate){
 	    	SimpleDateFormat formatter = getDateFormatter(formatTemplate);
@@ -270,7 +272,7 @@ public class DateUtility extends java.lang.Object
 				return false;
 			}
 	    }
-	    
+
 	    /**
 	     * Returns whether getDateFromString will be able to succeed without error.
 	     * Added because getDateFromString was not implemented with error throwing.
@@ -498,7 +500,7 @@ public class DateUtility extends java.lang.Object
 	        return new AbsoluteTimeDifference(time1, time2, highestReturnedCalendarTimeUnit,
 	                ignoreSmallTimeUnits, highestCalendarTimeUnitToIgnore);
 	    }
-	    
+
 	    /**
 	     * Returns an absolute time difference that ignores hours and smaller units if highest returned calendar unit is days or greater.
 	     * @param time1
@@ -521,16 +523,16 @@ public class DateUtility extends java.lang.Object
 	    	//System.out.println("time1="+time1 +", time2="+time2);
 	    	return getAbsoluteTimeDifference(time1, time2, highestReturnedCalendarTimeUnit, true, Calendar.HOUR);
 	    }
-	    
+
 	    /**
-	     * Returns true if the absolute time difference between time1 and time2 is within the indicated parameters, using 
+	     * Returns true if the absolute time difference between time1 and time2 is within the indicated parameters, using
 	     * conventional notions of time.  Hours and smaller units are ignored if the calendar unit is days or greater.
-	     * 
+	     *
 	     * If the time difference is at the specified boundary (e.g., 2 years specified as cutoff and two dates are
 	     * 12/31/2009 and 12/31/2011, returns true).
-	     * 
+	     *
 	     * Note that a time unit of week is currently not supported.
-	     * 
+	     *
 	     * E.g., this means the following in the case that the maximumTimeDifferenceInUnit is 2:
 	     * - for time unit of year, time1 and time2 are at most 2 years apart (e.g., 1/1/2000 at any time and 1/1/2002 at any time)
 	     * - for time unit of month, time1 and time2 are at most 2 months apart (e.g., 1/1/2000 at any time and 3/1/2000 at any time)
@@ -553,11 +555,11 @@ public class DateUtility extends java.lang.Object
 	    	{
 	    		throw new IllegalArgumentException("time1 and time2 may not be null.");
 	    	}
-	    	
+
 	    	AbsoluteTimeDifference atd = getAbsoluteTimeDifference(time1, time2, calendarTimeUnit);
 	    	if (calendarTimeUnit == Calendar.YEAR)
 	    	{
-	    		if ((atd.getYearDifference() < maximumTimeDifferenceInUnit) || 
+	    		if ((atd.getYearDifference() < maximumTimeDifferenceInUnit) ||
 	    		   ((atd.getYearDifference() == maximumTimeDifferenceInUnit) && (atd.getMonthDifference() == 0) && (atd.getDayDifference() == 0)))
 	    		{
 	    			return true;
@@ -565,7 +567,7 @@ public class DateUtility extends java.lang.Object
 	    	}
 	    	else if (calendarTimeUnit == Calendar.MONTH)
 	    	{
-	    		if ((atd.getMonthDifference() < maximumTimeDifferenceInUnit) || 
+	    		if ((atd.getMonthDifference() < maximumTimeDifferenceInUnit) ||
 	    		   ((atd.getMonthDifference() == maximumTimeDifferenceInUnit) && (atd.getDayDifference() == 0)))
 	    		{
 	    			return true;
@@ -585,7 +587,7 @@ public class DateUtility extends java.lang.Object
 	    	else if ((calendarTimeUnit == Calendar.HOUR_OF_DAY) ||
 		                (calendarTimeUnit == Calendar.HOUR))
 	        {
-	    		if ((atd.getHourDifference() < maximumTimeDifferenceInUnit) || 
+	    		if ((atd.getHourDifference() < maximumTimeDifferenceInUnit) ||
 	    		((atd.getHourDifference() == maximumTimeDifferenceInUnit) && (atd.getMinuteDifference() == 0) && (atd.getSecondDifference() == 0) && (atd.getMillisecondDifference() == 0)))
 	    		{
 	    			return true;
@@ -618,19 +620,19 @@ public class DateUtility extends java.lang.Object
 	    	{
 	    		throw new IllegalArgumentException("calendarTimeUnit of " + calendarTimeUnit + " is not supported.");
 	    	}
-			
-	    	return false;	    	
+
+	    	return false;
 	    }
-		        
+
 	    /**
-	     * Returns true if the absolute time difference between time1 and time2 is within the indicated parameters, using 
+	     * Returns true if the absolute time difference between time1 and time2 is within the indicated parameters, using
 	     * conventional notions of time.  Hours and smaller units are ignored if the calendar unit is days or greater.
-	     * 
+	     *
 	     * Note that a time unit of week is currently not supported.
-	     * 
+	     *
 	     * If the time difference is at the specified boundary (e.g., 2 years specified as cutoff and two dates are
 	     * 12/31/2009 and 12/31/2011, returns false).
-	     * 
+	     *
 	     * E.g., this means the following in the case that the maximumTimeDifferenceInUnit is 2:
 	     * - for time unit of year, time1 and time2 are less than 2 years apart (e.g., 1/2/2000 at any time and 1/1/2002 at any time)
 	     * - for time unit of month, time1 and time2 are less than 2 months apart (e.g., 1/2/2000 at any time and 3/1/2000 at any time)
@@ -653,18 +655,18 @@ public class DateUtility extends java.lang.Object
 	    	{
 	    		throw new IllegalArgumentException("time1 and time2 may not be null.");
 	    	}
-	    	
+
 	    	AbsoluteTimeDifference atd = getAbsoluteTimeDifference(time1, time2, calendarTimeUnit);
 	    	if (calendarTimeUnit == Calendar.YEAR)
 	    	{
-	    		if (atd.getYearDifference() < maximumTimeDifferenceInUnit) 
+	    		if (atd.getYearDifference() < maximumTimeDifferenceInUnit)
 	    		{
 	    			return true;
 	    		}
 	    	}
 	    	else if (calendarTimeUnit == Calendar.MONTH)
 	    	{
-	    		if (atd.getMonthDifference() < maximumTimeDifferenceInUnit) 
+	    		if (atd.getMonthDifference() < maximumTimeDifferenceInUnit)
 	    		{
 	    			return true;
 	    		}
@@ -697,7 +699,7 @@ public class DateUtility extends java.lang.Object
 	    	}
 	    	else if (calendarTimeUnit == Calendar.SECOND)
 	    	{
-	    		if (atd.getSecondDifference() < maximumTimeDifferenceInUnit) 
+	    		if (atd.getSecondDifference() < maximumTimeDifferenceInUnit)
 	    		{
 	    			return true;
 	    		}
@@ -713,8 +715,8 @@ public class DateUtility extends java.lang.Object
 	    	{
 	    		throw new IllegalArgumentException("calendarTimeUnit of " + calendarTimeUnit + " is not supported.");
 	    	}
-			
-	    	return false;	    	
+
+	    	return false;
 	    }
 
 	    /**
@@ -1086,14 +1088,14 @@ public class DateUtility extends java.lang.Object
 	        final long MILLIS_PER_HOUR = 1000 * 60 * 60;
 	        return Math.abs(date1.getTime() - date2.getTime()) <= MILLIS_PER_HOUR * maxHoursDifference;
 	    }
-	    
+
 	    /**
 	     * Returns true if there is any overlap in the date 1 time interval and date 2 time interval.
-	     * 
+	     *
 	     * Assumes date1Start before or equal to date1End and that date2Start before or equal to date2End.
-	     * 
+	     *
 	     * See http://c2.com/cgi/wiki?TestIfDateRangesOverlap.
-	     * 
+	     *
 	     * Returns false if any of the values are null.
 	     * @param interval1Start
 	     * @param interval1End
@@ -1107,7 +1109,7 @@ public class DateUtility extends java.lang.Object
 	    	{
 	    		return false;
 	    	}
-	    	
+
 	    	// ( start1 <= end2 and start2 <= end1 )
 	    	if ((! interval1Start.after(interval2End)) && (! interval2Start.after(interval1End)))
 	    	{
@@ -1122,39 +1124,23 @@ public class DateUtility extends java.lang.Object
 //	    	String hl7_TS_value = "20110127130123.123-0600";
 	        DateUtility utility = DateUtility.getInstance();
 //	        java.util.Date dt = utility.getDateFromString( hl7_TS_value, "yyyyMMddHHmmss.SSSZZZZZ" );
-//	        
+//
 //	        System.out.println( dt );
-//	        
+//
 //	        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS aaa");
 //	        String pretty_time = formatter.format( dt );
 //
 //	        System.out.println( pretty_time );
-	       
-	        String formatTemplate = "yyyyMMddHHmmss.SSSZZZZZ";
-	        String hl7Time = "20201002113456+0000";
-	        System.out.println("Calling getDateFromString() for " + hl7Time);
-	        
-	        Date dateFromValue;
-	        if (DateUtility.getInstance().isValidDateFormat(hl7Time, formatTemplate.substring(0, hl7Time.length()))) {
-	        	dateFromValue = DateUtility.getInstance().getDateFromString(hl7Time, formatTemplate.substring(0, hl7Time.length()));
-	        }
-	        else {
-	        	dateFromValue = DateUtility.getInstance().getDateFromString(hl7Time, "yyyyMMddHHmmssZ");
-	        }
-	        if (dateFromValue != null) {
-	        	System.out.println("Date is not null: " + dateFromValue);
-	        }
-	        else {
-	        	System.out.println("Date is null");
-	        }
-/**
+
+/*
 	        AbsoluteTimeDifference atd = utility.getAbsoluteTimeDifference(
 	                (new GregorianCalendar(2007, Calendar.FEBRUARY, 1)).getTime(), (new GregorianCalendar(2007, Calendar.MARCH, 31)).getTime(),
 	                Calendar.MONTH, true, Calendar.HOUR);
 	        atd.print();
 	        System.out.println(atd.getMonthDifference());
-	        
+**/
 	        //System.out.println(utility.getDateAsString(new Date(), "MMMMM dd, yyyy"));
+	        /**
 	         Date date1 = utility.getDate(2003, 12, 14);
 	         Date date2 = utility.getDate(2003, 12, 12);
 
@@ -1236,28 +1222,23 @@ public class DateUtility extends java.lang.Object
 	         System.out.println(arrayList.get(k));
 	         }
 	         **/
-	        
-	        /**	        
+
 	        Date date1 = utility.getDate(2012, 1, 1);
 	        System.out.println( date1 );
-	        
+
 	        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS aaa");
 	        String pretty_time = formatter.format( date1 );
 
 	        System.out.println( pretty_time );
-	        
+
 	        Date date2 = utility.getDate(2010, 1, 1);
 	        System.out.println( date2 );
 	        String pretty_time2 = formatter.format( date2 );
 
 	        System.out.println( pretty_time2 );
-	        
+
 	        System.out.println(utility.timeDifferenceLessThanOrEqualTo(date1, date2, Calendar.YEAR, 2));
-			**/
-				SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssZ");
-				System.out.println(sdf.format(new Date()));
-	        SimpleDateFormat sdf2 = new SimpleDateFormat("yyMMddHHmmssZZZZ");
-	        System.out.println(sdf2.format(new Date()));
+
 
 	    }
 }

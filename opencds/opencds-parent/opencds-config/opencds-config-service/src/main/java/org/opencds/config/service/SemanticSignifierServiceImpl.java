@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.service;
 
 import java.util.HashMap;
@@ -5,8 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.common.cache.OpencdsCache.CacheRegion;
-import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.common.interfaces.ResultSetBuilder;
 import org.opencds.config.api.FactListsBuilder;
 import org.opencds.config.api.cache.CacheService;
@@ -14,10 +31,13 @@ import org.opencds.config.api.dao.SemanticSignifierDao;
 import org.opencds.config.api.model.SSId;
 import org.opencds.config.api.model.SemanticSignifier;
 import org.opencds.config.api.service.SemanticSignifierService;
+import org.opencds.config.api.ss.EntryPoint;
+import org.opencds.config.api.ss.ExitPoint;
 
 import com.google.common.collect.ImmutableList;
 
 public class SemanticSignifierServiceImpl implements SemanticSignifierService {
+    private static final Log log = LogFactory.getLog(SemanticSignifierServiceImpl.class);
 
     private final SemanticSignifierDao dao;
     private CacheService cacheService;
@@ -31,12 +51,14 @@ public class SemanticSignifierServiceImpl implements SemanticSignifierService {
     
     private void init(List<SemanticSignifier> allSS) {
         cacheService.putAll(SSCacheRegion.SEMANTIC_SIGNIFIER, buildPairs(allSS));
+        cacheService.putAll(SSCacheRegion.ENTRY_POINT,  buildEntryPointPairs(allSS));
+        cacheService.putAll(SSCacheRegion.EXIT_POINT,  buildExitPointPairs(allSS));
         cacheService.putAll(SSCacheRegion.FACT_LISTS_BUILDER, buildFactListsBuilderPairs(allSS));
         cacheService.putAll(SSCacheRegion.RESULT_SET_BUILDER, buildResultSetBuilderPairs(allSS));
         
     }
 
-    @Override
+	@Override
     public SemanticSignifier find(SSId ssId) {
         return cacheService.get(SSCacheRegion.SEMANTIC_SIGNIFIER, ssId);
     }
@@ -71,6 +93,16 @@ public class SemanticSignifierServiceImpl implements SemanticSignifierService {
             cacheService.evict(SSCacheRegion.RESULT_SET_BUILDER, ss.getSSId());
         }
     }
+    
+    @Override
+    public <T> EntryPoint<T> getEntryPoint(SSId ssId) {
+    	return cacheService.get(SSCacheRegion.ENTRY_POINT, ssId);
+    }
+
+    @Override
+    public ExitPoint getExitPoint(SSId ssId) {
+    	return cacheService.get(SSCacheRegion.EXIT_POINT, ssId);
+    }
 
     @Override
     public FactListsBuilder getFactListsBuilder(SSId ssId) {
@@ -83,12 +115,42 @@ public class SemanticSignifierServiceImpl implements SemanticSignifierService {
     }
 
     private Map<SSId, SemanticSignifier> buildPairs(List<SemanticSignifier> all) {
-        Map<SSId, SemanticSignifier> cachables = new HashMap<>();
-        for (SemanticSignifier ss : all) {
-            cachables.put(ss.getSSId(), ss);
-        }
-        return cachables;
+    	Map<SSId, SemanticSignifier> cachables = new HashMap<>();
+    	for (SemanticSignifier ss : all) {
+    		cachables.put(ss.getSSId(), ss);
+    	}
+    	return cachables;
     }
+    
+    private Map<SSId, EntryPoint<?>> buildEntryPointPairs(List<SemanticSignifier> allSS) {
+    	Map<SSId, EntryPoint<?>> cachables = new HashMap<>();
+    	for (SemanticSignifier ss : allSS) {
+    		Class<EntryPoint<?>> epClass;
+    		try {
+    			epClass = (Class<EntryPoint<?>>) Class.forName(ss.getEntryPoint());
+    			EntryPoint<?> entryPoint = epClass.newInstance();
+    			cachables.put(ss.getSSId(), entryPoint);
+    		} catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            	log.error("Problem loading EntryPoint from configuration: " + e.getMessage(),e);
+    		}
+    	}
+    	return cachables;
+    }
+    
+	private Map<?, ?> buildExitPointPairs(List<SemanticSignifier> allSS) {
+    	Map<SSId, ExitPoint> cachables = new HashMap<>();
+    	for (SemanticSignifier ss : allSS) {
+    		Class<ExitPoint> exClass;
+    		try {
+    			exClass = (Class<ExitPoint>) Class.forName(ss.getExitPoint());
+    			ExitPoint exitPoint = exClass.newInstance();
+    			cachables.put(ss.getSSId(), exitPoint);
+    		} catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            	log.error("Problem loading ExitPoint from configuration: " + e.getMessage(),e);
+    		}
+    	}
+    	return cachables;
+	}
 
     @SuppressWarnings("unchecked")
     private Map<SSId, FactListsBuilder> buildFactListsBuilderPairs(List<SemanticSignifier> all) {
@@ -100,7 +162,7 @@ public class SemanticSignifierServiceImpl implements SemanticSignifierService {
                 FactListsBuilder flbInstance = flbClass.newInstance();
                 cachables.put(ss.getSSId(), flbInstance);
             } catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                throw new OpenCDSRuntimeException("Problem loading fact lists builder from configuration: " + e.getMessage());
+            	log.error("Problem loading FactListsBuilder from configuration: " + e.getMessage(),e);
             }
         }
         return cachables;
@@ -115,7 +177,7 @@ public class SemanticSignifierServiceImpl implements SemanticSignifierService {
                 ResultSetBuilder<?> rsbInstance = rsbClass.newInstance();
                 cachables.put(ss.getSSId(), rsbInstance);
             } catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                throw new OpenCDSRuntimeException("Problem loading fact lists builder from configuration: " + e.getMessage());
+            	log.error("Problem loading ResultSetBuilder from configuration: " + e.getMessage(),e);
             }
         }
         return cachables;
@@ -123,6 +185,8 @@ public class SemanticSignifierServiceImpl implements SemanticSignifierService {
 
     private enum SSCacheRegion implements CacheRegion {
         SEMANTIC_SIGNIFIER(SemanticSignifier.class),
+        ENTRY_POINT(SemanticSignifier.class),
+        EXIT_POINT(SemanticSignifier.class),
         FACT_LISTS_BUILDER(FactListsBuilder.class),
         RESULT_SET_BUILDER(ResultSetBuilder.class);
 

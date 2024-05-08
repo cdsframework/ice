@@ -1,4 +1,27 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.migrate;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.opencds.config.api.model.KMId;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,16 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.opencds.config.api.model.KMId;
-
 public class FileConfigHandler implements ConfigHandler {
-	private static final Logger log = LogManager.getLogger();
+    private static final Log log = LogFactory.getLog(FileConfigHandler.class);
     private static final String CONFIG_SCHEMA_URL = "org.opencds.config.schema";
 
     private static final String CDM_DIR = "conceptDeterminationMethods";
@@ -28,7 +43,7 @@ public class FileConfigHandler implements ConfigHandler {
     private static final String SS_FILE = "semanticSignifiers.xml";
     private static final String KM_FILE = "knowledgeModules.xml";
     private static final String KP_DIR = "knowledgePackages";
-    
+
     protected static final String XML_SUFFIX = ".xml";
 
     private Path path;
@@ -109,7 +124,7 @@ public class FileConfigHandler implements ConfigHandler {
         ensureExists(path.getParent().toFile());
         return new FileOutputStream(path.toFile());
     }
-    
+
     protected void ensureExists(File targetDir) {
         if (!targetDir.exists()) {
             targetDir.mkdirs();
@@ -124,15 +139,15 @@ public class FileConfigHandler implements ConfigHandler {
         Path newPath = Paths.get(path.toString(), baseName + XML_SUFFIX);
         return new FileOutputStream(newPath.toFile());
     }
-    
+
     private static class SplitFileConfigHandler extends FileConfigHandler {
         private Path basePath;
-        
+
         public SplitFileConfigHandler(Path path) throws Exception {
             super(path);
             basePath = path;
         }
-        
+
         @Override
         public OutputStream getOutputStream(String baseName) throws Exception {
             // targetPath represents the file
@@ -140,7 +155,7 @@ public class FileConfigHandler implements ConfigHandler {
             Path newPath = Paths.get(basePath.toString(), baseName + XML_SUFFIX);
             return new FileOutputStream(newPath.toFile());
         }
-        
+
     }
 
 }

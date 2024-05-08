@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/util
+	http://www.springframework.org/schema/util/spring-util.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/mvc
+    http://www.springframework.org/schema/mvc/spring-mvc.xsd
+    http://cxf.apache.org/jaxrs
+    http://cxf.apache.org/schemas/jaxrs.xsd">
+
+    <mvc:annotation-driven/>
+    <context:annotation-config/>
+    <context:component-scan
+            base-package="org.opencds.webapp.config.dss"/>
+
+    <context:property-placeholder
+            system-properties-mode="OVERRIDE"
+            location="file:${user.home}/.opencds/opencds.properties,classpath:org/cdsframework/ice/util/iceversion.properties,classpath:org/cdsframework/ice/util/git.properties"
+    />
+
+    <!-- version data map for use in ice and version controller -->
+    <util:map id="versionData" map-class="java.util.HashMap">
+        <entry key="iceVersion" value="${ice-version:unknown}"/>
+        <entry key="gitCommitSha" value="${git.commit.id.abbrev:no-git-sha}"/>
+        <entry key="buildDate" value="${git.build.time:no-build-time}"/>
+    </util:map>
+
+    <!-- set the version data inside ICEVersionUtil -->
+    <bean id="iceVersionSetup" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="org.cdsframework.ice.util.ICEVersionUtil" />
+        <property name="targetMethod" value="setVersionData" />
+        <property name="arguments" ref="versionData"/>
+    </bean>
+
+    <bean id="healthResource" class="org.cdsframework.rest.opencds.HealthResource">
+    </bean>
+
+    <bean id="versionResource" class="org.cdsframework.rest.opencds.VersionResource">
+        <constructor-arg name="versionData" ref="versionData"/>
+    </bean>
+
+    <bean id="evaluateResource" class="org.cdsframework.rest.opencds.EvaluateResource">
+        <constructor-arg name="evaluationService" ref="dssEvaluation" />
+        <constructor-arg name="configurationService" ref="configurationService" />
+    </bean>
+
+    <jaxrs:server id="healthRESTService" address="/">
+        <jaxrs:serviceBeans>
+            <ref bean="healthResource" />
+            <ref bean="versionResource"/>
+        </jaxrs:serviceBeans>
+    </jaxrs:server>
+
+    <jaxrs:server id="evaluationRESTService" address="/api">
+        <jaxrs:serviceBeans>
+            <ref bean="evaluateResource" />
+        </jaxrs:serviceBeans>
+    </jaxrs:server>
+
+</beans>

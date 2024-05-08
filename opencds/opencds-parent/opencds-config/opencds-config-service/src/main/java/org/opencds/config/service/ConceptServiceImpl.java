@@ -1,3 +1,19 @@
+/*
+ * Copyright 2014-2020 OpenCDS.org
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.opencds.config.service;
 
 import java.util.ArrayList;
@@ -8,8 +24,8 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.opencds.common.cache.OpencdsCache.CacheRegion;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.api.cache.CacheService;
@@ -28,7 +44,7 @@ import org.opencds.config.api.service.ConceptService;
 import org.opencds.config.api.service.KnowledgeModuleService;
 
 public class ConceptServiceImpl implements ConceptService, Observer {
-	private static final Logger log = LogManager.getLogger();
+    private static final Log log = LogFactory.getLog(ConceptServiceImpl.class);
     private static final String ALL_CONCEPTS = "allConcepts";
 
     private ConceptDeterminationMethodService conceptDeterminationMethodService;
@@ -81,7 +97,7 @@ public class ConceptServiceImpl implements ConceptService, Observer {
 
         if (log.isDebugEnabled())
             log.debug("Finding concept in conceptMaps: codeSystem= " + codeSystem + ", code= " + code);
-        List<ConceptMap> concepts = conceptMaps.get(ConceptImpl.create(code, codeSystem, null, null));
+        List<ConceptMap> concepts = conceptMaps.get(ConceptImpl.create(code, codeSystem, null, null, null, null));
         if (log.isDebugEnabled())
             log.debug("Concepts found in conceptMaps: " + concepts);
         if (concepts != null) {
@@ -217,6 +233,8 @@ public class ConceptServiceImpl implements ConceptService, Observer {
                             addAllConceptMaps(cms, secondaries);
                         } else if (sec.getSupportMethod() == SupportMethod.REPLACEMENT) {
                             replaceConceptMaps(cms, secondaries);
+                        } else if (sec.getSupportMethod() == SupportMethod.RETRACTIVE) {
+                            retractConceptMaps(cms, secondaries);
                         }
                     }
                 }
@@ -285,6 +303,23 @@ public class ConceptServiceImpl implements ConceptService, Observer {
             fromConcepts.add(cm.getFromConcept());
         }
         return fromConcepts;
+    }
+
+    private void retractConceptMaps(Map<Concept, List<ConceptMap>> cms, List<ConceptMap> retractions) {
+        for (ConceptMap retraction : retractions) {
+            if (cms.containsKey(retraction.getFromConcept())) {
+                List<ConceptMap> cmsList = cms.get(retraction.getFromConcept());
+                if (cmsList != null) {
+                    List<ConceptMap> removals = new ArrayList<>();
+                    for (ConceptMap cmsElement : cmsList) {
+                        if (cmsElement.getToConcept().equals(retraction.getToConcept())) {
+                            removals.add(cmsElement);
+                        }
+                    }
+                    cmsList.removeAll(removals);
+                }
+            }
+        }
     }
 
     private static class ConceptMap {
