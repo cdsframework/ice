@@ -26,8 +26,6 @@
 
 package org.cdsframework.ice.service;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,8 +37,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.service.Recommendation.RecommendationDateType;
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
@@ -1087,7 +1089,7 @@ public class TargetSeries {
 	}
 
 	/**
-	 * Return a simple count of valid shots administered in this series. Does not take into account immunity or skipped doses
+	 * Return a simple count of valid shots administered in this series. Does NOT take into account immunity or skipped doses!
 	 */
 	public int determineNumberOfDosesAdministeredInSeries() {
 
@@ -1198,12 +1200,44 @@ public class TargetSeries {
 	 * @return effective number of valid and accepted doses, taking immunity and skip doses into account
 	 */
 	public int determineEffectiveNumberOfDosesInSeries() {
+		return determineEffectiveNumberOfDosesInSeriesForSpecifiedDiseasesOnly(new ArrayList<>());
+	}
 
-		// String _METHODNAME = "determineEffectiveNumberOfDosesInSeries()";
+
+	/**
+	 * If diseasesOfInterest parameter is empty, assume interest is in all diseases.
+	 *
+	 * @return effective number of valid and accepted doses, taking immunity and skip doses into account
+	 */
+	public int determineEffectiveNumberOfDosesInSeriesForSpecifiedDiseasesOnly(Collection<String> pDiseasesOfInterest) {
+		String _METHODNAME = "determineEffectiveNumberOfDosesInSeriesForSpecifiedDiseasesOnly()";
+
+		boolean diseasesOfInterestSpecified;
+		Map<String, Integer> evaluationValidiityCountsBySpecifiedDiseases = new HashMap<>();
+		if (pDiseasesOfInterest == null || pDiseasesOfInterest.isEmpty()) {
+			evaluationValidiityCountsBySpecifiedDiseases.putAll(this.interimEvaluationValidityCountByDisease);
+			diseasesOfInterestSpecified = false;
+		}
+		else {
+			diseasesOfInterestSpecified = true;
+			for (String lDiseaseOfInterest : pDiseasesOfInterest) {
+				evaluationValidiityCountsBySpecifiedDiseases.put(lDiseaseOfInterest, getInterimDiseaseEvaluationValidityCount(lDiseaseOfInterest));
+			}
+		}
+
+		// Validate that all specified diseases are supported by this series
+		if (diseasesOfInterestSpecified) {
+			Set<String> lAllDiseases = this.interimEvaluationValidityCountByDisease.keySet();
+			if (! lAllDiseases.containsAll(pDiseasesOfInterest)) {
+				String lErrStr = "one or more diseases of interest specified is not supported by this series: " + getSeriesName();
+				logger.warn(_METHODNAME, lErrStr);
+				throw new InconsistentConfigurationException(lErrStr);
+			}
+		}
 
 		if (this.targetDoses == null || this.targetDoses.isEmpty()) {
 			if (this.seriesRules.isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered()) {
-				Collection<Integer> lDiseaseValidityCountList = this.interimEvaluationValidityCountByDisease.values();
+				Collection<Integer> lDiseaseValidityCountList = evaluationValidiityCountsBySpecifiedDiseases.values();
 				int lLowestCount = 0;
 				for (Integer lValidityCountInt : lDiseaseValidityCountList) {
 					if (lValidityCountInt != null) {
@@ -1231,7 +1265,7 @@ public class TargetSeries {
 				// Since this method is public and could be accessed as a Drools accessor method, the below call does NOT and MAY NOT update the state of this
 				// object (third parameter), and the antigen set is appropriately constant as well.
 				// TODO: cache this.
-				return doseNumberDeterminationUpdateUtility(lastDose, false, false, true, interimEvaluationValidityCountByDisease.keySet());
+				return doseNumberDeterminationUpdateUtility(lastDose, false, false, true, evaluationValidiityCountsBySpecifiedDiseases.keySet());
 			}
 			else {
 				return 0;
@@ -3658,19 +3692,20 @@ public class TargetSeries {
 		return seriesRulesProcessed;
 	}
 
+
 	public void addSeriesRuleProcessed(String ruleName) {
 		if (ruleName != null) {
 			seriesRulesProcessed.add(ruleName);
 		}
 	}
 
-	public Collection<String> getDiseasesSupportedByThisSeries() {
 
+	public Collection<String> getDiseasesSupportedByThisSeries() {
 		return interimEvaluationValidityCountByDisease.keySet();
 	}
 
-	private int getInterimDiseaseEvaluationValidityCount(String disease) {
 
+	private int getInterimDiseaseEvaluationValidityCount(String disease) {
 		if (disease == null) {
 			return 0;
 		}
@@ -3682,8 +3717,46 @@ public class TargetSeries {
 		return i.intValue();
 	}
 
-	public void setManuallySetAccountForLiveVirusIntervalsInRecommendation(boolean yesno) {
 
+	/**
+	 * Returns a copy of the evaluation validity counts tracked in this series for each diseases
+	 * @return
+	 */
+	public Map<String, Integer> getAllEvaluationValidityCountsByDisease() {
+
+		Map<String, Integer> evaluationValidityCountsByDisease = new HashMap<>();
+		evaluationValidityCountsByDisease.putAll(this.interimEvaluationValidityCountByDisease);
+		return evaluationValidityCountsByDisease;
+	}
+
+
+	public Map<String, Integer> getEvaluationValidityCountsByDiseasesSpecified(List<String> pDiseasesOfInterest) {
+		final String _METHODNAME = "getEvaluationValidityCountsByDiseasesSpecified(): ";
+
+		Map<String, Integer> lValidityCountsOfInterest = new HashMap<>();
+		if (pDiseasesOfInterest == null || pDiseasesOfInterest.isEmpty()) {
+			return lValidityCountsOfInterest;
+		}
+
+		Map<String, Integer> lAllDiseaseDoseCounts = this.interimEvaluationValidityCountByDisease;
+		Set<String> lAllDiseases = lAllDiseaseDoseCounts.keySet();
+
+		if (! lAllDiseases.containsAll(pDiseasesOfInterest)) {
+			String lErrStr = "one or more diseases of interest specified is not supported by this series: " + getSeriesName();
+			logger.warn(_METHODNAME, lErrStr);
+			throw new InconsistentConfigurationException(lErrStr);
+		}
+
+		for (String lDiseaseOfInterest : pDiseasesOfInterest) {
+			Integer lDiseaseDoseCount = lAllDiseaseDoseCounts.get(lDiseaseOfInterest);
+			lValidityCountsOfInterest.put(lDiseaseOfInterest, lDiseaseDoseCount);
+		}
+
+		return lValidityCountsOfInterest;
+	}
+
+
+	public void setManuallySetAccountForLiveVirusIntervalsInRecommendation(boolean yesno) {
 		manuallySetAccountForLiveVirusIntervalsInRecommendation = new Boolean(yesno);
 	}
 
@@ -3691,6 +3764,7 @@ public class TargetSeries {
 	public RecommendationStatus getRecommendationStatus() {
 		return recommendationStatus;
 	}
+
 
 	/**
 	 * Sets the RecommendationStatus to the specified value
