@@ -2639,7 +2639,6 @@ function void setShotValidity(SubstanceAdministrationEvent sae, TargetDose td) {
 ///////// ***
 rule "ProcessResults: Return Evaluations" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	/////// lock-on-active true
 	salience 10
 	when
 		$sae : SubstanceAdministrationEvent()	
@@ -2661,9 +2660,35 @@ end
 ///////// ***
 // Supplementary rule... To be migrated to custom rule
 ///////// ***
-rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations" ruleflow-group "ProcessResults"
+rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB1- always reset to dose 1 in the Sept 2023 season)" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	/////// lock-on-active true
+	salience 11
+	when
+		$sae : SubstanceAdministrationEvent()
+		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true, administrationDate >= "12-Sep-2023")
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == "COVID19Sep2023Season")
+		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
+		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $ts, isValid == true, administrationDate >= "12-Sep-2023", administrationDate <= $td.administrationDate, 
+			administeredShotNumberInSeries < $td.administeredShotNumberInSeries), count($acctd))
+		$evalTime: EvalTime()
+	then
+		String _RULENAME = kcontext.rule.name;
+		PayloadHelper p = new PayloadHelper(schedule);
+		int doseNumberToDisplay = $numberOfPreviousDoses.intValue() == 0 ? 1 : $numberOfPreviousDoses.intValue()+1;
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, doseNumberToDisplay);
+		$sae.setToBeReturned(true);
+		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
+		insert(saeEvaluation);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $td);	
+end
+
+
+///////// ***
+// Supplementary rule... To be migrated to custom rule
+///////// ***
+/*
+rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do not reset to 1 in the Sept 2023 season)" ruleflow-group "ProcessResults"
+	dialect "mvel"
 	salience 11
 	when
 		$sae : SubstanceAdministrationEvent()
@@ -2688,7 +2713,6 @@ end
 ///////// ***
 rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	/////// lock-on-active true
 	salience 10
 	when
 		exists ICEFactTypeFinding(iceResultFinding == "UNSUPPORTED_VACCINES_GROUP_FEATURE_ENABLED")
