@@ -1290,11 +1290,41 @@ end
 
 
 ///////// ***
-// Supplemental Series Table rule... modifying this rule not suggested
+// Supplemental Series Table rule... Do not Edit
 // If all shots in the TargetSeries have been evaluated and the patient has reached immunity for every disease handled by this Series, mark in the TargetSeries that
 // the patient is immune to all diseases.
 ///////// ***
-rule "HistoryEvaluation: Set Immunity Flag in Series to True if Immune to All Diseases Tracked by this Series as of the Evaluation Time" ruleflow-group "HistoryEvaluation"
+rule "HistoryEvaluation: If all shots have been evaluated, take immunity dates into account to determine if series is complete" ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	when
+		$ts : TargetSeries(isSeriesComplete() == false)
+		not TargetDose(hasBeenEvaluated == false) from $ts.targetDoses
+		$diseaseImmunitiesRecordedForTargetSeries : List(size > 0) from accumulate(DiseaseImmunity($diseaseacc : disease memberOf $ts.diseasesSupportedByThisSeries), collectList($diseaseacc))
+		TargetSeries(this == $ts, $numberOfDosesInSeries : seriesRules.numberOfDosesInSeries, $diseasesOfInterest : allEvaluationValidityCountsByDisease.keySet())
+		eval($diseasesOfInterest.removeAll($diseaseImmunitiesRecordedForTargetSeries) == true && $ts.determineEffectiveNumberOfDosesInSeriesForSpecifiedDiseasesOnly($diseasesOfInterest) == $ts.seriesRules.numberOfDosesInSeries)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($ts) {
+			setSeriesComplete(true);
+		}
+		for (String diseaseImmunityRecorded : $diseaseImmunitiesRecordedForTargetSeries) {
+			ICELogicHelper.logDRLDebugMessage(_RULENAME, "in TargetSeries " + $ts + "; Disease Immunity Recorded: " + diseaseImmunityRecorded);
+		} 
+		Set lDiseasesOfInterest = $ts.getAllEvaluationValidityCountsByDisease.keySet();
+		lDiseasesOfInterest.removeAll($diseaseImmunitiesRecordedForTargetSeries);
+		for (String disease : lDiseasesOfInterest) {
+			ICELogicHelper.logDRLDebugMessage(_RULENAME, "in TargetSeries " + $ts + "; disease of interest: " + disease);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "in TargetSeries " + $ts + "; determineEffective..." + $ts.determineEffectiveNumberOfDosesInSeriesForSpecifiedDiseasesOnly(lDiseasesOfInterest));
+end
+ 
+
+///////// ***
+// Supplemental Series Table rule... Do not Edit
+// If all shots in the TargetSeries have been evaluated and the patient has reached immunity for every disease handled by this Series, mark in the TargetSeries that
+// the patient is immune to all diseases.
+///////// ***
+rule "HistoryEvaluation: Set Disease Immunity Flag in Series to True if Immune to All Diseases Tracked by this Series as of the Evaluation Time" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	when
 		$ts : TargetSeries($diseasesSupportedByThisSeries : diseasesSupportedByThisSeries, isImmunityToAllDiseasesRecorded() == false)
@@ -2545,7 +2575,7 @@ end
 
 
 ///////// ***
-// Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+// Supplemental Recommendation rule... Do not Edit; support for modifying this rule will be available in a future release
 // If the patient is immune (for any reason) to all of the diseases handled by the TargetSeries, mark the series and forecasting complete
 ///////// ***
 rule "RecommendNotRecommendedIfImmuneToAllDiseasesInSeries"
@@ -2555,8 +2585,7 @@ rule "RecommendNotRecommendedIfImmuneToAllDiseasesInSeries"
 		$targetSeries : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS, $diseasesSupportedByThisSeries : diseasesSupportedByThisSeries)
 		do[invokeCustomRecommendationRules]
 		Set(size == $diseasesSupportedByThisSeries.size()) from accumulate($di : DiseaseImmunity(dateOfImmunity <= evalTime, disease memberOf $diseasesSupportedByThisSeries), collectSet($di.getDisease()))
-		$diseaseImmunityList : List(size == $diseasesSupportedByThisSeries.size()) from 
-			accumulate($di : DiseaseImmunity(dateOfImmunity <= evalTime, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
+		$diseaseImmunityList : List() from accumulate($di : DiseaseImmunity(dateOfImmunity <= evalTime, disease memberOf $diseasesSupportedByThisSeries), collectList($di))
 	then
 		String _RULENAME = drools.getRule().getName();
 		Recommendation $recommendation = new Recommendation($targetSeries); 
@@ -2610,7 +2639,6 @@ function void setShotValidity(SubstanceAdministrationEvent sae, TargetDose td) {
 ///////// ***
 rule "ProcessResults: Return Evaluations" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	/////// lock-on-active true
 	salience 10
 	when
 		$sae : SubstanceAdministrationEvent()	
@@ -2632,20 +2660,47 @@ end
 ///////// ***
 // Supplementary rule... To be migrated to custom rule
 ///////// ***
-rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations" ruleflow-group "ProcessResults"
+rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB1- always reset to dose 1 in the Sept 2023 season)" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	/////// lock-on-active true
+	salience 11
+	when
+		$sae : SubstanceAdministrationEvent()
+		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true, administrationDate >= "12-Sep-2023")
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == "COVID19Sep2023Season")
+		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
+		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $ts, isValid == true, administrationDate >= "12-Sep-2023", administrationDate <= $td.administrationDate, 
+			administeredShotNumberInSeries < $td.administeredShotNumberInSeries), count($acctd))
+		$evalTime: EvalTime()
+	then
+		String _RULENAME = kcontext.rule.name;
+		PayloadHelper p = new PayloadHelper(schedule);
+		int doseNumberToDisplay = $numberOfPreviousDoses.intValue() == 0 ? 1 : $numberOfPreviousDoses.intValue()+1;
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, doseNumberToDisplay);
+		$sae.setToBeReturned(true);
+		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
+		insert(saeEvaluation);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $td);	
+end
+
+
+///////// ***
+// Supplementary rule... To be migrated to custom rule
+///////// ***
+/*
+rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do not reset to 1 in the Sept 2023 season)" ruleflow-group "ProcessResults"
+	dialect "mvel"
 	salience 11
 	when
 		$sae : SubstanceAdministrationEvent()
 		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == "COVID19Sep2023Season")
 		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
+		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate < $td.administrationDate, isValid == true), count($acctd))
 		$evalTime: EvalTime()
 	then
 		String _RULENAME = kcontext.rule.name;
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, false);
+		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $numberOfPreviousDoses.intValue()+1);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
 		insert(saeEvaluation);
@@ -2658,7 +2713,6 @@ end
 ///////// ***
 rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported" ruleflow-group "ProcessResults"
 	dialect "mvel"
-	/////// lock-on-active true
 	salience 10
 	when
 		exists ICEFactTypeFinding(iceResultFinding == "UNSUPPORTED_VACCINES_GROUP_FEATURE_ENABLED")

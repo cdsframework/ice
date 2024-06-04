@@ -66,7 +66,7 @@
 		<jersey-ext.version>2.36</jersey-ext.version>
 
 		<!-- xml libs -->
-		<cxf.version>3.4.10</cxf.version>
+		<cxf.version>3.5.8</cxf.version>
 		<jaxb.api.version>2.2.12</jaxb.api.version>
 		<xerces.impl.version>2.12.2</xerces.impl.version> <!-- Needs this specific version -->
 
@@ -115,7 +115,8 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
-						<version>9.0.9</version>
+						<!-- <version>9.0.10</version> -->
+						<version>8.4.3</version>
 						<executions>
 							<execution>
 								<goals>
@@ -622,16 +623,6 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-        <repository>
-            <id>hlnconsulting.jfrog.io-release</id>
-            <name>hlnconsulting.jfrog.io</name>
-            <url>https://hlnconsulting.jfrog.io/artifactory/libs-release-local/</url>
-        </repository>
-        <repository>
-            <id>hlnconsulting.jfrog.io-snapshot</id>
-            <name>hlnconsulting.jfrog.io-snapshot</name>
-            <url>https://hlnconsulting.jfrog.io/artifactory/libs-snapshot-local/</url>
-        </repository>
 	</repositories>
 	<distributionManagement>
 		<repository>

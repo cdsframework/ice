@@ -20,11 +20,14 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [condition][]The [Pp]atient has [Ii]mmunity to a [Dd]isease=exists DiseaseImmunity()
+[condition][]There does not exist {entity:an |another |a |}[Dd]isease[Ii]mmunity=not DiseaseImmunity()
 [condition][]- [Tt]he [Vv]accine [Gg]roup affected by the reported [Ii]mmunity is {dd_oSupportedVaccineGroupConcept}=vaccineGroup == {dd_oSupportedVaccineGroupConcept}
 [condition][]- [Tt]he [Dd]ate of [Ii]mmunity is {aOp}  {dtImmunityDate}=dateOfImmunity {aOp}  {dtImmunityDate}
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate of [Ii]mmunity as {assign_dtImmunityDate}={assign_dtImmunityDate} : dateOfImmunity
 [condition][][Tt]he [Pp]atient is [Ii]mmune to all of the [Dd]iseases specified by {refer_oCollectionOfDiseases} as of the [Dd]ate {refer_dtDate}=List(size == {refer_oCollectionOfDiseases}.size()) from accumulate(DiseaseImmunity($d : disease, dateOfImmunity <= {refer_dtDate}, $r : immunityReason, disease memberOf {refer_oCollectionOfDiseases}), collectList($d))
 [condition][][Tt]he [Pp]atient is [Ii]mmune to all of the [Dd]iseases in {refer_oCollectionOfDiseases}=List(size == {refer_oCollectionOfDiseases}.size()) from accumulate(DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, disease memberOf {refer_oCollectionOfDiseases}), collectList($d))
+
+
 [condition][]The [Ii]mmunization [Hh]istory indicates that the [Pp]atient has obtained [Ii]mmunity to {ddOpenCdsImmunityConcept1Disease} due to reason {ddOpenCdsReasonConcept}=$of : ObservationFocusConcept(openCdsConceptCode == {ddOpenCdsImmunityConcept1Disease}) and $ov : ObservationCodedValueConcept(conceptTargetId == $of.conceptTargetId, openCdsConceptCode == {ddOpenCdsReasonConcept}) and $or : ObservationResult(id == $ov.conceptTargetId)
 [consequence][]Make [Nn]ote of the [Pp]atient's [Ii]mmunity to {ddOpenCdsDiseaseConcept} with [Ii]mmunity [Dd]ate as {assign_oDate} and [Ee]valuation [Rr]eason {ddEvaluationReason} and [Rr]ecommendation [Rr]eason {ddRecommendationReason}=Date {assign_oDate} = ICELogicHelper.extractSingularDateValueFromIVLDate($or.getObservationEventTime()); DiseaseImmunity diseaseImmunity = new DiseaseImmunity({ddOpenCdsDiseaseConcept}, {assign_oDate}, {ddEvaluationReason}, {ddRecommendationReason}); insert(diseaseImmunity);
 [consequence][]Log that [Ii]mmunity was noted for {sDiseaseName} and [Ii]mmunity [Dd]ate {refer_oDate}=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Added {sDiseaseName} Immunity as of date " + {refer_oDate}.toString());
