@@ -76,8 +76,15 @@ public class PayloadHelper {
 	}
 
 
-	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d,  boolean outputSupplementalText,
-			boolean outputDoseCountInsteadOfDoseNumber) {
+	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d, boolean outputSupplementalText,
+			boolean outputDoseCountInsteadOfDoseNumberInSeries) {
+
+		OutputNestedImmEvaluationResult(k, pNamedObjects, evalTime, focalPersonId, cdsSource, sae, vg, d, outputSupplementalText, outputDoseCountInsteadOfDoseNumberInSeries, -1);
+	}
+
+
+	public void OutputNestedImmEvaluationResult(KnowledgeHelper k, java.util.HashMap pNamedObjects, EvalTime evalTime, String focalPersonId, String cdsSource, SubstanceAdministrationEvent sae, String vg, TargetDose d, boolean outputSupplementalText,
+			boolean outputDoseCountInsteadOfDoseNumberInSeries, int doseNumberCountToOutput) {
 
 		String _METHODNAME = "OutputNestedImmEvaluationResult: ";
 		if (k == null || pNamedObjects == null || evalTime == null || sae == null || d == null) {
@@ -117,14 +124,22 @@ public class PayloadHelper {
 		subsAdmGeneralPurposeCD.setCode("384810002");
 		subsAdmGeneralPurposeCD.setDisplayName("Immunization/vaccination management (procedure)");
 		lSAE.setSubstanceAdministrationGeneralPurpose(subsAdmGeneralPurposeCD);
-		// Dose information
+
+		// Dose number information
 		INT lINTDoseNumber = new INT();
-		if (outputDoseCountInsteadOfDoseNumber && d.getDoseNumberInSeries() > d.getDoseNumberCount()) {
+		if (outputDoseCountInsteadOfDoseNumberInSeries && doseNumberCountToOutput >= 1) {
+			lINTDoseNumber.setValue(doseNumberCountToOutput);
+		}
+		else if (outputDoseCountInsteadOfDoseNumberInSeries && d.getDoseNumberInSeries() > d.getDoseNumberCount()) {
+			lINTDoseNumber.setValue(d.getDoseNumberCount());
+		}
+		else if (d.getDoseNumberInSeries() > d.getDoseNumberCount()) {
 			lINTDoseNumber.setValue(d.getDoseNumberCount());
 		}
 		else {
 			lINTDoseNumber.setValue(d.getDoseNumberInSeries());
 		}
+
 		lSAE.setDoseNumber(lINTDoseNumber);
 		// Administration Time Interval
 		lSAE.setAdministrationTimeInterval(sae.getAdministrationTimeInterval());
