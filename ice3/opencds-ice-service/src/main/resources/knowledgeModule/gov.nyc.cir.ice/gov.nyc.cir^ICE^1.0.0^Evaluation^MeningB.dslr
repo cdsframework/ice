@@ -169,14 +169,14 @@ MenB 4C 2-dose Series specific rules
 
 // If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is reported, then evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
 // Ignore the reported CVX 162 when determining the recommended vaccine and calculating the recommended due date for the next target dose.
-rule "MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
+rule "MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
-			- the vaccine administered is "ICE162"
+			- the vaccine administered a member of ("ICE162", "ICE316")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -188,7 +188,7 @@ end
 
 
 rule "Mening B / MenB 4C 2-dose Series: Skip interval check on ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOSE_RECENT_VACCINE_GIVEN" extends 
-		"MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
+		"MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"

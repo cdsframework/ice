@@ -94,7 +94,7 @@ end
 
 // For any of the Mening B series, if patient has at least one CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and at least one CVX 163 (Meningococcal B 4C, OMV (Bexsero)) on record, 
 // recommend CVX 163 and include the reason codes: DUE_NOW or DUE_IN_FUTURE and OTHER_VACCINE_PRODUCT_POSSIBLE.
-rule "Mening B: If a patient has at least one CVX 162 and at least one CVX 163 and a shot is recommended, include a recommendation with reason OTHER_VACCINE_PRODUCT_POSSIBLE"
+rule "Mening B: If a patient has at least one CVX 162 or CVX 316 and at least one CVX 163, and a shot is recommended, include a recommendation with reason OTHER_VACCINE_PRODUCT_POSSIBLE"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
@@ -104,7 +104,7 @@ rule "Mening B: If a patient has at least one CVX 162 and at least one CVX 163 a
 			- post processing on the Series forecast has not already been run
 		There exists an administered shot
 			- the shot belongs to the series $targetSeries
-			- the vaccine administered is "ICE162"
+			- the vaccine administered a member of ("ICE162", "ICE316")
 		There exists another administered shot
 			- the shot belongs to the series $targetSeries
 			- the vaccine administered is "ICE163"
