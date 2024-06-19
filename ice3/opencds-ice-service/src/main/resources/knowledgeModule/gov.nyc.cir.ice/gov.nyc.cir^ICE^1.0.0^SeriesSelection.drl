@@ -1456,6 +1456,29 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series by default"
 end
 
 
+// If the 2-dose series was selected and is complete, but the 3-dose series is also complete, and was either completed on the same day or sooner
+rule "SeriesSelection(MenB): Select 3-dose series if both 2-dose and 3-dose series are complete but the 3-dose series was completed on the same day or before the 2-dose series"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == true, isSeriesComplete() == true)
+		$ts3 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, isSeriesComplete() == true)
+		$ts2dose2 : TargetDose(associatedTargetSeries == $ts2, doseNumberInSeries == 2, isValid == true)
+		TargetDose(associatedTargetSeries == $ts3, doseNumberInSeries == 3, isValid == true, administrationDate <= $ts2dose2.administrationDate) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3);
+		$ts2.setSelectedSeries(false);
+		$ts3.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2);
+		update($ts3);
+end
+
+
 // If one or more of the series is complete, pick it; leave it to default series selection rules to determine which series was complete first
 rule "SeriesSelection(MenB): Select Complete Series"
 	dialect "mvel"
