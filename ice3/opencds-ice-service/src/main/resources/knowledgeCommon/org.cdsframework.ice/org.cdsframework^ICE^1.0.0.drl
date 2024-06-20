@@ -99,6 +99,7 @@ global java.lang.Boolean doseOverrideFeatureEnabled
 global java.lang.Boolean outputSupplementalText
 global java.util.List<String> vaccineGroupExclusions
 global java.lang.Boolean enableUnsupportedVaccinesGroup
+global java.lang.Boolean disableCovid19DoseNumberReset
 global java.lang.String iceVersion
 
 // global org.drools.runtime.KnowledgeContext kcontext
@@ -199,6 +200,22 @@ rule "ImmunizationReferenceData: Initialize Unsupported Vaccines Group Feature F
 		String _RULENAME = kcontext.rule.name;		
 		ICEFactTypeFinding ift = new ICEFactTypeFinding("UNSUPPORTED_VACCINES_GROUP_FEATURE_ENABLED");
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Unsupported Vaccines Group Feature Fact Object Initialized");
+		insert(ift);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+rule "ImmunizationReferenceData: Initialize COVID-19 Sep2023 Dose Number Reset Feature Fact Object" ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+	when
+		not ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
+		eval(disableCovid19DoseNumberReset != null && disableCovid19DoseNumberReset.booleanValue() == true)
+	then
+		String _RULENAME = kcontext.rule.name;		
+		ICEFactTypeFinding ift = new ICEFactTypeFinding("COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED");
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "COVID19 Sep2023 Dose Number Reset Feature Fact Object Initialized");
 		insert(ift);
 end
 
@@ -516,7 +533,7 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Non-Seasonal* Targ
 		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
 		// this SubstanceAdministrationEvent and this OpenCDS concept, that the value of this key is the same as concept code as that of the vaccine group's. 
 		// Furthermore, if there exists a vaccine component within this shot administered that has not been initialized in this series for this vaccine group, 
-		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true) 
+		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
 		// Condition: the administered vaccine targets one or more of the diseases handled for this vaccine group
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
 			// && $tdit.allTargetDosesHaveBeenInitializedInSeries($sae, schedule.getVaccineByCdsConceptValue($occ), $ts) == false)
@@ -527,7 +544,6 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Non-Seasonal* Targ
 			insert(initializedTargetDose);
 		}
 		update($ts);
-		// update($tdit);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);
 		// ICELogicHelper.logDRLDebugMessage(_RULENAME, "completed");		
 end
@@ -2662,10 +2678,11 @@ end
 ///////// ***
 // Supplementary rule... To be migrated to custom rule
 ///////// ***
-rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB1- always reset to dose 1 in the Sept 2023 season)" ruleflow-group "ProcessResults"
+rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (always reset to dose 1 in the Sept 2023 season)" ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 11
 	when
+		not ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
 		$sae : SubstanceAdministrationEvent()
 		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true, administrationDate >= "12-Sep-2023")
 		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == "COVID19Sep2023Season")
@@ -2688,11 +2705,11 @@ end
 ///////// ***
 // Supplementary rule... To be migrated to custom rule
 ///////// ***
-/*
 rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do not reset to 1 in the Sept 2023 season)" ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 11
 	when
+		exists ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
 		$sae : SubstanceAdministrationEvent()
 		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == "COVID19Sep2023Season")
@@ -2708,7 +2725,7 @@ rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do no
 		insert(saeEvaluation);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Results processing: " + $td);	
 end
-*/
+
 
 ///////// ***
 // General Design rule... Do not Edit
