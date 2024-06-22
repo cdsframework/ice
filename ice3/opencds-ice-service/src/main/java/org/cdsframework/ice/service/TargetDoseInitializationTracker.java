@@ -47,41 +47,56 @@ public class TargetDoseInitializationTracker {
 
 	private Set<String> initializedTargetDoseList;
 	private Map<String, String> initializedTargetDoseByVgMap;
-	
+
 	private static final Logger logger = LogManager.getLogger();
-	
-	
+
+
 	public TargetDoseInitializationTracker() {
-		
+
 		//String _METHODNAME = "TargetDoseInitializationTracker(): ";
 		initializedTargetDoseList = new HashSet<String>();
 		initializedTargetDoseByVgMap = new HashMap<String, String>();
 	}
 
+
 	public List<TargetDose> addTargetDoseInitialization(Vaccine vaccineAdministered, SubstanceAdministrationEvent sae, TargetSeries ts, Schedule scheduleBackingSeries) {
-		
+
 		return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, false);
 	}
-	
+
+
+	public List<TargetDose> addTargetDoseInitialization(Vaccine vaccineAdministered, SubstanceAdministrationEvent sae, TargetSeries ts, Schedule scheduleBackingSeries, VaccineComponent addThisVaccineComponentOnly) {
+
+		return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, addThisVaccineComponentOnly, false);
+	}
+
+
+	public List<TargetDose> addTargetDoseInitialization(Vaccine vaccineAdministered, SubstanceAdministrationEvent sae, TargetSeries ts,	Schedule scheduleBackingSeries, boolean overrideSeasonalDateRestriction) {
+
+		return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, null, overrideSeasonalDateRestriction);
+	}
+
+
 	/**
-	 * 
-	 * @param ic
+	 *
+	 * @param vaccineAdministered
 	 * @param sae
 	 * @param ts
 	 * @param scheduleBackingSeries
+	 * @param addThisVaccineComponentOnly if not null, only add a TargetDose for the VaccineComponent that equals() this parameter. This method uses the VaccineComponent object that is already part of the vaccineAdministered object when initializing the TargetDose,
+	 * 		not the data in specified for by this parameter.
 	 * @return List of TargetDoses that were added to the initialization tracker; empty if none are added
 	 * @throws IllegalArgumentException If any of the parameters are null or SubstanceAdministrationDates are inconsistent
 	 */
-	public List<TargetDose> addTargetDoseInitialization(Vaccine vaccineAdministered, SubstanceAdministrationEvent sae, TargetSeries ts,	Schedule scheduleBackingSeries, 
-		boolean overrideSeasonalDateRestriction) {
-		
+	public List<TargetDose> addTargetDoseInitialization(Vaccine vaccineAdministered, SubstanceAdministrationEvent sae, TargetSeries ts,	Schedule scheduleBackingSeries, VaccineComponent addThisVaccineComponentOnly, boolean overrideSeasonalDateRestriction) {
+
 		String _METHODNAME = "addTargetDoseInitialization(): ";
 		if (vaccineAdministered == null || sae == null || ts == null || scheduleBackingSeries == null) {
 			String errStr = "Vaccine, SubstanceAdministrationEvent, TargetSeries or Schedule parameters not populated";
 			logger.warn(errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		Date adminDate = null;
 		try {
 			adminDate = ICELogicHelper.extractSingularDateValueFromIVLDate(sae.getAdministrationTimeInterval());
@@ -96,18 +111,41 @@ public class TargetDoseInitializationTracker {
 			logger.warn(errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		// Get the vaccine component(s) associated with the vaccine group in focus and create a TargetDose for each (should only be 1 or something weird is going on)
 		String vaccineGroupStr = ts.getSeriesRules().getVaccineGroup();
 		Collection<String> targetedDiseases = scheduleBackingSeries.getDiseasesTargetedByVaccineGroup(vaccineGroupStr);
 		Collection<VaccineComponent> vcsContainingTargetedDiseases = vaccineAdministered.getVaccineComponentsTargetingSpecifiedDiseases(targetedDiseases);
+
+		// If a specific vaccine component was specified but that vaccine component is not a disease supported by the series, exit out
+		if (addThisVaccineComponentOnly != null) {
+			Collection<VaccineComponent> vcSelected = new ArrayList<>();
+			boolean vaccineComponentMatched = false;
+			for (VaccineComponent vc : vcsContainingTargetedDiseases) {
+				if (vc.equals(addThisVaccineComponentOnly)) {
+					vcSelected.add(vc);
+					vaccineComponentMatched = true;
+					break;
+				}
+			}
+			if (! vaccineComponentMatched) {
+				String errStr = "Specified a VaccineComponent not supported by this series; cannot continue";
+				logger.warn(errStr);
+				throw new IllegalArgumentException(errStr);
+			}
+			else {
+				vcsContainingTargetedDiseases = vcSelected;
+			}
+		}
+
+		// Initialize the target dose(s).
 		List<TargetDose> initializedTargetDoses = new ArrayList<TargetDose>();
 		for (VaccineComponent vc : vcsContainingTargetedDiseases) {
 			String ctid = sae.getId();
 			/////// String ctidvcc = ctid + vc.getVaccineConcept().getOpenCdsConceptCode();
 			String ctidvcc = ctid + vc.getCdsConceptName();
 			if (! initializedTargetDoseByVgMap.containsKey(ctidvcc) || initializedTargetDoseByVgMap.get(ctidvcc).equals(vaccineGroupStr)) {
-				/////// TODO: For seasons, only add the TargetDose to the TargetSeries if the dose was administered during timeframe permitted by the Series 
+				/////// TODO: For seasons, only add the TargetDose to the TargetSeries if the dose was administered during timeframe permitted by the Series
 				/////// TargetDose td = new TargetDose(ctid, vaccineAdministered, vc, adminDate);
 				TargetDose td = new TargetDose(vaccineAdministered, vc, adminDate, ts, sae);
 				boolean lTargetDoseAdded = false;
@@ -131,19 +169,53 @@ public class TargetDoseInitializationTracker {
 				}
 			}
 		}
-		
+
 		return initializedTargetDoses;
 	}
-	
-	
+
+
+	public boolean isTargetDoseInitializedInSeries(SubstanceAdministrationEvent sae, VaccineComponent vc, TargetSeries targetSeries) {
+
+		if (vc == null || sae == null || targetSeries == null) {
+			return false;
+		}
+		String conceptTargetId = sae.getId();
+		String targetSeriesIdentifier = targetSeries.getTargetSeriesIdentifier();
+		String vcConceptCode = vc.getCdsConceptName();
+		if (conceptTargetId == null || targetSeriesIdentifier == null || vcConceptCode == null) {
+			return false;
+		}
+		if (! initializedTargetDoseList.contains(conceptTargetId + vcConceptCode + targetSeriesIdentifier)) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+
+
+	public boolean allTargetDosesHaveBeenInitializedInSeries(SubstanceAdministrationEvent sae, Vaccine vaccine, TargetSeries targetSeries) {
+
+		if (vaccine == null || sae == null || targetSeries == null) {
+			return false;
+		}
+		for (VaccineComponent vc : vaccine.getVaccineComponents()) {
+			if (! isTargetDoseInitializedInSeries(sae, vc, targetSeries)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	/**
-	 * If the specified substance administration event and associated ImmunizationConcept has not previously been initialized for a DIFFERENT vaccine group, 
+	 * If the specified substance administration event and associated ImmunizationConcept has not previously been initialized for a DIFFERENT vaccine group,
 	 * and at least one vaccine component of the shot has not been initialized for the specified substance administration event and TargetSeries, and the
-	 * (REMOVING SEASON DATE CHECK) shot falls within any specified season dates, then the shot administered can be loaded into the TargetSeries (returns true). Otherwise, it cannot 
+	 * (REMOVING SEASON DATE CHECK) shot falls within any specified season dates, then the shot administered can be loaded into the TargetSeries (returns true). Otherwise, it cannot
 	 * (returns false).
-	 * 
+	 *
 	 * This method also updates the list of applicable seasons to the TargetSeries object (attribute applicableSeasons)
-	 * 
+	 *
 	 * @param ic ImmunizationConcept
 	 * @param svgc Vaccine Group
 	 * @param sae SubstanceAdministrationEvent
@@ -151,15 +223,23 @@ public class TargetDoseInitializationTracker {
 	 * @param vaccineAdministered Vaccine Administered
 	 * @return true or false according to criteria above
 	 */
-	public boolean shotAdministeredIsEligibleForInclusionInTargetSeries(ImmunizationConcept ic, String svgc, SubstanceAdministrationEvent sae, 
-		TargetSeries targetSeries, Vaccine vaccineAdministered) {
-	
+	public boolean shotAdministeredIsEligibleForInclusionInTargetSeries(ImmunizationConcept ic, String svgc, SubstanceAdministrationEvent sae, TargetSeries targetSeries, Vaccine vaccineAdministered) {
+
+
+		// If not all vaccine components of the Vaccine have been initialized for the ....
+		// AI:
+
 		if (specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(ic, svgc) == true &&
 			atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(sae, targetSeries, vaccineAdministered) == true) {
-			
-			// If there is a season associated with the SeriesRules, ensure that the shot administration date falls within the set of dates
+			return true;
+		}
+		else {
+			return false;
+		}
+
+		// If there is a season associated with the SeriesRules, ensure that the shot administration date falls within the set of dates
 			/*
-			 * * * * * * * * 
+			 * * * * * * * *
 			 * Season targetSeason = targetSeries.getTargetSeason();
 			 *if (targetSeason == null) {
 			 *	return true;
@@ -179,29 +259,23 @@ public class TargetDoseInitializationTracker {
 			 *		return false;
 			 *	}
 			 * }
-			 * * * * * * * * 
+			 * * * * * * * *
 			 */
-			return true;
-		}
-		else {
-			return false;
-		}
 	}
-	
-	
-	private boolean atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(SubstanceAdministrationEvent sae, TargetSeries targetSeries, 
-		Vaccine vaccine) {
-		
+
+
+	private boolean atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(SubstanceAdministrationEvent sae, TargetSeries targetSeries, Vaccine vaccine) {
+
 		if (vaccine == null || sae == null || targetSeries == null) {
 			return false;
-		}	
-		
+		}
+
 		String conceptTargetId = sae.getId();
 		String targetSeriesIdentifier = targetSeries.getTargetSeriesIdentifier();
 		if (conceptTargetId == null || targetSeriesIdentifier == null) {
 			return false;
 		}
-		
+
 		List<VaccineComponent> vaccineComponents = vaccine.getVaccineComponents();
 		for (VaccineComponent vc : vaccineComponents) {
 			/////// String vcConceptCode = vc.getVaccineConcept().getOpenCdsConceptCode();
@@ -210,22 +284,21 @@ public class TargetDoseInitializationTracker {
 				return true;
 			}
 		}
-		
-		return false; 
+
+		return false;
 	}
-	
-	
-	private boolean specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(ImmunizationConcept ic, 
-		String vaccineGroup) {
-		
+
+
+	private boolean specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(ImmunizationConcept ic, String vaccineGroup) {
+
 		if (ic != null && vaccineGroup != null) {
-			
+
 			String conceptTargetId = ic.getConceptTargetId();
 			String immunizationConcept = ic.getOpenCdsConceptCode();
 			if (conceptTargetId == null || immunizationConcept == null) {
 				return false;
 			}
-			
+
 			String mapKey = conceptTargetId + immunizationConcept;
 			if (! initializedTargetDoseByVgMap.containsKey(mapKey) || initializedTargetDoseByVgMap.get(mapKey).equals(vaccineGroup)) {
 				return true;

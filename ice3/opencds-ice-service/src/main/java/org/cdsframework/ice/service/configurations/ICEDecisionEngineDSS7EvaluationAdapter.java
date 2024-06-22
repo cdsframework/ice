@@ -123,6 +123,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private Boolean outputSupplementalText = null;
 	private List<String> vaccineGroupExclusions = null;
 	private Boolean enableUnsupportedVaccinesGroup = null;
+	private Boolean disableCovid19DoseNumberReset = null;
 
 	private static final Logger logger = LogManager.getLogger();
 
@@ -405,6 +406,13 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("enableUnsupportedVaccinesGroup", enableUnsupportedVaccinesGroup));
+
+		if (disableCovid19DoseNumberReset == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: enableCovid19DoseNumberReset flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		cmds.add(CommandFactory.newSetGlobal("disableCovid19DoseNumberReset", disableCovid19DoseNumberReset));
 
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -762,6 +770,18 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		}
 		if (logger.isInfoEnabled()) {
 			logger.info(_METHODNAME + "output_supplemental_text set to " + outputSupplementalText);
+		}
+
+		// Reset Dose Numbering for COVID-19
+		String lEnableCovid19DoseNumberReset = lProps.getProperty("disable_covid19_sep2023_dose_number_reset");
+		if (lEnableCovid19DoseNumberReset != null && lEnableCovid19DoseNumberReset.equals("Y")) {
+			disableCovid19DoseNumberReset = new Boolean(true);
+		}
+		else {
+			disableCovid19DoseNumberReset = new Boolean(false);
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info(_METHODNAME + "enable_covid19_sep2023_dose_number_reset set to " + disableCovid19DoseNumberReset);
 		}
 
 		/////// Set up knowledge base

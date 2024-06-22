@@ -52,7 +52,7 @@ public class VaccineComponent extends AbstractVaccine {
 	 * @param pDisease Disease that this vaccine component induces immunity to
 	 * @throws IllegalArgumentException If either parameter is not supplied
 	 */
-	public VaccineComponent(CdsConcept pVaccineConcept, List<String> pDiseaseImmunityList) {
+	public VaccineComponent(CdsConcept pVaccineConcept, Collection<String> pDiseaseImmunityList) {
 
 		super(pVaccineConcept);
 
