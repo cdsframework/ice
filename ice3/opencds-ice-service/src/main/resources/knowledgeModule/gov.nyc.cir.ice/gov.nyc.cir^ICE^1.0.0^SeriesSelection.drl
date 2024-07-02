@@ -1456,6 +1456,29 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series by default"
 end
 
 
+// If the 2-dose series was selected and is complete, but the 3-dose series is also complete, and was either completed on the same day or sooner
+rule "SeriesSelection(MenB): Select 3-dose series if both 2-dose and 3-dose series are complete but the 3-dose series was completed on the same day or before the 2-dose series"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == true, isSeriesComplete() == true)
+		$ts3 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, isSeriesComplete() == true)
+		$ts2dose2 : TargetDose(associatedTargetSeries == $ts2, doseNumberInSeries == 2, isValid == true)
+		TargetDose(associatedTargetSeries == $ts3, doseNumberInSeries == 3, isValid == true, administrationDate <= $ts2dose2.administrationDate) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3);
+		$ts2.setSelectedSeries(false);
+		$ts3.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2);
+		update($ts3);
+end
+
+
 // If one or more of the series is complete, pick it; leave it to default series selection rules to determine which series was complete first
 rule "SeriesSelection(MenB): Select Complete Series"
 	dialect "mvel"
@@ -1536,7 +1559,7 @@ end
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// START: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and
+// START: If dose 1 is CVX 162 or CVX 316 and
 //     * Invalid for the MenB FHbp 2-dose Series, but valid for MenB FHbp 3-dose Series, the MenB FHbp 3-dose series applies.
 //     * Valid for the MenB FHbp 2-dose Series AND valid for MenB FHbp 3-dose Series, the MenB FHbp 2-dose series applies.
 //
@@ -1545,7 +1568,7 @@ end
 ////////////////////////////
 // Sub-bullet 1: If target dose 1 is (CVX 162 [Meningococcal B FHbp, recombinant (Trumenba)]) and Invalid for the FHbp 2-dose Series, but valid for FHbp 3-dose Series, the FHbp 3-dose series applies.
 ////////////////////////////
-rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1554,17 +1577,17 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target d
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() == 0)
 		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() >= 1)
-		$td : TargetDose(associatedTargetSeries == $ts3doseSeries, vaccineComponent.cdsConceptName == "ICE162")
+		$td : TargetDose(associatedTargetSeries == $ts3doseSeries, vaccineComponent.cdsConceptName in ("ICE162", "ICE316"))
 		not TargetDose(associatedTargetSeries == $td.associatedTargetSeries, administrationDate > $td.administrationDate)
-		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName != "ICE162", administrationDate > $td.administrationDate, isValid == true)		
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName not in ("ICE162", "ICE316"), administrationDate > $td.administrationDate, isValid == true)		
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
 
 end
 
-rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162) is Invalid for FHbp 2-dose series, valid for FHbp 3-dose series; FHbp 3-dose series _is_ complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
+rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, valid for FHbp 3-dose series; FHbp 3-dose series _is_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1581,8 +1604,8 @@ rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX
 		update($ts3doseSeries);
 end
 
-rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162) is Invalid for FHbp 2-dose series, valid for FHb3 3-dose series; FHbp 3-dose series is _not_ complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
+rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, valid for FHb3 3-dose series; FHbp 3-dose series is _not_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1607,7 +1630,7 @@ end
 ////////////////////////////
 // Sub-bullet 2: If target dose 1 (CVX 162 [Meningococcal B FHbp, recombinant (Trumenba)]) is Valid for the MenB FHbp 2-dose Series AND Valid for MenB FHbp 3-dose Series, the MenB FHbp 2-dose series applies.
 ////////////////////////////
-rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1616,16 +1639,16 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target d
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() == 1)
 		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() == 1)
-		$td : TargetDose(associatedTargetSeries == $ts2doseSeries, vaccineComponent.cdsConceptName == "ICE162")
+		$td : TargetDose(associatedTargetSeries == $ts2doseSeries, vaccineComponent.cdsConceptName in ("ICE162", "ICE316"))
 		not TargetDose(associatedTargetSeries == $td.associatedTargetSeries, administrationDate > $td.administrationDate)
-		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName != "ICE162", administrationDate > $td.administrationDate, isValid == true)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName not in ("ICE162", "ICE316"), administrationDate > $td.administrationDate, isValid == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
 end
 
-rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 (CVX 162) is Valid for both FHbp 2-dose series/FHbp 3-dose series; FHbp 2-dose series _is_ complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162) is Valid for both FHbp 2-dose series and FHbp 3-dose series"	
+rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series/FHbp 3-dose series; FHbp 2-dose series _is_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"	
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1643,7 +1666,7 @@ rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 (CVX 162) i
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 (CVX 162) is Valid for both FHbp 2-dose series/FHb3 3-dose series; FHbp 2-dose series is _not_ complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1682,7 +1705,7 @@ end
 // Sub-bullet 1: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba) and target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and valid for the MenB FHbp 2-dose series, 
 // the MenB FHbp 2-dose series applies.
 ////////////////////////////
-rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162; target dose 2 (CVX 162) is Valid in FHbp 2-dose series"
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"	
 	salience 10
@@ -1695,8 +1718,8 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 i
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts2doseSeries);
 end
 
-rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162; target dose 2 (CVX 162) is Valid for FHbp 2-dose series; FHbp 2-dose series _is_ complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162; target dose 2 (CVX 162) is Valid in FHbp 2-dose series"
+rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid for FHbp 2-dose series; FHbp 2-dose series _is_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1713,8 +1736,8 @@ rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162;
 		update($ts2doseSeries);
 end
 
-rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162; target dose 2 (CVX 162) is Valid for FHbp 2-dose series; FHbp 2-dose series is _not_ complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162; target dose 2 (CVX 162) is Valid in FHbp 2-dose series"
+rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid for FHbp 2-dose series; FHbp 2-dose series is _not_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1740,7 +1763,7 @@ end
 // Sub-bullet 2: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and invalid for the MenB FHbp 2-dose series, '
 // but valid for MenB FHbp 3-dose series, the MenB FHbp 3-dose series applies.
 ////////////////////////////
-rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162 and target dose 2 (CVX 162) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series" 
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series" 
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1754,8 +1777,8 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 i
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts3doseSeries);
 end
 
-rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162; target dose 2 (CVX 162) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHBp 3-dose series _is_ complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162 and target dose 2 (CVX 162) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
+rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHBp 3-dose series _is_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1771,8 +1794,8 @@ rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162;
 		update($ts3doseSeries);
 end
 
-rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162; target dose 2 (CVX 162) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHbp 3-dose series is _not_ complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162 and target dose 2 (CVX 162) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
+rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162; target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHbp 3-dose series is _not_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1797,7 +1820,7 @@ end
 // START Sub-bullet 3: If dose 1 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and target dose 2 is CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and invalid for BOTH the MenB FHbp 2-dose series 
 // and MenB FHbp 3-dose series, the MenB FHbp 2-dose series applies. Neither series will be complete
 ////////////////////////////
-rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both FHbp 2-dose series/3-dose series"
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1812,8 +1835,8 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 i
 end
 
 // This should not happen based on current rules - 2-dose series is not complete until 2-doses have been administered
-rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both MenB FHbp 2-dose series/3-dose series but series is complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both FHbp 2-dose series/3-dose series"
+rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162) is Invalid in both MenB FHbp 2-dose series/3-dose series but series is complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1830,8 +1853,8 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162
 		update($ts2doseSeries);
 end
 
-rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both MenB FHbp 2-dose series/3-dose series, series is not complete, and there are no other series complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is CVX 162, target dose 2 (CVX 162) is Invalid in both FHbp 2-dose series/3-dose series"
+rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both MenB FHbp 2-dose series/3-dose series, series is not complete, and there are no other series complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1872,7 +1895,7 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Sub-bullet 1: If both CVX 162 and CVX 163 are on the patient record; CVX 163 is the last shot administered
-rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and latest shot date administered is CVX 163"
+rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -1880,7 +1903,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 1
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
-		exists TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE162")
+		exists TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName in ("ICE162", "ICE316"))
 		$td : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE163")
 		not TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE163", administrationDate > $td.administrationDate) 
 		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName != "ICE163", administrationDate > $td.administrationDate, isValid == true)
@@ -1889,8 +1912,8 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 1
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts);		
 end
 
-rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, last shot administered is CVX 163, and series is complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and latest shot date administered is CVX 163"
+rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, and series is complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"	
 	salience 30
@@ -1906,8 +1929,8 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CV
 		update($ts);
 end
 
-rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, last shot administered is CVX 163, series is not complete, and there are no other series complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both CVX 162 and CVX 163 present, and latest shot date administered is CVX 163"
+rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, series is not complete, and there are no other series complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30

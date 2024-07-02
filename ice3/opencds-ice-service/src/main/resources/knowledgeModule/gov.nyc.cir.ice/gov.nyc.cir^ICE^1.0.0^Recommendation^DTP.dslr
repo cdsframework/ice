@@ -487,7 +487,8 @@ end
 
 /*************************************************************************************************************************************************************************************
 Rules for Recurring booster
-Once the patient has completed the primary DTP series (3-dose or 5-dose) and has received a dose of pertussis at >= 7 years of age, a Td (09) is needed every 10 years.  
+Once the patient has completed the primary DTP series (3-dose or 5-dose) and has received a dose of pertussis at >= 7 years of age, a booster is needed every 10 years.  
+Recommendation reason codes ADMINISTER_TDAP_OR_TD and SUPPLEMENTAL_TEXT, descriptive Text: "Administer either Tdap or Td."
 
 Evaluation Rules for Recurring booster
     + All vaccines in the DTP vaccine group are allowed for the recurring booster
@@ -496,7 +497,7 @@ Evaluation Rules for Recurring booster
 *************************************************************************************************************************************************************************************/
 
 // If a patient has completed the Adolescent Tdap requirements, then the next dose in the series should be recommended is a booster dose
-rule "DTP: Recommend booster at earliest interval of 5y, recommended interval of 10yrs, and latest recommended interval of 10y+4w if series is complete has received a pertussis dose >= 7yrs"
+rule "DTP: Recommend booster at earliest interval of 5y, recommended interval of 10yrs, and latest recommended interval of 10y+4w if series is complete has received a pertussis dose >= 7yrs; include recommendation reason ADMINISTER_TDAP_OR_TD and supplemental text"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationIntervalCheck"
@@ -517,6 +518,12 @@ rule "DTP: Recommend booster at earliest interval of 5y, recommended interval of
 		Set the Recommendation Earliest Forecast Date for $oRecommendationInterval to $dtEarliestRecommendedCalculated
 		Set the Recommendation Overdue Forecast Date for $oRecommendationInterval to $dtOverdueCalculated
 		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
+		Create a recommendation as $rReason for the Series $targetSeries
+		Set the Recommendation Reason for $rReason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_TDAP_OR_TD"
+		Include the Recommendation $rReason for Consideration in the final Forecast of the Series $targetSeries
+		Create a recommendation as $rSupplementalText for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $rSupplementalText to "Administer either Tdap or Td."
+		Include the Recommendation $rSupplementalText for Consideration in the final Forecast of the Series $targetSeries		
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end

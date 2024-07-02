@@ -139,7 +139,6 @@ public class PayloadHelper {
 		else {
 			lINTDoseNumber.setValue(d.getDoseNumberInSeries());
 		}
-
 		lSAE.setDoseNumber(lINTDoseNumber);
 		// Administration Time Interval
 		lSAE.setAdministrationTimeInterval(sae.getAdministrationTimeInterval());
