@@ -65,6 +65,12 @@ then
     sed -i "s/vaccine_group_exclusions=.*/vaccine_group_exclusions=$VACCINE_GROUP_EXCLUSIONS/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
 fi
 
+if [[ -v DISABLE_COVID19_SEP2023_DOSE_NUMBER_RESET ]]
+then
+    echo "Setting disable_covid19_sep2023_dose_number_reset in ice.properties to: $DISABLE_COVID19_SEP2023_DOSE_NUMBER_RESET"
+    sed -i "s/disable_covid19_sep2023_dose_number_reset=.*/disable_covid19_sep2023_dose_number_reset=$DISABLE_COVID19_SEP2023_DOSE_NUMBER_RESET/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
+fi
+
 if [[ -v REMOTE_CONFIG_ENABLED ]]; then
     echo "REMOTE_CONFIG_ENABLED is set to: $REMOTE_CONFIG_ENABLED"
     if [ "$REMOTE_CONFIG_ENABLED" == "Y" ]; then
