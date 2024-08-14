@@ -203,13 +203,19 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
         /////// Set up knowledge base
         KieServices kieServices = KieServices.Factory.get();
         KieBase kieBase = null;
+        final ClassLoader classLoader = getClass().getClassLoader();
         if (loadRulesFromPkgFileBool && pkgFile != null && pkgFile.exists()) {
             logger.info(_METHODNAME + "loading knowledge from pkg file: " + pkgFile.getAbsolutePath());
+            final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(pkgFile.getAbsolutePath()))) {
+                Thread.currentThread().setContextClassLoader(classLoader);
                 kieBase = (KieBase) ois.readObject();
             }
             catch (Exception e) {
                 throw new RuntimeException("Failed to load Drools package file" + pkgFile.getAbsolutePath(), e);
+            }
+            finally {
+                Thread.currentThread().setContextClassLoader(originalClassLoader);
             }
         }
         else {
@@ -315,7 +321,6 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
                 }
             }
 
-            final ClassLoader classLoader = getClass().getClassLoader();
             //////////////////////////////////////////////////////////////////////
             KieBuilder kieBuilder = kieServices.newKieBuilder(kfs, classLoader).buildAll();
             if (kieBuilder.getResults().getMessages(Message.Level.ERROR).size() != 0) {

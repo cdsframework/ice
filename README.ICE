@@ -50,8 +50,8 @@ Alternatively, to build the software via source:
 5) Compile the software:
     $ cd opencds
     $ mvn clean
-    $ mvn -DskipTests -DskipITs install
+    $ mvn -DskipTests -DskipITs -Djetty.skip=true install
     $ cd ..
     $ mvn clean
-    $ mvn -DskipTests -DskipITs install
+    $ mvn -DskipTests -DskipITs -Djetty.skip=true install
 
