@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -45,6 +46,8 @@ import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
 import org.cdsframework.ice.util.FileNameWithExtensionFilterImpl;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
+import org.drools.core.common.DroolsObjectInputStream;
+import org.drools.core.common.DroolsObjectOutputStream;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
@@ -206,16 +209,11 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
         final ClassLoader classLoader = getClass().getClassLoader();
         if (loadRulesFromPkgFileBool && pkgFile != null && pkgFile.exists()) {
             logger.info(_METHODNAME + "loading knowledge from pkg file: " + pkgFile.getAbsolutePath());
-            final ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(pkgFile.getAbsolutePath()))) {
-                Thread.currentThread().setContextClassLoader(classLoader);
+            try (final InputStream fis = new FileInputStream(pkgFile.getAbsolutePath()); final ObjectInputStream ois = new DroolsObjectInputStream(fis, classLoader)) {
                 kieBase = (KieBase) ois.readObject();
             }
             catch (Exception e) {
                 throw new RuntimeException("Failed to load Drools package file" + pkgFile.getAbsolutePath(), e);
-            }
-            finally {
-                Thread.currentThread().setContextClassLoader(originalClassLoader);
             }
         }
         else {
@@ -342,10 +340,9 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
                         + "since pkg file did not exist and knowledge package was loaded via source, persisting dynamically loaded knowledge base to a pkg file for future use");
             }
             //	write out the package to a file
-            try {
-                ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(pkgFile.getAbsolutePath()));
+            try (final OutputStream fos = new FileOutputStream(pkgFile.getAbsolutePath()); final ObjectOutputStream out = new DroolsObjectOutputStream(fos)) {
                 out.writeObject(kieBase);
-                out.close();
+                logger.debug("Wrote pkg file to: {}", pkgFile.getAbsolutePath());
             }
             catch (Exception e) {
                 throw new RuntimeException("Failed to write serialized pkg file", e);
