@@ -1284,6 +1284,7 @@ end
 /*
  * This has been commented out for now, because we cannot assume that the interval between the prior season and this season is as noted in the series of the new season.
  *
+ */
 rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasonal series and most recent shot from a prior season" ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
 	activation-group "doseIntervalCheckFromPreviousSeason"
@@ -1306,7 +1307,7 @@ rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasona
 		$td.addDoseRuleProcessed(_RULENAME);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in " + $ts + "; Prior Dose " + $lastFromPrev + " in " + $tsprev);
 end
-*/
+
 
 ///////// ***
 // Series table rule... Do not Edit

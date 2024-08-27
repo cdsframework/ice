@@ -467,28 +467,22 @@ end
 rule "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: If a shot of CVX 211 was previously administered for target dose 1 and evaluated as Accepted / VACCINE_NOT_PART_OF_THIS_SERIES, the recommended interval from that shot to target dose 1 is 28 days"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "recommendationIntervalCheck"
 	salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
 			- the name of the Series is "COVID19Sep2023gte5Series"
-			- the effective dose number in the series is == 1
+			- the number of doses administered is == 0
 			- the Series is not complete
-		There is an administered shot $previousShot
+		There is an administered shot $shotOfInterest
 			- the shot belongs to the Series $targetSeries
 			- the dose number in the series is == 1
 			- the vaccine administered is "ICE211"
 			- that has already been evaluated and whose shot validity is ACCEPTED
+			- make note of the date this shot was administered as $cvx211administrationDate
 			- make note of Accepted evaluation reasons for this shot as $acceptedReasons
 			- the collection $acceptedReasons contains "EVALUATION_REASON_CONCEPT.VACCINE_NOT_PART_OF_THIS_SERIES" 
 			- make note of the date this shot was administered as $previousShotDate
-		//There does not exist an administered shot
-		//	- the shot belongs to the Series $targetSeries
-		//	- that has already been evaluated and whose shot validity is ACCEPTED
-		//	- the dose number in the series is == 1
-		//	- the vaccine administered is "ICE313"
-		//	- the administration date of the shot is > $previousShotDate	
 	then
 		Create a Recommendation as $r for the Series $targetSeries
 		Add "28d" to $previousShotDate and make note of the newly calculated date as $dtCalculated
@@ -499,15 +493,35 @@ rule "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: If a shot of CVX 211 
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: activation-group extension => If a shot of CVX 211 was previously administered for target dose 1 and evaluated as Accepted / VACCINE_NOT_PART_OF_THIS_SERIES, the earliest interval from that shot to target dose 1 is 28 days"
+
+// We include override rules here because the new interval, 28 days, is less than the default interval of 4 months in the Series (interval from dose 1 to dose 2 in the COVID19Sep2023gte5Series series). 
+// Typically, we never wrote rules like this because we always wanted to longest recommended interval to apply. In this case, we do not want the series table's interval to apply.
+rule "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: There are no other shots administered after the CVX 211; therefore, _also_ override default recommendationIntervalCheck"
 		extends "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: If a shot of CVX 211 was previously administered for target dose 1 and evaluated as Accepted / VACCINE_NOT_PART_OF_THIS_SERIES, the recommended interval from that shot to target dose 1 is 28 days"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "earliestIntervalCheck"
-	salience 10
+	activation-group "recommendationIntervalCheck"
 	when
-		// No condition required for this extension
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the administration date of the shot is >= $cvx211administrationDate
+			- the vaccine administered is not "ICE211"
 	then
+		// Nothing to do; simply overriding default doseIntervalRule
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: There are no other shots administered after the CVX 211; therefore, _also_ override default earliestIntervalCheck"
+		extends "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: There are no other shots administered after the CVX 211; therefore, _also_ override default recommendationIntervalCheck"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
+	activation-group "earliestIntervalCheck"
+	when
+		// No additional checks needed
+	then
+		// Nothing to do; simply overriding default doseIntervalRule
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
