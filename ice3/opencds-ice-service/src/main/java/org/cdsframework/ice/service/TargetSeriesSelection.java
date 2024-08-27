@@ -37,51 +37,59 @@ public class TargetSeriesSelection {
 	public enum SeriesSelectionStatus {
 		SERIES_SELECTION_NOT_STARTED, SERIES_SELECTION_IN_PREPROCESS, SERIES_SELECTION_IN_PROCESS, SERIES_SELECTION_IN_POSTPROCESS, SERIES_SELECTION_COMPLETE
 	}
-	
+
 	private String seriesSelectionVaccineGroup;
 	private Season seriesSelectionSeason;
 	private SeriesSelectionStatus seriesSelectionStatus;
 	private String selectedSeriesName;
 	private int seriesSelectionPriority;
-	
+	private int seriesGroup;
+
 	private static final Logger logger = LogManager.getLogger();
-	
-	private TargetSeriesSelection(String seriesSelectionVG, Schedule pSchedule) {
-		
+
+
+	/**
+	 * Initialize TargetSeriesSelection
+	 * @param pTS representing the vaccine group
+	 * @param seriesGroup the series group that this series was assigned to
+	 * @param season the season, or null if none
+	 * @param schedule the backing schedule
+	 * @throws if specified vaccine group or schedule does not exist
+	 */
+	public TargetSeriesSelection(TargetSeries pTS, Schedule pSchedule) {
 		String _METHODNAME = "TargetSeriesSelection(): ";
+
+		if (pTS == null) {
+			String lErrStr = "TargetSeries supplied is not initialized";
+			logger.error(_METHODNAME + lErrStr);
+			throw new IllegalArgumentException(lErrStr);
+		}
 		if (pSchedule == null) {
 			String lErrStr = "Schedule supplied is not initialized";
 			logger.error(_METHODNAME + lErrStr);
 			throw new IllegalArgumentException(lErrStr);
 		}
-		
-		if (! pSchedule.getSupportedVaccineGroups().vaccineGroupItemExists(seriesSelectionVG)) {
-			String lErrStr = "specified vaccine group does not exist for this schedule; vaccine group specified: " + seriesSelectionVG;
+
+		if (! pSchedule.getSupportedVaccineGroups().vaccineGroupItemExists(pTS.getVaccineGroup())) {
+			String lErrStr = "specified vaccine group does not exist for this schedule; vaccine group specified: " + pTS.getVaccineGroup();
 			logger.error(_METHODNAME + lErrStr);
 			throw new IllegalArgumentException(lErrStr);
 		}
 		else {
-			this.seriesSelectionPriority = pSchedule.getSupportedVaccineGroups().getVaccineGroupItem(seriesSelectionVG).getPriority();
+			this.seriesSelectionPriority = pSchedule.getSupportedVaccineGroups().getVaccineGroupItem(pTS.getVaccineGroup()).getPriority();
 		}
-		this.seriesSelectionVaccineGroup = seriesSelectionVG;
-		this.seriesSelectionSeason = null;
+		this.seriesSelectionVaccineGroup = pTS.getVaccineGroup();
+		if (pTS.getTargetSeason() != null) {
+			this.seriesSelectionSeason = pTS.getTargetSeason();
+		}
+		else {
+			seriesSelectionSeason = null;
+		}
 		this.seriesSelectionStatus = SeriesSelectionStatus.SERIES_SELECTION_NOT_STARTED;
-		this.selectedSeriesName = null;
+		this.seriesGroup = 0;	// TODO:
 	}
-	
-	/**
-	 * Initialize TargetSeriesSelection
-	 * @param seriesSelectionVG representing the vaccine group
-	 * @param season the season, or null if none
-	 * @param schedule the backing schedule
-	 * @throws if specified vaccine group or schedule does not exist
-	 */
-	public TargetSeriesSelection(String seriesSelectionVG, Season season, Schedule schedule) {
-		
-		this(seriesSelectionVG, schedule);
-		this.seriesSelectionSeason = season;
-	}
-	
+
+
 	public String getSeriesSelectionVaccineGroup() {
 		return seriesSelectionVaccineGroup;
 	}
@@ -89,7 +97,7 @@ public class TargetSeriesSelection {
 	public void setSeriesSelectionVaccineGroup(String seriesSelection) {
 		this.seriesSelectionVaccineGroup = seriesSelection;
 	}
-	
+
 	public int getSeriesSelectionPriority() {
 		return seriesSelectionPriority;
 	}
@@ -97,7 +105,7 @@ public class TargetSeriesSelection {
 	public Season getSeriesSelectionSeason() {
 		return this.seriesSelectionSeason;
 	}
-	
+
 	public void setSeriesSelectionSeason(Season s) {
 		this.seriesSelectionSeason = s;
 	}
@@ -115,18 +123,15 @@ public class TargetSeriesSelection {
 	}
 
 	public void setSeriesSelectionStatus(SeriesSelectionStatus seriesSelectionStatus)  {
-		
+
 		this.seriesSelectionStatus = seriesSelectionStatus;
 	}
-	
-	
+
+
 	@Override
 	public String toString() {
-		return "TargetSeriesSelection [seriesSelectionVaccineGroup="
-				+ seriesSelectionVaccineGroup + ", seriesSelectionSeason="
-				+ seriesSelectionSeason + ", seriesSelectionStatus="
-				+ seriesSelectionStatus + ", selectedSeriesName="
-				+ selectedSeriesName + "]";
+		return "TargetSeriesSelection [seriesSelectionVaccineGroup=" + seriesSelectionVaccineGroup + ", seriesSelectionSeason=" + seriesSelectionSeason +
+				", seriesSelectionStatus=" + seriesSelectionStatus + ", selectedSeriesName="	+ selectedSeriesName + "]";
 	}
 
 	@Override
@@ -171,5 +176,5 @@ public class TargetSeriesSelection {
 			return false;
 		return true;
 	}
-	
+
 }
