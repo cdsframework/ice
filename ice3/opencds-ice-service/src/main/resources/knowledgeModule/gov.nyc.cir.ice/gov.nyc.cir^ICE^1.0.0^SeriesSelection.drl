@@ -1081,6 +1081,17 @@ rule "SeriesSelection(COVID-19): If a Novavax 2023 Series is completed but the p
 end	
 
 
+/*
+ * START
+ * If the patient has no prior COVID-19 doses on record before 9/12/2023, and  
+ *    dose 1 in a Sept 2023 series is Novavax (CVX 211, CVX 313),
+ *       and there are no other doses after dose 1 (in a Sept 2023 series),
+ *           and dose 1 was administered at >= 12 years, then the Sept 2023 Novavax Series applies.
+ *           and dose 1 was administered at < 12 years, then the Sept 2023 COVID-19 Series (>= 5 years) applies.
+ *       and dose 2 (in a Sept 2023 series) is Novavax (CVX 211, CVX 313), then the Sept 2023 Novavax Series applies.
+ *   dose 1 in Sept 2023 series is not Novavax (CVX 211, CVX 313), then the Sept 2023 COVID-19 Series (>= 5 years) applies. 
+*/
+
 rule "SeriesSelection(COVID-19): In the Sep2023 season, if the patient is >= 5 years of age and there are no doses on record at >= 5 years in the current season, then COVID-19 >= 5y Series applies"
 		extends "SeriesSelection(COVID-19 Abstract): In Sep2023 season, determine date at which patients turns 5 years of age"
 	dialect "mvel"
@@ -1143,6 +1154,37 @@ rule "SeriesSelection(COVID-19): In the Sep2023 season, if the first dose admini
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 end
+
+
+rule "SeriesSelection(COVID-19): In the Sep2023 season, if the first 2 doses is Novavax (CVX 211, CVX 311) and there are no doses in the prior seasons, then the Novavax 2023 Series applies"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 28
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName == "COVID19Sep2023Season")
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		// Confirm that there are no valid doses in a prior season
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason != $tss.seriesSelectionSeason, isValid == true)
+		// Identify the first (valid) dose in this series (the Novavax 2023 series)
+		$td1 : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1,  isValid == true, vaccineComponent.cdsConceptName in ("ICE211", "ICE313"))
+		$td2 : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 2, isValid == true, vaccineComponent.cdsConceptName in ("ICE211", "ICE313"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, doseNumberInSeries == 1, isValid == true, administrationDate < $td1.administrationDate, vaccineComponent.cdsConceptName not in ("ICE211", "ICE313")) 
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, doseNumberInSeries == 2, isValid == true, administrationDate < $td2.administrationDate) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+end
+
+
+/*
+ * END: If the patient has no prior COVID-19 doses on record before 9/12/2023, and...  
+ */
 
 
 /*
