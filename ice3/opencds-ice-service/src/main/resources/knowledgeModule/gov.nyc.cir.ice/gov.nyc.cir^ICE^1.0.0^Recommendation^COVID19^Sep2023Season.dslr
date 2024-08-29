@@ -66,7 +66,7 @@ rule "COVID-19(Sep2023): If a prior formulation that does not count towards U.S.
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	/////// activation-group "recommendationIntervalCheck"
-	salience 10
+	/////// salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
@@ -467,7 +467,6 @@ end
 rule "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: If a shot of CVX 211 was previously administered for target dose 1 and evaluated as Accepted / VACCINE_NOT_PART_OF_THIS_SERIES, the recommended interval from that shot to target dose 1 is 28 days"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
@@ -501,6 +500,7 @@ rule "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: There are no other sh
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	activation-group "recommendationIntervalCheck"
+	salience 10
 	when
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
@@ -518,6 +518,7 @@ rule "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 3: There are no other sh
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	activation-group "earliestIntervalCheck"
+	salience 10
 	when
 		// No additional checks needed
 	then

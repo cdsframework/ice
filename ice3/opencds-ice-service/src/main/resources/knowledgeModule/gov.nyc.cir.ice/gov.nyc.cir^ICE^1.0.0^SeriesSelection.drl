@@ -967,13 +967,13 @@ rule "SeriesSelection(COVID-19 Abstract): In Sep2023 season, determine date at w
 end
 
 
-rule "SeriesSelection(COVID-19 Abstract): In Sep2023 season, determine date at which patients turns 12 years of age"
+rule "SeriesSelection(COVID-19 Abstract): In Sep2023 season, determine date at which patients turns 12y-4d years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName == "COVID19Sep2023Season")
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
-		$person : EvaluatedPerson($birthDate : demographics.birthTime,  $dateAt12yrs : TimePeriod.addTimePeriod(demographics.birthTime, "12y"))
+		$person : EvaluatedPerson($birthDate : demographics.birthTime,  $dateAt12yrs : TimePeriod.addTimePeriod(demographics.birthTime, "12y-4d"))
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection")
@@ -1133,12 +1133,11 @@ end
 
 
 rule "SeriesSelection(COVID-19): In the Sep2023 season, if the first dose administered is the Novavax vaccine at >= 12 years of age, there are no other doses after dose 1 in another series, and there are no doses in the prior season, then the Novavax 2023 Series applies"
-		extends "SeriesSelection(COVID-19 Abstract): In Sep2023 season, determine date at which patients turns 12 years of age"
+		extends "SeriesSelection(COVID-19 Abstract): In Sep2023 season, determine date at which patients turns 12y-4d years of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 28
 	when
-		/////// EvaluatedPerson($birthDate : demographics.birthTime,  $dateAt12yrs : TimePeriod.addTimePeriod(demographics.birthTime, "12y"))
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 		// Confirm that there are no valid doses in a prior season
 		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason != $tss.seriesSelectionSeason, isValid == true)
