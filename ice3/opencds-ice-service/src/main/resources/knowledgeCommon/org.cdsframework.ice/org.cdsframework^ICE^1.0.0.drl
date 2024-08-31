@@ -1068,7 +1068,8 @@ rule "HistoryEvaluation.denoteDoseReadyForFinalEvaluationStatus" ruleflow-group 
 		modify($td) {
 			setStatus(DoseStatus.EVALUATION_COMPLETE);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries.seriesName);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
 
@@ -1086,7 +1087,8 @@ rule "HistoryEvaluation.markExtraneousDosesAcceptedIfCompleteForAllDiseaseTarget
 		String _RULENAME = kcontext.rule.name;
 		$td.addAcceptedReason(BaseDataEvaluationReason._EXTRA_DOSE_EVALUATION_REASON.getCdsListItemName());
 		$td.addDoseRuleProcessed(_RULENAME);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 end
 
 
@@ -1106,7 +1108,8 @@ rule "HistoryEvaluation.checkIsAllowableVaccine" ruleflow-group "HistoryEvaluati
 		insert(hef);
 		$td.addInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.getCdsListItemName());
 		$td.addDoseRuleProcessed(_RULENAME);	
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 end
 
 
@@ -1129,7 +1132,8 @@ rule "HistoryEvaluation.checkMinimumAgeVaccine" ruleflow-group "HistoryEvaluatio
 		insert(hef);
 		$td.addInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_AGE_VACCINE_REASON.getCdsListItemName());
 		$td.addDoseRuleProcessed(_RULENAME);	
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 end
 
 
@@ -1153,7 +1157,8 @@ rule "HistoryEvaluation.checkMinimumAgeVaccineDoseRule" ruleflow-group "HistoryE
 		insert(hef);
 		$td.addInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_AGE_VACCINE_REASON.getCdsListItemName());
 		$td.addDoseRuleProcessed(_RULENAME);	
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 end
 
 
@@ -1175,7 +1180,8 @@ rule "HistoryEvaluation.checkMaximumAgeVaccine" ruleflow-group "HistoryEvaluatio
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
 		insert(hef)		
 		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_VACCINE.getCdsListItemName());
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 end
 
 
@@ -1198,7 +1204,8 @@ rule "HistoryEvaluation.checkMaximumAgeVaccineDoseRuleDoseRule" ruleflow-group "
 		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
 		insert(hef)		
 		$td.addInvalidReason(BaseDataEvaluationReason._ABOVE_MAXIMUM_AGE_VACCINE.getCdsListItemName());
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 end
 
 
@@ -1222,7 +1229,8 @@ rule "HistoryEvaluation.evaluateVaccineGroupMaximumAge" ruleflow-group "HistoryE
 			insert(hef)				
 		}
 		$td.addDoseRuleProcessed(_RULENAME);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 end 
 
 
@@ -1246,7 +1254,8 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumAge" ruleflow-group "HistoryE
 			insert(hef)				
 		}
 		$td.addDoseRuleProcessed(_RULENAME);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts.seriesName);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td.toString() + " in TargetSeries " + $ts);
 end 
 
 
