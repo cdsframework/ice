@@ -396,8 +396,7 @@ rule "COVID-19(Sep2023 >= 5yrs)->TargetDose 1/Exception 2: If a shot of CVX 313 
 			- make note of the date this shot was administered as $shotOfInterestDate
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
-			- the administration date of the shot is >= $shotOfInterestDate
-			- the vaccine administered is not "ICE313"
+			- the administration date of the shot is > $shotOfInterestDate
 	then
 		Create a Recommendation as $r for the Series $targetSeries
 		Add "28d" to $shotOfInterestDate and make note of the newly calculated date as $dtCalculated
