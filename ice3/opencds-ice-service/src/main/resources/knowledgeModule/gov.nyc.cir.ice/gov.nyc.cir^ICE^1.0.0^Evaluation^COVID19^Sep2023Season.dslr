@@ -176,6 +176,9 @@ rule "COVID-19(Sep2023 >= 5yrs Series)-->TargetDose 1/Exception 2: If a shot of 
 		There does not exist an administered shot
 			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated and whose shot validity is VALID
+		There does not exist an administered shot
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is < "12-Sep-2023"
 	then
 		Include the reason for shot $currentShot Accepted due to "Vaccine Not Allowed For This Dose"
 		Record that this dose rule was Processed for the TargetDose $currentShot
@@ -772,7 +775,7 @@ rule "COVID-19(Sep2023 Pfizer/Moderna/Mixed Product < 5yrs; Novavax Series): If 
 end
 
 
-rule "COVID-19(Sep2023 Moderna < 5rs Series (Abstract): For target dose 2 with no prior doses in this season (due to skip), if a shot was administered prior in the prior season, the absolute minimum interval from the prior shot to the current shot is 8w-4d"
+rule "COVID-19(Sep2023 Moderna < 5rs Series): If there are no doses in the current season but target is dose 2 (due to skip), and there were >=2 doses in a prior season, then absolute minimum interval from the prior shot to the current shot is 8w-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 	activation-group "doseIntervalCheckFromPreviousSeason"
@@ -793,11 +796,18 @@ rule "COVID-19(Sep2023 Moderna < 5rs Series (Abstract): For target dose 2 with n
  		There is an administered shot $previousShot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
 			- make note of the date this shot was administered as $previousShotDate
+			- make note of the associated series as $priorSeasonSeries
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the series $priorSeasonSeries
 			- the administration date of the shot is > $previousShotDate
 			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated and whose shot validity is VALID
+		There exists another administered shot
+			- the shot belongs to the series $priorSeasonSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the administration date of the shot is < $previousShotDate
 		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
 	then
 		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"

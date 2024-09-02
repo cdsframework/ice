@@ -1143,7 +1143,7 @@ rule "SeriesSelection(COVID-19): In the Sep2023 season, if the first dose admini
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason != $tss.seriesSelectionSeason, isValid == true)
 		// Identify the first (valid) dose in this series (the Novavax 2023 series)
 		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, administrationDate >= $dateAt12yrs)
-		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, administrationDate < $td.administrationDate, vaccineComponent.cdsConceptName not in ("ICE211", "ICE313"))
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, administrationDate >= $td.administrationDate, vaccineComponent.cdsConceptName not in ("ICE211", "ICE313"))
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.setSelectedSeries(true);
@@ -1169,7 +1169,6 @@ rule "SeriesSelection(COVID-19): In the Sep2023 season, if the first 2 doses is 
 		$td1 : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1,  isValid == true, vaccineComponent.cdsConceptName in ("ICE211", "ICE313"))
 		$td2 : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 2, isValid == true, vaccineComponent.cdsConceptName in ("ICE211", "ICE313"))
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, doseNumberInSeries == 1, isValid == true, administrationDate < $td1.administrationDate, vaccineComponent.cdsConceptName not in ("ICE211", "ICE313")) 
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, doseNumberInSeries == 2, isValid == true, administrationDate < $td2.administrationDate) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.setSelectedSeries(true);
@@ -1179,7 +1178,6 @@ rule "SeriesSelection(COVID-19): In the Sep2023 season, if the first 2 doses is 
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 end
-
 
 /*
  * END: If the patient has no prior COVID-19 doses on record before 9/12/2023, and...  
