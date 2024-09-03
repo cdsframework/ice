@@ -276,19 +276,19 @@ public class TargetSeries {
 		if (doseNumberOfSwitchFromSeriesFromWhichToBeginSwitch != doseNumberOfSwitchToSeriesToWhichToSwitch) {
 			// For now, mechanims are not in place permit/support moving from one dose number to a different dose number; additionally, it does not fit into
 			// the definition of converting to a series. (E.g. - doesn't make sense to go from dose 3 of "from" series to dose 2 of "to" series)
-			String lErrStr = "Dose number from series to switch from does not equal the dose number of the series being switched to";
+			String lErrStr = "Dose number from series to switch from does not equal the dose number of the series being switched to; cannot continue.";
 			logger.error(_METHODNAME + lErrStr);
 			throw new IllegalArgumentException(lErrStr);
 		}
 		// Get the specified SeriesRules
 		SeriesRules srOfSwitchSeries = scheduleBackingSeries.getScheduleSeriesByName(this.seriesRules.getVaccineGroup(), seriesToConvertTo);
 		if (srOfSwitchSeries == null) {
-			String str = _METHODNAME + "specified series not found";
+			String str = _METHODNAME + "specified series not found; cannot continue.";
 			logger.error(str);
 			throw new IllegalArgumentException(str);
 		}
 		if (srOfSwitchSeries.getNumberOfDosesInSeries() < doseNumberOfSwitchToSeriesToWhichToSwitch) {
-			String str = _METHODNAME + "number of doses in specified series is less than the specified dose number from which to begin the switch";
+			String str = _METHODNAME + "number of doses in specified series is less than the specified dose number from which to begin the switch; cannot continue.";
 			logger.error(str);
 			throw new IllegalArgumentException(str);
 		}
@@ -308,7 +308,7 @@ public class TargetSeries {
 		// SeriesRules srOfThisSeries = this.seriesRules;
 		List<DoseRule> thisSeriesDoseRules = this.seriesRules.getSeriesDoseRules();
 		if (thisSeriesDoseRules == null) {
-			String str = _METHODNAME + "specified series does not have any dose rules";
+			String str = _METHODNAME + "specified series does not have any dose rules; cannot continue.";
 			logger.error(str);
 			throw new InconsistentConfigurationException(str);
 		}
@@ -322,10 +322,8 @@ public class TargetSeries {
 			logger.debug(debugStr);
 			debugStr = _METHODNAME + "After removing doseNumber-forward existing DoseRules from this Series, the following DoseRules remain: ";
 			for (DoseRule dr : this.seriesRules.getSeriesDoseRules()) {
-				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " +
-						dr.getMinimumAge() + " absoluteMinimumInterval: " + dr.getAbsoluteMinimumInterval() + " minInterval: " +
-						dr.getMinimumInterval() + " recommendedAge: " + dr.getEarliestRecommendedAge() + " recommendedInterval " +
-						dr.getEarliestRecommendedAge() + "; ";
+				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " + dr.getMinimumAge() + " absoluteMinimumInterval: " + dr.getAbsoluteMinimumInterval() +
+					" minInterval: " + dr.getMinimumInterval() + " recommendedAge: " + dr.getEarliestRecommendedAge() + " recommendedInterval " + dr.getEarliestRecommendedAge() + "; ";
 			}
 			logger.debug(debugStr);
 		}
@@ -345,9 +343,8 @@ public class TargetSeries {
 		if (logger.isDebugEnabled()) {
 			String debugStr = _METHODNAME + "Switch series doses to add: ";
 			for (DoseRule dr : ssDoseRulesToAdd) {
-				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " +
-						dr.getMinimumAge() + " absoluteMinimumInterval: " + dr.getAbsoluteMinimumInterval() + " minInterval: " + dr.getMinimumInterval() +
-						" recommendedAge: "	+ dr.getEarliestRecommendedAge() + " recommendedInterval " + dr.getEarliestRecommendedAge() + "; ";
+				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " + dr.getMinimumAge() + " absoluteMinimumInterval: " + dr.getAbsoluteMinimumInterval() +
+					" minInterval: " + dr.getMinimumInterval() + " recommendedAge: "	+ dr.getEarliestRecommendedAge() + " recommendedInterval " + dr.getEarliestRecommendedAge() + "; ";
 			}
 			logger.debug(debugStr);
 		}
@@ -361,9 +358,8 @@ public class TargetSeries {
 		if (logger.isDebugEnabled()) {
 			String debugStr = _METHODNAME + "Final set of DoseRules with switch series doses added: ";
 			for (DoseRule dr : this.seriesRules.getSeriesDoseRules()) {
-				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " + dr.getMinimumAge() + " absoluteMinimumInterval: " +
-						dr.getAbsoluteMinimumInterval() + " minInterval: " + dr.getMinimumInterval() + " recommendedAge: " + dr.getEarliestRecommendedAge() +
-						" recommendedInterval " +	dr.getEarliestRecommendedAge() + "; ";
+				debugStr += "(dose #: " + dr.getDoseNumber() + ") absoluteMinimumAge: " + dr.getAbsoluteMinimumAge() + " minAge: " + dr.getMinimumAge() + " absoluteMinimumInterval: " +  dr.getAbsoluteMinimumInterval() +
+					" minInterval: " + dr.getMinimumInterval() + " recommendedAge: " + dr.getEarliestRecommendedAge() +	" recommendedInterval " +	dr.getEarliestRecommendedAge() + "; ";
 			}
 			logger.debug(debugStr);
 		}
@@ -2594,10 +2590,7 @@ public class TargetSeries {
 	/**
 	 *
 	 * @param pTD
-	 * @return TimePeriod representing the minimum age; null if the TargetDose
-	 *         supplied is null or there is no rule associated with this dose
-	 *         number; and finally, TimePeriod with duration set to 0 if there
-	 *         is no corresponding minimum age
+	 * @return TimePeriod representing the minimum age; null if the TargetDose supplied is null or there is no rule associated with this dose number; and finally, TimePeriod with duration set to 0 if there is no corresponding minimum age.
 	 */
 	public TimePeriod getAbsoluteMinimumAgeForTargetDose(int targetDoseNumber) {
 
@@ -2610,7 +2603,7 @@ public class TargetSeries {
 
 		DoseRule seriesDoseRule = obtainDoseRuleForSeriesByDoseNumber(targetDoseNumber);
 		if (seriesDoseRule == null) {
-			String str = "Corresponding series dose not found: " + getVaccineGroup() + "; " + getSeriesName() + "; " + getTargetSeriesIdentifier();
+			String str = "Corresponding series dose not found: " + getVaccineGroup() + "; " + getSeriesName() + "; target dose number: " + targetDoseNumber;
 			logger.info(_METHODNAME + str);
 			return null;
 		}
@@ -2646,10 +2639,7 @@ public class TargetSeries {
 	/**
 	 *
 	 * @param pTD
-	 * @return TimePeriod representing the minimum age; null if the TargetDose
-	 *         supplied is null or there is no rule associated with this dose
-	 *         number; and finally, TimePeriod with duration set to 0 if there
-	 *         is no corresponding minimum age
+	 * @return TimePeriod representing the minimum age; null if the TargetDose supplied is null or there is no rule associated with this dose number; and finally, TimePeriod with duration set to 0 if there is no corresponding minimum age.
 	 */
 	public TimePeriod getAbsoluteMinimumAgeForTargetDose(TargetDose pTD) {
 
