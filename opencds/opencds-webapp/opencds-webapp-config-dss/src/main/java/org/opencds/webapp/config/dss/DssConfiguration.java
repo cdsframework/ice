@@ -57,16 +57,14 @@ public class DssConfiguration {
     @Bean
     public Endpoint endpoint(SpringBus springBus, EvaluationSoapService evaluationSoapService) {
         EndpointImpl endpoint = new EndpointImpl(springBus, evaluationSoapService);
-        endpoint.publish("/evaluate");
         endpoint.setServiceName(new QName(
                 "http://www.omg.org/spec/CDSS/201105/dssWsdl",
-                "dss:DecisionSupportService",
-                "dss"));
+                "DecisionSupportService"));
         endpoint.setEndpointName(new QName(
                 "http://www.omg.org/spec/CDSS/201105/dssWsdl",
-                "dss:evaluate",
-                "dss"));
+                "evaluate"));
         endpoint.setWsdlLocation("WEB-INF/wsdl/dss.wsdl");
+        endpoint.publish("/evaluate");
         return endpoint;
     }
 
