@@ -1627,50 +1627,6 @@ rule "SeriesSelection: Retract All Series Not Selected in the same Series Group 
 end
 
 
-// AI: Move this to RecommendationForecast
-///////// ***
-// Supplemental Series Selection rule... Output Series Selection Information, if _OUTPUT_NUMBER_OF_DOSES_REMAINING option enabled
-///////// ***
-rule "SeriesSelection: Make a Record of all Non-Seasonal TargetSeries of the Vaccine Group for Series Selection Display purposes, if the Series Selection Display Option is Enabled" ruleflow-group "SeriesSelection"
-	dialect "mvel"
-	salience 55
-	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
-		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_COMPLETE)
-		exists TargetSeries(seriesRules.vaccineGroup == $tss.seriesSelectionVaccineGroup, selectedSeries == true)
-		$ts : TargetSeries(vaccineGroup == $tss.seriesSelectionVaccineGroup, targetSeason == null)
-		not SeriesDisplaySelection(targetSeries == $ts)
-	then
-		String _RULENAME = kcontext.rule.name;
-		SeriesDisplaySelection ss = new SeriesDisplaySelection($ts);
-		insert(ss);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Series Selection \": " + $ts.seriesName);	
-end
-
-
-// AI: Move this to RecommendationForecast
-///////// ***
-// Supplemental Series Selection rule... Output Series Selection Information, if _OUTPUT_NUMBER_OF_DOSES_REMAINING option enabled
-///////// ***
-rule "SeriesSelection: Maka a Record of Seasonal TargetSeries in the Current Season of the Vaccine Group for Series Selection Display purposes, if the Series Selection Display Option is Enabled" ruleflow-group "SeriesSelection"
-	dialect "mvel"
-	salience 55
-	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
-		$tss : TargetSeriesSelection(seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_COMPLETE)
-		exists TargetSeries(seriesRules.vaccineGroup == $tss.seriesSelectionVaccineGroup, selectedSeries == true)
-		$ts : TargetSeries(vaccineGroup == $tss.seriesSelectionVaccineGroup, targetSeason != null, isSeriesComplete() == false)
-		not SeriesDisplaySelection(targetSeries == $ts)
-		not TargetSeries(vaccineGroup == $tss.seriesSelectionVaccineGroup, targetSeason != null, targetSeason.fullySpecifiedSeasonStartDate.isAfter($ts.targetSeason.fullySpecifiedSeasonStartDate))
-	then
-		String _RULENAME = kcontext.rule.name;
-		SeriesDisplaySelection ss = new SeriesDisplaySelection($ts);
-		insert(ss);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Series Selection \": " + $ts.seriesName);	
-end
-
-
-
 ///////// ***
 // Supplemental Series Selection rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
 // For all vaccine groups, if a series has not been selected by one of the custom rules and there are one or more series that have been completed, 
@@ -1748,6 +1704,42 @@ end
 // 											Ruleflow group for forecasting "RecommendationForecast"
 /*****************************************************************************************************************************************************************************/
 
+///////// ***
+// Supplemental rule... Output Series Selection Information, if _OUTPUT_NUMBER_OF_DOSES_REMAINING option enabled
+///////// ***
+rule "RecommendationForecast: Make a Record of all Non-Seasonal TargetSeries of the Vaccine Group for Series Selection Display purposes, if the Series Selection Display Option is Enabled" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	/////// salience 55
+	when
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
+		$ts : TargetSeries(isSelectedSeries() == true, targetSeason == null)
+		not SeriesDisplaySelection(targetSeries == $ts)
+	then
+		String _RULENAME = kcontext.rule.name;
+		SeriesDisplaySelection ss = new SeriesDisplaySelection($ts);
+		insert(ss);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Series Selection \": " + $ts.seriesName);	
+end
+
+
+///////// ***
+// Supplemental rule... Output Series Selection Information, if _OUTPUT_NUMBER_OF_DOSES_REMAINING option enabled
+///////// ***
+rule "RecommendationForecast: Maka a Record of Seasonal TargetSeries in the Current Season of the Vaccine Group for Series Selection Display purposes, if the Series Selection Display Option is Enabled" ruleflow-group "RecommendationForecast"
+	dialect "mvel"
+	/////// salience 55
+	when
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
+		$ts : TargetSeries(isSelectedSeries() == true, targetSeason != null, isSeriesComplete() == false)
+		not SeriesDisplaySelection(targetSeries == $ts)
+		not TargetSeries(vaccineGroup == $ts.vaccineGroup, targetSeason != null, targetSeason.fullySpecifiedSeasonStartDate.isAfter($ts.targetSeason.fullySpecifiedSeasonStartDate))
+	then
+		String _RULENAME = kcontext.rule.name;
+		SeriesDisplaySelection ss = new SeriesDisplaySelection($ts);
+		insert(ss);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Series Selection \": " + $ts.seriesName);	
+end
+
 
 ///////// ***	
 // General Design rule... Do not Edit
@@ -1788,7 +1780,6 @@ rule "RecommendationForecast.findMostRecentAdministeredSelectAdjuvantProductVacc
 		}		
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Found most recent adjuvant product vaccine administered on " + $dft.getFactDate());
 end
-
 
 
 /*
