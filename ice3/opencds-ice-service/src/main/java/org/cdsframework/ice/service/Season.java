@@ -47,22 +47,22 @@ public class Season {
 	private MonthDay defaultEndMonthAndDay;
 	private String associatedVaccineGroup;
 
-	private enum SeasonDateType { START, END, OFFSEASON_START, OFFSEASON_END }; 
+	private enum SeasonDateType { START, END, OFFSEASON_START, OFFSEASON_END };
 	private static final Logger logger = LogManager.getLogger();
 
-	
+
 	private Season() {
 		// Internally available only
 	}
-	
+
 	/**
 	 * Creates a fully-specified Season with a start and end dates (month/day/year). Off-season end dates permitted by default.
 	 * @throws IllegalArgumentException if month/day values are invalid
 	 */
 	public Season(String seasonName, String svgc, boolean definedBySeriesTableRules, int startMonth, int startDay, int startYear, int endMonth, int endDay, int endYear) {
-		
+
 		String _METHODNAME = "Season(): ";
-		
+
 		if (svgc == null) {
 			String errStr = _METHODNAME + "vaccine group not specified";
 			throw new IllegalArgumentException(errStr);
@@ -79,15 +79,15 @@ public class Season {
 		this.defaultSeason = false;
 		this.offSeasonPermitted = true;
 	}
-	
+
 	/**
 	 * Creates a default Season with a start and end dates (month/day but no year). Off-season end dates permitted by default.
 	 * @throws IllegalArgumentException if month/day values are invalid
 	 */
 	public Season(String seasonName, String svgc, boolean definedBySeriesTableRules, int defaultStartMonth, int defaultStartDay, int defaultEndMonth, int defaultEndDay) {
-		
+
 		String _METHODNAME = "Season(): ";
-		
+
 		if (svgc == null) {
 			String errStr = _METHODNAME + "vaccine group not specified";
 			throw new IllegalArgumentException(errStr);
@@ -104,18 +104,18 @@ public class Season {
 		this.defaultSeason = true;
 		this.offSeasonPermitted = true;
 	}
-	
-	
+
+
 	/**
 	 * Construct deep copy of Season object and return the newly created object to the caller
 	 * @return
 	 */
 	public static Season constructDeepCopyOfSeasonObject(Season pS) {
-		
+
 		if (pS == null) {
 			return null;
 		}
-		
+
 		Season lS = new Season();
 		lS.seasonName = pS.seasonName;
 		lS.associatedVaccineGroup = pS.associatedVaccineGroup;
@@ -127,39 +127,39 @@ public class Season {
 		lS.defaultStartMonthAndDay = pS.defaultStartMonthAndDay;
 		lS.defaultEndMonthAndDay = pS.defaultEndMonthAndDay;
 		lS.offSeasonPermitted = pS.offSeasonPermitted;
-		
+
 		return lS;
 	}
-	
-	
+
+
 	public String getSeasonName() {
 		return seasonName;
 	}
-	
-	
+
+
 	public String getVaccineGroup() {
 		return associatedVaccineGroup;
 	}
 
 
 	public boolean isDefaultSeason() {
-		
+
 		return defaultSeason;
 	}
-	
-	
+
+
 	public boolean isDefinedBySeriesTableRules() {
 		return this.definedBySeriesTableRules;
 	}
-	
+
 	/**
-	 * For fully-specified Seasons, returns whether the season is before the specified season (or on the same date or before is startDateInclusive is set to true). 
+	 * For fully-specified Seasons, returns whether the season is before the specified season (or on the same date or before is startDateInclusive is set to true).
 	 * If either season is a default season, an IllegalArgumentException is thrown
 	 * @param pS
 	 * @return
 	 */
 	public boolean startsBeforeStartDate(Season pS, boolean startDateInclusive) {
-		
+
 		int compareTo = compareSeasonDates(pS, SeasonDateType.START);
 		if (startDateInclusive) {
 			if (compareTo <= 0) {
@@ -179,15 +179,15 @@ public class Season {
 		}
 	}
 
-	
+
 	/**
-	 * For fully-specified Seasons, returns whether the season is after the specified season (or on the same date or after if startDateInclusive is set to true). 
+	 * For fully-specified Seasons, returns whether the season is after the specified season (or on the same date or after if startDateInclusive is set to true).
 	 * If either season is a default season, an IllegalArgumentException is thrown
 	 * @param pS
 	 * @return
 	 */
 	public boolean startsAfterStartDate(Season pS, boolean startDateInclusive) {
-		
+
 		int compareTo = compareSeasonDates(pS, SeasonDateType.START);
 		if (startDateInclusive) {
 			if (compareTo >= 0) {
@@ -207,13 +207,13 @@ public class Season {
 		}
 	}
 
-	
+
 	/**
-	 * For fully-specified seasons, returns whether the season start date is equal to the specified season's start date. 
+	 * For fully-specified seasons, returns whether the season start date is equal to the specified season's start date.
 	 * If either season is a default season, an IllegalArgumentException is thrown
 	 */
 	public boolean startsOnSameStartDate(Season pS) {
-		
+
 		int compareTo = compareSeasonDates(pS, SeasonDateType.START);
 		if (compareTo == 0) {
 			return true;
@@ -223,13 +223,13 @@ public class Season {
 		}
 	}
 
-	
+
 	/**
-	 * For fully-specified seasons, returns whether the season ends before the specified season's end date (or on the same date or before is endDateInclusive is set to true). 
+	 * For fully-specified seasons, returns whether the season ends before the specified season's end date (or on the same date or before is endDateInclusive is set to true).
 	 * If either season is a default season, an IllegalArgumentException is thrown
 	 */
 	public boolean endsBeforeEndDate(Season pS, boolean endDateInclusive) {
-		
+
 		int compareTo = compareSeasonDates(pS, SeasonDateType.END);
 		if (endDateInclusive) {
 			if (compareTo <= 0) {
@@ -248,15 +248,15 @@ public class Season {
 			}
 		}
 	}
-	
+
 	/**
-	 * For non-default Seasons, returns whether the season is after the specified season's end date (or on the same date or after if endDateInclusive is set to true). 
+	 * For non-default Seasons, returns whether the season is after the specified season's end date (or on the same date or after if endDateInclusive is set to true).
 	 * If either season is a default season or does not have an end date, an IllegalArgumentException is thrown
 	 * @param pS
 	 * @return
 	 */
 	public boolean endsAfterEndDate(Season pS, boolean endDateInclusive) {
-		
+
 		int compareTo = compareSeasonDates(pS, SeasonDateType.END);
 		if (endDateInclusive) {
 			if (compareTo >= 0) {
@@ -275,9 +275,9 @@ public class Season {
 			}
 		}
 	}
-	
+
 	/**
-	 * For non-default Seasons, returns whether the season's end date is equal to the specified season's end date. If either season is a default season or does not have an end date, 
+	 * For non-default Seasons, returns whether the season's end date is equal to the specified season's end date. If either season is a default season or does not have an end date,
 	 * an IllegalArgumentException is thrown
 	 */
 	public boolean endsOnSameEndDate(Season pS) {
@@ -291,20 +291,20 @@ public class Season {
 		}
 	}
 
-	
+
 	/**
 	 * If either season is a default season or does not have an end date, an IllegalArgumentException is thrown
 	 * TODO: Future support for default seasons
 	 */
 	private int compareSeasonDates(Season pS, SeasonDateType seasonDateType) {
-		
+
  		String _METHODNAME = "compareToSeasonDate(): ";
 		if (seasonDateType == null || pS == null || pS.isDefaultSeason() || this.isDefaultSeason()) {
 			String errStr = "one of the seasons is a default season";
 			logger.warn(_METHODNAME + errStr);
-			throw new IllegalArgumentException(errStr);			
+			throw new IllegalArgumentException(errStr);
 		}
-	
+
 		if (seasonDateType == SeasonDateType.START) {
 			LocalDate startDateThis = this.getFullySpecifiedSeasonStartDate();
 			LocalDate startDatePS = pS.getFullySpecifiedSeasonStartDate();
@@ -314,7 +314,7 @@ public class Season {
 				throw new IllegalArgumentException(errStr);
 			}
 			return startDateThis.compareTo(startDatePS);
-		}		
+		}
 		else if (seasonDateType == SeasonDateType.END) {
 			LocalDate endDateThis = this.getFullySpecifiedSeasonEndDate();
 			LocalDate endDatePS = pS.getFullySpecifiedSeasonEndDate();
@@ -351,48 +351,48 @@ public class Season {
 			throw new IllegalArgumentException(errStr);
 		}
 	}
-	
-	
+
+
 	public boolean isOffSeasonPermitted() {
-		
+
 		return this.offSeasonPermitted;
 	}
 
-	
+
 	public void setOffSeasonPermission(boolean truefalse) {
-		
+
 		this.offSeasonPermitted = truefalse;
 	}
 
-	
+
 	/**
 	 * If NOT a default season, returns the season start date as a LocalDate. If a default season, null is returned.
 	 */
 	public LocalDate getFullySpecifiedSeasonStartDate() {
-		
+
 		return seasonStartDate;
 	}
-	
-	
+
+
 	/**
 	 * IfNOT a default season, returns the season end date as a LocalDate. If a default season, null is returned.
 	 */
 	public LocalDate getFullySpecifiedSeasonEndDate() {
-		
+
 		return seasonEndDate;
 	}
-	
-	
-	/** 
-	 * If this is a fully-specified season and the off-season end date has been previously set, this method returns the off-season start date as one day 
-	 * after the season's end date. Otherwise, null is returned. 
+
+
+	/**
+	 * If this is a fully-specified season and the off-season end date has been previously set, this method returns the off-season start date as one day
+	 * after the season's end date. Otherwise, null is returned.
 	 */
 	public LocalDate getFullySpecifiedSeasonOffSeasonStartDate() {
-		
+
 		if (seasonEndDate == null || offSeasonEndDate == null) {
 			return null;
 		}
-		
+
 		if (offSeasonEndDate != null) {
 			if (offSeasonEndDate.isAfter(seasonEndDate)) {
 				return seasonEndDate.plusDays(1);
@@ -407,12 +407,12 @@ public class Season {
 		// There is no season start date - return null
 		return null;
 	}
-	
-	
+
+
 	/**
 	 * Sets the off-season end date. The off season starts after the end date of the season and ends sometime after that. The start date of the off-season
-	 * is always after the end date of the season. Therefore, if there is no end, date, the end date specified here is not after the end date of the season, 
-	 * or this is a default season, no action is taken. If the date provided is not a valid date, an IllegalArgumentException is thrown. If 
+	 * is always after the end date of the season. Therefore, if there is no end, date, the end date specified here is not after the end date of the season,
+	 * or this is a default season, no action is taken. If the date provided is not a valid date, an IllegalArgumentException is thrown. If
 	 * isOffSeasonPermitted() is set to false, no action is taken. Thus, it is suggested that the caller verify that off-season dates can be set
 	 * by calling isOffSeasonPermitted() first and setOffSeasonPermitted() if necessary.
 	 * @param month
@@ -421,23 +421,23 @@ public class Season {
 	 * @throws IllegalArgumentException
 	 */
 	public void setOffSeasonEndDateForFullySpecifiedSeason(int month, int day, int year) {
-	
+
 		LocalDate lOffSeasonDate = new LocalDate(year, month, day);
 		setOffSeasonEndDateForFullySpecifiedSeason(lOffSeasonDate);
 	}
 
-	
+
 	/**
 	 * Sets the off-season end date. The off season starts after the end date of the season and ends sometime after that. The start date of the off-season
-	 * is always after the end date of the season. Therefore, if there is no end, date, the end date specified here is not after the end date of the season,  
-	 * or this is a default season, no action is taken. If the date provided is not a valid date, an IllegalArgumentException is thrown. If 
+	 * is always after the end date of the season. Therefore, if there is no end, date, the end date specified here is not after the end date of the season,
+	 * or this is a default season, no action is taken. If the date provided is not a valid date, an IllegalArgumentException is thrown. If
 	 * isOffSeasonEndDatePermitted() is set to false, no action is taken. Thus, it is suggested that the caller verify that off-season dates can be set
 	 * by calling isOffSeasonEndDatePermitted() first and setOffSeasonEndDatePermitted() if necessary.
 	 */
 	public void setOffSeasonEndDateForFullySpecifiedSeason(LocalDate pLD) {
-		
+
 		String _METHODNAME = "setOffSeasonEndDate(LocalDate): ";
-		
+
 		if (pLD == null) {
 			return;
 		}
@@ -452,47 +452,47 @@ public class Season {
 			logger.warn(_METHODNAME + errStr);
 			return;
 		}
-		
+
 		offSeasonEndDate = pLD;
 	}
-	
+
 	public LocalDate getFullySpecifiedSeasonOffSeasonEndDate() {
-		
+
 		return offSeasonEndDate;
 	}
-	
-	
+
+
 	/**
-	 * If a default season, returns the season start date as a MonthDay. Otherwise null is returned. 
+	 * If a default season, returns the season start date as a MonthDay. Otherwise null is returned.
 	 */
 	public MonthDay getDefaultSeasonStartMonthAndDay() {
-		
+
 		return defaultStartMonthAndDay;
 	}
-	
+
 	/**
-	 * If a default season and an end month/day is defined, returns the season end date as a MonthDay. 
+	 * If a default season and an end month/day is defined, returns the season end date as a MonthDay.
 	 */
 	public MonthDay getDefaultSeasonEndMonthAndDay() {
-		
+
 		return defaultEndMonthAndDay;
 	}
 
 	/**
 	 * Returns a full (non-default) Season that applies to the provided date. If the season parameter provided in the call not a default season, it
-	 * is simply returned as is. If the date is not provided, null is returned. 
+	 * is simply returned as is. If the date is not provided, null is returned.
 	 * @param pSeason a default Season
-	 * @param pApplicableDate 
+	 * @param pApplicableDate
 	 * @return
 	 */
 	public static Season constructFullySpecifiedSeasonFromDefaultSeasonAndDate(Season pSeason, Date applicableDate) {
-		
+
 		// String _METHODNAME = "constructFullySpecifiedSeasonFromDefaultSeasonAndDate(): ";
-		
+
 		if (pSeason == null || applicableDate == null) {
 			return null;
 		}
-		
+
 		if (pSeason.isDefaultSeason() == false) {
 			return pSeason;
 		}
@@ -504,10 +504,10 @@ public class Season {
 		int defaultStartDay = pSeason.defaultStartMonthAndDay.getDayOfMonth();
 		int defaultEndMonth = pSeason.defaultEndMonthAndDay.getMonthOfYear();
 		int defaultEndDay = pSeason.defaultEndMonthAndDay.getDayOfMonth();
-		
+
 		int startYear = requestYear;
 		int endYear = requestYear;
-		
+
 		MonthDay applicableDateMonthDay = new MonthDay(applicableDate);
 		if (monthAndDayFallsWithinRange(requestMonth, requestDate.getDayOfMonth(), defaultStartMonth, defaultStartDay, defaultEndMonth, defaultEndDay)) {
 			if (applicableDateMonthDay.compareTo(pSeason.defaultEndMonthAndDay) <= 0) {
@@ -527,22 +527,22 @@ public class Season {
 			seasonName = "automated";
 		}
 		Season full = new Season(seasonName, pSeason.associatedVaccineGroup, pSeason.isDefinedBySeriesTableRules(), defaultStartMonth, defaultStartDay, startYear, defaultEndMonth, defaultEndDay, endYear);
-				
+
 		return full;
 	}
-	
+
 
 	/**
 	 * Returns true if the seasons START dates are equivalent (same vaccine group, and end month/day/year or end month/day), or false if not.
-	 * This method is applicable to both fully-specified seasons as well as default seasons. Thus, if either or both seasons are a default season, 
+	 * This method is applicable to both fully-specified seasons as well as default seasons. Thus, if either or both seasons are a default season,
 	 * the year is not checked and equivalence is based on month and day only.
 	 */
 	public boolean seasonsHaveEquivalentStartDates(Season pS) {
-		
+
 		if (pS == null) {
 			return false;
 		}
-		
+
 		if (this.associatedVaccineGroup != pS.associatedVaccineGroup) {
 			return false;
 		}
@@ -554,22 +554,22 @@ public class Season {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
-	
+
+
 	/**
 	 * Returns true if the seasons END dates are equivalent (same vaccine group, and end month/day/year or end month/day), or false if not.
-	 * This method is applicable to both fully-specified seasons as well as default seasons. Thus, if either or both seasons are a default season, 
+	 * This method is applicable to both fully-specified seasons as well as default seasons. Thus, if either or both seasons are a default season,
 	 * the year is not checked and equivalence is based on month and day only.
 	 */
 	public boolean seasonsHaveEquivalentEndDates(Season pS) {
-		
+
 		if (pS == null) {
 			return false;
 		}
-		
+
 		if (this.associatedVaccineGroup != pS.associatedVaccineGroup) {
 			return false;
 		}
@@ -581,17 +581,17 @@ public class Season {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Returns true if the seasons are equivalent (same vaccine group, and start & end month/day/year or start & end month/day), or false if not.
-	 * This method is applicable to both fully-specified seasons as well as default seasons. Thus, if either or both seasons are a default season, 
+	 * This method is applicable to both fully-specified seasons as well as default seasons. Thus, if either or both seasons are a default season,
 	 * the year is not checked and equivalence is based on month and day only.
 	 */
 	public boolean seasonsHaveEquivalentStartAndEndDates(Season pS) {
-		
+
 		if (seasonsHaveEquivalentStartDates(pS) && seasonsHaveEquivalentEndDates(pS)) {
 			return true;
 		}
@@ -599,16 +599,16 @@ public class Season {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Date falls within the off-season
 	 */
 	public boolean dateIsApplicableToOffSeason(Date pDate) {
-		
+
 		if (pDate == null) {
 			return false;
 		}
-		
+
 		LocalDate lDate = LocalDate.fromDateFields(pDate);
 		if (isDefaultSeason()) {
 			return ! monthAndDayFallsWithinRange(lDate.getMonthOfYear(), lDate.getDayOfMonth(), this.getDefaultSeasonStartMonthAndDay(), this.getDefaultSeasonEndMonthAndDay());
@@ -638,37 +638,37 @@ public class Season {
 	 * Overload to dateIsApplicableToSeason(Date, boolean), with the 2nd parameter set to true.
 	 */
 	public boolean dateIsApplicableToSeason(Date pDate) {
-		
+
 		return dateIsApplicableToSeason(pDate, true);
 	}
-	
-	
+
+
 	/**
 	 * If the date falls between the season start date and off-season end date (inclusive), return true, else false. If the date is on or after season start date, the includeOffSeason
-	 * is set to true, and there is no off-season end date, true is returned. 
+	 * is set to true, and there is no off-season end date, true is returned.
 	 * @param pDate
 	 * @param includeOffSeason
 	 * @return
 	 */
 	public boolean dateIsApplicableToSeason(Date pDate, boolean includeOffSeason) {
-		
+
 		if (pDate == null) {
 			return false;
 		}
 
 		return dateIsApplicableToSeason(LocalDate.fromDateFields(pDate), includeOffSeason);
 	}
-	
-	
+
+
 	/**
-	 * Check to see if the date falls within the start and the end dates of the season. 
-	 * (1) If an off-season end date has been defined and the includeOffSeason parameter is set to true, then this method checks if the date falls between the start date 
-	 * and off-season end date. Otherwise, it checks is the date falls between the start date and regular season end date. 
+	 * Check to see if the date falls within the start and the end dates of the season.
+	 * (1) If an off-season end date has been defined and the includeOffSeason parameter is set to true, then this method checks if the date falls between the start date
+	 * and off-season end date. Otherwise, it checks is the date falls between the start date and regular season end date.
 	 * (2) If the season is a default season, returns true always if off-season should be included. Otherwise checks to see if the date falls between the start date and end date.
 	 */
 	private boolean dateIsApplicableToSeason(LocalDate pDate, boolean includeOffSeason) {
 
-		
+
 		String _METHODNAME = "dateIsApplicableToSeason(LocalDate, boolean): ";
 		if (pDate == null) {
 			return false;
@@ -713,26 +713,26 @@ public class Season {
 		else {
 			return false;
 		}
-		
+
 	}
-	
-	
+
+
 	/**
-	 * Checks if the supplied month and day falls within the range of the specified start month/day and end month/day, inclusive. If any of the month/day combinations are invalid, 
+	 * Checks if the supplied month and day falls within the range of the specified start month/day and end month/day, inclusive. If any of the month/day combinations are invalid,
 	 * an IllegalArgumentException is thrown.
 	 */
 	public static boolean monthAndDayFallsWithinRange(int month, int day, MonthDay rangeStart, MonthDay rangeEnd) {
-	
+
 		String _METHODNAME = "monthAndDayFallsWithinRange(): ";
-		
+
 		if (rangeStart == null || rangeEnd == null) {
 			String errStr = "Invalid rangeStart or rangeEnd parameter supplied";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		new MonthDay(month, day);		// Check that month and day values sent are valid; MonthDay throws an exception if not
-		
+
 		// Only compare with respect to month and day. Determine set of relevant months of pS Season;
 		Set<Integer> relevantMonthsOfPS = new HashSet<Integer>();
 		int rangeStartMonth = rangeStart.getMonthOfYear();
@@ -759,8 +759,8 @@ public class Season {
 				i++;
 			}
 		}
-		
-		// If both the start and end months fall outside of the list of relevant months, then return false (seasons do not overlap). If either or 
+
+		// If both the start and end months fall outside of the list of relevant months, then return false (seasons do not overlap). If either or
 		// both of the start/end months are on the same month, check that the start day is on/after pS or the end day is on/before pS's end day
 		boolean fallsWithinStartRange = false;
 		boolean fallsWithinEndRange = false;
@@ -781,9 +781,9 @@ public class Season {
 			}
 			else {
 				fallsWithinEndRange = true;
-			}				
+			}
 		}
-		
+
 		if (fallsWithinStartRange && fallsWithinEndRange) {
 			return true;
 		}
@@ -791,12 +791,12 @@ public class Season {
 			return false;
 		}
 	}
-	
-	
+
+
 	/**
-	 * Checks if the supplied month and day falls within the range of the specified start month/day and end month/day, inclusive. If any of the month/day combinations are invalid, 
+	 * Checks if the supplied month and day falls within the range of the specified start month/day and end month/day, inclusive. If any of the month/day combinations are invalid,
 	 * an IllegalArgumentException is thrown.
-	 *  
+	 *
 	 * @param month
 	 * @param day
 	 * @param rangeStartMonth
@@ -806,24 +806,24 @@ public class Season {
 	 * @return
 	 */
 	public static boolean monthAndDayFallsWithinRange(int month, int day, int rangeStartMonth, int rangeStartDay, int rangeEndMonth, int rangeEndDay) {
-	
+
 		MonthDay rangeStart = new MonthDay(rangeStartMonth, rangeStartDay);
 		MonthDay rangeEnd = new MonthDay(rangeEndMonth, rangeEndDay);
 		return monthAndDayFallsWithinRange(month, day, rangeStart, rangeEnd);
 	}
-	
-	
+
+
 	/**
 	 * Return true of season dates (start and end) intersect in any way; false if they do not. If either of the seasons is a default season, only the month/day are taken into account.
 	 * Otherwise, the fully-specified month/date/year is taken into consideration. If one of the fully-specified seasons starts before the other and it does not have an end date, then
-	 * they will be considered to be overlapping. Off-season start/end dates, since they are typically calculated for seasons in reference to one another, are not taken into consideration. 
+	 * they will be considered to be overlapping. Off-season start/end dates, since they are typically calculated for seasons in reference to one another, are not taken into consideration.
 	 */
 	public boolean seasonOverlapsWith(Season pS) {
-	
+
 		if (pS == null) {
 			return false;
 		}
-		
+
 		if (this.isDefaultSeason() || pS.isDefaultSeason()) {
 			// Only compare with respect to month and day. Determine set of relevant months of pS Season;
 			int pSStartMonth = pS.getSeasonStartMonth();
@@ -849,7 +849,7 @@ public class Season {
 					i++;
 				}
 			}
-			// If both the start and end months fall outside of the list of relevant months, then return false (seasons do not overlap). If either or 
+			// If both the start and end months fall outside of the list of relevant months, then return false (seasons do not overlap). If either or
 			// both of the start/end months are on the same month, check that the start day is on/after pS or the end day is on/before pS's end day
 			if (relevantMonthsOfPS.contains(new Integer(this.getSeasonStartMonth()))) {
 				if (this.getSeasonStartMonth() == pS.getSeasonStartMonth()) {
@@ -869,14 +869,14 @@ public class Season {
 				}
 				else {
 					return true;
-				}				
+				}
 			}
 		}
 		else {
 			// Both Seasons are fully specified season
 			LocalDate seasonStartThis = this.getFullySpecifiedSeasonStartDate();
 			LocalDate seasonStartPS = pS.getFullySpecifiedSeasonStartDate();
-			
+
 			Season priorSeason = null;
 			Season laterSeason = null;
 			if (seasonStartThis.compareTo(seasonStartPS) <= 0) {
@@ -887,23 +887,23 @@ public class Season {
 				priorSeason = pS;
 				laterSeason = this;
 			}
-			
+
 			if (priorSeason.getFullySpecifiedSeasonStartDate().compareTo(laterSeason.getFullySpecifiedSeasonStartDate()) >= 0 ||
 					priorSeason.getFullySpecifiedSeasonEndDate() == null || priorSeason.getFullySpecifiedSeasonEndDate().compareTo(laterSeason.getFullySpecifiedSeasonStartDate()) >= 0) {
 				return true;
 			}
 		}
-		
+
 		// Seasons do not overlap
 		return false;
 	}
 
-	
+
 	/**
 	 * Returns the season start month, or 0 if there is no start month.
 	 */
 	public int getSeasonStartMonth() {
-		
+
 		if (defaultSeason) {
 			if (this.defaultStartMonthAndDay == null) {
 				return 0;
@@ -918,12 +918,12 @@ public class Season {
 		}
 	}
 
-	
+
 	/**
 	 * For either default or fully-specified seasons, returns the season end month, or 0 if there is no end month
 	 */
 	public int getSeasonEndMonth() {
-		
+
 		if (defaultSeason) {
 			if (this.defaultEndMonthAndDay == null) {
 				return 0;
@@ -938,12 +938,12 @@ public class Season {
 		}
 	}
 
-	
+
 	/**
 	 * For either default or fully-specified seasons, returns the season end month, or 0 if there is no end month
 	 */
 	public int getOffSeasonEndMonth() {
-		
+
 		if (defaultSeason) {
 			return 0;
 		}
@@ -954,13 +954,13 @@ public class Season {
 			return this.offSeasonEndDate.getMonthOfYear();
 		}
 	}
-	
-	
+
+
 	/**
 	 * For either default or fully-specified seasons, returns the season start date, or 0 if there is no start day.
 	 */
 	public int getSeasonStartDay() {
-		
+
 		if (defaultSeason) {
 			if (this.defaultStartMonthAndDay == null) {
 				return 0;
@@ -974,13 +974,13 @@ public class Season {
 			return seasonStartDate.getDayOfMonth();
 		}
 	}
-	
-	
+
+
 	/**
 	 * For either default or fully-specified seasons, returns the season end day, or 0 if there is no end day
 	 */
 	public int getSeasonEndDay() {
-		
+
 		if (defaultSeason) {
 			if (this.defaultEndMonthAndDay == null) {
 				return 0;
@@ -994,13 +994,13 @@ public class Season {
 			return seasonEndDate.getDayOfMonth();
 		}
 	}
-	
-	
+
+
 	/**
 	 * For either default or fully-specified seasons, returns the season end day, or 0 if there is no end day
 	 */
 	public int getOffSeasonEndDay() {
-		
+
 		if (defaultSeason) {
 			return 0;
 		}
@@ -1011,13 +1011,13 @@ public class Season {
 			return offSeasonEndDate.getDayOfMonth();
 		}
 	}
-	
-	
+
+
 	/**
 	 * Get the season start year, or 0 if there is no end year. (Always returns 0 in the case of default seasons)
 	 */
 	public int getSeasonStartYear() {
-				
+
 		if (defaultSeason) {
 			return 0;
 		}
@@ -1028,13 +1028,13 @@ public class Season {
 			return seasonStartDate.getYear();
 		}
 	}
-	
-	
+
+
 	/**
 	 * Get the season end year, or 0 if there is no end year. (Always returns 0 in the case of default seasons)
 	 */
 	public int getSeasonEndYear() {
-		
+
 		if (defaultSeason) {
 			return 0;
 		}
@@ -1045,13 +1045,13 @@ public class Season {
 			return seasonEndDate.getYear();
 		}
 	}
-	
+
 
 	/**
 	 * Get the season end year, or 0 if there is no end year. (Always returns 0 in the case of default seasons)
 	 */
 	public int getOffSeasonEndYear() {
-		
+
 		if (defaultSeason) {
 			return 0;
 		}
@@ -1063,7 +1063,7 @@ public class Season {
 		}
 	}
 
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -1128,22 +1128,23 @@ public class Season {
 			return false;
 		return true;
 	}
-	
-	
+
+
 	@Override
 	public String toString() {
-		return "Season [getSeasonName()=" + getSeasonName() + 
-				", getAssociatedVaccineGroup()=" + getVaccineGroup() + 
-				", isDefaultSeason()=" + isDefaultSeason() + 
-				", getSeasonStartMonth()=" + getSeasonStartMonth() + 
+		return "Season [getSeasonName()=" + getSeasonName() +
+				", getAssociatedVaccineGroup()=" + getVaccineGroup() +
+				", isDefaultSeason()=" + isDefaultSeason() +
+				", getSeasonStartMonth()=" + getSeasonStartMonth() +
 				", getSeasonStartDay()=" + + getSeasonStartDay() +
-				", getSeasonStartYear()=" + getSeasonStartYear() + 
+				", getSeasonStartYear()=" + getSeasonStartYear() +
 				", getSeasonEndMonth()=" + getSeasonEndMonth() +
 				", getSeasonEndDay()=" + getSeasonEndDay() +
-				", getSeasonEndYear()=" + getSeasonEndYear() + 
-				", getOffSeasonEndMonth()=" + getOffSeasonEndMonth() + 
-				", getOffSeasonEndDay()=" + getOffSeasonEndDay() + 
-				", getOffSeasonEndYear()=" + getOffSeasonEndYear();
+				", getSeasonEndYear()=" + getSeasonEndYear() +
+				", getOffSeasonEndMonth()=" + getOffSeasonEndMonth() +
+				", getOffSeasonEndDay()=" + getOffSeasonEndDay() +
+				", getOffSeasonEndYear()=" + getOffSeasonEndYear() +
+				", isDefinedBySeriesTableRules()=" + isDefinedBySeriesTableRules();
 	}
 
 }

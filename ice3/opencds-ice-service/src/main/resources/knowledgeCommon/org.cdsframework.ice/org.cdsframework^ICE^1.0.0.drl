@@ -308,6 +308,25 @@ end
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
+rule "InitializeSeriesAndSeasons: Load Default Seasons on to FactList if not already there" ruleflow-group "InitializeSeriesAndSeasons"
+	dialect "mvel"
+	salience 15
+	when
+		$defaultSeason : Season(isDefaultSeason() == true) from schedule.getSeasonsExcludingVaccineGroupExclusions(vaccineGroupExclusions)
+		not Season(this == $defaultSeason)
+		$tseasons : TargetSeasons()
+	then
+		String _RULENAME = kcontext.rule.name;
+		// Adds the Season to the list being tracked by TargetSeasons, and populates off-season end dates for Season (if any)
+		$tseasons.addTargetSeason($defaultSeason);
+		insert($defaultSeason);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Initial season inserted into working memory; TargetSeasons updated with Season: " + $defaultSeason.toString());
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
 rule "InitializeSeriesAndSeasons: Update Seasons in Working Memory with Information from TargetSeasons" ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
 	salience 10
@@ -410,7 +429,6 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries for *Current* Seaso
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
 		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.DAYS).isLessThanEqualTo($s.seriesEndAge)) &&
 			($s.seriesStartAge == null || $s.seriesStartAge != null && TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.DAYS).isGreaterThanEqualTo($s.seriesStartAge)))
-		$evalutedPerson : EvaluatedPerson()
 	then
 		String _RULENAME = kcontext.rule.name;
 		TargetSeries ts = new TargetSeries($s, schedule, $season, $evaluatedPerson);
@@ -463,10 +481,9 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		$season : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, $season.dateIsApplicableToSeason($shotDate)) from $s.seasons
 		not (TargetSeries(seriesName == $s.seriesName, targetSeason != null, targetSeason == $season))
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
-		$evalutedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
+		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
 		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.calculateElapsedTimePeriod($birthDate, $shotDate, DurationType.DAYS).isLessThanEqualTo($s.seriesEndAge)) &&
 			($s.seriesStartAge == null || $s.seriesStartAge != null	&& TimePeriod.calculateElapsedTimePeriod($birthDate, $shotDate, DurationType.DAYS).isGreaterThanEqualTo($s.seriesStartAge)))
-		$evaluatedPerson : EvaluatedPerson()
 	then
 		String _RULENAME = kcontext.rule.name;
 		TargetSeries ts = new TargetSeries($s, schedule, $season, $evaluatedPerson);

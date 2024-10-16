@@ -27,6 +27,7 @@
 package knowledgeModule.gov.nyc.cir.ice
 
 import java.util.List
+
 import java.util.Set
 import java.util.Date
 import org.opencds.vmr.v1_0.internal.EvalTime
@@ -54,6 +55,7 @@ global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
 
 
+
 // If a patient is >= 8 months and < 20 months, the recommendation is Conditional and the reason code is HIGH_RISK.
 rule "RSV: If a patient is >= 8 months and < 20 months of age, the recommendation is Conditional with reason code HIGH_RISK" 
 	dialect "mvel"
@@ -72,6 +74,7 @@ rule "RSV: If a patient is >= 8 months and < 20 months of age, the recommendatio
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
 
 // If a patient is < 8 months and is complete for the RSV Infant Series, the recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK.
 rule "RSV: If a patient is < 8 months of age and is complete for the RSV Infant Series, the recommendation is Not Recommended with reason code COMPLETE_HIGH_RISK"
@@ -161,6 +164,7 @@ rule "RSV: If a patient is >= 60 years and < 75 years of age and the Adult Serie
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Create a Recommendation as $supplementalText for the Series $targetSeries
 		Set the Recommendation supplemental text for $supplementalText to "The RSV evaluations and recommendations in ICE primarily target the routine series. Adults ages 60- 74 years of age who are at increased risk of severe RSV disease receive a single dose of RSV vaccine. RSV vaccination is recommended as a single lifetime dose only. Persons who have already received RSV vaccination are NOT recommended to receive another dose."
+		Include the Recommendation $supplementalText for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -169,4 +173,4 @@ end
 
 // If a patient is >= 75 years of age and is either (i) not complete for the RSV Adult Series, the recommendation is RECOMMENDED; or (ii) not complete for the RSV Adult Series, the recommendation is NOT_RECOMMENDED / COMPLETE.
 // ==> Nothing to do here; this is taken care of by series table rules.
- 
+
