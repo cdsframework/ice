@@ -220,8 +220,8 @@ rule "CandidateSeriesIdentification(RSV): If the patient age is <= the RSV Infan
 	when
 		$s: SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesName == "RSVInfantSeries", seasons.size() > 0, seriesEndAge != null)
 		not Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, dateIsApplicableToSeason(evalTime))
-		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup)
-		/////// $priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, $priorSeasonStart.toDate() < evalTime
+		/////// $priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup)
+		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, $priorSeasonStart.toDate() < evalTime)
 		Number(intValue > 0) from accumulate($accseason : Season(this == $priorSeason) from $s.seasons, count($accseason))
 		not Season(vaccineGroup == $s.vaccineGroup, isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, fullySpecifiedSeasonStartDate.isAfter($priorSeason.fullySpecifiedSeasonStartDate))
 		not (TargetSeries(seriesName == $s.seriesName, vaccineGroup == $s.vaccineGroup, targetSeason != null, targetSeason == 
@@ -243,8 +243,7 @@ rule "CandidateSeriesIdentification(RSV): If the patient age is <= the RSV Infan
 		insert(ts);
 		insert(fullySpecified);
 		update($s);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Seasonal* TargetSeries initialized: " + ts.toString());
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Updated* TargetSeasons: " + $tseasons.toString());
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Seasonal* TargetSeries initialized: " + ts.toString() + "; *Updated* TargetSeasons: " + $tseasons.toString());
 end
 
 
@@ -255,9 +254,9 @@ rule "CandidateSeriesIdentification(RSV): If a shot was administered <= the RSV 
 	when
 		ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode)
 		SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
-		$s : SeriesRules($sseriesName : seriesName, vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seasons.size() > 0)
-		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup)
-		/////// $priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, $priorSeasonStart.toDate() < $shotDate)
+		$s : SeriesRules($sseriesName : seriesName, vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seasons.size() > 0)
+		/////// $priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup)
+		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, $priorSeasonStart.toDate() < $shotDate)
 		Number(intValue > 0) from accumulate($accseason : Season(this == $priorSeason) from $s.seasons, count($accseason))
 		not Season(vaccineGroup == $s.vaccineGroup, isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, fullySpecifiedSeasonStartDate.isAfter($priorSeason.fullySpecifiedSeasonStartDate))
 		not (TargetSeries(seriesName == $s.seriesName, vaccineGroup == $s.vaccineGroup, targetSeason != null, targetSeason == 
@@ -279,6 +278,5 @@ rule "CandidateSeriesIdentification(RSV): If a shot was administered <= the RSV 
 		insert(ts);
 		insert(fullySpecified);
 		update($s);
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Seasonal* TargetSeries initialized: " + ts.toString());
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Updated* TargetSeasons: " + $tseasons.toString());	
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "*Seasonal* TargetSeries initialized: " + ts.toString() + "; *Updated* TargetSeasons: " + $tseasons.toString());
 end

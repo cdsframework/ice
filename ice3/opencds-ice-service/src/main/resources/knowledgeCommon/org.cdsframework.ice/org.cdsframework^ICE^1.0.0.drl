@@ -502,7 +502,7 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode)
 		SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		$s : SeriesRules($vg : vaccineGroup, seasons.size() > 0)
-		not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._CANDIDATE_SERIES_IDENTIFICATION_DEFAULT_RULE_OVERRIDE.conceptCodeValue, associatedSeriesRules == $s)
+		/////// not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._CANDIDATE_SERIES_IDENTIFICATION_DEFAULT_RULE_OVERRIDE.conceptCodeValue, associatedSeriesRules == $s)
 		$season : Season(isDefaultSeason() == true) from $s.seasons
 		not Season(isDefaultSeason() == false, vaccineGroup == $vg, dateIsApplicableToSeason($shotDate))
 		// Note: for TargetSeries, do not match on series name when there is a default seasons because we do not want a TargetSeries created for the default season if another TargetSeries

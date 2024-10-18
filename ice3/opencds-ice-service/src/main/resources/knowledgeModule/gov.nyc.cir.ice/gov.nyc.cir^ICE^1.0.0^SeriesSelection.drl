@@ -911,7 +911,7 @@ rule "SeriesSelection(RSV): Select the RSV Infant Series if the Adult Series was
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", selectedSeries == true, targetSeason == $tss.seriesSelectionSeason, seriesRules.seriesGroup == $tss.seriesGroup)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries")
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", targetSeason == $tss.seriesSelectionSeason)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);

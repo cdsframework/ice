@@ -273,6 +273,7 @@
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Vv]alid={refer_oTargetDose}.setStatus(DoseStatus.VALID);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Aa]ccepted={refer_oTargetDose}.setStatus(DoseStatus.ACCEPTED);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Ii]nvalid={refer_oTargetDose}.setStatus(DoseStatus.INVALID);
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid due to "Outside Season"={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.OUTSIDE_SEASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid=
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Insufficient Antigen"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.INSUFFICIENT_ANTIGEN"); insert(new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Below Minimum Age for Vaccine"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_VACCINE");
