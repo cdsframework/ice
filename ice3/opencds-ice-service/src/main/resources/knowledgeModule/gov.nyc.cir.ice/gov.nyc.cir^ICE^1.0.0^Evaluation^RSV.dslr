@@ -84,13 +84,14 @@ rule "RSV: If an RSV shot is administered in the Infant Series to a patient < 8 
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the shot $currentShot does not fall within the season start and stop dates of the Series
+			- the series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and $currentShotDate < "8m"
 	then
 		// The shot is vald; nothing to do
 		Include the reason for shot $currentShot Valid due to "Outside Season"
-		Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
+		// Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -101,6 +102,7 @@ end
 rule "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted / Outside of any Routine Series"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	no-loop true
 	when
 		There is an Administered Shot $currentShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
@@ -113,7 +115,25 @@ rule "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted
 		Confirm elapsed time between $dtBirthDate and $administrationDate < "50y"
 	then
 		Record that this dose rule was processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries	
+end
+
+
+rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Valid or Accepted, evaluate the shot as as Accepted / OUTSIDE_ROUTINE_SERIES"
+		extends "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted / Outside of any Routine Series"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an Administered Shot $otherRSVShot
+			- that is the same shot as $currentShot
+			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
+	then
+		Remove all evaluation reasons from shot $otherRSVShot
+		Set the Shot Status of $otherRSVShot to Accepted
+		Include the reason for shot $otherRSVShot Accepted due to "Shot Administered Outside of a Routine Series"
+		/////// Refresh all facts in the shot $otherRSVShot
+		Record that this dose rule was processed for the TargetDose $otherRSVShot
+		Log that this dose rule fired for the dose $otherRSVShot in the Series $associatedTargetSeries	
 end
 
 
@@ -131,7 +151,7 @@ rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Inva
 		Remove all evaluation reasons from shot $otherRSVShot
 		Set the Shot Status of $otherRSVShot to Accepted
 		Include the reason for shot $otherRSVShot Accepted due to "Shot Administered Outside of a Routine Series"
-		Refresh all facts in the shot $otherRSVShot
+		/////// Refresh all facts in the shot $otherRSVShot
 		Record that this dose rule was processed for the TargetDose $otherRSVShot
 		Log that this dose rule fired for the dose $otherRSVShot in the Series $associatedTargetSeries	
 end

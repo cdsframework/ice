@@ -3405,7 +3405,7 @@ public class TargetSeries {
 
 
 	/**
-	 * Remove a target dose from TargetSeries. This method should be used to allow rule author says that the vaccine should not be evaluated as a part
+	 * Remove a target dose from TargetSeries. This method should be used in limited situations, such as prior to when the target series evaluation begins, or to allow rule author says that the vaccine should not be evaluated as a part
 	 * of this series. (e.g. CVX 109 may be evaluated as a part of PCV or PPSV depending circumstances).
 	 * @param targetDose
 	 */
@@ -3415,6 +3415,7 @@ public class TargetSeries {
 			return;
 		}
 
+		NavigableSet<TargetDose> targetDosesNew = Collections.synchronizedNavigableSet(new TreeSet<TargetDose>(new TargetSeriesComparator())); // Ordered by administration date
 		// Iterate through doses in the TargetSeries, so that doseNumber can be renumbered properly
 		int i = 1;
 		boolean foundShotToRemove = false;
@@ -3425,21 +3426,20 @@ public class TargetSeries {
 			if (foundShotToRemove == false && td.equals(targetDose)) {
 				foundShotToRemove = true;
 				prevDoseNumber = td.getDoseNumberInSeries();
-				this.targetDoses.remove(td);
-			}
-			else if (foundShotToRemove == false) {
-				i++;
-				continue;
 			}
 			else {		// found shot to remove is true
 				int nextDoseNumber = td.getDoseNumberInSeries();
 				td.setAdministeredShotNumberInSeries(i);
 				td.setDoseNumberInSeries(prevDoseNumber);
+				targetDosesNew.add(td);
 				prevDoseNumber = nextDoseNumber;
 				i++;
 			}
 		}
+
+		this.targetDoses = targetDosesNew ;
 	}
+
 
 	public boolean targetSeasonExists() {
 

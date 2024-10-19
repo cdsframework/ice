@@ -203,7 +203,7 @@ rule "CandidateSeriesIdentification(RSV): Initialize an Adult RSV TargetSeries i
 		SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($s.vaccineGroup)) == true)	
 		EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.DAYS).isGreaterThanEqualTo($s.seriesStartAge))
+		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, $shotDate, DurationType.DAYS).isGreaterThanEqualTo($s.seriesStartAge))
 		$evaluatedPerson : EvaluatedPerson()
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -231,7 +231,6 @@ rule "CandidateSeriesIdentification(RSV): If the patient age is <= the RSV Infan
 		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.DAYS).isLessThanEqualTo($s.seriesEndAge))
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Series: " + $s.toString() + "; Season: " + $priorSeason + "; fullySpecifiedSeasonStartDate=" + $priorSeason.fullySpecifiedSeasonStartDate + "; evalTime is " + evalTime);
 		int startMonth = $priorSeason.getSeasonStartMonth();
 		int startDay = $priorSeason.getSeasonStartDay();
 		int endMonth = $priorSeason.getSeasonEndMonth();
