@@ -905,13 +905,13 @@ end
 // If the patient is >= 20 months of age, then the RSV Adult Series; otherwise the RSV Infant Series applies.
 ///////
 
-rule "SeriesSelection(RSV): Select the RSV Infant Series if the Adult Series was not selected"
+rule "SeriesSelection(RSV): Select the RSV Infant Series if the Adult Series was not selected for any dose in the RSV Infant Series"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", selectedSeries == true, targetSeason == $tss.seriesSelectionSeason, seriesRules.seriesGroup == $tss.seriesGroup)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", targetSeason == $tss.seriesSelectionSeason)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", targetSeason == $tss.seriesSelectionSeason, seriesRules.seriesGroup == $tss.seriesGroup)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -925,13 +925,11 @@ end
 rule "SeriesSelection(RSV): Select the RSV Adult Series if the patient is >= 20 months of age"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 10
+	/////// salience 10
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", selectedSeries == true)
-		$person : EvaluatedPerson($birthDate : demographics.birthTime)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries")
-		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.YEARS).isGreaterThan(new TimePeriod(20, DurationType.MONTHS), true))
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", selectedSeries == true, seriesRules.seriesGroup == $tss.seriesGroup)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", seriesRules.seriesGroup == $tss.seriesGroup)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);

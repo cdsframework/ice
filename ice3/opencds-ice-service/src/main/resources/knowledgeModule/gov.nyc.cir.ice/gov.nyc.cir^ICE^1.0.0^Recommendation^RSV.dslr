@@ -178,7 +178,7 @@ rule "RSV: If a patient is >= 20 months and < 60 years of age and a shot is reco
 			- a forecast for the Series has been made and a shot is recommended
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and evalTime >= "20m" && elapsed time between $birthDate and evalTime < "60m"
+		Confirm elapsed time between $birthDate and evalTime >= "20m" && elapsed time between $birthDate and evalTime < "60y"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
 		Set the Recommendation Supplemental text for $recommendation to "The RSV evaluations and recommendations in ICE primarily target the routine series. RSV is recommended for adults 75 years of age and older and adults 60–74 years of age and older who are at increased risk of severe RSV disease. Note: RSV vaccine is also recommended for pregnant persons at 32-36 weeks' gestation, using seasonal administration." 

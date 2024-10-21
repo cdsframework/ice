@@ -107,7 +107,6 @@ rule "CandidateDosesRevisions(RSV): If there are shots adminstered > the Series 
 		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries > 0, seriesStartAgeDate != null)
 		$overlappingTd : TargetDose(associatedTargetSeries == $tsinfant, administrationDate > $tsinfant.seriesEndAgeDate)
 		exists TargetDose(associatedTargetSeries == $tsadult, doseId == $overlappingTd.doseId, administrationDate >= $tsadult.seriesStartAgeDate)
-		/////// not TargetDose(associatedTargetSeries == $tsinfant, administrationDate > $tsinfant.seriesEndAgeDate, administrationDate < $overlappingTd.administrationDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Removing TargetDose " + $overlappingTd + " from RSV Infant Series. ' TargetSeries: " + $tsinfant);
@@ -127,7 +126,6 @@ rule "CandidateDosesRevisions(RSV): If there are shots adminstered < the Series 
 		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries > 0, seriesStartAgeDate != null)
 		$overlappingTd : TargetDose(associatedTargetSeries == $tsadult, administrationDate < $tsadult.seriesStartAgeDate)
 		exists TargetDose(associatedTargetSeries == $tsinfant, doseId == $overlappingTd.doseId, administrationDate <= $tsinfant.seriesEndAgeDate)
-		/////// not TargetDose(associatedTargetSeries == $tsadult, administrationDate < $tsadult.seriesStartAgeDate, administrationDate < $overlappingTd.administrationDate)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Removing TargetDose " + $overlappingTd + " from RSV Adult Series. ' TargetSeries: " + $tsadult);	

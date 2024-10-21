@@ -743,7 +743,7 @@ rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNonNOSInSeriesForEvaluation"
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == false, associatedTargetSeries.targetSeasonExists() == false)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, administrationDate < $td.administrationDate, associatedTargetSeries == $td.associatedTargetSeries || associatedTargetSeries.seriesRules.seriesGroup < $td.associatedTargetSeries.seriesRules.seriesGroup) 
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -765,7 +765,7 @@ rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNOSInSeriesForEvaluation" ru
 	when
 		not TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
 		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, vaccineComponent.isUnspecifiedFormulation() == true, associatedTargetSeries.targetSeasonExists() == false)
-		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate < $td.administrationDate)
+		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, administrationDate < $td.administrationDate, associatedTargetSeries == $td.associatedTargetSeries || associatedTargetSeries.seriesRules.seriesGroup < $td.associatedTargetSeries.seriesRules.seriesGroup) 
 		not TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, uniqueId != $td.uniqueId, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false)
 		$ts : TargetSeries(this == $td.associatedTargetSeries)
 	then
@@ -1827,8 +1827,7 @@ rule "RecommendationForecast.setNextSeasonalTargetSeriesForRecommendation" rulef
 				//	TargetSeries(this == $ts, seriesEndAgeDate == null || seriesEndAgeDate < $tssa.seriesStartAgeDate)
 				//)
         	/////// )
-        	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, targetSeason == null, $ts.seriesEndAgeDate != null, seriesStartAgeDate != null && seriesStartAgeDate > $ts.seriesEndAgeDate, seriesRules.seriesGroup == $ts.seriesRules.seriesGroup, 
-        		numberOfShotsAdministeredInSeries > 0)
+        	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, targetSeason == null, $ts.seriesEndAgeDate != null, seriesStartAgeDate != null && seriesStartAgeDate > $ts.seriesEndAgeDate)
         )
 	then
 		String _RULENAME = kcontext.rule.name;	
@@ -1880,8 +1879,7 @@ rule "RecommendationForecast.setNextNonSeasonalTargetSeriesForRecommendation" ru
 			///////		TargetSeries(this == $ts, seriesStartAgeDate == null || seriesEndAgeDate == null || seriesStartAgeDate > $tssa.seriesEndAgeDate)
 			///////	)
         	/////// )
-        	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, $ts.seriesEndAgeDate != null, seriesStartAgeDate != null && seriesStartAgeDate > $ts.seriesEndAgeDate, seriesRules.seriesGroup == $ts.seriesRules.seriesGroup, 
-        		numberOfShotsAdministeredInSeries > 0)
+        	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, $ts.seriesEndAgeDate != null, seriesStartAgeDate != null && seriesStartAgeDate > $ts.seriesEndAgeDate) 
         )
 	then
 		String _RULENAME = kcontext.rule.name;		
@@ -3000,6 +2998,7 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series" ruleflow-gr
 	salience 10
 	when
 		$ts : TargetSeries(targetSeason == null)
+		not TargetSeries(vaccineGroup == $ts.vaccineGroup, seriesRules.seriesGroup > $ts.seriesRules.seriesGroup)
 		$evalTime: EvalTime()
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -3019,6 +3018,7 @@ rule "ProcessResults: Return Recommendations For Seasonal Series" ruleflow-group
 	salience 10
 	when
 		$ts : TargetSeries($vg : vaccineGroup, targetSeason != null, isSelectedSeries() == true, $tseasonStartDate : targetSeason.fullySpecifiedSeasonStartDate)
+		not TargetSeries(vaccineGroup == $vg, seriesRules.seriesGroup > $ts.seriesRules.seriesGroup) 
 		not TargetSeries(vaccineGroup == $vg, targetSeason != null,	targetSeason.fullySpecifiedSeasonStartDate.isAfter($tseasonStartDate)) 
 	then
 		String _RULENAME = kcontext.rule.name;
