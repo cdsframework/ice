@@ -145,7 +145,7 @@ rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Inva
 			- that is the same shot as $currentShot
 			- that has already been evaluated and whose shot validity is INVALID
 			- make note of all evaluation reasons for this shot as $oEvaluationReasons
-			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_SERIES"
+			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_VACCINE"
 			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
 	then
 		Remove all evaluation reasons from shot $otherRSVShot
@@ -154,4 +154,27 @@ rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Inva
 		/////// Refresh all facts in the shot $otherRSVShot
 		Record that this dose rule was processed for the TargetDose $otherRSVShot
 		Log that this dose rule fired for the dose $otherRSVShot in the Series $associatedTargetSeries	
+end
+
+
+rule "RSV: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE if there are other evaluation reason codes"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	no-loop true
+	when
+		There is an administered shot $notAllowedShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- that has already been evaluated
+			- make note of all evaluation reasons for this shot as $oEvaluationReasons
+			- the size of the collection $oEvaluationReasons is > 1
+			- the collection $oEvaluationReasons contains "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
+			- make note of the associated series as $associatedTargetSeries
+		There is an IceFact $iceFact
+			- that has associated series $associatedTargetSeries
+			- that has associated administered shot $notAllowedShot
+			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue	
+	then
+		Remove Evaluation Reason "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" from Shot $notAllowedShot
+		Record that this dose rule was processed for the TargetDose $notAllowedShot
+		Log that this dose rule fired for the dose $notAllowedShot in the Series $associatedTargetSeries
 end
