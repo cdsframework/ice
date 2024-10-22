@@ -119,18 +119,17 @@ rule "RSV: If a patient is < 8 months of age and is complete for the RSV Infant 
 end
 
 
-rule "RSV: If a dose is recommended in the Infant Series at >= 8 months, change recommendation to Conditional / HIGH_RISK"
+rule "RSV: If a dose is recommended at >= 8 months and < 20 months, change recommendation to Conditional / HIGH_RISK"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a recommendation date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
-			- the name of the Series is "RSVInfantSeries"
 			- make note of the recommendation date as $recommendationDate
 			- post processing on the Series forecast has not already been run
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and $recommendationDate >= "8m"
+		Confirm elapsed time between $birthDate and $recommendationDate >= "8m" && elapsed time between $birthDate and $recommendationDate < "20m"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
