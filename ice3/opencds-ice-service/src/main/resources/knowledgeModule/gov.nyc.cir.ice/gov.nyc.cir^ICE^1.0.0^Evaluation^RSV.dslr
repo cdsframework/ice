@@ -36,6 +36,7 @@ import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICEFactTypeFinding
 import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.Season
 import org.cdsframework.ice.service.SeriesRules
 import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
 import org.cdsframework.ice.service.TargetDose
@@ -96,6 +97,53 @@ rule "RSV: If an RSV shot is administered in the Infant Series to a patient < 8 
 end
 
 
+// If the RSV Infant Series was completed in a prior season, mark the current RSV infant series complete
+rule "RSV: If a shot was administered in the current season of the RSV Infant Series but the RSV Infant Series was completed in a prior season, mark the current season's RSV Infant Series Complete"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule" 
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Series with name "RSVInfantSeries"
+			- the Series that the shot belongs to is not complete
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the associated series as $associatedTargetSeries
+		There is an administered shot $otherShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Series with name "RSVInfantSeries"
+			- that has already been evaluated and whose shot validity is VALID 
+			- make note of the associated series as $associatedPriorTargetSeries
+			- the object $associatedPriorTargetSeries is != $associatedTargetSeries
+	then
+		Mark the Series $associatedTargetSeries complete
+		Refresh all facts in the Series $associatedTargetSeries
+		Record that this Series Rule was Processed for the TargetSeries $associatedTargetSeries
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+
+// If the RSV Infant Series was completed in a prior season, mark the current RSV infant series complete
+rule "RSV: If the RSV Infant Series was completed in a prior season, mark the current season's RSV Infant Series Complete"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck" 
+	when
+		There is an administered shot $priorSeasonShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Series with name "RSVInfantSeries"
+			- that has already been evaluated and whose shot validity is VALID 
+		There is a Series $currentSeasonSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the name of the Series is "RSVInfantSeries"
+			- the Series is not complete
+			- the current date falls between the season start and offseason stop dates of the Series
+	then
+		Mark the Series $currentSeasonSeries complete
+		Refresh all facts in the Series $currentSeasonSeries
+		Record that this Series Rule was Processed for the TargetSeries $currentSeasonSeries
+		Log that this dose rule fired for the dose $priorSeasonShot in the Series $currentSeasonSeries
+end
+
+
 // If any RSV shot is administered at age >= 8 months and < 50 years, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES.
 // Note that this overrides the ICE General Rule "Evaluation Selection Priority" in all cases, except where the ICE General Rule "Evaluation of Shots Above the Vaccine Code Absolute Maximum Age" applies. 
 rule "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted / Outside of any Routine Series"
@@ -151,9 +199,30 @@ rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Inva
 		Remove all evaluation reasons from shot $otherRSVShot
 		Set the Shot Status of $otherRSVShot to Accepted
 		Include the reason for shot $otherRSVShot Accepted due to "Shot Administered Outside of a Routine Series"
-		/////// Refresh all facts in the shot $otherRSVShot
 		Record that this dose rule was processed for the TargetDose $otherRSVShot
 		Log that this dose rule fired for the dose $otherRSVShot in the Series $associatedTargetSeries	
+end
+
+
+// CVX Code Absolute Maximum Age: If one of the CVX codes in the table above is administered above the absolute maximum age for that CVX code, then the Evaluation is Invalid and the reason code is ABOVE_MAXIMUM_AGE_VACCINE, 
+// per the ICE General Rule "Evaluation of Shots Above the Vaccine Code Absolute Maximum Age".
+rule "RSV: If shot administered was evaluated in the Adult Series as Invalid with an evaluation reason ABOVE_MAXIMUM_AGE_VACCINE and BELOW_MINIMUM_AGE_SERIES, remove the BELOW_MINIMUM_AGE_SERIES evaluation reason"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an administered shot $administeredShot 
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Series with name "RSVAdultSeries"
+			- that has already been evaluated and whose shot validity is INVALID
+			- make note of Invalid evaluation reasons for this shot as $oEvaluationReasons
+			- the size of the collection $oEvaluationReasons is > 1
+			- the collection $oEvaluationReasons contains "EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_VACCINE"
+			- the collection $oEvaluationReasons contains "EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_SERIES"
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Remove Evaluation Reason "EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_SERIES" from shot $administeredShot
+		Record that this dose rule was processed for the TargetDose $administeredShot
+		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries	
 end
 
 
@@ -164,8 +233,8 @@ rule "RSV: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE if there a
 	when
 		There is an administered shot $notAllowedShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
-			- that has already been evaluated
-			- make note of all evaluation reasons for this shot as $oEvaluationReasons
+			- that has already been evaluated and whose shot validity is INVALID
+			- make note of Invalid evaluation reasons for this shot as $oEvaluationReasons
 			- the size of the collection $oEvaluationReasons is > 1
 			- the collection $oEvaluationReasons contains "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
 			- make note of the associated series as $associatedTargetSeries
