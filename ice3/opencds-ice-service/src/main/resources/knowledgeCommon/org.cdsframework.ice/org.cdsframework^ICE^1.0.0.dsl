@@ -117,6 +117,7 @@
 [condition][]- [Tt]he [Nn]umeric  {oNumericOne:[\\$]?[a-zA-Z0-9\\.\\_]+}  is {aOp}  {nNumericTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oNumericOne} {aOp} {nNumericTwo}
 [condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
+[condition][]- [Tt]he [Oo]bject {oObjectOne:[\\$]?[a-zA-Z0-9\\.\\_]+} is {aOp}  {oObjectTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oObjectOne} {aOp} {oObjectTwo}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +144,13 @@
 [condition][]- [Tt]he [Ss]eries is a [Nn]ot a [Ss]easonal [Ss]eries=targetSeasonExists() == false
 [condition][]- [Tt]he [Ss]eries belongs to the [Ss]eason with [Nn]ame {sNameOfSeason}=targetSeasonExists() == true && targetSeason.seasonName == {sNameOfSeason}
 [condition][]- [Tt]he [Ss]eries does not belong to the [Ss]eason with [Nn]ame {sNameOfSeason}=targetSeasonExists == false || targetSeasonExists() == true && targetSeason.seasonName != {sNameOfSeason}
+[condition][]- [Tt]he [Cc]urrent [Dd]ate falls between the [Ss]eason [Ss]tart and [Oo]ffseason [Ss]top [Dd]ates of the [Ss]eries=targetSeason == null || targetSeason.dateIsApplicableToSeason(evalTime, true) == true
+[condition][]- [Tt]he [Cc]urrent [Dd]ate falls between the [Ss]eason [Ss]tart and [Ss]top [Dd]ates=targetSeason == null || targetSeason.dateIsApplicableToSeason(evalTime, false) == true
+/////// [condition][]- [Tt]he [Dd]ate {dtDate:[a-zA-Z]+} [Ff]alls within the [Ss]eason [Ss]tart and [Ss]top [Dd]ates of the [Ss]eries=targetSeason == null || targetSeason.dateIsApplicableToSeason({dtDate}, false) == true
+/////// [condition][]- [Tt]he [Dd]ate {dtDate:[\\$]?[a-zA-Z0-9\\.\\_\\]+} [Ff]alls within the [Ss]eason [Ss]tart and [Ss]top [Dd]ates of the [Ss]eries=targetSeason == null || targetSeason.dateIsApplicableToSeason({dtDate}, false) == true
+[condition][]- [Tt]he [Ss]hot {refer_oTargetDose} [Ff]alls within the [Ss]eason [Ss]tart and [Oo]ffseason [Ss]top [Dd]ates of the [Ss]eries=targetSeason == null || targetSeason.dateIsApplicableToSeason({refer_oTargetDose}.getAdministrationDate(), true) == true
 [condition][]- [Tt]he [Ss]hot {refer_oTargetDose} [Ff]alls within the [Ss]eason [Ss]tart and [Ss]top [Dd]ates of the [Ss]eries=targetSeason == null || targetSeason.dateIsApplicableToSeason({refer_oTargetDose}.getAdministrationDate(), false) == true
+[condition][]- [Tt]he [Ss]hot {refer_oTargetDose} does not [Ff]all within the [Ss]eason [Ss]tart and [Oo]ffseason [Ss]top [Dd]ates of the [Ss]eries=targetSeason != null && targetSeason.dateIsApplicableToSeason({refer_oTargetDose}.getAdministrationDate(), true) == false
 [condition][]- [Tt]he [Ss]hot {refer_oTargetDose} does not [Ff]all within the [Ss]eason [Ss]tart and [Ss]top [Dd]ates of the [Ss]eries=targetSeason != null && targetSeason.dateIsApplicableToSeason({refer_oTargetDose}.getAdministrationDate(), false) == false
 [condition][]- [Tt]he [Dd]ose [Nn]umber to [Rr]ecommend is {aOp}  {nDoseNumber}=doseNumberToRecommend {aOp}  {nDoseNumber}
 [condition][]- [Tt]he [Nn]umber of [Dd]oses [Rr]equired to [Cc]omplete this [Ss]eries is {aOp}  {nDoseNumber}=seriesRules.numberOfDosesInSeries {aOp}  {nDoseNumber}
@@ -215,6 +222,7 @@
 [condition][]- [Tt]he [Ss]tring {strObject} {aOp}  {strValue}={strObject} != null && {strObject} {aOp} {strValue} || {strObject} == null && {strValue} == null
 [condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=\\<\\>]+}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
+[condition][]- [Tt]he [Oo]bject {oObjectOne:[\\$]?[a-zA-Z0-9\\.\\_]+} is {aOp}  {oObjectTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oObjectOne} {aOp} {oObjectTwo}
 
 //
 // TargetDose accumulates
@@ -272,8 +280,10 @@
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Vv]alid={refer_oTargetDose}.setStatus(DoseStatus.VALID);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Aa]ccepted={refer_oTargetDose}.setStatus(DoseStatus.ACCEPTED);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Ii]nvalid={refer_oTargetDose}.setStatus(DoseStatus.INVALID);
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid due to "Outside Season"={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.OUTSIDE_SEASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid=
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Insufficient Antigen"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.INSUFFICIENT_ANTIGEN"); insert(new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), {refer_oTargetDose}));
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Above Maximum Age for Vaccine"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_VACCINE");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Below Minimum Age for Vaccine"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_VACCINE");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Below Minimum Age for Final Dose"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_FINAL_DOSE"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Below Minimum Age"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_SERIES"); insert(new ICEFactTypeFinding(SupportedFactConcept._BELOW_MINIMUM_AGE.getConceptCodeValue(), {refer_oTargetDose}));
@@ -334,7 +344,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [consequence][][Cc]lear [Ff]orecasted [Rr]ecommendations from [Cc]onsideration in [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.clearRecommendations();
-[consequence][][Rr]emove the [Ss]hot {refer_oTargetDose} from [Ee]valuation as a part of the [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ removeTargetDoseFromSeries({refer_oTargetDose}); \};
+[consequence][][Rr]emove the [Ss]hot {refer_oTargetDose} from [Ee]valuation as a part of the [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ removeTargetDoseFromSeries({refer_oTargetDose}); retract({refer_oTargetDose}); \};
 [consequence][][Ss]kip [Ss]eries [Dd]ose [Nn]umber to {nToDoseNumber} from {nFromDoseNumber} for [Dd]isease {dd_oSupportedDiseaseConcept} in [Ss]eries {refer_oTargetSeries:[\\$A-Za-z0-9\\_]+} but [Dd]o [Nn]ot [Rr]efresh [Ss]eries [Ff]acts={refer_oTargetSeries}.addSkipDoseEntryForSpecifiedDisease({nFromDoseNumber}, {nToDoseNumber}, {dd_oSupportedDiseaseConcept});
 [consequence][][Ss]kip [Ss]eries [Dd]ose [Nn]umber to {nToDoseNumber} from {nFromDoseNumber} for all [Dd]iseases in the [Ss]eries {refer_oTargetSeries:[\\$A-Za-z0-9\\_]+} but [Dd]o [Nn]ot [Rr]efresh [Ss]eries [Ff]acts={refer_oTargetSeries}.addSkipDoseEntryForDose({nFromDoseNumber}, {nToDoseNumber});
 [consequence][][Ss]kip [Ss]eries [Dd]ose [Nn]umber to {nToDoseNumber} from {nFromDoseNumber} for [Dd]isease {dd_oSupportedDiseaseConcept} in [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ addSkipDoseEntryForSpecifiedDisease({nFromDoseNumber}, {nToDoseNumber}, {dd_oSupportedDiseaseConcept}); \}
