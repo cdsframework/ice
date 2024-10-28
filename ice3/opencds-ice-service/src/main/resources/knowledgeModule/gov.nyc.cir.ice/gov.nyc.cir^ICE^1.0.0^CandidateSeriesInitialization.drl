@@ -183,7 +183,7 @@ rule "CandidateSeriesIdentification(RSV): Initialize an Adult RSV TargetSeries i
 		$s : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesName == "RSVAdultSeries", seasons.isEmpty(), seriesStartAge != null)
 		not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesName == $s.seriesName)
 		EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.DAYS).isGreaterThanEqualTo($s.seriesStartAge))
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $s.seriesStartAge) >= 0)
 		$evaluatedPerson : EvaluatedPerson()
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -203,7 +203,7 @@ rule "CandidateSeriesIdentification(RSV): Initialize an Adult RSV TargetSeries i
 		SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($s.vaccineGroup)) == true)	
 		EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, $shotDate, DurationType.DAYS).isGreaterThanEqualTo($s.seriesStartAge))
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, $s.seriesStartAge) >= 0)
 		$evaluatedPerson : EvaluatedPerson()
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -228,7 +228,7 @@ rule "CandidateSeriesIdentification(RSV): If the patient age is <= the RSV Infan
 			Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate(new Season($priorSeason.seasonName, $s.vaccineGroup, false, $priorSeason.seasonStartMonth, $priorSeason.seasonStartDay, $priorSeason.seasonEndMonth, $priorSeason.seasonEndDay), evalTime)))
 		$tseasons : TargetSeasons()
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.DAYS).isLessThanEqualTo($s.seriesEndAge))
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $s.seriesEndAge) <= 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		int startMonth = $priorSeason.getSeasonStartMonth();
@@ -262,7 +262,7 @@ rule "CandidateSeriesIdentification(RSV): If a shot was administered <= the RSV 
 				Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate(new Season($priorSeason.seasonName, $s.vaccineGroup, false, $priorSeason.seasonStartMonth, $priorSeason.seasonStartDay, $priorSeason.seasonEndMonth, $priorSeason.seasonEndDay), $shotDate)))
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($s.vaccineGroup)) == true)
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, $shotDate, DurationType.DAYS).isLessThanEqualTo($s.seriesEndAge))
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, $s.seriesEndAge) <= 0)
 		$tseasons : TargetSeasons()
 	then
 		String _RULENAME = kcontext.rule.name;

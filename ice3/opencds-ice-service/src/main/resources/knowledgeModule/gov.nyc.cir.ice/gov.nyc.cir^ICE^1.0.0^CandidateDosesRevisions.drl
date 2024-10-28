@@ -76,7 +76,7 @@ rule "CandidateDosesRevisions(RSV): If there are no shots administered in the RS
 		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries == 0, seriesRules.seriesEndAge != null)
 		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", seriesRules.seriesStartAge != null)
 		EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.DAYS).isGreaterThanEqualTo($tsadult.seriesRules.seriesStartAge))
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $tsadult.seriesRules.seriesStartAge) >= 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "RSV Infant Series TargetSeries removed: " + $tsinfant);
@@ -91,7 +91,7 @@ rule "CandidateDosesRevisions(RSV): If there are no shots administered in the RS
 		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", seriesRules.seriesEndAge != null)
 		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries == 0, seriesRules.seriesStartAge != null)
 		EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.DAYS).isLessThanEqualTo($tsinfant.seriesRules.seriesEndAge))
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $tsinfant.seriesRules.seriesEndAge) <= 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "RSV Adult Series TargetSeries removed: " + $tsadult);
