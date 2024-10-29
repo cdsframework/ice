@@ -388,7 +388,7 @@ public class TimePeriod {
 				if (token.charAt(0) == '+') {
 					token.deleteCharAt(0);
 				}
-				tp = new TimePeriod(parseInt(token.toString()), DurationType.DAYS);
+				tp = new TimePeriod(new Integer(new String(token)).intValue(), DurationType.DAYS);
 				if (logger.isDebugEnabled()) {
 					logger.debug("TimePeriod: " + tp.toString() + " to be added to interimDate: " + interimDate);
 				}
@@ -405,7 +405,7 @@ public class TimePeriod {
 				if (token.charAt(0) == '+') {
 					token.deleteCharAt(0);
 				}
-				tp = new TimePeriod(parseInt(token.toString()), DurationType.WEEKS);
+				tp = new TimePeriod(new Integer(new String(token)).intValue(), DurationType.WEEKS);
 				if (logger.isDebugEnabled()) {
 					logger.debug(_METHODNAME + "TimePeriod: " + tp.toString() + " to be added to interimDate: " + interimDate);
 				}
@@ -422,8 +422,7 @@ public class TimePeriod {
 				if (token.charAt(0) == '+') {
 					token.deleteCharAt(0);
 				}
-				token.toString();
-				tp = new TimePeriod(parseInt(token.toString()), DurationType.MONTHS);
+				tp = new TimePeriod(new Integer(new String(token)).intValue(), DurationType.MONTHS);
 				if (logger.isDebugEnabled()) {
 					logger.debug(_METHODNAME + "TimePeriod: " + tp.toString() + " to be added to interimDate: " + interimDate);
 				}
@@ -440,7 +439,7 @@ public class TimePeriod {
 				if (token.charAt(0) == '+') {
 					token.deleteCharAt(0);
 				}
-				tp = new TimePeriod(parseInt(token.toString()), DurationType.YEARS);
+				tp = new TimePeriod(new Integer(new String(token)).intValue(), DurationType.YEARS);
 				if (logger.isDebugEnabled()) {
 					logger.debug(_METHODNAME + "TimePeriod: " + tp.toString() + " to be added to interimDate: " + interimDate);
 				}
