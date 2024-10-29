@@ -1,0 +1,137 @@
+/**
+ * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+ 
+package knowledgeModule.gov.nyc.cir.ice
+
+import java.util.Date
+import java.util.Iterator
+import java.util.List
+import java.util.Set
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent
+import org.opencds.vmr.v1_0.internal.concepts.ImmunizationConcept
+import org.cdsframework.cds.CdsConcept
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.Schedule
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetDoseInitializationTracker
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+import org.cdsframework.ice.service.VaccineComponent
+
+global java.util.Date evalTime
+global org.cdsframework.ice.service.Schedule schedule
+
+
+
+/*************************************************************************************************************************************************************************************
+ RSV Candidate Dose Revisions Rules
+*************************************************************************************************************************************************************************************/
+
+/////////////////////
+// Logic to either select or combine the infant and/or adult series based on the current age of the patient and the age at which shots were administered. 
+// This logic will be generalized and extended for use with other vaccine groups (such as pneumococcal) at a later time. This initial implementation for RSV, all of which can be 
+// implemented in this agenda group, is as follows:
+//   + If there are shots administered both <= the maxAge of the infant series and >= the minAge of the adult series, remove/retract the target doses that overlap in the 2 target series, as applicable by series start/end ages. 
+/////////////////////
+
+
+rule "CandidateDosesRevisions(RSV): If there are no shots administered in the RSV Infant Series and the patient is greater than or equal to the series begin age of the RSV Adult Series, remove the RSV Infant TargetSeries from consideration"
+	dialect "mvel"
+	agenda-group "CandidateDosesRevisions^customCandidateDoseRevisionRule"
+	when
+		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries == 0, seriesRules.seriesEndAge != null)
+		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", seriesRules.seriesStartAge != null)
+		EvaluatedPerson($birthDate : demographics.birthTime)
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $tsadult.seriesRules.seriesStartAge) >= 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "RSV Infant Series TargetSeries removed: " + $tsinfant);
+		retract($tsinfant);	
+end
+
+
+rule "CandidateDosesRevisions(RSV): If there are no shots administered in the RSV Adult Series and the patient is less than or equal to the series end age of the RSV Infant Series, remove the RSV Adult TargetSeries from consideration"
+	dialect "mvel"
+	agenda-group "CandidateDosesRevisions^customCandidateDoseRevisionRule"
+	when
+		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", seriesRules.seriesEndAge != null)
+		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries == 0, seriesRules.seriesStartAge != null)
+		EvaluatedPerson($birthDate : demographics.birthTime)
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $tsinfant.seriesRules.seriesEndAge) <= 0)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "RSV Adult Series TargetSeries removed: " + $tsadult);
+		retract($tsadult);
+end
+
+
+rule "CandidateDosesRevisions(RSV): If there are shots adminstered > the Series End Date of the RSV Infant Series and >= the Series Start Date of the RSV Adult Series, remove the TargetDose from the RSV Infant TargeSeries"
+	dialect "mvel"
+	agenda-group "CandidateDosesRevisions^customCandidateDoseRevisionRule"
+	when
+		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries > 0, seriesEndAgeDate != null)
+		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries > 0, seriesStartAgeDate != null)
+		$overlappingTd : TargetDose(associatedTargetSeries == $tsinfant, administrationDate > $tsinfant.seriesEndAgeDate)
+		exists TargetDose(associatedTargetSeries == $tsadult, doseId == $overlappingTd.doseId, administrationDate >= $tsadult.seriesStartAgeDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Removing TargetDose " + $overlappingTd + " from RSV Infant Series. ' TargetSeries: " + $tsinfant);
+		// Remove the target dose from the target series and retract	
+		modify($tsinfant) {
+			removeTargetDoseFromSeries($overlappingTd);
+		}
+		retract($overlappingTd);
+end
+
+
+rule "CandidateDosesRevisions(RSV): If there are shots adminstered < the Series Start Date of the RSV Adult Series and <= the Series End Date of the RSV Infant Series, remove the TargetDose from the RSV Adult TargetSeries"
+	dialect "mvel"
+	agenda-group "CandidateDosesRevisions^customCandidateDoseRevisionRule"
+	when
+		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries > 0, seriesEndAgeDate != null)
+		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries > 0, seriesStartAgeDate != null)
+		$overlappingTd : TargetDose(associatedTargetSeries == $tsadult, administrationDate < $tsadult.seriesStartAgeDate)
+		exists TargetDose(associatedTargetSeries == $tsinfant, doseId == $overlappingTd.doseId, administrationDate <= $tsinfant.seriesEndAgeDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Removing TargetDose " + $overlappingTd + " from RSV Adult Series. ' TargetSeries: " + $tsadult);	
+		// Remove the target dose from the target series and retract
+		modify($tsadult) {
+			removeTargetDoseFromSeries($overlappingTd);
+		}
+		retract($overlappingTd);
+end
