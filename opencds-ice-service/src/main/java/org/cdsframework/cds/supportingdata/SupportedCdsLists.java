@@ -166,10 +166,10 @@ public class SupportedCdsLists implements SupportingData {
 		///////
 		Integer lCountOfCdsListItems = this.countOfCdsListItemsPerCdsList.get(lSLCCdsListCode);
 		if (lCountOfCdsListItems == null) {
-			this.countOfCdsListItemsPerCdsList.put(lSLCCdsListCode, 1);
+			this.countOfCdsListItemsPerCdsList.put(lSLCCdsListCode, new Integer(1));
 		}
 		else {
-			this.countOfCdsListItemsPerCdsList.put(lSLCCdsListCode, lCountOfCdsListItems + 1);
+			this.countOfCdsListItemsPerCdsList.put(lSLCCdsListCode, new Integer(lCountOfCdsListItems.intValue()+1));
 		}
 		
 		///////
@@ -258,7 +258,7 @@ public class SupportedCdsLists implements SupportingData {
 				if (lCountOfCdsListItems != null) {
 					int count = lCountOfCdsListItems.intValue();
 					if (count > 0) {
-						this.countOfCdsListItemsPerCdsList.put(lSLCI.getCdsListCode(), count - 1);
+						this.countOfCdsListItemsPerCdsList.put(lSLCI.getCdsListCode(), new Integer(count-1));
 					}
 				}
 			}
