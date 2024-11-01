@@ -29,9 +29,11 @@ package org.cdsframework.ice.service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.ice.util.TimePeriod;
 
 public class SeriesRules {
 
@@ -39,6 +41,10 @@ public class SeriesRules {
 	private String seriesName;
 	private CdsConcept vaccineGroupConcept;
 	private int numberOfDosesInSeries;
+	private int seriesGroup;
+	private int seriesGroupToTransitionTo;
+	private TimePeriod seriesStartAge;
+	private TimePeriod seriesEndAge;
 	private boolean recurringDosesAfterSeriesComplete;
 	private boolean doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
 	private List<DoseRule> seriesDoseRules;
@@ -53,7 +59,6 @@ public class SeriesRules {
 	 * @param pVaccineGroup CdsConcept representing the vaccine group, must be provided
 	 * @throws IllegalArgumentException of series name or vaccine group is null
 	 */
-	/////// public SeriesRules(String pSeriesName, String pVaccineGroup) {
 	public SeriesRules(String pSeriesName, CdsConcept pVaccineGroup) {
 
 		String _METHODNAME = "Series(): ";
@@ -65,10 +70,14 @@ public class SeriesRules {
 		// seriesId = pSeriesName;
 		seriesId = ICELogicHelper.generateUniqueString();
 		seriesName = pSeriesName;
+		seriesGroup = 0;
+		seriesGroupToTransitionTo = 0;
 		vaccineGroupConcept = pVaccineGroup;
 		seriesDoseRules = new ArrayList<DoseRule>();
 		applicableSeasons = new ArrayList<Season>();
 		numberOfDosesInSeries = 0;
+		seriesStartAge = null;
+		seriesEndAge = null;
 		doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = true;
 		recurringDosesAfterSeriesComplete = false;
 	}
@@ -91,8 +100,8 @@ public class SeriesRules {
 
 
 	/**
-	 * Construct a copy of this object and return i
-	 * @return
+	 * Construct a copy of this object and return it
+	 * @return SeriesRules full copy of the SeriesRules object passed into this method; null if there series passed in is null.
 	 */
 	public static SeriesRules constructDeepCopyOfSeriesRulesObject(SeriesRules pSR) {
 
@@ -103,7 +112,11 @@ public class SeriesRules {
 		SeriesRules lSR = new SeriesRules(pSR.getSeriesName(), pSR.getVaccineGroupConcept());
 		lSR.seriesId = ICELogicHelper.generateUniqueString();
 		lSR.seriesName = pSR.seriesName;
+		lSR.seriesGroup = pSR.seriesGroup;
 		lSR.vaccineGroupConcept = CdsConcept.constructDeepCopyOfCdsConceptObject(pSR.getVaccineGroupConcept());
+		lSR.numberOfDosesInSeries = pSR.numberOfDosesInSeries;
+		lSR.seriesStartAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pSR.seriesStartAge);
+		lSR.seriesEndAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pSR.seriesEndAge);
 		lSR.recurringDosesAfterSeriesComplete = pSR.recurringDosesAfterSeriesComplete;
 		lSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = pSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
 		lSR.applicableSeasons = new ArrayList<Season>();
@@ -134,9 +147,25 @@ public class SeriesRules {
 		return seriesId;
 	}
 
-
 	public String getSeriesName() {
 		return seriesName;
+	}
+
+
+	public int getSeriesGroup() {
+		return seriesGroup;
+	}
+
+	public void setSeriesGroup(int seriesGroup) {
+		this.seriesGroup = seriesGroup;
+	}
+
+	public int getSeriesGroupToTransitionTo() {
+		return seriesGroupToTransitionTo;
+	}
+
+	public void setSeriesGroupToTransitionTo(int seriesGroupToTransitionTo) {
+		this.seriesGroupToTransitionTo = seriesGroupToTransitionTo;
 	}
 
 	/**
@@ -156,6 +185,22 @@ public class SeriesRules {
 
 	public String getVaccineGroup() {
 		return vaccineGroupConcept.getOpenCdsConceptCode();
+	}
+
+	public TimePeriod getSeriesStartAge() {
+		return seriesStartAge;
+	}
+
+	public void setSeriesStartAge(TimePeriod patientStartAgeInSeries) {
+		this.seriesStartAge = patientStartAgeInSeries;
+	}
+
+	public TimePeriod getSeriesEndAge() {
+		return seriesEndAge;
+	}
+
+	public void setSeriesEndAge(TimePeriod patientEndAgeInSeries) {
+		this.seriesEndAge = patientEndAgeInSeries;
 	}
 
 	public int getNumberOfDosesInSeries() {
