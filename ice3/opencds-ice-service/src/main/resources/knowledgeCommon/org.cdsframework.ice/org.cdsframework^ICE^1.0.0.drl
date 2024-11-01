@@ -427,7 +427,7 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries for *Current* Seaso
 		$season : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, dateIsApplicableToSeason(evalTime)) from $s.seasons
 		not (TargetSeries(seriesName == $s.seriesName, targetSeason != null, targetSeason.isDefaultSeason() == false, targetSeason == $season))
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $s.seriesEndAge) <= 0) &&
+		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, new TimePeriod($s.seriesEndAge.getTimePeriodStringRepresentation() + "+1d")) < 0) &&
 			($s.seriesStartAge == null || $s.seriesStartAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $s.seriesStartAge) >= 0))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -450,7 +450,7 @@ rule "CandidateSeriesIdentification: Initialize *Current* Season TargetSeries wi
 		not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._CANDIDATE_SERIES_IDENTIFICATION_DEFAULT_RULE_OVERRIDE.conceptCodeValue, associatedSeriesRules == $s)  
 		not (TargetSeries(seriesName == $s.seriesName, targetSeason != null, targetSeason == $season))
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $s.seriesEndAge) <= 0) &&
+		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, new TimePeriod($s.seriesEndAge.getTimePeriodStringRepresentation() + "+1d")) < 0) &&
 			($s.seriesStartAge == null || $s.seriesStartAge != null	&& TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $s.seriesStartAge) >= 0))
 		$tseasons : TargetSeasons()
 	then
@@ -482,7 +482,7 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		not (TargetSeries(seriesName == $s.seriesName, targetSeason != null, targetSeason == $season))
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, $s.seriesEndAge) <= 0) &&
+		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, new TimePeriod($s.seriesEndAge.getTimePeriodStringRepresentation() + "+1d")) < 0) &&
 			($s.seriesStartAge == null || $s.seriesStartAge != null	&& TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, $s.seriesStartAge) >= 0))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -511,7 +511,7 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		$tseasons : TargetSeasons()
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, $s.seriesEndAge) <= 0) &&
+		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, new TimePeriod($s.seriesEndAge.getTimePeriodStringRepresentation() + "+1d")) < 0) &&
 			($s.seriesStartAge == null || $s.seriesStartAge != null	&& TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, $s.seriesStartAge) >= 0))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -546,8 +546,8 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries when Shots Administ
 		not (TargetSeries(seriesName == $s.seriesName, targetSeason != null, targetSeason == $season))
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.calculateElapsedTimePeriod($birthDate, $shotDate, DurationType.DAYS).isLessThanEqualTo($s.seriesEndAge)) &&
-			($s.seriesStartAge == null || $s.seriesStartAge != null	&& TimePeriod.calculateElapsedTimePeriod($birthDate, $shotDate, DurationType.DAYS).isGreaterThanEqualTo($s.seriesStartAge)))
+		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, new TimePeriod($s.seriesEndAge.getTimePeriodStringRepresentation() + "+1d")) < 0) &&
+			($s.seriesStartAge == null || $s.seriesStartAge != null	&& TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, $s.seriesStartAge) >= 0))
 	then
 		String _RULENAME = kcontext.rule.name;
 		TargetSeries ts = new TargetSeries($s, schedule, $season, $evaluatedPerson);
