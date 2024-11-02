@@ -228,7 +228,7 @@ rule "CandidateSeriesIdentification(RSV): If the patient age is <= the RSV Infan
 			Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate(new Season($priorSeason.seasonName, $s.vaccineGroup, false, $priorSeason.seasonStartMonth, $priorSeason.seasonStartDay, $priorSeason.seasonEndMonth, $priorSeason.seasonEndDay), evalTime)))
 		$tseasons : TargetSeasons()
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $s.seriesEndAge) <= 0)
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, new TimePeriod($s.seriesEndAge.getTimePeriodStringRepresentation() + "+1d")) < 0)
 	then
 		String _RULENAME = kcontext.rule.name;
 		int startMonth = $priorSeason.getSeasonStartMonth();
@@ -262,7 +262,7 @@ rule "CandidateSeriesIdentification(RSV): If a shot was administered <= the RSV 
 				Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate(new Season($priorSeason.seasonName, $s.vaccineGroup, false, $priorSeason.seasonStartMonth, $priorSeason.seasonStartDay, $priorSeason.seasonEndMonth, $priorSeason.seasonEndDay), $shotDate)))
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($s.vaccineGroup)) == true)
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
-		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, $s.seriesEndAge) <= 0)
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, new TimePeriod($s.seriesEndAge.getTimePeriodStringRepresentation() + "+1d")) < 0)
 		$tseasons : TargetSeasons()
 	then
 		String _RULENAME = kcontext.rule.name;

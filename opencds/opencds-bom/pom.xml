@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.opencds</groupId>
         <artifactId>opencds</artifactId>
-        <version>6.2.0</version>
+        <version>6.2.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>opencds-bom</artifactId>
@@ -58,6 +58,12 @@
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>${gson.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.errorprone</groupId>
+                        <artifactId>error_prone_annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
