@@ -1782,29 +1782,6 @@ rule "RecommendationForecast.findMostRecentAdministeredSelectAdjuvantProductVacc
 end
 
 
-/*
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "RecommendationForecast.setNextSeasonalTargetSeriesForRecommendation" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	when
-		// To avoid activation-group clashes, only forecast one series at a time
-		not TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS || recommendationStatus == RecommendationStatus.FORECASTING_COMPLETE)
-		$ts: TargetSeries(recommendationStatus == RecommendationStatus.NOT_FORECASTED, $vg : vaccineGroup, isSelectedSeries() == true, targetSeason != null, 
-			$tseasonStartDate : targetSeason.fullySpecifiedSeasonStartDate)
-		not TargetSeries(vaccineGroup == $vg, targetSeason != null,	targetSeason.fullySpecifiedSeasonStartDate.isAfter($tseasonStartDate)) 
-	then
-		String _RULENAME = kcontext.rule.name;		
-		modify($ts) {
-			setRecommendationStatus(RecommendationStatus.FORECASTING_IN_PROGRESS);
-		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Forecasting TargetSeries " + $ts);
-		setFocus("RecommendationForecast^preRecommendationValidation");
-end
-*/
-
-
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
@@ -1838,27 +1815,6 @@ rule "RecommendationForecast.setNextSeasonalTargetSeriesForRecommendation" rulef
 		setFocus("RecommendationForecast^preRecommendationValidation");
 end
 
-
-/*
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "RecommendationForecast.setNextNonSeasonalTargetSeriesForRecommendation" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	when
-		// To avoid activation-group clashes, only forecast one series at a time
-		not TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS || recommendationStatus == RecommendationStatus.FORECASTING_COMPLETE)
-		$ts: TargetSeries(recommendationStatus == RecommendationStatus.NOT_FORECASTED, isSelectedSeries() == true, targetSeason == null)
-	then
-		String _RULENAME = kcontext.rule.name;		
-		RecommendationStatus newRecommendationStatus = RecommendationStatus.FORECASTING_IN_PROGRESS;
-		modify($ts) {
-			setRecommendationStatus(newRecommendationStatus);
-		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Forecasting TargetSeries " + $ts);
-		setFocus("RecommendationForecast^preRecommendationValidation");
-end
-*/
 
 ///////// ***
 // General Design rule... Do not Edit
