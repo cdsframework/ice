@@ -198,7 +198,7 @@ rule "RSV: If a patient is >= 20 months and < 60 years of age and a shot is reco
 		Confirm elapsed time between $birthDate and evalTime >= "20m" && elapsed time between $birthDate and evalTime < "60y"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Supplemental text for $recommendation to "The RSV evaluations and recommendations in ICE primarily target the routine series. RSV is recommended for adults 75 years of age and older and adults 60–74 years of age and older who are at increased risk of severe RSV disease. Note: RSV vaccine is also recommended for pregnant persons at 32-36 weeks' gestation, using seasonal administration." 
+		Set the Recommendation Supplemental text for $recommendation to "The RSV evaluations and recommendations in ICE primarily target the routine series. RSV is recommended as a single lifetime dose for all adults 75 years of age and older and adults 60–74 years of age and older who are at increased risk of severe RSV disease. Note: RSV vaccine is also recommended for pregnant persons at 32-36 weeks' gestation, using seasonal administration."
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -222,7 +222,7 @@ rule "RSV: If a patient is >= 60 years and < 75 years of age and the Adult Serie
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Create a Recommendation as $supplementalText for the Series $targetSeries
-		Set the Recommendation supplemental text for $supplementalText to "The RSV evaluations and recommendations in ICE primarily target the routine series. Adults ages 60- 74 years of age who are at increased risk of severe RSV disease receive a single dose of RSV vaccine. RSV vaccination is recommended as a single lifetime dose only. Persons who have already received RSV vaccination are NOT recommended to receive another dose."
+		Set the Recommendation supplemental text for $supplementalText to "The RSV evaluations and recommendations in ICE primarily target the routine series. RSV is recommended as a single lifetime dose for all adults 75 years of age and older and adults 60–74 years of age who are at increased risk of severe RSV disease."
 		Include the Recommendation $supplementalText for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -230,7 +230,7 @@ rule "RSV: If a patient is >= 60 years and < 75 years of age and the Adult Serie
 end
 
 
-rule "RSV: If there are no shots administered in the RSV Adult Series, the evaluation date is < 10/1/2023, and the patient is >= 75 years of age, set the earliest/recommended to 10/1/2023"
+rule "RSV: If the RSV Adult Series is not complete, set the earliest/recommended to the latter of 75 years of age or 6/26/2024"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -239,13 +239,11 @@ rule "RSV: If there are no shots administered in the RSV Adult Series, the evalu
 			- the name of the Series is "RSVAdultSeries"
 			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
-        	- make note of the Patient's birthdate as $birthDate
-        Confirm the date evalTime is before "01-Oct-2023"
-        Confirm elapsed time between $birthDate and evalTime >= "75y" 
+        	- make note of the date as $dtDateAtAge75y when the patient is "75y" of age
 	then
 		Create a Recommendation as $r for the Series $targetSeries
-		Set the recommendation Earliest Forecast Date for $r to "01-Oct-2023"
-		Set the recommendation Recommended Forecast Date for $r to "01-Oct-2023"
+		Set the recommendation Earliest Forecast Date for $r to the latter of $dtDateAtAge75y and "26-Jun-2024"
+		Set the recommendation Recommended Forecast Date for $r to the latter of $dtDateAtAge75y and "26-Jun-2024"
 		Include the Recommendation $r for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries

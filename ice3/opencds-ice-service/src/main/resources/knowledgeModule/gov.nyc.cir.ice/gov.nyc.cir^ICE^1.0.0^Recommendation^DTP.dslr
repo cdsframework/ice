@@ -650,6 +650,7 @@ rule "DTP: (Six by Seven Rule)- Recommend next dose at age 7yrs for 5-dose serie
 		Confirm elapsed time between $birthdate and evalTime < "7y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
