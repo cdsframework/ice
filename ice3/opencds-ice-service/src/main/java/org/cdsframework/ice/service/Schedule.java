@@ -292,6 +292,24 @@ public class Schedule {
 	}
 
 
+	// Get a List of all Seasons supported by this Schedule excluding vaccine group exlusions
+	public List<Season> getSeasonsExcludingVaccineGroupExclusions(List<String> vgExclusions) {
+
+		if (vgExclusions == null || vgExclusions.isEmpty()) {
+			return getAllSeasons();
+		}
+		List<Season> lSeasonsWithoutExclusions = new ArrayList<Season>();
+		for (Season lSeason : this.iceSupportingDataConfiguration.getSupportedSeasons().getCopyOfAllSeasons()) {
+			if (! vgExclusions.contains(lSeason.getVaccineGroup())) {
+				lSeasonsWithoutExclusions.add(lSeason);
+			}
+		}
+
+		return lSeasonsWithoutExclusions;
+	}
+
+
+
 	// Get a List of all SeriesRules supported by this Schedule excluding vaccine group exlusions
 	public List<SeriesRules> getSeriesRulesExcludingVaccineGroupExclusions(List<String> vgExclusions) {
 
@@ -313,6 +331,12 @@ public class Schedule {
 	public List<SeriesRules> getAllSeries() {
 
 		return this.iceSupportingDataConfiguration.getSupportedSeries().getCopyOfAllSeriesRules();
+	}
+
+	// Get a list of all SeriesRules supported by this Schedule.
+	public List<Season> getAllSeasons() {
+
+		return this.iceSupportingDataConfiguration.getSupportedSeasons().getCopyOfAllSeasons();
 	}
 
 

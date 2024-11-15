@@ -83,6 +83,7 @@ rule "Zoster: If patient is administered adult varicella (CVX 21) doses, the min
 			- the administration date of the shot is > $dtAdministrationDate
 	then
 		Add "8w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Include a Recommendation as $earliest with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries

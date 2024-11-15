@@ -57,7 +57,9 @@ global org.cdsframework.ice.service.Schedule schedule
 
 
 
-///////////////////////////////////////////////////////////// Meningococcal ACWY and Meningococcal B TargetDose Initialization Rules ////////////////////////////////////////////////////////////
+/*************************************************************************************************************************************************************************************
+ Meningococcal ACWY and Meningococcal B TargetDose Initialization Rules
+*************************************************************************************************************************************************************************************/
 
 // Specialized initialization rule for Meningococcal and Meningococcal B vaccine group
 // This catchall rule should not fire, because all vaccines should either be explicitly placed into the Meningococcal ACWY or Meningococcal B vaccine group per other rules (below). 
@@ -238,3 +240,4 @@ rule "CandidateDosesIdentification: Initialize Meningococcal vaccine (CVX 316) i
 		update($tdit);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetDose initialized in TargetSeries " + $ts.getSeriesName() + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $saeAdminDate);
 end
+

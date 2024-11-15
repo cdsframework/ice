@@ -705,6 +705,195 @@ public class PayloadHelper {
 	}
 
 
+	public void OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, String pDosesRemaining, SubstanceAdministrationProposal pSAP)
+		throws ImproperUsageException {
+
+		String _METHODNAME = "OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal: ";
+		if (drools == null || pNamedObjects == null|| pSAP == null || pDosesRemaining == null) {
+			String lErrStr = "Unable to output doses remaining: one or more parameters not specified";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
+
+		// Now create the nested observation result
+		String nestedIdValue = ICELogicHelper.generateUniqueString();
+		// Observation
+		ObservationResult childObs = new ObservationResult();
+		childObs.setId(nestedIdValue);
+		childObs.setEvaluatedPersonId(focalPersonId);
+		childObs.setSubjectIsFocalPerson(true);
+
+		// Set the Observation Focus - always the vaccine group
+		CD localCD = new CD();
+		localCD.setCodeSystem("2.16.840.1.113883.3.795.12.100.10");
+		localCD.setCode("NUMBER_OF_DOSES_REMAINING");
+		localCD.setDisplayName("Doses Remaining");
+		localCD.setOriginalText("Number of doses remaining in the series, as of the evaluation date");
+		childObs.setObservationFocus(localCD);
+
+		// Observation Value
+		ObservationValue childObsValue = new ObservationValue();
+		childObsValue.setText(pDosesRemaining);
+		childObs.setObservationValue(childObsValue);
+		childObs.setClinicalStatementToBeRoot(false);
+		childObs.setToBeReturned(true);
+		drools.insert(childObs);
+		pNamedObjects.put("childObs" + nestedIdValue, childObs);
+
+		// Therefore, create as a relatedClinicalStatement
+		ClinicalStatementRelationship rel = new ClinicalStatementRelationship();
+		rel.setSourceId(pSAP.getId());
+		rel.setTargetId(nestedIdValue);
+		CD relCodeSR = new CD();
+		relCodeSR.setCodeSystem("2.16.840.1.113883.5.1002");
+		relCodeSR.setCode("RSON");
+		relCodeSR.setDisplayName("has pertaining reason");
+		rel.setTargetRelationshipToSource(relCodeSR);
+		drools.insert(rel);
+		pNamedObjects.put("rel" + nestedIdValue, rel);
+	}
+
+
+	private ObservationResult generateObservationResult(String pIdToAssignToObservationResult, String pFocalPersonId, boolean pSubjectIsFocalPerson) {
+
+		ObservationResult lObservationResult = new ObservationResult();
+		CD lSeriesToDisplayCD = new CD();
+		lObservationResult.setId(pIdToAssignToObservationResult);
+		lObservationResult.setEvaluatedPersonId(pFocalPersonId);
+		lObservationResult.setSubjectIsFocalPerson(pSubjectIsFocalPerson);
+
+		return lObservationResult;
+	}
+
+
+	public void OutputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(KnowledgeHelper drools, java.util.HashMap pNamedObjects, String focalPersonId, List<SeriesDisplaySelection> pSeriesDisplays, SubstanceAdministrationProposal pSAP)
+		throws ImproperUsageException {
+
+		String _METHODNAME = "OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal: ";
+		if (drools == null || pNamedObjects == null|| pSAP == null || pSeriesDisplays == null) {
+			String lErrStr = "Unable to output doses remaining: one or more parameters not specified";
+			logger.error(_METHODNAME + lErrStr);
+			throw new ImproperUsageException(lErrStr);
+		}
+
+		if (pSeriesDisplays.size() == 0) {
+			return;
+		}
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// START - Top Level Observation for the Series Display
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		ObservationResult lCollectionOfSeriesDisplaysObs = generateObservationResult(ICELogicHelper.generateUniqueString(), focalPersonId, true);
+
+		///////
+		// Set the Observation Focus for the Series Display
+		///////
+		CD localCD = new CD();	// TODO: incorporate into and pull from supporting data
+		localCD.setCodeSystem("2.16.840.1.113883.3.795.12.100.500");
+		localCD.setCode("SERIES_DISPLAY_OPTIONS");
+		localCD.setDisplayName("Series Options for Display");
+		lCollectionOfSeriesDisplaysObs.setObservationFocus(localCD);
+
+		// Loop through all of the scored series selections for display
+		for (SeriesDisplaySelection lSDS : pSeriesDisplays) {
+			////////////////////////////
+			// Create ObservationResult containing the Series Display Selection and its series display type
+			////////////////////////////
+			//////////////
+			// Set the ObservationFocus to the Series Display Type, and its ObservationValue to the coded value representing the Series itself
+			//////////////
+			ObservationResult lSeriesToDisplayObs = generateObservationResult(ICELogicHelper.generateUniqueString(), focalPersonId, true);
+			CD lSeriesToDisplayFocusCD = new CD();	// TODO: incorporate into and pull from supporting data
+			lSeriesToDisplayFocusCD.setCodeSystem("2.16.840.1.113883.3.795.12.100.501");
+			lSeriesToDisplayFocusCD.setCode(lSDS.getSeriesDisplaySelectionType().toString());
+			lSeriesToDisplayObs.setObservationFocus(lSeriesToDisplayFocusCD);
+			ObservationValue lSeriesToDisplayObsValue = new ObservationValue();
+			CD lSeriesCD = new CD();	// TODO: incorporate into and pull from supporting data
+			lSeriesCD.setCodeSystem("2.16.840.1.113883.3.795.12.100.10");
+			lSeriesCD.setCode(lSDS.getSeriesName());
+			lSeriesToDisplayObsValue.setConcept(lSeriesCD);
+			lSeriesToDisplayObs.setObservationValue(lSeriesToDisplayObsValue);
+
+			//////////////
+			// Doses Remaining - Embed the number of doses remaining for the series within the series display type, with the observation value as text representing the number of doses remaining
+			//////////////
+			ObservationResult lDosesRemainingObs = generateObservationResult(ICELogicHelper.generateUniqueString(), focalPersonId, true);
+			CD lDosesRemainingCD = new CD();	// TODO: incorporate into and pull from supporting data
+			lDosesRemainingCD.setCodeSystem("2.16.840.1.113883.3.795.12.100.500");
+			lDosesRemainingCD.setCode("NUMBER_OF_DOSES_REMAINING");
+			lDosesRemainingCD.setDisplayName("Doses Remaining");
+			lDosesRemainingCD.setOriginalText("Number of doses remaining in the series, as of the evaluation date");
+			lDosesRemainingObs.setObservationFocus(lDosesRemainingCD);
+			ObservationValue lDosesRemainingObsValue = new ObservationValue();
+			lDosesRemainingObsValue.setText(lSDS.getNumberOfDosesRemaining());
+			lDosesRemainingObs.setObservationValue(lDosesRemainingObsValue);
+			// Insert the doses remaining structure on the fact and named objects lists
+			drools.insert(lDosesRemainingObs);
+			pNamedObjects.put("childObs" + lDosesRemainingObs.getId(), lDosesRemainingObs);
+
+			// Relate the doses remaining observation to the series display selection, and place on fact and named objects lists
+			ClinicalStatementRelationship relDR = new ClinicalStatementRelationship();
+			relDR.setSourceId(lSeriesToDisplayObs.getId());
+			relDR.setTargetId(lDosesRemainingObs.getId());
+			CD relCodeDR= new CD();
+			relCodeDR.setCodeSystem("2.16.840.1.113883.5.1002");
+			relCodeDR.setCode("RSON");
+			relCodeDR.setDisplayName("has pertaining reason");
+			relDR.setTargetRelationshipToSource(relCodeDR);
+			drools.insert(relDR);
+			pNamedObjects.put("rel" + lDosesRemainingObs.getId(), relDR);
+			//////////////
+			// END Doses Remaining - Embed the number of doses remaining for the series...
+			//////////////
+
+			///////
+			// Place the display series and designated display score on the named objects list
+			///////
+			lSeriesToDisplayObs.setClinicalStatementToBeRoot(false);
+			lSeriesToDisplayObs.setToBeReturned(true);
+			drools.insert(lSeriesToDisplayObs);
+			pNamedObjects.put("childObs" +  lSeriesToDisplayObs.getId(), lSeriesToDisplayObs);
+
+			///////
+			// Relate the display series with the collection of series
+			///////
+			ClinicalStatementRelationship srel = new ClinicalStatementRelationship();
+			srel.setSourceId(lCollectionOfSeriesDisplaysObs.getId());
+			srel.setTargetId(lSeriesToDisplayObs.getId());
+			CD srelCodeSR = new CD();
+			srelCodeSR.setCodeSystem("2.16.840.1.113883.5.1002");
+			srelCodeSR.setCode("RSON");
+			srelCodeSR.setDisplayName("has pertaining reason");
+			srel.setTargetRelationshipToSource(srelCodeSR);
+			drools.insert(srel);
+			pNamedObjects.put("rel" + lSeriesToDisplayObs.getId(), srel);
+		}
+
+		//////////////
+		// Place Collection of Series Displays on the named objects list
+		//////////////
+		lCollectionOfSeriesDisplaysObs.setClinicalStatementToBeRoot(false);
+		lCollectionOfSeriesDisplaysObs.setToBeReturned(true);
+		drools.insert(lCollectionOfSeriesDisplaysObs);
+		pNamedObjects.put("childObs" + lCollectionOfSeriesDisplaysObs.getId(), lCollectionOfSeriesDisplaysObs);
+
+		///////
+		// Finally, relate the top-level ObservationResult collection to the SubstanceAdministrationProposal
+		///////
+		ClinicalStatementRelationship rel = new ClinicalStatementRelationship();
+		rel.setSourceId(pSAP.getId());
+		rel.setTargetId(lCollectionOfSeriesDisplaysObs.getId());
+		CD relCodeSR = new CD();
+		relCodeSR.setCodeSystem("2.16.840.1.113883.5.1002");
+		relCodeSR.setCode("RSON");
+		relCodeSR.setDisplayName("has pertaining reason");
+		rel.setTargetRelationshipToSource(relCodeSR);
+		drools.insert(rel);
+		pNamedObjects.put("rel" + lCollectionOfSeriesDisplaysObs.getId(), rel);
+	}
+
+
 	/**
 	 * Return local ICE3 Observation Evaluation Focus code for the Vaccine Group
 	 * @param pVG

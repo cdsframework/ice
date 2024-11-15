@@ -50,6 +50,25 @@ import org.cdsframework.ice.service.Vaccine
 global java.util.Date evalTime
 
 
+rule "Duplicate Shots/Same Day: If a Series is potentially no longer complete after a shot has been marked Invalid / DUPLICATE_SAME_DAY, mark the series not complete if applicable"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	// auto-focus true
+	no-loop true
+	when	
+		$tddup : TargetDose(status == DoseStatus.INVALID, invalidReasons contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
+		$ts : TargetSeries(this == $tddup.associatedTargetSeries, isSeriesComplete() == true) 
+		$tdlatest : TargetDose(associatedTargetSeries == $ts, hasBeenEvaluated == true, status == DoseStatus.VALID)
+		not TargetDose(associatedTargetSeries == $ts, hasBeenEvaluated == true, status == DoseStatus.VALID, doseNumberInSeries > $tdlatest.doseNumberInSeries)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($ts) {
+			isSeriesComplete();
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tddup + " in TargetSeries " + $ts);
+end
+
+
 // Duplicate Shot/Same Day Overview Rule #1: 
 // If all shots are the same CVX code, then evaluate the 1st CVX processed as Valid and evaluate the others as Invalid with a reason code of DUPLICATE_SAME_DAY. 
 // (This scenario shouldn't happen with most registries.)
@@ -73,7 +92,7 @@ rule "Duplicate Shots/Same Day Overview Rule #1: If both shots are of the same C
 		modify($td) {
 			setDuplicateShotSameDayCheckCompleted(true);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdother.associatedTargetSeries);
 end
 
 

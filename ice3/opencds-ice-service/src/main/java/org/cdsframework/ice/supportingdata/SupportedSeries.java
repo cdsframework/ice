@@ -558,6 +558,21 @@ public class SupportedSeries implements SupportingData {
 
 		////////////// Gather the DoseRules END //////////////
 
+		// Series Group Info
+		if (pIceSeriesSpecificationFile.getSeriesGroup() != null) {
+			series1Rules.setSeriesGroup(pIceSeriesSpecificationFile.getSeriesGroup().intValue());
+		}
+
+		///////
+		// Gather patient age information and the associated start/end ages for the series (if any), and add to the SeriesRules object
+		///////
+		if (pIceSeriesSpecificationFile.getPatientStartAge() != null) {
+			series1Rules.setSeriesStartAge(new TimePeriod(pIceSeriesSpecificationFile.getPatientStartAge()));
+		}
+		if (pIceSeriesSpecificationFile.getPatientEndAge() != null) {
+			series1Rules.setSeriesEndAge(new TimePeriod(pIceSeriesSpecificationFile.getPatientEndAge()));
+		}
+
 		///////
 		// Add the DoseRule information to the SeriesRules object
 		///////

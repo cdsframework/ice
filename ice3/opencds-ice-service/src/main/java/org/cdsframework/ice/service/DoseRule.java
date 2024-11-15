@@ -275,6 +275,7 @@ public class DoseRule {
 		return this.allowableVaccines;
 	}
 
+
 	/**
 	 * Sets the allowable vaccines for this dose rule. If the vaccines supplied is null, preferable vaccines is set to the empty set
 	 * @param vaccine
@@ -430,11 +431,9 @@ public class DoseRule {
 	@Override
 	public String toString() {
 
-		String toString = "DoseRule [doseNumber=" + doseNumber + "; absoluteMinimumAge=" + absoluteMinimumAge + "; minimumAge="
-				+ minimumAge + "; maximumAge=" + maximumAge + "; earliestRecommendedAge=" + earliestRecommendedAge
-				+ "; latestRecommendedAge=" + latestRecommendedAge + "; absoluteMinimumInterval="
-				+ absoluteMinimumInterval + "; minimumInterval=" + minimumInterval + "; earliestRecommendedInterval="
-				+ earliestRecommendedInterval + "; latestRecommendedInterval=" + latestRecommendedInterval;
+		String toString = "DoseRule [doseNumber=" + doseNumber + "; absoluteMinimumAge=" + absoluteMinimumAge + "; minimumAge="	+ minimumAge + "; maximumAge=" + maximumAge + "; earliestRecommendedAge=" + earliestRecommendedAge
+			+ "; latestRecommendedAge=" + latestRecommendedAge + "; absoluteMinimumInterval=" + absoluteMinimumInterval + "; minimumInterval=" + minimumInterval + "; earliestRecommendedInterval="	+ earliestRecommendedInterval
+			+ "; latestRecommendedInterval=" + latestRecommendedInterval;
 
 		toString += "\npreferableVaccines [[ ";
 		int i=1;
