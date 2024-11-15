@@ -1782,42 +1782,6 @@ rule "RecommendationForecast.findMostRecentAdministeredSelectAdjuvantProductVacc
 end
 
 
-/*
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "RecommendationForecast.setNextSeasonalTargetSeriesForRecommendation" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	when
-		// To avoid activation-group clashes, only forecast one series at a time
-		not TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS || recommendationStatus == RecommendationStatus.FORECASTING_COMPLETE)
-		$ts: TargetSeries(recommendationStatus == RecommendationStatus.NOT_FORECASTED, isSelectedSeries() == true, targetSeason != null)
-		not TargetSeries(vaccineGroup == $ts.vaccineGroup, targetSeason != null, targetSeason.fullySpecifiedSeasonStartDate.isAfter($ts.targetSeason.fullySpecifiedSeasonStartDate))
-		(		
-			TargetSeries(this == $ts, seriesRules.seriesGroup <= 0 || seriesRules.seriesGroup > 0 && seriesRules.seriesEndAge == null) 
-			or
-			/////// (
-				/////// not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, seriesStartAgeDate != null)
-				/////// or
-				// targetSeason == null because we don't want to compare defined ages with other seasonal series; we already selected the most recent/current series in the predicates above
-				// However, all non-seasonal series, iof any, should come after this seasonal series
-				//forall ($tssa : TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, seriesStartAgeDate != null, targetSeason == null, seriesRules.seriesGroup == $ts.seriesRules.seriesGroup)
-				//	TargetSeries(this == $ts, seriesEndAgeDate == null || seriesEndAgeDate < $tssa.seriesStartAgeDate)
-				//)
-        	/////// )
-        	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, targetSeason == null, $ts.seriesEndAgeDate != null, seriesStartAgeDate != null && seriesStartAgeDate > $ts.seriesEndAgeDate)
-        )
-	then
-		String _RULENAME = kcontext.rule.name;	
-		modify($ts) {
-			setRecommendationStatus(RecommendationStatus.FORECASTING_IN_PROGRESS);
-		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Forecasting TargetSeries " + $ts);
-		setFocus("RecommendationForecast^preRecommendationValidation");
-end
-*/
-
-
 ///////// ***
 // General Design rule... Do not Edit
 ///////// ***
@@ -1851,39 +1815,6 @@ rule "RecommendationForecast.setNextSeasonalTargetSeriesForRecommendation" rulef
 		setFocus("RecommendationForecast^preRecommendationValidation");
 end
 
-
-/*
-///////// ***
-// General Design rule... Do not Edit
-///////// ***
-rule "RecommendationForecast.setNextNonSeasonalTargetSeriesForRecommendation" ruleflow-group "RecommendationForecast"
-	dialect "mvel"
-	when
-		// To avoid activation-group clashes, only forecast one series at a time
-		not TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS || recommendationStatus == RecommendationStatus.FORECASTING_COMPLETE)
-		$ts: TargetSeries(recommendationStatus == RecommendationStatus.NOT_FORECASTED, isSelectedSeries() == true, targetSeason == null)
-		(		
-			TargetSeries(this == $ts, seriesRules.seriesGroup <= 0 || seriesRules.seriesGroup > 0 && seriesRules.seriesEndAge == null) 
-			or
-			/////// (
-			///////	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, seriesRules.seriesGroup == $ts.seriesRules.seriesGroup, seriesRules.seriesStartAge != null)
-			///////	or
-			///////	forall ($tssa : TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, seriesRules.seriesGroup == $ts.seriesRules.seriesGroup)
-			///////		TargetSeries(this == $ts, seriesStartAgeDate == null || seriesEndAgeDate == null || seriesStartAgeDate > $tssa.seriesEndAgeDate)
-			///////	)
-        	/////// )
-        	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, $ts.seriesEndAgeDate != null, seriesStartAgeDate != null && seriesStartAgeDate > $ts.seriesEndAgeDate) 
-        )
-	then
-		String _RULENAME = kcontext.rule.name;		
-		RecommendationStatus newRecommendationStatus = RecommendationStatus.FORECASTING_IN_PROGRESS;
-		modify($ts) {
-			setRecommendationStatus(newRecommendationStatus);
-		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Forecasting TargetSeries " + $ts);
-		setFocus("RecommendationForecast^preRecommendationValidation");
-end
-*/
 
 ///////// ***
 // General Design rule... Do not Edit
