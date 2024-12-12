@@ -1,0 +1,23 @@
+substitutions:
+  _ARTIFACT_REGISTRY: us-central1-docker.pkg.dev/cdsframework/ice-interim/
+  _CLOUD_RUN_INSTANCE: itm-tst #https://ice-489266476751.us-central1.run.app
+  _CLOUD_RUN_REGION: us-central1
+  _CONTAINER_NAME: test-manager
+
+steps:
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:alpine
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "${_CLOUD_RUN_INSTANCE}"
+      - "--image"
+      - "${_ARTIFACT_REGISTRY}/${_CONTAINER_NAME}:${SHORT_SHA}"
+      - "--region"
+      - "${_CLOUD_RUN_REGION}"
+
+timeout: 900s
+queueTtl: 1800s
+options:
+  dynamicSubstitutions: true
