@@ -748,7 +748,7 @@ rule "DTP: Enforce Minimum Interval between Tdap/DTaP and Td/DT if the shot meet
 		Retract IceFact $ICEFactTypeFinding from Working Memory
 		Include the reason for shot $currentShot Invalid due to "D_AND_T_INVALID/P_VALID"
 		Refresh all Facts in the Series $targetSeries for Evaluation
-		Refresh all Facts in the Shot $currentShot
+		Refresh all facts for the shot $currentShot
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end

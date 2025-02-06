@@ -38,6 +38,7 @@ import org.cdsframework.ice.service.ICELogicHelper
 import org.cdsframework.ice.service.RecommendationStatus
 import org.cdsframework.ice.service.SeriesRules
 import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.service.Season
 import org.cdsframework.ice.service.TargetDose
 import org.cdsframework.ice.service.TargetSeries
 import org.cdsframework.ice.util.TimePeriod
@@ -64,10 +65,11 @@ rule "COVID-19: If CVX 218, CVX 219, CVX 227, CVX 228, CVX 229, CVX 230, CVX 301
 			- the shot is not ignored
 			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
 			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_VACCINE"
+			/////// - the size of the collection $collectionOfStrReasons is == 1
 			- make note of the Associated Series as $associatedTargetSeries
 	then
 		Mark the shot $administeredShot as Ignored
-		Refresh all facts in the shot $administeredShot
+		Refresh all facts for the shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
 end
@@ -126,7 +128,7 @@ rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVI
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- make note of the Associated Series as $associatedTargetSeries
-			- make note of the unique ID of the shot as $uniqueShotId		
+			- make note of the unique ID of the shot as $uniqueShotId
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series belongs to the season with name "COVID19Dec2020Season"
 		There does not exist an IceFact
@@ -140,7 +142,7 @@ rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVI
 end
 
 
-rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVID19Sep2023 Season"
+rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVID19Sep2023+ Season"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	salience 999
@@ -151,7 +153,7 @@ rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVI
 			- make note of the Associated Series as $associatedTargetSeries
 			- make note of the unique ID of the shot as $uniqueShotId		
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the series belongs to the season with name "COVID19Sep2023Season"
+			- the series belongs to the season with name a member of ("COVID19Sep2023Season", "COVID19Aug2024Season")
 		There does not exist an IceFact
 			- that has finding $uniqueShotId
 			- that has associated administered shot $currentShot
@@ -162,6 +164,35 @@ rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVI
 		Set the Agenda Group Focus to "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 end
 
+/*
+// If any new seasons are defined after the COVID Sept 2023, for now, use the agenda group rules defined in the HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season, since they still apply.
+rule "COVID-19: Invoke separate agenda group for evaluation of shots for any season after the COVID19Sep2023 Season using the COVID19Sep2023 Rule Set (as of 2024-205 season, default behavior for seasons is the same as for the Sep2023 season)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the unique ID of the shot as $uniqueShotId
+		There is a Season $sept2023season
+			- the name of the Season is "COVID19Sep2023Season"
+			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the fully specified season start date as $dtSeasonStartDateSep2023			
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series is a seasonal series
+			- the season start date for the Series is > $dtSeasonStartDateSep2023
+		There does not exist an IceFact
+			- that has finding $uniqueShotId
+			- that has associated administered shot $currentShot
+	then
+		Logically insert an IceFact $uniqueShotId with TargetDose $currentShot into Working Memory
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+end
+*/
 
 rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in the COVID19Dec2020 Season"
 	dialect "mvel"
@@ -186,7 +217,7 @@ rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in
 end
 
 
-rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in the COVID19Sep2023 Season"
+rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in the COVID19Sep2023+ Season"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	salience 999
@@ -201,12 +232,41 @@ rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in
 			- that has already been evaluated
 			- the administered shot number is > $administeredShotNumberFocus
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the series belongs to the season with name "COVID19Sep2023Season"
+			- the series belongs to the season with name a member of ("COVID19Sep2023Season", "COVID19Aug2024Season")
 	then
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 		Set the Agenda Group Focus to "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
 end
+
+/*
+rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots for any season after the COVID19Sep2023 Season, using the COVID19Sep2023 rule set (as of 2024-205 season, default behavior is the same as for the Sep2023 season)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	salience 999
+	when
+		There is an administered shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- that has already been evaluated
+			- make note of the administered shot number as $administeredShotNumberFocus
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an administered shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is > $administeredShotNumberFocus
+		There is a Season $sept2023season
+			- the name of the Season is "COVID19Sep2023Season"
+			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the fully specified season start date as $dtSeasonStartDateSep2023
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series is a seasonal series
+			- the season start date for the Series is > $dtSeasonStartDateSep2023
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+end
+*/
 
 /*************************************************************************************************************************************************************************************
  END Invoke Seasonal Agenda Group Logic

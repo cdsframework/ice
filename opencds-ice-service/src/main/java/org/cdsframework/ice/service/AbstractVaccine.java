@@ -43,21 +43,21 @@ public abstract class AbstractVaccine {
 	private boolean selectAdjuvantProduct;
 	private TimePeriod validMinimumAgeOfUse;
 	private TimePeriod validMaximumAgeOfUse;
-	private TimePeriod licensedForUseMinimumAge;
-	private TimePeriod licensedForUseMaximumAge;
+	private TimePeriod recommendedForUseMinimumAge;
+	private TimePeriod recommendedForUseMaximumAge;
 
 	private static final Logger logger = LogManager.getLogger();
-	
+
 
 	public AbstractVaccine(AbstractVaccine pAbstractVaccine) {
-		
+
 		String _METHODNAME = "AbstractVaccine(AbstractVaccine): ";
 		if (pAbstractVaccine == null) {
 			String errStr = "Vaccine instance not specified";
 			logger.warn(_METHODNAME + errStr);
 			throw new IllegalArgumentException(errStr);
 		}
-		
+
 		// String lCdsListItemName = pAbstractVaccine.getCdsListItemName();
 		// if (lCdsListItemName == null) {
 		// 	String errStr = "cdsListItem code not supplied in Vaccine instance";
@@ -73,16 +73,16 @@ public abstract class AbstractVaccine {
 		this.unspecifiedFormulation = pAbstractVaccine.isUnspecifiedFormulation();
 		this.validMinimumAgeOfUse = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getValidMinimumAgeForUse());
 		this.validMaximumAgeOfUse = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getValidMaximumAgeForUse());
-		this.licensedForUseMinimumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getLicensedMinimumAgeForUse());
-		this.licensedForUseMaximumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getLicensedMaximumAgeForUse());
+		this.recommendedForUseMinimumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getRecommendedMinimumAgeForUse());
+		this.recommendedForUseMaximumAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getRecommendedMaximumAgeForUse());
 	}
-	
+
 	/**
 	 * Constructor for AbstractVaccine object
 	 * @param pCdsConceptName cdsListItemName to be associated with this Vaccine must be supplied
 	 */
 	public AbstractVaccine(CdsConcept pCC) {
-		
+
 		String _METHODNAME = "AbstractVaccine(String): ";
 		if (pCC == null || pCC.getOpenCdsConceptCode() == null) {			// The latter condition should never occur
 			String errStr = "cdsConceptName code not supplied";
@@ -98,8 +98,8 @@ public abstract class AbstractVaccine {
 		this.selectAdjuvantProduct = false;
 		this.validMinimumAgeOfUse = null;
 		this.validMaximumAgeOfUse = null;
-		this.licensedForUseMinimumAge = null;
-		this.licensedForUseMaximumAge = null;
+		this.recommendedForUseMinimumAge = null;
+		this.recommendedForUseMaximumAge = null;
 	}
 
 	/*
@@ -111,7 +111,7 @@ public abstract class AbstractVaccine {
 	public CdsConcept getCdsConcept() {
 		return this.cdsConcept;
 	}
-	
+
 	public String getCdsConceptName() {
 		return this.cdsConcept.getOpenCdsConceptCode();
 	}
@@ -156,13 +156,13 @@ public abstract class AbstractVaccine {
 			this.validMaximumAgeOfUse = validMaximumAgeForUse;
 		}
 	}
-	
+
 	public boolean isUnspecifiedFormulation() {
 		return unspecifiedFormulation;
 	}
 
 	/**
-	 * Sets the unspecified formulation flag to whatever is specified by the parameter, overriding any previous (including calculated) unspecified formulation 
+	 * Sets the unspecified formulation flag to whatever is specified by the parameter, overriding any previous (including calculated) unspecified formulation
 	 * @param unspecifiedFormulation
 	 */
 	public void setUnspecifiedFormulation(boolean unspecifiedFormulation) {
@@ -172,7 +172,7 @@ public abstract class AbstractVaccine {
 	public boolean isSelectAdjuvantProduct() {
 		return selectAdjuvantProduct;
 	}
-	
+
 	public void setSelectAdjuvantProduct(boolean selectAdjuvantProduct) {
 		this.selectAdjuvantProduct = selectAdjuvantProduct;
 	}
@@ -193,20 +193,20 @@ public abstract class AbstractVaccine {
 		this.manufacturerCode = manufacturerCode;
 	}
 
-	public TimePeriod getLicensedMinimumAgeForUse() {
-		return licensedForUseMinimumAge;
+	public TimePeriod getRecommendedMinimumAgeForUse() {
+		return recommendedForUseMinimumAge;
 	}
 
-	public void setLicensedMinimumAgeForUse(TimePeriod licensedForUseMinimumAge) {
-		this.licensedForUseMinimumAge = licensedForUseMinimumAge;
+	public void setRecommendedMinimumAgeForUse(TimePeriod recommendedForUseMinimumAge) {
+		this.recommendedForUseMinimumAge = recommendedForUseMinimumAge;
 	}
 
-	public TimePeriod getLicensedMaximumAgeForUse() {
-		return licensedForUseMaximumAge;
+	public TimePeriod getRecommendedMaximumAgeForUse() {
+		return recommendedForUseMaximumAge;
 	}
 
-	public void setLicensedMaximumAgeForUse(TimePeriod licensedForUseMaximumAge) {
-		this.licensedForUseMaximumAge = licensedForUseMaximumAge;
+	public void setRecommendedMaximumAgeForUse(TimePeriod recommendedForUseMaximumAge) {
+		this.recommendedForUseMaximumAge = recommendedForUseMaximumAge;
 	}
 
 	@Override

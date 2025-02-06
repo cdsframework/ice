@@ -489,8 +489,7 @@ public class SupportedVaccines implements SupportingData {
 				}
 			}
 			else {
-				String lErrStr = "Error: Unaccounted for inconsistency encountered during processing of vaccine supporting data. " +
-					"(Unaccounted for vaccine component when no vaccines have been defined)";
+				String lErrStr = "Error: Unaccounted for inconsistency encountered during processing of vaccine supporting data. (Unaccounted for vaccine component when no vaccines have been defined)";
 				logger.error(_METHODNAME + lErrStr);
 				throw new ICECoreError(lErrStr);
 			}
@@ -519,6 +518,16 @@ public class SupportedVaccines implements SupportingData {
 		lAge = pIVSF.getValidMaximumAgeForUse();
 		if (lAge != null) {
 			pVaccineComponent.setValidMaximumAgeForUse(new TimePeriod(lAge));
+		}
+		// Recommended Minimum Age
+		lAge = pIVSF.getRecommendedMinimumAgeForUse();
+		if (lAge != null) {
+			pVaccineComponent.setRecommendedMinimumAgeForUse(new TimePeriod(lAge));
+		}
+		// Recommended Maximum Age
+		lAge = pIVSF.getRecommendedMaximumAgeForUse();
+		if (lAge != null) {
+			pVaccineComponent.setRecommendedMaximumAgeForUse(new TimePeriod(lAge));
 		}
 		// Live virus
 		Boolean lBL = pIVSF.isLiveVirusVaccine();

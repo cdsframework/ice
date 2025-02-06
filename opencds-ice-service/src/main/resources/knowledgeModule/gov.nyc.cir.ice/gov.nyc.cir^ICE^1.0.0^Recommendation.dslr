@@ -77,3 +77,20 @@ rule "Recommend No Recommended Interval When Prior Dose Before DOB"
        	Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+/*
+// If a vaccine has been recommended at the CVX code level but the reommendation forecast is NOT_RECOMMENDED, remove the vaccine-level recommendation
+ rule "If a vaccine has been recommended at the CVX code level but the reommendation forecast is NOT_RECOMMENDED, remove the vaccine-level recommendation"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a Specific Vaccine is Not Recommended
+			- the effective dose number in the Series is == 1
+	then
+		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+*/

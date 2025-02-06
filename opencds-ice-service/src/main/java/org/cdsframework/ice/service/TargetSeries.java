@@ -1020,6 +1020,28 @@ public class TargetSeries {
 		}
 	}
 
+
+	/**
+	 * Get last shot administered, excluding ignored shots
+	 */
+	public TargetDose getLastShotAdministeredInSeriesExcludingIgnoredShots() {
+
+		TargetDose lastShotAdministered = null;
+		if (!targetDoses.isEmpty()) {
+			Iterator<TargetDose> tdIter = targetDoses.descendingIterator();
+			while (tdIter.hasNext()) {
+				TargetDose td = tdIter.next();
+				if (! td.isShotIgnored()) {
+					lastShotAdministered = td;
+					break;
+				}
+			}
+		}
+
+		return lastShotAdministered;
+	}
+
+
 	/**
 	 * Geth
 	 *
@@ -2630,7 +2652,7 @@ public class TargetSeries {
 		DoseRule seriesDoseRule = obtainDoseRuleForSeriesByDoseNumber(targetDoseNumber);
 		if (seriesDoseRule == null) {
 			String str = "Corresponding series dose not found: " + getVaccineGroup() + "; " + getSeriesName() + "; target dose number: " + targetDoseNumber;
-			logger.info(_METHODNAME + str);
+			/////// logger.info(_METHODNAME + str);
 			return null;
 		}
 
