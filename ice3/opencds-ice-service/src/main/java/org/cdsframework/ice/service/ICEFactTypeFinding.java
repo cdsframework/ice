@@ -56,6 +56,13 @@ public class ICEFactTypeFinding {
 		this.associatedSeriesRules = pTargetSeries != null ? pTargetSeries.getSeriesRules() : null;
 	}
 
+	public ICEFactTypeFinding(String pIceResultFinding, TargetDose pTargetDose, TargetSeries pTargetSeries) {
+		this.iceResultFinding = pIceResultFinding;
+		this.associatedTargetDose = pTargetDose;
+		this.associatedTargetSeries = pTargetSeries;
+		this.associatedSeriesRules = pTargetSeries != null ? pTargetSeries.getSeriesRules() : null;
+	}
+
 	public ICEFactTypeFinding(String pIceResultFinding, SeriesRules pSeriesRules) {
 		this.iceResultFinding = pIceResultFinding;
 		this.associatedSeriesRules = pSeriesRules;

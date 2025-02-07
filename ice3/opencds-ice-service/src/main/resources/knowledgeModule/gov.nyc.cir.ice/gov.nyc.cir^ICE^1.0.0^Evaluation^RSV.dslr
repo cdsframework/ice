@@ -66,7 +66,7 @@ rule "RSV: If an RSV shot is administered prior to 10/1/2023, evaluate as Invali
 		Set the shot status of $currentShot to Invalid
 		Remove all evaluation reasons from shot $currentShot
 		Include the reason for shot $currentShot Invalid due to "Vaccine Not Yet Available for Use on Specified Administration Date"
-		Refresh all facts in the shot $currentShot
+		Refresh all facts for the shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -178,7 +178,7 @@ rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Vali
 		Remove all evaluation reasons from shot $otherRSVShot
 		Set the Shot Status of $otherRSVShot to Accepted
 		Include the reason for shot $otherRSVShot Accepted due to "Shot Administered Outside of a Routine Series"
-		/////// Refresh all facts in the shot $otherRSVShot
+		/////// Refresh all facts for the shot $otherRSVShot
 		Record that this dose rule was processed for the TargetDose $otherRSVShot
 		Log that this dose rule fired for the dose $otherRSVShot in the Series $associatedTargetSeries	
 end

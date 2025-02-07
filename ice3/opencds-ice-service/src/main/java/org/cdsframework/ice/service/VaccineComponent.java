@@ -134,12 +134,9 @@ public class VaccineComponent extends AbstractVaccine {
 				+ ", getValidMaximumAgeForUse()=" + getValidMaximumAgeForUse()
 				+ ", getTradeName()=" + getTradeName()
 				+ ", getManufacturerCode()=" + getManufacturerCode()
-				+ ", getLicensedMinimumAgeForUse()="
-				+ getLicensedMinimumAgeForUse()
-				+ ", getLicensedMaximumAgeForUse()="
-				+ getLicensedMaximumAgeForUse()
-				+ ", isUnspecifiedFormulation()=" + isUnspecifiedFormulation()
-				+ "]";
+				+ ", getLicensedMinimumAgeForUse()=" + getRecommendedMinimumAgeForUse()
+				+ ", getLicensedMaximumAgeForUse()=" + getRecommendedMaximumAgeForUse()
+				+ ", isUnspecifiedFormulation()=" + isUnspecifiedFormulation() + "]";
 		}
 
 }

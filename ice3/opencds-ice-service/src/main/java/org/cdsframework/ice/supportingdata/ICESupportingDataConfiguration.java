@@ -752,8 +752,8 @@ public class ICESupportingDataConfiguration {
 			// age restrictions
 			lDebugStrb += "\nValid Minimum Age: " + pIceVaccineSpecification.getValidMinimumAgeForUse();
 			lDebugStrb += "\nValid Maximum Age: " + pIceVaccineSpecification.getValidMaximumAgeForUse();
-			lDebugStrb += "\nLicensed Minimum Age: " + pIceVaccineSpecification.getLicensedMinimumAgeForUse();
-			lDebugStrb += "\nLicensed Maximum Age: " + pIceVaccineSpecification.getLicensedMaximumAgeForUse();
+			lDebugStrb += "\nLicensed Minimum Age: " + pIceVaccineSpecification.getRecommendedMinimumAgeForUse();
+			lDebugStrb += "\nLicensed Maximum Age: " + pIceVaccineSpecification.getRecommendedMaximumAgeForUse();
 
 			// Targeted diseases
 			lDebugStrb += "\ngetDiseaseImmunities(): ";

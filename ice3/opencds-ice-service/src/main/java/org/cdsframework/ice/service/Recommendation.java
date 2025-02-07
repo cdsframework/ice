@@ -48,6 +48,7 @@ public class Recommendation {
 
 	private String recommendationIdentifier;
 	private String targetSeriesIdentifier;
+	private String targetDoseIdentifier;
 	private RecommendationStatus recommendationStatus;
 	private Vaccine recommendedVaccine;
 	private Date earliestDate;
@@ -85,12 +86,30 @@ public class Recommendation {
 		recommendationSupplementalText = null;
 	}
 
+	public Recommendation(TargetSeries pTS, TargetDose pTD)
+		throws IllegalArgumentException {
+
+		this(pTS);
+		String _METHODNAME = "Recommendation(): ";
+		if (pTD == null) {
+			String errStr = "Supplied target dose identifier is null";
+			logger.error(_METHODNAME + errStr);
+			throw new IllegalArgumentException(errStr);
+		}
+
+		targetDoseIdentifier = pTD.getUniqueId();
+	}
+
 	public String getRecommendationIdentifier() {
 		return recommendationIdentifier;
 	}
 
 	public String getTargetSeriesIdentifier() {
 		return targetSeriesIdentifier;
+	}
+
+	public String getTargetDoseIdentifier() {
+		return targetDoseIdentifier;
 	}
 
 	public RecommendationStatus getRecommendationStatus() {

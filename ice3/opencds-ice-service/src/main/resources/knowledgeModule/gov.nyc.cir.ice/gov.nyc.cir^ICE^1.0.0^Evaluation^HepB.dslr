@@ -241,7 +241,7 @@ rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a
 		Remove all evaluation reasons from shot $interveningOrEarlierShot
 		Set the Shot Status of $interveningOrEarlierShot to Accepted
 		Include the reason for shot $interveningOrEarlierShot Accepted due to "Vaccine Not Counted Based on Most Recent Vaccine Given"
-		Refresh all facts in the Shot $interveningOrEarlierShot
+		Refresh all facts for the shot $interveningOrEarlierShot
 		Record that this dose rule was Processed for the TargetDose $interveningOrEarlierShot
 		Log that this dose rule fired for the dose $interveningOrEarlierShot in the Series $targetSeries
 end
@@ -299,7 +299,7 @@ rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots
 		Remove all evaluation reasons from shot $priorCVX189shot
 		Retract IceFact $ICEFactTypeFinding from working memory
 		Set the Shot Status of $priorCVX189shot to Valid
-		Refresh all facts in the Shot $priorCVX189shot
+		Refresh all facts for the shot $priorCVX189shot
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end

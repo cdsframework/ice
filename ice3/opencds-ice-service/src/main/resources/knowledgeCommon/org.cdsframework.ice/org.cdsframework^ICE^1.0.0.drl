@@ -58,6 +58,8 @@ import org.cdsframework.ice.service.DiseaseImmunity
 import org.cdsframework.ice.service.DoseRule
 import org.cdsframework.ice.service.DoseStatus
 import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding.IntervalFactType
 import org.cdsframework.ice.service.LiveVirusFact
 import org.cdsframework.ice.service.InconsistentConfigurationException
 import org.cdsframework.ice.service.ICELogicHelper
@@ -1327,14 +1329,13 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval" ruleflow-group "His
 	activation-group "doseIntervalCheck"
 	salience 100
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $admindose: administeredShotNumberInSeries >= 2, $doseNumber : doseNumberInSeries, $tddate : administrationDate, 
-			$tdAssociatedTargetSeries : associatedTargetSeries)
-		$tdprev : TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administeredShotNumberInSeries < $admindose, administrationDate < $tddate, 
-			isShotIgnored() == false, $tdprevdate : administrationDate)
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $admindose: administeredShotNumberInSeries >= 2, $doseNumber : doseNumberInSeries, $tddate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries)
+		$tdprev : TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administeredShotNumberInSeries < $admindose, administrationDate < $tddate, isShotIgnored() == false, $tdprevdate : administrationDate)
 		not TargetDose(associatedTargetSeries == $tdAssociatedTargetSeries, administrationDate > $tdprevdate, administrationDate < $tddate, isShotIgnored() == false)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, this == $tdprev.associatedTargetSeries, seriesRules.numberOfDosesInSeries >= $doseNumber)
-		not (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1, 
-			associatedTargetDose.administeredShotNumberInSeries == $admindose-1))
+		not (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue, associatedTargetDose == $tdprev, associatedTargetDose.doseNumberInSeries == 1, associatedTargetDose.administeredShotNumberInSeries == $admindose-1))
+		not ICEIntervalFactTypeFinding(intervalFactType == IntervalFactType.EVALUATION, iceResultFinding == SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue, associatedCurrentTargetDose != null && associatedCurrentTargetDose == $td, 
+			associatedPreviousTargetDose != null && associatedPreviousTargetDose == $tdprev)
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, $tdprev);
@@ -2450,6 +2451,11 @@ rule "RecommendationForecast.recommendBasedOnEarliestIntervalRule" ruleflow-grou
 	when
 		$evalTime : EvalTime()
 		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
+		$td : TargetDose(associatedTargetSeries == $ts, isShotIgnored() == false)
+		not TargetDose(associatedTargetSeries == $ts, administeredShotNumberInSeries > $td.administeredShotNumberInSeries, isShotIgnored() == false)
+		not ICEIntervalFactTypeFinding(intervalFactType == IntervalFactType.RECOMMENDED, iceResultFinding == SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue, associatedCurrentTargetDose == $td)
+		/////// not ICEIntervalFactTypeFinding(intervalFactType == IntervalFactType.RECOMMENDED, currentTargetDose == $td)
+		// $ts.lastShotAdministeredInSeriesExcludingIgnoredShots) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.recommendNextShotBasedOnEarliestIntervalRule($evalTime.getEvalTimeValue());
@@ -2491,6 +2497,10 @@ rule "RecommendationForecast.recommendBasedOnLatestRecommendedIntervalRule" rule
 	when
 		$evalTime : EvalTime()
 		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
+		$td : TargetDose(associatedTargetSeries == $ts, isShotIgnored() == false)
+		not TargetDose(associatedTargetSeries == $ts, administeredShotNumberInSeries > $td.administeredShotNumberInSeries, isShotIgnored() == false)
+		not ICEIntervalFactTypeFinding(intervalFactType == IntervalFactType.RECOMMENDED, iceResultFinding == SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue, associatedCurrentTargetDose == $td)
+		/////// not ICEIntervalFactTypeFinding(intervalFactType == IntervalFactType.RECOMMENDED, currentTargetDose == $ts.lastShotAdministeredInSeriesExcludingIgnoredShots) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.recommendNextShotBasedOnLatestRecommendedIntervalRule($evalTime.getEvalTimeValue());
@@ -2517,6 +2527,7 @@ rule "RecommendationForecast.recommendBasedOnEarliestRecommendedAgeRule" ruleflo
 		$ts.recommendNextShotBasedOnEarliestRecommendedAgeRule($person.demographics.birthTime, $evalTime.getEvalTimeValue());
 		$ts.addSeriesRuleProcessed(_RULENAME);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+		/////// ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName + "; dose number to recommend: " + $ts.doseNumberToRecommend);
 end 
 
 
@@ -2530,11 +2541,16 @@ rule "RecommendationForecast.recommendBasedOnRecommendedIntervalRule" ruleflow-g
 	when
 		$evalTime : EvalTime()
 		$ts : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
+		$td : TargetDose(associatedTargetSeries == $ts, isShotIgnored() == false)
+		not TargetDose(associatedTargetSeries == $ts, administeredShotNumberInSeries > $td.administeredShotNumberInSeries, isShotIgnored() == false)
+		not ICEIntervalFactTypeFinding(intervalFactType == IntervalFactType.RECOMMENDED, iceResultFinding == SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue, associatedCurrentTargetDose == $td)
+		/////// not ICEIntervalFactTypeFinding(intervalFactType == IntervalFactType.RECOMMENDED, currentTargetDose == $ts.lastShotAdministeredInSeriesExcludingIgnoredShots) 
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.recommendNextShotBasedOnEarliestRecommendedIntervalRule($evalTime.getEvalTimeValue());
 		$ts.addSeriesRuleProcessed(_RULENAME);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName);
+		/////// ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $ts.seriesName + "; dose number to recommend: " + $ts.doseNumberToRecommend);
 end
 
 
@@ -2941,7 +2957,7 @@ rule "ProcessResults: Check Seasonal SeriesSelection Consistency" ruleflow-group
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "No *seasonal* series properly selected for vaccine group " + $vg + "; count of series was: " + $countInVG);
-		ICELogicHelper.throwRuntimeException(new InconsistentConfigurationException("No *seasonal* series properly selected for vaccine group " + $vg ". Count of Series was: " + $countInVG));
+		ICELogicHelper.throwRuntimeException(new InconsistentConfigurationException("No *seasonal* series properly selected for vaccine group " + $vg + ". Count of Series was: " + $countInVG));
 end
 
 

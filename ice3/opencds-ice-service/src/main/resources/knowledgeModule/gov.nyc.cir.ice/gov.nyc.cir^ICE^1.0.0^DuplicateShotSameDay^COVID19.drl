@@ -50,6 +50,29 @@ import org.cdsframework.ice.service.Vaccine
 global java.util.Date evalTime
 
 
+rule "Duplicate Shots/Same Day (COVID-19 >= 5y Series): If a CVX 213 and CVX 313 are administered on the same day and there are no prior doses on record, evaluate the CVX 213 first"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"
+	auto-focus true
+	when	
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", vaccineComponent.cdsConceptName == "313")
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.cdsConceptName == "ICE213")
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate < $td.administrationDate, isValid == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
+		}
+		modify($tdother) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + "will be evaluted before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
 rule "Duplicate Shots/Same Day (COVID-19): If a Janssen is administered on the same day as a Pfizer, Moderna or Novavax vaccine, evaluate the Pfizer/Moderna/Novavax shot first"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
@@ -116,16 +139,15 @@ rule "Duplicate Shots/Same Day (COVID-19): If shot is marked valid but another s
 end
 
 
-rule "Duplicate Shots/Same Day (COVID-19): If one of those shots is Valid and another shot on the same day is Invalid with reason code VACCINE_NOT_ALLOWED_FOR_THIS_DOSE, replace this reason code with DUPLICATE_SAME_DAY"
+rule "Duplicate Shots/Same Day (COVID-19): If one of those shots is Valid and another shot on the same day is Invalid with reason code VACCINE_NOT_ALLOWED_FOR_THIS_DOSE (and no other reason codes), replace this reason code with DUPLICATE_SAME_DAY"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", 
-			$tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
-		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.INVALID, isDoseStatusOverridden() == false, associatedTargetSeries == $tdAssociatedTargetSeries, 
-			doseNumberInSeries == $tddosenumber, containsInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.cdsListItemName), isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850")
+		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.INVALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries, 
+			doseNumberInSeries == $td.doseNumberInSeries, containsInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.cdsListItemName), invalidReasons.size() == 1, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
@@ -137,7 +159,7 @@ rule "Duplicate Shots/Same Day (COVID-19): If one of those shots is Valid and an
 		modify($td) {
 			setDuplicateShotSameDayCheckCompleted(true);
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
 

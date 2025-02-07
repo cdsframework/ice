@@ -125,7 +125,7 @@ rule "COVID-19: If a bivalent vaccine was administered prior to 9/2/2022, evalua
 		Set the shot status of $currentShot to Invalid
 		Remove all evaluation reasons from shot $currentShot
 		Include the reason for shot $currentShot Invalid due to "Vaccine Not Yet Available for Use on Specified Administration Date"
-		Refresh all facts in the shot $currentShot
+		Refresh all facts for the shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -1294,7 +1294,7 @@ rule "COVID-19: If CVX 229 or CVX 230 was evaluated as Not Valid due to VACCINE_
 			- make note of the Associated Series as $associatedTargetSeries
 	then
 		Mark the shot $administeredShot as Ignored
-		Refresh all facts in the shot $administeredShot
+		Refresh all facts for the shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
 end
