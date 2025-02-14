@@ -2275,6 +2275,8 @@ rule "SeriesSelection(Hep B): Select Hep B Newborn Series if at least one shot a
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
 		update($ts);
 end
 
@@ -2295,6 +2297,8 @@ rule "SeriesSelection(Hep B): Select Hep B Newborn Series if no shots have been 
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
 		update($ts);
 end
 
@@ -2316,6 +2320,8 @@ rule "SeriesSelection(Hep B): Select Hep B Child/Adolescent series if the patien
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
 		update($ts);	
 end
 
@@ -2337,6 +2343,8 @@ rule "SeriesSelection(Hep B): Select Hep B Child/Adolescent Series if the patien
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
 		update($ts);
 end
 
@@ -2391,6 +2399,7 @@ rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)	
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBAdult2DoseSeries", selectedSeries == false, $number2DoseAdultDoses : determineNumberOfDosesAdministeredInSeries())
 		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", associatedTargetSeries != $ts, administrationDate < $td.administrationDate, isValid == true)
 		$person : EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y-4d"))
 		not TargetDose(associatedTargetSeries != $ts, isValid == true, administrationDate < $dtDateAtAge)  
 	then

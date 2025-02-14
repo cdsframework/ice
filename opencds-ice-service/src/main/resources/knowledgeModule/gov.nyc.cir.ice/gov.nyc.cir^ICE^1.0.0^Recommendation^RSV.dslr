@@ -175,7 +175,7 @@ rule "RSV: If the patient is both < 8 months of age and a dose is recommended in
 		Confirm elapsed time between $birthDate and $recommendationDate < "8m" 
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Supplemental text for $recommendation to "If the patient's mother was not vaccinated during pregnancy, the mother’s vaccination status is unknown, or the mother was vaccinated within 14 days of the patient’s birth: Administer RSV mAb dose based on patient weight shortly before or during the RSV season."
+		Set the Recommendation Supplemental text for $recommendation to "If the mother of the patient was not vaccinated during her pregnancy, her vaccination status is unknown, or she was vaccinated within 14 days of the patient date of birth, then administer RSV mAb dose based on patient weight shortly before or during the RSV season."
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -198,7 +198,7 @@ rule "RSV: If a patient is >= 20 months and < 60 years of age and a shot is reco
 		Confirm elapsed time between $birthDate and evalTime >= "20m" && elapsed time between $birthDate and evalTime < "60y"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Supplemental text for $recommendation to "The RSV evaluations and recommendations in ICE primarily target the routine series. RSV is recommended as a single lifetime dose for all adults 75 years of age and older and adults 60–74 years of age and older who are at increased risk of severe RSV disease. Note: RSV vaccine is also recommended for pregnant persons at 32-36 weeks' gestation, using seasonal administration."
+		Set the Recommendation Supplemental text for $recommendation to "The RSV evaluations and recommendations in ICE primarily target the routine series. RSV is recommended as a single lifetime dose for all adults 75 years of age and older and adults 60 through 74 years of age and older who are at increased risk of severe RSV disease. Note: RSV vaccine is also recommended for pregnant persons at 32 through 36 weeks gestation, using seasonal administration."
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -222,7 +222,7 @@ rule "RSV: If a patient is >= 60 years and < 75 years of age and the Adult Serie
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Create a Recommendation as $supplementalText for the Series $targetSeries
-		Set the Recommendation supplemental text for $supplementalText to "The RSV evaluations and recommendations in ICE primarily target the routine series. RSV is recommended as a single lifetime dose for all adults 75 years of age and older and adults 60–74 years of age who are at increased risk of severe RSV disease."
+		Set the Recommendation supplemental text for $supplementalText to "The RSV evaluations and recommendations in ICE primarily target the routine series. RSV is recommended as a single lifetime dose for all adults 75 years of age and older and adults 60 through 74 years of age who are at increased risk of severe RSV disease."
 		Include the Recommendation $supplementalText for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries

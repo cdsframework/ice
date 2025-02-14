@@ -950,10 +950,10 @@ end
 //    Recommended interval = 28 days 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationAgeCheck*)"
+rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationIntervalCheck*)"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "recommendationAgeCheck"
+	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
@@ -982,11 +982,11 @@ rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a shot was previously administ
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*earliestAgeCheck*)"
-		extends "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationAgeCheck*)"
+rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*earliestIntervalCheck*)"
+		extends "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationIntervalCheck*)"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "earliestAgeCheck"
+	activation-group "earliestIntervalCheck"
 	when
 		// Series Table Earliest Age will be overridden by this rule and will not be enforced
 	then
@@ -1014,10 +1014,10 @@ end
 //    Recommended interval = 28 days 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19(Sep2023+ Moderna < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationAgeCheck*)"
+rule "COVID-19(Sep2023+ Moderna < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationIntervalCheck*)"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "recommendationAgeCheck"
+	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
@@ -1045,11 +1045,11 @@ rule "COVID-19(Sep2023+ Moderna < 5yrs Series): If a shot was previously adminis
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "COVID-19(Sep2023+ Moderna < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*earliestAgeCheck*)"
-		extends "COVID-19(Sep2023+ Moderna < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationAgeCheck*)"
+rule "COVID-19(Sep2023+ Moderna < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*earliestIntervalCheck*)"
+		extends "COVID-19(Sep2023+ Moderna < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationIntervalCheck*)"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "earliestAgeCheck"
+	activation-group "earliestIntervalCheck"
 when
 		// Series Table Earliest Age will be overridden by this rule and will not be enforced
 	then
@@ -1078,10 +1078,10 @@ end
 //        Recommended interval = 28 days 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-rule "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationAgeCheck*)"
+rule "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationIntervalCheck*)"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "recommendationAgeCheck"
+	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
@@ -1110,11 +1110,11 @@ rule "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a shot was previously a
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*earliestAgeCheck*)"
-		extends "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationAgeCheck*)"
+rule "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*earliestIntervalCheck*)"
+		extends "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationIntervalCheck*)"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
-	activation-group "earliestAgeCheck"
+	activation-group "earliestIntervalCheck"
 when
 		// Series Table Earliest Age will be overridden by this rule and will not be enforced
 	then
