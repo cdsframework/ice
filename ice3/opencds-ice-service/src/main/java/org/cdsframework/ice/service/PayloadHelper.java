@@ -984,7 +984,16 @@ public class PayloadHelper {
 			return null;
 		}
 
-		return sv.getCdsListItemCD();
+		CD lListItemCD = sv.getCdsListItemCD();
+		CD lLocalCDDup = new CD();
+		lLocalCDDup.setCodeSystem(lListItemCD.getCodeSystem());
+		lLocalCDDup.setCode(lListItemCD.getCode());
+		lLocalCDDup.setDisplayName(lListItemCD.getDisplayName());
+		lLocalCDDup.setCodeSystemName(lListItemCD.getCodeSystemName());
+		lLocalCDDup.setAny(lListItemCD.getAny());
+		lLocalCDDup.setOriginalText(lListItemCD.getOriginalText());
+
+		return lLocalCDDup;
 	}
 
 
