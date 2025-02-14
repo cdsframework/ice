@@ -26,6 +26,8 @@
 
 package org.cdsframework.ice.util;
 
+import static java.lang.Integer.parseInt;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
