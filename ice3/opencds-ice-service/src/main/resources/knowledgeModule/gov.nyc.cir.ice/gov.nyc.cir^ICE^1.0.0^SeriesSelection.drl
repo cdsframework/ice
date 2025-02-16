@@ -1655,10 +1655,11 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", determineNumberOfDosesAdministeredInSeries() >= 1)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries") /////// , determineNumberOfDosesAdministeredInSeries() >= 1)
 		$td : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName == "ICE163")
 		not TargetDose(associatedTargetSeries == $td.associatedTargetSeries, administrationDate > $td.administrationDate)
 		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName != "ICE163", administrationDate > $td.administrationDate, isValid == true)
+		eval($ts.determineNumberOfDosesAdministeredInSeries() >= 1)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
@@ -1721,11 +1722,12 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target d
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() == 0)
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() >= 1)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false) /////// , determineNumberOfDosesAdministeredInSeries() == 0)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false) /////// , determineNumberOfDosesAdministeredInSeries() >= 1)
 		$td : TargetDose(associatedTargetSeries == $ts3doseSeries, vaccineComponent.cdsConceptName in ("ICE162", "ICE316"))
 		not TargetDose(associatedTargetSeries == $td.associatedTargetSeries, administrationDate > $td.administrationDate)
-		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName not in ("ICE162", "ICE316"), administrationDate > $td.administrationDate, isValid == true)		
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName not in ("ICE162", "ICE316"), administrationDate > $td.administrationDate, isValid == true)
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() == 0 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() >= 1)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
@@ -1783,11 +1785,12 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target d
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() == 1)
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() == 1)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false) /////// , determineNumberOfDosesAdministeredInSeries() == 1)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false) /////// , determineNumberOfDosesAdministeredInSeries() == 1)
 		$td : TargetDose(associatedTargetSeries == $ts2doseSeries, vaccineComponent.cdsConceptName in ("ICE162", "ICE316"))
 		not TargetDose(associatedTargetSeries == $td.associatedTargetSeries, administrationDate > $td.administrationDate)
 		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName not in ("ICE162", "ICE316"), administrationDate > $td.administrationDate, isValid == true)
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() == 1 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() == 1)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
@@ -1858,7 +1861,8 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 i
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false, determineNumberOfDosesAdministeredInSeries() >= 2)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false) /////// , determineNumberOfDosesAdministeredInSeries() >= 2)
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() >= 2)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts2doseSeries);
@@ -1916,8 +1920,9 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 i
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", determineNumberOfDosesAdministeredInSeries() <= 1)
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", determineNumberOfDosesAdministeredInSeries() >= 2)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries") ///////, determineNumberOfDosesAdministeredInSeries() <= 1)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries") ///////, determineNumberOfDosesAdministeredInSeries() >= 2)
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() <= 1 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() >= 2)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts3doseSeries);
@@ -1973,8 +1978,9 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 i
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
-		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", determineNumberOfDosesAdministeredInSeries() == 1)
-		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", determineNumberOfDosesAdministeredInSeries() == 1)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries") /////// , determineNumberOfDosesAdministeredInSeries() == 1)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries") /////// , determineNumberOfDosesAdministeredInSeries() == 1)
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() == 1 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() == 1)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts2doseSeries);
