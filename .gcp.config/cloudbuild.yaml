@@ -57,19 +57,19 @@ steps:
         path: /root/.m2
 
   # build the rules packager
-  - name: "maven:3-openjdk-17-slim"
-    id: build
-    entrypoint: "mvn"
-    args:
-      [
-        "-Dmaven.compiler.release=17",
-        "compile",
-        "assembly:single",
-      ]
-    dir: "rules-packager"
-    volumes:
-      - name: "m2"
-        path: /root/.m2
+  #  - name: "maven:3-openjdk-17-slim"
+  #    id: build
+  #    entrypoint: "mvn"
+  #    args:
+  #      [
+  #        "-Dmaven.compiler.release=17",
+  #        "compile",
+  #        "assembly:single",
+  #      ]
+  #    dir: "rules-packager"
+  #    volumes:
+  #      - name: "m2"
+  #        path: /root/.m2
 
   # produce the compiled pkg for ice
   #- name: "maven:3-jdk-8-slim"
