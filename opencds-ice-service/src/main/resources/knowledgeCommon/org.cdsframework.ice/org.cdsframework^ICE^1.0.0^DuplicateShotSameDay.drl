@@ -50,6 +50,34 @@ import org.cdsframework.ice.service.Vaccine
 global java.util.Date evalTime
 
 
+/*******
+* AI: Future implementation across across vaccine groups.
+*
+// Fall back rule: If 2 shots are VALID and the series is complete, mark the latter administered shot as Invalid / DUPLICATE_SAME_DAY
+rule "Duplicate Shots/Same Day: If 2 shots are VALID and the series is complete, mark the latter administered shot as Invalid / DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience -1
+	when
+		$td : TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, associatedTargetSeries.isSeriesComplete() == true)
+		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true, status == DoseStatus.VALID,
+			doseNumberInSeries == $td.doseNumberInSeries, administeredShotNumberInSeries > $td.administeredShotNumberInSeries, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName());
+		}
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true);
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+*******/
+
+
 rule "Duplicate Shots/Same Day: If a Series is potentially no longer complete after a shot has been marked Invalid / DUPLICATE_SAME_DAY, mark the series not complete if applicable"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
