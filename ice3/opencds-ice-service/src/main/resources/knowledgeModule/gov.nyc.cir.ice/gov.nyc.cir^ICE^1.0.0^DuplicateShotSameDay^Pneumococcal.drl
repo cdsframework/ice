@@ -208,7 +208,6 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV20 dose and either a PCV
 		modify($tdother) {
 			setStatus(DoseStatus.INVALID),
 			removeAllEvaluationReasonsFromAllReasonSets,
-			removeAllEvaluationReasonsFromAllReasonSets(),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName()),
 			setDuplicateShotSameDayCheckCompleted(true);
 		}
