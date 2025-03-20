@@ -50,18 +50,18 @@ global java.util.Date evalTime
 
 
 /*************************************************************************************************************************************************************************************
-START PCV20 and PPSV15 / PPSV23 rules
-A PCV20 alone or PCV15 with PPSV23 completes the Adult Series. 
+START PCV21, PCV20 and PPSV15 / PPSV23 rules
+A PCV21 or PCV20 alone, or PCV15 with PPSV23, completes the Adult Series. 
 /************************************************************************************************************************************************************************************/
 
 // If a (valid) PCV20 dose has been administered in the Adult series, the series is complete. This general rule is also reflected in both series' special rules section.
-rule "Pneumococcal Adult: If a (valid) PCV20 dose has been administered, the series is complete"
+rule "Pneumococcal Adult: If a (valid) PCV21 or PCV20 dose has been administered, the series is complete"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
-		There is an administered shot $PCV20dose
+		There is an administered shot $PCV21or20dose
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the vaccine administered is "ICE216"
+			- the vaccine administered a member of ("ICE327", "ICE216")
 			- that has already been evaluated and whose shot validity status is VALID
 			- the dose number in the Series is >= 6
 			- make note of the date this shot was Administered as $administrationDate
@@ -73,7 +73,7 @@ rule "Pneumococcal Adult: If a (valid) PCV20 dose has been administered, the ser
 		Confirm elapsed time between $dtBirthDate and $administrationDate >= "18y-4d"		
 	then
 		Mark the Series $targetSeries complete
-		Record that this dose rule was Processed for the TargetDose $PCV20dose
+		Record that this dose rule was Processed for the TargetDose $PCV21or20dose
 		Log that this dose rule fired for the dose $PCV20dose in the Series $targetSeries
 end
 
