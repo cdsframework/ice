@@ -64,9 +64,13 @@ rule "Pneumococcal Adult: If a (valid) PCV20 dose has been administered, the ser
 			- the vaccine administered is "ICE216"
 			- that has already been evaluated and whose shot validity status is VALID
 			- the dose number in the Series is >= 6
+			- make note of the date this shot was Administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is not complete
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $administrationDate >= "18y-4d"		
 	then
 		Mark the Series $targetSeries complete
 		Record that this dose rule was Processed for the TargetDose $PCV20dose
@@ -84,6 +88,7 @@ rule "Pneumococcal Adult: if a (valid) PCV15 dose and (valid) PPSV23 dose has be
 			- the vaccine administered is "ICE215"
 			- that has already been evaluated and whose shot validity status is VALID
 			- the dose number in the Series is >= 6
+			- make note of the date this shot was Administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
 		There is an administered shot $PPSV23
 			- the shot belongs to the Series $associatedTargetSeries
@@ -92,6 +97,9 @@ rule "Pneumococcal Adult: if a (valid) PCV15 dose and (valid) PPSV23 dose has be
 			- the dose number in the Series is >= 6
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is not complete
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $administrationDate >= "18y-4d"
 	then
 		Mark the Series $targetSeries complete
 		Record that this dose rule was Processed for the TargetDose $PCV15dose
@@ -184,6 +192,35 @@ rule "Pneumococcal Adult: if ACCEPTED shot administered >= 5 yrs and < 19 yrs is
 		Record that this dose rule was processed for the TargetDose $otherPneumococcalShot
 		Log that this dose rule fired for the dose $otherPneumococcalShot in the Series $associatedTargetSeries	
 end
+
+
+rule "Pneumococcal Adult: if a PCV15 or PCV20 is administered >= 5 yrs and < 18y-4d, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^postEvaluationCheck"
+	no-loop true
+	when
+		There is an Administered Shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
+			- the dose number in the Series is >= 6
+			- that has already been evaluated 
+			- the vaccine administered a member of ("ICE215", "ICE216")
+			- make note of Accepted evaluation reasons for this shot as $acceptedReasons
+			- the collection $acceptedReasons does not contain "EVALUATION_REASON_CONCEPT.OUTSIDE_ROUTINE_SERIES" 
+			- make note of the date this shot was Administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $administrationDate >= "5y"
+		Confirm elapsed time between $dtBirthDate and $administrationDate < "18y-4d"	
+	then
+		Remove all evaluation reasons from shot $currentShot
+		Set the Shot Status of $currentShot to Accepted
+		Include the reason for shot $currentShot Accepted due to "Shot Administered Outside of a Routine Series"
+		Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries	
+end
+
 
 /*************************************************************************************************************************************************************************************
 END - Evaluation Rules for Adults' Shots Administered at >= 5 years and < 19 years - General Pneumococcal Adult Rules
