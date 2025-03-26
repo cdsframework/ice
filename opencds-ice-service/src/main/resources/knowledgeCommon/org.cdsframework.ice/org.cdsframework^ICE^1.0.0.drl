@@ -2829,18 +2829,19 @@ end
 
 
 ///////// ***
-// Supplementary rule... To be migrated to custom rule
+// Supplementary rule... To be migrated to custom rule and genericize
 ///////// ***
-rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (always reset to dose 1 in the Sept 2023 season)" ruleflow-group "ProcessResults"
+rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - always resetting to dose 1 at the beginning of the Sept 2023 or Aug 2024 season start dates" ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 11
 	when
 		not ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
+		$covidSeason : Season(seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"), fullySpecifiedSeasonStartDate != null, fullySpecifiedSeasonEndDate != null, $seasonStartDate : fullySpecifiedSeasonStartDate.toDate(), $seasonEndDate : fullySpecifiedSeasonEndDate.toDate())
 		$sae : SubstanceAdministrationEvent()
-		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true, administrationDate >= "12-Sep-2023")
-		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == "COVID19Sep2023Season")
+		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.targetSeason.seasonName == $covidSeason.seasonName, administrationDate >= $seasonStartDate, administrationDate <= $seasonEndDate)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == $covidSeason.seasonName)
 		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
-		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $ts, isValid == true, administrationDate >= "12-Sep-2023", administrationDate <= $td.administrationDate, 
+		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $ts, isValid == true, administrationDate >= $seasonStartDate, administrationDate <= $td.administrationDate, 
 			administeredShotNumberInSeries < $td.administeredShotNumberInSeries), count($acctd))
 		$evalTime: EvalTime()
 	then
@@ -2858,14 +2859,14 @@ end
 ///////// ***
 // Supplementary rule... To be migrated to custom rule
 ///////// ***
-rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do not reset to 1 in the Sept 2023 season)" ruleflow-group "ProcessResults"
+rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do not reset to 1 in the Sept 2023, Aug 2024 or later season)" ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 11
 	when
 		exists ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
 		$sae : SubstanceAdministrationEvent()
-		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true)
-		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == "COVID19Sep2023Season")
+		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true, administrationDate >= "12-Sep-2023")
+		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true)	//, targetSeason.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"))
 		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
 		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate < $td.administrationDate, isValid == true), count($acctd))
 		$evalTime: EvalTime()
