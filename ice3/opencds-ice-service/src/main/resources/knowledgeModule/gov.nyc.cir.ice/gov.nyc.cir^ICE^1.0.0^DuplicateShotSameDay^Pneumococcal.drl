@@ -167,14 +167,14 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV15 and PCV13 are both ad
 end
 
 
-rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV15 dose and PCV13 are administered on the same day and the series is not complete, mark the CVX133 as Invalid / Duplicate Shot (removing any other evaluations/reasons for that shot)"
+rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV15 dose and either a PCV13 or PCV7 are administered on the same day and the series is not complete, mark the PCV13 or PCV7 as Invalid / Duplicate Shot (removing any other evaluations/reasons for that shot)"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
 	salience 10
 	when
 		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE215")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName == "ICE133", 
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName in ("ICE133", "ICE100"),
 			isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false, associatedTargetSeries.isSeriesComplete() == false)
 	then
 		modify($td) {
@@ -191,14 +191,14 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV15 dose and PCV13 are ad
 end
 
 
-rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV20 dose and either a PCV15 or PCV13 is administered on the same day and the series is not complete, mark the PCV15 or PCV13 as Invalid / Duplicate Shot (removing any other evaluations/reasons for that shot)"
+rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV20 dose and either a PCV15, PCV13 or PCV7 is administered on the same day and the series is not complete, mark the PCV15 or PCV13 as Invalid / Duplicate Shot (removing any other evaluations/reasons for that shot)"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
 	salience 10
 	when
 		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE216")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName in ("ICE215", "ICE133"), 
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName in ("ICE215", "ICE133", "ICE100"), 
 			isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false, associatedTargetSeries.isSeriesComplete() == false)
 	then
 		modify($td) {
