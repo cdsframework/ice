@@ -307,7 +307,7 @@ end
 
 
 // If the evaluation date is < 10/25/2024 but the calculated recommendation date is > 10/25/2024 and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years.
-rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024, the dose number to recommend is 1, but the calculated recommendation date is > 10/25/2024 and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years."
+rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024, the dose number to recommend is 1 with a recommendation date > 10/25/2024, and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years."
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	no-loop true
@@ -321,7 +321,7 @@ rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024, the dose n
 			- make note of the Earliest Date as $earliestDate
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is < "25-Oct-2024"
+			- the administration date of the shot is < "25-Oct-2024"
 		Confirm the date evalTime is before "25-Oct-2024"
 		Confirm the date $earliestDate is after "25-Oct-2024"
 	then
@@ -337,7 +337,7 @@ end
 
 
 // If the evaluation date is < 10/25/2024, modify dose rule 1 for minimum age and recommended age to 10 years
-rule "Mening B(4C 2-dose Series): If the evaluation date is < 10/25/2024 and the dose number to recommend is 2, modify dose rule 2 to recommended age to 10 years"
+rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024 and the dose number to recommend is 2, modify the Dose Rule 2 to recommended age to 10 years"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
@@ -358,7 +358,7 @@ end
 
 
 // If the evaluation date is < 10/25/2024 but the calculated recommendation date is > 10/25/2024 and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years.
-rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024 but the calculated recommendation date is > 10/25/2024 and there was not a dose administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years."
+rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024, the dose number to recommend is 2 with recommendation date > 10/25/2024, and there was not a dose administered < 10/25/2024, then reset the minimum age and recommended age for the Dose 2 Rule back to 16 years."
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	no-loop true
@@ -372,7 +372,7 @@ rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024 but the cal
 			- make note of the Earliest Date as $earliestDate
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is < "25-Oct-2024"
+			- the administration date of the shot is < "25-Oct-2024"
 		Confirm the date evalTime is before "25-Oct-2024"
 		Confirm the date $earliestDate is after "25-Oct-2024"
 	then
