@@ -169,7 +169,7 @@ MenB 4C 2-dose Series specific rules
 
 // If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is reported, then evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
 // Ignore the reported CVX 162 when determining the recommended vaccine and calculating the recommended due date for the next target dose.
-rule "MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
+rule "MenB(4C 2-Dose Series): Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -187,8 +187,8 @@ rule "MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 or CVX 316 as ACCEPTED/VA
 end
 
 
-rule "Mening B / MenB 4C 2-dose Series: Skip interval check on ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOSE_RECENT_VACCINE_GIVEN" extends 
-		"MeningB: MenB 4C 2-dose Series: Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
+rule "MenB(4C 2-Dose Series): Skip interval check on ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOSE_RECENT_VACCINE_GIVEN" extends 
+		"MenB(4C 2-Dose Series): Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -200,10 +200,44 @@ rule "Mening B / MenB 4C 2-dose Series: Skip interval check on ACCEPTED/VACCINE_
 end
 
 
+rule "MenB(4C 2-Dose Series): Do not invoke default Absolute Minimum Age check for CVX 162 or CVX 316 administered on or after 10/25/2024 at >= 10 years-4 days of age"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseAgeCheck"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
+			- the vaccine administered a member of ("ICE162", "ICE316")
+			- the administration date of the shot is >= "25-Oct-2024"
+			- make note of the date this shot was administered as $shotDate
+			- make note of the associated series as $targetSeries
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthdate
+		Confirm Elapsed time between $birthdate and $shotDate >= "10y-4d"	
+	then
+		// Do nothing - overrides default absolute minimum age check
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+
+// If dose 2 was administered >= 10/25/2024, the absolute minimum interval from Valid Dose 1 (not necessarily the immediately prior shot) to target dose 2  is 6 months-4 days
+rule "MenB(4C 2-Dose Series): If dose 2 was administered >= 10/25/2024, the absolute minimum interval from the Valid Dose 1 (not necessarily the immediately prior shot) to target dose 2  is 6 months-4 days"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+	
+	then
+	
+end
+
+
 // Note that this rule only takes care of the evaluation parameters. Recommendation parameters for this DoseRule should be handled in the RecommendationForecast agenda group, as those considerations are different.
 rule "MenB(MenB 4C 2-Dose Series): If target dose 1 is administered < 10/25/2024, then modify DoseRule1 to the pre-10/25/2024 values as follows: (1) Absolute Minimum Age: 10y-4d; (2) Absolute Minimum Interval: 1m-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
@@ -226,6 +260,7 @@ end
 rule "MenB: If target dose 2 is administered < 10/25/2024, then modify DoseRule1 to their pre-10/25/2024 values as follows: (1) DoseRule1: (i) Absolute Minimum Interval: 1m-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"

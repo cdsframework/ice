@@ -289,6 +289,7 @@ rule "Mening B(4C 2-dose Series; Dose 1; CRR): If the evaluation date is < 10/25
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
+	salience 999
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the name of the Series is "MenB4C2DoseSeries"
@@ -314,6 +315,7 @@ rule "MenB(4C 2-dose Series; Dose 1; PCRC): If the evaluation date is < 10/25/20
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	no-loop true
+	salience 999
 	when
 		There is a Series $targetSeries
 			- post processing on the Series forecast has not already been run
@@ -346,6 +348,7 @@ rule "MenB(4C 2-dose Series; Dose 2; CRR): If the evaluation date is < 10/25/202
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
+	salience 999
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the name of the Series is "MenB4C2DoseSeries"
@@ -377,6 +380,7 @@ rule "MenB(4C 2-dose Series; Dose 2; PCRC): If the evaluation date is < 10/25/20
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	no-loop true
+	salience 999
 	when
 		There is a Series $targetSeries
 			- post processing on the Series forecast has not already been run
