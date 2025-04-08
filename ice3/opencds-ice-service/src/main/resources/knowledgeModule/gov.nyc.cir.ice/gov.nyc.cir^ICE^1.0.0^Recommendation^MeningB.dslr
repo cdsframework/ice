@@ -66,7 +66,6 @@ rule "Mening B: Do not recommend a specific vaccine if no (valid) doses have bee
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made and a Specific Vaccine is Recommended
-			- the effective dose number in the Series is == 1
 	then
 		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -82,10 +81,64 @@ rule "Mening B: Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose 
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the name of the series is "MenB4C2DoseSeries"
-			
+			- the dose number to recommend is > 1
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE163"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
+rule "Mening B: Recommend CVX 163 for the 2nd target dose and later in the MenB 4C 3-dose Series"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the series is "MenB4C2DoseSeries"
+			- the dose number to recommend is > 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE163"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB FHbp 2-dose Series, recommend CVX 162 for the next target dose.
+rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-dose Series"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the series is "MenBFHbp3DoseSeries"
+			- the dose number to recommend is > 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
+rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-dose Series"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the series is "MenBFHbp2DoseSeries"
+			- the dose number to recommend is > 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -115,41 +168,6 @@ rule "Mening B: If a patient has at least one CVX 162 or CVX 316 and at least on
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
-
-
-// When recommending in the MenB FHbp 2-dose Series, recommend CVX 162 for the next target dose.
-rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-dose Series"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
-			- the name of the series is "MenBFHbp3DoseSeries"
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-// When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
-rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-dose Series"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
-			- the name of the series is "MenBFHbp2DoseSeries"
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
 
 /*************************************************************************************************************************************************************************************
 END Recommending at the Vaccine vs. Vaccine Group Level; including additional reason codes where necessary
