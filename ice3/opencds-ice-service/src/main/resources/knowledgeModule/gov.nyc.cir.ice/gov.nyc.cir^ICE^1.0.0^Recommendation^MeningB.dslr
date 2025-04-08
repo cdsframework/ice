@@ -285,7 +285,7 @@ end
 *************************************************************************************************************************************************************************************/
 
 // If the evaluation date is < 10/25/2024, modify dose rule 1 for minimum age and recommended age to 10 years
-rule "Mening B(4C 2-dose Series): If the evaluation date is < 10/25/2024, modify dose rule 1 for minimum age and recommended age to 10 years"
+rule "Mening B(4C 2-dose Series; Dose 1; CRR): If the evaluation date is < 10/25/2024, modify DoseRule 1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
@@ -299,7 +299,9 @@ rule "Mening B(4C 2-dose Series): If the evaluation date is < 10/25/2024, modify
 	then
 		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
 		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
-		Set the Earliest Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
 		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -307,7 +309,7 @@ end
 
 
 // If the evaluation date is < 10/25/2024 but the calculated recommendation date is > 10/25/2024 and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years.
-rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024, the dose number to recommend is 1 with a recommendation date > 10/25/2024, and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years."
+rule "MenB(4C 2-dose Series; Dose 1; PCRC): If the evaluation date is < 10/25/2024, the calculated earliest date for dose 1 is > 10/25/2024, and there was no shot administered < 10/25/2024, then reset DoseRule1 minimum age, recommended age, minimum interval, and recommended inrerval back to their original values"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	no-loop true
@@ -328,7 +330,9 @@ rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024, the dose n
 		Clear forecasted recommendations from consideration in series $targetSeries
 		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
 		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
-		Set the Earliest Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "6m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "6m"
 		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
 		Refresh all Facts in the Series $targetSeries for Forecasting
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -337,7 +341,7 @@ end
 
 
 // If the evaluation date is < 10/25/2024, modify dose rule 1 for minimum age and recommended age to 10 years
-rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024 and the dose number to recommend is 2, modify the Dose Rule 2 to recommended age to 10 years"
+rule "MenB(4C 2-dose Series; Dose 2; CRR): If the evaluation date is < 10/25/2024 and the dose number to recommend is 2, then: (1) Modify DoseRule2 minimum age & recommended age to 10y+1m; (2) Modify DoseRule1 minimum age & recommended age to 10y; (3) Modify DoseRule1 minimum interval & recommended interval from dose 1 to dose 2 to 1 month"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
@@ -349,16 +353,25 @@ rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024 and the dos
 			- the number of doses administered is == 1
 		Confirm the date evalTime is before "25-Oct-2024"
 	then
+		// Set to the pre-10/25/2024 ages/interval values for DoseRule 2
 		Obtain the existing DoseRule for Dose Number 2 in the Series $targetSeries as $assign_oDoseRule2
-		Set the Earliest Recommended Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y"
+		Set the Minimum Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
+		Set the Recommended Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
 		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule2
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		// Set to the pre-10/25/2024 ages/interval values for DoseRule 1
+		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
 
 // If the evaluation date is < 10/25/2024 but the calculated recommendation date is > 10/25/2024 and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years.
-rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024, the dose number to recommend is 2 with recommendation date > 10/25/2024, and there was not a dose administered < 10/25/2024, then reset the minimum age and recommended age for the Dose 2 Rule back to 16 years."
+rule "MenB(4C 2-dose Series; Dose 2; PCRC): If the evaluation date is < 10/25/2024, the calculated earliest date for dose 2 is > 10/25/2024, and there was not a dose administered < 10/25/2024, then reset DoseRule2 and DoseRule1 minimum age, recommended age, minimum interval, recommended interval back to their original values"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	no-loop true
@@ -377,9 +390,17 @@ rule "MenB(4C 2-dose Series): If the evaluation date is < 10/25/2024, the dose n
 		Confirm the date $earliestDate is after "25-Oct-2024"
 	then
 		Clear forecasted recommendations from consideration in series $targetSeries
-		Obtain the existing DoseRule for Dose Number 2 in the Series $targetSeries as $assign_oDoseRule1
+		// Reset to the 10/25/2024 ages/interval values for DoseRule 2
+		Obtain the existing DoseRule for Dose Number 2 in the Series $targetSeries as $assign_oDoseRule2
+		Set the Minimum Age for DoseRule $assign_oDoseRule2 to TimePeriod "16y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule2 to TimePeriod "16y"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule2
+		// Reset to the 10/25/2024 ages/interval values for DoseRule 1
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
 		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
-		Set the Earliest Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "6m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "6m"
 		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
 		Refresh all Facts in the Series $targetSeries for Forecasting
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
