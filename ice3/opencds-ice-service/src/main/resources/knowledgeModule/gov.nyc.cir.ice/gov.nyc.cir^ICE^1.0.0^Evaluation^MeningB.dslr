@@ -200,10 +200,10 @@ rule "Mening B / MenB 4C 2-dose Series: Skip interval check on ACCEPTED/VACCINE_
 end
 
 
-rule "Mening B(MenB4c2DoseSeries): If a shot is administered < 10/25/2024 for target dose 1, the absolute minimum age is 10y-4d"
+// Note that this rule only takes care of the evaluation parameters. Recommendation parameters for this DoseRule should be handled in the RecommendationForecast agenda group, as those considerations are different.
+rule "MenB(MenB 4C 2-Dose Series): If target dose 1 is administered < 10/25/2024, then modify DoseRule1 to the pre-10/25/2024 values as follows: (1) Absolute Minimum Age: 10y-4d; (2) Absolute Minimum Interval: 1m-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
@@ -212,50 +212,36 @@ rule "Mening B(MenB4c2DoseSeries): If a shot is administered < 10/25/2024 for ta
 			- the Series that the shot belongs to is not complete
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
-		The patient information $patientInformation must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and $currentShotDate < "10y-4d"
 	then
-		Include the reason for shot $currentShot Invalid due to "Below Minimum Age"
+		Obtain the existing DoseRule for Dose Number 1 in the Series $associatedTargetSeries as $assign_oDoseRule1
+		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y-4d"
+		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m-4d"
+		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule1
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
 
-rule "Mening B(MenB4C2DoseSeries): If a shot is admininstered < 10/25/2024 for target dose 1 or target dose 2, the absolute minimum interval is 1 month-4 days"
+// This rule assumes that target dose 1 intervals have been modified appropriately. Note that this rule only takes care of the evaluation parameters. Recommendation parameters for this DoseRule should be handled in the RecommendationForecast agenda group, as those considerations are different.
+rule "MenB: If target dose 2 is administered < 10/25/2024, then modify DoseRule1 to their pre-10/25/2024 values as follows: (1) DoseRule1: (i) Absolute Minimum Interval: 1m-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
-			- the dose number in the Series is one of (1, 2)
+			- the dose number in the Series is == 2
 			- the administration date of the shot is < "25-Oct-2024"
 			- the Series that the shot belongs to is not complete
 			- make note of the date this shot was administered as $currentShotDate
-			- make note of the administered vaccine as $administeredVaccine
-			- make note of the dose number as $doseNumberInSeries
 			- make note of the associated series as $associatedTargetSeries
-		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the vaccine $administeredVaccine is permitted for dose number $doseNumberInSeries in this Series
-		There does not exist an IceFact
-			- that has associated administered shot $currentShot
-			- that has finding SupportedFactConcept._BELOW_MINIMUM_INTERVAL.conceptCodeValue
-		There is an administered shot $previousShot
-			- the shot belongs to the Series $associatedTargetSeries
-			- the administration date of the shot is < $currentShotDate
-			- make note of the date this shot was administered as $previousShotDate
-		There does not exist an administered shot
-			- the shot belongs to the Series $associatedTargetSeries
-			- the administration date of the shot is > $previousShotDate
-			- the administration date of the shot is < $currentShotDate
-		Confirm Elapsed time between $previousShotDate and $currentShotDate < "1m-4d"
 	then
-		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		// Only set the absolute minimum interval, minimum interval and recommended interval for Dose1Rule, since that's all we need here. (Though these should have been set already above.)
+		Obtain the existing DoseRule for Dose Number 1 in the Series $associatedTargetSeries as $assign_oDoseRule1
+		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m-4d"
+		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule1
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
-
 
 /*************************************************************************************************************************************************************************************
 MenB 4C 2-dose Series specific rules

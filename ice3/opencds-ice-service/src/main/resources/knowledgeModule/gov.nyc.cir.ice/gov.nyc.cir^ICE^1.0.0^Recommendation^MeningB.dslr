@@ -285,7 +285,7 @@ end
 *************************************************************************************************************************************************************************************/
 
 // If the evaluation date is < 10/25/2024, modify dose rule 1 for minimum age and recommended age to 10 years
-rule "Mening B(4C 2-dose Series; Dose 1; CRR): If the evaluation date is < 10/25/2024, modify DoseRule 1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
+rule "Mening B(4C 2-dose Series; Dose 1; CRR): If the evaluation date is < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
@@ -309,6 +309,7 @@ end
 
 
 // If the evaluation date is < 10/25/2024 but the calculated recommendation date is > 10/25/2024 and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years.
+/*
 rule "MenB(4C 2-dose Series; Dose 1; PCRC): If the evaluation date is < 10/25/2024, the calculated earliest date for dose 1 is > 10/25/2024, and there was no shot administered < 10/25/2024, then reset DoseRule1 minimum age, recommended age, minimum interval, and recommended inrerval back to their original values"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -338,10 +339,10 @@ rule "MenB(4C 2-dose Series; Dose 1; PCRC): If the evaluation date is < 10/25/20
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-
+*/
 
 // If the evaluation date is < 10/25/2024, modify dose rule 1 for minimum age and recommended age to 10 years
-rule "MenB(4C 2-dose Series; Dose 2; CRR): If the evaluation date is < 10/25/2024 and the dose number to recommend is 2, then: (1) Modify DoseRule2 minimum age & recommended age to 10y+1m; (2) Modify DoseRule1 minimum age & recommended age to 10y; (3) Modify DoseRule1 minimum interval & recommended interval from dose 1 to dose 2 to 1 month"
+rule "MenB(4C 2-dose Series; Dose 2; CRR): If the evaluation date is < 10/25/2024, then: (1) Modify DoseRule2 minimum age & recommended age to 10y+1m; (2) Modify DoseRule1 minimum age & recommended age to 10y; (3) Modify DoseRule1 minimum interval & recommended interval from dose 1 to dose 2 to 1 month"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
@@ -371,6 +372,7 @@ end
 
 
 // If the evaluation date is < 10/25/2024 but the calculated recommendation date is > 10/25/2024 and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years.
+/*
 rule "MenB(4C 2-dose Series; Dose 2; PCRC): If the evaluation date is < 10/25/2024, the calculated earliest date for dose 2 is > 10/25/2024, and there was not a dose administered < 10/25/2024, then reset DoseRule2 and DoseRule1 minimum age, recommended age, minimum interval, recommended interval back to their original values"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -406,7 +408,7 @@ rule "MenB(4C 2-dose Series; Dose 2; PCRC): If the evaluation date is < 10/25/20
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-
+*/
 
 /*************************************************************************************************************************************************************************************
  END MenB 4C 2-dose Series specific rules
