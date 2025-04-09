@@ -1645,8 +1645,76 @@ end
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// START: If dose 1 is CVX 163 (Meningococcal B 4C, OMV (Bexsero)), then the MenB 4C 2-dose series applies.
+// START: If target dose 1 is CVX 163 (Meningococcal B 4C, OMV (Bexsero)) and:
+//   * Invalid for the MenB 4C 2-dose Series, but valid for MenB 4C 3-dose Series, the MenB 4C 3-dose series applies.
+//   * Valid for the MenB 4C 2-dose Series AND valid for MenB 4C 3-dose Series, the MenB 4C 2-dose series applies.
+//
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////
+// Sub-bullet 1:    * Invalid for the MenB 4C 2-dose Series, but valid for MenB 4C 3-dose Series, the MenB 4C 3-dose series applies.
+////////////////////////////
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.825", seriesRules.seriesName == "MenB4C2DoseSeries")
+		not TargetDose(associatedTargetSeries == $ts2doseSeries, isValid == true) 
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries") /////// , determineNumberOfDosesAdministeredInSeries() >= 1)
+		$td3dose : TargetDose(associatedTargetSeries == $ts3doseSeries, vaccineComponent.cdsConceptName == "ICE163")
+		not TargetDose(associatedTargetSeries == $td3dose.associatedTargetSeries, administrationDate > $td3dose.administrationDate)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName != "ICE163", administrationDate > $td3dose.administrationDate, isValid == true)
+		eval($ts3doseSeries.determineNumberOfDosesAdministeredInSeries() >= 1)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
+end
+
+
+rule "SerieSelection(MenB): Select MenB 4C 3-dose series if target dose 1 (CVX 163) is Valid; series _is_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+
+rule "SerieSelection(MenB): Select MenB 4C 3-dose series if target dose 1 (CVX 163) is Valid; series is _not_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts3doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+
+/////////////////////
+// Sub-bullet 2:   * Valid for the MenB 4C 2-dose Series AND valid for MenB 4C 3-dose Series, the MenB 4C 2-dose series applies.
+/////////////////////
 
 rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
 	dialect "mvel"
@@ -1665,6 +1733,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
 end
 
+
 rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 163) is Valid; series _is_ complete" 
 		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
 	dialect "mvel"
@@ -1681,6 +1750,7 @@ rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 1
 		update($tss);
 		update($ts);
 end
+
 
 rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 163) is Valid; series is _not_ complete" 
 		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
@@ -1701,7 +1771,10 @@ rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 1
 end
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// END: If dose 1 is CVX 163 (Meningococcal B 4C, OMV (Bexsero)), then the MenB 4C 2-dose series applies.
+// END: If dose 1 is CVX 163 (Meningococcal B 4C, OMV (Bexsero)) and:::::::
+//   * Invalid for the MenB 4C 2-dose Series, but valid for MenB 4C 3-dose Series, the MenB 4C 3-dose series applies.
+//   * Valid for the MenB 4C 2-dose Series AND valid for MenB 4C 3-dose Series, the MenB 4C 2-dose series applies.
+//
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -2038,7 +2111,7 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // START: If both CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and CVX 163 (Meningococcal B 4C, OMV (Bexsero)) are on the patient record, then the series in which the Meningococcal B vaccine last 
 // administered applies. Ignore the reported shot of the other Meningococcal B vaccine.
-//    * If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is the last shot administered on the patient record, then the MenB 4C 2-dose series applies.
+//    * If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is the last shot administered on the patient record, then the MenB 4C 2-dose series ---> NEW: or MenB 3-dose series applies.
 //    * If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is the last shot administered on the patient record, then either the MenB FHbp 2-dose series applies or the MenB FHbp 3-dose series applies. 
 //      (See preceding Series Selection Rules to determine whether the MenB FHbp 2-dose series or MenB FHbp 3-dose series applies.)
 //
