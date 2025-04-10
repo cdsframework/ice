@@ -1655,8 +1655,6 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // START: If target dose 1 is CVX 163 (Meningococcal B 4C, OMV (Bexsero)) and:
 //   * Invalid for the MenB 4C 2-dose Series, but valid for MenB 4C 3-dose Series, the MenB 4C 3-dose series applies.
@@ -1672,6 +1670,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
 	when
+		exists ICEFactTypeFinding("SeriesSelection: Select MenB 4C Series")
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.825", seriesRules.seriesName == "MenB4C2DoseSeries")
@@ -1733,6 +1732,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
 	when
+		exists ICEFactTypeFinding("SeriesSelection: Select MenB 4C Series")
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries") /////// , determineNumberOfDosesAdministeredInSeries() >= 1)
@@ -1805,6 +1805,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target d
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
 	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false) /////// , determineNumberOfDosesAdministeredInSeries() == 0)
@@ -1868,6 +1869,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target d
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
 	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false) /////// , determineNumberOfDosesAdministeredInSeries() == 1)
@@ -1944,6 +1946,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 i
 	agenda-group "SeriesSelection^customSeriesSelectionRules"	
 	salience 10
 	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false) /////// , determineNumberOfDosesAdministeredInSeries() >= 2)
@@ -2003,6 +2006,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 i
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
 	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries") ///////, determineNumberOfDosesAdministeredInSeries() <= 1)
@@ -2012,6 +2016,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 i
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries " + $ts3doseSeries);
 end
+
 
 rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHBp 3-dose series _is_ complete" 
 		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
@@ -2061,6 +2066,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 i
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
 	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries") /////// , determineNumberOfDosesAdministeredInSeries() == 1)
@@ -2173,6 +2179,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries MenB4C2DoseSeries or TargetSeries MenB4C3DoseSeries");
 		insert(new ICEFactTypeFinding("SeriesSelection: Select MenB 4C Series"));
 end
+
 
 rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, Series is complete, and 4C 3-Dose Series is _not_ complete" 
 		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
