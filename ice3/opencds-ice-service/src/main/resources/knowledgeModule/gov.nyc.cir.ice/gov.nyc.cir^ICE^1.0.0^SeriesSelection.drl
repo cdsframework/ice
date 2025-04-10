@@ -2142,9 +2142,8 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose 
 		// There is a Bexsero
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName in ("ICE163"))
 		// There is also a Trumenba that is the last shot administered
-		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162")
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate > $latestTd.administrationDate)
-		// Verify that $latestTd is in a Trumenba series
+		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162", associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate >= $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE163")
 		TargetDose(this == $latestTd, associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"))
 	then
 		String _RULENAME = kcontext.rule.name;
@@ -2164,10 +2163,9 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 
 		// There is a Trumenba
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162")	// Do not need to specify ICE316 here, since that is a combo vaccine
 		// There is also a Bexsero that does not have a shot administered later than it was administered
-		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163")
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate >= $latestTd.administrationDate)
-		// Verify that $latestTd is in a Bexsero series
-		TargetDose(this == $latestTd, associatedTargetSeries.seriesName in ("MenB4C2DoseSeries", "MenB4C3DoseSeries"))
+		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163", associatedTargetSeries.seriesName in ("MenB4C2DoseSeries", "MenB4C3DoseSeries"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate > $latestTd, vaccineComponent.cdsConceptName == "ICE162")
+		// Make note of both Bexsero series for descendent rules
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
 		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries")
 	then
