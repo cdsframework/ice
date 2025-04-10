@@ -2139,7 +2139,9 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose 
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		// There is a Bexsero
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName in ("ICE163"))
+		// There is also a Trumenba that is the last shot administered
 		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162")
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate > $latestTd.administrationDate)
 		// Verify that $latestTd is in a Trumenba series
@@ -2159,13 +2161,15 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		// There is a Trumenba
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162")	// Do not need to specify ICE316 here, since that is a combo vaccine
+		// There is also a Bexsero that does not have a shot administered later than it was administered
+		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163")
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate >= $latestTd.administrationDate)
+		// Verify that $latestTd is in a Bexsero series
+		TargetDose(this == $latestTd, associatedTargetSeries.seriesName in ("MenB4C2DoseSeries", "MenB4C3DoseSeries"))
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
 		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries")
-		/////// exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName in ("ICE162", "ICE316"))
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162")
-		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835")
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate > $latestTd.administrationDate)
-		$tdCVX163In4CSeries : TargetDose(this == $latestTd, associatedTargetSeries == $ts2doseSeries || associatedTargetSeries == $ts3doseSeries)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries MenB4C2DoseSeries or TargetSeries MenB4C3DoseSeries");
