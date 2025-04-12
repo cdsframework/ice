@@ -118,6 +118,8 @@ MenB FHbp 2-dose Series specific rules END
 *************************************************************************************************************************************************************************************/
 
 
+
+
 /*************************************************************************************************************************************************************************************
 MenB FHbp 3-dose Series specific rules
 *************************************************************************************************************************************************************************************/
@@ -299,7 +301,7 @@ end
 
 
 // This rule assumes that target dose 1 intervals have been modified appropriately. Note that this rule only takes care of the evaluation parameters. Recommendation parameters for this DoseRule should be handled in the RecommendationForecast agenda group, as those considerations are different.
-rule "MenB(4C 2-Dose Series): If target dose 2 is administered < 10/25/2024, then modify DoseRule1 to their pre-10/25/2024 values as follows: (1) DoseRule1: (i) Absolute Minimum Interval: 1m-4d"
+rule "MenB(4C 2-Dose Series): If target dose 2 is administered < 10/25/2024, then modify DoseRule1 to their pre-10/25/2024 values as follows: (i) Absolute Minimum Interval: 1m-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	salience 999
