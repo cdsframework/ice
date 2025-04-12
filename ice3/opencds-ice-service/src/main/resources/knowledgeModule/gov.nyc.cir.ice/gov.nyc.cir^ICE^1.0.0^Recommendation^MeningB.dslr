@@ -181,6 +181,7 @@ END Recommending at the Vaccine vs. Vaccine Group Level; including additional re
 *************************************************************************************************************************************************************************************/
 
 
+
 /*************************************************************************************************************************************************************************************
 Recommendation Rules based on Patient Age
 If no doses are on record and
@@ -268,6 +269,12 @@ rule "Mening B: If the patient >= 24yrs and no doses on record, recommendation i
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/*************************************************************************************************************************************************************************************
+ END Recommendation Rules based on Patient Age
+/*************************************************************************************************************************************************************************************
+
+
+
 
 /*************************************************************************************************************************************************************************************
 MenB FHbp 3-dose Series specific rules
@@ -299,7 +306,6 @@ end
 // Recommend earliest inverval of 6 months between Dose 1 and Dose 3 in Men B FHbp 3-dose series
 // Nothing to do - since minimum interval and recommended interval is the same (6m); handled by above rule
 
-
 /*************************************************************************************************************************************************************************************
  END MenB FHbp 3-dose Series specific rules
 *************************************************************************************************************************************************************************************/
@@ -316,7 +322,7 @@ rule "MenB(4C 3-Dose Series): Recommend minimum & recommended interval of at 6 m
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the name of the Series is "MenB4C2DoseSeries"
+			- the name of the Series is "MenB4C3DoseSeries"
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
