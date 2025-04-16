@@ -386,42 +386,6 @@ rule "MenB(4C 2-Dose Series): If the evaluation date is >= 10/25/2024, the minim
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-/*
-rule "MenB(4C 2-Dose Series): If the evaluation date is < 10/25/2024, the minimum interval & recommended interval is 1m from the most recent shot (*recommendationIntervalCheck*)"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	activation-group "recommendationIntervalCheck"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the name of the Series is "MenB4C2DoseSeries"
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
-			- the Series is not Complete
-			- the effective dose number in the Series is == 2
-		There is an Administered Shot $dose1
-			- the Shot belongs to the Series $targetSeries 
-			- that has already been evaluated
-			- make note of the date this Shot was Administered as $dtAdministrationDate
-		Confirm the date evalTime is before "25-Oct-2024" 
-	then
-		Add "1m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
-		Set the Recommendation Earliest Forecast Date for $r to $dtCalculated
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-rule "MenB(4C 2-Dose Series): If target dose 2 was administered < 10/25/2024, the minimum interval & recommended interval is 1m from the most recent shot (*earliestIntervalCheck*)"
-		extends "MenB(4C 2-Dose Series): If the evaluation date is < 10/25/2024, the minimum interval & recommended interval is 1m from the most recent shot (*recommendationIntervalCheck*)"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	activation-group "earliestIntervalCheck"
-	when
-		// Conditions checked in parent rule; no additional conditions to check
-	then
-		// Nothing to do; earliest forecast date set in parent rule
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-*/
 
 // If the evaluation date is < 10/25/2024, modify dose rule 1 for minimum age and recommended age to 10 years
 rule "MenB(4C 2-Dose Series; Dose 1; CRR): If the evaluation date is < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"

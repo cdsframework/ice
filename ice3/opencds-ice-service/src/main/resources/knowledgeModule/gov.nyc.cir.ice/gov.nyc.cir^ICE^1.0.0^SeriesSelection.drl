@@ -2442,37 +2442,36 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose 
 end
 
 
-/*
-rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, series is not complete, and there are no other series complete" 
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
+// If both CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and CVX 163 (Meningococcal B 4C, OMV (Bexsero)) are on the patient record, and one or more Series is complete,
+// then select the Series of all of them that finished first.
+rule "SeriesSelection(MenB): If both (CVX 162, CVX 316) and CVX 163 are present, and one or more Series is complete, select the Series that completed first (and did not complete on the same day)"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 30
+	salience 40
 	when
-		TargetSeries(this == $ts, isSeriesComplete() == false)
-		not TargetSeries(this != $ts, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		and
+		$ts : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+		and
+		(
+			not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", this != $ts, isSeriesComplete() == true)
+		//	or
+		)	
 	then
-		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
-		update($tss);
-		update($ts);
+	
 end
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// END: If both CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and CVX 163 (Meningococcal B 4C, OMV (Bexsero)) are on the patient record, then the series in which the Meningococcal B vaccine last 
+// END: If both CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and CVX 163 (Meningococcal B 4C, OMV (Bexsero)) are on the patient recnd, then the series in which the Meningococcal B vaccine last 
 // administered applies. Ignore the reported shot of the other Meningococcal B vaccine.
 //    * If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is the last shot administered on the patient record, then the MenB 4C 2-dose series applies.
 //    * If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is the last shot administered on the patient record, then either the MenB FHbp 2-dose series applies or the MenB FHbp 3-dose series applies. 
 //      (See preceding Series Selection Rules to determine whether the MenB FHbp 2-dose series or MenB FHbp 3-dose series applies.)
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 /*************************************************************************************************************************************************************************************
- Meningococcal B Series Selection START
+ END Meningococcal B Series Selection
 *************************************************************************************************************************************************************************************/
 
 

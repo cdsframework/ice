@@ -250,8 +250,8 @@ rule "MenB(4C 2-Dose Series): Do not invoke default Absolute Minimum Age check f
 end
 
 
-// If dose 2 was administered >= 10/25/2024, the absolute minimum interval from Valid Dose 1 (not necessarily the immediately prior shot) to target dose 2  is 6 months-4 days. This is different than the table interval rule,
-// which checks that there is a 4m-4d interval between the immediate last shot and the current shot
+// If dose 2 was administered >= 10/25/2024, the absolute minimum interval from Valid Dose 1 (not necessarily the immediately prior shot) to target dose 2  is 6 months-4 days. 
+// (This is different than the table interval rule, which checks that there is a 4m-4d interval between the immediate last shot and the current shot.)
 rule "MenB(4C 2-Dose Series): If dose 2 was administered >= 10/25/2024, the absolute minimum interval from the (valid) Dose 1 (not necessarily the immediately prior shot) to target dose 2  is 6 months-4 days"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -322,6 +322,19 @@ rule "MenB(4C 2-Dose Series): If target dose 2 is administered < 10/25/2024, the
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+
+// Series Exception Rule for Series Switch to MenB 4C 3-dose Series: If target dose 2 is administered >= 10/25/2024 and the Absolute Minimum Interval is >= 4 weeks - 4 days and < 6 months - 4 days, switch this series to the MenB 4C 3-dose Series starting with target dose 2.
+rule "MenB(4C 2-Dose Series): "
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
+	when
+	
+	then
+	
+end
+
+
 /*************************************************************************************************************************************************************************************
 MenB 4C 2-dose Series specific rules
 *************************************************************************************************************************************************************************************/
@@ -342,7 +355,7 @@ MenB 4C 3-dose Series specific rules
 
 // If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is reported, then evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
 // Ignore the reported CVX 162 when determining the recommended vaccine and calculating the recommended due date for the next target dose.
-rule "Mening B(MenB 4C 3-dose Series): Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
+rule "MenB(4C 3-dose Series): Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -360,7 +373,7 @@ rule "Mening B(MenB 4C 3-dose Series): Evaluate CVX 162 or CVX 316 as ACCEPTED/V
 end
 
 
-rule "Mening B(MenB 4C 3-dose Series): Skip interval check on ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOSE_RECENT_VACCINE_GIVEN" extends 
+rule "MenB(4C 3-dose Series): Skip interval check on ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOSE_RECENT_VACCINE_GIVEN" extends 
 		"Mening B(MenB 4C 3-dose Series): Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN and Ignore Shot"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
@@ -374,7 +387,7 @@ end
 
 
 // Rule for Shots Administered < 10/25/2024 (Prior to Addition of the MenB 4C 3-dose Series): If any shot is administered < 10/25/2024 in the MenB 4C 3-dose Series, then evaluate all shots as Invalid.
-rule "Mening B(MenB 4C 3-dose Series): If there are any shots administered < 10/25/2024 (and the series is not complete), evaluate all shots that needs to be evaluated as Invalid"
+rule "MenB(4C 3-dose Series): If a shot is administered < 10/25/2024 and the series is not complete, evaluate the shot as Invalid"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -382,8 +395,7 @@ rule "Mening B(MenB 4C 3-dose Series): If there are any shots administered < 10/
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C3DoseSeries"
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $associatedTargetSeries
-		There exists an administered shot
-			- the shot belongs to the Series $associatedTargetSeries
+			- the administration date of the shot is < "25-Oct-2024"
 			- the administration date of the shot is < "25-Oct-2024"	
 	then
 		Include the reason for shot $currentShot Invalid for this Series
