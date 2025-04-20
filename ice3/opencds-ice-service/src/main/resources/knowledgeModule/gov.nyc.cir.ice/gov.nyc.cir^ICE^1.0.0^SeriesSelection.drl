@@ -2395,6 +2395,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 
 		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162")	// Do not need to specify ICE316 here, since that is a combo vaccine
 		// There is also a Bexsero that does not have a shot administered later than it was administered
 		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163", associatedTargetSeries.seriesName in ("MenB4C2DoseSeries", "MenB4C3DoseSeries"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163", associatedTargetSeries.seriesName in ("MenB4C2DoseSeries", "MenB4C3DoseSeries"), administrationDate > $latestTd.administrationDate)
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate > $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE162")
 		// Make note of both Bexsero series for descendent rules
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
@@ -2405,7 +2406,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 
 		insert(new ICEFactTypeFinding("SeriesSelection: Select MenB 4C Series"));
 end
 
-/*
+
 rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, Series is complete, and 4C 3-Dose Series is _not_ complete" 
 		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
 	dialect "mvel"
@@ -2442,10 +2443,35 @@ rule "SeriesSelection(MenB): Select MenB 4C 3-Dose Series if both (CVX 162, CVX 
 		update($tss);
 		update($ts3doseSeries);
 end
+
+
+///////
+// sub-bullet 2: if cvx 162 (meningococcal b fhbp, recombinant (trumenba)) is the last shot administered on the patient record, then either the menb fhbp 2-dose series applies or the menb fhbp 3-dose series applies"
+///////
+/*
+rule "abstract seriesselection(menb): select menb fhbp 2-dose series _or_ fhbp 4c 3-dose series if both (cvx 162, cvx 316) and cvx 163 present, and latest shot date administered is cvx 162"
+	dialect "mvel"
+	agenda-group "seriesselection^customseriesselectionrules"
+	salience 30
+	when
+		$tss : targetseriesselection(seriesselectionvaccinegroup == "vaccine_group_concept.835", seriesselectionstatus == seriesselectionstatus.series_selection_in_process)
+		not targetseries(seriesrules.vaccinegroup == "vaccine_group_concept.835", selectedseries == true)
+		// there is a bexsero
+		exists targetdose(associatedvaccinegroup == "vaccine_group_concept.835", vaccinecomponent.cdsconceptname in ("ice163"))
+		// there is also a trumenba that is the last shot administered
+		$latesttd : targetdose(associatedvaccinegroup == "vaccine_group_concept.835", vaccinecomponent.cdsconceptname == "ice162", associatedtargetseries.seriesname in ("menbfhbp2doseseries", "menbfhbp3doseseries"))
+		not targetdose(associatedvaccinegroup == "vaccine_group_concept.835", administrationdate >= $latesttd.administrationdate, vaccinecomponent.cdsconceptname == "ice163")
+		targetdose(this == $latesttd, associatedtargetseries.seriesname in ("menbfhbp2doseseries", "menbfhbp3doseseries"))
+	then
+		string _rulename = kcontext.rule.name;
+		icelogichelper.logdrldebugmessage(_rulename, "targetseries menbfhbp2doseseries or targetseries menbfhbp3doseseries");
+		insert(new icefacttypefinding("seriesselection: select menb fhbp series"));
+end
 */
 
-// Sub-bullet 2: If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is the last shot administered on the patient record, then either the MenB FHbp 2-dose series applies or the MenB FHbp 3-dose series applies"
-rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
+
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -2453,17 +2479,58 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose 
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		// There is a Bexsero
-		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName in ("ICE163"))
-		// There is also a Trumenba that is the last shot administered
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163")	// Do not need to specify ICE316 here, since that is a combo vaccine
+		// There is also a Trumenba that does not have a shot administered later than it was administered
 		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162", associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"))
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate >= $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE163")
-		TargetDose(this == $latestTd, associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"))
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"), administrationDate > $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE162")
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162", associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"), administrationDate > $latestTd.administrationDate)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate > $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE163")
+		// Make note of both Bexsero series for descendent rules
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries")
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries")
 	then
 		String _RULENAME = kcontext.rule.name;
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries MenBFHbp2DoseSeries or TargetSeries MenBFHbp3DoseSeries");
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "ABSTRACT SeriesSelection: TargetSeries MenB4C2DoseSeries or TargetSeries MenB4C3DoseSeries");
 		insert(new ICEFactTypeFinding("SeriesSelection: Select MenB FHbp Series"));
 end
 
+
+rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 162, Series is complete, and FHbp 3-Dose Series is _not_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"	
+	salience 30
+	when
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == false)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+
+rule "SeriesSelection(MenB): Select MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, Series is complete, and FHbp 2-Dose Series is _not_ complete" 
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"	
+	salience 30
+	when
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
 
 // If both CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and CVX 163 (Meningococcal B 4C, OMV (Bexsero)) are on the patient record, and one or more Series is complete,
 // then select the Series of all of them that finished first.

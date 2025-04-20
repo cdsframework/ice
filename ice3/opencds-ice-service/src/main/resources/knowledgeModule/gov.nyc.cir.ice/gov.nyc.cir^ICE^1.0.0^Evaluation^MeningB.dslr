@@ -329,7 +329,9 @@ end
 rule "MenB(4C 2-Dose Series): If dose 1 was administered < 10/25/2024, target dose 2 is CVX 163 is administered >= 10/25/2024, and the interval between the previous (unignored) shot is >= 4w-4d and < 4m-4d OR the interval from (valid) dose 1 is < 6m-4d, _switch_ to the 4C 3-dose Series"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "SwitchFromMenB2DoseTo3Dose"
 	salience 999
+	no-loop true
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
@@ -340,6 +342,7 @@ rule "MenB(4C 2-Dose Series): If dose 1 was administered < 10/25/2024, target do
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the vaccine $currentShotAdministeredVaccine is permitted for dose number 2 in this Series
+			- the Series is not complete
 		There is an administered shot $dose1
 			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated and whose shot validity is VALID
@@ -356,8 +359,9 @@ rule "MenB(4C 2-Dose Series): If dose 1 was administered < 10/25/2024, target do
 			- that has already been evaluated
 			- the shot is not ignored
 			- the administration date of the shot is > $previousShotDate
-			There is a Series $seriesToSwitchTo
-				- the name of the Series is "MenB4C3DoseSeries"
+		There is a Series $seriesToSwitchTo
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the Series is "MenB4C3DoseSeries"
 		Confirm that the following is true: elapsed time between $dose1Date and $currentShotDate < "6m-4d" || elapsed time between $previousShotDate and $currentShotDate >= "4w-4d" && elapsed time between $previousShotDate and $currentShotDate < "4m-4d"
 	then
 		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number 2 and evaluate using Interval for prior dose to this dose from SwitchedTo Series
