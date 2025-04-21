@@ -1678,6 +1678,32 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+
+// Because there is a possibility in the Evaluation Stage that there was a switch from the 4C 2-dose Series to the 3-dose Series during evaluation,  
+rule "SeriesSelection(MenB): Select available MenB 4C 3-dose if there is no MenB 4C 2-dose Series and a MenB 4C Series should be selected"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 1
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB 4C Series");
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries")
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // START: If target dose 1 is CVX 163 (Meningococcal B 4C, OMV (Bexsero)) and:
 //   * Invalid for the MenB 4C 2-dose Series, but valid for MenB 4C 3-dose Series, the MenB 4C 3-dose series applies.
@@ -1828,7 +1854,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is 
 	agenda-group "SeriesSelection^customSeriesSelectionRules"	
 	salience 10
 	when
-		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB 4C Series")
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB 4C Series") // SeriesSelection: Select MenB 4C Series
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false) /////// , determineNumberOfDosesAdministeredInSeries() >= 2)
