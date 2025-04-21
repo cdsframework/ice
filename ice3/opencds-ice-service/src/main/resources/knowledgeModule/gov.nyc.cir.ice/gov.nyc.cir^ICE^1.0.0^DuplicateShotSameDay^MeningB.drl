@@ -59,15 +59,51 @@ global java.util.Date evalTime
 //    + evaluate CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) as Invalid with reason codes DUPLICATE_SAME_DAY and SUPPLEMENTAL_TEXT; Descriptive Text: "The patient record indicates that different Meningococcal B products were administered on the same day. Based on the available information, the product administered is undetermined and therefore unable to be evaluated." 
 //    + evaluate CVX 163 (Meningococcal B 4C, OMV (Bexsero)) as Invalid with a reason codes DUPLICATE_SAME_DAY and SUPPLEMENTAL_TEXT; Descriptive Text: "The patient record indicates that different Meningococcal B products were administered on the same day. Based on the available information, the product administered is undetermined and therefore unable to be evaluated." 
         
-rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162 or CVX 316 is administered on the same day as CVX 163 on a date >= 10/25/2024, evaluate CVX 162 as Invalid with reason DUPLICATE_SAME_DAY"
+rule "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
 	no-loop true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162", administrationDate >= "25-Oct-2024", isDoseStatusOverridden() == false)
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false,
-			doseNumberInSeries == $td.doseNumberInSeries, vaccineComponent.cdsConceptName == "ICE163", isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+		$td: TargetDose(hasBeenEvaluated == true, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate >= "25-Oct-2024", doseNumberInSeries <= associatedTargetSeries.seriesRules.numberOfDosesInSeries, isDoseStatusOverridden() == false)
+		$tdother : TargetDose(this != $td,  administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate == $td.administrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false, doseNumberInSeries == $td.doseNumberInSeries, 
+			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+			//associatedTargetSeries == $td.associatedTargetSeries,
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
+rule "Duplicate Shots/Same Day (MenB): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and the Series is complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
+		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
+	dialect "mvel"
+	auto-focus true
+	no-loop true
+	when
+		TargetSeries(this == $td.associatedTargetSeries, isSeriesComplete() == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true);
+		}
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName()),
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+
+rule "Duplicate Shots/Same Day (MenB): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and neither Series ic omplete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
+		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
+	dialect "mvel"
+	auto-focus true
+	no-loop true
+	when
+		TargetSeries(this == $td.associatedTargetSeries, isSeriesComplete() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($tdother) {
@@ -84,7 +120,8 @@ rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162 or CVX 316 is administer
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName()),
 			addSupplementalTextForInvalidShot("The patient record indicates that different Meningococcal B products were administered on the same day. Based on the available information, the product administered is undetermined and therefore unable to be evaluated.");
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td + " in TargetSeries " + $td.associatedTargetSeries);
+
 end
 
 
@@ -101,7 +138,7 @@ rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162/CVX 163 reported on same
 	auto-focus true
 	no-loop true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", associatedTargetSeries.seriesName in ("MenB4C2DoseSeries", "Menb4C3DoseSeries"), vaccineComponent.cdsConceptName == "ICE163",
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", associatedTargetSeries.seriesName == "MenB4C2DoseSeries", vaccineComponent.cdsConceptName == "ICE163",
 			administrationDate < "25-Oct-2024", isDoseStatusOverridden() == false)
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, doseNumberInSeries == $td.doseNumberInSeries, 
 			vaccineComponent.cdsConceptName == "ICE162", isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
