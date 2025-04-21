@@ -2492,8 +2492,6 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4
 			invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"), administrationDate > $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE162",
 			invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
-		/////// not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162", associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"), administrationDate > $latestTd.administrationDate,
-			/////// invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
 		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate > $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE163", invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
 		// Make note of both Bexsero series for descendent rules
 		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries")
