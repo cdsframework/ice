@@ -366,6 +366,7 @@ rule "MenB(4C 2-Dose Series): If dose 1 was administered < 10/25/2024, target do
 	then
 		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number 2 and evaluate using Interval for prior dose to this dose from SwitchedTo Series
 		Refresh all facts in the Series $targetSeries for Evaluation
+		Refresh all facts for the Shot $currentShot
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
