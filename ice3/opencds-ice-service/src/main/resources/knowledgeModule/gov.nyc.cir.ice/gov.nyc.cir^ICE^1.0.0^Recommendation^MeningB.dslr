@@ -66,7 +66,9 @@ rule "Mening B: Do not recommend a specific vaccine if no (valid) doses have bee
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made and a Specific Vaccine is Recommended
-			- the effective dose number in the Series is == 1
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
 	then
 		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -82,10 +84,68 @@ rule "Mening B: Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose 
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
 			- the name of the series is "MenB4C2DoseSeries"
-			
+			- the Series is not complete 
+			- the dose number to recommend is > 1
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "ICE163"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
+rule "Mening B: Recommend CVX 163 for the 2nd target dose and later in the MenB 4C 3-dose Series"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the series is "MenB4C3DoseSeries"
+			- the series is not complete
+			- the dose number to recommend is > 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE163"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB FHbp 2-dose Series, recommend CVX 162 for the next target dose.
+rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-dose Series"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the series is "MenBFHbp3DoseSeries"
+			- the Series is not complete
+			- the dose number to recommend is > 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
+rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-dose Series"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the series is "MenBFHbp2DoseSeries"
+			- the Series is not complete
+			- the dose number to recommend is > 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -116,44 +176,10 @@ rule "Mening B: If a patient has at least one CVX 162 or CVX 316 and at least on
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-
-// When recommending in the MenB FHbp 2-dose Series, recommend CVX 162 for the next target dose.
-rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-dose Series"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
-			- the name of the series is "MenBFHbp3DoseSeries"
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
-// When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
-rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-dose Series"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
-			- the name of the series is "MenBFHbp2DoseSeries"
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-
-
 /*************************************************************************************************************************************************************************************
 END Recommending at the Vaccine vs. Vaccine Group Level; including additional reason codes where necessary
 *************************************************************************************************************************************************************************************/
+
 
 
 /*************************************************************************************************************************************************************************************
@@ -243,13 +269,19 @@ rule "Mening B: If the patient >= 24yrs and no doses on record, recommendation i
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/*************************************************************************************************************************************************************************************
+ END Recommendation Rules based on Patient Age
+/*************************************************************************************************************************************************************************************
+
+
+
 
 /*************************************************************************************************************************************************************************************
 MenB FHbp 3-dose Series specific rules
 *************************************************************************************************************************************************************************************/
 
 // Recommended interval between Dose 1 and Dose 3 in Men B FHbp 3-dose series is 6 months
-rule "MeningB: Recommend an recommended interval of at 6 months between doses 1 & 3 in FHbp 3-dose Series"
+rule "MeningB: Recommend minimum interval & recommended interval of at 6 months between doses 1 & 3 in FHbp 3-dose Series"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -274,7 +306,315 @@ end
 // Recommend earliest inverval of 6 months between Dose 1 and Dose 3 in Men B FHbp 3-dose series
 // Nothing to do - since minimum interval and recommended interval is the same (6m); handled by above rule
 
+/*************************************************************************************************************************************************************************************
+ END MenB FHbp 3-dose Series specific rules
+*************************************************************************************************************************************************************************************/
+
+
+
 
 /*************************************************************************************************************************************************************************************
-END MenB FHbp 3-dose Series specific rules
+ MenB 4C 3-dose Series specific rules
+*************************************************************************************************************************************************************************************/
+
+// Recommended interval between Dose 1 and Dose 3 in Men B 4C 3-dose series is 6 months
+rule "MenB(4C 3-Dose Series): Recommend minimum & recommended interval of at 6 months between doses 1 & 3"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the name of the Series is "MenB4C3DoseSeries"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries 
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $r to $dtCalculated
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+/*************************************************************************************************************************************************************************************
+ END MenB 4C 3-dose Series specific rules
+*************************************************************************************************************************************************************************************/
+
+
+
+
+/*************************************************************************************************************************************************************************************
+ MenB 4C 2-dose Series specific rules
+*************************************************************************************************************************************************************************************/
+
+rule "MenB(4C 2-Dose Series): If (valid) dose 1 was >= 10/25/2024, the minimum interval & recommended interval is 6m from the (valid) dose 1 (*recommendationIntervalCheck*)"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the name of the Series is "MenB4C2DoseSeries"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 2
+		 There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries 
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- the administration date of the shot is >= "25-Oct-2024"
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+		 /////// Confirm the date evalTime is on the same date or after "25-Oct-2024" 
+	then
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Create a recommendation as $r for the Series $targetSeries
+		Set the recommendation recommended forecast date for $r to the latter of $dtCalculated and "25-Oct-2024"
+		Set the recommendation earliest forecast date for $r to the latter of $dtCalculated and "25-Oct-2024"
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "MenB(4C 2-Dose Series): If the (valid) dose 1 was administered >= 10/25/2024, the minimum interval & recommended interval is 6m from the (valid) dose 1 (*earliestIntervalCheck*)"
+		extends "MenB(4C 2-Dose Series): If (valid) dose 1 was >= 10/25/2024, the minimum interval & recommended interval is 6m from the (valid) dose 1 (*recommendationIntervalCheck*)"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		// Conditions checked in parent rule; no additional conditions to check
+	then
+		// Nothing to do; earliest forecast date set in parent rule
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If no shots were administered and the evalTime < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	no-loop true
+	salience 999
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the name of the Series is "MenB4C2DoseSeries"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series is not Complete
+			- the number of administered shots is == 0
+		Confirm the date evalTime is before "25-Oct-2024"
+	then
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If an (invalid) shot was 1 was administered < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	no-loop true
+	salience 999
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the name of the Series is "MenB4C2DoseSeries"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series is not Complete
+			- the number of doses administered is == 0
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the administration date of the shot is < "25-Oct-2024"
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the administration date of the shot is >= "25-Oct-2024"
+	then
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "MenB(4C 2-Dose Series; Target Dose 2; CRR): If a (valid) dose 1 administered was < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	no-loop true
+	salience 999
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the name of the Series is "MenB4C2DoseSeries"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series is not Complete
+			- the number of doses administered is == 1
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the dose number in the Series is == 1
+			- the administration date of the shot is < "25-Oct-2024"
+	then
+		// Set to the pre-10/25/2024 ages/interval values for DoseRule 2
+		Obtain the existing DoseRule for Dose Number 2 in the Series $targetSeries as $assign_oDoseRule2
+		Set the Minimum Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
+		Set the Recommended Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule2
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		// Set to the pre-10/25/2024 ages/interval values for DoseRule 1
+		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/*
+// If the evaluation date is < 10/25/2024, modify dose rule 1 for minimum age and recommended age to 10 years
+rule "MenB(4C 2-Dose Series; Target Dose 2; CRR): If either no shots were administered or target dose 1 was administered < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	no-loop true
+	salience 999
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the name of the Series is "MenB4C2DoseSeries"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series is not Complete
+			- the number of doses administered is == 1
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the administration date of the shot is >= "25-Oct-2024"
+		/////// Confirm the date evalTime is before "25-Oct-2024"
+	then
+		// Set to the pre-10/25/2024 ages/interval values for DoseRule 2
+		Obtain the existing DoseRule for Dose Number 2 in the Series $targetSeries as $assign_oDoseRule2
+		Set the Minimum Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
+		Set the Recommended Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule2
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		// Set to the pre-10/25/2024 ages/interval values for DoseRule 1
+		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+*/
+
+/*
+// If the evaluation date is < 10/25/2024, modify dose rule 1 for minimum age and recommended age to 10 years
+rule "MenB(4C 2-Dose Series; Dose 2; CRR): If the evaluation date is < 10/25/2024, then: (1) Modify DoseRule2 minimum age & recommended age to 10y+1m; (2) Modify DoseRule1 minimum age & recommended age to 10y; (3) Modify DoseRule1 minimum interval & recommended interval from dose 1 to dose 2 to 1 month"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	no-loop true
+	salience 999
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the name of the Series is "MenB4C2DoseSeries"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series is not Complete
+			- the number of doses administered is == 1
+		Confirm the date evalTime is before "25-Oct-2024"
+	then
+		// Set to the pre-10/25/2024 ages/interval values for DoseRule 2
+		Obtain the existing DoseRule for Dose Number 2 in the Series $targetSeries as $assign_oDoseRule2
+		Set the Minimum Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
+		Set the Recommended Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule2
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		// Set to the pre-10/25/2024 ages/interval values for DoseRule 1
+		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+/*
+
+// If the evaluation date is < 10/25/2024 but the calculated recommendation date is > 10/25/2024 and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years.
+/*
+rule "MenB(4C 2-dose Series; Dose 1; PCRC): If the evaluation date is < 10/25/2024, the calculated earliest date for dose 1 is > 10/25/2024, and there was no shot administered < 10/25/2024, then reset DoseRule1 minimum age, recommended age, minimum interval, and recommended inrerval back to their original values"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	no-loop true
+	salience 999
+	when
+		There is a Series $targetSeries
+			- post processing on the Series forecast has not already been run
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the Series is "MenB4C2DoseSeries"
+			- the number of doses administered is == 0
+			- make note of the Earliest Date as $earliestDate
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the administration date of the shot is < "25-Oct-2024"
+		Confirm the date evalTime is before "25-Oct-2024"
+		Confirm the date $earliestDate is after "25-Oct-2024"
+	then
+		Clear forecasted recommendations from consideration in series $targetSeries
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "6m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "6m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
+		Refresh all Facts in the Series $targetSeries for Forecasting
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+*/
+
+// If the evaluation date is < 10/25/2024 but the calculated recommendation date is > 10/25/2024 and there was no shot administered < 10/25/2024, then reset the minimum age and recommended age for the dose 1 rule back to 16 years.
+/*
+rule "MenB(4C 2-dose Series; Dose 2; PCRC): If the evaluation date is < 10/25/2024, the calculated earliest date for dose 2 is > 10/25/2024, and there was not a dose administered < 10/25/2024, then reset DoseRule2 and DoseRule1 minimum age, recommended age, minimum interval, recommended interval back to their original values"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	no-loop true
+	salience 999
+	when
+		There is a Series $targetSeries
+			- post processing on the Series forecast has not already been run
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the name of the Series is "MenB4C2DoseSeries"
+			- the number of doses administered is == 1
+			- make note of the Earliest Date as $earliestDate
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the administration date of the shot is < "25-Oct-2024"
+		Confirm the date evalTime is before "25-Oct-2024"
+		Confirm the date $earliestDate is after "25-Oct-2024"
+	then
+		Clear forecasted recommendations from consideration in series $targetSeries
+		// Reset to the 10/25/2024 ages/interval values for DoseRule 2
+		Obtain the existing DoseRule for Dose Number 2 in the Series $targetSeries as $assign_oDoseRule2
+		Set the Minimum Age for DoseRule $assign_oDoseRule2 to TimePeriod "16y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule2 to TimePeriod "16y"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule2
+		// Reset to the 10/25/2024 ages/interval values for DoseRule 1
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
+		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "16y"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "6m"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "6m"
+		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
+		Refresh all Facts in the Series $targetSeries for Forecasting
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+*/
+
+/*************************************************************************************************************************************************************************************
+ END MenB 4C 2-dose Series specific rules
 *************************************************************************************************************************************************************************************/
