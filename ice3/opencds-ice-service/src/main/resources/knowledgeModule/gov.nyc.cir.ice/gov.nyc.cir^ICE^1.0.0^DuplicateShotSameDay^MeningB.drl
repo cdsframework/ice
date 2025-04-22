@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -66,22 +66,22 @@ rule "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administ
 	no-loop true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate >= "25-Oct-2024", doseNumberInSeries <= associatedTargetSeries.seriesRules.numberOfDosesInSeries, isDoseStatusOverridden() == false)
-		$tdother : TargetDose(this != $td,  administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate == $td.administrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false, doseNumberInSeries == $td.doseNumberInSeries, 
-			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
-			//associatedTargetSeries == $td.associatedTargetSeries,
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate == $td.administrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false, 
+			doseNumberInSeries == $td.doseNumberInSeries, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
 
-rule "Duplicate Shots/Same Day (MenB): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and the Series is complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
+rule "Duplicate Shots/Same Day (MenB- td shot valid): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and the Series is complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
 		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
 	dialect "mvel"
 	auto-focus true
 	no-loop true
 	when
 		TargetSeries(this == $td.associatedTargetSeries, isSeriesComplete() == true)
+		TargetDose(this == $td, isValid == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		modify($td) {
@@ -93,11 +93,34 @@ rule "Duplicate Shots/Same Day (MenB): If CVX 162 or CVX 316 is administered >= 
 			removeAllEvaluationReasonsFromAllReasonSets(),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName()),
 		}
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, $td + " in TargetSeries " + $td.associatedTargetSeries);
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $td.associatedTargetSeries);
 end
 
 
-rule "Duplicate Shots/Same Day (MenB): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and neither Series ic omplete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
+rule "Duplicate Shots/Same Day (MenB- tdother shot valid): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and the Series is complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
+		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
+	dialect "mvel"
+	auto-focus true
+	no-loop true
+	when
+		TargetSeries(this == $td.associatedTargetSeries, isSeriesComplete() == true)
+		TargetDose(this == $tdother, isValid == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true);
+		}
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName()),
+		}
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeries " + $td.associatedTargetSeries);
+end
+
+
+rule "Duplicate Shots/Same Day (MenB): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and neither Series complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
 		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
 	dialect "mvel"
 	auto-focus true

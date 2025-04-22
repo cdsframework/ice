@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -1595,8 +1595,9 @@ end
 rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series by default"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience -1
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", isSeriesComplete() == false)
 	then
@@ -1605,6 +1606,26 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series by default"
 		$ts.setSelectedSeries(true);
 		$tss.setSelectedSeriesName($ts.seriesName);
 		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+
+rule "SeriesSelection(MenB): Select the MenB series with the most doses if no series is complete"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+		$ts : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", $numberOfDosesRemaining : seriesRules.numberOfDosesInSeries - determineNumberOfDosesAdministeredInSeries()) //  numberOfDosesAdministered
+		not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", this != $ts, seriesRules.numberOfDosesInSeries - determineNumberOfDosesAdministeredInSeries() > $numberOfDosesRemaining)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
 		update($tss);
 		update($ts);
 end
