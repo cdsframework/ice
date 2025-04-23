@@ -1067,7 +1067,7 @@ rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Mixed Product < 
 			// NOS administered
 			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
 		)
-		$tsmixedproduct : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023MixedProductLT5ySeries")
+		$tsmixedproduct : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, seriesRules.seriesName == "COVID19Sep2023MixedProductLT5ySeries")
 	then
 		String _RULENAME = kcontext.rule.name;
 		$tsmixedproduct.setSelectedSeries(true);
@@ -1106,8 +1106,8 @@ rule "SeriesSelection(COVID-19): If a >= 5yrs Series is completed but the previo
 	salience 26
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionSeason!.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"), seriesSelectionStatus in (SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, SeriesSelectionStatus.SERIES_SELECTION_COMPLETE))
-		$tsnovavax : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", selectedSeries == true, isSeriesComplete() == false)
-		$tsgte5yrs : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023gte5Series", selectedSeries == false, isSeriesComplete() == true)
+		$tsnovavax : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, selectedSeries == true, isSeriesComplete() == false)
+		$tsgte5yrs : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023gte5Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, selectedSeries == false, isSeriesComplete() == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		$tsgte5yrs.setSelectedSeries(true);
@@ -1127,8 +1127,8 @@ rule "SeriesSelection(COVID-19): If a Novavax 2023 Series is completed but the p
 	salience 26
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionSeason!.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"), seriesSelectionStatus in (SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, SeriesSelectionStatus.SERIES_SELECTION_COMPLETE))
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023gte5Series", selectedSeries == true, isSeriesComplete() == false)
-		$tsnovavax : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", selectedSeries == false, isSeriesComplete() == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023gte5Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, selectedSeries == true, isSeriesComplete() == false)
+		$tsnovavax : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, selectedSeries == false, isSeriesComplete() == true)
 	then
 		String _RULENAME = kcontext.rule.name;
 		$tsnovavax.setSelectedSeries(true);
