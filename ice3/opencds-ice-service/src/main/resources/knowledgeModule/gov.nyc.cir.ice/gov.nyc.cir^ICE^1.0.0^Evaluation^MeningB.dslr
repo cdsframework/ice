@@ -69,7 +69,7 @@ rule "Mening B / FHbp 2-dose series: Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_CO
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp2DoseSeries"
-			- the vaccine administered is "ICE163"
+			- the vaccine administered a member of ("ICE163", "ICE328")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -100,7 +100,7 @@ rule "Mening B / FBhp 2-dose series: Do not invoke default Absolute Minimum Age 
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp2DoseSeries"
-			- the vaccine administered is "ICE163"
+			- the vaccine administered a member of ("ICE163", "ICE328")
 			- make note of the date this shot was administered as $shotDate
 			- make note of the associated series as $targetSeries
 		The Patient information $patientInfo must be known to complete writing this rule
@@ -137,7 +137,7 @@ rule "MenB(FHbp 3-Dose Series): Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COUNTED
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp3DoseSeries"
-			- the vaccine administered is "ICE163"
+			- the vaccine administered a member of ("ICE163", "ICE328")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
