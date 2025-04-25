@@ -59,23 +59,24 @@ global java.util.Date evalTime
 //    + evaluate CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) as Invalid with reason codes DUPLICATE_SAME_DAY and SUPPLEMENTAL_TEXT; Descriptive Text: "The patient record indicates that different Meningococcal B products were administered on the same day. Based on the available information, the product administered is undetermined and therefore unable to be evaluated." 
 //    + evaluate CVX 163 (Meningococcal B 4C, OMV (Bexsero)) as Invalid with a reason codes DUPLICATE_SAME_DAY and SUPPLEMENTAL_TEXT; Descriptive Text: "The patient record indicates that different Meningococcal B products were administered on the same day. Based on the available information, the product administered is undetermined and therefore unable to be evaluated." 
         
-rule "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
+rule "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163 or CVX 328"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
 	no-loop true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate >= "25-Oct-2024", doseNumberInSeries <= associatedTargetSeries.seriesRules.numberOfDosesInSeries, isDoseStatusOverridden() == false)
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate == $td.administrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false, 
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, hasBeenEvaluated == true, isDoseStatusOverridden() == false, 
 			doseNumberInSeries == $td.doseNumberInSeries, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+			// associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835" 
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
 
-rule "Duplicate Shots/Same Day (MenB- td shot valid): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and the Series is complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
-		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
+rule "Duplicate Shots/Same Day (MenB- Series is Complete; $td Shot is Valid): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and the Series is complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
+		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163 or CVX 328"
 	dialect "mvel"
 	auto-focus true
 	no-loop true
@@ -97,8 +98,8 @@ rule "Duplicate Shots/Same Day (MenB- td shot valid): If CVX 162 or CVX 316 is a
 end
 
 
-rule "Duplicate Shots/Same Day (MenB- tdother shot valid): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and the Series is complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
-		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
+rule "Duplicate Shots/Same Day (MenB- Series is Complete; $tdother Shot is Valid): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as a CVX 163 or CVX 328 on a date >= 10/25/2024, and the Series is complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
+		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163 or CVX 328"
 	dialect "mvel"
 	auto-focus true
 	no-loop true
@@ -120,8 +121,8 @@ rule "Duplicate Shots/Same Day (MenB- tdother shot valid): If CVX 162 or CVX 316
 end
 
 
-rule "Duplicate Shots/Same Day (MenB): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 on a date >= 10/25/2024, and neither Series complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
-		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163"
+rule "Duplicate Shots/Same Day (MenB- Series is Not Complete): If CVX 162 or CVX 316 is administered >= 10/25/2024 on the same day as CVX 163 or CVX 328 on a date >= 10/25/2024, and neither Series complete, evaluate the shot that completes the Series as Valid and the other shot as Invalid / DUPLICATE_SAME_DAY"
+		extends "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administered >= 10/25/2024 and on the same day as CVX 163 or CVX 328"
 	dialect "mvel"
 	auto-focus true
 	no-loop true
@@ -155,7 +156,7 @@ end
 // However, if both Meningococcal B vaccines are administered on the same day, and one vaccine would complete a Meningococcal B series, then evaluate that vaccine as Valid and the other 
 // Meningococcal B vaccine as Invalid with a reason code of DUPLICATE_SAME_DAY.
 
-rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162/CVX 163 reported on same day in the 4C 2-dose Series on a date < 10/25/2024, evaluate the CVX 162 as Invalid with reason DUPLICATE_SAME_DAY"
+rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162 (or CVX 316) / CVX 163 (or CVX 328) reported on same day in the 4C 2-dose Series on a date < 10/25/2024, evaluate the CVX 162 as Invalid with reason DUPLICATE_SAME_DAY"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
@@ -179,7 +180,7 @@ rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162/CVX 163 reported on same
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, $tdother + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
-rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162/CVX 163 reported on same day in FBhp 2-dose or FBhp 3-dose Series < 10/25/2024, evaluate the CVX 163 as Invalid with reason DUPLICATE_SAME_DAY"
+rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162 (or CVX 316) / CVX 163 (or CVX 328) reported on same day in FBhp 2-dose or FBhp 3-dose Series < 10/25/2024, evaluate the CVX 163 as Invalid with reason DUPLICATE_SAME_DAY"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true

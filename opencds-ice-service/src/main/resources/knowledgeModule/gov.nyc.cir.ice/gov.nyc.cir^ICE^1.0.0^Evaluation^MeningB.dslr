@@ -69,7 +69,7 @@ rule "Mening B / FHbp 2-dose series: Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_CO
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp2DoseSeries"
-			- the vaccine administered is "ICE163"
+			- the vaccine administered a member of ("ICE163", "ICE328")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -100,7 +100,7 @@ rule "Mening B / FBhp 2-dose series: Do not invoke default Absolute Minimum Age 
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp2DoseSeries"
-			- the vaccine administered is "ICE163"
+			- the vaccine administered a member of ("ICE163", "ICE328")
 			- make note of the date this shot was administered as $shotDate
 			- make note of the associated series as $targetSeries
 		The Patient information $patientInfo must be known to complete writing this rule
@@ -137,7 +137,7 @@ rule "MenB(FHbp 3-Dose Series): Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COUNTED
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp3DoseSeries"
-			- the vaccine administered is "ICE163"
+			- the vaccine administered a member of ("ICE163", "ICE328")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -162,7 +162,7 @@ end
 
 
 // Regardless of the interval between dose 2 and target dose 3, if the Absolute Minimum Interval between dose 1 and target dose 3 >= 6 months-4 days, then evaluate dose 3 as Valid (as long as minimum age requirements are met, where applicable).
-rule "MenB(FHbp 3-Dose Series): Regardless of the interval between dose 2 and target dose 3, if the Absolute Minimum Interval between dose 1 and target dose 3 >= 6 months-4 days, then evaluate dose 3 as Valid"
+rule "MenB(FHbp 3-Dose Series): Regardless of the interval between dose 2 and target dose 3, if the Absolute Minimum Interval between dose 1 and target dose 3 >= 6 months-4 days, then evaluate the shot (target dose 3) as Valid"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
@@ -229,7 +229,7 @@ rule "MenB(4C 2-Dose Series): Skip interval check on ACCEPTED/VACCINE_NOT_COUNTE
 end
 
 
-rule "MenB(4C 2-Dose Series): Do not invoke default Absolute Minimum Age check for CVX 162 or CVX 316 administered on or after 10/25/2024 at >= 10 years-4 days of age"
+rule "MenB(4C 2-Dose Series): Do not invoke default Absolute Minimum Age check for CVX 162 or CVX 316 if administered on or after 10/25/2024 at >= 10 years-4 days of age"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseAgeCheck"
@@ -252,7 +252,7 @@ end
 
 // If dose 2 was administered >= 10/25/2024, the absolute minimum interval from Valid Dose 1 (not necessarily the immediately prior shot) to target dose 2  is 6 months-4 days. 
 // (This is different than the table interval rule, which checks that there is a 4m-4d interval between the immediate last shot and the current shot.)
-rule "MenB(4C 2-Dose Series): If dose 2 was administered >= 10/25/2024, the absolute minimum interval from the (valid) Dose 1 (not necessarily the immediately prior shot) to target dose 2  is 6 months-4 days"
+rule "MenB(4C 2-Dose Series): If dose 2 was administered >= 10/25/2024, the absolute minimum interval from the (valid) Dose 1 (_not_ necessarily the immediately prior shot) to target dose 2 is 6 months-4 days"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
