@@ -2616,7 +2616,7 @@ rule "SeriesSelection(MenB): If one or more Series is complete, select the Serie
 			and
 			not TargetDose(associatedTargetSeries == $tsothercomplete, isValid == true, administrationDate > $tdothercomplete.administrationDate)
 			and
-			eval($tdlatestcomplete.administrationDate >= $tdothercomplete.administrationDate) 
+			eval($tdlatestcomplete.administrationDate > $tdothercomplete.administrationDate) 
 		)	
 	then
 		String _RULENAME = kcontext.rule.name;
