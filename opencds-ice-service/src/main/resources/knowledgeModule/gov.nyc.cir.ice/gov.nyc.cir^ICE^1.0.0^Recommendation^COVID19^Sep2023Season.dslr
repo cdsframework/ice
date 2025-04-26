@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -273,7 +273,12 @@ rule "COVID-19(Sep2023+): If the patient is >= 5 years as of the recommended dat
 			- the name of the Series a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023ModernaLT5ySeries")
 			- post processing on the Series forecast has not already been run
 			- make note of the recommendation date as $recommendationDate
-			- make note of the date that the most recent shot was administered as $lastAdministeredShotDate
+		There is an administered shot $mostRecentShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the date this shot was administered as $lastAdministeredShotDate
+		There does not exist another administered shot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is > $lastAdministeredShotDate
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 			- make note of the date as $dateAt5yrs when the patient is "5y" of age
@@ -1536,7 +1541,7 @@ rule "COVID-19(Sep2023+ __Moderna__ < 5yrs Series): For target dose > 1: If 2 or
 		Obtain the Minimum Interval from the existing DoseRule $oDoseRule as $oMinimumInterval
 		Obtain the Recommended Interval from the existing DoseRule $oDoseRule as $oRecommendedInterval
 		Set the Minimum Interval for DoseRule $oDoseRule to TimePeriod "8w"
-		Set the Earliest Recommended Interval for DoseRule $oDoseRule to TimePeriod "8w"
+		Set the Recommended Interval for DoseRule $oDoseRule to TimePeriod "8w"
 		Replace the existing DoseRule in the Series $targetSeries with $oDoseRule
 		Refresh all facts in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
