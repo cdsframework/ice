@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.kie.api.definition.type.ClassReactive;
 import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
 
@@ -511,6 +512,7 @@ public class TargetDose {
 	 * Add the supplemental text, if not already present
 	 */
 	public void addSupplementalTextForValidShot(String supplementalTextForValidShots) {
+		addValidReason(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
 		if (supplementalTextForValidShots != null && ! supplementalTextsForValidShots.contains(supplementalTextForValidShots)) {
 			supplementalTextsForValidShots.add(supplementalTextForValidShots);
 		}
@@ -521,6 +523,7 @@ public class TargetDose {
 	}
 
 	public void addSupplementalTextForAcceptedShot(String supplementalTextForAcceptedShots) {
+		addAcceptedReason(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
 		if (supplementalTextForAcceptedShots != null && ! supplementalTextsForAcceptedShots.contains(supplementalTextForAcceptedShots)) {
 			supplementalTextsForAcceptedShots.add(supplementalTextForAcceptedShots);
 		}
@@ -531,6 +534,7 @@ public class TargetDose {
 	}
 
 	public void addSupplementalTextForInvalidShot(String supplementalTextForInvalidShots) {
+		addInvalidReason(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
 		if (supplementalTextForInvalidShots != null && ! supplementalTextsForInvalidShots.contains(supplementalTextForInvalidShots)) {
 			supplementalTextsForInvalidShots.add(supplementalTextForInvalidShots);
 		}
