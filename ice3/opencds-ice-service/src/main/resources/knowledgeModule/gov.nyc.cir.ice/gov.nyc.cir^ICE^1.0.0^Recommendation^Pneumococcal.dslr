@@ -529,7 +529,7 @@ end
 
 
 // If patient is >= 5 years and < 19 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
-rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age, the series *is not* complete and an adult dose has not been administered, then recommend Conditional/HIGH_RISK"
+rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age, the series *is not* complete and an adult dose *has not* been administered, then recommend Conditional/HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 200
@@ -557,7 +557,7 @@ end
 
 
 // If patient is >= 5 years and < 19 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
-rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age, the series *is* complete and an adult dose has not been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
+rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age, the series *is* complete and an adult dose *has not* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 200
@@ -582,6 +582,33 @@ rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age, the serie
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
+
+/*******
+// If patient is >= 5 years and < 19 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
+rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age and an adult dose *has* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	salience 200
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+		There exists an administered shot
+			- the shot belongs to the series $targetSeries
+			- the dose number in the Series is >= 6
+			- that has already been evaluated and whose shot validity is VALID
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "19y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+*******/
 
 
 // Post Recommendation Check: If the series is not complete and the patient will be >= 5 years at the recommended due date and < 19 years at the recommended due date, 
