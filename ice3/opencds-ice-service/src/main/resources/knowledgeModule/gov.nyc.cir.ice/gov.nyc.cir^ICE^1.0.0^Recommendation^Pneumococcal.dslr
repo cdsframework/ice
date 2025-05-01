@@ -53,12 +53,31 @@ global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
 
 
-/*************************************************************************************************************************************************************************************
+/*****************************************************************************************************************************************************************************************************************
  START Adult Recommendation Rules
-/************************************************************************************************************************************************************************************/
+*****************************************************************************************************************************************************************************************************************/
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// START - Adult Special Recommendation Rules 1 & 2
+//   + Special Recommendation Rule 1: If a patient >= 50 years of age, has not completed the series, has >= 1 dose of PCV13 administeredat any age, and there are no PPSV23, PCV15, PCV20, or PCV21 shots dose on record, 
+//     and there is a recommendation date for the next target dose, recommend at the vaccine group level with recommendation reason code ADMINISTER_PCV20_OR_PCV21. 
+//   + Special Recommendation Rule 2: If a patient >= 50 years of age, has not completed the series, has >= 1 dose of PCV13 administered at any age, >= 1 dose of PPSV23 administered at < 65 years of age, 
+//     and there are no PCV15, PCV20, or PCV21 shots dose on record,  and there is a recommendation date for the next target dose, recommend at the vaccine group level with recommendation reason code ADMINISTER_PCV20_OR_PCV21.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END - Adult Special Recommendation Rules 1 & 2
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 // Recommend PCV for target dose 1 of the Adult Series
-rule "Pneumococcal Adult Series: Recommend at the vaccine group with reason code ADMINISTER_PCV15_OR_PCV20 if no adult doses have been administered"
+rule "Pneumococcal Adult Series: Recommend at the vaccine group with reason code ADMINISTER_PCV15_PCV20_OR_PCV21 if no adult doses have been administered"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
@@ -70,7 +89,7 @@ rule "Pneumococcal Adult Series: Recommend at the vaccine group with reason code
 			- the effective dose number in the Series is == 6
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_OR_PCV20"
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_PCV20_OR_PCV21"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -161,7 +180,7 @@ rule "Pneumococcal Adult Series: Recommend PPSV23 with supplemental text for Adu
 end
 
 
-rule "Pneumococcal Adult Series: Recommend PCV vaccine via reason code ADMINISTER_PCV15_OR_PCV20 for Adult target dose 3 if a PCV dose was not previously administered"
+rule "Pneumococcal Adult Series: Recommend PCV vaccine via reason code ADMINISTER_PCV15_PCV20_OR_PCV21 for Adult target dose 3 if a PCV dose was not previously administered"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
@@ -178,14 +197,14 @@ rule "Pneumococcal Adult Series: Recommend PCV vaccine via reason code ADMINISTE
 			- the vaccine administered a member of ("ICE133", "ICE215", "ICE216")
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_OR_PCV20"
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_PCV20_OR_PCV21"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
 
-rule "Pneumococcal Adult Series: Recommend PCV vaccine via reason code ADMINISTER_PCV15_OR_PCV20 for Adult target dose 2 if first administered Adult dose a PPSV23 vaccine"
+rule "Pneumococcal Adult Series: Recommend PCV vaccine via reason code ADMINISTER_PCV15_PCV20_OR_PCV20 for Adult target dose 2 if first administered Adult dose a PPSV23 vaccine"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	no-loop true
@@ -204,7 +223,7 @@ rule "Pneumococcal Adult Series: Recommend PCV vaccine via reason code ADMINISTE
 			- the vaccine administered is "ICE33"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_OR_PCV20"
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_PCV20_OR_PCV21"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries

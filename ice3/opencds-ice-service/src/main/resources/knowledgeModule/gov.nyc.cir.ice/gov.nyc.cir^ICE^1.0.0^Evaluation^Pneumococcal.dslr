@@ -397,16 +397,13 @@ end
  Otherwise, if a PCV is administered for dose 1 of the Adult series, then a PPSV must be administered for dose 2 of the adult series.  
 /************************************************************************************************************************************************************************************/
 
-/*************************************************************************************************************************************************************************************
- START Adult Series Skip Dose Rules  ====> DELETE this section but not the be low rule
-/************************************************************************************************************************************************************************************/
 
-///////
-// As per latest set of rules, there are no skip doses ==> so deleting old rules related to that.
-///////
 
-// AI: Talk to Nette - In ****PCV-PPSV******* series, there is this rule:
-//     + "If a Valid PPSV23 (CVX 33) was previously administered at >= 65 years of age, target dose 3 is not required. The series is complete."   ===> Should this be 65y, or 50y?
+
+////////////////////////////
+// If a Valid PCV15 (CVX 215), PCV20 (CVX 216), or PCV21 (CVX 327) shot was previously administered, target dose 3 is not required. The series is complete. 
+////////////////////////////
+
 rule "Pneumococcal Adult: If a PPSV23 dose was previously administered at >= 65 years of age as well as a PCV13/PCV15/PCV20/PCV21, mark the series is complete"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
@@ -433,9 +430,8 @@ rule "Pneumococcal Adult: If a PPSV23 dose was previously administered at >= 65 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
-/*************************************************************************************************************************************************************************************
-END Adult Series Skip Dose Rules
-/************************************************************************************************************************************************************************************/
+
+
 
 /*************************************************************************************************************************************************************************************
  PCV7 in the Adult Series START  
@@ -482,6 +478,9 @@ end
 /*************************************************************************************************************************************************************************************
 END PCV7 in the Adult Series  
 /************************************************************************************************************************************************************************************/
+
+
+
 
 /*************************************************************************************************************************************************************************************
 Childhood Series Rules START
