@@ -69,6 +69,7 @@ global org.cdsframework.ice.service.Schedule schedule
 rule "Pnuemo Adult Special Recommendation Rule #1: If a patient >= 50 years of age, has not completed the series, has >= 1 dose of PCV13 administered at any age, and there are no PPSV23, PCV15, PCV20, or PCV21 shots dose on record, and there is a recommendation date for the next target dose, recommend at the vaccine group level with recommendation reason code ADMINISTER_PCV20_OR_PCV21"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	salience 999
 	when
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a Recommendation Date has been determined
@@ -86,19 +87,21 @@ rule "Pnuemo Adult Special Recommendation Rule #1: If a patient >= 50 years of a
 			- the vaccine administered a member of ("ICE33", "ICE215", "ICE216", "ICE327")
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
-		Confirm elapsed time between $birthDate and evalTime is >= "50y"	
+		Confirm elapsed time between $birthDate and evalTime >= "50y"	
 	then
+		Insert an IceFact "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1" with TargetSeries $targetSeries into working memory
 		Unset the Recommended Vaccine for the forecast in the Series $targetSeries 
 		Create a Recommendation as $recommendation for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV20_OR_PCV21"
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
+      	Log that this Series Rule fired for the Series $targetSeries
 end
 
 
 rule "Pneumo Adult Special Recommendation Rule #2"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	salience 999
 	when
 	
 	then
