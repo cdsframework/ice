@@ -309,7 +309,7 @@ end
 
 
 // The Recommended Interval from a previously administered PPSV23 (CVX 33) or CVX 109 shot to the next target PPSV23 dose is 5 years. 
-rule "Pneumococcal Adult Series: Recommended Interval of 5yrs from prior PPSV shot (or CVX 109) to the next target dose of PPSV"
+rule "Pneumococcal Adult Series: Earliest and Recommended Interval of 5yrs from prior PPSV shot (or CVX 109) to the next target dose of PPSV"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
@@ -336,6 +336,7 @@ rule "Pneumococcal Adult Series: Recommended Interval of 5yrs from prior PPSV sh
 	then
 		Add "5y" to $dateAdultPPSVor109Administered and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtCalculated
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtCalculated
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -344,7 +345,7 @@ end
 
 
 // The Recommended Interval from a previously administered CVX 133, CVX 152, CVX 215, or CVX 216 shot to the next target dose is 1 year.
-rule "Pneumococcal Adult Series: Recommend Interval of 1 yr from prior PCV shot (or CVX 109) to the next target dose"
+rule "Pneumococcal Adult Series: Recommend Earliest and Recommended Interval of 1 yr from prior PCV shot (or CVX 109) to the next target dose"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -368,6 +369,7 @@ rule "Pneumococcal Adult Series: Recommend Interval of 1 yr from prior PCV shot 
 	then
 		Add "1y" to $dateMostRecentPCVAdministered and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtCalculated
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtCalculated
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series		
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
