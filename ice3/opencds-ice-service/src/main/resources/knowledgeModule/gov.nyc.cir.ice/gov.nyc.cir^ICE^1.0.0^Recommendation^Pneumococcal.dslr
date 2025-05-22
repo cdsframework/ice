@@ -406,7 +406,7 @@ rule "Pneumococcal Adult: If the patient >= 19 years and < 50 years of age and t
 end
 
 
-rule "If the patient is < 50 years of age, received one or more valid doses in an Adult Series at < 50 years old, recommend Conditional/HIGH_RISK along with supplemental text"
+rule "Pneumococcal Adult: If the patient is < 50 years of age, received one or more valid doses in an Adult Series at < 50 years old, recommend Conditional/HIGH_RISK along with supplemental text"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	salience 100
@@ -440,6 +440,35 @@ end
  END Adult Recommendation Rules
 /************************************************************************************************************************************************************************************/
 
+
+/*************************************************************************************************************************************************************************************
+ Child Recommendation Rules 
+/************************************************************************************************************************************************************************************/
+
+// When recommending in the Child Series, always recommend at the vaccine group level with reason code SUPPLEMENTAL_TEXT and Descriptive Text: 
+// "Administer either PCV15 or PCV20; if PCV15 or PCV20 is not available, PCV13 should be used."
+rule "Pneumococcal: When recommending in the child series, always recommend at the vaccine group level with reason code SUPPLEMENTAL_TEXT"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the Recommendation Date as $recommendationDate
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is <= 5
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $targetSeries
+	then
+		Unset the recommended vaccine for the forecast in the Series $targetSeries 
+		Create a Recommendation as $sRecommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $sRecommendation to "Administer either PCV15 or PCV20; if PCV15 or PCV20 is not available, PCV13 should be used."
+		Include the Recommendation $sRecommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
 
 
 
