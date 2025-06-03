@@ -70,7 +70,7 @@ rule "Pneumococcal Adult: If a (valid) PCV21 or PCV20 dose has been administered
 			- the series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and $administrationDate >= "19y-4d"		
+		Confirm elapsed time between $dtBirthDate and $administrationDate >= "19y"		
 	then
 		Mark the Series $targetSeries complete
 		Record that this dose rule was Processed for the TargetDose $PCV21or20dose
@@ -99,7 +99,7 @@ rule "Pneumococcal Adult: if a (valid) PCV15 dose and (valid) PPSV23 dose has be
 			- the series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and $administrationDate >= "19y-4d"
+		Confirm elapsed time between $dtBirthDate and $administrationDate >= "19y"
 	then
 		Mark the Series $targetSeries complete
 		Record that this dose rule was Processed for the TargetDose $PCV15dose
@@ -135,7 +135,7 @@ rule "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs-4days Outs
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and $administrationDate >= "5y"
-		Confirm elapsed time between $dtBirthDate and $administrationDate < "19y-4d"
+		Confirm elapsed time between $dtBirthDate and $administrationDate < "19y"
 	then
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
