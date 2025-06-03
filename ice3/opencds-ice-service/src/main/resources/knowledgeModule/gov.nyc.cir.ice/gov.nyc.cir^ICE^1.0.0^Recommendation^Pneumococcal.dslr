@@ -99,6 +99,7 @@ rule "Pnuemo Adult Special Recommendation Rule #1: If a patient >= 50 years of a
 		Unset the Recommended Vaccine for the forecast in the Series $targetSeries 
 		Create a Recommendation as $recommendation for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV20_OR_PCV21"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
       	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -140,6 +141,7 @@ rule "Pneumo Adult Special Recommendation Rule #2: If a patient >= 50y years of 
 		Unset the Recommended Vaccine for the forecast in the Series $targetSeries 
 		Create a Recommendation as $recommendation for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV20_OR_PCV21"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
       	Log that this Series Rule fired for the Series $targetSeries
 end
@@ -154,7 +156,7 @@ end
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // PCV-PPSV Series - Target Dose 1
-rule "Pneumococcal Adult: If no adult doses have been administered and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend at the vaccine group level with recommendation reason code is ADMINISTER_PCV15_PCV20_OR_PCV21."
+rule "Pneumococcal Adult(PCV-PPSV Series): If no adult doses have been administered and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend at the vaccine group level with recommendation reason code is ADMINISTER_PCV15_PCV20_OR_PCV21."
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	no-loop true
@@ -185,7 +187,7 @@ end
 
 
 // PCV-PPSV Series - Target Dose 2 or Target Dose 3
-rule "Pneumococcal Adult: If dose 1 of the adult series was a PCV vaccine, and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend PPSV23 (CVX 33) with supplemental text for target dose 2 or target dose 3"
+rule "Pneumococcal Adult(PCV-PPSV Series): If dose 1 of the adult series was a PCV vaccine, and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend PPSV23 (CVX 33) with supplemental text for target dose 2 or target dose 3"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	no-loop true
@@ -196,19 +198,18 @@ rule "Pneumococcal Adult: If dose 1 of the adult series was a PCV vaccine, and S
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made and a shot is recommended
 			- a forecast for the Series has been made and a specific vaccine is not recommended
-			- post processing on the Series forecast has not already been run
 			- the effective dose number in the Series is >= 7
-		There is an administered shot $priorDose
+		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- the dose number in the Series is == 6
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE133", "ICE215", "ICE216", "ICE327")	
+			- the vaccine administered == "ICE33"	
 		There does not exist an IceFact
 			- that has associated series $targetSeries
 			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1"	
 		There does not exist an IceFact
 			- that has associated series $targetSeries
-			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"			
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
 		Set the Recommendation Supplemental text for $recommendation to "If PPSV23 is unavailable, PCV20 or PCV21 may be administered. No further doses of any type of pneumococcal vaccine are recommended after PCV20 or PCV21 is given."
@@ -220,8 +221,76 @@ rule "Pneumococcal Adult: If dose 1 of the adult series was a PCV vaccine, and S
 end
 
 
+// If Special Recommendation Rule 1 and Special Recommendation 2 above are not true, when and a dose is recommended for target dose 2, recommend at the vaccine group level with recommendation reason codereturned is ADMINISTER_PCV15_OR_PCV20
+rule "Pneumococcal Adult(PPSV-PCV Series): If dose 1 of the adult series was a PPSV23 vaccine, and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend at the vaccine group level with recommendation reason code is ADMINISTER_PCV15_PCV20_OR_PCV21 for target dose 2"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a shot is recommended
+			- a forecast for the Series has been made and a specific vaccine is not recommended
+			- the effective dose number in the Series is == 7
+		There is an administered shot $priorDose
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is == 6
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE33"
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1"	
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"	
+	then
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_PCV20_OR_PCV21"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+// If Special Recommendation Rule 1 and Special Recommendation Rule 2 above are not true, When and a dose is recommended for target dose 1 or target dose 3, the recommended vaccine is CVX 33 (PPSV23) PPSV23 (CVX 33) with recommendation reason code SUPPLEMENTAL_TEXT and Descriptive Text: "If PPSV23 is unavailable, PCV20 or PCV21 may be administered. No further doses of any type of pneumococcal vaccine are recommended after PCV20 or PCV21 is given."
+rule "Pneumococcal Adult(PPSV-PCV Series): If dose 1 of the adult series was a PPSV23 vaccine, and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend PPSV23 (CVX 33) with supplemental text for target dose 3"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	no-loop true
+	when
+			There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a shot is recommended
+			- a forecast for the Series has been made and a specific vaccine is not recommended
+			- the effective dose number in the Series is == 8
+		There is an administered shot $priorDose
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is == 6
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE33"
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1"	
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"	
+	then
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Supplemental text for $recommendation to "If PPSV23 is unavailable, PCV20 or PCV21 may be administered. No further doses of any type of pneumococcal vaccine are recommended after PCV20 or PCV21 is given."
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE33"
+		Refresh all facts in the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+ 
 // PRIOR: TO BE REPLACED BY NEW RULE
-// This is related to Skip Dose Rule..... *Nette* 
+// This is related to Skip Dose Rule that we commented out..... 
 /***
 rule "Pneumococcal Adult Series: Recommend PPSV23 specifically with supplemental text if a Valid or Accepted PCV dose was administered prior to first adult dose"
 	dialect "mvel"
@@ -252,66 +321,6 @@ end
 ***/
 
 
-// PRIOR: TO BE REPLACED BY NEW RULE --- Taken care of by Adult Special Recommendation Rule w/ Series Special Rule
-// This is related to Skip Dose Rule..... *Nette*
-/***
-rule "Pneumococcal Adult Series: Recommend PPSV23 with supplemental text for Adult target dose 3 if a PCV dose was previously administered"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
-	no-loop true
-	when
-		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalSeries"
-			- post processing on the Series forecast has not already been run
-			- a forecast for the Series has been made and a shot is recommended
-			- a forecast for the Series has been made and a specific vaccine is not recommended
-			- the effective dose number in the Series is == 8
-		There exists an administered shot
-			- the shot belongs to the Series $targetSeries
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- the vaccine administered a member of ("ICE133", "ICE215", "ICE216")
-	then
-		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Supplemental text for $recommendation to "If PPSV23 is unavailable, PCV20 may be administered. No further doses of any type of pneumococcal vaccine are recommended after PCV20 is given."
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE33"
-		Refresh all facts in the Series $targetSeries
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-***/
-
-
-// PRIOR: TO BE REPLACED BY NEW RULE --- Taken care of by Adult Special Recommendation Rule w/ Series Special Rule
-/***
-rule "Pneumococcal Adult Series: Recommend PCV vaccine via reason code ADMINISTER_PCV15_PCV20_OR_PCV20 for Adult target dose 2 if first administered Adult dose a PPSV23 vaccine"
-	dialect "mvel"
-	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
-	no-loop true
-	when
-		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
-			- the name of the Series is "PneumococcalSeries"
-			- post processing on the Series forecast has not already been run
-			- a forecast for the Series has been made and a shot is recommended
-			- a forecast for the Series has been made and a specific vaccine is not recommended
-			- the effective dose number in the Series is == 7		
-		There is an administered shot $priorDose
-			- the shot belongs to the Series $targetSeries
-			- the dose number in the Series is == 6
-			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered is "ICE33"
-	then
-		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_PCV20_OR_PCV21"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-       	Log that this Series Rule fired for the Series $targetSeries
-end
-***/
-
-
 // The Recommended Interval from a previously administered PPSV23 (CVX 33) or CVX 109 shot to the next target PPSV23 dose is 5 years. 
 rule "Pneumococcal Adult Series: Earliest and Recommended Interval of 5yrs from prior PPSV shot (or CVX 109) to the next target dose of PPSV"
 	dialect "mvel"
@@ -323,18 +332,15 @@ rule "Pneumococcal Adult Series: Earliest and Recommended Interval of 5yrs from 
 			- the name of the Series is "PneumococcalSeries"
 			- post processing on the Series forecast has not already been run
 			- the effective dose number in the Series is >= 6
-			- a forecast for the Series has been made and a specific vaccine is recommended
-			- make note of the recommended vaccine as $recommendedVaccine
-			- the string $recommendedVaccine == "ICE33"
 		There is an administered shot $priorPPSVor109Shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
-			- the vaccine administered a member of ("ICE33","ICE109")
+			- the vaccine administered a member of ("ICE33", "ICE109")
 			- make note of the date this Shot was administered as $dateAdultPPSVor109Administered
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
-			- the vaccine administered a member of ("ICE33","ICE109")
+			- the vaccine administered a member of ("ICE33", "ICE109")
 			- make note of the date this Shot was administered as $dateOtherAdultPPSVor109Administered
 			- the date $dateOtherAdultPPSVor109Administered > $dateAdultPPSVor109Administered
 	then
@@ -349,7 +355,7 @@ end
 
 
 // The Recommended Interval from a previously administered CVX 133, CVX 152, CVX 215, or CVX 216 shot to the next target dose is 1 year.
-rule "Pneumococcal Adult Series: Recommend Earliest and Recommended Interval of 1 yr from prior PCV shot (or CVX 109) to the next target dose"
+rule "Pneumococcal Adult Series: Recommend Earliest and Recommended Interval of 1 yr from prior PCV shot to the next target dose"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -362,12 +368,14 @@ rule "Pneumococcal Adult Series: Recommend Earliest and Recommended Interval of 
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
 			- the dose number in the Series is <= 6
-			- the vaccine administered a member of ("ICE327", "ICE216", "ICE215", "ICE133", "ICE152", "ICE109")
+			- the vaccine administered a member of ("ICE327", "ICE216", "ICE215", "ICE133", "ICE152") 
+				/////// , "ICE109")
 			- make note of the date this Shot was administered as $dateMostRecentPCVAdministered
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
-			- the vaccine administered a member of ("ICE327", "ICE216", "ICE215", "ICE133", "ICE152", "ICE109")
+			- the vaccine administered a member of ("ICE327", "ICE216", "ICE215", "ICE133", "ICE152") 
+				/////// , "ICE109")
 			- make note of the date this Shot was administered as $dateOtherRecentPCVAdministered
 			- the date $dateOtherRecentPCVAdministered > $dateMostRecentPCVAdministered
 	then
@@ -952,7 +960,7 @@ rule "Pneumococcal Adult Series: Set Recommendation Date to 50y and Skip Dose to
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-
+/*
 // Exception 5
 rule "Pneumococcal Adult Series: Set Recommendation Date to 50y and Skip Dose to dose 7 (Adult Series target dose 2) if Patient >= 5y and prior PCV15 or PCV20 dose"
 	// Prior: Pneumococcal Adult Series: Set Recommendation Date to 65y and Skip Dose to dose 7 (Adult Series target dose 2) if Patient >= 5y and prior PCV13, PCV15 or PCV20 dose" 
@@ -984,6 +992,7 @@ rule "Pneumococcal Adult Series: Set Recommendation Date to 50y and Skip Dose to
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
+*/
 
 /*************************************************************************************************************************************************************************************
  END Pneumococcal Child Series 4-dose Series Exception Rules
