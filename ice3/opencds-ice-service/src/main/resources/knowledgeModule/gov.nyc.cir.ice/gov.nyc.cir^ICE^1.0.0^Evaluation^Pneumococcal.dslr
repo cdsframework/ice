@@ -328,6 +328,8 @@ rule "If a PCV15, PCV20, PCV21 or PCV13 dose is administered for dose 1 of the A
 			- the dose number in the Series is == 6
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE215", "ICE216", "ICE327", "ICE133")
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and $currentShotDate < "50y"
 	then
 		Include the reason for shot $currentShot Invalid due to "Vaccine not Permitted for this Dose"

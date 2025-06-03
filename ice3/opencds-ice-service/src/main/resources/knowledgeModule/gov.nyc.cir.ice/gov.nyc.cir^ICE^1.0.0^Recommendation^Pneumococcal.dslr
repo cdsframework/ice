@@ -104,7 +104,7 @@ rule "Pnuemo Adult Special Recommendation Rule #1: If a patient >= 50 years of a
 end
 
 
-rule "Pneumo Adult Special Recommendation Rule #2: If a patient >= 50 years of age, has not completed the series, has >= 1 dose of PCV13 administered at any age, >= 1 dose of PPSV23 administered at < 65 years of age, and there are no PCV15, PCV20, or PCV21 shots dose on record, and there is a recommendation date for the next target dose, recommend at the vaccine group level with recommendation reason code ADMINISTER_PCV20_OR_PCV21."
+rule "Pneumo Adult Special Recommendation Rule #2: If a patient >= 50y years of age, has not completed the series, has >= 1 dose of PCV13 administered at any age, >= 1 dose of PPSV23 administered at < 65 years of age, and there are no PCV15, PCV20, or PCV21 shots dose on record, and there is a recommendation date for the next target dose, recommend at the vaccine group level with recommendation reason code ADMINISTER_PCV20_OR_PCV21."
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	salience 999
@@ -164,7 +164,11 @@ rule "Pneumococcal Adult: If no adult doses have been administered and Special R
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- post processing on the Series forecast has not already been run
-			- the effective dose number in the Series is == 6
+			- the effective dose number in the Series is >= 6
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is >= 6
+			- that has already been evaluated and whose shot validity is VALID
 		There does not exist an IceFact
 			- that has associated series $targetSeries
 			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1"	
@@ -420,6 +424,10 @@ rule "Pneumococcal Adult: If the patient is < 50 years of age, received one or m
 			- make note of the recommendation date as $recommendationDate
 			- post processing on the Series forecast has not already been run
 			- the effective dose number in the Series is >= 7
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is >= 6
+			- that has already been evaluated and whose shot validity is VALID 
 		The patient information $patientInformation must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge50 when the patient is "50y" of age
 			- the date evalTime < $dtDateAtAge50
