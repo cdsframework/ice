@@ -188,6 +188,7 @@
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended [Nn]ow=recommendationStatus == RecommendationStatus.RECOMMENDED
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Nn]ot [Rr]ecommended=recommendationStatus == RecommendationStatus.NOT_RECOMMENDED
+[condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Nn]ot [Cc]onditionally [Rr]ecommended=recommendationStatus != RecommendationStatus.CONDITIONALLY_RECOMMENDED && (RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.NOT_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a [Ss]pecific [Vv]accine is [Nn]ot [Rr]ecommended=recommendationVaccine == null && (recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a [Ss]pecific [Vv]accine is [Rr]ecommended=recommendationVaccine != null && (recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED || recommendationStatus == RecommendationStatus.NOT_RECOMMENDED
@@ -502,7 +503,7 @@
 [consequence][][Ll]og that this [Ss]eries [Rr]ule fired for the [Ss]eries {refer_oTargetSeries}=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "in TargetSeries " + {refer_oTargetSeries}.getSeriesName());
 [consequence][][Ll]og that this [Rr]ule fired=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "fired");
 [consequence][][Ll]og [Dd]ebugging [Ii]nformation about [Oo]bject [Nn]amed {strObjectName} and [Vv]alue {oDebugObject}=ICELogicHelper.logDRLDebugMessage("DEBUG INFORMATION for " + drools.getRule().getName(), {strObjectName} + ": " + {oDebugObject});
-
+[consequence][][Mm]ake [Nn]ote of the [Nn]ame of this [Rr]ule as {sRuleName}=String {sRuleName} = drools.getRule().getName(); 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IceResult Fact Object START
