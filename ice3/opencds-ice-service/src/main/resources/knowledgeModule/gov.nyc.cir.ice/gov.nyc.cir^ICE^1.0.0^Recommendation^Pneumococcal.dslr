@@ -87,10 +87,14 @@ rule "Pnuemo Adult Special Recommendation Rule #1: If a patient >= 50 years of a
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered is "ICE133"
+			// AI: Talk to Nette about the below... I added it based on what was being done in the test cases
+			- the dose number in the Series is >= 6
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE33", "ICE215", "ICE216", "ICE327")
+			// AI: Talk to Nette about the below... I added it based on what was being done in the test cases
+			- the dose number in the Series is >= 6
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
 		Confirm elapsed time between $birthDate and evalTime >= "50y"	
@@ -125,10 +129,14 @@ rule "Pneumo Adult Special Recommendation Rule #2: If a patient >= 50y years of 
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered is "ICE133"
+			// AI: Talk to Nette about the below... I added it based on what was being done in the test cases
+			- the dose number in the Series is >= 6
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE215", "ICE216", "ICE327")
+			// AI: Talk to Nette about the below... I added it based on what was being done in the test cases
+			- the dose number in the Series is >= 6
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge65y when the patient is "65y" of age
 		There exists an administered shot
@@ -178,17 +186,17 @@ rule "Pneumococcal Adult: If a patient >= 65 years of age, has completed the ser
 			- the shot belongs to the Series $targetSeries
 			- the vaccine administered is "ICE133"
 			- that has already been evaluated
-			// and whose shot validity is VALID   ===> Change in Rule: Talk to Nette
+			// AI: and whose shot validity is VALID   ===> AI: Change in Rule: Talk to Nette
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
-			// the line makes it such that the CVX 215, CVX 216 or CVX 327 had to be an adult dose.  (Change in Rule?  ===> Talk to Nette)
+			// AI: the line makes it such that the CVX 215, CVX 216 or CVX 327 had to be an adult dose.  (Change in Rule?  ===> Talk to Nette)
 			- the dose number in the Series is >= 6
 			- that has already been evaluated and whose shot validity is VALID
 			- the vaccine administered a member of ("ICE215", "ICE216", "ICE327")
 		There is an administered shot $ppsv23
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated
-			// and whose shot validity is VALID   ===> Change in Rule: Talk to Nette
+			// AI: and whose shot validity is VALID   ===> AI: Change in Rule: Talk to Nette
 			- the vaccine administered is "ICE33"
 		The patient information $patientInformation must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge65 when the patient is "65y" of age
