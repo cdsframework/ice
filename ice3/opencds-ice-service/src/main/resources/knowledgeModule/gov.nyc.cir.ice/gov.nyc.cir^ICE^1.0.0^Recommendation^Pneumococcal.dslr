@@ -522,7 +522,7 @@ end
 
 /*******
 // If patient is >= 5 years and < 19 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
-rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age and an adult dose *has* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
+rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age and an adult dose *has* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 200
@@ -549,7 +549,7 @@ end
 
 
 // If patient is >= 5 years and < 19 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
-rule "Pneumococcal Series: if patient *is* >= 5yrs and < 19yrs of age, the series *is not* complete and an adult dose *has not* been administered, then recommend Conditional/HIGH_RISK"
+rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childhood series *is not* complete and an adult dose *has not* been administered, then recommend Conditional/HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 200
@@ -577,7 +577,7 @@ end
 
 
 // If patient is >= 5 years and < 19 years and the series is not complete, then the Recommendation is Conditional and the reason code is HIGH_RISK.
-rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the series *is* complete and an adult dose *has not* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
+rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childhood series *is* complete and an adult dose *has not* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 200
