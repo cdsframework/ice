@@ -205,6 +205,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate that the most recent [Ss]hot was [Aa]dministered as {assign_dtShotDate}={assign_dtShotDate} : getAdministrationDateOfTargetDoseByShotNumberNumber(getNumberOfShotsAdministeredInSeries())
 [condition][]- [Mm]ake [Nn]ote of the [Ee]arliest [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalEarliestDate, {assign_dtRecommendationDate} != null
 [condition][]- [Mm]ake [Nn]ote of the [Rr]ecommendation [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalRecommendationDate, {assign_dtRecommendationDate} != null
+[condition][]- [Mm]ake [Nn]ote of the [Rr]ecommendation [Ss]tatus as {assign_oRecommendationStatus}={assign_oRecommendationStatus} : recommendationStatus, {assign_oRecommendationStatus} != null
 [condition][]- [Mm]ake [Nn]ote of the [Oo]verdue [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalOverdueDate, {assign_dtRecommendationDate} != null
 [condition][]- [Mm]ake [Nn]ote of the [Rr]ecommended [Vv]accine as {assign_strRecommendationShot}={assign_strRecommendationShot} : recommendationVaccine!.cdsConceptName
 [condition][]- [Mm]ake [Nn]ote of the [Nn]umber of [Ss]hots [Aa]dministered as {assign_nNumberOfShotsAdministered}={assign_nNumberOfShotsAdministered} : numberOfShotsAdministeredInSeries()
