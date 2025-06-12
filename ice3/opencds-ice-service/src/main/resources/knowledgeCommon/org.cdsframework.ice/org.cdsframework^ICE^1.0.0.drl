@@ -2350,7 +2350,8 @@ rule "RecommendationForecast.finalizeRecommendationsForSeries" ruleflow-group "R
 	then
 		String _RULENAME = kcontext.rule.name;
 		$ts.finalizeRecommendationsForForecasting();
-		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Finalized recommendations for TargetSeries " + $ts.getSeriesName());
+		// ICELogicHelper.logDRLDebugMessage(_RULENAME, "Finalized recommendations for TargetSeries " + $ts.getSeriesName());
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Finalized recommendations for TargetSeries " + $ts)
 		update($ts);
 		setFocus("RecommendationForecast^supplementalSeriesRule");
 		setFocus("RecommendationForecast^adjustRecommendationDates");

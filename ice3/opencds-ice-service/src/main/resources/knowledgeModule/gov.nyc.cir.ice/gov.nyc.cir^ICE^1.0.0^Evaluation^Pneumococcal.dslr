@@ -604,7 +604,6 @@ rule "Pneumococcal Child Series: Evaluate PCV Shot as Valid if Patient < 5yrs, i
 		Confirm elapsed time between $previousAdministrationDate and $administrationDate >= "52d"
 	then
 		Include the reason for shot $currentShotValid Valid
-		Insert an IceFact SupportedFactConcept._PNEUMOCOCCAL_EVALUATION_CHILD_RECEIVED_PCV13_DOSE.getConceptCodeValue() with TargetSeries $targetSeries into working memory
 		Record that this dose rule was processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
