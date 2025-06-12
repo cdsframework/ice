@@ -1701,7 +1701,6 @@ end
 ///////// ***
 rule "RecommendationForecast: Make a Record of all Non-Seasonal TargetSeries of the Vaccine Group for Series Selection Display purposes, if the Series Selection Display Option is Enabled" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
-	/////// salience 55
 	when
 		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ts : TargetSeries(isSelectedSeries() == true, targetSeason == null)
@@ -1719,7 +1718,6 @@ end
 ///////// ***
 rule "RecommendationForecast: Maka a Record of Seasonal TargetSeries in the Current Season of the Vaccine Group for Series Selection Display purposes, if the Series Selection Display Option is Enabled" ruleflow-group "RecommendationForecast"
 	dialect "mvel"
-	/////// salience 55
 	when
 		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ts : TargetSeries(isSelectedSeries() == true, targetSeason != null, isSeriesComplete() == false)
@@ -1787,15 +1785,6 @@ rule "RecommendationForecast.setNextSeasonalTargetSeriesForRecommendation" rulef
 		(		
 			TargetSeries(this == $ts, seriesRules.seriesGroup <= 0 || seriesRules.seriesGroup > 0 && seriesRules.seriesEndAge == null) 
 			or
-			/////// (
-				/////// not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, seriesStartAgeDate != null)
-				/////// or
-				// targetSeason == null because we don't want to compare defined ages with other seasonal series; we already selected the most recent/current series in the predicates above
-				// However, all non-seasonal series, iof any, should come after this seasonal series
-				//forall ($tssa : TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, seriesStartAgeDate != null, targetSeason == null, seriesRules.seriesGroup == $ts.seriesRules.seriesGroup)
-				//	TargetSeries(this == $ts, seriesEndAgeDate == null || seriesEndAgeDate < $tssa.seriesStartAgeDate)
-				//)
-        	/////// )
         	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, targetSeason == null, $ts.seriesEndAgeDate != null, seriesStartAgeDate != null && seriesStartAgeDate > $ts.seriesEndAgeDate)
         )
 	then
@@ -1820,13 +1809,6 @@ rule "RecommendationForecast.setNextNonSeasonalTargetSeriesForRecommendation" ru
 		(		
 			TargetSeries(this == $ts, seriesRules.seriesGroup <= 0 || seriesRules.seriesGroup > 0 && seriesRules.seriesEndAge == null) 
 			or
-			/////// (
-			///////	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, seriesRules.seriesGroup == $ts.seriesRules.seriesGroup, seriesRules.seriesStartAge != null)
-			///////	or
-			///////	forall ($tssa : TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, seriesRules.seriesGroup == $ts.seriesRules.seriesGroup)
-			///////		TargetSeries(this == $ts, seriesStartAgeDate == null || seriesEndAgeDate == null || seriesStartAgeDate > $tssa.seriesEndAgeDate)
-			///////	)
-        	/////// )
         	not TargetSeries(this != $ts, vaccineGroup == $ts.vaccineGroup, $ts.seriesEndAgeDate != null, seriesStartAgeDate != null && seriesStartAgeDate > $ts.seriesEndAgeDate) 
         )
 	then
