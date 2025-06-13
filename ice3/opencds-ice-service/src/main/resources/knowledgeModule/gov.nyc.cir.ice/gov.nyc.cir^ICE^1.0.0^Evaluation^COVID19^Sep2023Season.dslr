@@ -101,7 +101,6 @@ rule "COVID-19(Sep2023+): If a COVID-19 shot that does not count towards U.S. va
 		extends "COVID-19(Sep2023+ Abstract): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 8w-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
-	/////// activation-group "doseIntervalCheck"
 	when
 		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
 	then
@@ -115,7 +114,6 @@ rule "COVID-19(Sep2023+): If a COVID-19 shot that does not count towards U.S. va
 		extends "COVID-19(Sep2023+ Abstract): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 8w-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
-	///////	activation-group "doseIntervalCheck"
 	when
 		Confirm Elapsed time between $previousShotDate and $currentShotDate >= "8w-4d"
 	then
