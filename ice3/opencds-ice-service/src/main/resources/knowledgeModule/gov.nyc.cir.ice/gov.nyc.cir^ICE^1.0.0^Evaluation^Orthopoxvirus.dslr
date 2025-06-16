@@ -181,7 +181,7 @@ rule "Orthopoxvirus: If a shot, ICE75 or ICE 105, is evaluated as Invalid due to
 		There is an administered shot $administeredShot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.860"
 			- that has already been evaluated and whose Shot Validity Status is INVALID
-			- the administered shot number is == 2
+			/////// - the administered shot number is == 2
 			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
 			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS"
 			- the size of the collection $collectionOfStrReasons is == 1
@@ -228,8 +228,8 @@ rule "Orthopoxvirus: Evaluate first shot after series completion as Valid"
 			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.860"
 			- the series that the shot belongs to is Complete
 			- that has already been evaluated and whose Shot Validity Status is ACCEPTED
-			/////// - make note of accepted evaluation reasons for this shot as $collectionOfAcceptedReasons
-			/////// - the collection $collectionOfAcceptedReasons contains "EVALUATION_REASON_CONCEPT.EXTRA_DOSE"
+			- make note of accepted evaluation reasons for this shot as $collectionOfAcceptedReasons
+			- the collection $collectionOfAcceptedReasons contains "EVALUATION_REASON_CONCEPT.EXTRA_DOSE"
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
