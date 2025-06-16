@@ -188,6 +188,7 @@
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended [Nn]ow=recommendationStatus == RecommendationStatus.RECOMMENDED
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Nn]ot [Rr]ecommended=recommendationStatus == RecommendationStatus.NOT_RECOMMENDED
+[condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Nn]ot [Cc]onditionally [Rr]ecommended=recommendationStatus != RecommendationStatus.CONDITIONALLY_RECOMMENDED && (RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.NOT_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a [Ss]pecific [Vv]accine is [Nn]ot [Rr]ecommended=recommendationVaccine == null && (recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a [Ss]pecific [Vv]accine is [Rr]ecommended=recommendationVaccine != null && (recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED || recommendationStatus == RecommendationStatus.NOT_RECOMMENDED
@@ -204,6 +205,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate that the most recent [Ss]hot was [Aa]dministered as {assign_dtShotDate}={assign_dtShotDate} : getAdministrationDateOfTargetDoseByShotNumberNumber(getNumberOfShotsAdministeredInSeries())
 [condition][]- [Mm]ake [Nn]ote of the [Ee]arliest [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalEarliestDate, {assign_dtRecommendationDate} != null
 [condition][]- [Mm]ake [Nn]ote of the [Rr]ecommendation [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalRecommendationDate, {assign_dtRecommendationDate} != null
+[condition][]- [Mm]ake [Nn]ote of the [Rr]ecommendation [Ss]tatus as {assign_oRecommendationStatus}={assign_oRecommendationStatus} : recommendationStatus, {assign_oRecommendationStatus} != null
 [condition][]- [Mm]ake [Nn]ote of the [Oo]verdue [Dd]ate as {assign_dtRecommendationDate}={assign_dtRecommendationDate} : finalOverdueDate, {assign_dtRecommendationDate} != null
 [condition][]- [Mm]ake [Nn]ote of the [Rr]ecommended [Vv]accine as {assign_strRecommendationShot}={assign_strRecommendationShot} : recommendationVaccine!.cdsConceptName
 [condition][]- [Mm]ake [Nn]ote of the [Nn]umber of [Ss]hots [Aa]dministered as {assign_nNumberOfShotsAdministered}={assign_nNumberOfShotsAdministered} : numberOfShotsAdministeredInSeries()
@@ -321,6 +323,7 @@
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Vv]alid={refer_oTargetDose}.setStatus(DoseStatus.VALID);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Aa]ccepted={refer_oTargetDose}.setStatus(DoseStatus.ACCEPTED);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Ii]nvalid={refer_oTargetDose}.setStatus(DoseStatus.INVALID);
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid due to "Booster Dose"={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.BOOSTER_DOSE");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid due to "Outside Season"={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.OUTSIDE_SEASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid=
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Insufficient Antigen"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.INSUFFICIENT_ANTIGEN"); insert(new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), {refer_oTargetDose}));
@@ -502,7 +505,7 @@
 [consequence][][Ll]og that this [Ss]eries [Rr]ule fired for the [Ss]eries {refer_oTargetSeries}=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "in TargetSeries " + {refer_oTargetSeries}.getSeriesName());
 [consequence][][Ll]og that this [Rr]ule fired=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "fired");
 [consequence][][Ll]og [Dd]ebugging [Ii]nformation about [Oo]bject [Nn]amed {strObjectName} and [Vv]alue {oDebugObject}=ICELogicHelper.logDRLDebugMessage("DEBUG INFORMATION for " + drools.getRule().getName(), {strObjectName} + ": " + {oDebugObject});
-
+[consequence][][Mm]ake [Nn]ote of the name of this [Rr]ule [Nn]ame as {sRuleName}=String {sRuleName} = drools.getRule().getName(); 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IceResult Fact Object START

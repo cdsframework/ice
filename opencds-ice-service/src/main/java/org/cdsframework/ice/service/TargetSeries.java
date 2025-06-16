@@ -4058,7 +4058,9 @@ public class TargetSeries {
 		+ ", getVaccineGroup()=" + getVaccineGroup()
 		+ ", getTargetSeason()=" + getTargetSeason()
 		+ ", isSeriesComplete()=" + isSeriesComplete()
-		+ ", number of targetDose(s)=" + this.targetDoses.size();
+		+ ", number of targetDose(s)=" + this.targetDoses.size()
+		+ ", determineDoseNumberInSeries(): " + determineDoseNumberInSeries()
+		+ ", determineEffectiveNumberOfDosesInSeries(): " + determineEffectiveNumberOfDosesInSeries();
 		/////// + ", doseAfterWhichSeriesWasMarkedComplete()=" + getDoseAfterWhichSeriesWasMarkedComplete()
 		/////// int i=1;
 		/////// for (TargetDose targetDose : this.targetDoses) {
