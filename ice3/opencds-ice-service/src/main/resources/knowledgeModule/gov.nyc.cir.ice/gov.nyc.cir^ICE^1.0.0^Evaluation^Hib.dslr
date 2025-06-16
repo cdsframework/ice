@@ -205,7 +205,8 @@ rule "Hib: Booster Vaccine Not Allowed (Booster only) for patients less than 5y 
 	salience 140
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.300" and the Series with Name "Hib4DoseSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.300"
+			/////// and the Series with Name "Hib4DoseSeries"
 			- the Vaccine Administered is "ICE50"
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the Associated Series as $associatedTargetSeries
