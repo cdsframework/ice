@@ -64,10 +64,10 @@
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is a [Ss]elect [Aa]djuvant [Pp]roduct=vaccineComponent.isSelectAdjuvantProduct == true
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is not a [Cc]ombination [Vv]accine=getAdministeredVaccine().isCombinationVaccine() == false
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is a [Cc]ombination [Vv]accine=getAdministeredVaccine().isCombinationVaccine() == true
-[condition][]- [Tt]he [Vv]accine [Aa]dministered is not {dd_oVaccineCdsListItem:[a-zA-Z0-9\\.\\-\\_\\"]+}=vaccineComponent.cdsConceptName != {dd_oVaccineCdsListItem} || administeredVaccine.cdsConceptName != {dd_oVaccineCdsListItem}
+[condition][]- [Tt]he [Vv]accine [Aa]dministered is not {dd_oVaccineCdsListItem:[a-zA-Z0-9\\.\\-\\_\\"]+}=vaccineComponent.cdsConceptName != {dd_oVaccineCdsListItem} && administeredVaccine.cdsConceptName != {dd_oVaccineCdsListItem}
 [condition][]- [Tt]he [Vv]accine [Aa]dministered is {dd_oVaccineCdsListItem:[a-zA-Z0-9\\.\\-\\_\\"]+}=vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}
 [condition][]- [Tt]he [Vv]accine [Aa]dministered a member of {list_oVaccineCdsListItem:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+}=vaccineComponent.cdsConceptName in {list_oVaccineCdsListItem} || administeredVaccine.cdsConceptName in {list_oVaccineCdsListItem}
-[condition][]- [Tt]he [Vv]accine [Aa]dministered not a member of {list_oVaccineCdsListItem:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+}=vaccineComponent.cdsConceptName not in {list_oVaccineCdsListItem} || administeredVaccine.cdsConceptName not in {list_oVaccineCdsListItem}
+[condition][]- [Tt]he [Vv]accine [Aa]dministered not a member of {list_oVaccineCdsListItem:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+}=vaccineComponent.cdsConceptName not in {list_oVaccineCdsListItem} && administeredVaccine.cdsConceptName not in {list_oVaccineCdsListItem}
 [condition][]- [Tt]he [Vv]accine [Aa]dministered has a [Mm]aximum [Vv]alid [Aa]ge=vaccineComponent.validMaximumAgeForUse != null
 [condition][]- [Tt]he [Vv]accine [Aa]dministered has a [Mm]inimum [Vv]alid [Aa]ge=vaccineComponent.validMinimumAgeForUse != null
 [condition][]- [Tt]he [Aa]dministered [Ss]hot [Nn]umber is {aOp}  {nAdministeredShotNumber}=administeredShotNumberInSeries {aOp}  {nAdministeredShotNumber}
