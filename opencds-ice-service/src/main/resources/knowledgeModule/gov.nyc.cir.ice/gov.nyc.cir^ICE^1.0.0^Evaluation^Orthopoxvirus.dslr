@@ -71,12 +71,8 @@ rule "Orthopoxvirus: If the administered vaccine is not permitted by default for
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-//If the 2nd shot is administered below the minimum interval or live virus interval, 
-//evaluate the shot as Valid with reason code SUPPLEMENTAL_TEXT and descriptive text: “The interval between this dose and the prior shot 
-//is less than the minimum interval. The dose does not need to be repeated unless the patient is severely immunosuppressed, 
-//in which case the repeated dose should be administered after the dose given in error by at least 28 days.
 
-rule "Orthopoxvirus: If the dose 2 of the 2-dose series is administered prior to 28 days, include supplemental text that the dose does not follow the guidelines for minimum intervals"
+rule "Orthopoxvirus: If the dose 2 of the 2-dose series is administered prior to 24 days, include supplemental text that the dose does not follow the guidelines for minimum intervals"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
@@ -103,20 +99,21 @@ rule "Orthopoxvirus: If the dose 2 of the 2-dose series is administered prior to
 			- the shot belongs to the series $targetSeries
 			- the administration date of the shot is > $priorShotDate
 			- the administration date of the shot is < $currentShotDate
-		Confirm elapsed time between $priorShotDate and $currentShotDate < "28d"
+		Confirm elapsed time between $priorShotDate and $currentShotDate < "24d"
 	then
 		Include Supplemental Text "The interval between this dose and the prior shot is less than the absolute minimum interval. The dose does not need to be repeated unless the patient is severely immunosuppressed, in which case the repeated dose should be administered after the dose given in error by at least 28 days." for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
         Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
 
-/************************************************************************************
+
 rule "Orthopoxvirus: If a booster dose is administered, evaluate the shot as Valid"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.860"
+			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is complete
@@ -128,68 +125,19 @@ rule "Orthopoxvirus: If a booster dose is administered, evaluate the shot as Val
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
-**********************************************************************************/
 
-rule "Orthopoxvirus: If a booster dose is administered, evaluate the shot as Valid"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "extraDoseCheck"
-	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.860"
-			- the Series that the shot belongs to is complete
-			- make note of the administered shot number as $currentShotNumber
-			- make note of the associated series as $associatedTargetSeries
-		There is a Series $targetSeries identified by $associatedTargetSeries
-			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-		There is an administered shot $previousDoseWhichCompletesSeries
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.860"
-			- the administered shot number is == $currentShotNumber-1
-			- that has already been evaluated and whose shot validity is VALID
-			- the dose number in the Series is == $doseNumberAfterWhichComplete
-	then
-		Set the Shot Status of $currentShot to Valid
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
-end
 
-/***********************************************************************************************************
-//rule "Orthopoxvirus: If a shot is evaluated as Invalid due to being below the live virus interval, mark the shot Valid"
-//	dialect "mvel"
-//	agenda-group "HistoryEvaluation^postEvaluationCheck"
-//	when
-//		There is an administered shot $administeredShot
-//			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.860"
-//			- that has already been evaluated and whose Shot Validity Status is INVALID
-//			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
-//			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS"
-//			- the size of the collection $collectionOfStrReasons is == 1
-//			- make note of the Associated Series as $associatedTargetSeries
-//	then
-//		Set the shot status of $administeredShot to Valid
-//		Remove all evaluation reasons from shot $administeredShot
-//		Mark that evaluation of shot $administeredShot is complete and therefore should not be reevaluated by any other rules
-//		Record that this dose rule was Processed for the TargetDose $administeredShot
-//		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
-//end
-***********************************************************************************************************************/
-
-rule "Orthopoxvirus: If a shot, ICE75 or ICE 105, is evaluated as Invalid due to being below the live virus interval, mark the shot Valid if first shot is ICE206"
+rule "Orthopoxvirus: If a shot is evaluated as Invalid due to being below the live virus interval, mark the shot Valid"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an administered shot $administeredShot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.860"
 			- that has already been evaluated and whose Shot Validity Status is INVALID
-			- the administered shot number is == 2
 			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
 			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS"
 			- the size of the collection $collectionOfStrReasons is == 1
 			- make note of the Associated Series as $associatedTargetSeries
-		There is an administered shot $previousShot
-			- the Shot belongs to the series $associatedTargetSeries
-			- that has already been evaluated and whose shot validity status is VALID
-			- the vaccine administered is "ICE206"
 	then
 		Set the shot status of $administeredShot to Valid
 		Remove all evaluation reasons from shot $administeredShot
@@ -199,65 +147,23 @@ rule "Orthopoxvirus: If a shot, ICE75 or ICE 105, is evaluated as Invalid due to
 end
 
 
-//rule "Orthopoxvirus: If a shot is evaluated as Invalid due to being below the live virus interval and the series is an extra dose, mark the shot Accepted / EXTRA_DOSE"
-//	dialect "mvel"
-//	agenda-group "HistoryEvaluation^postEvaluationCheck"
-//	when
-//		There is an administered shot $administeredShot
-//			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.860"
-//			- that has already been evaluated and whose Shot Validity Status is INVALID
-//			- make note of invalid evaluation reasons for this shot as $collectionOfInvalidReasons
-//			- the size of the collection $collectionOfInvalidReasons is == 1
-//			- the collection $collectionOfInvalidReasons contains "EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS"
-//			- make note of accepted evaluation reasons for this shot as $collectionOfAcceptedReasons
-//			- the collection $collectionOfAcceptedReasons contains "EVALUATION_REASON_CONCEPT.EXTRA_DOSE"
-//			- make note of the Associated Series as $associatedTargetSeries
-//	then
-//		Set the shot status of $administeredShot to Accepted
-//		Remove evaluation reason "EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS" from shot $administeredShot
-//		Mark that evaluation of shot $administeredShot is complete and therefore should not be reevaluated by any other rules
-//		Record that this dose rule was Processed for the TargetDose $administeredShot
-//		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
-//end
-
-
-rule "Orthopoxvirus: Evaluate first shot after series completion as Valid"
-	agenda-group "HistoryEvaluation^postEvaluationCheck"
-	when
-		There is an Administered Shot $administeredShot 
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.860"
-			- the series that the shot belongs to is Complete
-			- that has already been evaluated and whose Shot Validity Status is INVALID
-			- make note of accepted evaluation reasons for this shot as $collectionOfAcceptedReasons
-			- the collection $collectionOfAcceptedReasons contains "EVALUATION_REASON_CONCEPT.EXTRA_DOSE"
-			- make note of the Associated Series as $associatedTargetSeries
-		There is a Series $targetSeries identified by $associatedTargetSeries
-			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-			- the effective number of doses administered in the Series is >= $doseNumberAfterWhichComplete+1
-	then
-		Set the shot status of $administeredShot to Valid
-		Remove evaluation reason "EVALUATION_REASON_CONCEPT.EXTRA_DOSE" from shot $administeredShot
-		Mark that evaluation of shot $administeredShot is complete and therefore should not be reevaluated by any other rules
-		Record that this dose rule was processed for the TargetDose $administeredShot
-		Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
-end
-
-/************************************************************************************************************************/
-rule "Orthopoxvirus: If additional shots are administered after booster shot, evaluated them as Accepted / EXTRA_DOSE"
+rule "Orthopoxvirus: If a shot is evaluated as Invalid due to being below the live virus interval and the series is an extra dose, mark the shot Accepted / EXTRA_DOSE"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an administered shot $administeredShot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.860"
-			- the series that the shot belongs to is Complete
+			- that has already been evaluated and whose Shot Validity Status is INVALID
+			- make note of invalid evaluation reasons for this shot as $collectionOfInvalidReasons
+			- the size of the collection $collectionOfInvalidReasons is == 1
+			- the collection $collectionOfInvalidReasons contains "EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS"
+			- make note of accepted evaluation reasons for this shot as $collectionOfAcceptedReasons
+			- the collection $collectionOfAcceptedReasons contains "EVALUATION_REASON_CONCEPT.EXTRA_DOSE"
 			- make note of the Associated Series as $associatedTargetSeries
-		There is a Series $targetSeries identified by $associatedTargetSeries
-			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
-			- the effective number of doses administered in the Series is > $doseNumberAfterWhichComplete+2
 	then
-		Include the reason for shot $administeredShot Accepted due to "Extra Dose"
+		Set the shot status of $administeredShot to Accepted
+		Remove evaluation reason "EVALUATION_REASON_CONCEPT.TOO_EARLY_LIVE_VIRUS" from shot $administeredShot
 		Mark that evaluation of shot $administeredShot is complete and therefore should not be reevaluated by any other rules
-		Record that this dose rule was processed for the TargetDose $administeredShot
+		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
 end
-/**********************************************************************/
