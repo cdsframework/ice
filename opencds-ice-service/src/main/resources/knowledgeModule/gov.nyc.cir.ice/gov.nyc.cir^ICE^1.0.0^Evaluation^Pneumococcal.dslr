@@ -126,7 +126,7 @@ rule "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
 			- the dose number in the Series is >= 6
 			- that has already been evaluated
-			- make note of the date this shot was Administered as $administrationDate
+			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -177,6 +177,7 @@ END - Evaluation Rules for Adults' Shots Administered at >= 5 years and < 19 yea
 /************************************************************************************************************************************************************************************/
 
 
+
 /*************************************************************************************************************************************************************************************
 START
 General Pneumococcal Adult Rules
@@ -223,7 +224,6 @@ rule "Pneumococcal Adult: If CVX 109 or CVX 152 has been evaluated as INVALID / 
 	when
 		There is an administered shot $administeredShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the series that the shot belongs to is not complete
 			- the dose number in the Series is >= 6
 			- that has already been evaluated and whose shot validity status is INVALID
 			- the vaccine administered a member of ("ICE109", "ICE152")
@@ -236,28 +236,12 @@ rule "Pneumococcal Adult: If CVX 109 or CVX 152 has been evaluated as INVALID / 
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
 end
 
-
-rule "Pneumococcal Adult: If CVX 109, CVX 100 or CVX 177 is administered in the Adult Series and the Series is complete, override allowableVaccineCheck so that shot can be evaluated as ACCEPTED / EXTRA_DOSE (as other allowable shots/vaccines would be)"
-	dialect "mvel"
-	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "allowableVaccineCheck"
-	when
-		There is an administered shot $administeredShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
-			- the series that the shot belongs to is complete
-			- the dose number in the Series is >= 6
-			- the vaccine administered a member of ("ICE177", "ICE109", "ICE152")
-			- make note of the associated series as $associatedTargetSeries
-	then
-		Record that this dose rule was Processed for the TargetDose $administeredShot
-		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
-end
-
-
 /*************************************************************************************************************************************************************************************
 END
 General Pneumococcal Adult Rules - Series Evaluation Rule for Pneumococcal Adult PCV-PPSV Series and Pneumococcal Adult PPSV-PCV Series (VALID / INVALID / ACCEPTED PCV and PPSVs)
 /************************************************************************************************************************************************************************************/
+
+
 
 /*************************************************************************************************************************************************************************************
  START
@@ -334,9 +318,7 @@ rule "Pneumococcal Adult: A PCV20, PCV21 or PCV15 must be administered for the 3
 end
 
 
-rule "If PCV13 is administered for dose 3 of the Adult series and neither a PCV15/PCV20/PCV21 dose was previously administered nor a PPSV23 dose at >= 50 yrs of age, evaluate the shot as ACCEPTED / OUTSIDE_ROUTINE_SERIES"
-	// AI: Talk to Nette -- PPSV-PCV: what do I do if CVX 133 is administered in this case? CVX 133 is crossed out for dose 3.  Is it just Invalid /VACCINE_NOT_ALLOWED_FOR_THIS_DOSE?
-	// Example, PCV-PPSV: (1) CVX 133; (2) CVX 33
+rule "Pneumococcal Adult: If PCV13 is administered for dose 3 of the Adult series and neither a PCV15/PCV20/PCV21 dose was previously administered nor a PPSV23 dose at >= 50 yrs of age, evaluate the shot as ACCEPTED / OUTSIDE_ROUTINE_SERIES"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -434,7 +416,7 @@ rule "Pneumococcal Adult Series: Evaluate PCV7 shot (CVX 100) as Accepted with a
 			- make note of the associated series as $associatedTargetSeries
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and $administrationDate >= "19y"
+		Confirm elapsed time between $dtBirthDate and $administrationDate >= "5y"
 	then
 		Include the reason for shot $currentShot Accepted due to "Vaccine Not Allowed"
 		Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
@@ -479,7 +461,7 @@ Childhood Series Rules START
 // Child Series: If an invalid vaccine is administered in the Child Series, mark the shot as *Accepted* (rather than INVALID) with a reason code of VACCINE_NOT_PART_OF_THIS_SERIES. 
 // As of 10/2016, only CVX 33. (Overrides general "allowableVaccineCheck" rule)
 /////////////////////
-rule "Pneumococcal Child Series: Evaluate shot administered with an invalid vaccine as Accepted with reason code of VACCINE_NOT_PART_OF_THIS_SERIES"
+rule "Pneumococcal Child Series: Evaluate shot administered with an invalid vaccine as Accepted with reason code of VACCINE_NOT_PART_OF_THIS_SERIES (corollary to below; child series not complete)"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -489,14 +471,42 @@ rule "Pneumococcal Child Series: Evaluate shot administered with an invalid vacc
 			- make note of the administered vaccine as $vaccineAdministered
 			- make note of the dose number as $doseNumber
 			- make note of the associated series as $associatedTargetSeries
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
 			- the name of the Series is "PneumococcalSeries"
 			- the effective dose number in the series is <= 4
 			- the vaccine $vaccineAdministered is not permitted for dose number $doseNumber in this series
-		There does not exist an IceFact
+	then
+		Include the reason for shot $currentShot Accepted due to "Vaccine Not Part of This Series"
+		Record that this dose rule was processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+end
+
+
+rule "Pneumococcal Child Series: Evaluate shot administered with an invalid vaccine as Accepted with reason code of VACCINE_NOT_PART_OF_THIS_SERIES (corollary to above; child series complete; patient < 5 yrs of age)"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750" and the Series with name "PneumococcalSeries"
+			- make note of the administered vaccine as $vaccineAdministered
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+		There exists an IceFact
 			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
-			- that has associated series $targetSeries
+			- that has associated series $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the series is <= 6
+			- the vaccine $vaccineAdministered is not permitted for dose number 4 in this series
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $administrationDate < "5y"
 	then
 		Include the reason for shot $currentShot Accepted due to "Vaccine Not Part of This Series"
 		Record that this dose rule was processed for the TargetDose $currentShot
