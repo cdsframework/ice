@@ -2785,13 +2785,20 @@ rule "SeriesSelection(Hep A): If a CVX 104 (Twinrix) is administered to a patien
 	salience 10
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		and
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
+		and
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepAAdult3DoseSeries", selectedSeries == false)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", this != $ts, isSeriesComplete() == true)
-		$tdsEvaluated : List(size == 1 || size == 2) from accumulate($tdacc : TargetDose(associatedTargetSeries == $ts, isValid == true), collectList($tdacc))
+		and
+		(
+			not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", this != $ts, isSeriesComplete() == true)
+			or
+			TargetSeries(this == $ts, isSeriesComplete() == true)
+		)
+		and
 		$person : EvaluatedPerson($birthDate : demographics.birthTime,  $dateAt18yminus4d : TimePeriod.addTimePeriod(demographics.birthTime, "18y-4d"))
-		forall ($td : TargetDose(associatedTargetSeries == $ts, isValid == true) 
-			TargetDose(this == $td, administeredVaccine.cdsConceptName == "ICE104", administrationDate >= $dateAt18yminus4d))
+		and
+		exists TargetDose(associatedTargetSeries == $ts, doseNumberInSeries <= 2, administeredVaccine.cdsConceptName == "ICE104", isValid == true, administrationDate >= $dateAt18yminus4d)
 	then
 		String _RULENAME = kcontext.rule.name;
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
