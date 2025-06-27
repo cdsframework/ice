@@ -104,11 +104,11 @@ rule "Hep A: If CVX 104 (Twinrix) is administered at >= 18 years-4 days in the 3
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm Elapsed time between $dtBirthDate and $administrationDate >= "18y-4d"
 	then
-		// Do not check maximum age for the vaccine
+		// Do not check maximum age via default rule for the vaccine in this Series
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
- 
+
 
 // If dose 1 and dose 2 are administered at < 19 years and the interval between dose 1 and dose 2 is >= 6 months-4 days, the series is complete.
 rule "Hep A: If dose 1 and dose 2 are administered in the 3-dose Series at < 19y of age, and the interval between dose 1 and dose 2 is >= 6 months-4 day, then the Series is complete"
@@ -206,10 +206,10 @@ rule "Hep A: Switch from 2-Dose HepA series to 3-Dose HepA series if CVX 83 (Hep
 end
 
 
-rule "Hep A: Switch from 2-Dose HepA series to 3-Dose HepA series if Dose 2 is given >= 24d and < 6m-4d from dose 1 and dose 2 is given to a patient >= 18yrs old"
+rule "Hep A: Switch from 2-Dose HepA series to 3-Dose HepA series if Dose 2 is given >= 24d and < 6m-4d from dose 1 and dose 2 is given to a patient >= 18yrs-4d old"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
-	activation-group "SwitchFromHepA2DoseTo3Dose"
+	/////// activation-group "SwitchFromHepA2DoseTo3Dose"
 	salience 10
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
@@ -232,7 +232,7 @@ rule "Hep A: Switch from 2-Dose HepA series to 3-Dose HepA series if Dose 2 is g
 			- the name of the Series is "HepAAdult3DoseSeries"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
-		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateTwo >= "18y"
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDateTwo >= "18y-4d"
 		Confirm elapsed time between $dtAdministrationDateOne and $dtAdministrationDateTwo < "6m-4d"
 		Confirm elapsed time between $dtAdministrationDateOne and $dtAdministrationDateTwo >= "24d"
 	then
