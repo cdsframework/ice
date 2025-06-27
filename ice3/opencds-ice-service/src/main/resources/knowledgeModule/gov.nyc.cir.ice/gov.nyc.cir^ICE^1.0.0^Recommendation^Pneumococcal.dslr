@@ -207,11 +207,8 @@ rule "Pneumococcal Adult: If a patient >= 65 years of age, has completed the ser
 		Clear forecasted recommendations from consideration in Series $targetSeries
 		Mark the Series $targetSeries complete
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $recommendation for Consideration in the final forecast of the Series
-		Create a Recommendation as $clinicalPatientDiscretionReason for the Series $targetSeries
-		Set the Recommendation Reason for $clinicalPatientDiscretionReason to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
-		Include the Recommendation $clinicalPatientDiscretionReason for Consideration in the final forecast of the Series
 		Create a Recommendation as $supplementalText for the Series $targetSeries
 		Set the Recommendation Supplemental text for $supplementalText to "Consider administering PCV20 or PCV21 based on Shared Clinical Decision-Making (SCDM), at least 5 years after the most recent dose of pneumococcal vaccine."
 		Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
