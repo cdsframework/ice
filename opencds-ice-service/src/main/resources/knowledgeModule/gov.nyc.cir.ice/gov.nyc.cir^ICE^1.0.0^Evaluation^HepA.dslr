@@ -134,3 +134,37 @@ rule "Hep A: If dose 1 and dose 2 are administered in the 3-dose Series at < 19y
 		Record that this dose rule was Processed for the TargetDose $hepAAdultDose2
 		Log that this dose rule fired for the dose $hepAAdultDose2 in the Series $associatedTargetSeries
 end
+
+
+rule "Hep A: Switch from 2-Dose Hep A series to 3-Dose Hep A series if CVX 104 dose is administered to a patient >= 18 year-4 days as dose 2 and a previous dose was administered prior to 18 years-4 days"
+	dialect "mvel"
+	agenda-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an administered shot $latestShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810" and the Series with name "HepA2DoseChildAdultSeries"
+			- the dose number in the series is == 2
+			- the vaccine administered is "ICE104"
+			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
+			- make note of the associated series as $targetSeries
+		The Patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAge18yMinus4d when the patient is "18y-4d" of age
+		There is an administered shot $sameShot
+			- that is the same shot as $latestShot
+			- the administration date of the shot is >= $dtDateAtAge18yMinus4d
+		There is an administered shot $dose1evaluatedValid
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is == 1
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the administration date of the shot is < $dtDateAtAge18yMinus4d
+		There is a Series $seriesToSwitchTo
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810"
+			- the name of the Series is "HepAAdult3DoseSeries"
+	then
+		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number 2 and evaluate using Interval for prior dose to this dose from SwitchedTo Series
+		Refresh all facts in the Series $targetSeries for Evaluation
+		Refresh all facts for the Shot $latestShot
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+
