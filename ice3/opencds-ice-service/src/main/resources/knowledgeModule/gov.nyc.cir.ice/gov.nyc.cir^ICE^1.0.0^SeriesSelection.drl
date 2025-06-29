@@ -2764,7 +2764,6 @@ end
 rule "SeriesSelection.SelectByDefaultHepA2DoseSeries"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	/////// activation-group "HepASeriesSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
@@ -2846,7 +2845,6 @@ rule "SeriesSelection(Hep A): If 2-dose Series was selected over the 3-dose Seri
 			addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN");
 		}
 		 ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $t2series);
-		/////// ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetDose " + $t2SeriesTd + "in " + TargetSeries " + $t2series);
 end
 
 
@@ -2861,12 +2859,6 @@ rule "SeriesSelection(Hep A): If a CVX 104 (Twinrix) is administered to a patien
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepAAdult3DoseSeries", selectedSeries == false)
 		$ts2dose : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepA2DoseChildAdultSeries")
-//		and
-//		(
-//			not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepA2DoseChildAdultSeries", isSeriesComplete() == true)
-//			or
-//			TargetSeries(this == $ts, isSeriesComplete() == true)
-//		)
 		$person : EvaluatedPerson($birthDate : demographics.birthTime,  $dateAt18yminus4d : TimePeriod.addTimePeriod(demographics.birthTime, "18y-4d"))
 		exists TargetDose(associatedTargetSeries == $ts, doseNumberInSeries <= 2, administeredVaccine.cdsConceptName == "ICE104", isValid == true, administrationDate >= $dateAt18yminus4d)
 		$ts3dose1 : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true)
