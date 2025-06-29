@@ -139,7 +139,6 @@ end
 rule "Hep A: Switch from 2-Dose Hep A series to 3-Dose Hep A series if CVX 104 dose is administered to a patient >= 18 year-4 days as dose 2 and a previous dose was administered prior to 18 years-4 days"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule"
-	/////// agenda-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an administered shot $latestShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810" and the Series with name "HepA2DoseChildAdultSeries"
