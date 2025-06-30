@@ -33,7 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public record IceSupportingDataProperties(Boolean outputEarliestOverdueDates, Boolean doseOverrideFeatureEnabled, Boolean outputSupplementalText,
-                                          List<String> vaccineGroupExclusions, Boolean enableUnsupportedVaccinesGroup, Boolean disableCovid19DoseNumberReset) {
+                                          List<String> vaccineGroupExclusions, Boolean enableUnsupportedVaccinesGroup, Boolean disableCovid19DoseNumberReset, Boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries) {
     
     private static final Logger logger = LogManager.getLogger();
 
@@ -78,7 +78,14 @@ public record IceSupportingDataProperties(Boolean outputEarliestOverdueDates, Bo
             logger.info(_METHODNAME + "enable_covid19_sep2023_dose_number_reset set to " + disableCovid19DoseNumberReset);
         }
 
+        // Disable output of earliest and overdue dates for pneumcoccal adult series
+        String lDisableOutputEarliestOverdueDatesForPneumococcalAdultSeries = props.getProperty("disable_output_earliest_and_overdue_dates_for_pneumococcal_adult_series");
+        final boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries = lDisableOutputEarliestOverdueDatesForPneumococcalAdultSeries != null && lDisableOutputEarliestOverdueDatesForPneumococcalAdultSeries.equals("Y");
+        if (logger.isInfoEnabled()) {
+            logger.info(_METHODNAME + "disable_output_earliest_and_overdue_dates_for_pneumococcal_adult_series set to " + disableOutputEarliestOverdueDatesForPneumococcalAdultSeries);
+        }
+
         return new IceSupportingDataProperties(outputEarliestOverdueDates, doseOverrideFeatureEnabled, outputSupplementalText, vaccineGroupExclusions,
-                enableUnsupportedVaccinesGroup, disableCovid19DoseNumberReset);
+                enableUnsupportedVaccinesGroup, disableCovid19DoseNumberReset, disableOutputEarliestOverdueDatesForPneumococcalAdultSeries);
     }
 }

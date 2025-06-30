@@ -60,6 +60,74 @@ global org.cdsframework.ice.service.Schedule schedule
 *****************************************************************************************************************************************************************************************************************/
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not output earliest and overdue dates if in the adult series
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestAgeCheck* override)"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	activation-group "earliestAgeCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the series is not complete
+			- the effective dose number in the Series is >= 6
+		There exists an IceFact
+			- that has finding "DISABLE_OUTPUT_EARLIEST_OVERDUE_DATES_FOR_PNEUMOCOCCAL_ADULT_SERIES"
+	then
+		// Do not calculate earliest age
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+      	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestInterval* override)"
+		extends "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestAgeCheck* override)"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+	when
+		// Nothing to do
+	then
+		// Do not calculate earliest age
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+      	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*latestRecommendedAgeCheck* override)"
+		extends "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestAgeCheck* override)"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	activation-group "latestRecommendedAgeCheck"
+	when
+		// Nothing to do
+	then
+		// Do not calculate earliest age
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+      	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*latestRecommendedIntervalCheck* override)"
+		extends "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestAgeCheck* override)"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	activation-group "latestRecommendedIntervalCheck"
+	when
+		// Nothing to do
+	then
+		// Do not calculate earliest age
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+      	Log that this Series Rule fired for the Series $targetSeries
+end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END not outputting earliest and overdue date for adult series if configured 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // START - Adult Special Recommendation Rules 1 & 2
 //   + Special Recommendation Rule 1: If a patient >= 50 years of age, has not completed the series, has >= 1 dose of PCV13 administeredat any age, and there are no PPSV23, PCV15, PCV20, or PCV21 shots dose on record, 
 //     and there is a recommendation date for the next target dose, recommend at the vaccine group level with recommendation reason code ADMINISTER_PCV20_OR_PCV21. 
