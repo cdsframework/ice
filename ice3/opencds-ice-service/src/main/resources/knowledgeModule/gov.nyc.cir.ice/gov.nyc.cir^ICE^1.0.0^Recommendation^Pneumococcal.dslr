@@ -459,7 +459,7 @@ rule "Pneumococcal Adult: Earliest Interval of 5yrs from prior PPSV shot (or CVX
 	dialect "mvel"
 	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
-		There exists an IceFact
+		There does not exist an IceFact
 			- that has finding "DISABLE_OUTPUT_EARLIEST_OVERDUE_DATES_FOR_PNEUMOCOCCAL_ADULT_SERIES"
 	then
 		Add "5y" to $dateAdultPPSVor109Administered and make note of the newly calculated date as $dtCalculated
@@ -498,9 +498,25 @@ rule "Pneumococcal Adult: Recommend Recommended Interval of 1 yr from prior PCV 
 	then
 		Add "1y" to $dateMostRecentPCVAdministered and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtCalculated
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtCalculated
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series		
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+
+rule "Pneumococcal Adult: Recommend Earliest Interval of 1 yr from prior PCV shot to the next target dose"
+		extends "Pneumococcal Adult: Recommend Recommended Interval of 1 yr from prior PCV shot to the next target dose"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^customRecommendationRule"
+	when
+		There does not exist an IceFact
+			- that has finding "DISABLE_OUTPUT_EARLIEST_OVERDUE_DATES_FOR_PNEUMOCOCCAL_ADULT_SERIES"
+	then
+		Add "1y" to $dateMostRecentPCVAdministered and make note of the newly calculated date as $dtCalculated
+		Create a Recommendation as $oRecommendationEarliest for the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $oRecommendationEarliest to $dtCalculated
+		Include the Recommendation $oRecommendationEarliest for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
