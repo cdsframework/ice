@@ -125,6 +125,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 	private Boolean enableUnsupportedVaccinesGroup = null;
 	private Boolean outputNumberOfDosesRemaining = null;
 	private Boolean disableCovid19DoseNumberReset = null;
+	private Boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries;
 
 	private static final Logger logger = LogManager.getLogger();
 
@@ -407,7 +408,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("enableUnsupportedVaccinesGroup", enableUnsupportedVaccinesGroup));
-		
+
 		if (outputNumberOfDosesRemaining == null) {
 			String lErrStr = "An error occurred: knowledge module not properly initialized: output number of doses remaining flag not set; cannot continue";
 			logger.error(_METHODNAME + lErrStr);
@@ -421,6 +422,13 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			throw new RuntimeException(lErrStr);
 		}
 		cmds.add(CommandFactory.newSetGlobal("disableCovid19DoseNumberReset", disableCovid19DoseNumberReset));
+
+		if (disableOutputEarliestOverdueDatesForPneumococcalAdultSeries == null) {
+			String lErrStr = "An error occurred: knowledge module not properly initialized: disableOutputEarliestOverdueDatesForPneumococcalAdultSeries flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		cmds.add(CommandFactory.newSetGlobal("disableOutputEarliestOverdueDatesForPneumococcalAdultSeries", disableOutputEarliestOverdueDatesForPneumococcalAdultSeries));
 
 		/*
 		 * Add globals provided by plugin; don't allow any global that have the same name as our globals.
@@ -779,7 +787,7 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		if (logger.isInfoEnabled()) {
 			logger.info(_METHODNAME + "output_supplemental_text set to " + outputSupplementalText);
 		}
-		
+
 		// Output doses remaining for each series recommendation?
 		String lOutputDosesRemaining = lProps.getProperty("series_display_selection");
 		if (lOutputDosesRemaining != null && lOutputDosesRemaining.equals("Y")) {
@@ -792,17 +800,6 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 			logger.info(_METHODNAME + "output_number_of_doses_remaining set to " + outputNumberOfDosesRemaining);
 		}
 
-		// Reset Dose Numbering for COVID-19
-		String lEnableCovid19DoseNumberReset = lProps.getProperty("disable_covid19_sep2023_dose_number_reset");
-		if (lEnableCovid19DoseNumberReset != null && lEnableCovid19DoseNumberReset.equals("Y")) {
-			disableCovid19DoseNumberReset = new Boolean(true);
-		}
-		else {
-			disableCovid19DoseNumberReset = new Boolean(false);
-		}
-		if (logger.isInfoEnabled()) {
-			logger.info(_METHODNAME + "enable_covid19_sep2023_dose_number_reset set to " + disableCovid19DoseNumberReset);
-		}
 
 		/////// Set up knowledge base
 		KieServices kieServices = KieServices.Factory.get();
@@ -978,6 +975,30 @@ public class ICEDecisionEngineDSS7EvaluationAdapter implements Evaluater {
 		logger.info("Enable Unsupported Vaccines Group: " + this.enableUnsupportedVaccinesGroup);
 
 		logger.info("Output Selected Series and Number of Doses Remaining in Series: " + ((this.outputNumberOfDosesRemaining == null || this.outputNumberOfDosesRemaining.equals(Boolean.FALSE)) ? "No" : "Yes"));
+
+		// Reset Dose Numbering for COVID-19
+		String lEnableCovid19DoseNumberReset = lProps.getProperty("disable_covid19_sep2023_dose_number_reset");
+		if (lEnableCovid19DoseNumberReset != null && lEnableCovid19DoseNumberReset.equals("Y")) {
+			disableCovid19DoseNumberReset = new Boolean(true);
+		}
+		else {
+			disableCovid19DoseNumberReset = new Boolean(false);
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info(_METHODNAME + "enable_covid19_sep2023_dose_number_reset set to " + disableCovid19DoseNumberReset);
+		}
+
+		// Disable output of earliest and overdue dates in the pneumococcal adult series
+		String ldisableOutputEarliestOverdueDatesForPneumococcalAdultSeries = lProps.getProperty("disable_output_earliest_and_overdue_dates_for_pneumococcal_adult_series");
+		if (ldisableOutputEarliestOverdueDatesForPneumococcalAdultSeries != null && ldisableOutputEarliestOverdueDatesForPneumococcalAdultSeries.equals("Y")) {
+			disableOutputEarliestOverdueDatesForPneumococcalAdultSeries = new Boolean(true);
+		}
+		else {
+			disableOutputEarliestOverdueDatesForPneumococcalAdultSeries = new Boolean(false);
+		}
+		if (logger.isInfoEnabled()) {
+			logger.info(_METHODNAME + "disable_output_earliest_and_overdue_dates_for_pneumococcal_adult_series set to " + disableOutputEarliestOverdueDatesForPneumococcalAdultSeries);
+		}
 
 		//// return kieBase;
 		return knowledgeBases;

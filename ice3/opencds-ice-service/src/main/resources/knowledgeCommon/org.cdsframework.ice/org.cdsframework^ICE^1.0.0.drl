@@ -105,6 +105,7 @@ global java.util.List<String> vaccineGroupExclusions
 global java.lang.Boolean enableUnsupportedVaccinesGroup
 global java.lang.Boolean outputNumberOfDosesRemaining
 global java.lang.Boolean disableCovid19DoseNumberReset
+global java.lang.Boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries
 global java.lang.String iceVersion
 
 // global org.drools.runtime.KnowledgeContext kcontext
@@ -227,6 +228,39 @@ end
 
 ///////// ***
 // General Design rule... Do not Edit
+/////////
+rule "InitializeReferenceData: Output Number of Doses Remaining Fact Object" ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+when
+	not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue)
+	eval(outputNumberOfDosesRemaining != null && outputNumberOfDosesRemaining.booleanValue() == true)
+then
+	String _RULENAME = kcontext.rule.name;
+	ICEFactTypeFinding iftf = new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue);
+	insert(iftf);
+	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Output number of doses remaining? Initialized");
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
+///////// ***
+// AI: Move this to Pneumococcal rules
+rule "ImmunizationReferenceData: Initalize Output of Earliest and Overdue Dates for Pneumococcal Adult Series Fact Object" ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+	when
+		not ICEFactTypeFinding(iceResultFinding == "DISABLE_OUTPUT_EARLIEST_OVERDUE_DATES_FOR_PNEUMOCOCCAL_ADULT_SERIES")
+		eval(disableOutputEarliestOverdueDatesForPneumococcalAdultSeries != null && disableOutputEarliestOverdueDatesForPneumococcalAdultSeries.booleanValue() == true)
+	then
+		String _RULENAME = kcontext.rule.name;		
+		ICEFactTypeFinding ift = new ICEFactTypeFinding("DISABLE_OUTPUT_EARLIEST_OVERDUE_DATES_FOR_PNEUMOCOCCAL_ADULT_SERIES");
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "Disable Output of Earliest and Overdue Dates for Pneumococcal Adult Initialized");
+		insert(ift);
+end
+
+
+///////// ***
+// General Design rule... Do not Edit
 ///////// ***
 rule "ImmunizationReferenceData: Initialize Target Seasons Fact Object" ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -237,22 +271,6 @@ rule "ImmunizationReferenceData: Initialize Target Seasons Fact Object" ruleflow
 		TargetSeasons tseasons = new TargetSeasons(evalTime);
 		insert(tseasons);
 		ICELogicHelper.logDRLDebugMessage(_RULENAME, "TargetSeasons Fact Object Initialized");
-end
-
-
-///////// ***
-// General Design rule... Do not Edit
-/////////
-rule "InitializeReferenceData: Output Number of Doses Remaining?" ruleflow-group "ImmunizationReferenceData"
-	dialect "mvel"
-when
-	not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue)
-	eval(outputNumberOfDosesRemaining != null && outputNumberOfDosesRemaining.booleanValue() == true)
-then
-	String _RULENAME = kcontext.rule.name;
-	ICEFactTypeFinding iftf = new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue);
-	insert(iftf);
-	ICELogicHelper.logDRLDebugMessage(_RULENAME, "Output number of doses remaining? Initialized");
 end
 
 
