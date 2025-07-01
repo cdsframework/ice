@@ -501,10 +501,10 @@ rule "COVID-19(Sep2023+ >= 5yrs): If the patient has >= 1 COVID-19 shot(s) on re
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
 			- the administration date of the shot is > $mostRecentShotDate
 			- the shot is not ignored
-		//There does not exist an IceFact
-		//	- that has associated series $targetSeries
-		//	- that has associated administered shot $mostRecentShot
-		//	- that has finding a member of ("COVID19_SEPT2023GTE5SERIES_EXCEPTION_2_FOR_TARGET_DOSE_1", "COVID19_SEPT2023GTE5SERIES_EXCEPTION_3_FOR_TARGET_DOSE_1")
+		/////// There does not exist an IceFact
+		///////	- that has associated series $targetSeries
+		///////	- that has associated administered shot $mostRecentShot
+		///////	- that has finding a member of ("COVID19_SEPT2023GTE5SERIES_EXCEPTION_2_FOR_TARGET_DOSE_1", "COVID19_SEPT2023GTE5SERIES_EXCEPTION_3_FOR_TARGET_DOSE_1")
 		There does not exist an IceIntervalFact
 			- that has IceIntervalFact type IntervalFactType.RECOMMENDED
 			- that has IceIntervalFact finding SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue

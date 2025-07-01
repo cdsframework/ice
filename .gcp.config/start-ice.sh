@@ -71,6 +71,12 @@ then
     sed -i "s/disable_covid19_sep2023_dose_number_reset=.*/disable_covid19_sep2023_dose_number_reset=$DISABLE_COVID19_SEP2023_DOSE_NUMBER_RESET/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
 fi
 
+if [[ -v DISABLE_EARLIEST_OVERDUE_DATE_OUTPUTS_FOR_PNEUMOCOCCAL_ADULT_SERIES ]]
+then
+    echo "Setting disable_output_earliest_and_overdue_dates_for_pneumococcal_adult_series in ice.properties to: $DISABLE_EARLIEST_OVERDUE_DATE_OUTPUTS_FOR_PNEUMOCOCCAL_ADULT_SERIES"
+    sed -i "s/disable_output_earliest_and_overdue_dates_for_pneumococcal_adult_series=.*/disable_output_earliest_and_overdue_dates_for_pneumococcal_adult_series=$DISABLE_EARLIEST_OVERDUE_DATE_OUTPUTS_FOR_PNEUMOCOCCAL_ADULT_SERIES/" /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes/ice.properties
+fi
+
 if [[ -v REMOTE_CONFIG_ENABLED ]]; then
     echo "REMOTE_CONFIG_ENABLED is set to: $REMOTE_CONFIG_ENABLED"
     if [ "$REMOTE_CONFIG_ENABLED" == "Y" ]; then

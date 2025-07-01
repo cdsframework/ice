@@ -138,6 +138,14 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin {
 			throw new RuntimeException(lErrStr);
 		}
 		context.getGlobals().put("disableCovid19DoseNumberReset", iceProps.disableCovid19DoseNumberReset());
+
+		if (iceProps.disableOutputEarliestOverdueDatesForPneumococcalAdultSeries() == null) {
+			String lErrStr =
+					"An error occurred: knowledge module not properly initialized: disableOutputEarliestOverdueDatesForPneumococcalAdultSeries flag not set; this should not happen. Cannot continue";
+			logger.error(_METHODNAME + lErrStr);
+			throw new RuntimeException(lErrStr);
+		}
+		context.getGlobals().put("disableOutputEarliestOverdueDatesForPneumococcalAdultSeries", iceProps.disableOutputEarliestOverdueDatesForPneumococcalAdultSeries());
 	}
 
 	public static SupportingData getSupportingData(PreProcessPluginContext context) {

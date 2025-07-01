@@ -2748,7 +2748,6 @@ end
 rule "SeriesSelection.HepADoNOTSelectAlreadyCompleteSeriesWithFewestDosesIfExistsAndOtherSeriesPreviouslySelected"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 100
 	activation-group "SeriesSelectionFewestDoses"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
@@ -2765,8 +2764,6 @@ end
 rule "SeriesSelection.SelectByDefaultHepA2DoseSeries"
 	dialect "mvel"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
-	salience 100
-	activation-group "HepASeriesSelectionCheck"
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
@@ -2780,9 +2777,105 @@ rule "SeriesSelection.SelectByDefaultHepA2DoseSeries"
 end
 
 
+rule "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		$t3series : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepAAdult3DoseSeries", selectedSeries == true)
+		$t2series : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepA2DoseChildAdultSeries", isSeriesComplete() == true)
+		$t2seriesTd2 : TargetDose(associatedTargetSeries == $t2series, doseNumberInSeries == 2, isValid == true)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $t2series);
+end
+
+
+rule "SeriesSelection(Hep A): Keep selection as 3-dose series if the 3-dose was completed on the same day or before"
+		extends "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 3
+	when
+		TargetSeries(this == $t3series, isSeriesComplete() == true)
+		TargetDose(associatedTargetSeries == $t3series, doseNumberInSeries == 3, isValid == true, administrationDate <= $t2seriesTd2.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $t3series);
+end
+
+
+rule "SeriesSelection(Hep A): Make the change to the 2-dose and 3-dose series if the 2-dose was completed earlier than the 3-dose or the 3-dose was never completed"
+		extends "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 3
+	when
+		TargetSeries(this == $t3series, isSeriesComplete() == false)
+		or
+		TargetSeries(this == $t3series, isSeriesComplete() == true)
+		and
+		TargetDose(associatedTargetSeries == $t3series, doseNumberInSeries == 3, isValid == true, administrationDate > $t2seriesTd2.administrationDate)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $t2series);
+		$t3series.setSelectedSeries(false);		
+		$t2series.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($t2series.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($t3series);
+		update($t2series);
+		update($tss);
+end
+
+
+rule "SeriesSelection(Hep A): If 2-dose Series was selected over the 3-dose Series when the 3-dose Series was previously selected, mark any prior 3-dose Series doses as Accepted / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN in the 2-dose Series"
+		extends "SeriesSelection(Hep A): Make the change to the 2-dose and 3-dose series if the 2-dose was completed earlier than the 3-dose or the 3-dose was never completed"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		$t3seriesTd : TargetDose(associatedTargetSeries == $t3series, isValid == true)
+		$t2seriesTd : TargetDose(associatedTargetSeries == $t2series, administrationDate == $t3seriesTd.administrationDate, isValid == false, status != DoseStatus.ACCEPTED) 
+	then
+		String _RULENAME = kcontext.rule.name;
+		modify($t2seriesTd) {
+			setStatus(DoseStatus.ACCEPTED),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN");
+		}
+		 ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $t2series);
+end
+
+
+
+// The Hep A 3-dose series applies only if one of the following is true: CVX 104 (Twinrix) is given to a patient >= 18 years - 4 days old as dose 1 and/or dose 2
+rule "SeriesSelection(Hep A): If a CVX 104 (Twinrix) is administered to a patient >= 18 years-4 days as dose 1 and/or dose 2, select the Hep A 3-dose Series"
+	dialect "mvel"
+	agenda-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepAAdult3DoseSeries", selectedSeries == false)
+		$ts2dose : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepA2DoseChildAdultSeries")
+		$person : EvaluatedPerson($birthDate : demographics.birthTime,  $dateAt18yminus4d : TimePeriod.addTimePeriod(demographics.birthTime, "18y-4d"))
+		exists TargetDose(associatedTargetSeries == $ts, doseNumberInSeries <= 2, administeredVaccine.cdsConceptName == "ICE104", isValid == true, administrationDate >= $dateAt18yminus4d)
+		$ts3dose1 : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true)
+		not TargetDose(associatedTargetSeries == $ts2dose, doseNumberInSeries == 1, isValid == true, administrationDate < $dateAt18yminus4d)
+	then
+		String _RULENAME = kcontext.rule.name;
+		ICELogicHelper.logDRLDebugMessage(_RULENAME, "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+		update($tss);
+end
+
+
 ///////////////////////////////////////////////////////////// Hep B-Specific Series Selection Rules Start Here /////////////////////////////////////////////////////////////
 
-rule "SeriesSelection: Select already completed series that was completed on the same date and with the most doses if different completed series was previously selected"
+rule "SeriesSelection(Hep B): Select already completed series that was completed on the same date and with the most doses if different completed series was previously selected"
 	dialect "java"
 	agenda-group "SeriesSelection^customSeriesSelectionRules"
 	when

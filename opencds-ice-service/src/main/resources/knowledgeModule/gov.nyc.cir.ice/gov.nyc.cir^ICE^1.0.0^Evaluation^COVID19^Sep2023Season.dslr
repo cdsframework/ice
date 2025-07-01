@@ -101,7 +101,6 @@ rule "COVID-19(Sep2023+): If a COVID-19 shot that does not count towards U.S. va
 		extends "COVID-19(Sep2023+ Abstract): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 8w-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
-	/////// activation-group "doseIntervalCheck"
 	when
 		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
 	then
@@ -115,7 +114,6 @@ rule "COVID-19(Sep2023+): If a COVID-19 shot that does not count towards U.S. va
 		extends "COVID-19(Sep2023+ Abstract): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 8w-4d"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
-	///////	activation-group "doseIntervalCheck"
 	when
 		Confirm Elapsed time between $previousShotDate and $currentShotDate >= "8w-4d"
 	then
@@ -744,7 +742,6 @@ rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If the patient has 1 dose of upda
 		There is an Administered Shot $validShotSame
 			- that is the same shot as $validShot
 			- the administration date of the shot is >= $dtAtAge5y
-			/////// - the administration date of the shot is >= $seasonStartDate
 	then
 		Mark the Series $targetSeries complete
 		Refresh all facts in the Series $targetSeries
@@ -764,7 +761,6 @@ end
 rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a prior formulation COVID-19 vaccine (excluding non-US vaccines that do not count towards U.S vaccination) or a non-Pfizer updated seasonal COVID-19 vaccine is administered on or after 9/12/2023 for target dose 1 or target dose 2, the absolute minimum interval to the next dose is 24 days"
 	dialect "mvel"
 	agenda-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
-	/////// activation-group "doseIntervalCheck"
 	no-loop true
 	when
 		There is an administered shot $currentShot that needs to be evaluated
@@ -792,7 +788,7 @@ rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a prior formulation COVID-19 v
 		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
-		Log debugging information about object named "ICEFACT!!!!! TargetDose" and value $currentShot
+		/////// Log debugging information about object named "ICEFACT!!!!! TargetDose" and value $currentShot
 end
 
 /*****************************************************************************************************************************************************************************************************************
