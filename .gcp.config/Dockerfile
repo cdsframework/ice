@@ -1,4 +1,4 @@
-FROM tomcat:10-jre17-temurin-noble AS build
+FROM tomcat:10.1.43-jre17-temurin-noble AS build
 
 # Metadata
 LABEL organization="HLN Consulting, LLC"
@@ -23,6 +23,7 @@ RUN apt-get -y update && \
     adduser --system --home /home/appuser --disabled-login appuser && \
     rm -rf /usr/local/tomcat/webapps/docs /usr/local/tomcat/webapps/ROOT /usr/local/tomcat/webapps/examples /usr/local/tomcat/webapps/host-manager /usr/local/tomcat/webapps/manager && \
     mkdir -p /home/appuser/.opencds
+
 
 WORKDIR /home/appuser
 
