@@ -1,4 +1,4 @@
-FROM tomcat:10.1.43-jre17-temurin-noble AS build
+FROM tomcat:11-jre21-temurin-noble AS build
 
 # Metadata
 LABEL organization="HLN Consulting, LLC"
@@ -19,7 +19,7 @@ ENV REMOTE_CONFIG_PASSWORD="password"
 EXPOSE 8080
 
 RUN apt-get -y update && \
-    apt-get -y dist-upgrade && \
+    apt install dos2unix && \
     adduser --system --home /home/appuser --disabled-login appuser && \
     rm -rf /usr/local/tomcat/webapps/docs /usr/local/tomcat/webapps/ROOT /usr/local/tomcat/webapps/examples /usr/local/tomcat/webapps/host-manager /usr/local/tomcat/webapps/manager && \
     mkdir -p /home/appuser/.opencds
@@ -28,8 +28,8 @@ RUN apt-get -y update && \
 WORKDIR /home/appuser
 
 # copy config files
-COPY opencds-ice-service/target/opencds-ice-service /usr/local/tomcat/webapps/opencds-decision-support-service
-COPY opencds-ice-service/src/main/resources /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/resources
+COPY target/opencds-ice-service /usr/local/tomcat/webapps/opencds-decision-support-service
+COPY src/main/resources /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/resources
 COPY .gcp.config/opencds.properties .opencds
 COPY .gcp.config/sec.xml .opencds
 COPY .gcp.config/log4j2.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
@@ -38,6 +38,8 @@ COPY .gcp.config/start-ice.sh ./
 COPY .gcp.config/server.xml /usr/local/tomcat/conf
 
 RUN chown -R appuser: /home/appuser /usr/local/tomcat
+
+RUN dos2unix ./start-ice.sh && chmod a+x ./start-ice.sh
 
 USER appuser
 
