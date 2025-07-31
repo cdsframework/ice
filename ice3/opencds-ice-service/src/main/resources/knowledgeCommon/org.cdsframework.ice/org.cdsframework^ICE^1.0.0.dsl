@@ -232,6 +232,7 @@
 [condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=\\<\\>]+}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 [condition][]- [Tt]he [Oo]bject {oObjectOne:[\\$]?[a-zA-Z0-9\\.\\_]+} is {aOp}  {oObjectTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oObjectOne} {aOp} {oObjectTwo}
+[condition][]- [Tt]he following [Ss]ubexpression for the [Ss]eries is true: {expression:([\\(]{0,1}.*[\\)]{0,1})}={expression}
 
 
 

@@ -56,10 +56,26 @@ global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
 
 
-/*
-Cholera Recommendation Rule
-    When recommending in the Cholera vaccine group:
-    always return reason code SUPPLEMENTAL_TEXT with descriptive text, "Cholera vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk. Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information.", except when the Recommendation is Not Recommended and the reason code is COMPLETE.
-*/
+/////////////////////
+// Cholera Recommendation Rule
+// When recommending in the Cholera vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text, "Cholera vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk. 
+// Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information.", except when the Recommendation is Not Recommended and the reason code is COMPLETE.
+/////////////////////
 
-        
+rule "Cholera: Always include supplemental text with the recommendation indicating Cholera is not routinely recommended in the U.S., except when the recommendation is Not Recommended / COMPLETE"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.901"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made
+			- the Series is not complete
+			- make note of the recommendation status as $recommendationStatus
+			- make note of the final recommendations as $allFinalRecommedations
+			- the following subexpression for the Series is true: $recommendationStatus != RecommendationStatus.NOT_RECOMMENDED && "RECOMMENDATION_REASON_CONCEPT.COMPLETE" not memberOf $allFinalRecommedations
+	then
+	
+end
+
+ 
