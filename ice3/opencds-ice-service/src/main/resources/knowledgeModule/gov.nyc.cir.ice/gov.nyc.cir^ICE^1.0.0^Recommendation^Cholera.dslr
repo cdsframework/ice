@@ -73,9 +73,14 @@ rule "Cholera: Always include supplemental text with the recommendation indicati
 			- the Series is not complete
 			- make note of the recommendation status as $recommendationStatus
 			- make note of the final recommendations as $allFinalRecommedations
-			- the following subexpression for the Series is true: $recommendationStatus != RecommendationStatus.NOT_RECOMMENDED && "RECOMMENDATION_REASON_CONCEPT.COMPLETE" not memberOf $allFinalRecommedations
+		There does not exist a Recommendation
+			- the recommendation is associated with Series $targetSeries
+			- the recommendation status is RecommendationStatus.NOT_RECOMMENDED
 	then
-	
+		Create a Recommendation as $supplementalText for the Series $targetSeries
+		Set the Recommendation Supplemental text for $supplementalText to "Cholera vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk. Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information."
+		Include the Recommendation $supplementalText for Consideration in the final forecast of the Series		
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
 end
 
- 

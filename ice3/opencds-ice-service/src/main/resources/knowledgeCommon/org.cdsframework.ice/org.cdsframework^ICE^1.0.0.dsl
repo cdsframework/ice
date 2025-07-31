@@ -232,7 +232,7 @@
 [condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=\\<\\>]+}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 [condition][]- [Tt]he [Oo]bject {oObjectOne:[\\$]?[a-zA-Z0-9\\.\\_]+} is {aOp}  {oObjectTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oObjectOne} {aOp} {oObjectTwo}
-[condition][]- [Tt]he following [Ss]ubexpression for the [Ss]eries is true: {expression:([\\(]{0,1}.*[\\)]{0,1})}={expression}
+/////// [condition][]- [Tt]he following [Ss]ubexpression for the [Ss]eries is true: {expression:([\\(]{0,1}.*[\\)]{0,1})}={expression}
 
 
 
@@ -251,6 +251,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate as {assign_dtSeasonStartDate}={assign_dtSeasonStartDate} : fullySpecifiedSeasonStartDate.toDate(), {assign_dtSeasonStartDate} != null
 
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Recommendation
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,6 +262,11 @@
 [condition][]There is {entity:a |}[Rr]ecommendation {assign_oRecommendation}={assign_oRecommendation} : Recommendation()
 [condition][]- [Tt]he [Rr]ecommendation is [Aa]ssociated with [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries} != null && targetSeriesIdentifier != null && targetSeriesIdentifier == {refer_oTargetSeries}.targetSeriesIdentifier
 [condition][]- [Tt]he [Rr]ecommendation is [Aa]ssociated with [Ss]hot {refer_oTargetDose}={refer_oTargetDose} != null && targetDoseIdentifier != null && targetDoseIdentifier == {refer_oTargetDose}.uniqueId
+[condition][]- [Tt]he [Rr]ecommendation [Ss]tatus is not {oRecommendationStatus}=recommendationStatus != {oRecommendationStatus}
+[condition][]- [Tt]he [Rr]ecommendation [Ss]tatus is {oRecommendationStatus}=recommendationStatus == {oRecommendationStatus}
+[condition][]- [Tt]he [Rr]ecommendation [Rr]eason is not {strRecommendationReason}=recommendationReason != {strRecommendationReason}
+[condition][]- [Tt]he [Rr]ecommendation [Rr]eason is {strRecommendationReason}=recommendationReason == {strRecommendationReason}
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
