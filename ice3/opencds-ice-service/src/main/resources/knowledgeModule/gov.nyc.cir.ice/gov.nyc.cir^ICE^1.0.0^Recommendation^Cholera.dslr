@@ -56,6 +56,10 @@ global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
 
 
+/*****************************************************************************************************************************************************************************************************************
+ START Recommendation Rules
+*****************************************************************************************************************************************************************************************************************/
+
 /////////////////////
 // Cholera Recommendation Rule
 // When recommending in the Cholera vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text, "Cholera vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk. 
@@ -83,4 +87,18 @@ rule "Cholera: Always include supplemental text with the recommendation indicati
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
 end
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Rules Based on Patient's Age
+//
+// If no doses are on record and:
+//   + the patient is < the routine age (i.e., 2 years old) for the Cholera Risk 1-dose Series, then the Recommendation is Not Recommended and the reason code is SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
+//   + the patient is >= the routine age (i.e., 2 years old) for the Cholera Risk 1-dose Series and < 65 years old, then the Recommendation is Conditional and the reason code is HIGH_RISK and SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
+//   + the patient is >= 65 years old, then the Recommendation is Not Recommended and the reason code is TOO_OLD and SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/*****************************************************************************************************************************************************************************************************************
+ END Recommendation Rules
+*****************************************************************************************************************************************************************************************************************/
 
