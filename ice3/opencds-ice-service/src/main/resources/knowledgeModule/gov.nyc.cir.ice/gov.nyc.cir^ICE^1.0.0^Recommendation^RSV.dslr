@@ -55,7 +55,7 @@ global java.util.Date evalTime
 global org.cdsframework.ice.service.Schedule schedule
 
 
-rule "RSV: If the evaluation date is >= 1/1/2023 and < 10/1/2023, and the patient is < 8 months of age, set the earliest/recommended to 10/1/2023"
+rule "RSV: If the evaluation date is >= 6/21/2023 and < 10/1/2023, and the patient is < 8 months of age, set the earliest/recommended to 10/1/2023"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -66,7 +66,7 @@ rule "RSV: If the evaluation date is >= 1/1/2023 and < 10/1/2023, and the patien
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- make note of the Patient's birthdate as $birthDate
         Confirm the date evalTime is before "01-Oct-2023"
-        Confirm the date evalTime is on the same date or after "01-Jan-2023"
+        Confirm the date evalTime is on the same date or after "21-Jun-2023"
         Confirm elapsed time between $birthDate and evalTime < "8m" 
 	then
 		Create a Recommendation as $r for the Series $targetSeries
@@ -78,7 +78,7 @@ rule "RSV: If the evaluation date is >= 1/1/2023 and < 10/1/2023, and the patien
 end
 
 
-rule "RSV: If the evaluation date is < 1/1/2023 and the Series is not complete, the recommendation is Not Recommended with reason code NOT_SUPPORTED"
+rule "RSV: If the evaluation date is < 6/21/2023 and the Series is not complete, the recommendation is Not Recommended with reason code NOT_SUPPORTED"
 	dialect "mvel"
 	agenda-group "RecommendationForecast^customRecommendationRule"
 	salience 1
@@ -88,7 +88,7 @@ rule "RSV: If the evaluation date is < 1/1/2023 and the Series is not complete, 
 			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- make note of the Patient's birthdate as $birthDate
-        Confirm the date evalTime is before "01-Jan-2023"
+        Confirm the date evalTime is before "21-Jun-2023"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.NOT_SUPPORTED"
