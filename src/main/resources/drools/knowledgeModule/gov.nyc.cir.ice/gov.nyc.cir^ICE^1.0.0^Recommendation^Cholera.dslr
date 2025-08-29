@@ -1,0 +1,52 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
+rule "Cholera: Always include supplemental text with the recommendation indicating Cholera is not routinely recommended in the U.S., except when the recommendation is Not Recommended / COMPLETE"
+	dialect "mvel"
+	agenda-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.901"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made
+			- the Series is not complete
+			- make note of the recommendation status as $recommendationStatus
+			- make note of the final recommendations as $allFinalRecommedations
+		There does not exist a Recommendation
+			- the recommendation is associated with Series $targetSeries
+			- the recommendation status is RecommendationStatus.NOT_RECOMMENDED
+	then
+		Create a Recommendation as $supplementalText for the Series $targetSeries
+		Set the Recommendation Supplemental text for $supplementalText to "Cholera vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk. Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information."
+		Include the Recommendation $supplementalText for Consideration in the final forecast of the Series		
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
