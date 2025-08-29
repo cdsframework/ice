@@ -499,6 +499,27 @@ public class TargetSeries
     }
 
     /**
+     * Check if next recommended shot could be a live virus vaccine. Not subject to the manual override flag.
+     *
+     * @return true if recommended shot is a live virus vaccine or any vaccine that is in the vaccine group contains a live virus vaccine, false if recommended shot is
+     * not a live virus vaccine, or if not recommendation has been made yet
+     */
+    public boolean isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccineNoOverride()
+    {
+        if (this.recommendationStatus == null || (this.recommendationStatus != RecommendationStatus.RECOMMENDED
+                && this.recommendationStatus != RecommendationStatus.RECOMMENDED_IN_FUTURE
+                && this.recommendationStatus != RecommendationStatus.CONDITIONALLY_RECOMMENDED))
+            return false;
+
+        final int lTargetDoseNumber = determineEffectiveNumberOfDosesInSeries() + 1;
+        final DoseRule dr = getSeriesRules().getSeriesDoseRuleByDoseNumber(lTargetDoseNumber);
+        if (dr == null)
+            return false;
+
+        return dr.getAllPermittedVaccines().stream().anyMatch(AbstractVaccine::isLiveVirusVaccine);
+    }
+
+    /**
      * Check if next recommended shot is a live virus vaccine (and therefore recommendationStatus is either RECOMMENDED, RECOMMENDED_IN_FUTURE, or CONDITIONALLY_RECOMMENDED)
      *
      * @return true if recommended shot is a live virus vaccine or any vaccine that is in the vaccine group contains a live virus vaccine, false if recommended shot is
@@ -518,7 +539,6 @@ public class TargetSeries
 
         return Objects.requireNonNullElseGet(manuallySetAccountForLiveVirusIntervalsInRecommendation,
                 () -> dr.getAllPermittedVaccines().stream().anyMatch(AbstractVaccine::isLiveVirusVaccine));
-
     }
 
     /**
@@ -3847,6 +3867,14 @@ public class TargetSeries
             setFinalEarliestDate(null);
             setFinalOverdueDate(null);
         }
+    }
+
+    public List<String> getRecommendationReasonsForStatus(final RecommendationStatus status)
+    {
+        return this.finalRecommendations.stream()
+                .filter(rec -> rec.getRecommendationStatus() == status)
+                .map(Recommendation::getRecommendationReason)
+                .toList();
     }
 
     private void setFinalRecommendations(final List<Recommendation> recommendation)

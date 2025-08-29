@@ -51,4 +51,10 @@ public class LiveVirusFact
         liveVirusDate = pLiveVirusDate;
         liveVirusDateSet = true;
     }
+
+    @Override
+    public String toString()
+    {
+        return "LiveVirusFact[liveVirusDate=%s,  liveVirusDateSet=%s]".formatted(liveVirusDate, liveVirusDateSet);
+    }
 }

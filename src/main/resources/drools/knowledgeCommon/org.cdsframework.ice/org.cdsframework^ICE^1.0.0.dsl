@@ -129,7 +129,6 @@
 [condition][]- [Tt]he [Ss]eason [Ee]nd [Dd]ate for the [Ss]eries is {aOp:[\=\\<\\>]+}  {dtDate}=seasonEndDate != null, {dtDate} != null, seasonEndDate {aOp} {dtDate}
 [condition][]- [Tt]he [Cc]urrent [Dd]ate falls between the [Ss]eason [Ss]tart and [Oo]ffseason [Ss]top [Dd]ates of the [Ss]eries=targetSeason == null || targetSeason.dateIsApplicableToSeason(evalTime, true) == true
 [condition][]- [Tt]he [Cc]urrent [Dd]ate falls between the [Ss]eason [Ss]tart and [Ss]top [Dd]ates=targetSeason == null || targetSeason.dateIsApplicableToSeason(evalTime, false) == true
-
 [condition][]- [Tt]he [Ss]hot {refer_oTargetDose} [Ff]alls within the [Ss]eason [Ss]tart and [Oo]ffseason [Ss]top [Dd]ates of the [Ss]eries=targetSeason == null || targetSeason.dateIsApplicableToSeason({refer_oTargetDose}.getAdministrationDate(), true) == true
 [condition][]- [Tt]he [Ss]hot {refer_oTargetDose} [Ff]alls within the [Ss]eason [Ss]tart and [Ss]top [Dd]ates of the [Ss]eries=targetSeason == null || targetSeason.dateIsApplicableToSeason({refer_oTargetDose}.getAdministrationDate(), false) == true
 [condition][]- [Tt]he [Ss]hot {refer_oTargetDose} does not [Ff]all within the [Ss]eason [Ss]tart and [Oo]ffseason [Ss]top [Dd]ates of the [Ss]eries=targetSeason != null && targetSeason.dateIsApplicableToSeason({refer_oTargetDose}.getAdministrationDate(), true) == false
@@ -151,6 +150,7 @@
 [condition][]- [Tt]here is an [Aa]bsolute [Mm]inimum [Ii]nterval for [Dd]ose {nDoseNumber} in this [Ss]eries=getAbsoluteMinimumIntervalForTargetDoseInStringFormat({nDoseNumber}) != null
 [condition][]- [Tt]here is an [Aa]bsolute [Mm]inimum [Aa]ge for [Dd]ose {nDoseNumber} in this [Ss]eries=getAbsoluteMinimumAgeForTargetDoseInStringFormat({nDoseNumber}) != null
 [condition][]- [Tt]his [Rr]ule {sRuleName} has not executed before for this [Ss]eries \(and we do not want the [Rr]ule executing more than once for the [Ss]eries\)=containsRuleProcessed({sRuleName}) == false
+[condition][]- [T]he [Rr]ecommendation is for a [Ll]ive [Vv]accine=isRecommendedVaccineOrVaccineGroupLevelRecommendationAnExpectedLiveVirusVaccineNoOverride() == true
 [condition][]- [Pp]ost [Pp]rocessing on the [Ss]eries [Ff]orecast has not already been run=isPostForecastCheckCompleted() == false
 [condition][]- [Pp]ost [Pp]rocessing on the [Ss]eries [Ff]orecast has been run=isPostForecastCheckCompleted() == true
 [condition][]- [Pp]erform [Pp]ost [Ff]orecast [Cc]heck is [Ss]et=getPerformPostForecastCheck() == true
@@ -207,6 +207,7 @@
 [condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=\\<\\>]+}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 [condition][]- [Tt]he [Oo]bject {oObjectOne:[\\$]?[a-zA-Z0-9\\.\\_]+} is {aOp}  {oObjectTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oObjectOne} {aOp} {oObjectTwo}
+/////// [condition][]- [Tt]he following [Ss]ubexpression for the [Ss]eries is true: {expression:([\\(]{0,1}.*[\\)]{0,1})}={expression}
 
 [condition][]There exists {entity:a |another |}[Ss]eason=exists Season()
 [condition][]There does not exist {entity:a |another |}[Ss]eason=not Season()
@@ -218,13 +219,23 @@
 [condition][]- [Tt]he [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate is {aOp:[\=\\<\\>]+}  {dtObject}=fullySpecifiedSeasonStartDate != null && {dtObject} != null && fullySpecifiedSeasonStartDate.toDate() {aOp} {dtObject}
 [condition][]- [Mm]ake [Nn]ote of the [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate as {assign_dtSeasonStartDate}={assign_dtSeasonStartDate} : fullySpecifiedSeasonStartDate.toDate(), {assign_dtSeasonStartDate} != null
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Recommendation
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 [condition][]There exists {entity:a |another |}[Rr]ecommendation=exists Recommendation()
 [condition][]There does not exist {entity:a |another |}[Rr]ecommendation=not Recommendation()
 [condition][]There is {entity:a |}[Rr]ecommendation {assign_oRecommendation} distinct from {assign_oOtherRecommendation}={assign_oRecommendation} : Recommendation(this != {assign_oOtherRecommendation})
 [condition][]There is {entity:a |}[Rr]ecommendation {assign_oRecommendation}={assign_oRecommendation} : Recommendation()
 [condition][]- [Tt]he [Rr]ecommendation is [Aa]ssociated with [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries} != null && targetSeriesIdentifier != null && targetSeriesIdentifier == {refer_oTargetSeries}.targetSeriesIdentifier
 [condition][]- [Tt]he [Rr]ecommendation is [Aa]ssociated with [Ss]hot {refer_oTargetDose}={refer_oTargetDose} != null && targetDoseIdentifier != null && targetDoseIdentifier == {refer_oTargetDose}.uniqueId
+[condition][]- [Tt]he [Rr]ecommendation [Ss]tatus is not {oRecommendationStatus}=recommendationStatus != {oRecommendationStatus}
+[condition][]- [Tt]he [Rr]ecommendation [Ss]tatus is {oRecommendationStatus}=recommendationStatus == {oRecommendationStatus}
+[condition][]- [Tt]he [Rr]ecommendation [Rr]eason is not {strRecommendationReason}=recommendationReason != {strRecommendationReason}
+[condition][]- [Tt]he [Rr]ecommendation [Rr]eason is {strRecommendationReason}=recommendationReason == {strRecommendationReason}
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TargetDose accumulates
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 [condition][][Vv]erify that the [Cc]ount of [Dd]oses [Aa]dministered in [Ss]eries {refer_oTargetSeries} with [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 [condition][][Vv]erify that the [Cc]ount of [Dd]oses [Aa]dministered in [Ss]eries {refer_oTargetSeries} with [Vv]accine {dd_oVaccineCdsListItem} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || $td.administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 [condition][][Vv]erify that the [Uu]nique [Cc]ount of [Ss]hots [Aa]dministered in [Ss]eries {refer_oTargetSeries} by [Dd]ate is {aOp_num}  {nNumberOfShots}=Set(size {aOp_num} {nNumberOfShots}) from accumulate(TargetDose($shotDate : administrationDate) from {refer_oTargetSeries}.targetDoses, collectSet($shotDate))
@@ -236,23 +247,21 @@
 [keyword][][Cc]onfirm {conditions}=eval( {conditions} )
 [condition][][Tt]he [Vv]ariable {refer_oVariable} is {aOp}  {oValue:[\\$a-zA-Z0-9_]+}={refer_oVariable}  {aOp}  {oValue}
 [condition][][Tt]he [Aa]ge of the [Pp]atient {refer_oEvaluatedPerson} at the [Tt]ime the [Vv]accine was [Aa]dministered for [Dd]ose {refer_oTargetDose} is [Gg]reater [Tt]han the [Mm]aximum [Aa]llowable [Aa]ge for the [Vv]accine=(TimePeriod.compareElapsedTimePeriodToDateRange({refer_oEvaluatedPerson}.getDemographics().getBirthTime(), {refer_oTargetDose}.getAdministrationDate(), {refer_oTargetDose}.getVaccineComponent().getValidMaximumAgeForUse()) > 0)
-
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp}  {nDuration:[0-9]+}  {enumTimePeriod_durationType:[a-zA-Z0-9\.]+}={dtDateOne} != null && {dtDateTwo} != null && (TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, new TimePeriod({nDuration}, {enumTimePeriod_durationType})) {aOp} 0)
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp:[\=\\<\\>]+}  {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}={dtDateOne} != null && {dtDateTwo} != null && (TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, {sDuration}) {aOp} 0)
 [condition][][Ee]lapsed [Tt]ime between {dtDateOne} and {dtDateTwo}  {aOp}  {refer_Duration:([\\$]{1})[a-zA-Z0-9_]+}={dtDateOne} != null && {dtDateTwo} != null && (TimePeriod.compareElapsedTimePeriodToDateRange({dtDateOne}, {dtDateTwo}, {refer_Duration}) {aOp} 0)
-[condition][][Tt]he [Dd]ate {dtDateOne} is after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.after(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))
-[condition][][Tt]he [Dd]ate {dtDateOne} is after {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.after({dtDateTwo})
-[condition][][Tt]he [Dd]ate {dtDateOne} is before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.before(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))
-[condition][][Tt]he [Dd]ate {dtDateOne} is before {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.before({dtDateTwo})
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) <= 0
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or before {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) <= 0
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) >= 0
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same date or after {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) >= 0
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same day as {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.equals(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))
-[condition][][Tt]he [Dd]ate {dtDateOne} is on the same day as {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.equals({dtDateTwo})
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.after(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is after {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.after({dtDateTwo})
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.before(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo}))
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is before {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.before({dtDateTwo})
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is on the same date or before {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) <= 0
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is on the same date or before {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) <= 0
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is on the same date or after {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && {dtDateOne}.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) >= 0
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is on the same date or after {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && {dtDateOne}.compareTo({dtDateTwo}) >= 0
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is on the same day as {strDateTwo:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}={dtDateOne} != null && TimePeriod.differenceInDays({dtDateOne}, TimePeriod.generateDateFromStringInDroolsDateFormat({strDateTwo})) == 0
+[condition][][Tt]he [Dd]ate {dtDateOne:[\\$]?[a-zA-Z0-9\\.\\_\\]+} is on the same day as {dtDateTwo:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={dtDateOne} != null && {dtDateTwo} != null && TimePeriod.differenceInDays({dtDateOne}, {dtDateTwo}) == 0
 [condition][]\([Cc]alculate [Dd]ate from addition of {refer_dtDate} with TimePeriod {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}\)=TimePeriod.addTimePeriod({refer_dtDate}, {sDuration})
 [condition][]\([Cc]alculate [Dd]ate from addition of {refer_dtDate} with TimePeriod {refer_oDuration:([\\$]{1})(\w)+(\s){0}}\)=TimePeriod.addTimePeriod({refer_dtDate}, {refer_oDuration})
-
 [condition][][Tt]hat the following is true: {expression:([\\(]{0,1}.*[\\)]{0,1})}={expression}
 
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Vv]alid={refer_oTargetDose}.setStatus(DoseStatus.VALID);
@@ -299,7 +308,6 @@
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted for this [Ss]eries={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid for this [Ss]eries={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Nn]ot [Ee]valuated due to "Vaccine Not Supported"={refer_oTargetDose}.addNotEvalatedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED");
-
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {strReason:[\\"]{1}[a-zA-Z0-9\\.\\_\\ ]+[\\"]{1}} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({strReason});
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {oReason:[\\$]?[a-zA-Z0-9\\.\\_\\(\\)]+} from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({oReason});
 [consequence][][Rr]emove [Aa]ll [Ee]valuation [Rr]easons from [Ss]hot {refer_oTargetDose:[\\$]?[a-zA-Z0-9\\.\\_\\]+}={refer_oTargetDose}.removeAllEvaluationReasonsFromAllReasonSets();
@@ -307,7 +315,6 @@
 [consequence][][Mm]ark the [Ss]hot {refer_oTargetDose} as [Ii]gnored={refer_oTargetDose}.setIsShotIgnored(true);
 [consequence][][Ss]et [Dd]ose [Nn]umber of {refer_oTargetDose} to {nDoseNumber}=modify({refer_oTargetDose}) \{ setDoseNumberInSeries({nDoseNumber}); \};
 [consequence][][Mm]ark that [Ee]valuation of [Ss]hot {refer_oTargetDose} is complete and therefore should not be reevaluated by any other rules=modify ({refer_oTargetDose}) \{ setStatus(DoseStatus.EVALUATION_COMPLETE) \}
-
 [consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Vv]alid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"); {refer_oTargetDose}.addSupplementalTextForValidShot({sSupplementalText});
 [consequence][][Rr]emove [Ss]upplemental [Tt]ext {sSupplementalText} from [Vv]alid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.removeSupplementalTextForValidShot({sSupplementalText});
 [consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Aa]ccepted [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"); {refer_oTargetDose}.addSupplementalTextForAcceptedShot({sSupplementalText});
@@ -327,7 +334,6 @@
 [consequence][][Rr]efresh all [Ff]acts in the [Ss]eries {refer_oTargetSeries:[\\$]?[a-zA-Z0-9\\.\\_\\]+} for [Ee]valuation=modify ({refer_oTargetSeries}) \{ setRecommendationStatus(RecommendationStatus.NOT_FORECASTED); \}
 [consequence][][Rr]efresh all [Ff]acts in the [Ss]eries {refer_oTargetSeries:[\\$]?[a-zA-Z0-9\\.\\_\\]+} for [Ff]orecasting=modify ({refer_oTargetSeries}) \{ setRecommendationStatus(RecommendationStatus.FORECASTING_IN_PROGRESS); \}
 [consequence][][Rr]efresh all [Ff]acts in the [Ss]eries {refer_oTargetSeries:[\\$]?[a-zA-Z0-9\\.\\_\\]+}=update({refer_oTargetSeries});
-
 [consequence][][Mm]anually [Mm]ark the [Ss]eries {refer_oTargetSeries} [Nn]ot [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(false);
 [consequence][][Mm]ark the [Ss]eries {refer_oTargetSeries} [Cc]omplete={refer_oTargetSeries}.setSeriesComplete(true);
 [consequence][][Aa]dd {nDuration}  {oDurationType} to {dtDate} and [Mm]ake [Nn]ote of the newly [Cc]alculated [Dd]ate as {assign_dtDateCalculated}=Date {assign_dtDateCalculated} = TimePeriod.addTimePeriod({dtDate}, new TimePeriod({nDuration}, {oDurationType}));
@@ -339,7 +345,6 @@
 [consequence][][Mm]ake [Nn]ote of the [Rr]ecommended [Aa]ge for [Dd]ose {nDoseNumber} in the [Ss]eries {refer_oTargetSeries} as {assign_strTimePeriod}=String {assign_strTimePeriod}={refer_oTargetSeries}.getRecommendedAgeForTargetDoseInStringFormat({nDoseNumber});
 [consequence][][Mm]ake [Nn]ote of the [Rr]ecommended [Ii]nterval for [Dd]ose {nDoseNumber} in the [Ss]eries {refer_oTargetSeries} as {assign_strTimePeriod}=String {assign_strTimePeriod}={refer_oTargetSeries}.getRecommendedIntervalForTargetDoseInStringFormat({nDoseNumber});
 [consequence][][Cc]reate a [Rr]ecommendation as {assign_oRecommendation} with [Ss]tatus {enum_RecommendationStatus} for the [Ss]eries {refer_oTargetSeries}=Recommendation {assign_oRecommendation} = new Recommendation({refer_oTargetSeries}); {assign_oRecommendation}.setRecommendationStatus({enum_RecommendationStatus});
-
 [consequence][][Cc]reate a [Rr]ecommendation as {assign_oRecommendation} for the [Ss]eries {refer_oTargetSeries}=Recommendation {assign_oRecommendation} = new Recommendation({refer_oTargetSeries});
 [consequence][][Ss]et the [Rr]ecommendation [Ss]tatus for {refer_oRecommendation} to {enum_RecommendationStatus}={refer_oRecommendation}.setRecommendationStatus({enum_RecommendationStatus});
 [consequence][][Ss]et the [Rr]ecommendation [Ee]arliest [Ff]orecast [Dd]ate for {refer_oRecommendation} to the latter of {dtForecastDate} and {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=if ({dtForecastDate} != null) \{ Date latterDate = {dtForecastDate}; Date strDate = TimePeriod.generateDateFromStringInDroolsDateFormat({strDate}); if (strDate != null && latterDate != null && strDate.after(latterDate)) \{ latterDate = strDate; \} {refer_oRecommendation}.setEarliestDate(latterDate); \}
@@ -370,7 +375,6 @@
 [consequence][][Oo]btain the [Mm]inimum [Ii]nterval from the existing DoseRule {refer_oDoseRule} as {assign_oTimePeriod}={assign_oTimePeriod} = {refer_oDoseRule}.getMinimumInterval();
 [consequence][][Oo]btain the [Rr]ecommended [Ii]nterval from the existing DoseRule {refer_oDoseRule} as {assign_oTimePeriod}={assign_oTimePeriod} = {refer_oDoseRule}.getEarliestRecommendedInterval();
 [consequence][][Oo]btain the [Ll]atest [Rr]ecommended [Ii]nterval from the existing DoseRule {refer_oDoseRule} as {assign_oTimePeriod}={assign_oTimePeriod} = {refer_oDoseRule}.getLatestRecommendedInterval();
-
 [consequence][][Ss]et the [Aa]bsolute [Mm]inimum [Aa]ge for [Dd]oseRule {assign_oDoseRule} to TimePeriod {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}={assign_oDoseRule}.setAbsoluteMinimumAge(new TimePeriod({sDuration}));
 [consequence][][Ss]et the [Aa]bsolute [Mm]inimum [Aa]ge for [Dd]oseRule {assign_oDoseRule} to TimePeriod {refer_oTimePeriod}={assign_oDoseRule}.setAbsoluteMinimumAge({refer_oTimePeriod});
 [consequence][][Ss]et the [Mm]inimum [Aa]ge for [Dd]oseRule {assign_oDoseRule} to TimePeriod {sDuration:([\\"]{1})([-|+]?[0-9]+[Yy])?([-|+]?[0-9]+[Mm])?([-|+]?[0-9]+[Ww])?([-|+]?[0-9]+[Dd])?([\\"]{1})}={assign_oDoseRule}.setMinimumAge(new TimePeriod({sDuration}));
@@ -453,14 +457,32 @@
 
 [condition][]Verify that the [Cc]ount of IceFacts \({IceResultConditions}\) is {aOp}  {nNumberOfConditions}=accumulate($irf : ICEFactTypeFinding({IceResultConditions}); $countNum: count($irf); $countNum {aOp}  {nNumberOfConditions})
 
+// e.g. //Verify that the Count of IceResult Findings (where IceResult Finding is "yeah" and there is a TargetDose and the TargetDose administration date > "blah" and the TargetDose targets the disease "blah2") is > 5
+// or e.g. //Verify that the Count of IceResult Findings (where IceResult Finding is "yeah" and there is a TargetDose with administration date > "blah" and diseases targeted contains "blah2") is > 5
+///////// ***
+// [condition][]where there is a [Ff]inding {sIceResultFinding} only=iceResultFinding == {sIceResultFinding}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IceResult Fact Object END
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Adjust dates
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+[consequence][][Aa]djust [Ee]arliest [Dd]ate to {nDays} days after [Ll]ive [Vv]irus [Dd]ate {refer_dtLiveVirusDate} for [Ss]eries {refer_oTargetSeries}=String _RULENAME = drools.getRule().getName(); Date $newRecommendationDate = TimePeriod.addTimePeriod({refer_dtLiveVirusDate}, new TimePeriod({nDays}, DurationType.DAYS)); modify({refer_oTargetSeries}) { setFinalEarliestDate($newRecommendationDate), addLiveVirusDateAccountedForInRecommendedFinalEarliestDate($newRecommendationDate); };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Adjust dates END
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////// ***
+// Primary IceIntervalResult Fact Object conditions and sub-conditions
 [condition][]There exists {entity:an |another |}IceIntervalFact=exists ICEIntervalFactTypeFinding()
 [condition][]There does not exist {entity:an | another |}IceIntervalFact=not ICEIntervalFactTypeFinding()
 [condition][]There is {entity:an |another |}IceIntervalFact {oICEFactTypeFinding}={oICEFactTypeFinding} : ICEIntervalFactTypeFinding()
 [condition][]- that has IceIntervalFact [Tt]ype {oIntervalFactType}=intervalFactType == {oIntervalFactType}
 [condition][]- that has IceIntervalFact [Ff]inding {sIceResultFinding}=iceResultFinding == {sIceResultFinding}
-
 [condition][]- that has IceIntervalFact [Pp]reviously [Aa]dministered [Ss]hot {oPreviousTargetDose}=associatedPreviousTargetDose != null, associatedPreviousTargetDose == {oPreviousTargetDose}
-
 [condition][]- that has IceIntervalFact [Cc]urrent [Aa]dministered [Ss]hot {oTargetDose}=associatedCurrentTargetDose != null, associatedCurrentTargetDose == {oTargetDose}
 
 [consequence][][Ii]nsert an [Ee]valuation IceIntervalFact {sIceResultFinding} with TargetDoses {oTargetDosePrevious} and {oTargetDose} into [Ww]orking [Mm]emory=insert(new ICEIntervalFactTypeFinding({sIceResultFinding}, {oTargetDosePrevious}, {oTargetDose}));
