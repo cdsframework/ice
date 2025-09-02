@@ -1,4 +1,4 @@
-FROM tomcat:10.1.43-jre17-temurin-noble AS build
+FROM tomcat:10.1.44-jre17-temurin-noble AS build
 
 # Metadata
 LABEL organization="HLN Consulting, LLC"
