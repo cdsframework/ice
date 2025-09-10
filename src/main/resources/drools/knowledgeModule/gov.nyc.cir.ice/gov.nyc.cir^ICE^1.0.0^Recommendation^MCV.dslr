@@ -1,0 +1,104 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+
+rule "Meningococcal: Mark the Series Complete if Dose 1 is Administered >= 16yrs and < 19yrs of Age"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 100
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
+			- the name of the Series is "MCV42DoseSeries"
+			- the Series is Not Complete
+			- the number of Doses Administered is == 1
+		There is an Administered Shot $shot
+			- the Shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- make note of the date this shot was administered as $dtAdministrationDate
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAge when the patient is "16y" of age
+		There is a Series $sameTargetSeries identified by $targetSeries
+			- the number of Doses Administered before $dtDateAtAge is == 0
+		Confirm elapsed time between $dtBirthDate and $dtAdministrationDate >= "16y" && elapsed time between $dtBirthDate and $dtAdministrationDate < "19y"
+	then
+		Mark the Series $targetSeries Complete
+		Refresh all Facts in the Series $targetSeries for Forecasting
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Meningococcal: Recommend Dose 1 at 16yrs of age if Patient >= 16yrs and < 19yrs of Age"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
+			- the name of the Series is "MCV42DoseSeries"
+			- the Series is Not Complete
+			- the number of Doses Administered is == 0
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAge when the patient is "16y" of age
+		Confirm elapsed time between $dtBirthDate and evalTime >= "16y" && elapsed time between $dtBirthDate and evalTime < "19y"
+	then
+		Include a Recommendation as $recommendation with recommended forecast date $dtDateAtAge for consideration in the final forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Meningococcal: If a patient completed the series, recommendation is Not Recommended / COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.830"
+			- the Series is Complete
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Meningococcal: If a patient is >= 19 years and did NOT complete the series before 19 years of age, Recommendation is Conditional/HIGH_RISK and Mark that the Series cannot be Completed"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+    when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.830"
+			- the Series is Not Complete
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "19y"
+    then
+        Manually Mark the Series $targetSeries Not Complete
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+

@@ -1,0 +1,2734 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.service.TargetSeriesSelection;
+import org.cdsframework.ice.service.TargetSeriesSelection.SeriesSelectionStatus;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import accumulate org.cdsframework.ice.service.DateMinAccumulateFunction minDate;
+import accumulate org.cdsframework.ice.service.DateMaxAccumulateFunction maxDate;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+global java.util.Date patientAgeTimeOfInterest;
+
+rule "SeriesSelection: DUMMY catch-all Influenza season rule, 2 dose-series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false, targetSeason == $sss)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection: Select Only Influenza Series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", targetSeason == $sss, $tsid : targetSeriesIdentifier)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", targetSeason == $sss, targetSeriesIdentifier != $tsid)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection: For the Influenza 2017-2018, 2016-2017, 2015-2016, 2014-2015, 2013-2014 or 2012-2013 season if the patient < 9yrs and all 2-dose series conditions met, then 2-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 110
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null,
+			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" ||
+				seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason != null && targetSeason == $sss)
+
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false, targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection: For the Influenza 2014-2015 season if the patient < 9yrs and 3rd 1-dose series condition met, then 1-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 120
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS,
+			seriesSelectionSeason != null, seriesSelectionSeason.seasonName == "20142015InfluenzaSeason", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason != null && targetSeason == $sss)
+		$season : Season(seasonName == "20142015InfluenzaSeason", isDefinedBySeriesTableRules() == true, $seasonDefStart : fullySpecifiedSeasonStartDate, $seasonDefEnd : fullySpecifiedSeasonEndDate)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false,
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $seasonEndDate : targetSeason.fullySpecifiedSeasonEndDate,
+			$seasonStartDate.compareTo($seasonDefStart) == 0 && $seasonEndDate.compareTo($seasonDefEnd) == 0, $tsid : targetSeriesIdentifier)
+		$ts2013 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason.seasonName == "20132014InfluenzaSeason")
+		accumulate($tsthis : TargetDose(isValid == true) from $ts2013.targetDoses; $countValid : count($tsthis); $countValid >= 1)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 season if the patient < 9yrs and 2nd 1-dose series condition met, then 1-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 120
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null,
+			seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" || seriesSelectionSeason.seasonName == "20122013InfluenzaSeason",
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason != null && targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false,
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+		$currentAndPriorSeasonsInfluenzaSeasons : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800",
+			 targetSeason != null && targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate) || targetSeriesIdentifier == $tsid), collectList($tsInfluenzaThis))
+		$allh1n12009Seasons : List() from accumulate($thisH1N1Series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890",
+			targetSeason != null && targetSeason.seasonName == "2009H1N1Season", selectedSeries == true), collectList($thisH1N1Series))
+		accumulate($tdpriorCondition2 : TargetDose(isValid == true, administrationDate < "01-Jul-2010") from getAllDosesAcrossListOfTargetSeries($currentAndPriorSeasonsInfluenzaSeasons);
+			$countPriorInfluenzaDosesCondition2 : count($tdpriorCondition2); $countPriorInfluenzaDosesCondition2 >= 2)
+		accumulate($tdpriorH1N1Condition2 : TargetDose(isValid == true) from getAllDosesAcrossListOfTargetSeries($allh1n12009Seasons);
+			$countPriorH1N1DosesCondition2 : count($tdpriorH1N1Condition2);	$countPriorH1N1DosesCondition2 >= 1)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015 season if the patient < 9yrs and 1st 1-dose series condition met, then 1-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 120
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null,
+			seriesSelectionSeason.seasonName in ("20142015InfluenzaSeason", "20132014InfluenzaSeason", "20122013InfluenzaSeason"),
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false,
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+		$priorSeasonsInfluenzaSeasons : List() from accumulate(
+			$tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800",
+			targetSeason != null && targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)),
+			collectList($tsInfluenzaThis))
+		accumulate(
+			$tdprior: TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenzaSeasons);
+			$latestInfluenzaDoseDateFromPriorSeasons : maxDate($shotDateCondition1),
+			$countPriorDoses : count($tdprior)
+		)
+		eval($countPriorDoses >= 2)
+		eval($latestInfluenzaDoseDateFromPriorSeasons != null &&
+			 $latestInfluenzaDoseDateFromPriorSeasons >= new Date("01-Jul-2010"))
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection: For the Influenza 2015-2016, 2016-2017 and 2017-2018 seasons if the patient < 9yrs and at least 2 doses of seasonal influenza vaccine during any prior influenza seasons, then 1-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 120
+	activation-group "InfluenzaSeries6mto9yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null,
+			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false,
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+		$priorSeasonsInfluenzaSeasons : List() from accumulate(
+			$tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800",
+			targetSeason != null && targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)),
+			collectList($tsInfluenzaThis))
+		accumulate(
+			$tdprior: TargetDose(isValid == true) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenzaSeasons);
+			$countPriorDoses : count($tdprior);
+			$countPriorDoses >=2
+		)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015, 2015-2016, 2016-2017, or 2017-2018 season if patient >= 9yrs and < 10yrs and 1-dose series conditions are met, then 1-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 110
+	activation-group "InfluenzaSeries9to10yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null,
+			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" ||
+			seriesSelectionSeason.seasonName == "20122013InfluenzaSeason", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false, targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") >= 0 &&
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 season if patient >= 9yrs and < 10yrs and all 2-dose series conditions met, then 2-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 120
+	activation-group "InfluenzaSeries9to10yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null,
+			seriesSelectionSeason.seasonName in ("20142015InfluenzaSeason", "20132014InfluenzaSeason", "20122013InfluenzaSeason"),
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false,
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+        $priorSeasonsInfluenza : List() from accumulate($tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800",
+            targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)), collectList($tsInfluenzaThis))
+        accumulate($tdpriorCondition1 : TargetDose(isValid == true, $shotDateCondition1 : administrationDate) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenza);
+            $latestInfluenzaDoseDateFromPriorSeasons : maxDate($shotDateCondition1), $countPriorInfluenzaDosesCondition1 : count($tdpriorCondition1);
+            $latestInfluenzaDoseDateFromPriorSeasons == null || ! ($countPriorInfluenzaDosesCondition1 >= 2 && $latestInfluenzaDoseDateFromPriorSeasons != null &&
+                $latestInfluenzaDoseDateFromPriorSeasons >= "01-Jul-2010"))
+        $currentAndPriorSeasonsInfluenza : List() from accumulate($tsInfluenzaThis2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800",
+            targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate) || targetSeriesIdentifier == $tsid), collectList($tsInfluenzaThis2))
+        $allh1n12009Season : List() from accumulate($thisH1N1Series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890",
+            targetSeason != null && targetSeason.seasonName == "2009H1N1Season", selectedSeries == true), collectList($thisH1N1Series))
+        $countPriorH1N1Doses : Number() from accumulate($td2009h1n1shot: TargetDose(isValid == true) from getAllDosesAcrossListOfTargetSeries($allh1n12009Season), count($td2009h1n1shot))
+        accumulate($tdpriorCondition2 : TargetDose(isValid == true, administrationDate < "01-Jul-2010") from getAllDosesAcrossListOfTargetSeries($currentAndPriorSeasonsInfluenza);
+            $countPriorInfluenzaDosesCondition2 : count($tdpriorCondition2); ! ($countPriorInfluenzaDosesCondition2 >= 2 && $countPriorH1N1Doses >= 1))
+		$person : EvaluatedPerson()
+		$earliestInfluenzaDoseDateThisSeason : Date() from accumulate(
+			$tdcurr : TargetDose(isValid == true, $doseDatesThisSeason : administrationDate) from $ts.targetDoses,
+			minDate($doseDatesThisSeason)
+		)
+		eval(
+			$earliestInfluenzaDoseDateThisSeason != null &&
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $earliestInfluenzaDoseDateThisSeason, "9y") < 0 &&
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") >= 0 &&
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0
+		)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "patient age of interest " + patientAgeTimeOfInterest + "; SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection: For the Influenza 2015-2016, 2016-2017 and 2017-2018 season if patient >= 9yrs and < 10yrs and all 2-dose series conditions met, then 2-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 120
+	activation-group "InfluenzaSeries9to10yrSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null,
+			seriesSelectionSeason.seasonName == "20152016InfluenzaSeason", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza2DoseSeries", selectedSeries == false,
+			targetSeason == $sss, $seasonStartDate : targetSeason.fullySpecifiedSeasonStartDate, $tsid : targetSeriesIdentifier)
+		$priorSeasonsInfluenza : List() from accumulate(
+			$tsInfluenzaThis : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800",
+			targetSeason.fullySpecifiedSeasonStartDate.isBefore($seasonStartDate)),
+			collectList($tsInfluenzaThis))
+		accumulate(
+			$tdpriorCondition1 : TargetDose(isValid == true) from getAllDosesAcrossListOfTargetSeries($priorSeasonsInfluenza);
+			$countPriorInfluenzaDosesCondition1 : count($tdpriorCondition1);
+			! ($countPriorInfluenzaDosesCondition1 >= 2)
+		)
+		$earliestInfluenzaDoseDateThisSeason : Date() from accumulate(
+			$tdcurr : TargetDose(isValid == true, $doseDatesThisSeason : administrationDate) from $ts.targetDoses,
+			minDate($doseDatesThisSeason)
+		)
+		$person : EvaluatedPerson()
+		eval(
+			$earliestInfluenzaDoseDateThisSeason != null &&
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $earliestInfluenzaDoseDateThisSeason, "9y") < 0 &&
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") >= 0 &&
+			TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0
+		)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "patient age of interest " + patientAgeTimeOfInterest + "; SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015, 2015-2016, 2016-2017 and 2017-2018 seasons and patient >= 10yrs, 1-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 120
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason != null,
+				seriesSelectionSeason.seasonName == "20152016InfluenzaSeason" || seriesSelectionSeason.seasonName == "20132014InfluenzaSeason" ||
+				seriesSelectionSeason.seasonName == "20122013InfluenzaSeason" || seriesSelectionSeason.seasonName == "20142015InfluenzaSeason", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seriesRules.seriesName == "Influenza1DoseSeries", selectedSeries == false,
+			targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") >= 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "patient age of interest " + patientAgeTimeOfInterest + "; SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection: Select Only H1N1 Series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.890", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS,
+			$sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890", targetSeason == $sss, $tsid : targetSeriesIdentifier)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890", targetSeason == $sss, targetSeriesIdentifier != $tsid)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection: For the H1N1 2009 season, patient < 10yrs, 2-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 110
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.890", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS,
+			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009H1N1Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890", seriesRules.seriesName == "H1N12DoseSeries", selectedSeries == false, targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection: For the H1N1 2009 season, patient >= 10yrs and number of effective doses <= 1 at last shot date, 1-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 110
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.890", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS,
+			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009H1N1Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890", selectedSeries == true, targetSeason == $sss)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890", seriesRules.seriesName == "H1N11DoseSeries", selectedSeries == false,
+			targetSeason == $sss)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "10y") >= 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection: For the H1N1 2009 season, if effective number of doses >=2 on the date of the last shot, the 2-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 120
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.890", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS,
+			seriesSelectionSeason != null && seriesSelectionSeason.seasonName == "2009H1N1Season", $sss : seriesSelectionSeason)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890", selectedSeries == true, targetSeason == $sss)
+		$td : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate : administrationDate)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.890", seriesRules.seriesName == "H1N12DoseSeries", selectedSeries == false,
+			targetSeason == $sss, containsTargetDose($td))
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "10y") < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.HPV: Default to 3-dose series if 2-dose series not otherwise selected"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.HPV: Select 2-dose series if patient < 15yrs and no doses have been adminstered in any series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries", $numberOfDoses : determineNumberOfDosesAdministeredInSeries)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", determineNumberOfDosesAdministeredInSeries() > 0)
+		$person : EvaluatedPerson()
+		eval($numberOfDoses == 0 && TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "15y") < 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.HPV: Select 2-Dose Series if 1-dose administered to a patient < 15yrs of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$td : TargetDose(doseNumberInSeries == 1, isValid == true, $tdAdministrationDate : administrationDate)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries", containsTargetDose($td),
+			$numberOfDoses : determineNumberOfDosesAdministeredInSeries)
+		$person : EvaluatedPerson()
+		eval($numberOfDoses == 1 && TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $tdAdministrationDate, "15y") < 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.HPV: Select 2-dose series if first dose administered < 15yrs of age, Valid target dose 2 in 2-dose series, and no prior Valid target dose 2 earlier in 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$ts2series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries")
+		$ts3series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries")
+		$td2dose : TargetDose(associatedTargetSeries == $ts2series, doseNumberInSeries == 2, isValid == true, $tdAdministrationDate: administrationDate)
+		not TargetDose(associatedTargetSeries == $ts3series, administrationDate < $tdAdministrationDate, doseNumberInSeries == 2, isValid == true)
+		TargetDose(associatedTargetSeries == $ts2series, doseNumberInSeries == 1, isValid == true, $tdAdministrationDateDose1 : administrationDate)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $tdAdministrationDateDose1, "15y") < 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2series);
+		$ts2series.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2series.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts2series);
+end
+
+rule "SeriesSelection.HPV: Select 3-dose series if first dose administered < 15yrs of age, Valid target dose 2 in 3-dose series, and no prior Valid target dose 2 on same day or before in 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", selectedSeries == true))
+		$ts2series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV2DoseSeries")
+		$ts3series : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.840", seriesRules.seriesName == "HPV3DoseSeries")
+		TargetDose(associatedTargetSeries == $ts3series, doseNumberInSeries == 2, isValid == true, $tdAdministrationDate: administrationDate)
+		not TargetDose(associatedTargetSeries == $ts2series, administrationDate <= $tdAdministrationDate, doseNumberInSeries == 2, isValid == true)
+		TargetDose(associatedTargetSeries == $ts3series, doseNumberInSeries == 1, isValid == true, $tdAdministrationDateDoseOne : administrationDate)
+		$person : EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $tdAdministrationDateDoseOne, "15y") < 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3series);
+		$ts3series.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3series.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts3series);
+end
+
+rule "SeriesSelection.SelectOnlyZosterSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	activation-group "ZosterSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.620-", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.620", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.620", $tsid : targetSeriesIdentifier)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectOnlyPolioSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	activation-group "PolioSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.400", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.400", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.400", $tsid : targetSeriesIdentifier)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectOnlyMCVSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	activation-group "MCVSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.830", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.830", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.830", $tsid : targetSeriesIdentifier)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectOnlyPneumococcalSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.750", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectAdultPneumococcalSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.750", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", seriesRules.seriesName == "PneumococcalAdultSeries", selectedSeries == false)
+		$person: EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "5y") >= 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectChildPneumococcalSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.750", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", seriesRules.seriesName == "PneumococcalChildSeries", selectedSeries == false)
+		$person: EvaluatedPerson()
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "5y") < 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(Orthopoxvirus): If no other series was selected, the Orthopoxvirus 2-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesRules.seriesName == "Orthopoxvirus2DoseSeries")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelect(Orthopoxvirus): If a series was selected but another series was marked complete earlier, select the series that was complete earlier"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true, isSeriesComplete() == true, $dcts1 : doseAfterWhichSeriesWasMarkedComplete)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == false, isSeriesComplete() == true, $dcts2: doseAfterWhichSeriesWasMarkedComplete)
+		$td1 : TargetDose(associatedTargetSeries == $ts1, isValid == true, doseNumberInSeries == $dcts1)
+		exists TargetDose(associatedTargetSeries == $ts2, doseNumberInSeries == $dcts2, isValid == true, administrationDate < $td1.administrationDate)
+	then
+		$ts1.setSelectedSeries(false);
+		$ts2.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2.seriesName);
+
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Previously Selected TargetSeries " + $ts1 + " reverted ==> Newly selected series: " + $ts2);
+		update($tss);
+		update($ts1);
+		update($ts2);
+end
+
+rule "SeriesSelection(Orthopoxvirus): Select already _completed_ series if a different, _incomplete_ series was previously selected"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true, isSeriesComplete() == false)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == false, isSeriesComplete() == true)
+	then
+		$ts1.setSelectedSeries(false);
+		$ts2.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2.seriesName);
+
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts2);
+		update($tss);
+		update($ts1);
+		update($ts2);
+end
+
+rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 1-dose series was administered and no other doses were administered in another series prior to this shot, the Orthopoxvirus 1-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, doseNumberInSeries == 1, associatedTargetSeries.seriesRules.seriesName == "Orthopoxvirus1DoseSeries", $ts : associatedTargetSeries)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate < $td.administrationDate)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 2-dose series was administered and no other doses were administered in another series prior to this shot, the Orthopoxvirus 2-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 20
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, doseNumberInSeries == 1, associatedTargetSeries.seriesRules.seriesName == "Orthopoxvirus2DoseSeries", $ts : associatedTargetSeries)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate < $td.administrationDate)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(RSV): Select the RSV Infant Series if the Adult Series was not selected for any dose in the RSV Infant Series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", selectedSeries == true, targetSeason == $tss.seriesSelectionSeason, seriesRules.seriesGroup == $tss.seriesGroup)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", targetSeason == $tss.seriesSelectionSeason, seriesRules.seriesGroup == $tss.seriesGroup)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(RSV): Select the RSV Adult Series if the patient is >= 20 months of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", selectedSeries == true, seriesRules.seriesGroup == $tss.seriesGroup)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", seriesRules.seriesGroup == $tss.seriesGroup)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(COVID-19): Select already _completed_ series if a different, _incomplete_ series was previously selected"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	activation-group "SeriesSelection^COVID19Sep2023^customSeriesSelectionCompletionRules"
+	salience 5
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, isSeriesComplete() == false, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == false, isSeriesComplete() == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+	then
+		$ts1.setSelectedSeries(false);
+		$ts2.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2.seriesName);
+
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Previously Selected TargetSeries Reverted. Newly selected series: " + $ts2);
+		update($tss);
+		update($ts1);
+		update($ts2);
+end
+
+rule "SeriesSelection(COVID-19 Sep2023+ Adult Series): Do NOT select already _completed_ Sep2023+ _Child_ series if a different, _incomplete_ Sep2023+ _Adult_ series was previously selected and there are no doses at < 5 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	activation-group "SeriesSelection^COVID19Sep2023^customSeriesSelectionCompletionRules"
+	salience 6
+	when
+		$tss: TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, isSeriesComplete() == false, targetSeason != null && targetSeason == $tss.seriesSelectionSeason, seriesRules.seriesName in ("COVID19Sep2023gte5Series", "COVID19Sep2023NovavaxSeries"))
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == false, isSeriesComplete() == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason,
+			seriesRules.seriesName in ("COVID19Sep2023MixedProductLT5ySeries", "COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023ModernaLT5ySeries"))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Previously Selected TargetSeries NOT Reverted");
+end
+
+rule "SeriesSelect(COVID-19): Catch All-- In Sep2023+ season, select the Mixed Product Series if no other series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"))
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023MixedProductLT5ySeries")
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"))
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$person : EvaluatedPerson($birthDate : demographics.birthTime,  $dateAt5yrs : TimePeriod.addTimePeriod(demographics.birthTime, "5y"))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection")
+end
+
+rule "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 12y-4d years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"))
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$person : EvaluatedPerson($birthDate : demographics.birthTime,  $dateAt12yrs : TimePeriod.addTimePeriod(demographics.birthTime, "12y-4d"))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection")
+end
+
+rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Mixed Product < 5 yrs series if any doses were administered in the current season prior to 5 yrs of age, and there are a mix of products used"
+		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 25
+	when
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, administrationDate < $dateAt5yrs, associatedTargetSeries.seriesRules.seriesName == "COVID19Sep2023MixedProductLT5ySeries", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
+		(
+
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName in ("ICE311", "ICE312"))
+			and
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE311", "ICE312"))
+			or
+
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName in ("ICE308", "ICE309", "ICE310"))
+			and
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE308", "ICE309", "ICE310"))
+			or
+
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName in ("ICE211", "ICE313"))
+			and
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE211", "ICE313"))
+			or
+
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
+		)
+		$tsmixedproduct : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, seriesRules.seriesName == "COVID19Sep2023MixedProductLT5ySeries")
+	then
+		$tsmixedproduct.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsmixedproduct.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($tsmixedproduct);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsmixedproduct);
+end
+
+rule "SeriesSelect(COVID-19): In Sep2023+ season, select the COVID-19 Mixed Product < 5y series if patient is < 5 years of age and there are no doses on record in the current season"
+		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 25
+	when
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023MixedProductLT5ySeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		not TargetDose(associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, administrationDate < $dateAt5yrs)
+		eval(evalTime.compareTo($dateAt5yrs) < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19): If a >= 5yrs Series is completed but the previously selected Novavax Series is not, then the >= 5yr Series applies"
+
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 26
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionSeason!.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"), seriesSelectionStatus in (SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, SeriesSelectionStatus.SERIES_SELECTION_COMPLETE))
+		$tsnovavax : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, selectedSeries == true, isSeriesComplete() == false)
+		$tsgte5yrs : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023gte5Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, selectedSeries == false, isSeriesComplete() == true)
+	then
+		$tsgte5yrs.setSelectedSeries(true);
+		$tsnovavax.setSelectedSeries(false);
+		$tss.setSelectedSeriesName($tsgte5yrs.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($tsgte5yrs);
+		update($tsnovavax);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsgte5yrs);
+end
+
+rule "SeriesSelection(COVID-19): If a Novavax 2023 Series is completed but the previously selected >= 5y Series is not, then the Novavax 2023 Series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 26
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionSeason!.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"), seriesSelectionStatus in (SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, SeriesSelectionStatus.SERIES_SELECTION_COMPLETE))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023gte5Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, selectedSeries == true, isSeriesComplete() == false)
+		$tsnovavax : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, selectedSeries == false, isSeriesComplete() == true)
+	then
+		$tsnovavax.setSelectedSeries(true);
+		$ts.setSelectedSeries(false);
+		$tss.setSelectedSeriesName($tsnovavax.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		update($tsnovavax);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19): In the Sep2023 season, if the patient is >= 5 years of age and there are no doses on record at >= 5 years in the current season, then COVID-19 >= 5y Series applies"
+		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 27
+	when
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023gte5Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		not TargetDose(associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, administrationDate >= $dateAt5yrs)
+		eval(evalTime.compareTo($dateAt5yrs) >= 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelect(COVID-19): In Sep2023+ season, if patient is >= 5 years of age and there are no doses on record at < 5 years of age in the current season, then the COVID-19 >= 5y series"
+		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 27
+	when
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023gte5Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		not TargetDose(associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, isValid == true, administrationDate < $dateAt5yrs)
+		eval(evalTime.compareTo($dateAt5yrs) >= 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19): In the Sep2023+ season, if the first dose administered is the Novavax vaccine at >= 12 years of age, there are no other doses after dose 1 in another series, and there are no doses in the prior season, then the Novavax 2023 Series applies"
+		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 12y-4d years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 28
+	when
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason != $tss.seriesSelectionSeason, associatedTargetSeries!.targetSeason.startsBeforeStartDate($ts.targetSeason, false), isValid == true)
+		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, administrationDate >= $dateAt12yrs)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries.seriesRules.seriesName == "COVID19Sep2023gte5Series", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason,
+			isValid == true)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19): In the Sep2023+ season, if the first 2 doses is Novavax (CVX 211, CVX 311) and there are no doses in the prior seasons, then the Novavax 2023 Series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 28
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"))
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023NovavaxSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason != $tss.seriesSelectionSeason, associatedTargetSeries!.targetSeason.startsBeforeStartDate($ts.targetSeason, false), isValid == true)
+		$td1 : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1,  isValid == true)
+		$td2 : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 2, isValid == true)
+		 not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries.seriesRules.seriesName == "COVID19Sep2023gte5Series", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, doseNumberInSeries == 1,
+		 	isValid == true, administrationDate < $td1.administrationDate)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Mixed Product Series < 5 yrs if at least one dose (if any) in the prior season doses was administered at < 5 yrs of age, all doses (if any) in the prior season are a mix of vaccines, and all shots (if any) in the current season are a mix of 2023 vaccines"
+		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 29
+	when
+		$ts : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023MixedProductLT5ySeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		and
+		(
+			exists TargetDose(associatedTargetSeries == $ts, administrationDate < $dateAt5yrs)
+			or
+			eval(evalTime < $dateAt5yrs)
+			or
+			(
+				$tspriorseasonseries : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", targetSeason != null, isSeriesComplete() == false, targetSeason.startsBeforeStartDate($ts.targetSeason, false))
+				and
+				exists TargetDose(associatedTargetSeries == $tspriorseasonseries, isValid == true, administrationDate < $dateAt5yrs)
+				and
+				not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $tspriorseasonseries, targetSeason != null, targetSeason.startsAfterStartDate($tspriorseasonseries.targetSeason, false), targetSeason.startsBeforeStartDate($ts.targetSeason, false))
+			)
+		)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Pfizer < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all doses (if any) in the all seasons are Pfizer vaccines:, and all shots (if any) are in the current season are a Pfizer vaccine"
+		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023PfizerLT5ySeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		and
+
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason || associatedTargetSeries!.targetSeason.startsBeforeStartDate($ts.targetSeason, false), isValid == true,
+			vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE520"), associatedTargetSeries.seriesRules.seriesName not in ("COVID19Sep2023gte5Series", "COVID19Sep2023NovavaxSeries"))
+		and
+
+		exists TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason || associatedTargetSeries!.targetSeason.startsBeforeStartDate($ts.targetSeason, false), isValid == true,
+			vaccineComponent.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE520"))
+		and
+		(
+			eval(evalTime < $dateAt5yrs)
+			or
+			(
+				exists TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $ts, administrationDate < $dateAt5yrs)
+				or
+				exists TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate < $dateAt5yrs, isValid == true, associatedTargetSeries!.targetSeason.startsBeforeStartDate($ts.targetSeason, false))
+				and
+				$tspriorseasonseries : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", targetSeason != null, isSeriesComplete() == false, targetSeason.startsBeforeStartDate($ts.targetSeason, false))
+				and
+				not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $tspriorseasonseries, targetSeason != null, targetSeason.startsAfterStartDate($tspriorseasonseries!.targetSeason, false), targetSeason.startsBeforeStartDate($ts!.targetSeason, false))
+			)
+		)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19): In Sep2023 season, select the Moderna < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all doses (if any) in the prior season are Moderna vaccines, and all shots (if any) in the current season are a Moderna vaccine"
+		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Sep2023ModernaLT5ySeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		and
+
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason || associatedTargetSeries!.targetSeason.startsBeforeStartDate($ts.targetSeason, false), isValid == true,
+			vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE311", "ICE312", "ICE519"), associatedTargetSeries.seriesRules.seriesName not in ("COVID19Sep2023gte5Series", "COVID19Sep2023NovavaxSeries"))
+		and
+
+		exists TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason || associatedTargetSeries!.targetSeason.startsBeforeStartDate($ts.targetSeason, false), isValid == true,
+			vaccineComponent.cdsConceptName in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE311", "ICE312", "ICE519"))
+		and
+		(
+			eval(evalTime < $dateAt5yrs)
+			or
+			(
+				exists TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $ts, administrationDate < $dateAt5yrs)
+				or
+				exists TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate < $dateAt5yrs, isValid == true, associatedTargetSeries!.targetSeason.startsBeforeStartDate($ts.targetSeason, false))
+				and
+				$tspriorseasonseries : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", targetSeason != null, isSeriesComplete() == false, targetSeason.startsBeforeStartDate($ts.targetSeason, false))
+				and
+				not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.850", this != $tspriorseasonseries, targetSeason != null, targetSeason.startsAfterStartDate($tspriorseasonseries!.targetSeason, false), targetSeason.startsBeforeStartDate($ts!.targetSeason, false))
+			)
+		)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19): In Dec2020 season, select the Mixed Series by default if no valid NOS shots on record"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName == "COVID19Dec2020Season")
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName in ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries"),
+			vaccineComponent.isUnspecifiedFormulation() == false)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19MixedProductSeries")
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not found in the Pfizer, Moderna, Mixed Product or Janssen series (see related rules), then select the another (i.e. - WHO series) that has the earliest, non-NOS (Valid) _dose_ administered to it"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 25
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Season")
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false)
+		$ts : TargetSeries(this == $td.associatedTargetSeries, getPreferableVaccinesForTargetDose($td.doseNumberInSeries) contains $td.administeredVaccine)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries != $ts, associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were all administered doses a Moderna, Pfizer or Novavax vaccine (i.e.- none of Moderna-only, Pfizer-only or Novavax-only Series are applicable), but (Valid) doses exist in the Mixed Product Series, then select the Mixed Product Series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 28
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Season")
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19MixedProductSeries", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason)
+		(
+
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"))
+			and
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"))
+			or
+
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
+			and
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
+			or
+
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName == "ICE211")
+			and
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName != "ICE211")
+			or
+
+			exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
+		)
+		$tsmixedproduct : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19MixedProductSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsmixedproduct);
+		$tsmixedproduct.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsmixedproduct.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($tsmixedproduct);
+end
+
+rule "SeriesSelection(COVID-19): If all administered doses are a Moderna vaccine and the valid shot(s) are in the Moderna series, then the Moderna Series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Season")
+		and
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		and
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19ModernaSeries", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason)
+		and
+		(
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == true)
+			and
+			$tdts : TargetDose(associatedTargetSeries == $ts, isValid == true, doseNumberInSeries == $ts.doseAfterWhichSeriesWasMarkedComplete)
+			and
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"),
+				administrationDate < $tdts.administrationDate)
+			or
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19ModernaSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == false)
+			and
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"))
+		)
+		and
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine and the valid shot(s) are in the Pfizer series, then the Pfizer Series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Season")
+		and
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		and
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19PfizerSeries", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason)
+		and
+		(
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == true)
+			and
+			$tdts : TargetDose(associatedTargetSeries == $ts, isValid == true, doseNumberInSeries == $ts.doseAfterWhichSeriesWasMarkedComplete)
+			and
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"),
+				administrationDate < $tdts.administrationDate)
+			or
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19PfizerSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == false)
+			and
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName not in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
+		)
+		and
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(COVID-19): If all administered doses are a Novavax vaccine and the valid shot(s) are in the Novavax series, then the Novavax Series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Season")
+		and
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		and
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, associatedTargetSeries.seriesRules.seriesName == "COVID19Novavax2DoseSeries")
+		and
+		(
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == true)
+			or
+			$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Novavax2DoseSeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason, isSeriesComplete() == false)
+			and
+			not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName != "ICE211")
+		)
+		and
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.isUnspecifiedFormulation() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(COVID-19): If the first dose administered is the Janssen vaccine, then the Janssen Series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 40
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason.seasonName == "COVID19Dec2020Season")
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, isValid == true, vaccineComponent.cdsConceptName == "ICE212",
+			associatedTargetSeries.seriesRules.seriesName == "COVID19Janssen1DoseSeries", $ts : associatedTargetSeries)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeason != null && associatedTargetSeries.targetSeason == $tss.seriesSelectionSeason, vaccineComponent.cdsConceptName != "ICE212", isValid == true,
+			vaccineComponent.isUnspecifiedFormulation() == false, administrationDate < $td.administrationDate)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series by default"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience -1
+	when
+$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", isSeriesComplete() == false)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(MenB): Select the MenB series with the most doses if no series is complete"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+		$ts : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", $numberOfDosesRemaining : seriesRules.numberOfDosesInSeries - determineNumberOfDosesAdministeredInSeries())
+		not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", this != $ts, seriesRules.numberOfDosesInSeries - determineNumberOfDosesAdministeredInSeries() > $numberOfDosesRemaining)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(MenB FHbp): Select 3-dose series if both 2-dose and 3-dose series are complete but the 3-dose series was completed on the same day or before the 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == true, isSeriesComplete() == true)
+		$ts3 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false, isSeriesComplete() == true)
+		$ts2dose2 : TargetDose(associatedTargetSeries == $ts2, doseNumberInSeries == 2, isValid == true)
+		TargetDose(associatedTargetSeries == $ts3, doseNumberInSeries == 3, isValid == true, administrationDate <= $ts2dose2.administrationDate)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3);
+		$ts2.setSelectedSeries(false);
+		$ts3.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2);
+		update($ts3);
+end
+
+rule "SeriesSelection(MenB 4C): Select 3-dose series if both 2-dose and 3-dose series are complete but the 3-dose series was completed on the same day or before the 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == true, isSeriesComplete() == true)
+		$ts3 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries", selectedSeries == false, isSeriesComplete() == true)
+		$ts2dose2 : TargetDose(associatedTargetSeries == $ts2, doseNumberInSeries == 2, isValid == true)
+		TargetDose(associatedTargetSeries == $ts3, doseNumberInSeries == 3, isValid == true, administrationDate <= $ts2dose2.administrationDate)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3);
+		$ts2.setSelectedSeries(false);
+		$ts3.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2);
+		update($ts3);
+end
+
+rule "SeriesSelection(MenB): Select Complete Series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(MenB): Select available MenB 4C 3-dose if there is no MenB 4C 2-dose Series and a MenB 4C Series should be selected"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 1
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB 4C Series");
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB 4C Series");
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
+		not TargetDose(associatedTargetSeries == $ts2doseSeries, isValid == true)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries")
+		$td3dose : TargetDose(associatedTargetSeries == $ts3doseSeries, vaccineComponent.cdsConceptName in ("ICE163", "ICE328"))
+		not TargetDose(associatedTargetSeries == $td3dose.associatedTargetSeries, administrationDate > $td3dose.administrationDate)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName not in ("ICE163", "ICE328"), administrationDate > $td3dose.administrationDate, isValid == true)
+		eval($ts3doseSeries.determineNumberOfDosesAdministeredInSeries() >= 1)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB 4C 3-dose series if target dose 1 (CVX 163, CVX 328) is Valid; series _is_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB 4C 3-dose series if target dose 1 (CVX 163, CVX 328) is Valid; series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts3doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB 4C Series")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
+		$td : TargetDose(associatedTargetSeries == $ts, vaccineComponent.cdsConceptName in ("ICE163", "ICE328"))
+		not TargetDose(associatedTargetSeries == $td.associatedTargetSeries, administrationDate > $td.administrationDate)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName not in ("ICE163", "ICE328"), administrationDate > $td.administrationDate, isValid == true)
+		eval($ts.determineNumberOfDosesAdministeredInSeries() >= 1)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 163, CVX 328) is Valid; series _is_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		TargetSeries(this == $ts, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
+rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 163, CVX 328) is Valid; series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		TargetSeries(this == $ts, isSeriesComplete() == false)
+		not TargetSeries(this != $ts, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid in 4C 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB 4C Series")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries", selectedSeries == false)
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() >= 2)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries " + $ts2doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid for 4C 2-dose series; 4C 2-dose series _is_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid in 4C 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid for 4C 2-dose series; 4C 2-dose series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid in 4C 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts2doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, CVX 328) and target dose 2 (CVX 163, CVX 328) is Invalid for 4C 2-dose series but Valid for 4C 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB 4C Series")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries")
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() <= 1 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() >= 2)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries " + $ts3doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Invalid for 4C 2-dose series, Valid for 4C 3-dose series; 4C 4C 4C 4C 3-dose series _is_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, CVX 328) and target dose 2 (CVX 163, CVX 328) is Invalid for 4C 2-dose series but Valid for 4C 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB 4C 3-dose series if dose 1 is CVX 163; target dose 2 (CVX 163) is Invalid for 4C 2-dose series, Valid for 4C 3-dose series; 4C 3-dose series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, CVX 328) and target dose 2 (CVX 163, CVX 328) is Invalid for 4C 2-dose series but Valid for 4C 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts3doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both 4C 2-dose series/3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB 4C Series")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries")
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() == 1 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() == 1)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries " + $ts2doseSeries);
+end
+
+rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both MenB 4C 2-dose series/3-dose series but series is complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both 4C 2-dose series/3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both MenB 4C 2-dose series/3-dose series, series is not complete, and there are no other series complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both 4C 2-dose series/3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts2doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false)
+		$td : TargetDose(associatedTargetSeries == $ts3doseSeries, vaccineComponent.cdsConceptName in ("ICE162", "ICE316"))
+		not TargetDose(associatedTargetSeries == $td.associatedTargetSeries, administrationDate > $td.administrationDate)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName not in ("ICE162", "ICE316"), administrationDate > $td.administrationDate, isValid == true)
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() == 0 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() >= 1)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, valid for FHbp 3-dose series; FHbp 3-dose series _is_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, valid for FHb3 3-dose series; FHbp 3-dose series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts3doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false)
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries", selectedSeries == false)
+		$td : TargetDose(associatedTargetSeries == $ts2doseSeries, vaccineComponent.cdsConceptName in ("ICE162", "ICE316"))
+		not TargetDose(associatedTargetSeries == $td.associatedTargetSeries, administrationDate > $td.administrationDate)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName not in ("ICE162", "ICE316"), administrationDate > $td.administrationDate, isValid == true)
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() == 1 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() == 1)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series/FHbp 3-dose series; FHbp 2-dose series _is_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 (CVX 162) is Valid for both FHbp 2-dose series/FHb3 3-dose series; FHbp 2-dose series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts2doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries", selectedSeries == false)
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() >= 2)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries " + $ts2doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid for FHbp 2-dose series; FHbp 2-dose series _is_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid for FHbp 2-dose series; FHbp 2-dose series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts2doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries")
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries")
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() <= 1 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() >= 2)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries " + $ts3doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHBp 3-dose series _is_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162; target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHbp 3-dose series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts3doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		exists ICEFactTypeFinding(iceResultFinding == "SeriesSelection: Select MenB FHbp Series")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries")
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries")
+		eval($ts2doseSeries.determineNumberOfDosesAdministeredInSeries() == 1 && $ts3doseSeries.determineNumberOfDosesAdministeredInSeries() == 1)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries " + $ts2doseSeries);
+end
+
+rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162) is Invalid in both MenB FHbp 2-dose series/3-dose series but series is complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both MenB FHbp 2-dose series/3-dose series, series is not complete, and there are no other series complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
+		not TargetSeries(this != $ts2doseSeries, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 3-Dose Series if all shots administered are CVX 162"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		not ICEFactTypeFinding(iceResultFinding in ("SeriesSelection: Select MenB 4C Series", "SeriesSelection: Select MenB FHbp Series"))
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName in ("ICE162"))
+
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeries MenB4FHbpDoseSeries or TargetSeries MenFHbp3DoseSeries");
+		insert(new ICEFactTypeFinding("SeriesSelection: Select MenB FHbp Series"));
+end
+
+rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ 4C 3-Dose Series if all shots administered are CVX 163"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		not ICEFactTypeFinding(iceResultFinding in ("SeriesSelection: Select MenB 4C Series", "SeriesSelection: Select MenB FHbp Series"))
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName in ("ICE163"))
+
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeries MenB4C2DoseSeries or TargetSeries Men4C3DoseSeries");
+		insert(new ICEFactTypeFinding("SeriesSelection: Select MenB 4C Series"));
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		not ICEFactTypeFinding(iceResultFinding in ("SeriesSelection: Select MenB 4C Series", "SeriesSelection: Select MenB FHbp Series"))
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162")
+
+		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163", associatedTargetSeries.seriesName in ("MenB4C2DoseSeries", "MenB4C3DoseSeries"),
+			invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163", associatedTargetSeries.seriesName in ("MenB4C2DoseSeries", "MenB4C3DoseSeries"), administrationDate > $latestTd.administrationDate,
+			invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate > $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE162", invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
+
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C2DoseSeries")
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenB4C3DoseSeries")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries MenB4C2DoseSeries or TargetSeries MenB4C3DoseSeries");
+		insert(new ICEFactTypeFinding("SeriesSelection: Select MenB 4C Series"));
+end
+
+rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, Series is complete, and 4C 3-Dose Series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == false)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "SeriesSelection(MenB): Select MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, Series is complete, and 4C 2-Dose Series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		not ICEFactTypeFinding(iceResultFinding in ("SeriesSelection: Select MenB 4C Series", "SeriesSelection: Select MenB FHbp Series"))
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+
+		exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE163")
+
+		$latestTd : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162", associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"),
+			invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", associatedTargetSeries.seriesName in ("MenBFHbp2DoseSeries", "MenBFHbp3DoseSeries"), administrationDate > $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE162",
+			invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate > $latestTd.administrationDate, vaccineComponent.cdsConceptName == "ICE163", invalidReasons not contains BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.cdsListItemName)
+
+		$ts2doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp2DoseSeries")
+		$ts3doseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesRules.seriesName == "MenBFHbp3DoseSeries")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries MenB4C2DoseSeries or TargetSeries MenB4C3DoseSeries");
+		insert(new ICEFactTypeFinding("SeriesSelection: Select MenB FHbp Series"));
+end
+
+rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 162, Series is complete, and FHbp 3-Dose Series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == true)
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == false)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2doseSeries);
+		$ts2doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts2doseSeries);
+end
+
+rule "SeriesSelection(MenB): Select MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, Series is complete, and FHbp 2-Dose Series is _not_ complete"
+		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 30
+	when
+		TargetSeries(this == $ts2doseSeries, isSeriesComplete() == false)
+		TargetSeries(this == $ts3doseSeries, isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts3doseSeries);
+		$ts3doseSeries.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts3doseSeries.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts3doseSeries);
+end
+
+rule "SeriesSelection(MenB): If one or more Series is complete, select the Series that completed first (and did not complete on the same day)"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 40
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.835", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", selectedSeries == true)
+		and
+		$tslatestcomplete : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+		and
+		$tdlatestcomplete : TargetDose(associatedTargetSeries == $tslatestcomplete, isValid == true)
+		and
+		not TargetDose(associatedTargetSeries == $tslatestcomplete, administrationDate > $tdlatestcomplete.administrationDate, isValid == true)
+		and
+		(
+			not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.835", this != $tslatestcomplete, isSeriesComplete() == true)
+			or
+			$tsothercomplete : TargetSeries(this != $tslatestcomplete, vaccineGroup == "VACCINE_GROUP_CONCEPT.835", isSeriesComplete() == true)
+			and
+			$tdothercomplete : TargetDose(associatedTargetSeries == $tsothercomplete, isValid == true)
+			and
+			not TargetDose(associatedTargetSeries == $tsothercomplete, isValid == true, administrationDate > $tdothercomplete.administrationDate)
+			and
+			eval($tdlatestcomplete.administrationDate > $tdothercomplete.administrationDate)
+		)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tslatestcomplete);
+		$tslatestcomplete.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tslatestcomplete.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($tslatestcomplete);
+end
+
+rule "SeriesSelection(Hib): If the Series that was selected is Not Complete but the other Series is Complete, select the other (completed) Series instead"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		$tsNotSelected : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", selectedSeries == false, isSeriesComplete() == true)
+		$tsSelected : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", targetSeriesIdentifier != $tsNotSelected.targetSeriesIdentifier, selectedSeries == true, isSeriesComplete() == false)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection(Hib) change to *completed* TargetSeries " + $tsNotSelected);
+		$tsSelected.setSelectedSeries(false);
+		$tsNotSelected.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsNotSelected.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tsNotSelected);
+		update($tsSelected);
+		update($tss);
+end
+
+rule "SeriesSelection.SelectByDefaultHib4DoseSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	activation-group "HibSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesRules.seriesName == "Hib4DoseSeries",	selectedSeries == false)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectHibOMPSeriesIfFirstDoseHibOMPBefore7MonthsAndOnlyOneValidDoseTotal"
+	dialect "java"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 200
+	activation-group "HibSeriesSelectionCheck"
+	when
+
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", selectedSeries == true)
+		$td : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate, vaccineComponent.cdsConceptName == "ICE49", $td1UniqueId : uniqueId)
+		$ts: TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", $sn : seriesRules.seriesName == "HibOMPSeries", selectedSeries == false,
+			containsTargetDose($td), $effectiveDoses : determineEffectiveNumberOfDosesInSeries, numberOfShotsAdministeredInSeries == 1)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesRules.seriesName != $sn, $validShotByDoseNumber : getValidShotByDoseNumber(1), $validShotByDoseNumber != null, $validShotByDoseNumber.getAdministrationDate() < $administrationDate)
+		$person : EvaluatedPerson($birthDate : demographics.birthTime)
+		eval($effectiveDoses == 1 && TimePeriod.calculateElapsedTimePeriod($birthDate, $administrationDate, DurationType.MONTHS).isLessThan(new TimePeriod(7, DurationType.MONTHS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts.getSeriesName());
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.getSeriesName());
+		update($ts);
+end
+
+rule "SeriesSelection.SelectHibOMPSeriesIfTwoDosesHibOMPOneBefore7MonthsOtherBefore12Months"
+	dialect "java"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 300
+	activation-group "HibSeriesSelectionCheck"
+	when
+
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", selectedSeries == true)
+		$td1 : TargetDose(doseNumberInSeries == 1, isValid == true, $administrationDate1 : administrationDate, vaccineComponent.cdsConceptName == "ICE49")
+		$td2 : TargetDose(doseNumberInSeries == 2, isValid == true, $administrationDate2 : administrationDate, vaccineComponent.cdsConceptName == "ICE49", $td2UniqueId : uniqueId)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", $sn : seriesRules.seriesName == "HibOMPSeries",	selectedSeries == false, containsTargetDose($td1), containsTargetDose($td2))
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", seriesRules.seriesName != $sn, $validShotByDoseNumber : getValidShotByDoseNumber(2), $validShotByDoseNumber != null, $validShotByDoseNumber.getAdministrationDate() < $administrationDate2)
+		$person : EvaluatedPerson($birthDate : demographics.birthTime)
+		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, $administrationDate1, DurationType.MONTHS).isLessThan(new TimePeriod(7, DurationType.MONTHS)) &&
+			TimePeriod.calculateElapsedTimePeriod($birthDate, $administrationDate2, DurationType.MONTHS).isLessThan(new TimePeriod(12, DurationType.MONTHS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.getSeriesName());
+		update($ts);
+end
+
+rule "SeriesSelection.HepADoNOTSelectAlreadyCompleteSeriesWithFewestDosesIfExistsAndOtherSeriesPreviouslySelected"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	activation-group "SeriesSelectionFewestDoses"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		$ts : TargetSeries(selectedSeries == true, seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection.SelectByDefaultHepA2DoseSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesRules.seriesName == "HepA2DoseChildAdultSeries",	selectedSeries == false)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+rule "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		$t3series : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepAAdult3DoseSeries", selectedSeries == true)
+		$t2series : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepA2DoseChildAdultSeries", isSeriesComplete() == true)
+		$t2seriesTd2 : TargetDose(associatedTargetSeries == $t2series, doseNumberInSeries == 2, isValid == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $t2series);
+end
+
+rule "SeriesSelection(Hep A): Keep selection as 3-dose series if the 3-dose was completed on the same day or before"
+		extends "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 3
+	when
+		TargetSeries(this == $t3series, isSeriesComplete() == true)
+		TargetDose(associatedTargetSeries == $t3series, doseNumberInSeries == 3, isValid == true, administrationDate <= $t2seriesTd2.administrationDate)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $t3series);
+end
+
+rule "SeriesSelection(Hep A): Make the change to the 2-dose and 3-dose series if the 2-dose was completed earlier than the 3-dose or the 3-dose was never completed"
+		extends "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 3
+	when
+		TargetSeries(this == $t3series, isSeriesComplete() == false)
+		or
+		TargetSeries(this == $t3series, isSeriesComplete() == true)
+		and
+		TargetDose(associatedTargetSeries == $t3series, doseNumberInSeries == 3, isValid == true, administrationDate > $t2seriesTd2.administrationDate)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $t2series);
+		$t3series.setSelectedSeries(false);
+		$t2series.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($t2series.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($t3series);
+		update($t2series);
+		update($tss);
+end
+
+rule "SeriesSelection(Hep A): If 2-dose Series was selected over the 3-dose Series when the 3-dose Series was previously selected, mark any prior 3-dose Series doses as Accepted / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN in the 2-dose Series"
+		extends "SeriesSelection(Hep A): Make the change to the 2-dose and 3-dose series if the 2-dose was completed earlier than the 3-dose or the 3-dose was never completed"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 5
+	when
+		$t3seriesTd : TargetDose(associatedTargetSeries == $t3series, isValid == true)
+		$t2seriesTd : TargetDose(associatedTargetSeries == $t2series, administrationDate == $t3seriesTd.administrationDate, isValid == false, status != DoseStatus.ACCEPTED)
+	then
+		modify($t2seriesTd) {
+			setStatus(DoseStatus.ACCEPTED),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addAcceptedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN")
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $t2series);
+end
+
+rule "SeriesSelection(Hep A): If a CVX 104 (Twinrix) is administered to a patient >= 18 years-4 days as dose 1 and/or dose 2, select the Hep A 3-dose Series"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepAAdult3DoseSeries", selectedSeries == false)
+		$ts2dose : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.810", seriesName == "HepA2DoseChildAdultSeries")
+		$person : EvaluatedPerson($birthDate : demographics.birthTime,  $dateAt18yminus4d : TimePeriod.addTimePeriod(demographics.birthTime, "18y-4d"))
+		exists TargetDose(associatedTargetSeries == $ts, doseNumberInSeries <= 2, administeredVaccine.cdsConceptName == "ICE104", isValid == true, administrationDate >= $dateAt18yminus4d)
+		$ts3dose1 : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true)
+		not TargetDose(associatedTargetSeries == $ts2dose, doseNumberInSeries == 1, isValid == true, administrationDate < $dateAt18yminus4d)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+		update($tss);
+end
+
+rule "SeriesSelection(Hep B): Select already completed series that was completed on the same date and with the most doses if different completed series was previously selected"
+	dialect "java"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", $ssvg : seriesSelectionVaccineGroup,
+			seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS, $sss : seriesSelectionSeason)
+		$ts1 : TargetSeries(seriesRules.vaccineGroup == $ssvg, $id1 : targetSeriesIdentifier, selectedSeries == true, targetSeason == null || targetSeason == $sss, $seriesComplete1 : isSeriesComplete(),
+			$lastNecessaryShotAdministered1 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries), $ts1numberOfDosesInSeries : seriesRules.numberOfDosesInSeries)
+		$ts2 : TargetSeries(seriesRules.vaccineGroup == $ssvg, targetSeriesIdentifier != $id1, selectedSeries == false, targetSeason == null || targetSeason == $sss, $seriesComplete2 : isSeriesComplete(),
+			$ts2numberOfDosesInSeries : seriesRules.numberOfDosesInSeries, $ts2numberOfDosesInSeries > $ts1numberOfDosesInSeries, $lastNecessaryShotAdministered2 : getValidShotByDoseNumber(seriesRules.numberOfDosesInSeries))
+		eval($seriesComplete1 == true && $seriesComplete2 == true && $lastNecessaryShotAdministered1 != null && $lastNecessaryShotAdministered2 != null &&
+			TimePeriod.differenceInDays($lastNecessaryShotAdministered1.getAdministrationDate(), $lastNecessaryShotAdministered2.getAdministrationDate()) == 0)
+	then
+		$ts1.setSelectedSeries(false);
+		$ts2.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts2.getSeriesName());
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($ts1);
+		update($ts2);
+		update($tss);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Previously Selected TargetSeries Retracted for Already Complete Series: " + $ts2 + "; " + $lastNecessaryShotAdministered1 + "; " + $lastNecessaryShotAdministered2);
+end
+
+rule "SeriesSelection(Hep B): Select Hep B Newborn Series if at least one shot administered at < 28 days of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
+		$td : TargetDose(associatedTargetSeries.seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", administeredShotNumberInSeries == 1)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBNewbornSeries", selectedSeries == false, containsTargetDose($td))
+		$person : EvaluatedPerson()
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isLessThan(new TimePeriod(28, DurationType.DAYS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(Hep B): Select Hep B Newborn Series if no shots have been administered and patient is < 28 days of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	no-loop true
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBNewbornSeries", selectedSeries == false, targetDoses.empty)
+		$person : EvaluatedPerson()
+		$evalTime: EvalTime()
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue,	DurationType.DAYS).isLessThan(new TimePeriod(28, DurationType.DAYS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(Hep B): Select Hep B Child/Adolescent series if the patient is >= 28 days and < 19 years of age when first shot was admininstered "
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	no-loop true
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
+		$td : TargetDose(associatedTargetSeries.seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", administeredShotNumberInSeries == 1)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBChildAdolescentSeries", selectedSeries == false, containsTargetDose($td))
+		$person : EvaluatedPerson()
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.DAYS).isGreaterThanEqualTo(new TimePeriod(28, DurationType.DAYS)))
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.YEARS).isLessThan(new TimePeriod(19, DurationType.YEARS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(Hep B): Select Hep B Child/Adolescent Series if the patient is >= 28 days and < 19 years of age, and no shots have been admininstered"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	no-loop true
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBChildAdolescentSeries", selectedSeries == false, targetDoses.empty)
+		$person : EvaluatedPerson()
+		$evalTime: EvalTime()
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue, DurationType.DAYS).isGreaterThanEqualTo(new TimePeriod(28, DurationType.DAYS)))
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue, DurationType.YEARS).isLessThan(new TimePeriod(19, DurationType.YEARS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(Hep B): Select the Hep B 3-dose Adult Series if the patient >= 19 years of age, and no shots have been administered"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	no-loop true
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBAdult3DoseSeries", selectedSeries == false, targetDoses.empty)
+		$person : EvaluatedPerson()
+		$evalTime: EvalTime()
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $evalTime.evalTimeValue, DurationType.YEARS).isGreaterThanEqualTo(new TimePeriod(19, DurationType.YEARS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+rule "SeriesSelection(Hep B): Select Hep B 3-dose Adult series if the patient is >= 19 years of age when first shot was admininstered "
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	no-loop true
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
+		$td : TargetDose(associatedTargetSeries.seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", administeredShotNumberInSeries == 1)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBAdult3DoseSeries", selectedSeries == false, containsTargetDose($td))
+		$person : EvaluatedPerson()
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.YEARS).isGreaterThanEqualTo(new TimePeriod(19, DurationType.YEARS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", selectedSeries == true)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", seriesRules.seriesName == "HepBAdult2DoseSeries", selectedSeries == false, $number2DoseAdultDoses : determineNumberOfDosesAdministeredInSeries())
+		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true)
+		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", associatedTargetSeries != $ts, administrationDate < $td.administrationDate, isValid == true)
+		$person : EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y-4d"))
+		not TargetDose(associatedTargetSeries != $ts, isValid == true, administrationDate < $dtDateAtAge)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.YEARS).isLessThan(new TimePeriod(19, DurationType.YEARS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		eval(TimePeriod.calculateElapsedTimePeriod($person.demographics.birthTime, $td.administrationDate, DurationType.YEARS).isGreaterThanEqualTo(new TimePeriod(19, DurationType.YEARS)))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "ABSTRACT SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y-4d and < 19 years of age, 1 dose, and no additional shots on record"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries == 1)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >= 19 years of age, and no additional shots on records, select the 3-dose Adult Series"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 110
+	when
+		TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries == 1)
+		$tsAdult3Dose : TargetSeries(seriesRules.seriesName == "HepBAdult3DoseSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries == 1)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsAdult3Dose);
+		$tsAdult3Dose.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsAdult3Dose.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($tsAdult3Dose);
+end
+
+rule "SeriesSelection(Hep B): For patient with CVX 189 dose at >= 18y-4d and < 19 years of age, and >= 1 dose and additional shots on record, select the Child/Adolescent Series if it has more doses than the Adult Series"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		$tsAdult2Dose : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
+		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepBChildAdolescentSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, determineNumberOfDosesAdministeredInSeries() > $number2DoseAdultDoses)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsChildAdult);
+		$tsChildAdult.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsChildAdult.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($tsChildAdult);
+end
+
+rule "SeriesSelection(Hep B): For patient with CVX 189 at >= 18y-4d and < 19 years of age, and >= 1 dose and additional shots on record, select the 2-dose Adult Series if it has greater than or equal the number of doses as the Child/Adolescent Series"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		$tsAdult2Dose : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
+		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepBChildAdolescentSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1,	determineNumberOfDosesAdministeredInSeries() <= $number2DoseAdultDoses)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsAdult2Dose);
+		$tsAdult2Dose.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsAdult2Dose.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($tsAdult2Dose);
+end
+
+rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >= 19 years of age, and >= 1 dose and additional shots on record, select the 3-dose Adult Series if it has more doses than the 2-dose Adult Series"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		$tsAdult2Dose : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
+		$tsAdult3Dose : TargetSeries(seriesRules.seriesName == "HepBAdult3DoseSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, determineNumberOfDosesAdministeredInSeries() > $number2DoseAdultDoses)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsAdult3Dose);
+		$tsAdult3Dose.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsAdult3Dose.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($tsAdult3Dose);
+end
+
+rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >= 19 years of age, and >= 1 dose and additional shots on record, select the 2-dose Adult Series if it has greater than or equal the number of doses as the Child/Adolescent Series"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		$tsAdult2Dose : TargetSeries(targetSeriesIdentifier == $ts.targetSeriesIdentifier, numberOfShotsAdministeredInSeries > 1)
+		$tsAdult3Dose : TargetSeries(seriesRules.seriesName == "HepBAdult3DoseSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", numberOfShotsAdministeredInSeries > 1, determineNumberOfDosesAdministeredInSeries() <= $number2DoseAdultDoses)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsAdult2Dose);
+		$tsAdult2Dose.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsAdult2Dose.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($tsAdult2Dose);
+end
+
+rule "SeriesSelection(Hep B): Select Child/Adult Series if it is complete"
+		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 110
+	when
+		$tsChildAdult : TargetSeries(seriesRules.seriesName == "HepBChildAdolescentSeries", seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.100", isSeriesComplete() == true)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsChildAdult);
+		$tsChildAdult.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($tsChildAdult.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($tsChildAdult);
+end
+
+rule "SeriesSelection.SelectDTP5DoseSeriesIf3DoseSeriesNotSelected"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	activation-group "DTPSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.200", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", seriesRules.seriesName == "DTP5DoseSeries")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.Select3DoseDTPSeriesIfNoShotsPriorTo7YrsAnd7YrsOldOrOlder"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 110
+	activation-group "DTPSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.200", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", selectedSeries == true))
+		$person : EvaluatedPerson($birthDate : demographics.birthTime, $ageAt7yrs : TimePeriod.addTimePeriod(demographics.birthTime, "7y"))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", seriesRules.seriesName == "DTP3DoseSeries")
+		not TargetDose(associatedTargetSeries == $ts, administrationDate < $ageAt7yrs)
+		eval(TimePeriod.calculateElapsedTimePeriod($birthDate, evalTime, DurationType.YEARS).isGreaterThan(new TimePeriod(7, DurationType.YEARS), true))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectOnlyMMRSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	activation-group "MMRSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.500", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.500")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectOnlyVaricellaSeries"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	activation-group "VaricellaSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.600", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.600", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.600")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectRotavirus3DoseSeriesDefault"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 140
+	activation-group "RotavirusSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.820", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", seriesRules.seriesName == "Rotavirus3DoseSeries")
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectRotavirus3DoseSeriesIfCertainVaccinesAdministered"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 200
+	activation-group "RotavirusSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.820", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", selectedSeries == true))
+		$td : TargetDose(isValid == true, isShotIgnored() == false,
+			(vaccineComponent.cdsConceptName == "ICE116" ||
+			  vaccineComponent.cdsConceptName == "ICE122" ||
+			  vaccineComponent.cdsConceptName == "ICE74"))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", seriesRules.seriesName == "Rotavirus3DoseSeries", containsTargetDose($td))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+rule "SeriesSelection.SelectRotavirus2DoseSeriesIf1DoseRV1"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 150
+	activation-group "RotavirusSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.820", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", selectedSeries == true))
+		$td : TargetDose(isValid == true, doseNumberInSeries == 1, vaccineComponent.cdsConceptName == "ICE119")
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", seriesRules.seriesName == "Rotavirus2DoseSeries", containsTargetDose($td))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		update($ts);
+end
+
+function List getAllDosesAcrossListOfTargetSeries(List tss) {
+	List tds = new ArrayList();
+	if (tss == null) {
+		return tds;
+	}
+
+	Iterator iter = tss.iterator();
+	while (iter.hasNext()) {
+		TargetSeries ts = (TargetSeries) iter.next();
+		Collection tsd = ts.getTargetDoses();
+		if (tsd != null) {
+			Iterator ii = tsd.iterator();
+			while (ii.hasNext()) {
+				TargetDose td = (TargetDose) ii.next();
+				tds.add(td);
+			}
+		}
+	}
+
+	return tds;
+}
+

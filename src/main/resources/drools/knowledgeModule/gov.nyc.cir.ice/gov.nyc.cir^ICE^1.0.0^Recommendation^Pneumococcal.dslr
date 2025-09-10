@@ -1,0 +1,934 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
+rule "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestAgeCheck* override)"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "earliestAgeCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the series is not complete
+			- the effective dose number in the Series is >= 6
+		There exists an IceFact
+			- that has finding "DISABLE_OUTPUT_EARLIEST_OVERDUE_DATES_FOR_PNEUMOCOCCAL_ADULT_SERIES"
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestInterval* override)"
+		extends "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestAgeCheck* override)"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+	when
+
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*latestRecommendedAgeCheck* override)"
+		extends "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestAgeCheck* override)"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "latestRecommendedAgeCheck"
+	when
+
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*latestRecommendedIntervalCheck* override)"
+		extends "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dates were disabled in the settings, do not determine earliest and overdue dates (*earliestAgeCheck* override)"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "latestRecommendedIntervalCheck"
+	when
+
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pnuemo Adult Special Recommendation Rule #1: If a patient >= 50 years of age, has not completed the series, has >= 1 dose of PCV13 administered at any age, and there are no PPSV23, PCV15, PCV20, or PCV21 shots dose on record, and there is a recommendation date for the next target dose, recommend at the vaccine group level with recommendation reason code ADMINISTER_PCV20_OR_PCV21"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	salience 999
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- a forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- post processing on the Series forecast has not already been run
+			- the Series is not complete
+			- the effective dose number in the Series is >= 6
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1"
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE133"
+
+			- the dose number in the Series is >= 6
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered a member of ("ICE33", "ICE215", "ICE216", "ICE327")
+
+			- the dose number in the Series is >= 6
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and evalTime >= "50y"
+	then
+		Insert an IceFact "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1" with TargetSeries $targetSeries into working memory
+		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV20_OR_PCV21"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumo Adult Special Recommendation Rule #2: If a patient >= 50y years of age, has not completed the series, has >= 1 dose of PCV13 administered at any age, >= 1 dose of PPSV23 administered at < 65 years of age, and there are no PCV15, PCV20, or PCV21 shots dose on record, and there is a recommendation date for the next target dose, recommend at the vaccine group level with recommendation reason code ADMINISTER_PCV20_OR_PCV21."
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	salience 999
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- a forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- post processing on the Series forecast has not already been run
+			- the Series is not complete
+			- the effective dose number in the Series is >= 6
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE133"
+
+			- the dose number in the Series is >= 6
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered a member of ("ICE215", "ICE216", "ICE327")
+
+			- the dose number in the Series is >= 6
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+			- make note of the date as $dtDateAtAge65y when the patient is "65y" of age
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE33"
+			- the administration date of the shot is < $dtDateAtAge65y
+		Confirm elapsed time between $birthDate and evalTime >= "50y"
+	then
+		Insert an IceFact "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2" with TargetSeries $targetSeries into working memory
+		Unset the Recommended Vaccine for the forecast in the Series $targetSeries
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV20_OR_PCV21"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: If a patient >= 65 years of age, has completed the series with >= 1 dose of PCV13 administered at any age, and >= 1 dose of PPSV23 administered >=65 years of age, and there are no PCV15, PCV20, or PCV21 shots on record, recommendation is Conditional with reason codes COMPLETE, CLINICAL_PATIENT_DISCRETION, and SUPPLEMENTAL_TEXT."
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the Series is complete
+			- a forecast for the Series has been made
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is >= 6
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_CONDITIONALLY_RECOMMENDED_W_COMPLETE_CLINICAL_PATIENT_DISCRETION"
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the vaccine administered is "ICE133"
+			- that has already been evaluated
+
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+
+			- the dose number in the Series is >= 6
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered a member of ("ICE215", "ICE216", "ICE327")
+		There is an administered shot $ppsv23
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated
+
+			- the vaccine administered is "ICE33"
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge65 when the patient is "65y" of age
+		There is an administered shot $ppsv23sameshot
+			- that is the same shot as $ppsv23
+			- the administration date of the shot is >= $dtDateAtAge65
+	then
+		Clear forecasted recommendations from consideration in Series $targetSeries
+		Mark the Series $targetSeries complete
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
+		Include the Recommendation $recommendation for Consideration in the final forecast of the Series
+		Create a Recommendation as $supplementalText for the Series $targetSeries
+		Set the Recommendation Supplemental text for $supplementalText to "Consider administering PCV20 or PCV21 based on Shared Clinical Decision-Making (SCDM), at least 5 years after the most recent dose of pneumococcal vaccine."
+		Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
+		Mark forecasting of the Series $targetSeries complete
+		Insert an IceFact "PNEUMOCOCCAL_ADULT_CONDITIONALLY_RECOMMENDED_W_COMPLETE_CLINICAL_PATIENT_DISCRETION" with TargetSeries $targetSeries into working memory
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult(PCV-PPSV Series): If no adult doses have been administered and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend at the vaccine group level with recommendation reason code is ADMINISTER_PCV15_PCV20_OR_PCV21."
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is >= 6
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is >= 6
+			- that has already been evaluated and whose shot validity is VALID
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1"
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"
+	then
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_PCV20_OR_PCV21"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult(PCV-PPSV Series): If dose 1 of the adult series was a PCV vaccine, and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend PPSV23 (CVX 33) with supplemental text for target dose 2 or target dose 3"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a shot is recommended
+			- a forecast for the Series has been made and a specific vaccine is not recommended
+			- the effective dose number in the Series is >= 7
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is == 6
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE33"
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1"
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"
+	then
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Supplemental text for $recommendation to "If PPSV23 is unavailable, PCV20 or PCV21 may be administered. No further doses of any type of pneumococcal vaccine are recommended after PCV20 or PCV21 is given."
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE33"
+		Refresh all facts in the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult(PPSV-PCV Series): If dose 1 of the adult series was a PPSV23 vaccine, and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend at the vaccine group level with recommendation reason code is ADMINISTER_PCV15_PCV20_OR_PCV21 for target dose 2"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a shot is recommended
+			- a forecast for the Series has been made and a specific vaccine is not recommended
+			- the effective dose number in the Series is == 7
+		There is an administered shot $priorDose
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is == 6
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE33"
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1"
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"
+	then
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_PCV15_PCV20_OR_PCV21"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult(PPSV-PCV Series): If dose 1 of the adult series was a PPSV23 vaccine, and Special Recommendation Rule 1 & Special Recommendation Rule 2 are not true, recommend PPSV23 (CVX 33) with supplemental text for target dose 3"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made and a shot is recommended
+			- a forecast for the Series has been made and a specific vaccine is not recommended
+			- the effective dose number in the Series is == 8
+		There is an administered shot $priorDose
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is == 6
+			- that has already been evaluated and whose shot validity is VALID
+			- the vaccine administered is "ICE33"
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_1"
+		There does not exist an IceFact
+			- that has associated series $targetSeries
+			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"
+	then
+		Create a Recommendation as $recommendation for the Series $targetSeries
+		Set the Recommendation Supplemental text for $recommendation to "If PPSV23 is unavailable, PCV20 or PCV21 may be administered. No further doses of any type of pneumococcal vaccine are recommended after PCV20 or PCV21 is given."
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE33"
+		Refresh all facts in the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: Recommended Interval of 5yrs from prior PPSV shot (or CVX 109) to the next target dose of PPSV"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is >= 6
+			- a forecast for the Series has been made and a recommendation date has been determined
+			- a forecast for the Series has been made and a specific vaccine is Recommended
+			- make note of the recommended vaccine as $recommendedVaccine
+			- the string $recommendedVaccine == "ICE33"
+		There is an administered shot $priorPPSVor109Shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated
+			- the vaccine administered a member of ("ICE33", "ICE109")
+			- make note of the date this Shot was administered as $dateAdultPPSVor109Administered
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated
+			- the vaccine administered a member of ("ICE33", "ICE109")
+			- make note of the date this Shot was administered as $dateOtherAdultPPSVor109Administered
+			- the date $dateOtherAdultPPSVor109Administered > $dateAdultPPSVor109Administered
+	then
+		Add "5y" to $dateAdultPPSVor109Administered and make note of the newly calculated date as $dtCalculated
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtCalculated
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: Earliest Interval of 5yrs from prior PPSV shot (or CVX 109) to the next target dose of PPSV"
+		extends "Pneumococcal Adult: Recommended Interval of 5yrs from prior PPSV shot (or CVX 109) to the next target dose of PPSV"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There does not exist an IceFact
+			- that has finding "DISABLE_OUTPUT_EARLIEST_OVERDUE_DATES_FOR_PNEUMOCOCCAL_ADULT_SERIES"
+	then
+		Add "5y" to $dateAdultPPSVor109Administered and make note of the newly calculated date as $dtCalculated
+		Create a Recommendation as $oRecommendationEarliest for the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $oRecommendationEarliest to $dtCalculated
+		Include the Recommendation $oRecommendationEarliest for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: Recommend Recommended Interval of 1 yr from prior PCV shot to the next target dose"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the series is not complete
+			- the effective dose number in the Series is >= 6
+		There is an administered shot $priorPCVshot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated
+			- the dose number in the Series is <= 6
+			- the vaccine administered a member of ("ICE327", "ICE216", "ICE215", "ICE133", "ICE152")
+
+			- make note of the date this Shot was administered as $dateMostRecentPCVAdministered
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated
+			- the vaccine administered a member of ("ICE327", "ICE216", "ICE215", "ICE133", "ICE152")
+
+			- make note of the date this Shot was administered as $dateOtherRecentPCVAdministered
+			- the date $dateOtherRecentPCVAdministered > $dateMostRecentPCVAdministered
+	then
+		Add "1y" to $dateMostRecentPCVAdministered and make note of the newly calculated date as $dtCalculated
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtCalculated
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: Recommend Earliest Interval of 1 yr from prior PCV shot to the next target dose"
+		extends "Pneumococcal Adult: Recommend Recommended Interval of 1 yr from prior PCV shot to the next target dose"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There does not exist an IceFact
+			- that has finding "DISABLE_OUTPUT_EARLIEST_OVERDUE_DATES_FOR_PNEUMOCOCCAL_ADULT_SERIES"
+	then
+		Add "1y" to $dateMostRecentPCVAdministered and make note of the newly calculated date as $dtCalculated
+		Create a Recommendation as $oRecommendationEarliest for the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $oRecommendationEarliest to $dtCalculated
+		Include the Recommendation $oRecommendationEarliest for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: If the patient >= 19 years and < 50 years of age and the series is not complete, include supplemental text"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the Series is not complete
+			- a forecast for the Series has been made
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is >= 6
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge19 when the patient is "19y" of age
+			- make note of the date as $dtDateAtAge50 when the patient is "50y" of age
+			- the date evalTime >= $dtDateAtAge19
+			- the date evalTime < $dtDateAtAge50
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $oRecommendation to "The Pneumococcal evaluations and recommendations in ICE primarily target the routine series. Adults ages 19-49 with underlying medical conditions or other risk factors who have not previously received PCV or whose previous vaccination history is unknown should receive 1 dose of PCV (either PCV20, PCV21 or PCV15). When PCV15 is used, it should be followed by a dose of PPSV23 at the appropriate interval(s). Patients who previously received a PCV13 should receive PCV20 or PCV21. Refer to ACIP for additional information."
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: If the patient is < 50 years of age, received one or more valid doses in an Adult Series at < 50 years old, recommend Conditional/HIGH_RISK along with supplemental text"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	salience 100
+	no-loop true
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the Series is not complete
+			- a forecast for the Series has been made and a shot is recommended
+			- make note of the recommendation date as $recommendationDate
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is >= 7
+		There exists an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is >= 6
+			- that has already been evaluated and whose shot validity is VALID
+		The patient information $patientInformation must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge50 when the patient is "50y" of age
+			- the date evalTime < $dtDateAtAge50
+			- the date evalTime < $recommendationDate
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final forecast of the Series
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $oRecommendation to "The Pneumococcal evaluations and recommendations in ICE primarily target the routine series. Adults ages 19-49 with underlying medical conditions or other risk factors who have not previously received PCV or whose previous vaccination history is unknown should receive 1 dose of PCV (either PCV20, PCV21 or PCV15). When PCV15 is used, it should be followed by a dose of PPSV23 at the appropriate interval(s). Patients who previously received a PCV13 should receive PCV20 or PCV21. Refer to ACIP for additional information."
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Refresh all facts in the Series $targetSeries for forecasting
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childhood series *is not* complete and an adult dose *has not* been administered, then recommend Conditional/HIGH_RISK"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 200
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- the dose number in the Series is >= 6
+			- that has already been evaluated and whose shot validity is VALID
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $targetSeries
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "19y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childhood series *is* complete, _not_ including the PCV13/PCV15/PCV20 rule, and an adult dose *has not* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 200
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- the dose number in the Series is >= 6
+			- that has already been evaluated and whose shot validity is VALID
+		There exists an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $targetSeries
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("ICE133", "ICE215", "ICE216") is == 0
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "19y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childhood series *is* complete, including the PCV13/PCV15/PCV20 rule, and an adult dose *has not* been administered, then recommend Conditional/COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 200
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- the dose number in the Series is >= 6
+			- that has already been evaluated and whose shot validity is VALID
+		There exists an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $targetSeries
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("ICE133", "ICE215", "ICE216") is > 0
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "19y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child: When recommending in the child series, always recommend at the vaccine group level with reason code SUPPLEMENTAL_TEXT"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the recommendation date as $recommendationDate
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is <= 5
+			- make note of the recommendation status as $recommendationStatus
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $targetSeries
+	then
+		Unset the recommended vaccine for the forecast in the Series $targetSeries
+		Create a Recommendation as $sRecommendation for the Series $targetSeries
+		Set the Recommendation Status for $sRecommendation to $recommendationStatus
+		Set the Recommendation Supplemental Text for $sRecommendation to "Administer either PCV15 or PCV20; if PCV15 or PCV20 is not available, PCV13 should be used."
+		Include the Recommendation $sRecommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child: if the patient < 2yrs, if a PPSV23 (CVX 33) shot has been given, recommended interval of 0 days from the PPSV23 to the next target dose of PCV"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the series is <= 5
+			- make note of the Last Shot Administered in the Series as $lastAdministeredShot
+			- make note of the Date that the most recent Shot was Administered as $dateLastAdministeredShot
+		There is an administered shot $shot
+			- that is the same shot as $lastAdministeredShot
+			- the vaccine administered is "ICE33"
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $dateLastAdministeredShot < "2y"
+	then
+		Mark the shot $shot as Ignored
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child: if the patient >= 2yrs and < 5 years, if a PPSV23 (CVX 33) shot has been given, recommended interval of 56 days from the PPSV23 to the next target dose of PCV"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the Last Shot Administered in the Series as $lastAdministeredShot
+			- make note of the Date that the most recent Shot was Administered as $dateLastAdministeredShot
+		There is an administered shot $shot
+			- that is the same shot as $lastAdministeredShot
+			- the vaccine administered is "ICE33"
+			- Make note of the date this shot was administered as $dtAdministrationDate
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and $dateLastAdministeredShot >= "2y" && elapsed time between $dtBirthDate and $dateLastAdministeredShot < "5y"
+	then
+		Add "56d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child Series: Recommend PCV13/PCV15/PCV20 dose if series complete if no prior VALID PCV13, PCV15 or PCV20 doses, is < 5 yrs of age and will be less than 5 yrs of age upon recommendation date"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 450
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the Series is == 5
+			- the Number of Administered Shots is > 0
+			- make note of the date that the most recent shot was administered as $shotDate
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine a member of ("ICE133", "ICE215", "ICE216") is == 0
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
+		Confirm elapsed time between $dtBirthDate and (calculate date from addition of $shotDate with TimePeriod "8w") < "5y"
+	then
+		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
+		Include a recommendation as $recommendation with recommended forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
+		Create a recommendation as $supplementalText for the Series $targetSeries
+		Set the recommendation supplemental text for $supplementalText to "Administer either PCV15 or PCV20; if PCV15 or PCV20 is not available, PCV13 should be used."
+		Include the recommendation $supplementalText for consideration in the final forecast of the Series
+		Mark forecasting of the Series $targetSeries Complete
+		Insert an IceFact SupportedFactConcept._PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE.getConceptCodeValue() with TargetSeries $targetSeries into working memory
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child Series: if patient is < 5yrs completed the Child series (including a PCV13/PCV15/PCV20), recommend Not Recommended with reason COMPLETE_HIGH_RISK"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 425
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- the effective dose number in the Series is <= 6
+			- the effective dose number in the Series is > 4
+		There is an administered shot $shot
+			- the shot belongs to the Series $targetSeries
+			- the vaccine administered a member of ("ICE133", "ICE215", "ICE216")
+			- that has already been evaluated and whose Shot Validity is VALID
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime < "5y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child Series: if patient *will be* >= 5 years at the recommended due date and < 19 years and the series *is* complete but has not received a childhood PCV13/PCV15/PCV20 dose, then recommend Conditional/HIGH_RISK"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the Recommendation Date as $recommendationDate
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is < 7
+		There exists an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $targetSeries
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE.conceptCodeValue
+			- that has associated series $targetSeries
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and evalTime < "5y" && elapsed time between $birthDate and $recommendationDate >= "5y" && elapsed time between $birthDate and $recommendationDate < "19y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child Series: if patient **will be** >= 5 years at the recommended due date and < 19 years and the series *is not* complete, then recommend Conditional/HIGH_RISK"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- a Forecast for the Series has been made and a Recommendation Date has been determined
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the Recommendation Date as $recommendationDate
+			- post processing on the Series forecast has not already been run
+			- the effective dose number in the Series is < 7
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._PNEUMOCOCCAL_CHILD_SERIES_COMPLETE.conceptCodeValue
+			- that has associated series $targetSeries
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthDate
+		Confirm elapsed time between $birthDate and evalTime < "5y" && elapsed time between $birthDate and $recommendationDate >= "5y" && elapsed time between $birthDate and $recommendationDate < "19y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-Dose PCV Series and TargetDose 2 if Patient is between 7and12months and Received No Doses before 7months of Age"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 500
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- the numeric $nEffectiveDoseNumber is <= 2
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
+		There is a Series $sameTargetSeries identified by $targetSeries
+			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 0
+		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
+	then
+		Skip Series Dose Number to 2 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeSevenMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-Dose PCV Series and TargetDose 3 if Patient is between 7and12months and Received 1 Dose before 7months of Age"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 500
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- the numeric $nEffectiveDoseNumber is <= 3
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeSevenMonths when the Patient is "7m" of age
+		There is a Series $sameTargetSeries identified by $targetSeries
+			- the Number of Doses Administered before $dtDateAtAgeSevenMonths is == 1
+		Confirm elapsed time between $dtBirthDate and evalTime >= "7m" && elapsed time between $dtBirthDate and evalTime < "12m"
+	then
+		Skip Series Dose Number to 3 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeSevenMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 3 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child Series: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose PCV Series if Patient between age 12and24months and Received <2 Doses before 12months of Age"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 500
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- the numeric $nEffectiveDoseNumber is <= 3
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age
+		There is a Series $sameTargetSeries identified by $targetSeries
+			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is < 2
+		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
+	then
+		Skip Series Dose Number to 3 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 3 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child Series: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose PCV Series and Patient between age 12and24months and Received 2 Doses before 12months of Age"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 500
+	activation-group "recommendationAgeCheck"
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- the numeric $nEffectiveDoseNumber is <= 4
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeTwelveMonths when the Patient is "12m" of age
+		There is a Series $sameTargetSeries identified by $targetSeries
+			- the Number of Doses Administered before $dtDateAtAgeTwelveMonths is == 2
+		Confirm elapsed time between $dtBirthDate and evalTime >= "12m" && elapsed time between $dtBirthDate and evalTime < "24m"
+	then
+		Skip Series Dose Number to 4 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeTwelveMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Child Series: Set Recommendation Date to 24months and TargetDose 4 in 4-Dose PCV Series if Patient between age 24months and 5years"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 500
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- the numeric $nEffectiveDoseNumber is <= 4
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeTwentyFourMonths when the Patient is "24m" of age
+		There is a Series $sameTargetSeries identified by $targetSeries
+			- the Effective Number of Doses in the Series before $dtDateAtAgeTwentyFourMonths is < 4
+		Confirm elapsed time between $dtBirthDate and evalTime >= "24m" && elapsed time between $dtBirthDate and evalTime < "5y"
+	then
+		Skip Series Dose Number to 4 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtDateAtAgeTwentyFourMonths for Consideration in the final Forecast of the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult Series: Set Recommendation Date to 50y and Skip Dose to dose 6 (Adult Series target dose 1) if Patient >= 5y and no prior PCV15 or PCV20 dose"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 500
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- the numeric $nEffectiveDoseNumber is <= 6
+		There does not exist an administered shot
+			- the shot belongs to the Series $targetSeries
+			- the dose number in the Series is <= 6
+			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
+			- the vaccine administered a member of ("ICE133", "ICE215", "ICE216")
+
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeFiftyYears when the Patient is "50y" of age
+		Confirm elapsed time between $dtBirthDate and evalTime >= "5y"
+	then
+		Skip Series Dose Number to 6 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+
+		Set the Dose Number of Recommendation Forecast to 6 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Pneumococcal Adult: If the patient is >= 19 years of age, Skip to Target Dose 6"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 500
+	no-loop true
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.750"
+			- the name of the Series is "PneumococcalSeries"
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- the numeric $nEffectiveDoseNumber is <= 5
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+			- make note of the date as $dtDateAtAgeFiftyYears when the Patient is "19y" of age
+		Confirm elapsed time between $dtBirthDate and evalTime >= "19y"
+	then
+		Skip Series Dose Number to 6 from $nEffectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.481" in Series $targetSeries
+
+		Set the Dose Number of Recommendation Forecast to 6 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+

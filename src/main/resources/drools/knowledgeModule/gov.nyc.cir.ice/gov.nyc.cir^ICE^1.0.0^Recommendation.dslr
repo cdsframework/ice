@@ -1,0 +1,46 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.List;
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.TargetSeries;
+
+global java.util.Date evalTime;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+rule "Recommend No Earliest Interval When Prior Dose Before DOB"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+    when
+		There is a Series $targetSeries that needs forecasting
+			- at least one shot has been administered
+			- make note of the date that the most recent shot was administered as $shotDate
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm the date $shotDate is before $dtBirthDate
+    then
+       	Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Recommend No Recommended Interval When Prior Dose Before DOB"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationIntervalCheck"
+    when
+		There is a Series $targetSeries that needs forecasting
+			- at least one shot has been administered
+			- make note of the date that the most recent shot was administered as $shotDate
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm the date $shotDate is before $dtBirthDate
+    then
+       	Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
