@@ -45,20 +45,6 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 public class CdsConcept extends VmrOpenCdsConcept
 {
-    /**
-     * Construct a CdsConcept from a VmrOpenCdsConcept
-     */
-    public static CdsConcept constructCdsConceptFromVmrOpenCdsConcept(final VmrOpenCdsConcept pVOCC)
-    {
-        if (pVOCC == null)
-            return null;
-
-        final CdsConcept lIC = new CdsConcept(pVOCC.getOpenCdsConceptCode(), true, pVOCC.getDisplayName());
-        lIC.setConceptTargetId(pVOCC.getConceptTargetId());
-        lIC.setDeterminationMethodCode(pVOCC.getDeterminationMethodCode());
-        return lIC;
-    }
-
     public static CdsConcept constructDeepCopyOfCdsConceptObject(final CdsConcept pIC)
     {
         if (pIC == null)

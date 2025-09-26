@@ -27,15 +27,15 @@
 package org.cdsframework.ice.util;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
 import java.util.Objects;
 
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.joda.time.Months;
-import org.joda.time.Weeks;
-import org.joda.time.Years;
+import org.cdsframework.ice.service.ICELogicHelper;
 import org.springframework.util.ObjectUtils;
 
 import lombok.AccessLevel;
@@ -115,7 +115,7 @@ public class TimePeriod
 
     public static int numberOfDaysInMonth(final int year, final int month)
     {
-        return new DateTime(year, month, 14, 12, 0, 0, 0).dayOfMonth().getMaximumValue();
+        return YearMonth.of(year, month).lengthOfMonth();
     }
 
     public static int differenceInDays(final Date startDate, final Date endDate)
@@ -123,10 +123,7 @@ public class TimePeriod
         if (startDate == null || endDate == null)
             return 0;
 
-        final DateTime dtStart = new DateTime(startDate);
-        final DateTime dtEnd = new DateTime(endDate);
-        final Days d = Days.daysBetween(dtStart, dtEnd);
-        return d.getDays();
+        return Math.toIntExact(ChronoUnit.DAYS.between(ICELogicHelper.toLocalDate(startDate), ICELogicHelper.toLocalDate(endDate)));
     }
 
     public static int differenceInMonths(final Date startDate, final Date endDate)
@@ -134,10 +131,8 @@ public class TimePeriod
         if (startDate == null || endDate == null)
             return 0;
 
-        final DateTime dtStart = new DateTime(startDate);
-        final DateTime dtEnd = new DateTime(endDate);
-        final Months m = Months.monthsBetween(dtStart, dtEnd);
-        return m.getMonths();
+        return Math.toIntExact(
+                ChronoUnit.MONTHS.between(ICELogicHelper.toLocalDate(startDate), ICELogicHelper.toLocalDate(endDate)));
     }
 
     public static int differenceInWeeks(final Date startDate, final Date endDate)
@@ -145,10 +140,8 @@ public class TimePeriod
         if (startDate == null || endDate == null)
             return 0;
 
-        final DateTime dtStart = new DateTime(startDate);
-        final DateTime dtEnd = new DateTime(endDate);
-        final Weeks w = Weeks.weeksBetween(dtStart, dtEnd);
-        return w.getWeeks();
+        return Math.toIntExact(
+                ChronoUnit.WEEKS.between(ICELogicHelper.toLocalDate(startDate), ICELogicHelper.toLocalDate(endDate)));
     }
 
     public static int differenceInYears(final Date startDate, final Date endDate)
@@ -156,10 +149,8 @@ public class TimePeriod
         if (startDate == null || endDate == null)
             return 0;
 
-        final DateTime dtStart = new DateTime(startDate);
-        final DateTime dtEnd = new DateTime(endDate);
-        final Years y = Years.yearsBetween(dtStart, dtEnd);
-        return y.getYears();
+        return Math.toIntExact(
+                ChronoUnit.YEARS.between(ICELogicHelper.toLocalDate(startDate), ICELogicHelper.toLocalDate(endDate)));
     }
 
     /**
@@ -182,42 +173,39 @@ public class TimePeriod
             return startDate;
 
         final int duration = pTP.getDuration();
-        LocalDate startLD = new LocalDate(startDate);
         final DurationType tpType = pTP.getDurationType();
 
-        switch (tpType)
+        return Date.from((switch (tpType)
         {
-            case DAYS -> startLD = startLD.plusDays(duration);
+            case DAYS -> startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusDays(duration);
             case MONTHS ->
             {
+                LocalDate startLD = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 final int dayOfMonthBeforeCalculation = startLD.getDayOfMonth();
                 startLD = startLD.plusMonths(duration);
                 if (startLD.getDayOfMonth() < dayOfMonthBeforeCalculation && startLD.isEqual(
-                        startLD.dayOfMonth().withMaximumValue()))
+                        startLD.with(TemporalAdjusters.lastDayOfMonth())))
                 {
                     startLD = startLD.plusDays(1);
                 }
+
+                yield startLD;
             }
-            case WEEKS -> startLD = startLD.plusWeeks(duration);
+            case WEEKS -> startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusWeeks(duration);
             case YEARS ->
             {
+                LocalDate startLD = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
                 final int dayOfMonthBeforeCalculation = startLD.getDayOfMonth();
                 startLD = startLD.plusYears(duration);
                 if (startLD.getDayOfMonth() < dayOfMonthBeforeCalculation && startLD.isEqual(
-                        startLD.dayOfMonth().withMaximumValue()))
+                        startLD.with(TemporalAdjusters.lastDayOfMonth())))
                 {
                     startLD = startLD.plusDays(1);
                 }
-            }
-            default ->
-            {
-                final String str = "Invalid TimePeriod.DurationType supplied";
-                log.warn(_METHODNAME + str);
-                throw new IllegalArgumentException(str);
-            }
-        }
 
-        return startLD.toDate();
+                yield startLD;
+            }
+        }).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     }
 
     /**

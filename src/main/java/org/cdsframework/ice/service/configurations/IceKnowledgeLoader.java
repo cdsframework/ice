@@ -88,7 +88,7 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
             lRequestedKmId = "gov.nyc.cir^ICE^1.0.0";
             lKMId = KMIdImpl.create("gov.nyc.cir", "ICE", "1.0.0");
         }
-        log.info("Initializing ICE3 Drools 7 KnowledgeBase - Knowledge Module {}", lRequestedKmId);
+        log.info("Initializing ICE3 Drools KnowledgeBase - Knowledge Module {}", lRequestedKmId);
 
         final ICEPropertiesDataConfiguration iceConfig = new ICEPropertiesDataConfiguration();
         final Properties lProps = iceConfig.getProperties();

@@ -26,6 +26,7 @@
 
 package org.cdsframework.ice.service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,7 +39,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.joda.time.LocalDate;
 import org.kie.api.definition.type.ClassReactive;
 
 import com.google.common.base.Predicates;
@@ -184,8 +184,8 @@ public class TargetSeasons
                     {
                         final LocalDate lNextSeasonStartDate = lNextSeason.getFullySpecifiedSeasonStartDate();
                         final LocalDate lMostRecentExaminedOffSeasonEndDate = lNextSeasonStartDate.minusDays(1);
-                        if (lMostRecentExaminedOffSeasonEndDate.compareTo(
-                                lMostRecentSeasonExamined.getFullySpecifiedSeasonEndDate()) >= 0)
+                        if (!lMostRecentExaminedOffSeasonEndDate.isBefore(
+                                lMostRecentSeasonExamined.getFullySpecifiedSeasonEndDate()))
                         {
                             if (lMostRecentSeasonExamined.isOffSeasonPermitted())
                             {
@@ -260,8 +260,8 @@ public class TargetSeasons
 
         final int lSeasonEndDateYear = pFullySpecifiedSeason.getSeasonEndYear();
         LocalDate nextSeasonStartDate =
-                new LocalDate(lSeasonEndDateYear, pDefaultSeason.getSeasonStartMonth(), pDefaultSeason.getSeasonStartDay());
-        if (nextSeasonStartDate.compareTo(pFullySpecifiedSeason.getFullySpecifiedSeasonEndDate()) <= 0)
+                LocalDate.of(lSeasonEndDateYear, pDefaultSeason.getSeasonStartMonth(), pDefaultSeason.getSeasonStartDay());
+        if (!nextSeasonStartDate.isAfter(pFullySpecifiedSeason.getFullySpecifiedSeasonEndDate()))
             nextSeasonStartDate = nextSeasonStartDate.plusYears(1);
 
         return nextSeasonStartDate.minusDays(1);

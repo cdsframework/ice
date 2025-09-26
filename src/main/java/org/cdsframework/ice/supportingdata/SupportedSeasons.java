@@ -26,6 +26,8 @@
 
 package org.cdsframework.ice.supportingdata;
 
+import java.time.LocalDate;
+import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,12 +41,11 @@ import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.ice.service.ICECoreError;
+import org.cdsframework.ice.service.ICELogicHelper;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Season;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.util.support.data.ice.season.IceSeasonSpecificationFile;
-import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.springframework.util.ObjectUtils;
 
@@ -213,17 +214,17 @@ public class SupportedSeasons implements SupportingData
             }
 
             final LocalDate lJodaFullySpecifiedSeasonStartDate =
-                    LocalDate.fromDateFields(pIceSeasonSpecificationFile.getStartDate());
-            final LocalDate lJodaFullySpecifiedSeasonEndDate = LocalDate.fromDateFields(pIceSeasonSpecificationFile.getEndDate());
+                    ICELogicHelper.toLocalDate(pIceSeasonSpecificationFile.getStartDate());
+            final LocalDate lJodaFullySpecifiedSeasonEndDate = ICELogicHelper.toLocalDate(pIceSeasonSpecificationFile.getEndDate());
             final Season lS =
-                    new Season(lSeasonCode, lcvgi.getCdsItemName(), true, lJodaFullySpecifiedSeasonStartDate.getMonthOfYear(),
+                    new Season(lSeasonCode, lcvgi.getCdsItemName(), true, lJodaFullySpecifiedSeasonStartDate.getMonthValue(),
                             lJodaFullySpecifiedSeasonStartDate.getDayOfMonth(), lJodaFullySpecifiedSeasonStartDate.getYear(),
-                            lJodaFullySpecifiedSeasonEndDate.getMonthOfYear(), lJodaFullySpecifiedSeasonEndDate.getDayOfMonth(),
+                            lJodaFullySpecifiedSeasonEndDate.getMonthValue(), lJodaFullySpecifiedSeasonEndDate.getDayOfMonth(),
                             lJodaFullySpecifiedSeasonEndDate.getYear());
             // If the off-season is set in the XML, set it here too
             if (pIceSeasonSpecificationFile.getOffSeasonEndDate() != null)
                 lS.setOffSeasonEndDateForFullySpecifiedSeason(
-                        LocalDate.fromDateFields(pIceSeasonSpecificationFile.getOffSeasonEndDate()));
+                        ICELogicHelper.toLocalDate(pIceSeasonSpecificationFile.getOffSeasonEndDate()));
             lSeasonsListForVG.add(lS);
             this.cdsListItemNameToSeasonItem.put(lSeasonCode,
                     new LocallyCodedSeasonItem(lSeasonCode, pIceSeasonSpecificationFile.getCdsVersions(), lS));
@@ -263,8 +264,8 @@ public class SupportedSeasons implements SupportingData
                 this.isSupportingDataConsistent = false;
                 throw new InconsistentConfigurationException(lErrStr);
             }
-            final Season lS = new Season(lSeasonCode, lcvgi.getCdsItemName(), true, lStartMonthDay.getMonthOfYear(),
-                    lStartMonthDay.getDayOfMonth(), lEndMonthDay.getMonthOfYear(), lEndMonthDay.getDayOfMonth());
+            final Season lS = new Season(lSeasonCode, lcvgi.getCdsItemName(), true, lStartMonthDay.getMonthValue(),
+                    lStartMonthDay.getDayOfMonth(), lEndMonthDay.getMonthValue(), lEndMonthDay.getDayOfMonth());
             lSeasonsListForVG.add(lS);
             this.cdsListItemNameToSeasonItem.put(lSeasonCode,
                     new LocallyCodedSeasonItem(lSeasonCode, pIceSeasonSpecificationFile.getCdsVersions(), lS));
@@ -344,7 +345,7 @@ public class SupportedSeasons implements SupportingData
 
         try
         {
-            return new MonthDay(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(3)));
+            return MonthDay.of(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(3)));
         }
         catch (final IllegalStateException ise)
         {

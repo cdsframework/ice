@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cdsframework</groupId>
     <artifactId>opencds-ice-service</artifactId>
-    <version>2.49.1-SNAPSHOT</version>
+    <version>2.50.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>Immunization Calculation Engine</name>
-    <description>ICE Implementation of DSS Evaluation Operation using Drools 7</description>
+    <description>ICE Implementation of DSS Evaluation Operation using Drools</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,7 +27,6 @@
         <log4j.version>2.25.1</log4j.version>
         <drools.version>7.74.1.Final</drools.version>
         <jackson.version>2.19.2</jackson.version>
-        <joda-time.version>2.14.0</joda-time.version>
         <lombok.version>1.18.38</lombok.version>
         <guava.version>33.4.8-jre</guava.version>
         <spring-framework.version>6.2.9</spring-framework.version>
@@ -386,12 +385,6 @@
         </dependency>
 
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${joda-time.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
@@ -466,28 +459,6 @@
                 <version>${jaxb-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>client</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <schemaDirectory>${basedir}/src/main/resources/client</schemaDirectory>
-                            <schemaIncludes>
-                                <include>BPMN20.xsd</include>
-                                <include>codeSystem.xsd</include>
-                                <include>code.xsd</include>
-                                <include>conceptType.xsd</include>
-                                <include>supportedConceptType.xsd</include>
-                                <include>conceptMapping.xsd</include>
-                                <include>adapter-client.xsd</include>
-                            </schemaIncludes>
-                            <bindingIncludes>
-                                <include>bindings-client.xjb.xml</include>
-                            </bindingIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/client</generateDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>jaxb-generate-cdsframework</id>
                         <goals>
                             <goal>generate</goal>
@@ -496,7 +467,7 @@
                             <args>
                                 <arg>-extension</arg>
                             </args>
-                            <schemaDirectory>${basedir}/src/main/resources/xml</schemaDirectory>
+                            <schemaDirectory>src/main/resources/xml</schemaDirectory>
                             <schemaIncludes>
                                 <include>*.xsd</include>
                             </schemaIncludes>
@@ -511,39 +482,6 @@
                     <extension>true</extension>
                     <verbose>true</verbose>
                     <markGenerated>true</markGenerated>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.sun.xml.ws</groupId>
-                <artifactId>jaxws-maven-plugin</artifactId>
-                <version>${jaxws-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>wsimport-generate-evaluate</id>
-                        <goals>
-                            <goal>wsimport</goal>
-                        </goals>
-                        <configuration>
-                            <wsdlDirectory>${basedir}/src/main/resources/client</wsdlDirectory>
-                            <wsdlFiles>
-                                <wsdlFile>evaluate.wsdl</wsdlFile>
-                            </wsdlFiles>
-                            <bindingDirectory>${basedir}/src/main/resources/client</bindingDirectory>
-                            <bindingFiles>
-                                <bindingFile>bindings-ws.xjb.xml</bindingFile>
-                                <bindingFile>adapter-ws.xsd</bindingFile>
-                            </bindingFiles>
-                            <wsdlLocation>https://cds.hln.com/opencds-decision-support-service/evaluate?wsdl</wsdlLocation>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <xnocompile>true</xnocompile>
-                    <verbose>true</verbose>
-                    <extension>true</extension>
-                    <xjcArgs>
-                        <xjcArg>-mark-generated</xjcArg>
-                    </xjcArgs>
                 </configuration>
             </plugin>
         </plugins>

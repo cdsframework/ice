@@ -62,17 +62,4 @@ public class DateUtilsTest
         final String expResult = formatter.format(new Date());
         Assert.assertEquals(expResult, formatter.format(DateUtils.parseISODateFormat(expResult)));
     }
-
-    /**
-     * Test of parseISODateFormat method, of class DateUtils.
-     */
-    @Test
-    public void testParseISODateFormat2() throws Exception
-    {
-        log.info("parseISODateFormat");
-        final String dateString = "20130610000000.000-0400";
-        final String expResult = new SimpleDateFormat("yyyyMMdd").format(DateUtils.parseISODateFormat(dateString));
-        log.info("expResult: {}", expResult);
-        Assert.assertEquals(dateString, dateString);
-    }
 }

@@ -40,7 +40,7 @@ import org.opencds.config.api.ExecutionEngineContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public record ICEDecisionEngineDSS7EvaluationAdapter()
+public record ICEDecisionEngineDSSEvaluationAdapter()
         implements ExecutionEngineAdapter<List<Command<?>>, ExecutionResults, IceKnowledgePackage>
 {
     @Override
