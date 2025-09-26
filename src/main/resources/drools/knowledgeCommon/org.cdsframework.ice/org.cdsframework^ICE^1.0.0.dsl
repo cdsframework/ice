@@ -214,9 +214,9 @@
 [condition][]There is {entity:a |}[Ss]eason {assign_oSeason}={assign_oSeason} : Season()
 [condition][]- [Tt]he [Nn]ame of the [Ss]eason is {sNameOfSeason}=seasonName == {sNameOfSeason}
 [condition][]- [Tt]he [Ss]eason belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=vaccineGroup == {dd_oVaccineGroupCdsListItem}
-[condition][]- [Tt]he [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate is {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=fullySpecifiedSeasonStartDate != null && {strDate} != null && fullySpecifiedSeasonStartDate.toDate() {aOp} {strDate}
-[condition][]- [Tt]he [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate is {aOp:[\=\\<\\>]+}  {dtObject}=fullySpecifiedSeasonStartDate != null && {dtObject} != null && fullySpecifiedSeasonStartDate.toDate() {aOp} {dtObject}
-[condition][]- [Mm]ake [Nn]ote of the [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate as {assign_dtSeasonStartDate}={assign_dtSeasonStartDate} : fullySpecifiedSeasonStartDate.toDate(), {assign_dtSeasonStartDate} != null
+[condition][]- [Tt]he [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate is {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=fullySpecifiedSeasonStartDate != null && {strDate} != null && ICELogicHelper.toDate(fullySpecifiedSeasonStartDate) {aOp} {strDate}
+[condition][]- [Tt]he [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate is {aOp:[\=\\<\\>]+}  {dtObject}=fullySpecifiedSeasonStartDate != null && {dtObject} != null && ICELogicHelper.toDate(fullySpecifiedSeasonStartDate) {aOp} {dtObject}
+[condition][]- [Mm]ake [Nn]ote of the [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate as {assign_dtSeasonStartDate}={assign_dtSeasonStartDate} : ICELogicHelper.toDate(fullySpecifiedSeasonStartDate), {assign_dtSeasonStartDate} != null
 
 [condition][]There exists {entity:a |another |}[Rr]ecommendation=exists Recommendation()
 [condition][]There does not exist {entity:a |another |}[Rr]ecommendation=not Recommendation()

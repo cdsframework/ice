@@ -26,9 +26,13 @@
 
 package org.cdsframework.ice.service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
@@ -148,5 +152,26 @@ public class ICELogicHelper
 
         // Compare dates
         return Integer.compare(dateday2, dateday1);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static LocalDate toLocalDate(final Date date)
+    {
+        return Optional.ofNullable(date)
+                .map(Date::toInstant)
+                .map(i -> i.atZone(ZoneId.systemDefault()))
+                .map(ZonedDateTime::toLocalDate)
+                .orElse(null);
+    }
+
+    @Deprecated(forRemoval = true)
+    public static Date toDate(final LocalDate localDate)
+    {
+        return Optional.ofNullable(localDate)
+                .map(LocalDate::atStartOfDay)
+                .map(ldt -> ldt.atZone(ZoneId.systemDefault()))
+                .map(ZonedDateTime::toInstant)
+                .map(Date::from)
+                .orElse(null);
     }
 }

@@ -26,6 +26,7 @@
 
 package org.cdsframework.ice.service;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1511,7 +1512,8 @@ public class TargetSeries
         Date ageDate = TimePeriod.addTimePeriod(pEvalPersonBirthTime, rAge);
         if (targetSeasonExists())
         {
-            final Date seasonStartDate = targetSeason.getFullySpecifiedSeasonStartDate().toDate();
+            final Date seasonStartDate = Date.from(
+                    targetSeason.getFullySpecifiedSeasonStartDate().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             if (ageDate.before(seasonStartDate))
                 ageDate = seasonStartDate;
             //////// Don't do this.. let the recommended age go through; otherwise too much logic ?
@@ -1683,9 +1685,9 @@ public class TargetSeries
         // AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
         // If this is a Seasonal TargetSeries and the rIntervalDate is after the off-season end date, then set the recommendation to the beginning of the next season
         if (this.targetSeason != null && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate() != null
-                && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().toDate().compareTo(rIntervalDate) < 0)
+                && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().isBefore(ICELogicHelper.toLocalDate(rIntervalDate)))
         {
-            rIntervalDate = targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1).toDate();
+            rIntervalDate = ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1));
         }
 
         // Otherwise, store the interval recommendation
@@ -3520,7 +3522,7 @@ public class TargetSeries
         if (targetSeason == null)
             return null;
 
-        return targetSeason.getFullySpecifiedSeasonStartDate().toDate();
+        return ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonStartDate());
     }
 
     /**
@@ -3533,7 +3535,7 @@ public class TargetSeries
         if (targetSeason == null)
             return null;
 
-        return targetSeason.getFullySpecifiedSeasonEndDate().toDate();
+        return ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonEndDate());
     }
 
     /**
@@ -3546,7 +3548,7 @@ public class TargetSeries
         if (targetSeason == null)
             return null;
 
-        return targetSeason.getFullySpecifiedSeasonOffSeasonStartDate().toDate();
+        return ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonOffSeasonStartDate());
     }
 
     /**
@@ -3559,7 +3561,7 @@ public class TargetSeries
         if (targetSeason == null)
             return null;
 
-        return targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().toDate();
+        return ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonOffSeasonEndDate());
     }
 
     public String getSeriesName()

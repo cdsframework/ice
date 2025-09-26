@@ -1,7 +1,5 @@
 package org.cdsframework.ice.supportingdatatmp;
 
-import java.util.Arrays;
-
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 public enum SupportedFactConcept
@@ -32,17 +30,6 @@ public enum SupportedFactConcept
             "Pneumococcal- Recommended Child Receive PCV13, PCV15 or PCV20 Dose"),
     _PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE("ICE_FACT-_PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE",
             "Pneumococcal- Recommended Child Receive PCV13, PC15 or PCV20 Dose");
-
-    /**
-     * Return SupportedEvaluationConcept for the specified concept code; null if no associated SupportedEvaluationConcept exists
-     */
-    public static SupportedFactConcept getSupportedFactConceptByConceptCode(final String conceptCode)
-    {
-        if (conceptCode == null)
-            return null;
-
-        return Arrays.stream(values()).filter(vc -> conceptCode.equals(vc.getConceptCodeValue())).findFirst().orElse(null);
-    }
 
     private final CD supportedFactConcept;
 

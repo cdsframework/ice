@@ -26,13 +26,15 @@
 
 package org.cdsframework.ice.service;
 
+import java.time.LocalDate;
+import java.time.MonthDay;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import org.joda.time.LocalDate;
-import org.joda.time.MonthDay;
+import org.kie.api.definition.type.ClassReactive;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -46,6 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Slf4j
+@ClassReactive
 public class Season
 {
     private enum SeasonDateType
@@ -93,18 +96,18 @@ public class Season
         if (!pSeason.isDefaultSeason())
             return pSeason;
 
-        final LocalDate requestDate = new LocalDate(applicableDate);
+        final LocalDate requestDate = applicableDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         final int requestYear = requestDate.getYear();
-        final int requestMonth = requestDate.getMonthOfYear();
-        final int defaultStartMonth = pSeason.defaultStartMonthAndDay.getMonthOfYear();
+        final int requestMonth = requestDate.getMonthValue();
+        final int defaultStartMonth = pSeason.defaultStartMonthAndDay.getMonthValue();
         final int defaultStartDay = pSeason.defaultStartMonthAndDay.getDayOfMonth();
-        final int defaultEndMonth = pSeason.defaultEndMonthAndDay.getMonthOfYear();
+        final int defaultEndMonth = pSeason.defaultEndMonthAndDay.getMonthValue();
         final int defaultEndDay = pSeason.defaultEndMonthAndDay.getDayOfMonth();
 
         int startYear = requestYear;
         int endYear = requestYear;
 
-        final MonthDay applicableDateMonthDay = new MonthDay(applicableDate);
+        final MonthDay applicableDateMonthDay = MonthDay.from(applicableDate.toInstant().atZone(ZoneId.systemDefault()));
         if (monthAndDayFallsWithinRange(requestMonth, requestDate.getDayOfMonth(), defaultStartMonth, defaultStartDay,
                 defaultEndMonth, defaultEndDay))
         {
@@ -144,13 +147,13 @@ public class Season
             throw new IllegalArgumentException(errStr);
         }
 
-        new MonthDay(month, day);        // Check that month and day values sent are valid; MonthDay throws an exception if not
+        MonthDay.of(month, day);        // Check that month and day values sent are valid; MonthDay throws an exception if not
 
         // Only compare with respect to month and day. Determine set of relevant months of pS Season;
         final Set<Integer> relevantMonthsOfPS = new HashSet<>();
-        final int rangeStartMonth = rangeStart.getMonthOfYear();
+        final int rangeStartMonth = rangeStart.getMonthValue();
         final int rangeStartDay = rangeStart.getDayOfMonth();
-        final int rangeEndMonth = rangeEnd.getMonthOfYear();
+        final int rangeEndMonth = rangeEnd.getMonthValue();
         final int rangeEndDay = rangeEnd.getDayOfMonth();
         if (rangeStartMonth > rangeEndMonth)
         {
@@ -208,8 +211,8 @@ public class Season
     public static boolean monthAndDayFallsWithinRange(final int month, final int day, final int rangeStartMonth,
             final int rangeStartDay, final int rangeEndMonth, final int rangeEndDay)
     {
-        return monthAndDayFallsWithinRange(month, day, new MonthDay(rangeStartMonth, rangeStartDay),
-                new MonthDay(rangeEndMonth, rangeEndDay));
+        return monthAndDayFallsWithinRange(month, day, MonthDay.of(rangeStartMonth, rangeStartDay),
+                MonthDay.of(rangeEndMonth, rangeEndDay));
     }
 
     private String seasonName;
@@ -249,8 +252,8 @@ public class Season
         this.seasonName = seasonName;
         this.associatedVaccineGroup = svgc;
         this.definedBySeriesTableRules = definedBySeriesTableRules;
-        this.seasonStartDate = new LocalDate(startYear, startMonth, startDay);
-        this.seasonEndDate = new LocalDate(endYear, endMonth, endDay);
+        this.seasonStartDate = LocalDate.of(startYear, startMonth, startDay);
+        this.seasonEndDate = LocalDate.of(endYear, endMonth, endDay);
         this.defaultSeason = false;
         this.offSeasonPermitted = true;
     }
@@ -274,8 +277,8 @@ public class Season
         this.seasonName = seasonName;
         this.associatedVaccineGroup = svgc;
         this.definedBySeriesTableRules = definedBySeriesTableRules;
-        this.defaultStartMonthAndDay = new MonthDay(defaultStartMonth, defaultStartDay);
-        this.defaultEndMonthAndDay = new MonthDay(defaultEndMonth, defaultEndDay);
+        this.defaultStartMonthAndDay = MonthDay.of(defaultStartMonth, defaultStartDay);
+        this.defaultEndMonthAndDay = MonthDay.of(defaultEndMonth, defaultEndDay);
         this.defaultSeason = true;
         this.offSeasonPermitted = true;
     }
@@ -470,7 +473,7 @@ public class Season
      */
     public void setOffSeasonEndDateForFullySpecifiedSeason(final int month, final int day, final int year)
     {
-        setOffSeasonEndDateForFullySpecifiedSeason(new LocalDate(year, month, day));
+        setOffSeasonEndDateForFullySpecifiedSeason(LocalDate.of(year, month, day));
     }
 
     /**
@@ -590,9 +593,9 @@ public class Season
         if (pDate == null)
             return false;
 
-        final LocalDate lDate = LocalDate.fromDateFields(pDate);
+        final LocalDate lDate = pDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         if (isDefaultSeason())
-            return !monthAndDayFallsWithinRange(lDate.getMonthOfYear(), lDate.getDayOfMonth(),
+            return !monthAndDayFallsWithinRange(lDate.getMonthValue(), lDate.getDayOfMonth(),
                     this.getDefaultSeasonStartMonthAndDay(), this.getDefaultSeasonEndMonthAndDay());
 
         final LocalDate lOffSeasonStartDate = getFullySpecifiedSeasonOffSeasonStartDate();
@@ -602,7 +605,7 @@ public class Season
         if (this.offSeasonEndDate.equals(lOffSeasonStartDate))
             return false;
 
-        return lDate.compareTo(this.offSeasonEndDate) <= 0 && lDate.compareTo(lOffSeasonStartDate) >= 0;
+        return !lDate.isAfter(this.offSeasonEndDate) && !lDate.isBefore(lOffSeasonStartDate);
     }
 
     /**
@@ -622,7 +625,7 @@ public class Season
         if (pDate == null)
             return false;
 
-        return dateIsApplicableToSeason(LocalDate.fromDateFields(pDate), includeOffSeason);
+        return dateIsApplicableToSeason(pDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), includeOffSeason);
     }
 
     /**
@@ -649,7 +652,7 @@ public class Season
             if (log.isDebugEnabled())
                 log.debug("seasonStartDate: {}; endDateToUse: {}", seasonStartDate, endDateToUse);
 
-            if (pDate.compareTo(seasonStartDate) >= 0 && pDate.compareTo(endDateToUse) <= 0)
+            if (!pDate.isBefore(seasonStartDate) && !pDate.isAfter(endDateToUse))
             {
                 if (log.isDebugEnabled())
                     log.debug(_METHODNAME + "returning true");
@@ -667,7 +670,7 @@ public class Season
         if (includeOffSeason)
             return true;
 
-        return monthAndDayFallsWithinRange(pDate.getMonthOfYear(), pDate.getDayOfMonth(), this.getDefaultSeasonStartMonthAndDay(),
+        return monthAndDayFallsWithinRange(pDate.getMonthValue(), pDate.getDayOfMonth(), this.getDefaultSeasonStartMonthAndDay(),
                 this.getDefaultSeasonEndMonthAndDay());
     }
 
@@ -735,7 +738,7 @@ public class Season
 
             final Season priorSeason;
             final Season laterSeason;
-            if (seasonStartThis.compareTo(seasonStartPS) <= 0)
+            if (!seasonStartThis.isAfter(seasonStartPS))
             {
                 priorSeason = this;
                 laterSeason = pS;
@@ -746,9 +749,9 @@ public class Season
                 laterSeason = this;
             }
 
-            return priorSeason.getFullySpecifiedSeasonStartDate().compareTo(laterSeason.getFullySpecifiedSeasonStartDate()) >= 0
-                    || priorSeason.getFullySpecifiedSeasonEndDate() == null
-                    || priorSeason.getFullySpecifiedSeasonEndDate().compareTo(laterSeason.getFullySpecifiedSeasonStartDate()) >= 0;
+            return !priorSeason.getFullySpecifiedSeasonStartDate().isBefore(laterSeason.getFullySpecifiedSeasonStartDate())
+                    || priorSeason.getFullySpecifiedSeasonEndDate() == null || !priorSeason.getFullySpecifiedSeasonEndDate()
+                    .isBefore(laterSeason.getFullySpecifiedSeasonStartDate());
         }
 
         // Seasons do not overlap
@@ -765,13 +768,13 @@ public class Season
             if (this.defaultStartMonthAndDay == null)
                 return 0;
 
-            return this.defaultStartMonthAndDay.getMonthOfYear();
+            return this.defaultStartMonthAndDay.getMonthValue();
         }
 
         if (seasonStartDate == null)
             return 0;
 
-        return this.seasonStartDate.getMonthOfYear();
+        return this.seasonStartDate.getMonthValue();
     }
 
     /**
@@ -784,13 +787,13 @@ public class Season
             if (this.defaultEndMonthAndDay == null)
                 return 0;
 
-            return this.defaultEndMonthAndDay.getMonthOfYear();
+            return this.defaultEndMonthAndDay.getMonthValue();
         }
 
         if (seasonEndDate == null)
             return 0;
 
-        return this.seasonEndDate.getMonthOfYear();
+        return this.seasonEndDate.getMonthValue();
     }
 
     /**
@@ -804,7 +807,7 @@ public class Season
         if (offSeasonEndDate == null)
             return 0;
 
-        return this.offSeasonEndDate.getMonthOfYear();
+        return this.offSeasonEndDate.getMonthValue();
     }
 
     /**

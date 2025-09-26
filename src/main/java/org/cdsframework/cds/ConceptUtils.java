@@ -71,20 +71,6 @@ public class ConceptUtils
     }
 
     /**
-     * Check to see that two CD elements are equal and minimally populated; two null CD elements are not equal
-     */
-    public static boolean cDElementsArePopulatedAndEqual(final CD pCD1, final CD pCD2)
-    {
-        if (pCD1 == null || pCD2 == null)
-            return false;
-
-        if (requiredAttributesForCDSpecified(pCD1) && requiredAttributesForCDSpecified(pCD2))
-            return pCD1.equals(pCD2);
-
-        return false;
-    }
-
-    /**
      * Returns a string representation of the schema CD element
      */
     public static String toStringCD(final org.opencds.vmr.v1_0.schema.CD lCD)

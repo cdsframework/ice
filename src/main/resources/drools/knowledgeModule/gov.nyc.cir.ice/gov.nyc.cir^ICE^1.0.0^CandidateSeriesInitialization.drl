@@ -31,7 +31,7 @@ rule "CandidateSeriesIdentification (Influenza): Initialize TargetSeries for *CU
 	when
 		$s : SeriesRules($vg : vaccineGroup, $sseriesName : seriesName, vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seasons.size() > 0)
 		not Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, dateIsApplicableToSeason(evalTime))
-		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, $priorSeasonStart.toDate() < evalTime)
+		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, ICELogicHelper.toDate($priorSeasonStart) < evalTime)
 		Number(intValue > 0) from accumulate($accseason : Season(this == $priorSeason) from $s.seasons, count($accseason))
 		not Season(vaccineGroup == $s.vaccineGroup, isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, fullySpecifiedSeasonStartDate.isAfter($priorSeason.fullySpecifiedSeasonStartDate))
 		not (TargetSeries(seriesName == $s.seriesName, vaccineGroup == $s.vaccineGroup, targetSeason != null, targetSeason ==
@@ -61,7 +61,7 @@ rule "CandidateSeriesIdentification (Influenza): Initialize TargetSeries for *Cu
 		ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode)
 		SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		$s : SeriesRules($sseriesName : seriesName, vaccineGroup == "VACCINE_GROUP_CONCEPT.800", seasons.size() > 0)
-		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, $priorSeasonStart.toDate() < $shotDate)
+		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, ICELogicHelper.toDate($priorSeasonStart) < $shotDate)
 		Number(intValue > 0) from accumulate($accseason : Season(this == $priorSeason) from $s.seasons, count($accseason))
 		not Season(vaccineGroup == $s.vaccineGroup, isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, fullySpecifiedSeasonStartDate.isAfter($priorSeason.fullySpecifiedSeasonStartDate))
 		not (TargetSeries(seriesName == $s.seriesName, vaccineGroup == $s.vaccineGroup, targetSeason != null, targetSeason ==
@@ -153,7 +153,7 @@ rule "CandidateSeriesIdentification(RSV): If the patient age is <= the RSV Infan
 		$s: SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesName == "RSVInfantSeries", seasons.size() > 0, seriesEndAge != null)
 		not Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, dateIsApplicableToSeason(evalTime))
 
-		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, $priorSeasonStart.toDate() < evalTime)
+		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, ICELogicHelper.toDate($priorSeasonStart) < evalTime)
 		Number(intValue > 0) from accumulate($accseason : Season(this == $priorSeason) from $s.seasons, count($accseason))
 		not Season(vaccineGroup == $s.vaccineGroup, isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, fullySpecifiedSeasonStartDate.isAfter($priorSeason.fullySpecifiedSeasonStartDate))
 		not (TargetSeries(seriesName == $s.seriesName, vaccineGroup == $s.vaccineGroup, targetSeason != null, targetSeason ==
@@ -185,7 +185,7 @@ rule "CandidateSeriesIdentification(RSV): If a shot was administered <= the RSV 
 		SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		$s : SeriesRules($sseriesName : seriesName, vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seasons.size() > 0)
 
-		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, $priorSeasonStart.toDate() < $shotDate)
+		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, ICELogicHelper.toDate($priorSeasonStart) < $shotDate)
 		Number(intValue > 0) from accumulate($accseason : Season(this == $priorSeason) from $s.seasons, count($accseason))
 		not Season(vaccineGroup == $s.vaccineGroup, isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, fullySpecifiedSeasonStartDate.isAfter($priorSeason.fullySpecifiedSeasonStartDate))
 		not (TargetSeries(seriesName == $s.seriesName, vaccineGroup == $s.vaccineGroup, targetSeason != null, targetSeason ==
