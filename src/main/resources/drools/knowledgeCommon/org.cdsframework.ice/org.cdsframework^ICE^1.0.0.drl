@@ -2135,7 +2135,7 @@ rule "ProcessResults: Return Evaluations"
 		$evalTime: EvalTime()
 	then
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true);
+		p.outputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
 		insert(saeEvaluation);
@@ -2159,7 +2159,7 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - always rese
 	then
 		PayloadHelper p = new PayloadHelper(schedule);
 		int doseNumberToDisplay = $numberOfPreviousDoses.intValue() == 0 ? 1 : $numberOfPreviousDoses.intValue()+1;
-		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, doseNumberToDisplay);
+		p.outputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, doseNumberToDisplay);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
 		insert(saeEvaluation);
@@ -2180,7 +2180,7 @@ rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do no
 		$evalTime: EvalTime()
 	then
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $numberOfPreviousDoses.intValue()+1);
+		p.outputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $numberOfPreviousDoses.intValue()+1);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
 		insert(saeEvaluation);
@@ -2199,7 +2199,7 @@ rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
 		$evalTime: EvalTime()
 	then
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputNestedImmEvaluationNotSupported(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, "VACCINE_GROUP_CONCEPT.999");
+		p.outputNestedImmEvaluationNotSupported(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, "VACCINE_GROUP_CONCEPT.999");
 		$sae.setToBeReturned(true);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $sae);
 end
@@ -2255,7 +2255,7 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series"
 		$evalTime: EvalTime()
 	then
 		PayloadHelper p = new PayloadHelper(schedule);
-		SubstanceAdministrationProposal sap = p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
+		SubstanceAdministrationProposal sap = p.outputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
 		insert(sap);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
@@ -2273,7 +2273,7 @@ rule "ProcessResults: Return Recommendations For Seasonal Series"
 		not TargetSeries(vaccineGroup == $vg, targetSeason != null,	targetSeason.fullySpecifiedSeasonStartDate.isAfter($tseasonStartDate))
 	then
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
+		p.outputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
 
@@ -2452,7 +2452,7 @@ rule "Series Display: Output Series Display Selections and Number of Doses Remai
 
 	then
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.OutputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(drools, namedObjects, focalPersonId, $sdlist, $sap);
+		p.outputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(drools, namedObjects, focalPersonId, $sdlist, $sap);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Display Selection \": " + $ts.seriesName);
 end
 

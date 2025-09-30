@@ -191,21 +191,21 @@ public record PayloadHelper(Schedule backingSchedule)
         }
     }
 
-    public void OutputNestedImmEvaluationResult(final KnowledgeHelper k, final Map<String, Object> pNamedObjects,
+    public void outputNestedImmEvaluationResult(final KnowledgeHelper k, final Map<String, Object> pNamedObjects,
             final EvalTime evalTime, final String focalPersonId, final String cdsSource, final SubstanceAdministrationEvent sae,
             final String vg, final TargetDose d, final boolean outputSupplementalText,
             final boolean outputDoseCountInsteadOfDoseNumberInSeries)
     {
-        OutputNestedImmEvaluationResult(k, pNamedObjects, evalTime, focalPersonId, cdsSource, sae, vg, d, outputSupplementalText,
+        outputNestedImmEvaluationResult(k, pNamedObjects, evalTime, focalPersonId, cdsSource, sae, vg, d, outputSupplementalText,
                 outputDoseCountInsteadOfDoseNumberInSeries, -1);
     }
 
-    public void OutputNestedImmEvaluationResult(final KnowledgeHelper k, final Map<String, Object> pNamedObjects,
+    public void outputNestedImmEvaluationResult(final KnowledgeHelper k, final Map<String, Object> pNamedObjects,
             final EvalTime evalTime, final String focalPersonId, final String cdsSource, final SubstanceAdministrationEvent sae,
             final String vg, final TargetDose d, final boolean outputSupplementalText,
             final boolean outputDoseCountInsteadOfDoseNumberInSeries, final int doseNumberCountToOutput)
     {
-        final String _METHODNAME = "OutputNestedImmEvaluationResult: ";
+        final String _METHODNAME = "outputNestedImmEvaluationResult: ";
         if (k == null || pNamedObjects == null || evalTime == null || sae == null || d == null)
         {
             final String str =
@@ -431,11 +431,11 @@ public record PayloadHelper(Schedule backingSchedule)
         pNamedObjects.put("rel" + nestedIdValue, relO);
     }
 
-    public void OutputNestedImmEvaluationNotSupported(final KnowledgeHelper k, final Map<String, Object> pNamedObjects,
+    public void outputNestedImmEvaluationNotSupported(final KnowledgeHelper k, final Map<String, Object> pNamedObjects,
             final EvalTime evalTime, final String focalPersonId, final String cdsSource, final SubstanceAdministrationEvent sae,
             final String vg)
     {
-        final String _METHODNAME = "OutputNestedImmEvaluationNotSupported: ";
+        final String _METHODNAME = "outputNestedImmEvaluationNotSupported: ";
         if (k == null || pNamedObjects == null || evalTime == null || sae == null || vg == null)
         {
             final String str =
@@ -582,12 +582,12 @@ public record PayloadHelper(Schedule backingSchedule)
      * </relatedClinicalStatement>
      * </substanceAdministrationProposal>
      */
-    public SubstanceAdministrationProposal OutputRootImmRecommendationSubstanceAdministrationProposal(final KnowledgeHelper drools,
+    public SubstanceAdministrationProposal outputRootImmRecommendationSubstanceAdministrationProposal(final KnowledgeHelper drools,
             final Map<String, Object> pNamedObjects, final String focalPersonId, final String cdsSource, final TargetSeries ts,
             final boolean outputEarliestOverdue, final boolean outputSupplementalText)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
-        final String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
+        final String _METHODNAME = "outputRootImmRecommendationSubstanceAdministrationProposal: ";
 
         if (ts == null || pNamedObjects == null || drools == null || ts.getTargetSeriesIdentifier() == null)
         {
@@ -764,7 +764,7 @@ public record PayloadHelper(Schedule backingSchedule)
             final Map<String, Object> pNamedObjects, final String focalPersonId, final String cdsSource)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
-        final String _METHODNAME = "OutputRootImmRecommendationSubstanceAdministrationProposal: ";
+        final String _METHODNAME = "outputRootImmRecommendationSubstanceAdministrationProposal: ";
 
         if (pNamedObjects == null || drools == null)
         {
@@ -861,11 +861,11 @@ public record PayloadHelper(Schedule backingSchedule)
         return sap;
     }
 
-    public void OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal(final KnowledgeHelper drools,
+    public void outputEmbeddedDosesRemainingInSubstanceAdministrationProposal(final KnowledgeHelper drools,
             final Map<String, Object> pNamedObjects, final String focalPersonId, final String pDosesRemaining,
             final SubstanceAdministrationProposal pSAP) throws IllegalArgumentException
     {
-        final String _METHODNAME = "OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal: ";
+        final String _METHODNAME = "outputEmbeddedDosesRemainingInSubstanceAdministrationProposal: ";
         if (drools == null || pNamedObjects == null || pSAP == null || pDosesRemaining == null)
         {
             final String lErrStr = "Unable to output doses remaining: one or more parameters not specified";
@@ -922,12 +922,12 @@ public record PayloadHelper(Schedule backingSchedule)
         return lObservationResult;
     }
 
-    public void OutputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(
+    public void outputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(
             final KnowledgeHelper drools, final Map<String, Object> pNamedObjects, final String focalPersonId,
             final List<SeriesDisplaySelection> pSeriesDisplays, final SubstanceAdministrationProposal pSAP)
             throws IllegalArgumentException
     {
-        final String _METHODNAME = "OutputEmbeddedDosesRemainingInSubstanceAdministrationProposal: ";
+        final String _METHODNAME = "outputEmbeddedDosesRemainingInSubstanceAdministrationProposal: ";
         if (drools == null || pNamedObjects == null || pSAP == null || pSeriesDisplays == null)
         {
             final String lErrStr = "Unable to output doses remaining: one or more parameters not specified";
