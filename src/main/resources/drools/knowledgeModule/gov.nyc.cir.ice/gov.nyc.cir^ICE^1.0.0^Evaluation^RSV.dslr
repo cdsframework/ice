@@ -47,6 +47,7 @@ rule "RSV: If an Adult or otherwise unspecified RSV vaccine (CVX 303, CVX 304, C
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+
 rule "RSV: If an Infant RSV vaccine (CVX 332) is administered prior to 6/9/2025, evaluate the shot as Invalid with reason code VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED."
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
