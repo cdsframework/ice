@@ -1,4 +1,10 @@
-FROM tomcat:11-jre21-temurin-noble AS build
+FROM maven:3-eclipse-temurin-21 AS build
+
+COPY . .
+
+RUN mvn clean package
+
+FROM tomcat:11-jre21-temurin-noble
 
 # Metadata
 LABEL organization="HLN Consulting, LLC"
@@ -24,18 +30,17 @@ RUN apt-get -y update && \
     rm -rf /usr/local/tomcat/webapps/docs /usr/local/tomcat/webapps/ROOT /usr/local/tomcat/webapps/examples /usr/local/tomcat/webapps/host-manager /usr/local/tomcat/webapps/manager && \
     mkdir -p /home/appuser/.opencds
 
-
 WORKDIR /home/appuser
 
 # copy config files
-COPY target/opencds-ice-service /usr/local/tomcat/webapps/opencds-decision-support-service
-COPY src/main/resources /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/resources
-COPY .gcp.config/opencds.properties .opencds
-COPY .gcp.config/sec.xml .opencds
-COPY .gcp.config/log4j2.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
-COPY .gcp.config/ice.properties /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
-COPY .gcp.config/start-ice.sh ./
-COPY .gcp.config/server.xml /usr/local/tomcat/conf
+COPY --from=build target/opencds-ice-service /usr/local/tomcat/webapps/opencds-decision-support-service
+COPY --from=build src/main/resources /usr/local/tomcat/webapps/opencds-decision-support-service/opencds-ice-service/src/main/resources
+COPY --from=build .gcp.config/opencds.properties .opencds
+COPY --from=build .gcp.config/sec.xml .opencds
+COPY --from=build .gcp.config/log4j2.xml /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
+COPY --from=build .gcp.config/ice.properties /usr/local/tomcat/webapps/opencds-decision-support-service/WEB-INF/classes
+COPY --from=build .gcp.config/start-ice.sh ./
+COPY --from=build .gcp.config/server.xml /usr/local/tomcat/conf
 
 RUN chown -R appuser: /home/appuser /usr/local/tomcat
 
