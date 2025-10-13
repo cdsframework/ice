@@ -2657,6 +2657,96 @@ rule "SeriesSelection.SelectOnlyVaricellaSeries"
 		update($ts);
 end
 
+rule "SeriesSelection.JapaneseEncephalitis.SelectJEVCRisk2DoseSeriesIfPatientUnder18OrOver65YearsAtFirstDose"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 120
+	activation-group "JapaneseEncephalitisSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.902", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.902", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.902", seriesRules.seriesName == "JEVCRisk2DoseSeries")
+		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate)
+		$person : EvaluatedPerson()
+		$dtBirthDate : Date() from $person.demographics.birthTime
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "18y-4d") < 0 ||
+		     TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "66y") >= 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: Patient was outside 18 to 65 years at first dose, selecting JE-VC Risk 2-dose Series");
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.JapaneseEncephalitis.SelectJEVCRisk2DoseSeriesIfPatientUnder18OrOver65Years"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	activation-group "JapaneseEncephalitisSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.902", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.902", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.902", seriesRules.seriesName == "JEVCRisk2DoseSeries")
+		$person : EvaluatedPerson()
+		$dtBirthDate : Date() from $person.demographics.birthTime
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "18y-4d") < 0 ||
+		     TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "66y") >= 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: Patient age is outside 18 to 65 years, selecting JE-VC Risk 2-dose Series");
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.JapaneseEncephalitis.SelectJEVCRisk2DoseAcceleratedSeriesIfPatientBetween18And65YearsAtFirstDose"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 110
+	activation-group "JapaneseEncephalitisSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.902", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.902", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.902", seriesRules.seriesName == "JEVCRisk2DoseAcceleratedSeries")
+		$person : EvaluatedPerson()
+		$dtBirthDate : Date() from $person.demographics.birthTime
+		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate)
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "18y-4d") >= 0 &&
+		     TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "66y") < 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: Patient was between 18 and 65 years at first dose, selecting JE-VC Risk 2-dose Accelerated Series");
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
+rule "SeriesSelection.JapaneseEncephalitis.SelectJEVCRisk2DoseAcceleratedSeriesIfPatientBetween18And65Years"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 110
+	activation-group "JapaneseEncephalitisSeriesSelectionCheck"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.902", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.902", selectedSeries == true))
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.902", seriesRules.seriesName == "JEVCRisk2DoseAcceleratedSeries")
+		$person : EvaluatedPerson()
+		$dtBirthDate : Date() from $person.demographics.birthTime
+		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "18y-4d") >= 0 &&
+		     TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "66y") < 0)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: Patient age is between 18 and 65 years, selecting JE-VC Risk 2-dose Accelerated Series");
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+end
+
 rule "SeriesSelection.SelectRotavirus3DoseSeriesDefault"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"

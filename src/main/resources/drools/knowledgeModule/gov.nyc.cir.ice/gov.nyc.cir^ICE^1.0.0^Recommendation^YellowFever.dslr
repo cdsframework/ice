@@ -1,0 +1,219 @@
+/**
+ * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Contributions by HLN Consulting, LLC
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+ * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+ * details.
+ *
+ * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+ * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+ * limitation, and warranty) complete irrevocable access and rights to this project.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+ *
+ * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+ * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+ * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+ * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information about this software, see http://www.hln.com/ice or send
+ * correspondence to ice@hln.com.
+ */
+
+package knowledgeModule.gov.nyc.cir.ice
+
+import java.util.List
+import java.util.Set
+import java.util.Date
+import org.opencds.vmr.v1_0.internal.EvalTime
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson
+import org.cdsframework.ice.service.DiseaseImmunity
+import org.cdsframework.ice.service.DoseRule
+import org.cdsframework.ice.service.DoseStatus
+import org.cdsframework.ice.service.ICEFactTypeFinding
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding
+import org.cdsframework.ice.service.ICELogicHelper
+import org.cdsframework.ice.service.Recommendation
+import org.cdsframework.ice.service.RecommendationStatus
+import org.cdsframework.ice.service.Season
+import org.cdsframework.ice.service.Schedule
+import org.cdsframework.ice.service.SeriesRules
+import org.cdsframework.ice.service.TargetDose
+import org.cdsframework.ice.service.TargetSeries
+import org.cdsframework.ice.service.LiveVirusFact
+import org.cdsframework.ice.util.TimePeriod
+import org.cdsframework.ice.util.TimePeriod.DurationType
+import org.cdsframework.ice.service.Vaccine
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
+
+global java.util.Date evalTime
+global org.cdsframework.ice.service.Schedule schedule
+
+
+/*****************************************************************************************************************************************************************************************************************
+ START Recommendation Rules
+*****************************************************************************************************************************************************************************************************************/
+
+///////////////////
+//  Yellow Fever Recommendation Rule
+//  When recommending in the yellow fever vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text,
+//  "Yellow fever vaccination is not routinely recommended in the U.S. and is only indicated for select patients at increased risk.
+//  Yellow fever is a live vaccine. An absolute minimum interval of 24 days is required between yellow fever vaccines.
+//  An absolute minimum interval of 28 days is required between a yellow fever vaccine and a live vaccine from another vaccine group.
+//  The minimum and recommended interval between yellow fever and another live vaccine is 30 days. Refer to ACIP and the
+//  CDC Yellow Book: Health Information for International Travel for additional information."
+///////////////////
+
+rule "Yellow Fever: Always include supplemental text with the recommendation indicating Yellow Fever is not routinely recommended in the U.S."
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made
+			- make note of the recommendation status as $recommendationStatus
+			- make note of the final recommendations as $allFinalRecommendations
+	then
+		Create a Recommendation as $supplementalText for the Series $targetSeries
+    	Set the Recommendation Supplemental text for $supplementalText to "Yellow fever vaccination is not routinely recommended in the U.S. and is only indicated for select patients at increased risk. Yellow fever is a live vaccine. An absolute minimum interval of 24 days is required between yellow fever vaccines. An absolute minimum interval of 28 days is required between a yellow fever vaccine and a live vaccine from another vaccine group. The minimum and recommended interval between yellow fever and another live vaccine is 30 days. Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information."
+    	Set the Recommendation Status for $supplementalText to $recommendationStatus
+    	Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
+    	Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//  Rules Based on Series Completion and Patient Age:
+// 
+//  If the patient is not complete for yellow fever and
+//    - the patient is < the absolute minimum age for the Yellow Fever Risk Series, (i.e., < 6 months), then the recommendation is Not Recommended with reason code SUPPLEMENTAL_TEXT (see Yellow Fever Recommendation Rule).
+//    - the patient is >= the absolute minimum age and < routine age for the Yellow Fever Risk Series (i.e., >= 6 months and < 9 months), then the recommendation is Conditional with reason codes BELOW_REC_AGE_SERIES
+//      HIGH_RISK and SUPPLEMENTAL_TEXT (see Yellow Fever Recommendation Rule).
+//    - the patient is >= the routine age for the Yellow Fever Risk Series (i.e., >= 9 months), then the recommendation is Conditional with reason codes HIGH_RISK
+//      and SUPPLEMENTAL_TEXT (see Yellow Fever Recommendation Rule).
+// 
+//  If the patient is complete for yellow fever, then the recommendation is Conditional with reason codes COMPLETE_HIGH_RISK and SUPPLEMENTAL_TEXT (see Yellow Fever Recommendation Rule).
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+rule "Yellow Fever: Patient < 6 months old, Not Recommended with SUPPLEMENTAL_TEXT"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- the Series is not complete
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime < "6m"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Yellow Fever: Patient >= 6 months and < 9 months and not complete, Conditional/High Risk/Below Recommended Age for Series"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- the Series is not complete
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "6m"
+		Confirm elapsed time between $dtBirthDate and evalTime < "9m"
+	then
+		Create a Recommendation as $recommendationHighRisk with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+        Set the Recommendation Reason for $recommendationHighRisk to "RECOMMENDATION_REASON_CONCEPT.BELOW_REC_AGE_SERIES"
+        Include the Recommendation $recommendationHighRisk for Consideration in the final Forecast of the Series
+        Create a Recommendation as $recommendationHighRisk with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+        Set the Recommendation Reason for $recommendationHighRisk to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+        Include the Recommendation $recommendationHighRisk for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Yellow Fever: Patient >= 9 months months old, Conditionally Recommended HIGH_RISK with SUPPLEMENTAL_TEXT"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- the Series is not complete
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "9m"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Yellow Fever: Patient is complete for yellow fever, Conditional/Complete_High_Risk"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- the Series is complete
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// END Rules Based on Series Completion and Patient Age
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Live Virus Interval Rules
+//
+// Rules affecting other live vaccines after receiving yellow fever vaccine
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////
+// Yellow Fever vaccine is a live virus vaccine, and there needs to be a 30-day interval between yellow fever and other live virus vaccines.
+// This rule adjusts the earliest forecast date for a live virus vaccine when a yellow fever vaccine was administered less than 30 days before
+// the earliest date.
+/////////////////
+rule "YellowFever.adjustEarliestDateDueToYellowFeverVaccine"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^supplementalSeriesRule"
+	when
+	 	There is a Series $yellowFeverVaccineSeries
+			- The Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- The Series is complete
+			- Make note of the date that the most recent shot was administered as $yellowFeverDate
+		There is a Series $targetSeries distinct from $yellowFeverVaccineSeries
+    	    - a Forecast for the Series has been made and a Recommendation Date has been determined
+    	    - The recommendation is for a live vaccine
+            - Make note of the earliest date as $earliestDate
+        Confirm (!(the date $yellowFeverDate is on the same day as evalTime) && elapsed time between $yellowFeverDate and $earliestDate < "30d") || (the date $yellowFeverDate is on the same day as evalTime && the date $earliestDate is after $yellowFeverDate && elapsed time between $yellowFeverDate and $earliestDate < "30d")
+	then
+	    Adjust earliest date to 30 days after live virus date $yellowFeverDate for Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+        Log that this Series Rule fired for the Series $targetSeries
+end
+
+/*****************************************************************************************************************************************************************************************************************
+ END Recommendation Rules
+*****************************************************************************************************************************************************************************************************************/
