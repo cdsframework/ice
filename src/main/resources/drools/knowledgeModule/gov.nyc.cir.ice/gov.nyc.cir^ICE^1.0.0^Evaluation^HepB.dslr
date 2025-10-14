@@ -58,6 +58,9 @@ rule "Hep B: Verify Adherence to the Maximum Valid Age for the Vaccine if Hep B 
 		Log that this dose rule fired for the dose $oTargetDose in the Series $oTargetSeries
 end
 
+/**
+ * Abolute minimum interval between doses 1 and 3 in Child/Adolescent Series and Adult 3-Dose Series is 108 days
+ */
 rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the Child/Adolescent or 3-dose Adult Series is >= 108d"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
@@ -82,6 +85,13 @@ rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the C
 		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
 end
 
+/**
+ * If a patient receives target dose 3 that is invalid (e.g. due to minimum interval violation or minimum age violation), there is
+ * no minimum interval between the next-to-last shot (invalid shot) and dose 3 (the final dose), but the patient must a.) meet the
+ * minimum interval between dose 2 and the final dose (52 days), b.) meet the minimum age for the final dose in the series (164
+ * days), and c.) meet the minimum interval between dose 1 and dose 3 of 16 weeks.
+ * (Note that sub-rules (a), (b), and (c) are handled by other rules.)
+ */
 rule "Hep B: Enough is Enough Rule"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
@@ -148,6 +158,13 @@ rule "Hep B: Mark Series Complete if Two Adult Doses Given to Patient between >=
 		Log that this series rule fired for the Series $associatedTargetSeries
 end
 
+/**
+ * HEPLISAV-B (CVX 189) Exception Rule
+ * A series containing 2 doses of HEPLISAV-B (CVX 189) administered at least minimum interval 4 weeks (absolute minimum interval =
+ * 24 days) apart is complete, regardless of any other Hep B shots administered (before, in between, and after). For the non-CVX 189
+ * shots, evaluate as Accepted and the reason code is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN.
+ * For the purpose of evaluation of the non-CVX 189 administered vaccines, ignore the non-CVX 189 shots.
+ */
 rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete regardless of any other prior Hep B shots administered"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
@@ -177,6 +194,10 @@ rule "Hep B: Mark Series with 2 Doses of CVX 189 Complete regardless of any othe
 		Log that this series rule fired for the Series $targetSeries
 end
 
+/**
+ * If a CVX 189 has been administered and there is a previous, VALID CVX 189 administered beforehand, mark any intervening non-CVX
+ * 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
+ */
 rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a prior VALID CVX 189, mark all intervening or prior Valid non-CVX 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 		extends "Hep B: Mark Series with 2 Doses of CVX 189 Complete regardless of any other prior Hep B shots administered"
 	dialect "mvel"
@@ -201,6 +222,10 @@ rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a
 		Log that this dose rule fired for the dose $interveningOrEarlierShot in the Series $targetSeries
 end
 
+/**
+ * When evaluating a CVX 189, ignore intervals to any intervening non-CVX 189 shots if there is a prior CVX 189 (valid) dose at
+ * least 24 days prior to this shot
+ */
 rule "Hep B: When evaluating a CVX 189, intervals to any prior non-CVX 189 shots are ignored if there is a prior valid CVX 189 dose at least 24 days apart"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"

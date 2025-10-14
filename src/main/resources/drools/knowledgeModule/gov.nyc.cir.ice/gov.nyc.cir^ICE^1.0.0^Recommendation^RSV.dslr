@@ -70,6 +70,11 @@ rule "RSV: If the evaluation date is < 6/21/2023 and the Series is not complete,
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If a patient is >= 8 months and < 20 months and is not complete for the RSV Infant Series, the recommendation is Conditional and
+ * the reason code is HIGH_RISK. and is complete for the RSV Infant Series, the recommendation is Conditional and the reason code is
+ * COMPLETE_HIGH_RISK.
+ */
 rule "RSV: If a patient is >= 8 months and < 20 months of age and not complete for RSV Infant Series, the recommendation is Conditional with reason code HIGH_RISK."
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -110,6 +115,14 @@ rule "RSV: If a patient is >= 8 months and < 20 months of age and is complete fo
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If a patient is >= 8 months and < 20 months and is not complete for the RSV Infant Series, the recommendation is Conditional and
+ * the reason code is HIGH_RISK. and is complete for the RSV Infant Series, the recommendation is Conditional and the reason code is
+ * COMPLETE_HIGH_RISK.
+ *
+ * If a patient is < 8 months and is complete for the RSV Infant Series, the recommendation is Not Recommended and the reason code
+ * is COMPLETE_HIGH_RISK.
+ */
 rule "RSV: If a patient is < 8 months of age and is complete for the RSV Infant Series, the recommendation is Not Recommended with reason code COMPLETE_HIGH_RISK. Mark forecasting of the series as completed."
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -190,6 +203,10 @@ rule "RSV: If the patient is both < 8 months of age and a dose is recommended in
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If a patient is >= 20 months and < 50 years old and a shot is recommended for the RSV Adult Series, add SUPPLEMENTAL_TEXT to the
+ * recommendation
+ */
 rule "RSV: If a patient is >= 20 months and < 50 years of age and a shot is recommended for the RSV Adult Series, add SUPPLEMENTAL_TEXT to the recommendation"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -211,6 +228,10 @@ rule "RSV: If a patient is >= 20 months and < 50 years of age and a shot is reco
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If a patient is >= 50 years old and < 75 years old, and is not complete for the RSV Adult Series, the recommendation is
+ * Conditional with reason codes HIGH_RISK and SUPPLEMENTAL_TEXT
+ */
 rule "RSV: If a patient is >= 50 years and < 75 years of age and the Adult Series is not complete, the recommendation is CONDITIONAL with reason code HIGH_RISK. Mark forecasting of the series as completed."
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"

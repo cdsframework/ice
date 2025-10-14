@@ -14,6 +14,10 @@ global java.util.Date evalTime;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
+/**
+ * If the previous dose was prior to the patient's DOB, there is no minimum interval between this dose and the recommended dose, so
+ * simply override the routine interval recommendation rule and don't do anything. By not doing anything, there is no interval
+ */
 rule "Recommend No Earliest Interval When Prior Dose Before DOB"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	activation-group "earliestIntervalCheck"
@@ -29,6 +33,10 @@ rule "Recommend No Earliest Interval When Prior Dose Before DOB"
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If the previous dose was prior to the patient's DOB, there is no minimum interval between this dose and the recommended dose, so
+ * simply override the routine interval recommendation rule and don't do anything. By not doing anything, there is no interval
+ */
 rule "Recommend No Recommended Interval When Prior Dose Before DOB"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationIntervalCheck"
@@ -43,4 +51,3 @@ rule "Recommend No Recommended Interval When Prior Dose Before DOB"
        	Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-

@@ -22,6 +22,11 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 
 global java.util.Date evalTime;
 
+/**
+ * Evaluation of vaccines not authorized by the FDA or WHO
+ * If the patient has received a COVID-19 vaccine not authorized by the FDA or WHO, then evaluate the shot as
+ * Invalid/VACCINE_NOT_APPROVED_IN_US_OR_BY_WHO
+ */
 rule "COVID-19: If the vaccine administered is authorized neither by the FDA nor WHO, evaluate the shot as INVALID/VACCINE_NOT_APPROVED_IN_US_OR_BY_WHO"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
@@ -37,6 +42,10 @@ rule "COVID-19: If the vaccine administered is authorized neither by the FDA nor
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+/**
+ * FDA-approved or WHO-approved vaccines in the wrong FDA-approved series that is not complete always get evaluated as
+ * ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN rather than Invalid.
+ */
 rule "COVID-19: If an FDA-approved, NOS or WHO-approved vaccine, the vaccine is not permitted be default for the Dec2020 seasonal series and there are other shots following it, and the series is not complete, evaluate it as ACCEPTED/VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
@@ -606,6 +615,34 @@ rule "COVID-19: If the 3rd booster dose is administered >= 9/2/2022 & < 4/19/202
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * After completion of either the Pfizer COVID-19 Series, Mixed Product COVID-19 Series, and a shot is administered >= 3/17/2023; or
+ * (2) Moderna COVID-19 Series, Janssen COVID-19 Series, Novavax COVID-19 Series, or COVID-19 vaccine series not authorized by the
+ * FDA, but authorized by the WHO, or a COVID-19 vaccine series not authorized by the FDA or WHO, but is an active COVID-19 vaccine
+ * candidate as part of a U.S.-based clinical trial of a COVID-19 vaccine, and a shot is administered >= 4/19/2023
+ * If the patient has not received any bivalent doses via a combination of prior booster doses at >= 9/2/2022, prior bivalent doses
+ * (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, or CVX 520) in the primary series, or prior doses administered >=
+ * 4/19/2023 in the primary series:
+ *   at < 8 weeks after series completion, then evaluate the shot as Valid/ SUPPLEMENTAL_TEXT; Descriptive Text: "The timing of the
+ *   administration of this shot does not follow the guidelines regarding the minimum interval of 8 weeks required for the 1st
+ *   Booster Dose."
+ *   at >= 8 weeks after series completion, then evaluate the shot as Valid
+ *   Otherwise:
+ * 	   If the patient is < 65 years of age:
+ *       If 1 or more previous doses that are bivalent vaccines (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, or CVX
+ *       520) were administered as either a booster dose at >= 9/2/2022 or as a dose in the primary series, or, alternatively, a
+ *       prior dose was administered >= 4/19/2023, evaluate the shot as Accepted / EXTRA_DOSE. (See Extra Shots section.)
+ *       If the patient is >= 65 years of age:
+ *         If 2 or more previous doses that are bivalent vaccines (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, or CVX 520)
+ *         were administered as either a booster dose at >= 9/2/2023 or as a dose in the primary series, or, alternatively, a prior
+ *         dose was administered >= 4/19/2023, evaluate the shot as Accepted / EXTRA_DOSE. (See Extra Shots section.)
+ *         If 1 previous bivalent dose that is a bivalent vaccine (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302, CVX 519, or CVX 520)
+ *         was administered as either a booster dose at >= 9/2/2023 or as a dose in the primary series, or, alternatively, a prior
+ *         dose was administered >= 4/19/2023:
+ *           at < 4 months after series completion, then evaluate the shot as Valid/ SUPPLEMENTAL_TEXT; Descriptive Text: "The
+ *           timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 4 months."
+ *           at >= 4 months after series completion, then evaluate the shot as Valid.
+ */
 rule "COVID-19(Administration of 1st Bivalent Dose in the Pfizer Series After Series Completion): If a shot is administered in the Pfizer series on >= 3/17/2023, the series is complete, and the patient has not received a dose of any bivalent vaccines < 3/17/2023 nor any COVID-19 dose >= 4/19/2023, evaluate the shot as Valid"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
@@ -702,6 +739,11 @@ rule "COVID-19: If the first bivalent dose on >= 4/19/2023 after series completi
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * If a shot is administered to a patient >= 65 yrs of age, and 1 bivalent vaccine dose (CVX 229, CVX 230, CVX 300, CVX 301, CVX 302,
+ * CVX 519, or CVX 520) was previously administered as a booster dose at >= 9/2/2023 or as a dose in the primary series, or,
+ * alternatively, any prior dose was administered on >= 4/19/2023, evaluate the shot as Accepted / EXTRA_DOSE"
+ */
 rule "COVID-19: If a shot was administered to a patient >= 65 yrs of age, and if 1 bivalent dose was previously administered or, alternatively, 1 was prior dose was administered on >= 4/19/2023, evaluate the shot as Valid"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
@@ -728,6 +770,12 @@ rule "COVID-19: If a shot was administered to a patient >= 65 yrs of age, and if
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * If the patient is >= 65 yrs of age and 2 or more previous doses that are bivalent vaccines (CVX 229, CVX 230, CVX 300, CVX 301,
+ * CVX 302, CVX 519, or CVX 520) were administered as either a booster dose at >= 9/2/2023 or as a dose in the primary series, or,
+ * alternatively, a prior dose was administered >= 4/19/2023, evaluate the shot as Accepted / EXTRA_DOSE"
+ * ... No rule needs to be written for this circumstance ... ICE evaluates extra doses as Accepted / EXTRA_DOSE by default.
+ */
 rule "COVID-19: If a 2nd bivalent dose was administered to a patient >= 65 yrs of age at < 4 months from the previous shot, include supplemental text regarding a 4 month minimum intervals"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
@@ -1053,6 +1101,9 @@ rule "COVID-19: If 2 doses of CVX 207, CVX 221, CVX 227, CVX 228, or CVX 229 wer
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
 end
 
+/**
+ * Novavax 2-dose limit logic in Mixed Product Series
+ */
 rule "COVID-19: If 2 or more doses of CVX 211 (Novavax) were administered in the Mixed Product series, then the 3rd dose is not required and the series is complete"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
@@ -1068,6 +1119,12 @@ rule "COVID-19: If 2 or more doses of CVX 211 (Novavax) were administered in the
 		Log that this series rule fired for the Series $targetSeries
 end
 
+/**
+ * If a Moderna bivalent vaccine (CVX 229, CVX 230) is inadvertently administered in the Pfizer or Mixed Product primary series and
+ * was evaluated as INVALID with reason code VACCINE_NOT_ALLOWED_FOR_THIS_DOSE, ignore the bivalent vaccine (CVX 229, CVX 230) when
+ * determining the recommended due date for the next target dose due and when evaluating the next shot based on the absolute minimum
+ * interval for that target dose.
+ */
 rule "COVID-19: If CVX 229 or CVX 230 was evaluated as Not Valid due to VACCINE_NOT_ALLOWED_FOR_THIS_DOSE in the Pfizer, Moderna or Mixed Product Series, Ignore the shot when calculating intervals"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
@@ -1245,6 +1302,9 @@ rule "COVID-19: If a shot is administered in the Pfizer or Mixed Product series 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * Moderna: absolute minimum interval from a prior Moderna shot to the current shot is 24 days
+ */
 rule "COVID-19: For patients >= 18y, enforce absolute minimum interval of 24 days *from* any prior Moderna or CVX 213 shots (in any Series) if after 10/25/2021"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
@@ -1358,4 +1418,3 @@ rule "COVID-19: For patients < 18y, always enforce absolute minimum interval of 
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
-

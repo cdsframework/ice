@@ -1,71 +1,41 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
 /**
- * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
- * Contributions by HLN Consulting, LLC
- *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
- * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
- * details.
- *
- * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
- * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
- * limitation, and warranty) complete irrevocable access and rights to this project.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
- *
- * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
- * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
- * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * For more information about this software, see http://www.hln.com/ice or send
- * correspondence to ice@hln.com.
+ * Cholera Recommendation Rule
+ * When recommending in the Cholera vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text, "Cholera
+ * vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk.
+ * Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information.", except when the
+ * Recommendation is Not Recommended and the reason code is COMPLETE.
  */
-
-package knowledgeModule.gov.nyc.cir.ice
-
-import java.util.List
-import java.util.Set
-import java.util.Date
-import org.opencds.vmr.v1_0.internal.EvalTime
-import org.opencds.vmr.v1_0.internal.EvaluatedPerson
-import org.cdsframework.ice.service.DiseaseImmunity
-import org.cdsframework.ice.service.DoseRule
-import org.cdsframework.ice.service.DoseStatus
-import org.cdsframework.ice.service.ICEFactTypeFinding
-import org.cdsframework.ice.service.ICEIntervalFactTypeFinding
-import org.cdsframework.ice.service.ICELogicHelper
-import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.RecommendationStatus
-import org.cdsframework.ice.service.Season
-import org.cdsframework.ice.service.Schedule
-import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.service.TargetDose
-import org.cdsframework.ice.service.TargetSeries
-import org.cdsframework.ice.util.TimePeriod
-import org.cdsframework.ice.util.TimePeriod.DurationType
-import org.cdsframework.ice.service.Vaccine
-import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
-import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason
-
-expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
-
-global java.util.Date evalTime
-global org.cdsframework.ice.service.Schedule schedule
-
-
-/*****************************************************************************************************************************************************************************************************************
- START Recommendation Rules
-*****************************************************************************************************************************************************************************************************************/
-
-/////////////////////
-// Cholera Recommendation Rule
-// When recommending in the Cholera vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text, "Cholera vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk. 
-// Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information.", except when the Recommendation is Not Recommended and the reason code is COMPLETE.
-/////////////////////
-
 rule "Cholera: Always include supplemental text with the recommendation indicating Cholera is not routinely recommended in the U.S., except when the recommendation is Not Recommended / COMPLETE"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -87,15 +57,17 @@ rule "Cholera: Always include supplemental text with the recommendation indicati
        	Log that this Series Rule fired for the Series $targetSeries
 end
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Rules Based on Patient's Age
-//
-// If no doses are on record and:
-//   + the patient is < the routine age (i.e., 2 years old) for the Cholera Risk 1-dose Series, then the Recommendation is Not Recommended and the reason code is SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
-//   + the patient is >= the routine age (i.e., 2 years old) for the Cholera Risk 1-dose Series and < 65 years old, then the Recommendation is Conditional and the reason code is HIGH_RISK and SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
-//   + the patient is >= 65 years old, then the Recommendation is Not Recommended and the reason code is TOO_OLD and SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Rules Based on Patient's Age
+ *
+ * If no doses are on record and:
+ *   + the patient is < the routine age (i.e., 2 years old) for the Cholera Risk 1-dose Series, then the Recommendation is Not
+ *     Recommended and the reason code is SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
+ *   + the patient is >= the routine age (i.e., 2 years old) for the Cholera Risk 1-dose Series and < 65 years old, then the
+ *     Recommendation is Conditional and the reason code is HIGH_RISK and SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
+ *   + the patient is >= 65 years old, then the Recommendation is Not Recommended and the reason code is TOO_OLD and
+ *     SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
+ */
 rule "Cholera: Patient < 2 years old, Not Recommended with supplemental text"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -155,12 +127,3 @@ rule "Cholera: Patient >= 65 years old, Not Recommended / TOO_OLD with supplemen
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// END Recommendation Rules based on Age
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*****************************************************************************************************************************************************************************************************************
- END Recommendation Rules
-*****************************************************************************************************************************************************************************************************************/
-

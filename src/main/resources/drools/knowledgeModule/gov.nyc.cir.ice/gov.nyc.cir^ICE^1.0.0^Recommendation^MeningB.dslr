@@ -26,6 +26,11 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 global java.util.Date evalTime;
 global org.cdsframework.ice.service.Schedule schedule;
 
+/**
+ * Recommending at the Vaccine vs. Vaccine Group Level; including additional reason codes where necessary
+ *
+ * If no doses have been administered, then do not recommend a specific vaccine
+ */
 rule "Mening B: Do not recommend a specific vaccine if no (valid) doses have been administered"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -43,6 +48,9 @@ rule "Mening B: Do not recommend a specific vaccine if no (valid) doses have bee
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
+ */
 rule "Mening B: Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose Series"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -60,6 +68,9 @@ rule "Mening B: Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
+ */
 rule "Mening B: Recommend CVX 163 for the 2nd target dose and later in the MenB 4C 3-dose Series"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -77,6 +88,9 @@ rule "Mening B: Recommend CVX 163 for the 2nd target dose and later in the MenB 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * When recommending in the MenB FHbp 2-dose Series, recommend CVX 162 for the next target dose.
+ */
 rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-dose Series"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -94,6 +108,9 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-do
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
+ */
 rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-dose Series"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -111,6 +128,11 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-do
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * For any of the Mening B series, if patient has at least one CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and at least
+ * one CVX 163 (Meningococcal B 4C, OMV (Bexsero)) on record, recommend CVX 163 and include the reason codes: DUE_NOW or
+ * DUE_IN_FUTURE and OTHER_VACCINE_PRODUCT_POSSIBLE.
+ */
 rule "Mening B: If a patient has at least one CVX 162 or CVX 316 and at least one CVX 163 or CVX 328, and a shot is recommended, include a recommendation with reason OTHER_VACCINE_PRODUCT_POSSIBLE"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -133,6 +155,10 @@ rule "Mening B: If a patient has at least one CVX 162 or CVX 316 and at least on
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If no doses are on record and the patient is < 10 years old, then the Recommendation is Not Recommended and the reason code is
+ * BELOW_MINIMUM_AGE_HIGH_RISK_SERIES.
+ */
 rule "Mening B: If the patient < 10yrs and no doses on record, recommendation is NOT_RECOMMENDED/BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -207,6 +233,9 @@ rule "Mening B: If the patient >= 24yrs and no doses on record, recommendation i
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Recommended interval between Dose 1 and Dose 3 in Men B FHbp 3-dose series is 6 months
+ */
 rule "MeningB: Recommend minimum interval & recommended interval of at 6 months between doses 1 & 3 in FHbp 3-dose Series"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -228,6 +257,9 @@ rule "MeningB: Recommend minimum interval & recommended interval of at 6 months 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Recommended interval between Dose 1 and Dose 3 in Men B 4C 3-dose series is 6 months
+ */
 rule "MenB(4C 3-Dose Series): Recommend minimum & recommended interval of at 6 months between doses 1 & 3"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -277,7 +309,6 @@ rule "MenB(4C 2-Dose Series): If the (valid) dose 1 was administered >= 10/25/20
 		extends "MenB(4C 2-Dose Series): If (valid) dose 1 was >= 10/25/2024, the minimum interval & recommended interval is 6m from the (valid) dose 1 (*recommendationIntervalCheck*)"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
-
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -365,4 +396,3 @@ rule "MenB(4C 2-Dose Series; Target Dose 2; CRR): If a (valid) dose 1 administer
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-

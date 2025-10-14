@@ -26,6 +26,9 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 global java.util.Date evalTime;
 global org.cdsframework.ice.service.Schedule schedule;
 
+/**
+ * If the patient is < 7 years or the recommendation date is < 7 years, always recommend DTaP NOS (CVX 107).
+ */
 rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, the series is not complete and the recommendation date is at < 7yrs of age, recommend DTaP NOS (CVX 107)"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -48,6 +51,9 @@ rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If the patient is < 7 years and the recommendation date is >= 7 years, always recommend Tdap (CVX 115).
+ */
 rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, the series is not complete and the recommendation date is at >= 7yrs of age, recommend Tdap (CVX 115)"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -70,6 +76,10 @@ rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If a patient is >=7 years; has _not_ completed the series and has received a dose of pertussis at >=7 years of age, then the next
+ * dose in the series should be recommended as Td (CVX 09).
+ */
 rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if series is not complete, patient >= 7yrs, has received a dose of pertussis >= 7yrs"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -101,6 +111,10 @@ rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if s
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If a patient is >=7 years, has _not_ completed the series and has _not_ received a dose of pertussis at >=7 years of age, then
+ * the next dose in the series should be Tdap (CVX 115).
+ */
 rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) at age 7yrs if series is not complete, if patient >= 7yrs and has _not_ received a dose of Pertussis >= 7yrs"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -127,6 +141,10 @@ rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) at age 7yrs if 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * #1: For patients who completed the primary DTP series (5-dose), if the patient has NOT received a pertussis-containing dose at >=
+ * 7 years and <10 years and...:
+ */
 rule "DTP: If the 5-Dose Series is Complete and the patient has NOT received a pertussis containing dose at >= 7 years and <10 years, then invoke 5-Dose Series Adolescent Tdap Exception Rules"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -152,6 +170,10 @@ rule "DTP: If the 5-Dose Series is Complete and the patient has NOT received a p
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * #2: For patients who completed the primary DTP series (3-dose or 5-dose): if the patient has received a pertussis-containing dose
+ * at >= 7 years and <10 years, then recommend another Tdap (CVX 115) at 11 years old. This is an adolescent Tdap dose.
+ */
 rule "DTP: If the primary series is complete and the patient has received a pertussis containing dose at >= 7 years and <10 years, then recommend another Tdap at at earliest date & recommended date of 11yrs, overdue date of 13yrs+4w"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -186,6 +208,14 @@ rule "DTP: If the primary series is complete and the patient has received a pert
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * For patients who completed the 5-dose series and NONE of the Tdap Adolescent Exceptions apply:
+ *   Recommended Vaccine = Tdap (CVX 115)
+ *   Recommended Age = 11 years
+ *   Recommended Interval = 6 months from the last dose of pertussis; 0 days from the last non-pertussis dose.
+ *   NOTE: No need to include a rule for the recommended interval in this section, as it is taken care of by the same recommendation
+ *   interval rule below which encompasses all series (not just the 5-dose series)
+ */
 rule "DTP: If the 5-dose series is complete and a Tdap 5-dose series recommendation exception did _not_ occur, recommend Tdap at earliest date & recommended date of 11yrs, overdue date of 13yrs+4w"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
@@ -212,6 +242,9 @@ rule "DTP: If the 5-dose series is complete and a Tdap 5-dose series recommendat
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If an Adolescent Tdap needed and ANY Adolescent Tdap exception occurred, recommend an Adolescent Tdap at 7 years of age
+ */
 rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If the 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Adolescent Tdap at Earliest, Recommended & Overdue Date of 7yrs"
 	ruleflow-group "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"
@@ -237,6 +270,10 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If the 5-Dose
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Exception A) The patient DOES NOT have a dose of pertussis at >= 4 years minus 4 days.
+ * Excepion A - higher activation priority than the general adolescent tdap recommendation rule above for 5-dose series
+ */
 rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not have a dose of pertussis >= 4y-4d in the 5-Dose Series(Exception A), make note that the Adolescent Tdap Recommendation Exception criteria was met"
 	ruleflow-group "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"
@@ -259,6 +296,11 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not 
 		Log that this series rule fired for the Series $targetSeries
 end
 
+/**
+ * Exception B) The patient DOES NOT have at least 4 doses of pertussis-containing vaccine given at < 7 years
+ * Excepion B - As with Exception A, higher activation priority than the general adolescent tdap recommendation rule above for
+ * 5-dose series
+ */
 rule "DTP: (Tdap 5-Dose Series Recommendation Exception B)- If the patient DOES NOT have at least 4 doses of pertussis given at < 7 years, make note that the Adolescent Tdap Recommendation Exception criteria was met"
 	ruleflow-group "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
 	dialect "mvel"
@@ -279,6 +321,10 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception B)- If the patient DOES 
 		Log that this series rule fired for the Series $targetSeries
 end
 
+/**
+ * If one or more of the Adolescent Tdap Exception Rules A or B apply, recommend an Adolescent Tdap 0 days from the last
+ * non-pertussis shot
+ */
 rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent Tdap is required, recommend Tdap at earliest & recommended interval of 0 days from last non-pertussis shot"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	dialect "mvel"
@@ -340,6 +386,10 @@ rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent T
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If a patient has completed the Adolescent Tdap requirements, then the next dose in the series should be recommended is a booster
+ * dose
+ */
 rule "DTP: Recommend booster at earliest interval of 5y, recommended interval of 10yrs, and latest recommended interval of 10y+4w if series is complete has received a pertussis dose >= 7yrs; include recommendation reason ADMINISTER_TDAP_OR_TD and supplemental text"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -371,6 +421,11 @@ rule "DTP: Recommend booster at earliest interval of 5y, recommended interval of
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Exception 1: Series Complete with 3 Doses
+ * If the patient is >=7 or will be >=7 as of the next due date, received the first dose at >= 12 months of age, and received at
+ * least one dose at >= 4 years of age, then the series is complete with 3 doses (doses 2, 3 and 4).
+ */
 rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for Patient who will be >= 7yrs as of the next due date, if 3 doses have been administered with the first dose at >= 12m and at least 1 dose at >= 4yrs"
  	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
  	dialect "mvel"
@@ -437,6 +492,10 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Skip to Dose 4 if patient >= 7yrs a
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Six by Seven Rule: If a child is < 7 years of age has received 6 shots from the DTP vaccine group, but has not yet completed the
+ * series, then the next dose is recommended at age 7 years; follow table rules for to determine the recommended interval.
+ */
 rule "DTP: (Six by Seven Rule)- Recommend next dose at age 7yrs for 5-dose series if patient < 7yrs, series is not complete and has received 6 shots"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationAgeCheck"
@@ -483,7 +542,6 @@ rule "DTP: (3-Dose Series Exception Rule[Recommendation])- If none of the 3 or m
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dateLastShotAdministered
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end

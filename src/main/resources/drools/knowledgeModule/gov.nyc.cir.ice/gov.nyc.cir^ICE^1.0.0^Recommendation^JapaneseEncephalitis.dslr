@@ -1,71 +1,40 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
 /**
- * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
- * Contributions by HLN Consulting, LLC
- *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
- * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
- * details.
- *
- * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
- * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
- * limitation, and warranty) complete irrevocable access and rights to this project.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
- *
- * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
- * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
- * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * For more information about this software, see http://www.hln.com/ice or send
- * correspondence to ice@hln.com.
+ * Japanese Encephalitis Recommendation Rule
+ * When recommending in the Japanese Encephalitis vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text,
+ * "Japanese Encephalitis vaccination is not routinely recommended in the U.S. and is only indicated for select patients at
+ * increased risk. Refer to ACIP guidelines for additional information."
  */
-
-package knowledgeModule.gov.nyc.cir.ice
-
-import java.util.List
-import java.util.Set
-import java.util.Date
-import org.opencds.vmr.v1_0.internal.EvalTime
-import org.opencds.vmr.v1_0.internal.EvaluatedPerson
-import org.cdsframework.ice.service.DiseaseImmunity
-import org.cdsframework.ice.service.DoseRule
-import org.cdsframework.ice.service.DoseStatus
-import org.cdsframework.ice.service.ICEFactTypeFinding
-import org.cdsframework.ice.service.ICEIntervalFactTypeFinding
-import org.cdsframework.ice.service.ICELogicHelper
-import org.cdsframework.ice.service.Recommendation
-import org.cdsframework.ice.service.RecommendationStatus
-import org.cdsframework.ice.service.Season
-import org.cdsframework.ice.service.Schedule
-import org.cdsframework.ice.service.SeriesRules
-import org.cdsframework.ice.service.TargetDose
-import org.cdsframework.ice.service.TargetSeries
-import org.cdsframework.ice.util.TimePeriod
-import org.cdsframework.ice.util.TimePeriod.DurationType
-import org.cdsframework.ice.service.Vaccine
-import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept
-import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason
-
-expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl
-
-global java.util.Date evalTime
-global org.cdsframework.ice.service.Schedule schedule
-
-/*****************************************************************************************************************************************************************************************************************
- START Recommendation Rules
-*****************************************************************************************************************************************************************************************************************/
-
-/////////////////////
-// Japanese Encephalitis Recommendation Rule
-// When recommending in the Japanese Encephalitis vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text,
-// "Japanese Encephalitis vaccination is not routinely recommended in the U.S. and is only indicated for select patients at increased risk.
-// Refer to ACIP guidelines for additional information."
-/////////////////////
-
 rule "Japanese Encephalitis: Always include supplemental text with the recommendation"
     dialect "mvel"
     ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -85,16 +54,18 @@ rule "Japanese Encephalitis: Always include supplemental text with the recommend
         Log that this Series Rule fired for the Series $targetSeries
 end
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Rules Based on Series Completion and Patient Age:
-//
-// If the patient is not complete for Japanese Encephalitis and
-//   - the patient is < the routine age for the JE-VC Risk 2-dose Series (i.e., < 2 months), then the recommendation is Not Recommended with reason code SUPPLEMENTAL_TEXT.
-//   - If the patient is >= the routine age for the JE-VC Risk 2-dose Series (i.e., >= 2 months), then the recommendation is Conditional with reason codes HIGH_RISK and SUPPLEMENTAL_TEXT.
-//
-// If the patient is complete for Japanese Encephalitis, then the recommendation is Conditional with reason codes COMPLETE_HIGH_RISK and SUPPLEMENTAL_TEXT.
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/**
+ * Rules Based on Series Completion and Patient Age:
+ *
+ * If the patient is not complete for Japanese Encephalitis and
+ *   - the patient is < the routine age for the JE-VC Risk 2-dose Series (i.e., < 2 months), then the recommendation is Not
+ *     Recommended with reason code SUPPLEMENTAL_TEXT.
+ *   - If the patient is >= the routine age for the JE-VC Risk 2-dose Series (i.e., >= 2 months), then the recommendation is
+ *     Conditional with reason codes HIGH_RISK and SUPPLEMENTAL_TEXT.
+ *
+ * If the patient is complete for Japanese Encephalitis, then the recommendation is Conditional with reason codes COMPLETE_HIGH_RISK
+ * and SUPPLEMENTAL_TEXT.
+ */
 rule "Japanese Encephalitis: Patient < 2 months old, Not Recommended with SUPPLEMENTAL_TEXT"
     dialect "mvel"
     ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -151,19 +122,10 @@ rule "Japanese Encephalitis: Patient is complete for Japanese Encephalitis, Cond
         Log that this Series Rule fired for the Series $targetSeries
 end
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// END Rules Based on Series Completion and Patient Age
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Series Exception Interval Rules
-//
-// Rules affecting minimum and recommended intervals
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////////////////
-// Suppress the regular latest recommended interval check if on accelerated schedule and second dose would be on or after 66th birthday
-/////////////////
+/**
+ * Suppress the regular latest recommended interval check if on accelerated schedule and second dose would be on or after 66th
+ * birthday
+ */
 rule "Japanese Encephalitis: Suppress Latest Recommended Interval Check for accelerated schedule when 66 or older"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -183,10 +145,10 @@ rule "Japanese Encephalitis: Suppress Latest Recommended Interval Check for acce
 	    Log that this Series Rule fired for the Series $targetSeries
 end
 
-/////////////////
-// If the recommended due date for target dose 2 of the accelerated series is >= 66 years old then use the non-accelerated minimum and recommended
-// intervals.
-/////////////////
+/**
+ * If the recommended due date for target dose 2 of the accelerated series is >= 66 years old then use the non-accelerated minimum
+ * and recommended intervals.
+ */
 rule "Japanese Encephalitis: Patient on accelerated schedule is 66 or older for recommended second dose"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -209,7 +171,3 @@ rule "Japanese Encephalitis: Patient on accelerated schedule is 66 or older for 
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
         Log that this Series Rule fired for the Series $targetSeries
 end
-
-/*****************************************************************************************************************************************************************************************************************
- END Recommendation Rules
-*****************************************************************************************************************************************************************************************************************/

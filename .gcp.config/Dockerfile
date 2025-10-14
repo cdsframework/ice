@@ -1,4 +1,4 @@
-FROM maven:3.9.11-eclipse-temurin-21-noble AS build
+FROM maven:3-eclipse-temurin-21 AS build
 
 COPY . .
 

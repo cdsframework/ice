@@ -23,6 +23,10 @@ import org.cdsframework.ice.service.Vaccine;
 
 global java.util.Date evalTime;
 
+/**
+ * Fall back rule: If 2 shots are VALID and the series is complete, mark the latter administered shot as Invalid /
+ * DUPLICATE_SAME_DAY
+ */
 rule "Duplicate Shots/Same Day(Pneumococcal): If 2 childhood series shots are VALID and the childhood series is complete, mark the latter administered shot as Invalid / DUPLICATE_SAME_DAY"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
@@ -45,6 +49,9 @@ rule "Duplicate Shots/Same Day(Pneumococcal): If 2 childhood series shots are VA
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
+/**
+ *  If neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination then:
+ */
 rule "Duplicate Shot/Same Day Overview Abstract Pneumococcal Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"

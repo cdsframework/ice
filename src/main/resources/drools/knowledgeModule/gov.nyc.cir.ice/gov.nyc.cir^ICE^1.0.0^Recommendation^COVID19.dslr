@@ -81,7 +81,6 @@ end
 rule "COVID-19: Invoke separate agenda group for post recommendation checks in the COVID19Sep2023 Season"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
-
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"

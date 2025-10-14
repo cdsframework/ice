@@ -17,6 +17,10 @@ global java.util.Date evalTime;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
+/**
+ * If a patient is >=105 days (15 weeks or older) and has not received any valid doses of rotavirus vaccine, then rotavirus is not
+ * recommended, the reason is Too_Old (display text: "Not recommended at this age"). Overrides routine recommendationAgeCheck
+ */
 rule "Rotavirus: Not Recommended When >= 105 days and No Valid Shots"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationAgeCheck"
@@ -36,6 +40,11 @@ rule "Rotavirus: Not Recommended When >= 105 days and No Valid Shots"
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If the patient is currently >8 months, 0 days, or will be >8 months, 0 days __as of the recommended date due__, then rotavirus is
+ * not recommended, and the reason is Too_Old
+ * (display text: "Not recommended at this age").
+ */
 rule "Rotavirus: Series is Complete if Over 8 Years of Age or Will Be as of the Routine Recommendation Date"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
@@ -55,4 +64,3 @@ rule "Rotavirus: Series is Complete if Over 8 Years of Age or Will Be as of the 
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-

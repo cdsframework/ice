@@ -24,6 +24,9 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 global java.util.Date evalTime;
 global org.cdsframework.ice.service.Schedule schedule;
 
+/**
+ * The recommended interval between dose 1 & 3 of HPV 3-dose series is 6 months. Routine interval rule still runs
+ */
 rule "HPV: Set the recommended interval of 6m between doses 1 & 3 for the HPV 3-Dose Series"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -45,6 +48,9 @@ rule "HPV: Set the recommended interval of 6m between doses 1 & 3 for the HPV 3-
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * The earliest interval between dose 1 & 3 of HPV 3-dose series is 5 months. Routine interval rule still runs
+ */
 rule "HPV: Set the earliest interval of 5m between doses 1 & 3 for the HPV 3-Dose Series"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -173,6 +179,10 @@ rule "HPV: Recommend CONDITIONAL / CLINICAL_PATIENT_DISCRETION if Series is Not 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * As defined in the XML, the default dose 1 latest recommended age is 13y+4w, and the default latest recommended interval is
+ * 13m+4w. If the patient is >= 15y, change the latest recommended age to 15y and the latest recommended interval to 16w.
+ */
 rule "HPV: If Patient >= 15 yrs and number of doses administered <= 1, modify HPV 3-Dose Series DoseRule 1 Latest Recommended Age to 15 yrs and Latest Recommended Interval to 16 weeks"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
