@@ -118,6 +118,10 @@ rule "Hib:Evaluate Hib Shot as Below Absolute Minimum Age for Final Dose of 4-Do
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end
 
+/**
+ * rule "Hib: Allow Hib Booster Vaccine For Last Dose of 4-Dose Hib Series if 4th Dose Administered >= the Absolute Minimum Age of
+ * 1y-4d and Prior Doses Administered"
+ */
 rule "Hib: Allow Hib Booster Vaccine For Last Dose if 4th Dose Administered >= the Absolute Minimum Age of 1y-4d and Prior Doses Administered"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"

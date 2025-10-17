@@ -22,6 +22,10 @@ global java.util.Date evalTime;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
+/**
+ * If the patient has completed the primary DTP series (3-dose or 5-dose) but has not received a dose of pertussis at >= 7 years,
+ * then an adolescent Tdap (CVX 115) is needed.
+ */
 rule "DTP(Any): Mark that dose of pertussis has not been administered for a shot if the shot is not valid"
 	ruleflow-group "customAnyRuleflowGroupRule"
 	auto-focus true
@@ -91,4 +95,3 @@ rule "DTP(Any): Retract Tdap needed if primary DTP series not complete"
 		Retract IceFact $iceTdapFact from Working Memory
 		Log that this Series Rule fired for the Series $targetSeries
 end
-

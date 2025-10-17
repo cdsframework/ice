@@ -85,6 +85,20 @@ rule "CandidateSeriesIdentification (Influenza): Initialize TargetSeries for *Cu
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "*Updated* TargetSeasons: " + $tseasons.toString());
 end
 
+/**
+ * Logic to either select or combine the infant and/or adult series based on the current age of the patient and the age at which
+ * shots were administered. This logic will be generalized and extended for use with other vaccine groups (such as pneumococcal) at
+ * a later time. This initial implementation for RSV, all of which can be implemented in this agenda group, is as follows:
+ *   + If there are no shots administered and the patient age is <= the maxAge of the infant series, add the infant series. Do not
+ *     add the adult series.
+ *   + If there are no shots administered and the patient age is >= the minAge of the adult series, add the adult series. Do not add
+ *     the infant series.
+ *   + If there are shots administered but they are all <= the max age of the infant series, simply add the infant series; do not
+ *     add the adult series
+ *   + If there are shots administered but they are all >= the min age of the adult series, simply add the adult series; do not add
+ *     the infant series
+ *   + If there are shots administered both <= the maxAge of the infant series and >= the minAge of the adult series, combine them.
+ */
 rule "CandidateSeriesIdentification(RSV): If there are exactly 2 RSV series whereby the Infant Series has a patientEndAge that is 1 day less than the patientStartAge of the Adult Series, invoke series identification workflow"
 	dialect "mvel"
 	ruleflow-group "CandidateSeriesIdentification^customCandidateSeriesIdentificationRule"

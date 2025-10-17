@@ -18,6 +18,12 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 
 global java.util.Date evalTime;
 
+/**
+ * If one of the CVX codes in the table above is administered above the absolute maximum age for that CVX code, then the Evaluation
+ * is Invalid and the reason code is ABOVE_MAXIMUM_AGE_VACCINE (per the ICE General Rule
+ * "Evaluation of Shots Above the Vaccine Code Absolute Maximum Age.", then there is no interval required between the Invalid shot
+ * and the next target dose.
+ */
 rule "Hep A: If a shot administered was evaluated and Not Valid due to ABOVE_MAXIMUM_AGE_VACCINE, ignore the shot when calculating intervals"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
@@ -57,6 +63,9 @@ rule "Hep A: Evaluate shot 2 as Valid if administered >= 6 months-4 days from Do
 		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
 end
 
+/**
+ * If CVX 104 is administered at >= 18 years-4 days, there is no maximum age for the Hep A vaccine component (CVX 83).
+ */
 rule "Hep A: If CVX 104 (Twinrix) is administered at >= 18 years-4 days in the 3-dose Series, there is no maximum age for the Hep A vaccine component (CVX 83)"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
@@ -75,6 +84,10 @@ rule "Hep A: If CVX 104 (Twinrix) is administered at >= 18 years-4 days in the 3
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * If dose 1 and dose 2 are administered at < 19 years and the interval between dose 1 and dose 2 is >= 6 months-4 days, the series
+ * is complete.
+ */
 rule "Hep A: If dose 1 and dose 2 are administered in the 3-dose Series at < 19y of age, and the interval between dose 1 and dose 2 is >= 6 months-4 day, then the Series is complete"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"

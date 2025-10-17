@@ -89,6 +89,11 @@ rule "Polio: If the execution date is before 8/7/2009 and the calculated Earlies
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Series complete with 3 doses: If patient is >= 4 years old (or will be >= 4 years old at the dose 3 recommended due date),
+ * recommend target dose 3 (and final dose) at 4 years old; minimum interval = 6 months (for earliest date); recommended interval =
+ * 6 months.
+ */
 rule "Polio: If patient >= 4 yrs (or will be >= 4 yrs for target dose 3 recommendation date), include recommendation at 4yrs of age; minimum & recommended interval of 6m from prior administered shot for target dose 3"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
@@ -124,4 +129,3 @@ rule "Polio: If patient >= 4 yrs (or will be >= 4 yrs for target dose 3 recommen
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-

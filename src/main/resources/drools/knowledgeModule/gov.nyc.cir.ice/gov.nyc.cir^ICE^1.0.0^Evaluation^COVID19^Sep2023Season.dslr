@@ -24,6 +24,18 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 
 global java.util.Date evalTime;
 
+/**
+ * ===> Non-U.S. vaccine that does not count towards vaccination, administered on or after 9/12/2023
+ * If the patient has a prior formulation COVID-19 shot that does not count towards U.S. vaccination (CVX 500, CVX 501, CVX 503,
+ * CVX 504, CVX 505, CVX 506, CVX 507, CVX 508, CVX 509, CVX 513, CVX 514, CVX 515, CVX 516, CVX 517, CVX 518, CVX 521) administered
+ * on or after 9/12/2023,
+ *    the intervals to the next target dose are:
+ *      + Absolute Minimum Interval = 8 weeks - 4 days
+ *      + Minimum Interval = 8 weeks
+ *      + Recommended Interval = 8 weeks
+ * If a prior formulation of a COVID-19 vaccine, excluding CVX 211, is administered on or after 9/12/2023, then the Evaluation is
+ * Invalid and the reason code is VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.
+ */
 rule "COVID-19(Sep2023+ Abstract): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 8w-4d"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -111,6 +123,15 @@ rule "COVID-19(Sep2023+): If a prior formulation is administered (excluding CVX 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * For the 2023-2024 season, if the patient has >= 1 (invalid) COVID-19 shot(s) administered PRIOR to 9/12/2023, but no doses on
+ * record, the intervals from the last shot, if prior to 9/12/2023, are:
+ *   Absolute Minimum Interval = 8 weeks - 4 days
+ *   Minimum Interval = 8 weeks
+ *   Recommended Interval = 8 weeks
+ *
+ * NOTE that this interval should override the table-based intervals for the 2023-2024 season from target dose 1 to dose 1.
+ */
 rule "COVID-19(Sep2023+): For the 2023-2024 season, if the patient has >= 1 (invalid) COVID-19 shot(s) administered prior to 9/12/2023, and there are no doses on record, the absolute minimum interval from (invalid) dose 1 is 8w-4d (*doseIntervalCheck*)"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -142,6 +163,11 @@ rule "COVID-19(Sep2023+): For the 2023-2024 season, if the patient has >= 1 (inv
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * In the 2023-2024 season, the absolute minimum interval (see evaluation rules), minimum interval and recommended interval from
+ * target dose 1 to dose 2 are, respectively, 4m-4d, 4m and 4m.
+ * This overrides the value set in the series table, which was for 2023-2024 season.
+ */
 rule "COVID-19(Sep2023+ >= 5yrs Series): For the 2023-2024 season, the absolute minimum interval from (invalid) dose 1 is 4m-4d (*doseIntervalCheck*)"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -177,6 +203,13 @@ rule "COVID-19(Sep2023+ >= 5yrs Series): For the 2023-2024 season, the absolute 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * If the patient has >= 1 COVID-19 shot(s) on record prior to target dose 1, evaluate and recommend using the following intervals
+ * from the last shot, if none of the following exceptions apply:
+ *   Absolute Minimum Interval = 8 weeks - 4 days
+ *   Minimum Interval = 8 weeks
+ *   Recommended Interval = 8 weeks
+ */
 rule "COVID-19(Sep2023+ >= 5yrs Series Abstract): If the patient has >= 1 COVID-19 shot(s) on record prior to target dose 1, the absolute minimum interval of 8w-4d is not met IF none of the exceptions apply"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -231,6 +264,10 @@ rule "COVID-19(Sep2023+ >= 5yrs Series): If the patient has >= 1 COVID-19 shot(s
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * If a shot of CVX 313 is administered for target dose 1 and it is the only dose on record, and the CVX 313 would otherwise be
+ * considered valid, target dose 1 is not fulfilled, evaluate as Accepted with reason code VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.
+ */
 rule "COVID-19(Sep2023+ >= 5yrs Series Parent Rule): If a shot of CVX 313 is administered for target dose 1, and there are no previous doses on record, evaluate the shot as Accepted / VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
@@ -283,11 +320,32 @@ rule "COVID-19(Sep2023+ >= 5yrs Series): If dose 1 is subsequently fulfilled aft
 		Log that this dose rule fired for the dose $priorShotCVX313 in the Series $associatedTargetSeries
 end
 
+/**
+ * Exception 1: If a shot has been ignored (due to the CVX Code Absolute Maximum Age rule or due to an inadvertent bivalent shot
+ * administered in the previous season), there is no absolute minimum interval to the next target dose.
+ * Handled in a rule or rules above.
+ *
+ * Exception 2 START
+ * If a shot of CVX 313 is administered for target dose 1 to a patient age 5 years and < 12 years - 4 days, and it is the only dose
+ * on record, and the CVX 313 would otherwise be considered valid, target dose 1 is not fulfilled, evaluate as Accepted with reason
+ * code VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.
+ *   Absolute minimum interval to fulfill target dose 1 = 24 days.
+ *   Minimum interval = 28 days
+ *   Recommended interval = 28 days. If the patient is < 12 years as of the evaluation date and is < 12 years at the recommended due
+ *   date), return recommended reason code ADMINISTER_mRNA_VACCINE.
+ *
+ * Exception 3: For the 2023-2024 COVID-19 vaccine season, exception 3: If a dose of CVX 211 is administered this season (i.e.,
+ * between 9/12/23 and 10/3/23), evaluate as Accepted with reason code VACCINE_NOT_PART_OF_THIS_SERIES.
+ *   Absolute minimum interval to fulfill target dose 1 = 24 days
+ *   Minimum interval = 28 days
+ *   Recommended interval = 28 days
+ *
+ * This rule is encompassed by the one above it, but we put the more precise rule because we need to know that this occurred
+ */
 rule "COVID-19(Sep2023+ >= 5yrs Series)-->TargetDose 1/Exception 2: If a shot of CVX 313 is administered for target dose 1 to a patient age 5y and < 12y-4d, and it is the only dose on record, and the CVX 313 would otherwise be considered valid, target dose 1 is not fulfilled"
 		extends "COVID-19(Sep2023+ >= 5yrs Series Parent Rule): If a shot of CVX 313 is administered for target dose 1, and there are no previous doses on record, evaluate the shot as Accepted / VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
-
 	salience 10
 	when
 		The patient information $patientInformation must be known to complete writing this rule
@@ -302,7 +360,6 @@ end
 rule "COVID-19(Sep2023+ >= 5yrs Series Abstract)-->TargetDose 1/Exception 2: If a previous shot of CVX 313 administered for target dose 1 was determined to be COVID19_INVALID_CVX_313_SEPT2023GTE5SERIES_OTHERWISE_WOULD_BE_CONSIDERED_VALID_FOR_TARGET_DOSE_1, the absolute minimum interval from that shot to target dose 1 is 24 days"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
-
 	salience 20
 	when
 		There is an administered shot $currentShot that needs to be evaluated
@@ -330,7 +387,6 @@ rule "COVID-19(Sep2023+ >= 5yrs Series)-->TargetDose 1/Exception 2: If a shot of
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 	no-loop true
-
 	salience 20
 	when
 		Confirm the date $currentShotDate is after $cvx313administrationDate && elapsed time between $cvx313administrationDate and $currentShotDate < "24d"
@@ -347,7 +403,6 @@ rule "COVID-19(Sep2023+ >= 5yrs Series)-->TargetDose 1/Exception 2: If a shot of
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 	no-loop true
-
 	salience 20
 	when
 		Confirm Elapsed time between $cvx313administrationDate and $currentShotDate >= "24d"
@@ -362,7 +417,6 @@ rule "COVID-19(Sep2023+ >= 5yrs Series)-->TargetDose 1/Exception 3: If a CVX 211
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 	activation-group "allowableVaccineCheck"
-
 	salience 20
 	when
 		There is an administered shot $currentShot that needs to be evaluated
@@ -380,7 +434,6 @@ end
 rule "COVID-19(Sep2023+ >= 5yrs Series Abstract)-->TargetDose 1/Exception 3: If a shot of CVX 211 was previously administered for target dose 1 and evaluated as Accepted / VACCINE_NOT_PART_OF_THIS_SERIES, the absolute minimum interval from that shot to target dose 1 is 24 days"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
-
 	salience 20
 	when
 		There is an administered shot $currentShot that needs to be evaluated
@@ -413,7 +466,6 @@ rule "COVID-19(Sep2023+ >= 5yrs Series)-->TargetDose 1/Exception 3: If a shot of
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 	no-loop true
-
 	salience 20
 	when
 		There does not exist an IceFact
@@ -433,7 +485,6 @@ rule "COVID-19(Sep2023+ >= 5yrs Series)-->TargetDose 1/Exception 3: If a shot of
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 	no-loop true
-
 	salience 20
 	when
 		Confirm Elapsed time between $previousShotDate and $currentShotDate >= "24d"
@@ -444,6 +495,15 @@ rule "COVID-19(Sep2023+ >= 5yrs Series)-->TargetDose 1/Exception 3: If a shot of
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * ===> Series: >= 5 yrs
+ *
+ * Target Dose 2 Evaluation Logic
+ *   + If a shot listed as a "Valid CVX Code(s) per Dose for this Series" is administered before the absolute minimum age, evaluate
+ *     as Accepted with reason code OUTSIDE_ROUTINE_SERIES.
+ * 	 + If a CVX 310 or CVX 311 is administered < the series absolute minimum age for the dose and <= the CVX code absolute maximum
+ *     age, evaluate as Accepted with reason code OUTSIDE_ROUTINE_SERIES.
+ */
 rule "COVID-19(Sep2023+ >= 5yrs Series)-->TargetDose 2: If a shot is administered before the absolute minimum age and permitted for this dose, evaluate as Accepted with reason code OUTSIDE_ROUTINE_SERIES"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
@@ -499,6 +559,9 @@ rule "COVID-19(Sep2023+ >= 5yrs Series)-->TargetDose 2: If a CVX 310 or CVX 311 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * For the 2023-2024 COVID-19 vaccine season, there is no absolute maximum age for CVX 308 for doses 2 and 3
+ */
 rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a CVX 308 is administered for target dose 2 or target dose 3 in the 2023-2024 season, then there is no maximum vaccine age for CVX 308"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -518,6 +581,15 @@ rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a CVX 308 is administered for 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * Pfizer < 5 yrs Series: If a shot is administered below the series absolute minimum age (< 6m - 4 days) in this season (on or
+ * after 9/12/2023):
+ * If administered as target dose 1 or target dose 2, intervals to the next target dose are:
+ *   Absolute minimum interval = 24 days
+ *   Minimum interval = 28 days
+ *   Recommended interval = 28 days
+ * If administered as target dose 3, follow series interval
+ */
 rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a shot was previously administered for target dose 1 or target dose 2 and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the absolute minimum interval from that shot to this shot is 24 days"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -573,6 +645,14 @@ rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If the patient has 1 dose of upda
 		Log that this dose rule fired for the dose $validShot in the Series $targetSeries
 end
 
+/**
+ * Interval from a Prior Formulation or Non-Pfizer Vaccine
+ * If a prior formulation COVID-19 vaccine (excluding non-US vaccines that do not count towards U.S vaccination) or a non-Pfizer
+ * updated seasonal COVID-19 vaccine is administered as target dose 1 or target dose 2, intervals to the next target dose are:
+ *   Absolute minimum interval = 24 days
+ *   Minimum interval = 28 days
+ *   Recommended interval = 28 days
+ */
 rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a prior formulation COVID-19 vaccine (excluding non-US vaccines that do not count towards U.S vaccination) or a non-Pfizer updated seasonal COVID-19 vaccine is administered on or after 9/12/2023 for target dose 1 or target dose 2, the absolute minimum interval to the next dose is 24 days"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -603,9 +683,16 @@ rule "COVID-19(Sep2023+ Pfizer < 5yrs Series): If a prior formulation COVID-19 v
 		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
-
 end
 
+/**
+ * Moderna < 5 yrs Series: If a shot is administered below the series absolute minimum age (< 6m - 4 days) in this season (on or
+ * after 9/12/2023):
+ * Intervals to the next target dose are:
+ *   Absolute minimum interval = 24 days
+ *   Minimum interval = 28 days
+ *   Recommended interval = 28 days
+ */
 rule "COVID-19(Sep2023+ Moderna < 5yrs Series): If a shot previously administered was evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES and the series is not complete, the absolute minimum interval from that shot to target dose 1 is 24 days"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -636,6 +723,9 @@ rule "COVID-19(Sep2023+ Moderna < 5yrs Series): If a shot previously administere
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * For the 2023-2024 COVID-19 vaccine season, there is no absolute maximum age for CVX 308 for doses 2 and 3
+ */
 rule "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a CVX 308 is administered for target dose 2 or target dose 3 in the 2023-2024 season, then there is no maximum vaccine age for CVX 308"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -655,6 +745,15 @@ rule "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a CVX 308 is administer
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * Mixed Product < 5 yrs Series:: If a shot is administered below the series absolute minimum age (< 6m - 4 days) in this season (on
+ * or after 9/12/2023):
+ * If administered as target dose 1 or target dose 2, intervals to the next target dose are:
+ *   Absolute minimum interval = 24 days
+ *   Minimum interval = 28 days
+ *   Recommended interval = 28 days
+ * If administered as target dose 3, follow series interval
+ */
 rule "COVID-19(Sep2023+ Mixed Product < 5yrs Series): If a shot previously administered for target dose 1 or target dose 2 was evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES, the absolute minimum interval from that shot to target dose 1 is 24 days"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -891,11 +990,16 @@ rule "COVID-19(Sep2023+ Moderna < 5rs Series): If there are no doses in the curr
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * In the 2023-2024 season, the absolute minimum interval (see evaluation rules), minimum interval and recommended interval from
+ * dose 3 to dose 4 are, respectively, 8w-4d, 8w and 6m.
+ * Absolute minimum interval rule is in this rule file; recommended interval rules are in the recommendation rule file.
+ * This overrides the value set in the series table, which is set for the latest season.
+ */
 rule "COVID-19(Sep2023+ Novavax Series): For the 2023-2024 season, the absolute minimum interval from dose 3 to dose 4 is 8w-4d (*doseIntervalCheck*)"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
 	activation-group "doseIntervalCheck"
-
 	salience -1
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
@@ -923,6 +1027,11 @@ rule "COVID-19(Sep2023+ Novavax Series): For the 2023-2024 season, the absolute 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * mRNA Administered for Target Dose 2
+ * If a CVX 213, CVX 309, or CVX 312 is administered for target dose 2, and target dose 2 is administered < 8 weeks - 4 days from
+ * dose 1, evaluate as Invalid / Below Minimum Interval.
+ */
 rule "COVID-19(Sep2023+ Novavax Series): If a CVX 213, CVX 309, or CVX 312 is administered for target dose 2, and target dose 2 is administered < 8 weeks - 4 days from dose 1, evaluate as Invalid / Below Minimum Interval"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -951,6 +1060,17 @@ rule "COVID-19(Sep2023+ Novavax Series): If a CVX 213, CVX 309, or CVX 312 is ad
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * If the patient is age >= 5 years and < 12 years and CVX 313 is administered as dose 1, evaluate and recommend using the following
+ * intervals:
+ *   Absolute Minimum Interval = 17 days
+ *   Minimum Interval = 4 weeks
+ *   Recommended Interval = 4 weeks
+ * Nothing needs to be done here, since the absolute minimum interval of 17 days matches what is in the series table. Changes need
+ * to be made on the recommendation side, however, as they do not match there.
+ * If a CVX 313 is administered for dose 1 in the Novavax 2023 series, then the absolute minimum age for dose 1 of the series is 5
+ * years
+ */
 rule "COVID-19(Sep2023+ Novavax Series): If a CVX 313 is administered for dose 1, then the absolute minimum age for dose 1 of the series is 5 years of age"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -1371,6 +1491,9 @@ rule "COVID-19(Sep2023+ Novavax__ Series): If CVX 313 was administered for dose 
 		Log that this Series Rule fired for the Series $associatedTargetSeries
 end
 
+/**
+ * If a CVX 211 is administered >= 10/4/2023 or CVX 313 is administered < 10/4/2023, then the vaccine is not allowed.
+ */
 rule "COVID-19(Sep2023+): If CVX 211 is administered on or after 10/4/2023 (any series), mark the shot Invalid / VACCINE_NOT_ALLOWED"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -1391,6 +1514,9 @@ rule "COVID-19(Sep2023+): If CVX 211 is administered on or after 10/4/2023 (any 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * Moderna: absolute minimum interval from a prior Moderna shot to the current shot is 24 days
+ */
 rule "COVID-19(Sep2023+): Always enforce absolute minimum interval of 24 days *from* any prior Moderna or CVX 213 shots (in any Series)"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
@@ -1459,4 +1585,3 @@ rule "COVID-19(Sep2023+): Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_
 		Record that this dose rule was processed for the TargetDose $notAllowedShot
 		Log that this dose rule fired for the dose $notAllowedShot in the Series $associatedTargetSeries
 end
-

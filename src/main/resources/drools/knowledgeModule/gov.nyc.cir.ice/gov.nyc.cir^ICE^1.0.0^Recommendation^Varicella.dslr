@@ -17,6 +17,11 @@ global java.util.Date evalTime;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
+/**
+ * For persons born prior to 01-01-1980, if the series is not complete, recommendation should be conditional/recommended for
+ * high-risk groups.
+ * Overrides routine recommendationAgeCheck
+ */
 rule "Varicella: Recommend conditional/high risk if born prior to 1/1/1980 and series not complete"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
     when
@@ -32,6 +37,9 @@ rule "Varicella: Recommend conditional/high risk if born prior to 1/1/1980 and s
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Overrides generic earliest interval check, as per the value defined in the series XML configuration
+ */
 rule "Varicella: 28 day Earliest Interval From Dose 1 to Dose 2 if >= 13 Years of Age"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	activation-group "earliestIntervalCheck"
@@ -51,6 +59,9 @@ rule "Varicella: 28 day Earliest Interval From Dose 1 to Dose 2 if >= 13 Years o
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Overrides generic interval check, as per the value defined in the series XML configuration
+ */
 rule "Varicella: 28 day Recommended Interval From Dose 1 to Dose 2 if >= 13 Years of Age"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationIntervalCheck"

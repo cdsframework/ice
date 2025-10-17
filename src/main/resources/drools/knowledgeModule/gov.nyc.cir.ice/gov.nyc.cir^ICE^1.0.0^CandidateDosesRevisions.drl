@@ -29,6 +29,13 @@ import org.cdsframework.ice.service.VaccineComponent;
 global java.util.Date evalTime;
 global org.cdsframework.ice.service.Schedule schedule;
 
+/**
+ * Logic to either select or combine the infant and/or adult series based on the current age of the patient and the age at which
+ * shots were administered. This logic will be generalized and extended for use with other vaccine groups (such as pneumococcal) at
+ * a later time. This initial implementation for RSV, all of which can be implemented in this agenda group, is as follows:
+ *   + If there are shots administered both <= the maxAge of the infant series and >= the minAge of the adult series, remove/retract
+ *     the target doses that overlap in the 2 target series, as applicable by series start/end ages.
+ */
 rule "CandidateDosesRevisions(RSV): If there are no shots administered in the RSV Infant Series and the patient is greater than or equal to the series begin age of the RSV Adult Series, remove the RSV Infant TargetSeries from consideration"
 	dialect "mvel"
 	ruleflow-group "CandidateDosesRevisions^customCandidateDoseRevisionRule"

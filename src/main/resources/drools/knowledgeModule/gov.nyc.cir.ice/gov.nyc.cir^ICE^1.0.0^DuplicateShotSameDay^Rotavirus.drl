@@ -23,6 +23,15 @@ import org.cdsframework.ice.service.Vaccine;
 
 global java.util.Date evalTime;
 
+/**
+ * If the date of administration is >= 1/1/2000, then:
+ *   + If one of the shots is CVX 74 (rotavirus, tetravalent), then:
+ *     = evaluate CVX 74 as Invalid with a reason code of DUPLICATE_SAME_DAY
+ *     = evaluate the other rotavirus CVX as Valid
+ *   + If neither shot is CVX 74 and one of the shots is CVX 119 (rotavirus, monovalent), then:
+ *     = evaluate the CVX 119 as Invalid with a reason code of DUPLICATE_SAME_DAY
+ *     = evaluate the other rotavirus CVX as Valid
+ */
 rule "Duplicate Shots/Same Day Rotavirus Rule #1a: If shot administered >= 1/1/2000 and one of the doses is CVX 74, evaluate CVX 74 as Invalid / DUPLICATE_SAME_DAY and other Rotavirus CVX as Valid"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
@@ -66,6 +75,15 @@ rule "Duplicate Shots/Same Day Rotavirus Rule #1b: If shot administered >= 1/1/2
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
+/**
+ * If the date of administration is < 1/1/2000, then:
+ *   + If one of the of the shots is CVX 74, then:
+ *     = evaluate CVX 74 as Valid
+ *     = evaluate the other rotavirus CVX as Invalid with a reason code of DUPLICATE_SAME_DAY
+ *   + If neither shot is CVX 74 and one of the shots is CVX 119, then:
+ *     = evaluate the CVX 119 as Invalid with a reason code of DUPLICATE_SAME_DAY
+ *     = evaluate the other rotavirus CVX as Valid
+ */
 rule "Duplicate Shots/Same Day Rotavirus Rule #2a: If shot administered < 1/1/2000 and one of the doses is CVX 74, evaluate CVX 74 as Valid and other Rotavirus CVX as Invalid / DUPLICATE_SAME_DAY"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
@@ -108,4 +126,3 @@ rule "Duplicate Shots/Same Day Rotavirus Rule #2b: If shot administered < 1/1/20
 		};
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
 end
-

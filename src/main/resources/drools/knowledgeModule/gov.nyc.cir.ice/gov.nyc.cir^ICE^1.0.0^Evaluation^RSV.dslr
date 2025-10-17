@@ -95,6 +95,11 @@ rule "RSV: If an Infant RSV vaccine or otherwise unspecified RSV vaccine (CVX 30
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * RSV shots administered to a patient age < 8 months outside the RSV season (e.g., during September, if the season has been defined
+ * as October 1 to March 31) will be evaluated as Valid with reason code OUTSIDE_SEASON.
+ * (Note: Patient is complete for the RSV Infant Series.)
+ */
 rule "RSV: If an RSV shot is administered in the Infant Series to a patient < 8 months of age outside the RSV season, the shot is Valid with reason code OUTSIDE_SEASON"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
@@ -116,6 +121,9 @@ rule "RSV: If an RSV shot is administered in the Infant Series to a patient < 8 
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * If the RSV Infant Series was completed in a prior season, mark the current RSV infant series complete
+ */
 rule "RSV: If a shot was administered in the current season of the RSV Infant Series but the RSV Infant Series was completed in a prior season, mark the current season's RSV Infant Series Complete"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
@@ -139,6 +147,9 @@ rule "RSV: If a shot was administered in the current season of the RSV Infant Se
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+/**
+ * If the RSV Infant Series was completed in a prior season, mark the current RSV infant series complete
+ */
 rule "RSV: If the RSV Infant Series was completed in a prior season, mark the current season's RSV Infant Series Complete"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
@@ -159,6 +170,11 @@ rule "RSV: If the RSV Infant Series was completed in a prior season, mark the cu
 		Log that this dose rule fired for the dose $priorSeasonShot in the Series $currentSeasonSeries
 end
 
+/**
+ * If any RSV shot is administered at age >= 8 months and < 50 years, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES.
+ * Note that this overrides the ICE General Rule "Evaluation Selection Priority" in all cases, except where the ICE General Rule
+ * "Evaluation of Shots Above the Vaccine Code Absolute Maximum Age" applies.
+ */
 rule "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted / Outside of any Routine Series"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
@@ -213,6 +229,11 @@ rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Inva
 		Log that this dose rule fired for the dose $otherRSVShot in the Series $associatedTargetSeries
 end
 
+/**
+ * CVX Code Absolute Maximum Age: If one of the CVX codes in the table above is administered above the absolute maximum age for that
+ * CVX code, then the Evaluation is Invalid and the reason code is ABOVE_MAXIMUM_AGE_VACCINE, per the ICE General Rule "Evaluation
+ * of Shots Above the Vaccine Code Absolute Maximum Age".
+ */
 rule "RSV: If shot administered was evaluated in the Adult Series as Invalid with an evaluation reason ABOVE_MAXIMUM_AGE_VACCINE and BELOW_MINIMUM_AGE_SERIES, remove the BELOW_MINIMUM_AGE_SERIES evaluation reason"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"

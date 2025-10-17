@@ -23,6 +23,10 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 
 global java.util.Date evalTime;
 
+/**
+ * Series complete with 3 doses if dose 3 was administered when the patient was >= 4 years and was administered at least 6 months -
+ * 4 days after the previous dose, then the series is complete with 3 doses.
+ */
 rule "Polio: (Series Complete with 3 Doses Rule 2)- Series is Complete if 3 prior doses, patient >= 4yrs when dose 3 administered, and dose 3 >= 6m-4d after previous dose"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
@@ -74,6 +78,11 @@ rule "Polio: Modify DoseRule4 Absolute minimum age and Absolute Minimum Interval
 		Log that this Series Rule fired for the Series $associatedTargetSeries
 end
 
+/**
+ * For children who received target dose 4 at >= 8/7/2009 and before 4 years - 4 days of age, evaluate target dose 4 as Accepted/
+ * BELOW_MINIMUM_AGE_FINAL_DOSE
+ * (if absolute minimum interval is met). (An additional dose will be recommended at >= 4 years of age).
+ */
 rule "Polio: Mark target dose 4 administered >= 8/7/2009 and before absolute minimum age as ACCEPTED with reason BELOW_MINIMUM_AGE_FINAL_DOSE"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseAgeCheck"
@@ -97,6 +106,9 @@ rule "Polio: Mark target dose 4 administered >= 8/7/2009 and before absolute min
 		Log that this dose rule fired for the dose $targetDose4 in the Series $targetSeries
 end
 
+/**
+ * If a patient receives CVX 178 or CVX 179, evaluate these shots as Invalid with reason code MISSING_ANTIGEN
+ */
 rule "Polio: Mark OPV shots (CVX 178 or CVX 179) as INVALID with reason MISSING_ANTIGEN"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "allowableVaccineCheck"
@@ -114,6 +126,10 @@ rule "Polio: Mark OPV shots (CVX 178 or CVX 179) as INVALID with reason MISSING_
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
+/**
+ * If a patient receives shots of OPV administered >= 4/1/2016, these shots do not count towards the series. Evaluate these shots as
+ * Invalid with reason code MISSING_ANTIGEN
+ */
 rule "Polio: Mark OPV shots administered >= 4/1/2016 as INVALID with reason MISSING_ANTIGEN"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when

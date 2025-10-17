@@ -17,6 +17,11 @@ global java.util.Date evalTime;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
+/**
+ * For persons born prior to 01-01-1957, if the series is not complete, recommendation should be conditional/recommended for
+ * high-risk groups.
+ * Series age rule still runs so that we can get the recommendation date
+ */
 rule "MMR: Recommend conditional/high risk if born prior to 1/1/1957 and series not complete"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -33,6 +38,10 @@ rule "MMR: Recommend conditional/high risk if born prior to 1/1/1957 and series 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Once a patient completes the MMR 2-dose series the Recommendation is Not Recommended and the reason code is COMPLETE_HIGH_RISK.
+ * (MMR should never have a recommendation of Not Recommended/Complete.)
+ */
 rule "MMR: If a patient completed the series, recommendation is Not Recommended / COMPLETE_HIGH_RISK"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -49,6 +58,10 @@ rule "MMR: If a patient completed the series, recommendation is Not Recommended 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * If the recommended due date for Target Dose 2 is >= 19 years old, then that dose is not required; the series is complete with 1
+ * dose.
+ */
 rule "MMR: If the recommended due date for Target Dose 2 is >= 19 years old, then that dose is not required; the series is complete with 1 dose"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"

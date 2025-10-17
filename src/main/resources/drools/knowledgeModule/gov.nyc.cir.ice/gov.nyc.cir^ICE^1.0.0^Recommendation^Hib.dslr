@@ -43,6 +43,9 @@ rule "Hib: Recommend Hib Conditional High Risk if Patient Age >=5yrs and Series 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Exception 1
+ */
 rule "Hib: Include Recommendation with Date 7months in 4-Dose Hib Series and TargetDose 2 if Patient is between 7and12months and Received No Doses before 7months of Age"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -64,6 +67,9 @@ rule "Hib: Include Recommendation with Date 7months in 4-Dose Hib Series and Tar
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Exception 2A
+ */
 rule "Hib: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose Hib Series if Patient between age 12and15months and Received <2 Doses before 12months of Age"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -85,6 +91,9 @@ rule "Hib: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Exception 2B
+ */
 rule "Hib: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose Hib Series and Patient between age 12and15months and Received 2 Doses before 12months of Age"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -107,6 +116,9 @@ rule "Hib: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose Hib Se
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
+/**
+ * Exception 3
+ */
 rule "Hib: Set Recommendation Date to 15months and TargetDose 4 in 4-Dose Hib Series if Patient between age 15months and 5years"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -128,4 +140,3 @@ rule "Hib: Set Recommendation Date to 15months and TargetDose 4 in 4-Dose Hib Se
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
-

@@ -24,6 +24,11 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 global java.util.Date evalTime;
 global org.cdsframework.ice.service.Schedule schedule;
 
+/**
+ * If CVX 118 (HPV, bivalent (Cervarix) is reported for a male patient, then evaluate as Accepted and the reason code is
+ * VACCINE_NOT_LICENSED_FOR_MALES.
+ * Mark that the shot should be ignored when determining further evaluations and recommendations
+ */
 rule "HPV: Evaluate CVX 118 administered to male patient as Accepted with reason VACCINE_NOT_LICENSED_FOR_MALES; Ignore shot for completion of the Series"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
@@ -83,4 +88,3 @@ rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses
 		Record that this dose rule was Processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
 end
-

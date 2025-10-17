@@ -23,6 +23,10 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 
 global java.util.Date evalTime;
 
+/**
+ * CVX 218, CVX 219, CVX 227, CVX 228, CVX 301, CVX 302, CVX 308, CVX 310, CVX 311 - if evaluated as Invalid due to being above the
+ * maximum age for that vaccine, should be ignored for purposes of recommendations
+ */
 rule "COVID-19: If CVX 218, CVX 219, CVX 227, CVX 228, CVX 229, CVX 230, CVX 301, CVX 302, CVX 308, CVX 310, CVX 311 was evaluated and Not Valid due to ABOVE_MAXIMUM_AGE_VACCINE, ignore the shot when calculating intervals"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
@@ -43,6 +47,10 @@ rule "COVID-19: If CVX 218, CVX 219, CVX 227, CVX 228, CVX 229, CVX 230, CVX 301
 		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
 end
 
+/**
+ * If an updated Sept 2023 Pfizer or Moderna COVID-19 vaccine (CVX 308, CVX 309, CVX 310, CVX 311, CVX 312) is administered prior to
+ * 9/12/2023, evaluate as Invalid with reason code VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED.
+ */
 rule "COVID-19: If CVX 308, CVX 309, CVX 310, CVX 311 or CVX 312 was administered < 9/12/2023, evaluate the shot as Invalid / VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
 	dialect"mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
@@ -166,4 +174,3 @@ rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 		Set the Agenda Group Focus to "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
 end
-
