@@ -163,6 +163,7 @@
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended [Nn]ow=recommendationStatus == RecommendationStatus.RECOMMENDED
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Rr]ecommended=recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Nn]ot [Rr]ecommended=recommendationStatus == RecommendationStatus.NOT_RECOMMENDED
+[condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and the status is [Nn]ot [Rr]ecommended=recommendationStatus != RecommendationStatus.RECOMMENDED
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a shot is [Nn]ot [Cc]onditionally [Rr]ecommended=recommendationStatus != RecommendationStatus.CONDITIONALLY_RECOMMENDED && (RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.NOT_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a [Ss]pecific [Vv]accine is [Nn]ot [Rr]ecommended=recommendationVaccine == null && (recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
 [condition][]- [Aa] [Ff]orecast for the [Ss]eries has been made and a [Ss]pecific [Vv]accine is [Rr]ecommended=recommendationVaccine != null && (recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED)
@@ -224,8 +225,6 @@
 [condition][]There is {entity:a |}[Rr]ecommendation {assign_oRecommendation}={assign_oRecommendation} : Recommendation()
 [condition][]- [Tt]he [Rr]ecommendation is [Aa]ssociated with [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries} != null && targetSeriesIdentifier != null && targetSeriesIdentifier == {refer_oTargetSeries}.targetSeriesIdentifier
 [condition][]- [Tt]he [Rr]ecommendation is [Aa]ssociated with [Ss]hot {refer_oTargetDose}={refer_oTargetDose} != null && targetDoseIdentifier != null && targetDoseIdentifier == {refer_oTargetDose}.uniqueId
-[condition][]- [Tt]he [Rr]ecommendation [Ss]tatus is not {oRecommendationStatus}=recommendationStatus != {oRecommendationStatus}
-[condition][]- [Tt]he [Rr]ecommendation [Ss]tatus is {oRecommendationStatus}=recommendationStatus == {oRecommendationStatus}
 [condition][]- [Tt]he [Rr]ecommendation [Rr]eason is not {strRecommendationReason}=recommendationReason != {strRecommendationReason}
 [condition][]- [Tt]he [Rr]ecommendation [Rr]eason is {strRecommendationReason}=recommendationReason == {strRecommendationReason}
 
