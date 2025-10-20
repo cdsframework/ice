@@ -107,9 +107,9 @@ rule "Yellow Fever: Patient >= 6 months and < 9 months and not complete, Conditi
 		Create a Recommendation as $recommendationHighRisk with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
         Set the Recommendation Reason for $recommendationHighRisk to "RECOMMENDATION_REASON_CONCEPT.BELOW_REC_AGE_SERIES"
         Include the Recommendation $recommendationHighRisk for Consideration in the final Forecast of the Series
-        Create a Recommendation as $recommendationHighRisk with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-        Set the Recommendation Reason for $recommendationHighRisk to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
-        Include the Recommendation $recommendationHighRisk for Consideration in the final Forecast of the Series
+        Create a Recommendation as $recommendationHighRisk2 with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+        Set the Recommendation Reason for $recommendationHighRisk2 to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+        Include the Recommendation $recommendationHighRisk2 for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries

@@ -42,8 +42,7 @@ rule "Japanese Encephalitis: Always include supplemental text with the recommend
         There is a Series $targetSeries
             - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.902"
             - post processing on the Series forecast has not already been run
-            - a forecast for the Series has been made
-            - The recommendation status is not "RecommendationStatus.RECOMMENDED"
+            - a forecast for the Series has been made and the status is not Recommended
             - make note of the recommendation status as $recommendationStatus
     then
         Create a Recommendation as $supplementalText for the Series $targetSeries
