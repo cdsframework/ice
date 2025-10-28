@@ -2,6 +2,7 @@ package knowledgeModule.gov.nyc.cir.ice;
 
 import java.util.Collection;
 import java.util.Date;
+import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
@@ -845,18 +846,155 @@ rule "SeriesSelection(RSV): Select the RSV Adult Series if the patient is >= 20 
 end
 
 /**
+ * Start COVID Series Selection Rules Aug2025+ Season
+ */
+
+rule "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName == "COVID19Aug2025Season")
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		$person : EvaluatedPerson($dateAt2yrs : TimePeriod.addTimePeriod(demographics.birthTime, "2y"), $dateAt65yrs : TimePeriod.addTimePeriod(demographics.birthTime, "65y"))
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: Aug2025 2 and 65 year thresholds calculated")
+end
+
+rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Series (< 2 years) if patient is < 2 years of age as of evaluation date, or patient is >= 2 years and has a shot administered in current season at < 2 years of age"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 100
+	when
+		(
+			eval(evalTime.compareTo($dateAt2yrs) < 0)
+			or
+			(
+				eval(evalTime.compareTo($dateAt2yrs) >= 0)
+				and
+				exists TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate < $dateAt2yrs, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
+			)
+		)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Aug2025lt2Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+ 	ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 1-dose COVID-19 Series (>= 2 - 64 years) if patient has no in-season shots and is >= 2 years and < 65 years as of evaluation date"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 50
+	when
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Aug20252yTo64ySeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		eval(evalTime.compareTo($dateAt2yrs) >= 0 && evalTime.compareTo($dateAt65yrs) < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Series (>= 65 years) if patient has no in-season shots and is >= 65 years as of evaluation date"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 50
+	when
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Aug2025gte65Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		eval(evalTime.compareTo($dateAt65yrs) >= 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 1-dose COVID-19 Series (>= 2 - 64 years) if patient has in-season shots administered at >= 2 years and target dose 1 received at age < 65 years"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 50
+	when
+		$td1 : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, doseNumberInSeries == 1, administrationDate >= $dateAt2yrs,  associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason,
+			$dose1AdminDate : administrationDate)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Aug20252yTo64ySeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		eval($dose1AdminDate.compareTo($dateAt65yrs) < 0)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Series (>= 65 years) if patient has in-season shots administered and target dose 1 received at age >= 65 years"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 50
+	when
+		$td1 : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, doseNumberInSeries == 1, administrationDate >= $dateAt65yrs, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Aug2025gte65Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+	then
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+		update($tss);
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Series (>= 65 years) if patient if dose 1 is administered to a patient that will turn 65 within 12 months of season start date"
+        extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 50
+	when
+		$td1 : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", isValid == true, doseNumberInSeries == 1, administrationDate < $dateAt65yrs,
+		                  associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, $seasonStartDate : associatedTargetSeries.seasonStartDate)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesRules.seriesName == "COVID19Aug2025gte65Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
+		eval($seasonStartDate != null && $seasonStartDate.compareTo($dateAt65yrs) < 0)
+        eval($seasonStartDate != null && TimePeriod.compareElapsedTimePeriodToDateRange($seasonStartDate, $dateAt65yrs, "12m") <= 0)
+	then
+        $ts.setSelectedSeries(true);
+        $tss.setSelectedSeriesName($ts.seriesName);
+        $tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_COMPLETE);
+        update($tss);
+        update($ts);
+        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+end
+
+/**
+ * Start COVID Series Selection Rules Pre-Aug2025+ Season
+ */
+
+/**
  * If one series is complete but another has been selected, selected an already completed one.
  * This is the only way a non-FDA, WHO-approved series can be selected (it must be complete).
  * If there is more than one series that has been complete, this rule picks one of them, and the general rules will pick the
  * earliest completed.
  */
-rule "SeriesSelection(COVID-19): Select already _completed_ series if a different, _incomplete_ series was previously selected"
+rule "SeriesSelection(COVID-19 Pre-Aug25): Select already _completed_ series if a different, _incomplete_ series was previously selected"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	activation-group "SeriesSelection^COVID19Sep2023^customSeriesSelectionCompletionRules"
 	salience 5
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS)
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.850", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS || seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS,
+		       seriesSelectionSeason.fullySpecifiedSeasonStartDate.isBefore(LocalDate.of(2025, 8, 27)))
 		$ts1 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == true, isSeriesComplete() == false, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 		$ts2 : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", selectedSeries == false, isSeriesComplete() == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 	then
@@ -870,7 +1008,7 @@ rule "SeriesSelection(COVID-19): Select already _completed_ series if a differen
 		update($ts2);
 end
 
-rule "SeriesSelection(COVID-19 Sep2023+ Adult Series): Do NOT select already _completed_ Sep2023+ _Child_ series if a different, _incomplete_ Sep2023+ _Adult_ series was previously selected and there are no doses at < 5 years of age"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024 Adult Series): Do NOT select already _completed_ Sep2023/Aug2024 _Child_ series if a different, _incomplete_ Sep2023/Aug2024 _Adult_ series was previously selected and there are no doses at < 5 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	activation-group "SeriesSelection^COVID19Sep2023^customSeriesSelectionCompletionRules"
@@ -884,7 +1022,7 @@ rule "SeriesSelection(COVID-19 Sep2023+ Adult Series): Do NOT select already _co
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Previously Selected TargetSeries NOT Reverted");
 end
 
-rule "SeriesSelect(COVID-19): Catch All-- In Sep2023+ season, select the Mixed Product Series if no other series applies"
+rule "SeriesSelect(COVID-19 Sep2023/Aug2024): Catch All-- Select the Mixed Product Series if no other series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	when
@@ -900,7 +1038,7 @@ rule "SeriesSelect(COVID-19): Catch All-- In Sep2023+ season, select the Mixed P
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
-rule "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	when
@@ -911,7 +1049,7 @@ rule "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at 
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection")
 end
 
-rule "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 12y-4d years of age"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 12y-4d years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	when
@@ -922,8 +1060,8 @@ rule "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at 
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection")
 end
 
-rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Mixed Product < 5 yrs series if any doses were administered in the current season prior to 5 yrs of age, and there are a mix of products used"
-		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024): Select the Mixed Product < 5 yrs series if any doses were administered in the current season prior to 5 yrs of age, and there are a mix of products used"
+	extends "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 25
@@ -954,8 +1092,8 @@ rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Mixed Product < 
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsmixedproduct);
 end
 
-rule "SeriesSelect(COVID-19): In Sep2023+ season, select the COVID-19 Mixed Product < 5y series if patient is < 5 years of age and there are no doses on record in the current season"
-		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+rule "SeriesSelect(COVID-19 Sep2023/Aug2024): Select the COVID-19 Mixed Product < 5y series if patient is < 5 years of age and there are no doses on record in the current season"
+	extends "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 25
@@ -972,7 +1110,7 @@ rule "SeriesSelect(COVID-19): In Sep2023+ season, select the COVID-19 Mixed Prod
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
-rule "SeriesSelection(COVID-19): If a >= 5yrs Series is completed but the previously selected Novavax Series is not, then the >= 5yr Series applies"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024): If a >= 5yrs Series is completed but the previously selected Novavax Series is not, then the >= 5yr Series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 26
@@ -991,7 +1129,7 @@ rule "SeriesSelection(COVID-19): If a >= 5yrs Series is completed but the previo
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $tsgte5yrs);
 end
 
-rule "SeriesSelection(COVID-19): If a Novavax 2023 Series is completed but the previously selected >= 5y Series is not, then the Novavax 2023 Series applies"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024): If a Novavax 2023 Series is completed but the previously selected >= 5y Series is not, then the Novavax 2023 Series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 26
@@ -1017,8 +1155,8 @@ end
  * applies. and dose 2 (in a Sept 2023 series) is Novavax (CVX 211, CVX 313), then the Sept 2023 Novavax Series applies.
  *   dose 1 in Sept 2023 series is not Novavax (CVX 211, CVX 313), then the Sept 2023 COVID-19 Series (>= 5 years) applies.
  */
-rule "SeriesSelection(COVID-19): In the Sep2023 season, if the patient is >= 5 years of age and there are no doses on record at >= 5 years in the current season, then COVID-19 >= 5y Series applies"
-		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024): If the patient is >= 5 years of age and there are no doses on record at >= 5 years in the current season, then COVID-19 >= 5y Series applies"
+	extends "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 27
@@ -1035,8 +1173,8 @@ rule "SeriesSelection(COVID-19): In the Sep2023 season, if the patient is >= 5 y
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
-rule "SeriesSelect(COVID-19): In Sep2023+ season, if patient is >= 5 years of age and there are no doses on record at < 5 years of age in the current season, then the COVID-19 >= 5y series"
-		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+rule "SeriesSelect(COVID-19 Sep2023/Aug2024): If patient is >= 5 years of age and there are no doses on record at < 5 years of age in the current season, then the COVID-19 >= 5y series"
+	extends "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 27
@@ -1053,8 +1191,8 @@ rule "SeriesSelect(COVID-19): In Sep2023+ season, if patient is >= 5 years of ag
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
-rule "SeriesSelection(COVID-19): In the Sep2023+ season, if the first dose administered is the Novavax vaccine at >= 12 years of age, there are no other doses after dose 1 in another series, and there are no doses in the prior season, then the Novavax 2023 Series applies"
-		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 12y-4d years of age"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024): If the first dose administered is the Novavax vaccine at >= 12 years of age, there are no other doses after dose 1 in another series, and there are no doses in the prior season, then the Novavax 2023 Series applies"
+	extends "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 12y-4d years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 28
@@ -1073,7 +1211,7 @@ rule "SeriesSelection(COVID-19): In the Sep2023+ season, if the first dose admin
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
-rule "SeriesSelection(COVID-19): In the Sep2023+ season, if the first 2 doses is Novavax (CVX 211, CVX 311) and there are no doses in the prior seasons, then the Novavax 2023 Series applies"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024): If the first 2 doses is Novavax (CVX 211, CVX 311) and there are no doses in the prior seasons, then the Novavax 2023 Series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 28
@@ -1103,8 +1241,8 @@ end
  *   applies.
  *   and neither of the above two conditions are true, then the Sept 2023 Mixed Product COVID-19 Series (< 5 years) applies.
  */
-rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Mixed Product Series < 5 yrs if at least one dose (if any) in the prior season doses was administered at < 5 yrs of age, all doses (if any) in the prior season are a mix of vaccines, and all shots (if any) in the current season are a mix of 2023 vaccines"
-		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024): Select the Mixed Product Series < 5 yrs if at least one dose (if any) in the prior season doses was administered at < 5 yrs of age, all doses (if any) in the prior season are a mix of vaccines, and all shots (if any) in the current season are a mix of 2023 vaccines"
+	extends "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 29
@@ -1133,8 +1271,8 @@ rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Mixed Product Se
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
-rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Pfizer < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all doses (if any) in the all seasons are Pfizer vaccines:, and all shots (if any) are in the current season are a Pfizer vaccine"
-		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024): Select the Pfizer < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all doses (if any) in the all seasons are Pfizer vaccines:, and all shots (if any) are in the current season are a Pfizer vaccine"
+	extends "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -1169,8 +1307,8 @@ rule "SeriesSelection(COVID-19): In Sep2023+ season, select the Pfizer < 5 yrs s
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
-rule "SeriesSelection(COVID-19): In Sep2023 season, select the Moderna < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all doses (if any) in the prior season are Moderna vaccines, and all shots (if any) in the current season are a Moderna vaccine"
-		extends "SeriesSelection(COVID-19 Abstract): In Sep2023+ season, determine date at which patients turns 5 years of age"
+rule "SeriesSelection(COVID-19 Sep2023/Aug2024): Select the Moderna < 5 yrs series if at least one dose (if any) in the prior season was administered at < 5 yrs of age, all doses (if any) in the prior season are Moderna vaccines, and all shots (if any) in the current season are a Moderna vaccine"
+	extends "SeriesSelection(COVID-19 Sep2023/Aug2024 Abstract): In Sep2023/Aug2024 seasons, determine date at which patients turns 5 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -1205,7 +1343,7 @@ rule "SeriesSelection(COVID-19): In Sep2023 season, select the Moderna < 5 yrs s
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
-rule "SeriesSelection(COVID-19): In Dec2020 season, select the Mixed Series by default if no valid NOS shots on record"
+rule "SeriesSelection(COVID-19 Dec2020): Select the Mixed Series by default if no valid NOS shots on record"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	when
@@ -1223,7 +1361,7 @@ rule "SeriesSelection(COVID-19): In Dec2020 season, select the Mixed Series by d
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 end
 
-rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not found in the Pfizer, Moderna, Mixed Product or Janssen series (see related rules), then select the another (i.e. - WHO series) that has the earliest, non-NOS (Valid) _dose_ administered to it"
+rule "SeriesSelection(COVID-19 Dec2020): If the earliest, non-NOS (Valid) _dose_ was not found in the Pfizer, Moderna, Mixed Product or Janssen series (see related rules), then select the another (i.e. - WHO series) that has the earliest, non-NOS (Valid) _dose_ administered to it"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 25
@@ -1242,7 +1380,7 @@ rule "SeriesSelection(COVID-19): If the earliest, non-NOS (Valid) _dose_ was not
 		update($ts);
 end
 
-rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were all administered doses a Moderna, Pfizer or Novavax vaccine (i.e.- none of Moderna-only, Pfizer-only or Novavax-only Series are applicable), but (Valid) doses exist in the Mixed Product Series, then select the Mixed Product Series"
+rule "SeriesSelection(COVID-19 Dec2020): If the Janssen Series was not selected nor were all administered doses a Moderna, Pfizer or Novavax vaccine (i.e.- none of Moderna-only, Pfizer-only or Novavax-only Series are applicable), but (Valid) doses exist in the Mixed Product Series, then select the Mixed Product Series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 28
@@ -1275,7 +1413,7 @@ rule "SeriesSelection(COVID-19): If the Janssen Series was not selected nor were
 		update($tsmixedproduct);
 end
 
-rule "SeriesSelection(COVID-19): If all administered doses are a Moderna vaccine and the valid shot(s) are in the Moderna series, then the Moderna Series applies"
+rule "SeriesSelection(COVID-19 Dec2020): If all administered doses are a Moderna vaccine and the valid shot(s) are in the Moderna series, then the Moderna Series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -1309,7 +1447,7 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Moderna vaccine
 		update($ts);
 end
 
-rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine and the valid shot(s) are in the Pfizer series, then the Pfizer Series applies"
+rule "SeriesSelection(COVID-19 Dec2020): If all administered doses are a Pfizer vaccine and the valid shot(s) are in the Pfizer series, then the Pfizer Series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -1343,7 +1481,7 @@ rule "SeriesSelection(COVID-19): If all administered doses are a Pfizer vaccine 
 		update($ts);
 end
 
-rule "SeriesSelection(COVID-19): If all administered doses are a Novavax vaccine and the valid shot(s) are in the Novavax series, then the Novavax Series applies"
+rule "SeriesSelection(COVID-19 Dec2020): If all administered doses are a Novavax vaccine and the valid shot(s) are in the Novavax series, then the Novavax Series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -1378,7 +1516,7 @@ end
  * or non-FDA series and the Pfizer/Moderna/non-FDA series is not complete, the catch all selection rule that examines for earliest
  * completed series will override this rule.
  */
-rule "SeriesSelection(COVID-19): If the first dose administered is the Janssen vaccine, then the Janssen Series applies"
+rule "SeriesSelection(COVID-19 Dec2020): If the first dose administered is the Janssen vaccine, then the Janssen Series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 40
@@ -1397,6 +1535,10 @@ rule "SeriesSelection(COVID-19): If the first dose administered is the Janssen v
 		update($tss);
 		update($ts);
 end
+
+/**
+ * End COVID Series Selection Rules
+ */
 
 rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series by default"
 	dialect "mvel"
@@ -1548,7 +1690,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (
 end
 
 rule "SerieSelection(MenB): Select MenB 4C 3-dose series if target dose 1 (CVX 163, CVX 328) is Valid; series _is_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1564,7 +1706,7 @@ rule "SerieSelection(MenB): Select MenB 4C 3-dose series if target dose 1 (CVX 1
 end
 
 rule "SerieSelection(MenB): Select MenB 4C 3-dose series if target dose 1 (CVX 163, CVX 328) is Valid; series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-Dose Series if it has a (valid) dose 1 and but MenB 4C 2-Dose Series does not have a (valid) dose 1"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1602,7 +1744,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose
 end
 
 rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 163, CVX 328) is Valid; series _is_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1618,7 +1760,7 @@ rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 1
 end
 
 rule "SerieSelection(MenB): Select MenB 4C 2-dose series if target dose 1 (CVX 163, CVX 328) is Valid; series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series if valid dose 1"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1653,7 +1795,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is 
 end
 
 rule "SerieSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid for 4C 2-dose series; 4C 2-dose series _is_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid in 4C 2-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid in 4C 2-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1669,7 +1811,7 @@ rule "SerieSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, 
 end
 
 rule "SerieSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid for 4C 2-dose series; 4C 2-dose series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid in 4C 2-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Valid in 4C 2-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1706,7 +1848,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-dose series if dose 1 is 
 end
 
 rule "SerieSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, CVX 328); target dose 2 (CVX 163, CVX 328) is Invalid for 4C 2-dose series, Valid for 4C 3-dose series; 4C 4C 4C 4C 3-dose series _is_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, CVX 328) and target dose 2 (CVX 163, CVX 328) is Invalid for 4C 2-dose series but Valid for 4C 3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, CVX 328) and target dose 2 (CVX 163, CVX 328) is Invalid for 4C 2-dose series but Valid for 4C 3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1722,7 +1864,7 @@ rule "SerieSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, 
 end
 
 rule "SerieSelection(MenB): Select MenB 4C 3-dose series if dose 1 is CVX 163; target dose 2 (CVX 163) is Invalid for 4C 2-dose series, Valid for 4C 3-dose series; 4C 3-dose series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, CVX 328) and target dose 2 (CVX 163, CVX 328) is Invalid for 4C 2-dose series but Valid for 4C 3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 3-dose series if dose 1 is (CVX 163, CVX 328) and target dose 2 (CVX 163, CVX 328) is Invalid for 4C 2-dose series but Valid for 4C 3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1759,7 +1901,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is 
 end
 
 rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both MenB 4C 2-dose series/3-dose series but series is complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both 4C 2-dose series/3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both 4C 2-dose series/3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1775,7 +1917,7 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163,
 end
 
 rule "SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both MenB 4C 2-dose series/3-dose series, series is not complete, and there are no other series complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both 4C 2-dose series/3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-dose series if dose 1 is (CVX 163, CVX 328), target dose 2 (CVX 163, CVX 328) is Invalid in both 4C 2-dose series/3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1819,7 +1961,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target d
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, valid for FHbp 3-dose series; FHbp 3-dose series _is_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1836,7 +1978,7 @@ rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, valid for FHb3 3-dose series; FHbp 3-dose series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if target dose 1 (CVX 162, CVX 316) is invalid for FHbp 2-dose series but valid for the FHbp 3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1877,7 +2019,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target d
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series/FHbp 3-dose series; FHbp 2-dose series _is_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1893,7 +2035,7 @@ rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 (CVX 162, C
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 (CVX 162) is Valid for both FHbp 2-dose series/FHb3 3-dose series; FHbp 2-dose series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if target dose 1 (CVX 162, CVX 316) is Valid for both FHbp 2-dose series and FHbp 3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -1929,7 +2071,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 i
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid for FHbp 2-dose series; FHbp 2-dose series _is_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1945,7 +2087,7 @@ rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid for FHbp 2-dose series; FHbp 2-dose series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Valid in FHbp 2-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1983,7 +2125,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 i
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316); target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHBp 3-dose series _is_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -1999,7 +2141,7 @@ rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162
 end
 
 rule "SerieSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is CVX 162; target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series, Valid for FHbp 3-dose series; FHbp 3-dose series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 3-dose series if dose 1 is (CVX 162, CVX 316) and target dose 2 (CVX 162, CVX 316) is Invalid for FHbp 2-dose series but Valid for FHbp 3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -2040,7 +2182,7 @@ end
  * This should not happen based on current rules - 2-dose series is not complete until 2-doses have been administered
  */
 rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162) is Invalid in both MenB FHbp 2-dose series/3-dose series but series is complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -2056,7 +2198,7 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 16
 end
 
 rule "SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both MenB FHbp 2-dose series/3-dose series, series is not complete, and there are no other series complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-dose series if dose 1 is (CVX 162, CVX 316), target dose 2 (CVX 162, CVX 316) is Invalid in both FHbp 2-dose series/3-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -2137,7 +2279,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 
 end
 
 rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, Series is complete, and 4C 3-Dose Series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -2154,7 +2296,7 @@ rule "SeriesSelection(MenB): Select MenB 4C 2-Dose Series if both (CVX 162, CVX 
 end
 
 rule "SeriesSelection(MenB): Select MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, Series is complete, and 4C 2-Dose Series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB 4C 2-Dose Series _or_ MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 163"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -2192,7 +2334,7 @@ rule "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4
 end
 
 rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 162, Series is complete, and FHbp 3-Dose Series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -2209,7 +2351,7 @@ rule "SeriesSelection(MenB): Select MenB FHbp 2-Dose Series if both (CVX 162, CV
 end
 
 rule "SeriesSelection(MenB): Select MenB 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, last shot administered is CVX 163, Series is complete, and FHbp 2-Dose Series is _not_ complete"
-		extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
+	extends "ABSTRACT SeriesSelection(MenB): Select MenB FHbp 2-Dose Series _or_ FHbp 4C 3-Dose Series if both (CVX 162, CVX 316) and CVX 163 present, and latest shot date administered is CVX 162"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 30
@@ -2389,7 +2531,7 @@ rule "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the
 end
 
 rule "SeriesSelection(Hep A): Keep selection as 3-dose series if the 3-dose was completed on the same day or before"
-		extends "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
+	extends "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 3
@@ -2401,7 +2543,7 @@ rule "SeriesSelection(Hep A): Keep selection as 3-dose series if the 3-dose was 
 end
 
 rule "SeriesSelection(Hep A): Make the change to the 2-dose and 3-dose series if the 2-dose was completed earlier than the 3-dose or the 3-dose was never completed"
-		extends "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
+	extends "SeriesSelection(Hep A Abstract): if the 3-dose series was selected but the 2-dose series was completed before the 3-dose series completed, potentially select the 2-dose series"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 3
@@ -2423,7 +2565,7 @@ rule "SeriesSelection(Hep A): Make the change to the 2-dose and 3-dose series if
 end
 
 rule "SeriesSelection(Hep A): If 2-dose Series was selected over the 3-dose Series when the 3-dose Series was previously selected, mark any prior 3-dose Series doses as Accepted / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN in the 2-dose Series"
-		extends "SeriesSelection(Hep A): Make the change to the 2-dose and 3-dose series if the 2-dose was completed earlier than the 3-dose or the 3-dose was never completed"
+	extends "SeriesSelection(Hep A): Make the change to the 2-dose and 3-dose series if the 2-dose was completed earlier than the 3-dose or the 3-dose was never completed"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 5
@@ -2622,7 +2764,7 @@ rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at
 end
 
 rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+	extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
@@ -2633,7 +2775,7 @@ rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at
 end
 
 rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+	extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
@@ -2644,7 +2786,7 @@ rule "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at
 end
 
 rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y-4d and < 19 years of age, 1 dose, and no additional shots on record"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
+	extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
@@ -2660,7 +2802,7 @@ rule "SeriesSelection(Hep B): Select Adult 2-dose Series is patient >= 18y-4d an
 end
 
 rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >= 19 years of age, and no additional shots on records, select the 3-dose Adult Series"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+	extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 110
@@ -2677,7 +2819,7 @@ rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >=
 end
 
 rule "SeriesSelection(Hep B): For patient with CVX 189 dose at >= 18y-4d and < 19 years of age, and >= 1 dose and additional shots on record, select the Child/Adolescent Series if it has more doses than the Adult Series"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+	extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
@@ -2694,7 +2836,7 @@ rule "SeriesSelection(Hep B): For patient with CVX 189 dose at >= 18y-4d and < 1
 end
 
 rule "SeriesSelection(Hep B): For patient with CVX 189 at >= 18y-4d and < 19 years of age, and >= 1 dose and additional shots on record, select the 2-dose Adult Series if it has greater than or equal the number of doses as the Child/Adolescent Series"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+	extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
@@ -2711,7 +2853,7 @@ rule "SeriesSelection(Hep B): For patient with CVX 189 at >= 18y-4d and < 19 yea
 end
 
 rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >= 19 years of age, and >= 1 dose and additional shots on record, select the 3-dose Adult Series if it has more doses than the 2-dose Adult Series"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+	extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
@@ -2728,7 +2870,7 @@ rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >=
 end
 
 rule "SeriesSelection(Hep B): For patient with CVX 189 dose 1 administered at >= 19 years of age, and >= 1 dose and additional shots on record, select the 2-dose Adult Series if it has greater than or equal the number of doses as the Child/Adolescent Series"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
+	extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and also >= 19 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
@@ -2749,7 +2891,7 @@ end
  * it completed first
  */
 rule "SeriesSelection(Hep B): Select Child/Adult Series if it is complete"
-		extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
+	extends "ABSTRACT SeriesSelection(Hep B): (valid) Dose 1 is CVX 189 administered at >= 18y-4d and < 19 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 110

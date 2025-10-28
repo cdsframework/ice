@@ -1,3 +1,7 @@
+// [keyword][]AND=&&
+// [keyword][]OR=||
+
+// Patient
 [condition][]The [Pp]atient [Ii]nformation {assign_oEvaluatedPerson} must be known to complete writing this rule={assign_oEvaluatedPerson} : EvaluatedPerson()
 [condition][]- [Tt]he [Pp]atient's birthdate is {aOp}  {dtDate}=demographics.birthTime {aOp} {dtDate}
 [condition][]- [Tt]he [Pp]atient is [Ff]emale=demographics.gender.code != null, demographics.gender.equals(schedule.getSupportedCdsLists().getCdsListItem(BaseDataPerson._GENDER_FEMALE.cdsListItemName).getCdsListItemCD())
@@ -7,6 +11,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Dd]ate as {assign_dtDateAtAge} when the [Pp]atient is {refer_oTimePeriod} of [Aa]ge={assign_dtDateAtAge} : TimePeriod.addTimePeriod(demographics.birthTime, {refer_oTimePeriod})
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 
+// Disease Immunity
 [condition][]The [Pp]atient has [Ii]mmunity to a [Dd]isease=exists DiseaseImmunity()
 [condition][]There does not exist {entity:an |another |a |}[Dd]isease[Ii]mmunity=not DiseaseImmunity()
 [condition][]- [Tt]he [Vv]accine [Gg]roup affected by the reported [Ii]mmunity is {dd_oSupportedVaccineGroupConcept}=vaccineGroup == {dd_oSupportedVaccineGroupConcept}
@@ -19,6 +24,7 @@
 [consequence][]Make [Nn]ote of the [Pp]atient's [Ii]mmunity to {ddOpenCdsDiseaseConcept} with [Ii]mmunity [Dd]ate as {assign_oDate} and [Ee]valuation [Rr]eason {ddEvaluationReason} and [Rr]ecommendation [Rr]eason {ddRecommendationReason}=Date {assign_oDate} = ICELogicHelper.extractSingularDateValueFromIVLDate($or.getObservationEventTime()); DiseaseImmunity diseaseImmunity = new DiseaseImmunity({ddOpenCdsDiseaseConcept}, {assign_oDate}, {ddEvaluationReason}, {ddRecommendationReason}); insert(diseaseImmunity);
 [consequence][]Log that [Ii]mmunity was noted for {sDiseaseName} and [Ii]mmunity [Dd]ate {refer_oDate}=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Added {sDiseaseName} Immunity as of date " + {refer_oDate}.toString());
 
+// TargetDose
 [condition][]There exists {entity:an |another |}[Aa]dministered [Ss]hot=exists TargetDose()
 [condition][]There does not exist {entity:an |another |}[Aa]dministered [Ss]hot=not TargetDose()
 [condition][]There is {entity:an |another |}[Aa]dministered [Ss]hot {assign_oTargetDose} that needs to be [Ee]valuated={assign_oTargetDose} : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS)
@@ -103,6 +109,7 @@
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 [condition][]- [Tt]he [Oo]bject {oObjectOne:[\\$]?[a-zA-Z0-9\\.\\_]+} is {aOp}  {oObjectTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oObjectOne} {aOp} {oObjectTwo}
 
+// TargetSeries
 [condition][]There exists {entity:a |another |}[Ss]eries=exists TargetSeries()
 [condition][]There does not exist {entity:a |another |}[Ss]eries=not TargetSeries()
 [condition][]There is a [Ss]eries {assign_oTargetSeries} that needs [Ff]orecasting={assign_oTargetSeries} : TargetSeries(recommendationStatus == RecommendationStatus.FORECASTING_IN_PROGRESS)
@@ -209,6 +216,7 @@
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=\\<\\>]+}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 [condition][]- [Tt]he [Oo]bject {oObjectOne:[\\$]?[a-zA-Z0-9\\.\\_]+} is {aOp}  {oObjectTwo:[\\$]?[a-zA-Z0-9\\.\\_]+}={oObjectOne} {aOp} {oObjectTwo}
 
+// Season
 [condition][]There exists {entity:a |another |}[Ss]eason=exists Season()
 [condition][]There does not exist {entity:a |another |}[Ss]eason=not Season()
 [condition][]There is {entity:a |}[Ss]eason {assign_oSeason} distinct from {assign_oOtherSeason}={assign_oSeason} : Season(this != {assign_oOtherSeason})
@@ -219,6 +227,7 @@
 [condition][]- [Tt]he [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate is {aOp:[\=\\<\\>]+}  {dtObject}=fullySpecifiedSeasonStartDate != null && {dtObject} != null && ICELogicHelper.toDate(fullySpecifiedSeasonStartDate) {aOp} {dtObject}
 [condition][]- [Mm]ake [Nn]ote of the [Ff]ully [Ss]pecified [Ss]eason [Ss]tart [Dd]ate as {assign_dtSeasonStartDate}={assign_dtSeasonStartDate} : ICELogicHelper.toDate(fullySpecifiedSeasonStartDate), {assign_dtSeasonStartDate} != null
 
+// Recommendation
 [condition][]There exists {entity:a |another |}[Rr]ecommendation=exists Recommendation()
 [condition][]There does not exist {entity:a |another |}[Rr]ecommendation=not Recommendation()
 [condition][]There is {entity:a |}[Rr]ecommendation {assign_oRecommendation} distinct from {assign_oOtherRecommendation}={assign_oRecommendation} : Recommendation(this != {assign_oOtherRecommendation})
@@ -228,14 +237,17 @@
 [condition][]- [Tt]he [Rr]ecommendation [Rr]eason is not {strRecommendationReason}=recommendationReason != {strRecommendationReason}
 [condition][]- [Tt]he [Rr]ecommendation [Rr]eason is {strRecommendationReason}=recommendationReason == {strRecommendationReason}
 
+// TargetDose accumulates
 [condition][][Vv]erify that the [Cc]ount of [Dd]oses [Aa]dministered in [Ss]eries {refer_oTargetSeries} with [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]+} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || $td.administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 [condition][][Vv]erify that the [Cc]ount of [Dd]oses [Aa]dministered in [Ss]eries {refer_oTargetSeries} with [Vv]accine {dd_oVaccineCdsListItem} is {aOp_num}  {nNumberOfDoses}=accumulate($td : TargetDose(status == DoseStatus.VALID, vaccineComponent.cdsConceptName == {dd_oVaccineCdsListItem} || $td.administeredVaccine.cdsConceptName == {dd_oVaccineCdsListItem}) from {refer_oTargetSeries}.targetDoses; $countNum: count($td); $countNum {aOp_num}  {nNumberOfDoses})
 [condition][][Vv]erify that the [Uu]nique [Cc]ount of [Ss]hots [Aa]dministered in [Ss]eries {refer_oTargetSeries} by [Dd]ate is {aOp_num}  {nNumberOfShots}=Set(size {aOp_num} {nNumberOfShots}) from accumulate(TargetDose($shotDate : administrationDate) from {refer_oTargetSeries}.targetDoses, collectSet($shotDate))
 [condition][][Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Aa]dministered {accumulate_oTargetDoses} in [Ss]eries {refer_oTargetSeries} as {assign_nNumberOfDoses} [Ww]here [Aa]dministration [Dd]ate {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}} with [Vv]accine a member of {dd_oVaccineCdsList:[\\(]+[a-zA-Z0-9\\.\\-_\\"\\,\\ \\(\\)]+[\\)]}=accumulate({accumulate_oTargetDoses} : TargetDose(status == DoseStatus.VALID, administrationDate {aOp} {strDate}, vaccineComponent.cdsConceptName in {dd_oVaccineCdsList} || administeredVaccine.cdsConceptName in {dd_oVaccineCdsList}) from {refer_oTargetSeries}.targetDoses; {assign_nNumberOfDoses}: count({accumulate_oTargetDoses}))
 [condition][][Mm]ake [Nn]ote of the [Nn]umber of [Dd]oses [Aa]dministered {accumulate_oTargetDoses} in [Ss]eries {refer_oTargetSeries} as {assign_nNumberOfDoses} [Ww]here [Aa]dministration [Dd]ate {aOp:[\=\\<\\>]+}  {strDate:[\\"]{1}[0-9]+[\\-]{1}[a-zA-Z]+[\\-]{1}[0-9]+[\\"]{1}}=accumulate({accumulate_oTargetDoses} : TargetDose(status == DoseStatus.VALID, administrationDate {aOp} {strDate}) from {refer_oTargetSeries}.targetDoses; {assign_nNumberOfDoses}: count({accumulate_oTargetDoses}))
 
+// TargetSeries accumulates
 [condition][]Verify that the [Cc]ount of [Rr]ecommendations in Series {refer_oTargetSeries} with [Rr]ecommendation [Ss]tatus {oRecommendationStatus} and a populated [Rr]eason is {aOp_num}  {nNumberOfRecommendations}=accumulate($recommendations : Recommendation(recommendationStatus == {oRecommendationStatus}, recommendationReason != null) from {refer_oTargetSeries}.finalRecommendations; $countNum : count($recommendations); $countNum {aOp_num}  {nNumberOfRecommendations})
 
+// EVAL Conditions
 [keyword][][Cc]onfirm {conditions}=eval( {conditions} )
 [condition][][Tt]he [Vv]ariable {refer_oVariable} is {aOp}  {oValue:[\\$a-zA-Z0-9_]+}={refer_oVariable}  {aOp}  {oValue}
 [condition][][Tt]he [Aa]ge of the [Pp]atient {refer_oEvaluatedPerson} at the [Tt]ime the [Vv]accine was [Aa]dministered for [Dd]ose {refer_oTargetDose} is [Gg]reater [Tt]han the [Mm]aximum [Aa]llowable [Aa]ge for the [Vv]accine=(TimePeriod.compareElapsedTimePeriodToDateRange({refer_oEvaluatedPerson}.getDemographics().getBirthTime(), {refer_oTargetDose}.getAdministrationDate(), {refer_oTargetDose}.getVaccineComponent().getValidMaximumAgeForUse()) > 0)
@@ -256,6 +268,9 @@
 [condition][]\([Cc]alculate [Dd]ate from addition of {refer_dtDate} with TimePeriod {refer_oDuration:([\\$]{1})(\w)+(\s){0}}\)=TimePeriod.addTimePeriod({refer_dtDate}, {refer_oDuration})
 [condition][][Tt]hat the following is true: {expression:([\\(]{0,1}.*[\\)]{0,1})}={expression}
 
+// CONSEQUENCES
+
+// TargetDose Actions
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Vv]alid={refer_oTargetDose}.setStatus(DoseStatus.VALID);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Aa]ccepted={refer_oTargetDose}.setStatus(DoseStatus.ACCEPTED);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Ii]nvalid={refer_oTargetDose}.setStatus(DoseStatus.INVALID);
@@ -315,6 +330,7 @@
 [consequence][][Rr]emove [Ss]upplemental [Tt]ext {sSupplementalText} from [Ii]nvalid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.removeSupplementalTextForInvalidShot({sSupplementalText});
 [consequence][][Rr]efresh all [Ff]acts for the [Ss]hot {refer_oTargetDose}=update({refer_oTargetDose});
 
+// TargetSeries Actions
 [consequence][][Cc]lear [Ff]orecasted [Rr]ecommendations from [Cc]onsideration in [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.clearRecommendations();
 [consequence][][Rr]emove the [Ss]hot {refer_oTargetDose} from [Ee]valuation as a part of the [Ss]eries {refer_oTargetSeries}=modify({refer_oTargetSeries}) \{ removeTargetDoseFromSeries({refer_oTargetDose}); retract({refer_oTargetDose}); \};
 [consequence][][Ss]kip [Ss]eries [Dd]ose [Nn]umber to {nToDoseNumber} from {nFromDoseNumber} for [Dd]isease {dd_oSupportedDiseaseConcept} in [Ss]eries {refer_oTargetSeries:[\\$A-Za-z0-9\\_]+} but [Dd]o [Nn]ot [Rr]efresh [Ss]eries [Ff]acts={refer_oTargetSeries}.addSkipDoseEntryForSpecifiedDisease({nFromDoseNumber}, {nToDoseNumber}, {dd_oSupportedDiseaseConcept});
@@ -362,6 +378,10 @@
 [consequence][][Ii]nclude the [Rr]ecommendation {refer_oRecommendation} for [Cc]onsideration in the final [Ff]orecast of the [Ss]eries=insert({refer_oRecommendation});
 [consequence][][Ll]ogically [Ii]nsert the [Rr]ecommendation {refer_oRecommendation} into [Ww]orking [Mm]emory for [Pp]otential [Cc]onsideration in the final [Ff]orecast of the [Ss]eries=insertLogical({refer_oRecommendation});
 
+// Consider adding reevaluation of all shots in the series
+// [consequence][][Rr]eevaluate all [Ss]hots in the [Ss]eries {refer_oTargetSeries}=
+
+// DoseRule Actions
 [consequence][][Cc]reate the next DoseRule as {assign_oDoseRule} which may be added to the SeriesRules for [Ss]eries {refer_oTargetSeries}=DoseRule {assign_oDoseRule} = new DoseRule(); {assign_oDoseRule}.setDoseNumber({refer_oTargetSeries}.getSeriesRules().getNumberOfDosesInSeries()+1);
 [consequence][][Oo]btain the existing DoseRule for [Dd]ose [Nn]umber {nDoseNumber} in the [Ss]eries {refer_oTargetSeries} as {assign_oDoseRule}=DoseRule {assign_oDoseRule} = DoseRule.constructDeepCopyOfDoseRuleObject({refer_oTargetSeries}.obtainDoseRuleForSeriesByDoseNumber({nDoseNumber})); if ({assign_oDoseRule} == null) \{ {assign_oDoseRule} = new DoseRule({refer_oTargetSeries}.getSeriesRules()); \}
 [consequence][][Oo]btain the [Mm]inimum [Ii]nterval from the existing DoseRule {refer_oDoseRule} as {assign_oTimePeriod}={assign_oTimePeriod} = {refer_oDoseRule}.getMinimumInterval();
@@ -394,15 +414,18 @@
 [consequence][][Aa]dd the new DoseRule {refer_oDoseRule} to the SeriesRules for [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.addVaccineGroupDoseRule({refer_oDoseRule});
 [consequence][][Rr]eplace the existing DoseRule in the [Ss]eries {refer_oTargetSeries} with {refer_oDoseRule}={refer_oTargetSeries}.modifyVaccineGroupDoseRule({refer_oDoseRule});
 
+// Other Recommendation / Forecasting actions
 [consequence][][Mm]ark [Ff]orecasting of the [Ss]eries {refer_oTargetSeries} [Cc]omplete=modify ({refer_oTargetSeries}) \{setRecommendationStatus(RecommendationStatus.FORECASTING_COMPLETE); \}
 [consequence][][Ss]et the [Dd]ose [Nn]umber of [Rr]ecommendation [Ff]orecast to {nDoseNumberOfForecast} in [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.setManuallySetDoseNumberToRecommend({nDoseNumberOfForecast});
 [consequence][][Mm]ark that [Pp]ost [Pp]rocessing on the [Ff]orecast of the [Ss]eries {refer_oTargetSeries} has been [Rr]un={refer_oTargetSeries}.setPostForecastCheckCompleted(true);
+[consequence][][Mm]ark the [Ss]eries {refer_oTargetSeries} to [Ii]nclude [Ff]orecast [Dd]ates for [Cc]onditional [Rr]ecommendations={refer_oTargetSeries}.setForecastDateToBeDisplayedForConditionalRecommendations(true);
 [consequence][][Ss]et the [Rr]ecommended [Vv]accine for the [Ff]orecast in the [Ss]eries {refer_oTargetSeries} to {dd_oSupportedVaccineConcept}={refer_oTargetSeries}.setRecommendationVaccine(schedule.getVaccineByCdsConceptValue({dd_oSupportedVaccineConcept}));
 [consequence][][Uu]nset the [Rr]ecommended [Vv]accine for the [Ff]orecast in the [Ss]eries {refer_oTargetSeries}={refer_oTargetSeries}.setRecommendationVaccine(null); for (Recommendation r : {refer_oTargetSeries}.getFinalRecommendations()) \{ r.setRecommendedVaccine(null); \}
 [consequence][][Ss]et [Dd]isplay [Ff]orecast [Dd]ate for [Cc]onditional [Rr]ecommendations in the [Ss]eries {refer_oTargetSeries} to [Tt]rue={refer_oTargetSeries}.setForecastDateToBeDisplayedForConditionalRecommendations(true);
 [consequence][][Ss]et [Dd]isplay [Ff]orecast [Dd]ate for [Cc]onditional [Rr]ecommendations in the [Ss]eries {refer_oTargetSeries} to [Ff]alse={refer_oTargetSeries}.setForecastDateToBeDisplayedForConditionalRecommendations(false);
 [consequence][][Ss]et the [Aa]genda [Gg]roup [Ff]ocus to {sAgendaGroupFocus:[\\"]{1}[a-zA-Z0-9\\^\\.\\_\\ ]+[\\"]{1}}=drools.setFocus({sAgendaGroupFocus});
 
+// Logging actions
 [consequence][][Rr]ecord that this [Ss]eries [Rr]ule was [Pp]rocessed for the TargetSeries {refer_oTargetSeries}={refer_oTargetSeries}.addSeriesRuleProcessed(drools.getRule().getName());
 [consequence][][Rr]ecord that this [Dd]ose [Rr]ule was [Pp]rocessed for the TargetDose {refer_oTargetDose}={refer_oTargetDose}.addDoseRuleProcessed(drools.getRule().getName());
 [consequence][][Ll]og that this [Dd]ose [Rr]ule fired for the [Dd]ose {refer_oTargetDose} in the Series {refer_oTargetSeries}=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), {refer_oTargetDose}.toString() + " in TargetSeries " + {refer_oTargetSeries}.getSeriesName());
@@ -412,14 +435,20 @@
 [consequence][][Ll]og [Dd]ebugging [Ii]nformation about [Oo]bject [Nn]amed {strObjectName} and [Vv]alue {oDebugObject}=ICELogicHelper.logDRLDebugMessage("DEBUG INFORMATION for " + drools.getRule().getName(), {strObjectName} + ": " + {oDebugObject});
 [consequence][][Mm]ake [Nn]ote of the name of this [Rr]ule [Nn]ame as {sRuleName}=String {sRuleName} = drools.getRule().getName();
 
+// IceResult Fact Object START
+
+// IceResult Fact Object condition SUBSTITUTIONS START
 [condition][]where IceResult [Ff]inding is {sIceResultFinding} includes an associated TargetDose=iceResultFinding == {sIceResultFinding}, targetDose != null
 
+
+// IceResult Fact Object condition WHERE clauses START
 [condition][]IceResult [Ff]inding=iceResultFinding
 [condition][]IceResult [Aa]dministration [Dd]ate=targetDose != null, targetDose.administrationDate
 [condition][]IceResult [Dd]iseases [Tt]argeted=targetDose.administeredVaccine.allDiseasesTargetedForImmunity
 [condition][]where {attr:[A-Za-z0-9\\.\\(\\)\\ ]+} {aOp}  {value}={attr} {aOp}  {value}
 [condition][]as well as {attr} {aOp}  {value}=, {attr} {aOp}  {value}
 
+// Primary IceResult Fact Object conditions and sub-conditions
 [condition][]There exists {entity:an |another |}IceFact=exists ICEFactTypeFinding()
 [condition][]There does not exist {entity:an | another |}IceFact=not ICEFactTypeFinding()
 [condition][]There is {entity:an |another |}IceFact {oICEFactTypeFinding}={oICEFactTypeFinding} : ICEFactTypeFinding()
@@ -438,6 +467,7 @@
 [condition][]- [Mm]ake [Nn]ote of the [Aa]ssociated [Ss]eries as {assign_oTargetSeries}={assign_oTargetSeries} : associatedTargetSeries, associatedTargetSeries != null
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 
+// IceResult Fact Object Consequences START
 [consequence][][Ll]ogically [Ii]nsert an IceFact {sIceResultFinding} with TargetDose {oTargetDose} into [Ww]orking [Mm]emory=insertLogical(new ICEFactTypeFinding({sIceResultFinding}, {oTargetDose}));
 [consequence][][Ll]ogically [Ii]nsert an IceFact {sIceResultFinding} with TargetSeries {oTargetSeries} into [Ww]orking [Mm]emory=insertLogical(new ICEFactTypeFinding({sIceResultFinding}, {oTargetSeries}));
 [consequence][][Ll]ogically [Ii]nsert an IceFact {sIceResultFinding} into [Ww]orking [Mm]emory=insertLogical(new ICEFactTypeFinding({sIceResultFinding}));
@@ -447,10 +477,16 @@
 [consequence][][Ii]nsert an IceFact {sIceResultFinding} into [Ww]orking [Mm]emory=insert(new ICEFactTypeFinding({sIceResultFinding}));
 [consequence][][Rr]etract IceFact {oICEFactTypeFinding} from [Ww]orking [Mm]emory=retract({oICEFactTypeFinding});
 
+// IceResult Fact Object Accumulates START
 [condition][]Verify that the [Cc]ount of IceFacts \({IceResultConditions}\) is {aOp}  {nNumberOfConditions}=accumulate($irf : ICEFactTypeFinding({IceResultConditions}); $countNum: count($irf); $countNum {aOp}  {nNumberOfConditions})
 
+// e.g. Verify that the Count of IceResult Findings (where IceResult Finding is "yeah" and there is a TargetDose and the TargetDose administration date > "blah" and the TargetDose targets the disease "blah2") is > 5
+// or e.g. Verify that the Count of IceResult Findings (where IceResult Finding is "yeah" and there is a TargetDose with administration date > "blah" and diseases targeted contains "blah2") is > 5
 [consequence][][Aa]djust [Ee]arliest [Dd]ate to {nDays} days after [Ll]ive [Vv]irus [Dd]ate {refer_dtLiveVirusDate} for [Ss]eries {refer_oTargetSeries}=String _RULENAME = drools.getRule().getName(); Date $newRecommendationDate = TimePeriod.addTimePeriod({refer_dtLiveVirusDate}, new TimePeriod({nDays}, DurationType.DAYS)); modify({refer_oTargetSeries}) { setFinalEarliestDate($newRecommendationDate), addLiveVirusDateAccountedForInRecommendedFinalEarliestDate($newRecommendationDate); };
 
+// IceResult Fact Object END
+
+// Primary IceIntervalResult Fact Object conditions and sub-conditions
 [condition][]There exists {entity:an |another |}IceIntervalFact=exists ICEIntervalFactTypeFinding()
 [condition][]There does not exist {entity:an | another |}IceIntervalFact=not ICEIntervalFactTypeFinding()
 [condition][]There is {entity:an |another |}IceIntervalFact {oICEFactTypeFinding}={oICEFactTypeFinding} : ICEIntervalFactTypeFinding()
@@ -459,6 +495,7 @@
 [condition][]- that has IceIntervalFact [Pp]reviously [Aa]dministered [Ss]hot {oPreviousTargetDose}=associatedPreviousTargetDose != null, associatedPreviousTargetDose == {oPreviousTargetDose}
 [condition][]- that has IceIntervalFact [Cc]urrent [Aa]dministered [Ss]hot {oTargetDose}=associatedCurrentTargetDose != null, associatedCurrentTargetDose == {oTargetDose}
 
+// IceResult Fact Object Consequences START
 [consequence][][Ii]nsert an [Ee]valuation IceIntervalFact {sIceResultFinding} with TargetDoses {oTargetDosePrevious} and {oTargetDose} into [Ww]orking [Mm]emory=insert(new ICEIntervalFactTypeFinding({sIceResultFinding}, {oTargetDosePrevious}, {oTargetDose}));
 [consequence][][Ii]nsert a [Rr]ecommendation IceIntervalFact {sIceResultFinding} with TargetDose {oTargetDose} into [Ww]orking [Mm]emory=insert(new ICEIntervalFactTypeFinding({sIceResultFinding}, {oTargetDose}));
 [consequence][][Rr]etract IceIntervalFact {oICEIntervalFactTypeFinding} from [Ww]orking [Mm]emory=retract({oICEIntervalFactTypeFinding});

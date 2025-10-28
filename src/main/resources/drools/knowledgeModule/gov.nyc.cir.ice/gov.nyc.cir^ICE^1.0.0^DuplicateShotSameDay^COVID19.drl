@@ -23,25 +23,28 @@ import org.cdsframework.ice.service.Vaccine;
 
 global java.util.Date evalTime;
 
-rule "Duplicate Shots/Same Day (COVID-19 >= 5y Series): If a CVX 213 and CVX 313 are administered on the same day and there are no prior doses on record, evaluate the CVX 213 first"
+rule "Duplicate Shots/Same Day (Sep2023/Aug2024 >= 5yrs): If a CVX 213 and CVX 313 are administered on the same day and both would be considered valid, evaluate the CVX 213 as valid"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	activation-group "duplicateShotEvaluationOrder"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", vaccineComponent.cdsConceptName == "313")
-		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.cdsConceptName == "ICE213")
-		not TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate < $td.administrationDate, isValid == true)
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850",
+		associatedTargetSeries!.targetSeason.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"), vaccineComponent.cdsConceptName == "ICE313")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true,
+		status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "ICE213")
 	then
 		modify($td) {
-			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
-			setDuplicateShotSameDayEvaluationOrderCompleted(true)
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
 		};
 		modify($tdother) {
-			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
-			setDuplicateShotSameDayEvaluationOrderCompleted(true)
+			setStatus(DoseStatus.VALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets()
 		};
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + "will be evaluted before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
 rule "Duplicate Shots/Same Day (COVID-19): If a Janssen is administered on the same day as a Pfizer, Moderna or Novavax vaccine, evaluate the Pfizer/Moderna/Novavax shot first"
@@ -62,7 +65,7 @@ rule "Duplicate Shots/Same Day (COVID-19): If a Janssen is administered on the s
 			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
 			setDuplicateShotSameDayEvaluationOrderCompleted(true)
 		};
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + "will be evaluted before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + "will be evaluated before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
 end
 
 rule "Duplicate Shots/Same Day (COVID-19): For shots prior to 10/25/2021, bypass Duplicate Shot/Same Day Processing by not setting the target dose number of the shot to be evaluated shot to the prior dose number"

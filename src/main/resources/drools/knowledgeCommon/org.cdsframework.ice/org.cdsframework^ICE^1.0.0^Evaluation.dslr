@@ -114,6 +114,7 @@ rule "Evaluate the Interval when the Shot Administered is Before the Birth Date"
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Number of Doses Required to Complete this Series is >= $nDoseNumber
 	then
+		// There is no minimum interval according, so don't do an interval check and thereby override the standard interval check
 		Record that this dose rule was processed for the TargetDose $currentDose
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end

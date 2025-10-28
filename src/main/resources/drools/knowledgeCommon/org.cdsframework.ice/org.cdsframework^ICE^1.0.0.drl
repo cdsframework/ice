@@ -58,6 +58,7 @@ import org.cdsframework.ice.service.VaccineComponent;
 import accumulate org.cdsframework.ice.service.DateMinAccumulateFunction minDate;
 import accumulate org.cdsframework.ice.service.DateMaxAccumulateFunction maxDate;
 
+// OpenCDS specific
 global java.lang.String clientLanguage;
 global java.lang.String clientTimeZoneOffset;
 global java.lang.String focalPersonId;
@@ -65,6 +66,7 @@ global java.util.Date evalTime;
 global java.util.Set assertions;
 global java.util.Map namedObjects;
 
+// ICE specific
 global java.util.Date patientAgeTimeOfInterest;
 global org.cdsframework.ice.service.Schedule schedule;
 global java.lang.Boolean outputEarliestOverdueDates;
@@ -77,6 +79,13 @@ global java.lang.Boolean disableCovid19DoseNumberReset;
 global java.lang.Boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries;
 global java.lang.String iceVersion;
 
+/**
+ * Initialize Immunization Schedule and other Reference Data
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ImmunizationReferenceData.Initialize Immunization Schedule and Supporting Data"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -84,9 +93,12 @@ rule "ImmunizationReferenceData.Initialize Immunization Schedule and Supporting 
 		eval(patientAgeTimeOfInterest == null)
 	then
 		kcontext.getKieRuntime().setGlobal("patientAgeTimeOfInterest", evalTime);
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Initialized patientAgeTimeOfInterest" + evalTime);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Initialized patientAgeTimeOfInterest: " + evalTime);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ImmunizationReferenceData.Initialize Focal Person Id"
 	ruleflow-group "ImmunizationReferenceData"
 	no-loop true
@@ -99,9 +111,12 @@ rule "ImmunizationReferenceData.Initialize Focal Person Id"
 		eval(focalPersonId == null || focalPersonId.length() == 0)
 	then
 		kcontext.getKieRuntime().setGlobal("focalPersonId", $evaluatedPerson.getId());
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Initialized Focal Person ID" + $evaluatedPerson.getId());
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Initialized Focal Person ID: " + $evaluatedPerson.getId());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ImmunizationReferenceData: Initialize Live Virus Fact Object"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -112,6 +127,9 @@ rule "ImmunizationReferenceData: Initialize Live Virus Fact Object"
 		insert(new LiveVirusFact());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ImmunizationReferenceData: Initialize Select Adjuvant Product Fact Object"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -122,6 +140,9 @@ rule "ImmunizationReferenceData: Initialize Select Adjuvant Product Fact Object"
 		insert(new DateFactType("SELECT_ADJUVANT_PRODUCT_INTERVAL"));
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ImmunizationReferenceData: Initialize Dose Override Feature Fact Object"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -133,6 +154,9 @@ rule "ImmunizationReferenceData: Initialize Dose Override Feature Fact Object"
 		insert(new ICEFactTypeFinding("DOSE_OVERRIDE_FEATURE_ENABLED"));
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ImmunizationReferenceData: Initialize Unsupported Vaccines Group Feature Fact Object"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -144,6 +168,9 @@ rule "ImmunizationReferenceData: Initialize Unsupported Vaccines Group Feature F
 		insert(new ICEFactTypeFinding("UNSUPPORTED_VACCINES_GROUP_FEATURE_ENABLED"));
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ImmunizationReferenceData: Initialize COVID-19 Sep2023 Dose Number Reset Feature Fact Object"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -156,6 +183,9 @@ rule "ImmunizationReferenceData: Initialize COVID-19 Sep2023 Dose Number Reset F
 		insert(ift);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "InitializeReferenceData: Output Number of Doses Remaining Fact Object"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -167,6 +197,10 @@ rule "InitializeReferenceData: Output Number of Doses Remaining Fact Object"
         ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output number of doses remaining? Initialized");
 end
 
+/**
+ * General Design rule... Do not Edit
+ * AI: Move this to Pneumococcal rules
+ */
 rule "ImmunizationReferenceData: Initalize Output of Earliest and Overdue Dates for Pneumococcal Adult Series Fact Object"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -179,6 +213,9 @@ rule "ImmunizationReferenceData: Initalize Output of Earliest and Overdue Dates 
 		insert(ift);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ImmunizationReferenceData: Initialize Target Seasons Fact Object"
 	ruleflow-group "ImmunizationReferenceData"
 	dialect "mvel"
@@ -190,6 +227,9 @@ rule "ImmunizationReferenceData: Initialize Target Seasons Fact Object"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeasons Fact Object Initialized");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "InitializeSeriesAndSeasons: Load SeriesRules and TargetDoseInitializationTracker on to Fact List"
 	ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "java"
@@ -217,6 +257,9 @@ rule "InitializeSeriesAndSeasons: Load SeriesRules and TargetDoseInitializationT
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Eval Time provided by OpenCDS: " + evalTime.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "InitializeSeriesAndSeasons: Insert SeriesRules Seasons into TargetSeasons"
 	ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
@@ -227,11 +270,15 @@ rule "InitializeSeriesAndSeasons: Insert SeriesRules Seasons into TargetSeasons"
 		$season : Season() from $sr.seasons
 		not (Season(this == $season))
 	then
+		// Adds the Season to the list being tracked by TargetSeasons, and populates off-season end dates for Season (if any)
 		$tseasons.addTargetSeason($season);
 		insert($season);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Initial season inserted into working memory; TargetSeasons updated with Season: " + $season.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "InitializeSeriesAndSeasons: Load Default Seasons on to FactList if not already there"
 	ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
@@ -241,11 +288,15 @@ rule "InitializeSeriesAndSeasons: Load Default Seasons on to FactList if not alr
 		not Season(this == $defaultSeason)
 		$tseasons : TargetSeasons()
 	then
+		// Adds the Season to the list being tracked by TargetSeasons, and populates off-season end dates for Season (if any)
 		$tseasons.addTargetSeason($defaultSeason);
 		insert($defaultSeason);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Initial season inserted into working memory; TargetSeasons updated with Season: " + $defaultSeason.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "InitializeSeriesAndSeasons: Update Seasons in Working Memory with Information from TargetSeasons"
 	ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
@@ -255,11 +306,15 @@ rule "InitializeSeriesAndSeasons: Update Seasons in Working Memory with Informat
 		$season : Season(isDefaultSeason() == false)
 		$tseasons : TargetSeasons(containsTargetSeason($season))
 	then
+		// Adds the Season to the list being tracked by TargetSeasons, and populates off-season end dates for Season (if any)
 		$tseasons.updateFullySpecifiedSeasonWithOffSeasonDates($season);
 		update($season);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Season **updated** in working memory: " + $season.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "InitializeSeriesAndSeasons: Update Fully-Specified Seasons in Series with Information from TargetSeasons"
 	ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
@@ -270,11 +325,15 @@ rule "InitializeSeriesAndSeasons: Update Fully-Specified Seasons in Series with 
 		$sr : SeriesRules(seasons.size() > 0)
 		$season : Season(isDefaultSeason() == false) from $sr.seasons
 	then
+		// Adds the Season to the list being tracked by TargetSeasons, and populates off-season end dates for Season (if any)
 		$tseasons.updateFullySpecifiedSeasonWithOffSeasonDates($season);
 		update($sr);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesRules Season **updated**: " + $season.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "InitializeSeriesAndSeasons: Log TargetSeasons Tracked for this Request"
 	ruleflow-group "InitializeSeriesAndSeasons"
 	dialect "mvel"
@@ -285,6 +344,14 @@ rule "InitializeSeriesAndSeasons: Log TargetSeasons Tracked for this Request"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeasons: " + $tseasons.toString());
 end
 
+		
+/**
+ * Identify Candidate Series Ruleflow Group - TargetSeries Initialization
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateSeriesIdentification: Initialize TargetSeries Custom Rules Invocation"
 	ruleflow-group "CandidateSeriesIdentification"
 	dialect "mvel"
@@ -297,6 +364,9 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries Custom Rules Invoca
 		drools.setFocus("CandidateSeriesIdentification^customCandidateSeriesIdentificationRule");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateSeriesIdentification: Initialize TargetSeries for non-seasonal vaccine groups"
 	ruleflow-group "CandidateSeriesIdentification"
 	dialect "mvel"
@@ -311,6 +381,9 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries for non-seasonal va
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeries initialized: " + ts.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateSeriesIdentification: Initialize TargetSeries for *Current* Season with Fully-Specified Season Parameters (if defined)"
 	ruleflow-group "CandidateSeriesIdentification"
 	dialect "mvel"
@@ -329,6 +402,9 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries for *Current* Seaso
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "*Seasonal* TargetSeries initialized: " + ts.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateSeriesIdentification: Initialize *Current* Season TargetSeries with Default Season Parameters if Current Not Defined for the Vaccine Group"
 	ruleflow-group "CandidateSeriesIdentification"
 	dialect "mvel"
@@ -355,6 +431,9 @@ rule "CandidateSeriesIdentification: Initialize *Current* Season TargetSeries wi
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "*Updated* TargetSeasons: " + $tseasons.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when Shots Administered with Fully-Specified Season Parameters if Fully-Specified Season Parameters Defined for the Season"
 	ruleflow-group "CandidateSeriesIdentification"
 	dialect "mvel"
@@ -376,6 +455,9 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "*Seasonal* TargetSeries initialized: " + ts.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when Shots Administered with Default Season Parameters if No Fully-Specified Season Parameters Defined for the Season"
 	ruleflow-group "CandidateSeriesIdentification"
 	dialect "mvel"
@@ -384,17 +466,19 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode)
 		SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		$s : SeriesRules($vg : vaccineGroup, seasons.size() > 0)
-
+		// not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._CANDIDATE_SERIES_IDENTIFICATION_DEFAULT_RULE_OVERRIDE.conceptCodeValue, associatedSeriesRules == $s)
 		$season : Season(isDefaultSeason() == true) from $s.seasons
 		not Season(isDefaultSeason() == false, vaccineGroup == $vg, dateIsApplicableToSeason($shotDate))
-
-		not (TargetSeries(targetSeason != null, targetSeason == Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate($season, $shotDate)))
+		// Note: for TargetSeries, do not match on series name when there is a default seasons because we do not want a TargetSeries created for the default season if another TargetSeries
+		// already handles that season
+		not (TargetSeries(targetSeason != null, targetSeason == Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate($season, $shotDate))) 
 		$tseasons : TargetSeasons()
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
 		eval(($s.seriesEndAge == null || $s.seriesEndAge != null && TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, new TimePeriod($s.seriesEndAge.getTimePeriodStringRepresentation() + "+1d")) < 0) &&
 			($s.seriesStartAge == null || $s.seriesStartAge != null	&& TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, $shotDate, $s.seriesStartAge) >= 0))
 	then
+		// Create a fully-specified season for this specific year using the default month and day
 		Season fullySpecified = Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate($season, $shotDate);
 		$tseasons.addTargetSeason(fullySpecified);
 		TargetSeries ts = new TargetSeries($s, schedule, fullySpecified, $evaluatedPerson);
@@ -406,6 +490,9 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "*Updated* TargetSeasons: " + $tseasons.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateSeriesIdentification: Initialize TargetSeries when Shots Administered when One and Only One Season for Vaccine Group exists and no matching Fully-Specified Season Parameters or Default Season Defined for the Season"
 	ruleflow-group "CandidateSeriesIdentification"
 	dialect "mvel"
@@ -416,7 +503,7 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries when Shots Administ
 		$s : SeriesRules($vg : vaccineGroup, seasons.size() > 0)
 		not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._CANDIDATE_SERIES_IDENTIFICATION_DEFAULT_RULE_OVERRIDE.conceptCodeValue, associatedSeriesRules == $s)
 		not Season(isDefaultSeason() == true, vaccineGroup == $vg)
-
+		// Condition: If there is only one season and above TS does not match it, then we can conclude that there is no seasonal TS that will match
 		accumulate($accSeason : Season(vaccineGroup == $vg); $count : count($accSeason); $count == 1)
 		$season : Season(isDefaultSeason() == false, vaccineGroup == $vg, dateIsApplicableToSeason($shotDate) == false)
 		not (TargetSeries(seriesName == $s.seriesName, targetSeason != null, targetSeason == $season))
@@ -430,6 +517,13 @@ rule "CandidateSeriesIdentification: Initialize TargetSeries when Shots Administ
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "*Seasonal* TargetSeries initialized: " + ts.toString());
 end
 
+/**
+ * Identify Candidate Doses Ruleflow Group - TargetDoses Initialization
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateDosesIdentification: Initialize TargetDose Custom Rules Invocation"
 	ruleflow-group "CandidateDosesIdentification"
 	dialect "mvel"
@@ -443,6 +537,7 @@ rule "CandidateDosesIdentification: Initialize TargetDose Custom Rules Invocatio
 end
 
 /**
+ * General Design rule... Do not Edit
  * For each series that was identified as relevant, initialize each TargetSeries with TargetDoses. TargetDoses are
  * created/initialized for all shots administered where the vaccine is used by the vaccine group, even if the Series itself does not
  * permit that kind of vaccine to be used in any of its doses. This is so that shots administered with a vaccine present in the
@@ -457,11 +552,13 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Non-Seasonal* Targ
 		$i : ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode, $occ not in ("ICE316", "ICE328"))
 		$sae : SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		$ts : TargetSeries($vg : vaccineGroup, targetSeasonExists() == false, $tsid : targetSeriesIdentifier)
-
+		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
+		// this SubstanceAdministrationEvent and this OpenCDS concept, that the value of this key is the same as concept code as that of the vaccine group's. 
+		// Furthermore, if there exists a vaccine component within this shot administered that has not been initialized in this series for this vaccine group, 
 		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
-
+		// Condition: the administered vaccine targets one or more of the diseases handled for this vaccine group
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
-
+		// && $tdit.allTargetDosesHaveBeenInitializedInSeries($sae, schedule.getVaccineByCdsConceptValue($occ), $ts) == false)
 	then
 		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
 		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule)) {
@@ -469,9 +566,11 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Non-Seasonal* Targ
 		}
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);
-
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateDosesIdentification: Initialize TargetDose in *Seasonal* TargetSeries"
 	ruleflow-group "CandidateDosesIdentification"
 	dialect "mvel"
@@ -481,9 +580,11 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Seasonal* TargetSe
 		$i : ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode)
 		$sae : SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		$ts : TargetSeries($vg : vaccineGroup, targetSeason != null && targetSeason.dateIsApplicableToSeason($shotDate), $tsid : targetSeriesIdentifier)
-
+		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
+		// this SubstanceAdministrationEvent and this OpenCDS concept, that the value of this key is the same as concept code as that of the vaccine group's. 
+		// Furthermore, if there exists a vaccine component within this shot administered that has not been initialized in this series for this vaccine group, 
 		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
-
+		// Condition: the administered vaccine targets one or more of the diseases handled for this vaccine group
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
 	then
 		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
@@ -492,10 +593,10 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Seasonal* TargetSe
 		}
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);
-
 end
 
 /**
+ * General Design rule... Do not Edit
  * Seasonal TargetDose Outlier Initialization Rule: TargetDose initialization rule for H1N1 or other "seasonal" series that have
  * only one defined season and no default season
  * E.G. - Since there is only one season for H1N1 and no default season, any shots that come in will get associated with the
@@ -511,13 +612,15 @@ rule "CandidateDosesIdentification: Initialize Outlier TargetDose into Existing 
 		$i : ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode)
 		$sae : SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		$ts : TargetSeries($vg : vaccineGroup, targetSeason != null && targetSeason.dateIsApplicableToSeason($shotDate) == false, $tsid : targetSeriesIdentifier)
-
+		// Condition: there is no default season for this vaccine group
 		not Season(vaccineGroup == $vg, isDefaultSeason() == true)
-
+		// Condition: If there is only one season and above TS does not match it, then we can conclude that there is no seasonal TS that will match
 		accumulate($accSeason : Season(vaccineGroup == $vg); $count : count($accSeason); $count == 1)
-
+		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
+		// this SubstanceAdministrationEvent and this OpenCDS concept, that the value of this key is the same as concept code as that of the vaccine group's. 
+		// Furthermore, if there exists a vaccine component within this shot administered that has not been initialized in this series for this vaccine group, 
 		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
-
+		// Condition: the administered vaccine targets one or more of the diseases handled for this vaccine group
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
 	then
 		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
@@ -526,20 +629,29 @@ rule "CandidateDosesIdentification: Initialize Outlier TargetDose into Existing 
 		}
 		update($ts);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.seriesName + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $shotDate);
-
 end
 
+/**
+ * Candidate Doses Revisions Ruleflow Group
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
 rule "CandidateDosesRevisions: Initialize Series Aggregation Custom Rules Invocation"
 	ruleflow-group "CandidateDosesRevisions"
 	dialect "mvel"
 	when
 		exists ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._CANDIDATE_SERIES_IDENTIFICATION_DEFAULT_RULE_OVERRIDE.conceptCodeValue)
-
 	then
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Invoke Custom Candidate Dose Revisions for All Series");
 		drools.setFocus("CandidateDosesRevisions^customCandidateDoseRevisionRule");
 end
 
+/**
+ * Record Disease Immunity
+ */
+ 
 /**
  * If the patient has immunity to a disease and it is on or after the immunity date, mark the patient as immune to the disease in
  * the series
@@ -557,6 +669,13 @@ rule "DiseaseImmunityRecord.MarkImmuneToDiseaseIfOnOrAfterImmunityDate"
 		update($targetSeries);
 end
 
+/**
+ * Evaluation of doses
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation.evaluateNonSeasonalSeriesWhenNoTargetDosesForEvaluation"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -571,6 +690,9 @@ rule "HistoryEvaluation.evaluateNonSeasonalSeriesWhenNoTargetDosesForEvaluation"
 		drools.setFocus("HistoryEvaluation^customEvaluationRule");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNonNOSInSeriesForEvaluation"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -589,6 +711,9 @@ rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNonNOSInSeriesForEvaluation"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * General Design rule... Do not Edit - for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
+ */
 rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNOSInSeriesForEvaluation"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -608,6 +733,9 @@ rule "HistoryEvaluation.setNonSeasonalNextTargetDoseNOSInSeriesForEvaluation"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation.evaluateSeasonalSeriesWhenNoTargetDosesForEvaluation"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -624,6 +752,9 @@ rule "HistoryEvaluation.evaluateSeasonalSeriesWhenNoTargetDosesForEvaluation"
 		drools.setFocus("HistoryEvaluation^customEvaluationRule");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation.setNextSeasonalTargetDoseNonNOSInSeriesForEvaluation"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -646,6 +777,7 @@ rule "HistoryEvaluation.setNextSeasonalTargetDoseNonNOSInSeriesForEvaluation"
 end
 
 /**
+ * General Design rule... Do not Edit
  * for same day shots, only select NOS shot for evaluation after all other non-NOS shots have been evaluated for this series
  */
 rule "HistoryEvaluation.setNextSeasonalTargetDoseNOSInSeriesForEvaluation"
@@ -671,6 +803,7 @@ rule "HistoryEvaluation.setNextSeasonalTargetDoseNOSInSeriesForEvaluation"
 end
 
 /**
+ * General Design and Supplemental Series Table rule... modifying this rule not suggested;
  * "Dose Override". If the Dose Override feature is enabled and caller specifies a shot should be treated as Valid or Invalid,
  * processed this shot before other shots on the same day. Thus, the higher salience. In addition, all other rules related to
  * evaluation logic are skipped for this dose override shot.
@@ -704,6 +837,9 @@ rule "HistoryEvaluation: If Dose Override Specified, set Dose Evaluation Status 
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Dose Override Check Complete for TargetDose " + $td + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation: Determine & Record if the Selected TargetDose to be Evaluated is a Primary Shot of the Series, and Initialize the TargetDose Shot Number and Dose Number"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -728,8 +864,8 @@ rule "HistoryEvaluation: Determine & Record if the Selected TargetDose to be Eva
 end
 
 /**
- * If the vaccine is administered after the immunity date recorded for *all* diseases targeted by the vaccine, mark the shot
- * ACCEPTED.
+ * General Design and Supplemental Series Table rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
+ * If the vaccine is administered after the immunity date recorded for *all* diseases targeted by the vaccine, mark the shot ACCEPTED.
  * Mark the status of the shot as EVALUATION_COMPLETE, to prevent other rules from overriding this ACCEPTED decision
  */
 rule "HistoryEvaluation: Check if Shot should be marked Accepted and Series Complete if Administered On or After Immunity Date"
@@ -751,6 +887,9 @@ rule "HistoryEvaluation: Check if Shot should be marked Accepted and Series Comp
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Marking Evaluation Complete for TargetDose " + $targetDose.toString() + " in TargetSeries " + $targetSeries .getSeriesName());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^makeNoteOfDuplicateShotSameDayIfAny"
@@ -765,11 +904,11 @@ rule "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
 end
 
 /**
- * If this shot is a duplicate shot/same day shot as another shot in the series, mark its dose number the same as the previous shot
- * (only one of the duplicate shot can be a valid dose)
+ * General Design rule... Do not Edit
+ * If this shot is a duplicate shot/same day shot as another shot in the series, mark its dose number the same as the previous shot (only one of the duplicate shot can be a valid dose)
  */
 rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the dose number of the shot being evaluated as equal to prior shots administered on the same date; Invoke custom evaluation rules"
-		extends "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
+	extends "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
@@ -790,11 +929,12 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 end
 
 /**
+ * General Design rule... Do not Edit
  * If this shot is a duplicate shot/same day shot as another shot in the series, but interval is 0 days between them so latter
  * shots' dose number is not set to same as previous shot
  */
 rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 days are not marked with the same dose number; Invoke custom evaluation rules"
-		extends "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
+	extends "Duplicate Shot/Same Day (Abstract): 2 shots administered on the same day"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^makeNoteOfDuplicateShotSameDayIfAny"
 	no-loop true
@@ -812,9 +952,10 @@ rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 d
 		drools.setFocus("HistoryEvaluation^customEvaluationRule");
 end
 
-/**
- * If this shot is not a duplicate shot/same day shot as another shot in the series, just move on to the custom rules
- */
+///////// ***
+// General Design rule... Do not Edit
+// If this shot is not a duplicate shot/same day shot as another shot in the series, just move on to the custom rules
+///////// ***
 rule "Not Duplicate Shot/Same Day: No duplicate shots to shot being evaluated; Invoke custom evaluation rules"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^makeNoteOfDuplicateShotSameDayIfAny"
@@ -829,6 +970,9 @@ rule "Not Duplicate Shot/Same Day: No duplicate shots to shot being evaluated; I
 		drools.setFocus("HistoryEvaluation^customEvaluationRule");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation.setDoseEvaluationStatusInvalid"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -847,6 +991,9 @@ rule "HistoryEvaluation.setDoseEvaluationStatusInvalid"
 		drools.setFocus("HistoryEvaluation^postEvaluationCheck");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -865,6 +1012,9 @@ rule "HistoryEvaluation.setDoseEvaluationStatusNotEvaluated"
 		drools.setFocus("HistoryEvaluation^postEvaluationCheck");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation.setDoseEvaluationStatusAccepted"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -883,6 +1033,9 @@ rule "HistoryEvaluation.setDoseEvaluationStatusAccepted"
 		drools.setFocus("HistoryEvaluation^postEvaluationCheck");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation.setDoseEvaluationStatusValid"
 	ruleflow-group "HistoryEvaluation"
 	dialect "java"
@@ -901,6 +1054,9 @@ rule "HistoryEvaluation.setDoseEvaluationStatusValid"
 		drools.setFocus("HistoryEvaluation^postEvaluationCheck");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "HistoryEvaluation.denoteDoseReadyForFinalEvaluationStatus"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -914,6 +1070,9 @@ rule "HistoryEvaluation.denoteDoseReadyForFinalEvaluationStatus"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $td.associatedTargetSeries.seriesName);
 end
 
+/**
+ * Supplemental Series Table rule... modifying this rule not suggested
+ */
 rule "HistoryEvaluation.markExtraneousDosesAcceptedIfCompleteForAllDiseaseTargetedByThisDose"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -928,6 +1087,9 @@ rule "HistoryEvaluation.markExtraneousDosesAcceptedIfCompleteForAllDiseaseTarget
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series Table rule... Do not Edit
+ */
 rule "HistoryEvaluation.checkIsAllowableVaccine"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -944,6 +1106,9 @@ rule "HistoryEvaluation.checkIsAllowableVaccine"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series Table rule... Do not Edit
+ */
 rule "HistoryEvaluation.checkMinimumAgeVaccine"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -963,6 +1128,9 @@ rule "HistoryEvaluation.checkMinimumAgeVaccine"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series Table rule... Do not Edit
+ */
 rule "HistoryEvaluation.checkMinimumAgeVaccineDoseRule"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -983,6 +1151,9 @@ rule "HistoryEvaluation.checkMinimumAgeVaccineDoseRule"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series Table rule... Do not Edit
+ */
 rule "HistoryEvaluation.checkMaximumAgeVaccine"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1001,6 +1172,9 @@ rule "HistoryEvaluation.checkMaximumAgeVaccine"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series Table rule... Do not Edit
+ */
 rule "HistoryEvaluation.checkMaximumAgeVaccineDoseRuleDoseRule"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1020,6 +1194,49 @@ rule "HistoryEvaluation.checkMaximumAgeVaccineDoseRuleDoseRule"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series Table rule... Do not Edit
+ */
+rule "HistoryEvaluation.checkMinimumDateVaccine"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 100
+	activation-group "minimumDateVaccineCheck"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminVaccine : administeredVaccine, $adminVaccine.minimumDateForUse != null, $administrationDate : administrationDate)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		eval($administrationDate.before($adminVaccine.getMinimumDateForUse()))
+	then
+		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
+		insert(hef);
+		$td.addInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_YET_AVAILABLE.getCdsListItemName());
+		$td.addDoseRuleProcessed(drools.getRule().getName());
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+/**
+ * Series Table rule... Do not Edit
+ */
+rule "HistoryEvaluation.checkMaximumDateVaccine"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 100
+	activation-group "maximumDateVaccineCheck"
+	when
+		$td : TargetDose(status == DoseStatus.EVALUATION_IN_PROCESS, $adminVaccine : administeredVaccine, $adminVaccine.maximumDateForUse != null, $administrationDate : administrationDate)
+		$ts : TargetSeries(this == $td.associatedTargetSeries)
+		eval($administrationDate.after($adminVaccine.getMaximumDateForUse()))
+	then
+		ICEFactTypeFinding hef = new ICEFactTypeFinding(SupportedFactConcept._INVALID_VACCINE.getConceptCodeValue(), $td);
+		insert(hef);
+		$td.addInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_ALLOWED.getCdsListItemName());
+		$td.addDoseRuleProcessed(drools.getRule().getName());
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
+end
+
+/**
+ * Series Table rule... Do not Edit
+ */
 rule "HistoryEvaluation.evaluateVaccineGroupMaximumAge"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1040,6 +1257,9 @@ rule "HistoryEvaluation.evaluateVaccineGroupMaximumAge"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series Table rule... Do not Edit
+ */
 rule "HistoryEvaluation.evaluateVaccineGroupMinimumAge"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1060,6 +1280,9 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumAge"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series table rule... Do not Edit
+ */
 rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1083,6 +1306,9 @@ rule "HistoryEvaluation.evaluateVaccineGroupMinimumInterval"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series table rule... Do not Edit
+ */
 rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasonal series and most recent shot from a prior season"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1096,6 +1322,8 @@ rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasona
 			targetSeason.fullySpecifiedSeasonStartDate.isBefore($tseason.getFullySpecifiedSeasonStartDate()))
 		$lastFromPrev: TargetDose(associatedTargetSeries == $tsprev, isShotIgnored() == false, $shotNumber: administeredShotNumberInSeries)
 		not TargetDose(associatedTargetSeries == $tsprev, isShotIgnored() == false, administeredShotNumberInSeries > $shotNumber)
+		not ICEIntervalFactTypeFinding(intervalFactType == IntervalFactType.EVALUATION, iceResultFinding == SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue, associatedCurrentTargetDose != null && associatedCurrentTargetDose == $td,
+        	associatedPreviousTargetDose != null && associatedPreviousTargetDose == $lastFromPrev)
 	then
 		$ts.evaluateVaccineGroupMinimumIntervalAndRecordReason($td, $lastFromPrev);
 		if ($td.containsInvalidReason(BaseDataEvaluationReason._BELOW_MINIMUM_INTERVAL_EVALUATION_REASON.getCdsListItemName())) {
@@ -1106,6 +1334,9 @@ rule "HistoryEvaluation: Evaluate minimum interval between first shot in seasona
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in " + $ts + "; Prior Dose " + $lastFromPrev + " in " + $tsprev);
 end
 
+/**
+ * Series table rule... Do not Edit
+ */
 rule "HistoryEvaluation: Evaluate Shot as Invalid if it is not between the Season Start and End Dates"
 	ruleflow-group "HistoryEvaluation"
 	dialect "mvel"
@@ -1121,6 +1352,7 @@ rule "HistoryEvaluation: Evaluate Shot as Invalid if it is not between the Seaso
 end
 
 /**
+ * Supplemental Series Table rule... Do not Edit
  * If all shots in the TargetSeries have been evaluated and the patient has reached immunity for every disease handled by this
  * Series, mark in the TargetSeries that the patient is immune to all diseases.
  */
@@ -1149,6 +1381,7 @@ rule "HistoryEvaluation: If all shots have been evaluated, take immunity dates i
 end
 
 /**
+ * Supplemental Series Table rule... Do not Edit
  * If all shots in the TargetSeries have been evaluated and the patient has reached immunity for every disease handled by this
  * Series, mark in the TargetSeries that the patient is immune to all diseases.
  */
@@ -1166,6 +1399,13 @@ rule "HistoryEvaluation: Set Disease Immunity Flag in Series to True if Immune t
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeries immunityToAllDiseasesRecorded set to true for " + $ts.seriesName);
 end
 
+/**
+ * Series Selection
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
 rule "SeriesSelection: Insert TargetSeriesSelection (Tracker) on to the Fact List for each Vaccine Group/Season"
 	ruleflow-group "SeriesSelection"
 	dialect "java"
@@ -1179,6 +1419,9 @@ rule "SeriesSelection: Insert TargetSeriesSelection (Tracker) on to the Fact Lis
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeriesSelection added to fact list: " + tss.toString());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "SeriesSelection: Initialize Next Non-Seasonal TargetSeriesSelection"
 	ruleflow-group "SeriesSelection"
 	dialect "mvel"
@@ -1193,6 +1436,9 @@ rule "SeriesSelection: Initialize Next Non-Seasonal TargetSeriesSelection"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeriesSelection Initialized " + $tss.toString() + ", Vaccine Group Priority " + $tss.seriesSelectionPriority);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "SeriesSelection: Initialize Next Seasonal TargetSeriesSelection"
 	ruleflow-group "SeriesSelection"
 	dialect "mvel"
@@ -1210,6 +1456,9 @@ rule "SeriesSelection: Initialize Next Seasonal TargetSeriesSelection"
 		drools.setFocus("SeriesSelection^SeasonalSeriesPatientAgeOfInterest");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "SeriesSelection: Default Series Selection Preprocess rule: invoke custom rules"
 	ruleflow-group "SeriesSelection"
 	dialect "mvel"
@@ -1222,6 +1471,9 @@ rule "SeriesSelection: Default Series Selection Preprocess rule: invoke custom r
 		drools.setFocus("SeriesSelection^customSeriesSelectionRules");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelection that is not in the current season, set patient age time of interest to last date of season if no shots administered and invoke custom rules"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^SeasonalSeriesPatientAgeOfInterest"
@@ -1238,6 +1490,9 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 		drools.setFocus("SeriesSelection^customSeriesSelectionRules");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelection that is not in the current season, set patient age time of interest to last shot of the series and invoke custom rules"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^SeasonalSeriesPatientAgeOfInterest"
@@ -1254,6 +1509,9 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 		drools.setFocus("SeriesSelection^customSeriesSelectionRules");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelection that is in the current season, set patient age time of interest to the execution time and invoke custom rules"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^SeasonalSeriesPatientAgeOfInterest"
@@ -1271,6 +1529,11 @@ rule "SeriesSelection: For the Seasonal Series being evaluated for SeriesSelecti
 end
 
 /**
+ * Series Selection Catch-All Rules Start Here
+ */
+
+/**
+ * General Design rule... Do not Edit
  * Updates series selection status for vaccine group to complete once series has been selected.
  */
 rule "SeriesSelection: Change Series Selection Status To Complete"
@@ -1289,6 +1552,7 @@ rule "SeriesSelection: Change Series Selection Status To Complete"
 end
 
 /**
+ * General Design rule... Do not Edit
  * Retracts all TargetSeries and corresponding TargetDoses in a vaccine group that remain (i.e. - were not chosen).
  * For Seasonal Series, since recommendations are only made on the current season
  */
@@ -1311,6 +1575,7 @@ rule "SeriesSelection: Retract All Series Not Selected in the same Series Group 
 end
 
 /**
+ * Supplemental Series Selection rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
  * For all vaccine groups, if a series has not been selected by one of the custom rules and there are one or more series that have
  * been completed, select the series with the fewest doses necessary required to complete the series.
  */
@@ -1334,6 +1599,7 @@ rule "SeriesSelection: Select already completed series that has the fewest doses
 end
 
 /**
+ * Supplemental Series Selection rule... modifying this rule not suggested; support for modifying this rule will be available in a future release
  * If more than one series is complete but one of them has already been selected which completed after one of the other series,
  * change the series selected to the one that was completed the soonest.
  */
@@ -1381,6 +1647,10 @@ rule "SeriesSelection.SelectOnlySeriesRemainingInVaccineGroup"
 end
 
 /**
+ * Ruleflow group for forecasting "RecommendationForecast"
+ */
+
+/**
  * Supplemental rule... Output Series Selection Information, if _OUTPUT_NUMBER_OF_DOSES_REMAINING option enabled
  */
 rule "RecommendationForecast: Make a Record of all Non-Seasonal TargetSeries of the Vaccine Group for Series Selection Display purposes, if the Series Selection Display Option is Enabled"
@@ -1413,6 +1683,9 @@ rule "RecommendationForecast: Maka a Record of Seasonal TargetSeries in the Curr
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Selection \": " + $ts.seriesName);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.findMostRecentAdministeredLiveVirusVaccineDate"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -1430,6 +1703,9 @@ rule "RecommendationForecast.findMostRecentAdministeredLiveVirusVaccineDate"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Found most recent live virus vaccine administered on " + $lvd.getLiveVirusDate());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.findMostRecentAdministeredSelectAdjuvantProductVaccineDate"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -1446,6 +1722,9 @@ rule "RecommendationForecast.findMostRecentAdministeredSelectAdjuvantProductVacc
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Found most recent adjuvant product vaccine administered on " + $dft.getFactDate());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.setNextSeasonalTargetSeriesForRecommendation"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -1467,6 +1746,9 @@ rule "RecommendationForecast.setNextSeasonalTargetSeriesForRecommendation"
 		drools.setFocus("RecommendationForecast^preRecommendationValidation");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.setNextNonSeasonalTargetSeriesForRecommendation"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -1488,6 +1770,9 @@ rule "RecommendationForecast.setNextNonSeasonalTargetSeriesForRecommendation"
 		drools.setFocus("RecommendationForecast^preRecommendationValidation");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.applyPostRecommendationCheck"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -1505,6 +1790,9 @@ rule "RecommendationForecast.applyPostRecommendationCheck"
 		drools.setFocus("RecommendationForecast^postCustomRecommendationCheck");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.noteCompletionOfPostRecommendationCheck - Do _not_ reprocess recommendation rules"
 	ruleflow-group "RecommendationForecast"
 dialect "mvel"
@@ -1521,6 +1809,9 @@ dialect "mvel"
         ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Note Completion of Post recommendation check for TargetSeries " + $targetSeries.getSeriesName());
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.noteCompletionOfPostRecommendationCheck - _Do_ reprocess recommendation rules"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^postRecommendationCheck"
@@ -1536,6 +1827,12 @@ rule "RecommendationForecast.noteCompletionOfPostRecommendationCheck - _Do_ repr
 end
 
 /**
+ * START Rules for adjusting live virus intervals to ensure adequate spacing between live virus vaccines
+ */
+
+/**
+ * Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a
+ * future release
  * If a recommended, conditionally recommended, or future recommendation for a live virus vaccine and other live virus shots have
  * been administered less than 28 days from the recommendation date, then adjust the earliest recommendation date to be 28 days
  * later than the most recent live virus shot
@@ -1565,6 +1862,8 @@ rule "RecommendationForecast.adjustEarliestDateDueToLiveVirusToFutureDate"
 end
 
 /**
+ * Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a
+ * future release
  * If a recommended, conditionally recommended, or future recommendation for a live virus vaccine, other live virus shots have been
  * administered more than 28 days in the past, and the live virus date is the same as today's date, set the earliest date for the
  * shot previously recommended in the past to today's date
@@ -1590,6 +1889,8 @@ rule "RecommendationForecast.adjustPriorEarliestDateDueToLiveVirusToCurrentDate"
 end
 
 /**
+ * Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a
+ * future release
  * If a recommended, conditionally recommended, or future recommendation for a live virus vaccine and other live virus shots have
  * been administered less than 28 days from the recommendation date, then adjust the recommendation date to be 28 days later than
  * the most recent live virus shot
@@ -1619,6 +1920,8 @@ rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirusToFutureDate"
 end
 
 /**
+ * Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a
+ * future release
  * If a recommended, conditionally recommended, or future recommendation for a live virus vaccine, other live virus shots have been
  * administered more than 28 days in the past, and the live virus date is the same as today's date, set the recommended date for the
  * shot previously recommended in the past to today's date
@@ -1644,6 +1947,16 @@ rule "RecommendationForecast.adjustRecommendedDateDueToLiveVirusToCurrentDate"
 end
 
 /**
+ * END Rules for adjusting live virus intervals to ensure adequate spacing between live virus vaccines
+ */
+
+/**
+ * START Rules for adjusting adjuvant product intervals to ensure adequate spacing between vaccines with adjuvant
+ */
+
+/**
+ * Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a
+ * future release
  * If a recommended, conditionally recommended, or future recommendation for a select adjuvant product and other select adjuvant
  * product shots been administered less than 28 days from the recommendation date, then adjust the earliest recommendation date to
  * be 28 days later than the most recent select adjuvant product
@@ -1672,6 +1985,8 @@ rule "RecommendationForecast.adjustEarliestDateDueToSelectAdjuvantProductToFutur
 end
 
 /**
+ * Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a
+ * future release
  * If a recommended, conditionally recommended, or future recommendation for a select adjuvant product, other adjuvant shots have
  * been administered more than 28 days in the past, and the adjuvant date is the same as today's date, set the earliest date for the
  * shot previously recommended in the past to today's date
@@ -1696,6 +2011,8 @@ rule "RecommendationForecast.adjustEarliestDateDueToSelectAdjuvantProductToCurre
 end
 
 /**
+ * Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a
+ * future release
  * If a recommended, conditionally recommended, or future recommendation for a select adjuvant product and other select adjuvant
  * product shots have been administered less than 28 days from the recommendation date, then adjust the recommendation date to be 28
  * days later than the most recent select adjuvant product
@@ -1724,6 +2041,8 @@ rule "RecommendationForecast.adjustRecommendedDateDueToSelectAdjuvantProductToFu
 end
 
 /**
+ * Supplemental Recommendation rule... modifying this rule not suggested; support for modifying this rule will be available in a
+ * future release
  * If a recommended, conditionally recommended, or future recommendation for a select adjuvant product, other adjuvant shots have
  * been administered more than 28 days in the past, and the adjuvant date is the same as today's date, set the earliest date for the
  * shot previously recommended in the past to today's date
@@ -1747,6 +2066,13 @@ rule "RecommendationForecast.adjustRecommendedDateDueToSelectAdjuvantProductToCu
       	ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Recommendation date adjustment from " + $recommendationDueDate + " to " + $dftDate + " due to select adjuvant product administered on : " + $dftDate + " in TargetSeries " + $targetSeries.getSeriesName());
 end
 
+/**
+ * END Rules for adjusting adjuvant product intervals to ensure adequate spacing between vaccines with adjuvant
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.adjustTargetSeriesEnclosedRecommendationWithRespectToEvalTime"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^supplementalSeriesRule"
@@ -1769,6 +2095,9 @@ rule "RecommendationForecast.adjustTargetSeriesEnclosedRecommendationWithRespect
 		update($targetSeries);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.adjustRecommendedStatusAndEnclosedRecommendationsWithRespectToEvalTime"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^supplementalSeriesRule"
@@ -1784,6 +2113,7 @@ rule "RecommendationForecast.adjustRecommendedStatusAndEnclosedRecommendationsWi
 end
 
 /**
+ * General Design rule... Do not Edit
  * Per ICE SME group, if recommendation is conditional, do not display a recommendation date. This can be overrided via
  * TargetSeries.setDisplayForecastDateForConditionalRecommendations()
  */
@@ -1800,6 +2130,7 @@ rule "RecommendationForecast.doNotReturnForecastDateForConditionalRecommendation
 end
 
 /**
+ * General Design rule... Do not Edit
  * If the list of recommended vaccines are inconsistent (i.e. - different interim recommendation forecasts with different vaccines),
  * and the patient is recommended for a forecast, then log the inconsistency and recommend at the vaccine group level
  */
@@ -1816,6 +2147,7 @@ rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccines
 end
 
 /**
+ * General Design rule... Do not Edit
  * If the list of recommended vaccines are inconsistent (i.e. - different interim recommendation forecasts with different vaccines),
  * and the patient is recommended for a forecast, then log the inconsistency and recommend at the vaccine group level
  */
@@ -1834,6 +2166,7 @@ rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfRecommendedVaccines
 end
 
 /**
+ * General Design rule... Do not Edit
  * If the list of recommended vaccines are consistent and not all empty, and the patient is recommended for a forecast, then
  * recommend at the vaccine level of the only specified vaccine. Set each Recommendation Object's recommendedVaccine to null and set
  * the TargetSeries recommendationVaccine to the 1 and only 1 vaccine
@@ -1860,6 +2193,7 @@ rule "RecommendationForecast.recommendedAtVaccineLevelIfRecommendedVaccinesConsi
 end
 
 /**
+ * General Design rule... Do not Edit
  * Recommend at vaccine group level if recommendation status (forecast) is NOT_RECOMMENDED
  */
 rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfNotRecommendedForecast"
@@ -1873,6 +2207,7 @@ rule "RecommendationForecast.recommendedAtVaccineGroupLevelIfNotRecommendedForec
 end
 
 /**
+ * General rule
  * Earliest, Recommended, and Past Due Dates must be on or after the Last Shot Given
  */
 rule "RecommendationForecast.recommendEarliestDateOnOrAfterLastShotGiven"
@@ -1890,6 +2225,7 @@ rule "RecommendationForecast.recommendEarliestDateOnOrAfterLastShotGiven"
 end
 
 /**
+ * General rule
  * Earliest, Recommended, and Past Due Dates must be on or after the Last Shot Given
  */
 rule "RecommendationForecast.recommendRecommendedDateOnOrAfterLastShotGiven"
@@ -1907,6 +2243,7 @@ rule "RecommendationForecast.recommendRecommendedDateOnOrAfterLastShotGiven"
 end
 
 /**
+ * General rule
  * Earliest, Recommended, and Past Due Dates must be on or after the Last Shot Given
  */
 rule "RecommendationForecast.recommendOverdueDateOnOrAfterLastShotGiven"
@@ -1923,6 +2260,9 @@ rule "RecommendationForecast.recommendOverdueDateOnOrAfterLastShotGiven"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.finalizeRecommendationsForSeries"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -1938,6 +2278,9 @@ rule "RecommendationForecast.finalizeRecommendationsForSeries"
 		drools.setFocus("RecommendationForecast^adjustRecommendationDates");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.addAnyRecommendationsOnFactListToSeries"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -1951,6 +2294,9 @@ rule "RecommendationForecast.addAnyRecommendationsOnFactListToSeries"
 		update($ts);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "RecommendationForecast.allRecommendationRulesProcessedForSeries"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -1965,6 +2311,7 @@ rule "RecommendationForecast.allRecommendationRulesProcessedForSeries"
 end
 
 /**
+ * Series Table rule... Do not Edit
  * To follow CDC guidelines, could change this to only fire if a recommended age is available; then calculate earliest possible
  * recommended date above using minimal age, minimum interval, etc. This separates the catch up schedule from the short
  * recommendation intervals used by NYC
@@ -1986,6 +2333,7 @@ rule "RecommendationForecast.recommendBasedOnEarliestAgeRule"
 end
 
 /**
+ * Series Table rule... Do not Edit
  * To follow CDC guidelines, could change this to only fire if a recommended age is not available
  */
 rule "RecommendationForecast.recommendBasedOnEarliestIntervalRule"
@@ -2007,6 +2355,7 @@ rule "RecommendationForecast.recommendBasedOnEarliestIntervalRule"
 end
 
 /**
+ * Series Table rule... Do not Edit
  * To follow CDC guidelines, could change this to only fire if a recommended age is available; then calculate earliest possible
  * recommended date above using minimal age, minimum interval, etc. This separates the catch up schedule from the short
  * recommendation intervals used by NYC
@@ -2028,6 +2377,7 @@ rule "RecommendationForecast.recommendBasedOnLatestRecommendedAgeRule"
 end
 
 /**
+ * Series Table rule... Do not Edit
  * To follow CDC guidelines, could change this to only fire if a recommended age is not available
  */
 rule "RecommendationForecast.recommendBasedOnLatestRecommendedIntervalRule"
@@ -2049,6 +2399,7 @@ rule "RecommendationForecast.recommendBasedOnLatestRecommendedIntervalRule"
 end
 
 /**
+ * Series Table rule... Do not Edit
  * To follow CDC guidelines, could change this to only fire if a recommended age is available; then calculate earliest possible
  * recommended date above using minimal age, minimum interval, etc. This separates the catch up schedule from the short
  * recommendation intervals used by NYC
@@ -2068,6 +2419,9 @@ rule "RecommendationForecast.recommendBasedOnEarliestRecommendedAgeRule"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeries " + $ts.seriesName);
 end
 
+/**
+ * Series Table rule... Do not Edit
+ */
 rule "RecommendationForecast.recommendBasedOnRecommendedIntervalRule"
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
@@ -2116,6 +2470,7 @@ rule "RecommendationForecast.Do Not Apply Recommended Interval for Dose 1 if Pri
 end
 
 /**
+ * Series Table rule... Do not Edit
  * For seasonal series, recommend shot on the first date of the next season or at the time that the patient becomes of minimum age
  * Overrides age check
  */
@@ -2143,8 +2498,10 @@ rule "RecommendationForecast: Recommend Earliest Recommended Age Date in Next Se
 end
 
 /**
+ * Series Table SEASONS rule... Do not Edit
  * Recommend earliest recommended age date in the next series for each series rules that have a recommended age and for which there
  * is an associated fully-specified season
+ * AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
  */
 rule "RecommendationForecast: Recommend at Earliest Recommended Age Date in Next Series Season as Specified by TargetSeries if Fully-Specified Season Defined and if during the Off-Season of Current Seasonal Series"
 	ruleflow-group "RecommendationForecast"
@@ -2169,9 +2526,11 @@ rule "RecommendationForecast: Recommend at Earliest Recommended Age Date in Next
 end
 
 /**
+ * Series Table SEASONS rule... Do not Edit
  * For seasonal series, patients should receive a shot on the first date of the next season if evaluation time is *after* the season
  * ended in current series
  * Overrides interval check.
+ * AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
  */
 rule "RecommendationForecast: Recommend Next Season Earliest Start Date if during the Off-Season of Current Seasonal Series"
 	ruleflow-group "RecommendationForecast"
@@ -2189,9 +2548,10 @@ rule "RecommendationForecast: Recommend Next Season Earliest Start Date if durin
 end
 
 /**
- * For seasonal series, patients should receive a shot on the first date of the next season if evaluation time is *after* the season
- * ended in current series
+ * Series Table SEASONS rule... Do not Edit
+ * For seasonal series, patients should receive a shot on the first date of the next season if evaluation time is *after* the season ended in current series
  * Overrides interval check.
+ * AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
  */
 rule "RecommendationForecast: Recommend Next Season Recommended Start Date if during the Off-Season of Current Seasonal Series"
 	ruleflow-group "RecommendationForecast"
@@ -2209,8 +2569,10 @@ rule "RecommendationForecast: Recommend Next Season Recommended Start Date if du
 end
 
 /**
+ * Series Table rule... Do not Edit
  * For seasonal series, if the series is complete, recommend that the patient receive a shot on the season start date of the next
  * season
+ * AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
  */
 rule "RecommendationForecast: Recommend Next Season Start Date if Current Seasonal Series is Complete"
 	ruleflow-group "RecommendationForecast"
@@ -2227,8 +2589,10 @@ rule "RecommendationForecast: Recommend Next Season Start Date if Current Season
 end
 
 /**
+ * Series Table rule... Do not Edit
  * For seasonal series, if the final recommendation date falls between the off-season start and end dates, modify the recommendation
  * date to the beginning of the next season
+ * AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
  */
 rule "RecommendationForecast/Post Recommendation Check: Recommend Next Season Start Date if Final Recommendation Date during Off-Season"
 	dialect "mvel"
@@ -2247,6 +2611,7 @@ rule "RecommendationForecast/Post Recommendation Check: Recommend Next Season St
 end
 
 /**
+ * Series Table rule... Do not Edit
  * For seasonal series, if the final recommendation date falls after the season end-date and there is no off-season, mark the series
  * NOT_RECOMMENDED and COMPLETE, as there will not be a next season (this is the one-and-only season as indicated by the fact that
  * there is no off-season)
@@ -2270,6 +2635,7 @@ rule "RecommendationForecast/Post Recommendation Check: Recommend Not Recommende
 end
 
 /**
+ * Supplemental Recommendation rule... Do not Edit; support for modifying this rule will be available in a future release
  * If the patient is immune (for any reason) to all of the diseases handled by the TargetSeries, mark the series and forecasting
  * complete
  */
@@ -2304,21 +2670,29 @@ rule "RecommendNotRecommendedIfImmuneToAllDiseasesInSeries"
        	drools.setFocus("RecommendationForecast^customRecommendationRule");
 end
 
+/**
+ * Ruleflow group for returning results
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
 function void setShotValidity(SubstanceAdministrationEvent sae, TargetDose td) {
 
 	if (sae == null || td == null) {
 		return;
 	}
-
 	BL currShotValidity = sae.getIsValid();
 	if (currShotValidity == null || currShotValidity.isValue()) {
 		BL shotValidity = new BL();
 		shotValidity.setValue(td.getIsValid());
 		sae.setIsValid(shotValidity);
 	}
-
 }
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ProcessResults: Return Evaluations"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2338,6 +2712,9 @@ rule "ProcessResults: Return Evaluations"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $td);
 end
 
+/**
+ * Supplementary rule... To be migrated to custom rule and genericize
+ */
 rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - always resetting to dose 1 at the beginning of the Sept 2023 or Aug 2024 season start dates"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2362,6 +2739,9 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - always rese
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $td);
 end
 
+/**
+ * Supplementary rule... To be migrated to custom rule
+ */
 rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do not reset to 1 in the Sept 2023, Aug 2024 or later season)"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2383,6 +2763,9 @@ rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do no
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $td);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2400,8 +2783,11 @@ rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $sae);
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ProcessResults: Return Recommendations for Vaccines Not Supported"
-	extends "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
+    extends "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 10
@@ -2414,6 +2800,9 @@ rule "ProcessResults: Return Recommendations for Vaccines Not Supported"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ProcessResults: Check Non-Seasonal Series Selection Consistency"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2427,6 +2816,9 @@ rule "ProcessResults: Check Non-Seasonal Series Selection Consistency"
 		ICELogicHelper.throwRuntimeException(new InconsistentConfigurationException("No *non-seasonal* series properly selected for vaccine group " + $vg + ". Count of Series was: " + $countInVG));
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ProcessResults: Check Seasonal SeriesSelection Consistency"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2440,6 +2832,9 @@ rule "ProcessResults: Check Seasonal SeriesSelection Consistency"
 		ICELogicHelper.throwRuntimeException(new InconsistentConfigurationException("No *seasonal* series properly selected for vaccine group " + $vg + ". Count of Series was: " + $countInVG));
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ProcessResults: Return Recommendation for Non-Seasonal Series"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2456,8 +2851,9 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
 
-
-
+/**
+ * General Design rule... Do not Edit
+ */
 rule "ProcessResults: Return Recommendations For Seasonal Series"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2473,6 +2869,14 @@ rule "ProcessResults: Return Recommendations For Seasonal Series"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
 
+/**
+ * START Supplemental Output Rules - Output Series Display Selection and Number of Doses Remaining for each Series Display Option
+ */
+
+/**
+ * General Design Rule... Do not Edit
+ * Output Series Selection display information if option enabled
+ */
 rule "Series Display(Abstract): Return Series Selection Display Options"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2486,8 +2890,12 @@ rule "Series Display(Abstract): Return Series Selection Display Options"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Selection \": " + $ts.seriesName);
 end
 
+/**
+ * General Design Rule... Do not Edit
+ * Output Series Selection display information if option enabled
+ */
 rule "Series Display: Mark Selected Series as Unambiguous for Display if there is only one configured series for the Vaccine Group"
-		extends "Series Display(Abstract): Return Series Selection Display Options"
+	extends "Series Display(Abstract): Return Series Selection Display Options"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 8
@@ -2501,8 +2909,12 @@ rule "Series Display: Mark Selected Series as Unambiguous for Display if there i
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Selection \": " + $ts.seriesName + "; " + SeriesDisplaySelectionType.SERIES_DISPLAY_UNAMBIGUOUS);
 end
 
-rule "Series Display: Mark Selected Series as Best Guess for Display when there are more than one configured series for the Vaccine Group"
-		extends "Series Display(Abstract): Return Series Selection Display Options"
+/**
+ * General Design Rule... Do not Edit
+ * Output Series Selection display information if option enabled
+ */
+rule "Series Display: Mark Selected Series as Best Guess for Display when there are more than one configured series for the Vaccine Group" 
+	extends "Series Display(Abstract): Return Series Selection Display Options"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 8
@@ -2516,6 +2928,10 @@ rule "Series Display: Mark Selected Series as Best Guess for Display when there 
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Selection \": " + $ts.seriesName + "; " + SeriesDisplaySelectionType.SERIES_DISPLAY_BEST_GUESS);
 end
 
+/**
+ * General Design Rule... Do not Edit
+ * Output Series Selection display information if option enabled
+ */
 rule "Series Display: Invoke Series Display Custom Rules"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2530,6 +2946,10 @@ rule "Series Display: Invoke Series Display Custom Rules"
 		drools.setFocus("ProcessResults^customSeriesDisplayLogic");
 end
 
+/**
+ * General Design Rule... Do not Edit
+ * Output Series Selection display information if option enabled
+ */
 rule "Series Display: For any remaining series display selections set to SERIES_DISPLAY_NOT_SELECTED, change the series display selection to SERIES_DISPLAY_NONE"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2544,6 +2964,10 @@ rule "Series Display: For any remaining series display selections set to SERIES_
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Display Selection changed to SERIES_DISPLAY_NONE for: " + $ss);
 end
 
+/**
+ * General Design Rule... Do not Edit
+ * Output Series Selection display information if option enabled
+ */
 rule "Series Display: Set Number of Doses Remaining to Recommendation for a Series that is Not Complete"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2665,6 +3089,17 @@ rule "Series Display: Output Series Display Selections and Number of Doses Remai
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Display Selection \": " + $ts.seriesName);
 end
 
+/**
+ * END -- Supplemental Output Rules - Output Series Display Selection and Number of Doses Remaining for each Series Display Option
+ */
+
+/**
+ * Set flag to be returned for all Entities and ClinicalStatements START
+ */
+
+/**
+ * General Design rule... Do not Edit
+ */
 rule "BounceAllEntities"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2675,6 +3110,9 @@ rule "BounceAllEntities"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
 
+/**
+ * General Design rule... Do not Edit
+ */
 rule "BounceAllClinicalStatements"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
@@ -2684,3 +3122,17 @@ rule "BounceAllClinicalStatements"
 		$cs.setToBeReturned( true );
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
+
+/**
+ * Set flag to be returned for all Entities and ClinicalStatements END
+ *
+ * NOTE: all demographics about the Patient are always returned in the result when the result is an outputVMR.
+ *
+ * NOTE2: all ClinicalStatements, except ObservationResults are always returned as root elements
+ *
+ * NOTE3: all Entities that have a relationship to a ClinicalStatement or to another Entity are always returned nested within that
+ * ClinicalStatement or Entity ONLY if that ClinicalStatement or Entity is flagged toBeReturned.
+ *
+ * NOTE4: all Entities that are related directly to the patient will be returned or not depending on the setting of the toBeReturned
+ * flag.
+ */

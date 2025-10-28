@@ -26,6 +26,8 @@
 
 package org.cdsframework.ice.service;
 
+import java.util.Date;
+
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.util.TimePeriod;
 
@@ -52,6 +54,8 @@ public abstract class AbstractVaccine
     private TimePeriod validMaximumAgeOfUse;
     private TimePeriod recommendedForUseMinimumAge;
     private TimePeriod recommendedForUseMaximumAge;
+    private Date minimumDateForUse;
+    private Date maximumDateForUse;
 
     public AbstractVaccine(final AbstractVaccine pAbstractVaccine)
     {
@@ -75,6 +79,8 @@ public abstract class AbstractVaccine
                 TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getRecommendedMinimumAgeForUse());
         this.recommendedForUseMaximumAge =
                 TimePeriod.constructDeepCopyOfTimePeriodObject(pAbstractVaccine.getRecommendedMaximumAgeForUse());
+        this.minimumDateForUse = pAbstractVaccine.getMinimumDateForUse();
+        this.maximumDateForUse = pAbstractVaccine.getMaximumDateForUse();
     }
 
     /**
@@ -101,6 +107,8 @@ public abstract class AbstractVaccine
         this.validMaximumAgeOfUse = null;
         this.recommendedForUseMinimumAge = null;
         this.recommendedForUseMaximumAge = null;
+        this.minimumDateForUse = null;
+        this.maximumDateForUse = null;
     }
 
     public String getCdsConceptName()

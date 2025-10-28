@@ -33,19 +33,15 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
-import java.util.Objects;
 
 import org.cdsframework.ice.service.ICELogicHelper;
 import org.springframework.util.ObjectUtils;
 
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @ToString(onlyExplicitlyIncluded = true)
 public class TimePeriod
@@ -58,6 +54,7 @@ public class TimePeriod
         YEARS
     }
 
+    public static final TimePeriod ZERO = new TimePeriod(0, DurationType.DAYS);
     private static final String TimePeriodStringFormat =
             "[([-|+]?[ ]*[0-9]+[Yy])?([ ]*[-|+]?[ ]*[0-9]+[Mm])?([ ]*[-|+]?[ ]*[0-9]+[Ww])?([ ]*[-|+]?[ ]*[0-9]+[Dd])?]+";
 
@@ -71,12 +68,7 @@ public class TimePeriod
         if (pTP == null)
             return null;
 
-        final TimePeriod lTP = new TimePeriod();
-        lTP.durationType = pTP.durationType;
-        lTP.duration = pTP.duration;
-        lTP.timePeriodSet = pTP.timePeriodSet;
-        lTP.timePeriodRepresentation = pTP.timePeriodRepresentation;
-        return lTP;
+        return new TimePeriod(pTP.getDurationType(), pTP.getDuration(), pTP.getTimePeriodRepresentation());
     }
 
     /**
@@ -452,24 +444,10 @@ public class TimePeriod
             throw new IllegalArgumentException(str);
         }
 
-        final Date d1;
-        final Date d2;
-        if (absoluteValue && pD2.before(pD1))
-        {
-            d1 = pD2;
-            d2 = pD1;
-        }
-        else
-        {
-            d1 = pD1;
-            d2 = pD2;
-        }
-        if (log.isDebugEnabled())
-            log.debug(_METHODNAME + "Date d1 is {}; Date d2 is {}", d1, d2);
-
         if (!pTimePeriodStr.matches(TimePeriodStringFormat))
         {
-            final String str = "TimePeriod string \"" + pTimePeriodStr + "\" does not match correct pattern: e.g. - 1y 10m 12d";
+            final String str =
+                    "TimePeriod string \"%s\" does not match correct pattern: e.g. - 1y 10m 12d".formatted(pTimePeriodStr);
             log.error(_METHODNAME + "{}", str);
             throw new IllegalArgumentException(str);
         }
@@ -477,15 +455,13 @@ public class TimePeriod
         if (log.isDebugEnabled())
             log.debug("TimePeriod String Supplied: {}", pTimePeriodStr);
 
-        final Date interimDate;
-        interimDate = addTimePeriod(d1, pTimePeriodStr);
-        if (Objects.requireNonNull(interimDate).before(d2))
-            return 1;
+        final Date d1 = absoluteValue && pD2.before(pD1) ? pD2 : pD1;
+        final LocalDate d2 = ICELogicHelper.toLocalDate(absoluteValue && pD2.before(pD1) ? pD1 : pD2);
 
-        if (interimDate.after(d2))
-            return -1;
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "Date d1 is {}; Date d2 is {}", d1, d2);
 
-        return 0;
+        return d2.compareTo(ICELogicHelper.toLocalDate(addTimePeriod(d1, pTimePeriodStr)));
     }
 
     /**
@@ -512,63 +488,13 @@ public class TimePeriod
         return lDateToReturn;
     }
 
-    private DurationType durationType;
-    private int duration;
-    // private boolean isInclusive;
-    private boolean timePeriodSet;
-    @ToString.Include
-    private String timePeriodRepresentation;
-
-    /**
-     * Create a new TimePeriod by specifying duration value and type. By using this, it is not possible to specify a combination TimePeriod with more than one duration type. i.e. -
-     * to specify a TimePeriod of 1 year, 5 months and 4 days, use TimePeriod(String). TimePeriods are immutable; once set, it is not possible to change it.
-     */
-    public TimePeriod(final int pDuration, final DurationType pDurationType)
-    {
-        durationType = pDurationType;
-        duration = pDuration;
-        // isInclusive = false;
-        timePeriodSet = true;
-        setTimePeriod(determineTimePeriodStringRepresentationFromDurationValues());
-    }
-
-    /**
-     * Create a TimePeriod. TimePeriod is expressed as years, months and days. Each unit is optional.  Examples: "1y", "1m", "1d", "1y1m" "1y+5m+4d" is the same as "1y5m4d".
-     * Months and days can be subtracted, as follows: 1y-4m-4d. TimePeriods can be negative: "-4d", "-1y+4d", etc. No spaces between units.
-     * TimePeriods are immutable; once set, it is not possible to change it.
-     *
-     * @throws IllegalArgumentException if the TimePeriod argument is not in the correct format.
-     */
-    public TimePeriod(final String pTimePeriodStr)
-    {
-        setTimePeriod(pTimePeriodStr);
-    }
-
-    public String getTimePeriodStringRepresentation()
-    {
-        return this.timePeriodRepresentation;
-    }
-
-    private void setTimePeriod(final String pTimePeriodStr)
-    {
-        final String _METHODNAME = "setTimePeriod()";
-        if (!isTimePeriodStringInCorrectFormat(pTimePeriodStr))
-        {
-            final String str = "TimePeriod string \"" + pTimePeriodStr + "\" does not match correct pattern: e.g. - 1y10m12d";
-            log.error(_METHODNAME + "{}", str);
-            throw new IllegalArgumentException(str);
-        }
-
-        this.timePeriodRepresentation = pTimePeriodStr;
-        this.timePeriodSet = true;
-    }
-
     /**
      * Return TimePeriod in string format year, month, or day. e.g. - "4y", "5m", "6d".
      *
      * @return String If DurationType is not of type DAYS, MONTHS, WEEKS or YEARS, null is returned.
      */
-    private String determineTimePeriodStringRepresentationFromDurationValues()
+    private static String determineTimePeriodStringRepresentationFromDurationValues(final DurationType durationType,
+            final int duration)
     {
         if (durationType == null)
             return null;
@@ -580,6 +506,52 @@ public class TimePeriod
             case MONTHS -> duration + "m";
             case YEARS -> duration + "y";
         };
+    }
+
+    private final DurationType durationType;
+    private final int duration;
+    @ToString.Include
+    private final String timePeriodRepresentation;
+
+    private TimePeriod(final DurationType durationType, final int duration, final String timePeriodRepresentation)
+    {
+        if (!isTimePeriodStringInCorrectFormat(timePeriodRepresentation))
+        {
+            final String str =
+                    "TimePeriod string \"" + timePeriodRepresentation + "\" does not match correct pattern: e.g. - 1y10m12d";
+            log.error(str);
+            throw new IllegalArgumentException(str);
+        }
+
+        this.durationType = durationType;
+        this.duration = duration;
+        this.timePeriodRepresentation = timePeriodRepresentation;
+    }
+
+    /**
+     * Create a new TimePeriod by specifying duration value and type. By using this, it is not possible to specify a combination TimePeriod with more than one duration type. i.e. -
+     * to specify a TimePeriod of 1 year, 5 months and 4 days, use TimePeriod(String). TimePeriods are immutable; once set, it is not possible to change it.
+     */
+    public TimePeriod(final int pDuration, final DurationType pDurationType)
+    {
+        this(pDurationType, pDuration, determineTimePeriodStringRepresentationFromDurationValues(pDurationType, pDuration));
+    }
+
+    /**
+     * Create a TimePeriod. TimePeriod is expressed as years, months and days. Each unit is optional.  Examples: "1y", "1m", "1d", "1y1m" "1y+5m+4d" is the same as "1y5m4d".
+     * Months and days can be subtracted, as follows: 1y-4m-4d. TimePeriods can be negative: "-4d", "-1y+4d", etc. No spaces between units.
+     * TimePeriods are immutable; once set, it is not possible to change it.
+     *
+     * @throws IllegalArgumentException if the TimePeriod argument is not in the correct format.
+     */
+    public TimePeriod(final String pTimePeriodStr)
+    {
+        this(null, 0, pTimePeriodStr);
+    }
+
+    public String getTimePeriodStringRepresentation()
+    {
+        return this.timePeriodRepresentation;
     }
 
     /**
@@ -595,7 +567,7 @@ public class TimePeriod
 
         TimePeriod lTimePeriod = pTD;
         if (pTD == null)
-            lTimePeriod = new TimePeriod("0d");
+            lTimePeriod = TimePeriod.ZERO;
 
         final Date lReferenceDate = new Date();
         final Date lTPDate1 = addTimePeriod(lReferenceDate, this);
@@ -627,7 +599,7 @@ public class TimePeriod
 
         TimePeriod lTimePeriod = pTD;
         if (pTD == null)
-            lTimePeriod = new TimePeriod("0d");
+            lTimePeriod = TimePeriod.ZERO;
 
         final Date lReferenceDate = new Date();
         final Date lTPDate1 = addTimePeriod(lReferenceDate, this);
@@ -658,7 +630,7 @@ public class TimePeriod
     {
         TimePeriod lTimePeriod = pTD;
         if (pTD == null)
-            lTimePeriod = new TimePeriod("0d");
+            lTimePeriod = TimePeriod.ZERO;
 
         final Date lReferenceDate = new Date();
         final Date lTPDate1 = addTimePeriod(lReferenceDate, this);

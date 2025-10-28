@@ -101,7 +101,7 @@ rule "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of
 end
 
 rule "Pneumococcal Adult: if INVALID shot administered >= 5 yrs and < 19 yrs was not evaluated as below the minimum age for the vaccine (e.g. - PCV21), evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
-		extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"
+	extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when
@@ -120,7 +120,7 @@ rule "Pneumococcal Adult: if INVALID shot administered >= 5 yrs and < 19 yrs was
 end
 
 rule "Pneumococcal Adult: if ACCEPTED shot administered >= 5 yrs and < 19yrs, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
-		extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"
+	extends "Pneumococcal Adult(Abstract): Evaluate shot >= 5yrs and < 19yrs Outside of any Routine Series"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when

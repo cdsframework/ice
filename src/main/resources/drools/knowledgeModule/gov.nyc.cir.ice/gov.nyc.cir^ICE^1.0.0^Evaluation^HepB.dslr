@@ -199,7 +199,7 @@ end
  * 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
  */
 rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a prior VALID CVX 189, mark all intervening or prior Valid non-CVX 189 shots as ACCEPTED / VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
-		extends "Hep B: Mark Series with 2 Doses of CVX 189 Complete regardless of any other prior Hep B shots administered"
+	extends "Hep B: Mark Series with 2 Doses of CVX 189 Complete regardless of any other prior Hep B shots administered"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when

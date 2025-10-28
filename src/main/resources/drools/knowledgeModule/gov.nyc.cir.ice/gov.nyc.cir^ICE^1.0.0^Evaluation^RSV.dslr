@@ -195,7 +195,7 @@ rule "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted
 end
 
 rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Valid or Accepted, evaluate the shot as as Accepted / OUTSIDE_ROUTINE_SERIES"
-		extends "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted / Outside of any Routine Series"
+	extends "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted / Outside of any Routine Series"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when
@@ -211,7 +211,7 @@ rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Vali
 end
 
 rule "RSV: If shot administered >= 8 months and < 50 years was evaluated as Invalid where the reason is not ABOVE_MAXIMUM_AGE, evaluate the shot as Accepted / OUTSIDE_ROUTINE_SERIES"
-		extends "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted / Outside of any Routine Series"
+	extends "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted / Outside of any Routine Series"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when
