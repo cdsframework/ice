@@ -1512,8 +1512,9 @@ public class TargetSeries
 
         final TimePeriod rAge = switch (pRecommendationDateType)
         {
-            case EARLIEST -> vaccineGroupDoseRule.getMinimumAge();
-            case EARLIEST_RECOMMENDED -> vaccineGroupDoseRule.getEarliestRecommendedAge();
+            case EARLIEST -> Objects.requireNonNullElse(vaccineGroupDoseRule.getMinimumAge(), TimePeriod.ZERO);
+            case EARLIEST_RECOMMENDED ->
+                    Objects.requireNonNullElse(vaccineGroupDoseRule.getEarliestRecommendedAge(), TimePeriod.ZERO);
             case LATEST_RECOMMENDED -> vaccineGroupDoseRule.getLatestRecommendedAge();
             case null -> throw new IllegalArgumentException(
                     _METHODNAME + "unknown type specified for RecommendationDateType; not supported");
@@ -1695,9 +1696,6 @@ public class TargetSeries
 
             return;
         }
-
-        if (!rInterval.isTimePeriodSet())
-            return;
 
         // Now calculate the date that the next shot should be administered according to internal rule
         Date rIntervalDate = TimePeriod.addTimePeriod(lastDoseAdministered.getAdministrationDate(), rInterval);
@@ -2799,7 +2797,7 @@ public class TargetSeries
         {
             if (log.isDebugEnabled())
                 log.debug(_METHODNAME + "No minimum age associated with this dose rule");
-            return new TimePeriod(0, DurationType.DAYS);
+            return TimePeriod.ZERO;
         }
 
         return minimumAge;
@@ -2846,7 +2844,7 @@ public class TargetSeries
         {
             if (log.isDebugEnabled())
                 log.debug(_METHODNAME + "No minimum age associated with this dose rule");
-            return new TimePeriod(0, DurationType.DAYS);
+            return TimePeriod.ZERO;
         }
 
         return minimumAge;
@@ -2981,7 +2979,7 @@ public class TargetSeries
         {
             if (log.isDebugEnabled())
                 log.debug(_METHODNAME + "No minimum age associated with this dose rule");
-            return new TimePeriod(0, DurationType.DAYS);
+            return TimePeriod.ZERO;
         }
 
         return minimumAge;
@@ -3031,7 +3029,7 @@ public class TargetSeries
         {
             if (log.isDebugEnabled())
                 log.debug(_METHODNAME + "No minimum age associated with this dose rule");
-            return new TimePeriod(0, DurationType.DAYS);
+            return TimePeriod.ZERO;
         }
 
         return minimumAge;
@@ -3067,7 +3065,7 @@ public class TargetSeries
         {
             if (log.isDebugEnabled())
                 log.debug(_METHODNAME + "No minimum age associated with this dose rule");
-            return new TimePeriod(0, DurationType.DAYS);
+            return TimePeriod.ZERO;
         }
 
         return recommendedAge;
@@ -3103,7 +3101,7 @@ public class TargetSeries
         {
             if (log.isDebugEnabled())
                 log.debug(_METHODNAME + "No recommended age associated with this dose rule");
-            return new TimePeriod(0, DurationType.DAYS);
+            return TimePeriod.ZERO;
         }
 
         return recommendedAge;

@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.cdsframework.cds.CdsConcept;
@@ -415,39 +417,26 @@ public class SupportedVaccines implements SupportingData
         ///////
         // START Create the Vaccine and store it this object
         ///////
-        final Vaccine lVaccine;
-        if (lVaccineComponentsToAddToVaccine.isEmpty())
-        {
-            lVaccine = new Vaccine(ic);
-            /////// lVaccine = new Vaccine(llccli.getCdsListItemName());
-        }
-        else
-        {
-            lVaccine = new Vaccine(ic, lVaccineComponentsToAddToVaccine, true);
-            /////// lVaccine = new Vaccine(llccli.getCdsListItemName(), lVaccineComponentsToAddToVaccine, true);
-        }
+        final Vaccine lVaccine = lVaccineComponentsToAddToVaccine.isEmpty()
+                                 ? new Vaccine(ic)
+                                 : new Vaccine(ic, lVaccineComponentsToAddToVaccine, true);
 
         // Set combination vaccine, live virus, and unformulated formulations, if applicable
         lVaccine.setCombinationVaccine(lCombinationVaccine);
         if (!lCombinationVaccine)
-        {
-            // Determine if the formulation of this vaccine is unformulated or not
-            boolean lUnspecifiedFormulation = false;
-            final Boolean pIceVaccineSpecificationFormulation = pIceVaccineSpecificationFile.isUnspecifiedFormulation();
-            if (pIceVaccineSpecificationFormulation != null && pIceVaccineSpecificationFormulation)
-                lUnspecifiedFormulation = true;
-            lVaccine.setUnspecifiedFormulation(lUnspecifiedFormulation);
-        }
+            lVaccine.setUnspecifiedFormulation(
+                    Objects.requireNonNullElse(pIceVaccineSpecificationFile.isUnspecifiedFormulation(), Boolean.FALSE));
+
         // Set live virus vaccine boolean
-        if (pIceVaccineSpecificationFile.isLiveVirusVaccine() != null)
-            lVaccine.setLiveVirusVaccine(pIceVaccineSpecificationFile.isLiveVirusVaccine());
-        else
-            lVaccine.setLiveVirusVaccine(false);
-        // Set select adjuvant product boolean
-        if (pIceVaccineSpecificationFile.isSelectAdjuvantProduct() != null)
-            lVaccine.setSelectAdjuvantProduct(pIceVaccineSpecificationFile.isSelectAdjuvantProduct());
-        else
-            lVaccine.setSelectAdjuvantProduct(false);
+        lVaccine.setLiveVirusVaccine(Objects.requireNonNullElse(pIceVaccineSpecificationFile.isLiveVirusVaccine(), Boolean.FALSE));
+
+        lVaccine.setSelectAdjuvantProduct(
+                Objects.requireNonNullElse(pIceVaccineSpecificationFile.isSelectAdjuvantProduct(), Boolean.FALSE));
+
+        // Set minimum and maximum date for use
+        lVaccine.setMinimumDateForUse(pIceVaccineSpecificationFile.getMinimumDateForUse());
+        lVaccine.setMaximumDateForUse(pIceVaccineSpecificationFile.getMaximumDateForUse());
+
         this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(),
                 new LocallyCodedVaccineItem(llccli.getCdsListItemName(), ic, lIntersectionOfSupportedCdsVersions, lVaccine));
 
@@ -510,7 +499,8 @@ public class SupportedVaccines implements SupportingData
     }
 
     /**
-     * Adds the minimum age, maximum age, unspecified formulation flag, and live virus vaccine flag from the ICE vaccine supporting data file to the vaccine component
+     * Adds the minimum age, maximum age, minimum date of use, maximum date of use, unspecified formulation flag, and live virus vaccine flag
+     * from the ICE vaccine supporting data file to the vaccine component
      *
      * @throws IllegalArgumentException, propagated from TimePeriod, if specified ages are in the wrong format.
      */
@@ -521,34 +511,30 @@ public class SupportedVaccines implements SupportingData
             return;
 
         // Valid Minimum Age
-        String lAge = pIVSF.getValidMinimumAgeForUse();
-        if (lAge != null)
-            pVaccineComponent.setValidMinimumAgeForUse(new TimePeriod(lAge));
+        Optional.ofNullable(pIVSF.getValidMinimumAgeForUse())
+                .map(TimePeriod::new)
+                .ifPresent(pVaccineComponent::setValidMinimumAgeForUse);
         // Valid Maximum Age
-        lAge = pIVSF.getValidMaximumAgeForUse();
-        if (lAge != null)
-            pVaccineComponent.setValidMaximumAgeForUse(new TimePeriod(lAge));
+        Optional.ofNullable(pIVSF.getValidMaximumAgeForUse())
+                .map(TimePeriod::new)
+                .ifPresent(pVaccineComponent::setValidMaximumAgeForUse);
         // Recommended Minimum Age
-        lAge = pIVSF.getRecommendedMinimumAgeForUse();
-        if (lAge != null)
-            pVaccineComponent.setRecommendedMinimumAgeForUse(new TimePeriod(lAge));
+        Optional.ofNullable(pIVSF.getRecommendedMinimumAgeForUse())
+                .map(TimePeriod::new)
+                .ifPresent(pVaccineComponent::setRecommendedMinimumAgeForUse);
         // Recommended Maximum Age
-        lAge = pIVSF.getRecommendedMaximumAgeForUse();
-        if (lAge != null)
-            pVaccineComponent.setRecommendedMaximumAgeForUse(new TimePeriod(lAge));
-        // Live virus
-        Boolean lBL = pIVSF.isLiveVirusVaccine();
-        if (lBL != null)
-            pVaccineComponent.setLiveVirusVaccine(lBL);
-        // Select Adjuvant Product
-        final Boolean lBLSA = pIVSF.isSelectAdjuvantProduct();
-        if (lBLSA != null)
-            pVaccineComponent.setSelectAdjuvantProduct(lBLSA);
-        // Unspecified Formulation
-        lBL = pIVSF.isUnspecifiedFormulation();
-        if (lBL != null)
-            pVaccineComponent.setUnspecifiedFormulation(lBL);
+        Optional.ofNullable(pIVSF.getRecommendedMaximumAgeForUse())
+                .map(TimePeriod::new)
+                .ifPresent(pVaccineComponent::setRecommendedMaximumAgeForUse);
+        Optional.ofNullable(pIVSF.getMinimumDateForUse()).ifPresent(pVaccineComponent::setMinimumDateForUse);
+        Optional.ofNullable(pIVSF.getMaximumDateForUse()).ifPresent(pVaccineComponent::setMaximumDateForUse);
 
+        // Live virus
+        Optional.ofNullable(pIVSF.isLiveVirusVaccine()).ifPresent(pVaccineComponent::setLiveVirusVaccine);
+        // Select Adjuvant Product
+        Optional.ofNullable(pIVSF.isSelectAdjuvantProduct()).ifPresent(pVaccineComponent::setSelectAdjuvantProduct);
+        // Unspecified Formulation
+        Optional.ofNullable(pIVSF.isUnspecifiedFormulation()).ifPresent(pVaccineComponent::setUnspecifiedFormulation);
     }
 
     @Override

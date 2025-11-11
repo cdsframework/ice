@@ -65,7 +65,7 @@ rule "Duplicate Shot/Same Day Overview Abstract DTP Rule #4: Make note if all sh
 end
 
 rule "Duplicate Shots/Same Day Overview Rule #4-DTP-Pertussis (BOTH Primary Series Doses): If both shots are NOS and one of them contains Pertussis and the other does not, then evaluate shot with Pertussis as Valid and evaluate the other as Invalid with a reason code of DUPLICATE_SAME_DAY"
-		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #4: Make note if all shots are an NOS CVX and one of them contains Pertussis and the other does not"
+	extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #4: Make note if all shots are an NOS CVX and one of them contains Pertussis and the other does not"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
@@ -86,7 +86,7 @@ rule "Duplicate Shots/Same Day Overview Rule #4-DTP-Pertussis (BOTH Primary Seri
 end
 
 rule "Duplicate Shots/Same Day Overview Rule #4-DTP-Pertussis (NOT Both Primary Series Doses): If neither shot is in the primary series, both are NOS, and one of them contains Pertussis and the other does not, then evaluate shot with Pertussis as Valid and evaluate the other as Invalid with a reason code of DUPLICATE_SAME_DAY"
-		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #4: Make note if all shots are an NOS CVX and one of them contains Pertussis and the other does not"
+	extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #4: Make note if all shots are an NOS CVX and one of them contains Pertussis and the other does not"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
@@ -119,7 +119,7 @@ rule "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neithe
 end
 
 rule "Duplicate Shots/Same Day DTP Rule 5a (BOTH Primary Series Doses): If one DTP shot is pertussis-containing vaccine and other is not pertussis-containing, evaluate the non-pertussis containing vaccine as Invalid w/ DUPLICATE_SHOT_SAME_DAY"
-		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, and neither shot is a combination or both shots are a combination"
+	extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, and neither shot is a combination or both shots are a combination"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
@@ -146,7 +146,7 @@ end
  * pertussis-containing, evaluate both as Valid since there is a 0 day interval between non-pertussis shots
  */
 rule "Duplicate Shots/Same Day DTP Rule 5a (_NOT_ BOTH Primary Series Doses): If one DTP shot is pertussis-containing vaccine and other is not pertussis-containing, but neither are primary series doses, evaluate both as Valid"
-		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, and neither shot is a combination or both shots are a combination"
+	extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, and neither shot is a combination or both shots are a combination"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
@@ -165,7 +165,7 @@ rule "Duplicate Shots/Same Day DTP Rule 5a (_NOT_ BOTH Primary Series Doses): If
 end
 
 rule "Duplicate Shot/Same Day DTP Rule 5b (BOTH Primary Series Doses): If neither shot contains pertussis or both shots contain pertussis, then evaluate the 1st shot processed as Valid and evaluate the 2nd shot processed as Invalid with a reason code of DUPLICATE_SAME_DAY"
-		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, and neither shot is a combination or both shots are a combination"
+	extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, and neither shot is a combination or both shots are a combination"
 	dialect "java"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
@@ -205,7 +205,7 @@ end
  * shot processed as Valid and evaluate the 2nd shot processed as Invalid with a reason code of DUPLICATE_SAME_DAY
  */
 rule "Duplicate Shot/Same Day DTP Rule 5b (_NOT_ BOTH Primary Series Doses): If neither shot contains pertussis or both shots contain pertussis, but neither are primary series doses, evaluate both as Valid"
-		extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, and neither shot is a combination or both shots are a combination"
+	extends "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neither shot is an NOS CVX, and neither shot is a combination or both shots are a combination"
 	dialect "java"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true

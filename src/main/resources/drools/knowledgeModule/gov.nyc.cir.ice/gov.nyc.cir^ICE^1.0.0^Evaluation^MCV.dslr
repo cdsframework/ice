@@ -74,7 +74,7 @@ rule "Meningococcal: Evaluate shot as Accepted/Below Recommended Age and does no
 end
 
 rule "Meningococcal: Do not run base rules for minimum age for vaccine if given below the minimum age for the series and above the vaccine minimum age"
-		extends	"Meningococcal: Evaluate shot as Accepted/Below Recommended Age and does not count towards series completion if given below the minimum age for the series and above the vaccine minimum age; skip base rules"
+	extends	"Meningococcal: Evaluate shot as Accepted/Below Recommended Age and does not count towards series completion if given below the minimum age for the series and above the vaccine minimum age; skip base rules"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "minimumAgeVaccineCheck"
