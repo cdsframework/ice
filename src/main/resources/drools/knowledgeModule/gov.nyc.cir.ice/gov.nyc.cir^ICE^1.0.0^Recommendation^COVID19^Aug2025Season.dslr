@@ -76,6 +76,8 @@ when
         - the name of the Series a member of ("COVID19Aug20252yTo64ySeries", "COVID19Aug2025gte65Series")
         - the effective dose number in the series is == 1
         - the Series is not complete
+        - make note of the season name as $seasonName
+        - the string $seasonName == "COVID19Aug2025Season"
     There is an administered shot $mostRecentShot
         - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
         - make note of the date this shot was administered as $mostRecentShotDate
@@ -84,12 +86,7 @@ when
         - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
         - the administration date of the shot is > $mostRecentShotDate
         - the shot is not ignored
-    There does not exist an IceIntervalFact
-        - that has IceIntervalFact type IntervalFactType.RECOMMENDED
-        - that has IceIntervalFact finding SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue
-        - that has IceIntervalFact current administered shot $mostRecentShot
 then
-    Insert a Recommendation IceIntervalFact SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue with TargetDose $mostRecentShot into working memory
     Create a Recommendation as $recommendation for the Series $targetSeries
     Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculated
     Set the recommendation Earliest Forecast Date for $recommendation to $dtCalculated
@@ -377,25 +374,21 @@ rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 2: If exactly one prior CVX 311
             - the Series is not complete
             - make note of the season start date as $seasonStartDate
         There does not exist an administered shot
-            - the shot belongs to the series with name $targetSeries.seriesName
-            - that has already been evaluated and whose Shot Validity Status is VALID
-        There is an administered shot $mostRecentPriorSeasonShot
+            - the shot belongs to the series $targetSeries
+            - that has already been evaluated
+        There is an administered shot $mostRecentShot
             - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
             - the shot does not belong to the series $targetSeries
             - the vaccine administered a member of ("ICE311","ICE312")
             - the administration date of the shot is < $seasonStartDate
-            - make note of the date this shot was administered as $mostRecentPriorSeasonShotDate
+            - make note of the date this shot was administered as $mostRecentShotDate
         There does not exist another administered shot
             - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
             - the vaccine administered a member of ("ICE311","ICE312")
             - the shot is not ignored
-            - the administration date of the shot is < $mostRecentPriorSeasonShotDate
+            - the administration date of the shot is < $mostRecentShotDate
             - the administration date of the shot is < $seasonStartDate
             - that has already been evaluated and whose Shot Validity Status is VALID
-        There is an administered shot $mostRecentShot
-            - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-            - the shot is not ignored
-            - make note of the date this shot was administered as $mostRecentShotDate
     then
         Insert a Recommendation IceIntervalFact SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue with TargetDose $mostRecentShot into working memory
         Create a Recommendation as $recommendation for the Series $targetSeries
@@ -428,7 +421,7 @@ when
         - the Series is not complete
         - make note of the season start date as $seasonStartDate
     There does not exist an administered shot
-        - the shot belongs to the series with name $targetSeries.seriesName
+    	- the shot belongs to the series $targetSeries
         - that has already been evaluated and whose Shot Validity Status is VALID
     There is an administered shot $mostRecentPriorSeasonShot
         - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"

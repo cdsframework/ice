@@ -109,52 +109,52 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
         @Override
         public void beforeMatchFired(final BeforeMatchFiredEvent event)
         {
-            droolsEventsLogger.info("Before match fired: {}. Objects={}", event.getMatch().getRule().getName(),
+            droolsEventsLogger.debug("Before match fired: {}. Objects={}", event.getMatch().getRule().getName(),
                     StringUtils.truncate(filterObjects(event.getMatch().getObjects()), MAX_LOG_LENGTH));
         }
 
         @Override
         public void afterMatchFired(final AfterMatchFiredEvent event)
         {
-            droolsEventsLogger.info("After match fired: {}\n", event.getMatch().getRule().getName());
+            droolsEventsLogger.debug("After match fired: {}\n", event.getMatch().getRule().getName());
         }
 
         @Override
         public void agendaGroupPopped(final AgendaGroupPoppedEvent event)
         {
             final String popped = focusQueue.pop();
-            droolsEventsLogger.info("Agenda group popped {}: queue={}", popped, focusQueue);
+            droolsEventsLogger.debug("Agenda group popped {}: queue={}", popped, focusQueue);
         }
 
         @Override
         public void agendaGroupPushed(final AgendaGroupPushedEvent event)
         {
             focusQueue.push(event.getAgendaGroup().getName());
-            droolsEventsLogger.info("Agenda group pushed {}: queue={}", event.getAgendaGroup().getName(), focusQueue);
+            droolsEventsLogger.debug("Agenda group pushed {}: queue={}", event.getAgendaGroup().getName(), focusQueue);
         }
 
         @Override
         public void beforeRuleFlowGroupActivated(final RuleFlowGroupActivatedEvent event)
         {
-            droolsEventsLogger.info("Before rule flow group activated: {}", event.getRuleFlowGroup().getName());
+            droolsEventsLogger.debug("Before rule flow group activated: {}", event.getRuleFlowGroup().getName());
         }
 
         @Override
         public void afterRuleFlowGroupActivated(final RuleFlowGroupActivatedEvent event)
         {
-            droolsEventsLogger.info("After rule flow group activated: {}", event.getRuleFlowGroup().getName());
+            droolsEventsLogger.debug("After rule flow group activated: {}", event.getRuleFlowGroup().getName());
         }
 
         @Override
         public void beforeRuleFlowGroupDeactivated(final RuleFlowGroupDeactivatedEvent event)
         {
-            droolsEventsLogger.info("Before rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
+            droolsEventsLogger.debug("Before rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
         }
 
         @Override
         public void afterRuleFlowGroupDeactivated(final RuleFlowGroupDeactivatedEvent event)
         {
-            droolsEventsLogger.info("After rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
+            droolsEventsLogger.debug("After rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
         }
     }
 
@@ -170,21 +170,21 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
         @Override
         public void objectInserted(final ObjectInsertedEvent event)
         {
-            droolsEventsLogger.info("Object inserted: {} - {}", event.getObject().getClass().getSimpleName(),
+            droolsEventsLogger.debug("Object inserted: {} - {}", event.getObject().getClass().getSimpleName(),
                     StringUtils.truncate(log(event.getObject()), MAX_LOG_LENGTH));
         }
 
         @Override
         public void objectUpdated(final ObjectUpdatedEvent event)
         {
-            droolsEventsLogger.info("Object updated: {} - {}", event.getObject().getClass().getSimpleName(),
+            droolsEventsLogger.debug("Object updated: {} - {}", event.getObject().getClass().getSimpleName(),
                     StringUtils.truncate(log(event.getObject()), MAX_LOG_LENGTH));
         }
 
         @Override
         public void objectDeleted(final ObjectDeletedEvent event)
         {
-            droolsEventsLogger.info("Object deleted: {} - {}", event.getOldObject().getClass().getSimpleName(),
+            droolsEventsLogger.debug("Object deleted: {} - {}", event.getOldObject().getClass().getSimpleName(),
                     StringUtils.truncate(log(event.getOldObject()), MAX_LOG_LENGTH));
         }
     }
