@@ -709,16 +709,18 @@ end
 
 /**
  * These series selection rules assume the existence of the following series only:
- *    + Orthopoxvirus 1-Dose Series
- *    + Orthopoxvirus 2-Dose Series
+ *    + Mpox 1-Dose Series
+ *    + Mpox 2-Dose Series
  */
-rule "SeriesSelection(Orthopoxvirus): If no other series was selected, the Orthopoxvirus 2-dose series applies"
+rule "SeriesSelection(Mpox): If a (valid) dose 1 of the Mpox 2-dose series was administered and no other doses were administered in another series prior to this shot, the Mpox 2-dose series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 20
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)
-		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesRules.seriesName == "Orthopoxvirus2DoseSeries")
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, doseNumberInSeries == 1, associatedTargetSeries.seriesRules.seriesName == "Mpox2DoseSeries", $ts : associatedTargetSeries)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate < $td.administrationDate)
 	then
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
@@ -728,10 +730,28 @@ rule "SeriesSelection(Orthopoxvirus): If no other series was selected, the Ortho
 		update($ts);
 end
 
+rule "SeriesSelection(Mpox): If a (valid) dose 1 of the Mpox 1-dose series was administered and no other doses were administered in another series prior to this shot, the Mpox 1-dose series applies"
+	dialect "mvel"
+	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
+	salience 10
+	when
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
+		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)
+		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, doseNumberInSeries == 1, associatedTargetSeries.seriesRules.seriesName == "Mpox1DoseSeries", $ts : associatedTargetSeries)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate < $td.administrationDate)
+	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
+		$ts.setSelectedSeries(true);
+		$tss.setSelectedSeriesName($ts.seriesName);
+		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
+		update($tss);
+		update($ts);
+end
+
 /**
  * If a series was selected but another series was marked complete with fewer doses, select the series with fewer doses
  */
-rule "SeriesSelect(Orthopoxvirus): If a series was selected but another series was marked complete earlier, select the series that was complete earlier"
+rule "SeriesSelect(Mpox): If a series was selected but another series was marked complete earlier, select the series that was complete earlier"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -755,7 +775,7 @@ end
 /**
  * If one series is complete but another has been selected, select an already completed one.
  */
-rule "SeriesSelection(Orthopoxvirus): Select already _completed_ series if a different, _incomplete_ series was previously selected"
+rule "SeriesSelection(Mpox): Select already _completed_ series if a different, _incomplete_ series was previously selected"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 10
@@ -774,33 +794,13 @@ rule "SeriesSelection(Orthopoxvirus): Select already _completed_ series if a dif
 		update($ts2);
 end
 
-rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 1-dose series was administered and no other doses were administered in another series prior to this shot, the Orthopoxvirus 1-dose series applies"
+rule "SeriesSelection(Mpox): If no other series was selected, the Mpox 2-dose series applies"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
-	salience 10
 	when
 		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)
-		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, doseNumberInSeries == 1, associatedTargetSeries.seriesRules.seriesName == "Orthopoxvirus1DoseSeries", $ts : associatedTargetSeries)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate < $td.administrationDate)
-	then
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
-		$ts.setSelectedSeries(true);
-		$tss.setSelectedSeriesName($ts.seriesName);
-		$tss.setSeriesSelectionStatus(SeriesSelectionStatus.SERIES_SELECTION_IN_POSTPROCESS);
-		update($tss);
-		update($ts);
-end
-
-rule "SeriesSelection(Orthopoxvirus): If a (valid) dose 1 of the Orthopoxvirus 2-dose series was administered and no other doses were administered in another series prior to this shot, the Orthopoxvirus 2-dose series applies"
-	dialect "mvel"
-	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
-	salience 20
-	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS)
-		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", selectedSeries == true)
-		$td : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, doseNumberInSeries == 1, associatedTargetSeries.seriesRules.seriesName == "Orthopoxvirus2DoseSeries", $ts : associatedTargetSeries)
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.860", isValid == true, associatedTargetSeries != $ts, administrationDate < $td.administrationDate)
+		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.860", seriesRules.seriesName == "Mpox2DoseSeries")
 	then
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts);
 		$ts.setSelectedSeries(true);
