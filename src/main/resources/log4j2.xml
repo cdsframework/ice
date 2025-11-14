@@ -5,6 +5,9 @@
         <Property name="basePath">/var/lib/tomcat/webapps/opencds-decision-support-service</Property>
     </Properties>
     <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n"/>
+        </Console>
         <RollingFile name="fileLogger" fileName="${basePath}/root.log" filePattern="${basePath}/root.log.%d{yyyy-MM-dd}">
             <PatternLayout>
                 <pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %c{1} - %msg%n</pattern>
@@ -15,6 +18,9 @@
         </RollingFile>
     </Appenders>
     <Loggers>
+        <Logger name="org.cdsframework.rules.packager.Packager" level="info" additivity="false">
+            <appender-ref ref="console"/>
+        </Logger>
         <Logger name="org.cdsframework.ice.service.ICELogicHelper" level="info" additivity="false">
             <appender-ref ref="fileLogger"/>
         </Logger>
