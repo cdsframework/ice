@@ -26,16 +26,42 @@
 
 package org.cdsframework.ice.service.configurations;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
+import org.cdsframework.ice.supportingdata.IceSupportingDataProperties;
 import org.kie.api.KieBase;
 import org.kie.api.command.Command;
+import org.kie.api.event.rule.AfterMatchFiredEvent;
+import org.kie.api.event.rule.AgendaEventListener;
+import org.kie.api.event.rule.AgendaGroupPoppedEvent;
+import org.kie.api.event.rule.AgendaGroupPushedEvent;
+import org.kie.api.event.rule.BeforeMatchFiredEvent;
+import org.kie.api.event.rule.MatchCancelledEvent;
+import org.kie.api.event.rule.MatchCreatedEvent;
+import org.kie.api.event.rule.ObjectDeletedEvent;
+import org.kie.api.event.rule.ObjectInsertedEvent;
+import org.kie.api.event.rule.ObjectUpdatedEvent;
+import org.kie.api.event.rule.RuleFlowGroupActivatedEvent;
+import org.kie.api.event.rule.RuleFlowGroupDeactivatedEvent;
+import org.kie.api.event.rule.RuleRuntimeEventListener;
 import org.kie.api.runtime.ExecutionResults;
 import org.kie.api.runtime.StatelessKieSession;
 import org.kie.internal.command.CommandFactory;
 import org.omg.dss.DSSRuntimeExceptionFault;
 import org.opencds.config.api.ExecutionEngineAdapter;
 import org.opencds.config.api.ExecutionEngineContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,6 +69,148 @@ import lombok.extern.slf4j.Slf4j;
 public record ICEDecisionEngineDSSEvaluationAdapter()
         implements ExecutionEngineAdapter<List<Command<?>>, ExecutionResults, IceKnowledgePackage>
 {
+    private static final Logger droolsEventsLogger = LoggerFactory.getLogger("drools-events");
+
+    private static String logObject(final Object object)
+    {
+        return switch (object)
+        {
+            case TargetSeries series -> "TargetSeries=%s".formatted(series.getSeriesName());
+            case TargetDose dose -> "TargetDose uniqueId=%s, Vaccine=%s, TargetSeries=%s, Status=%s".formatted(dose.getUniqueId(),
+                    dose.getAdministeredVaccine().getCdsConceptName(), dose.getTargetSeries().getSeriesName(), dose.getStatus());
+            case SeriesRules rules -> "SeriesRules=%s".formatted(rules.getSeriesName());
+            case ICEFactTypeFinding fact -> "Fact=%s, %s, %s, %s".formatted(fact.getIceResultFinding(),
+                    Optional.ofNullable(fact.getAssociatedTargetDose())
+                            .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
+                            .orElse(null), Optional.ofNullable(fact.getAssociatedTargetSeries())
+                            .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
+                            .orElse(null), Optional.ofNullable(fact.getAssociatedSeriesRules())
+                            .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
+                            .orElse(null));
+            default -> object.toString();
+        };
+    }
+
+    private static class DroolsAgendaEventLogger implements AgendaEventListener
+    {
+        private static final int MAX_LOG_LENGTH = 1024;
+
+        private static String filterObjects(final List<Object> objects)
+        {
+            return objects.stream().map(obj -> "<%s>".formatted(logObject(obj))).collect(Collectors.joining(" | ", "[", "]"));
+        }
+
+        private final Deque<String> focusQueue = new ArrayDeque<>();
+
+        @Override
+        public void matchCreated(final MatchCreatedEvent event)
+        {
+            droolsEventsLogger.debug("Match created: {}. Objects={}", event.getMatch().getRule().getName(),
+                    StringUtils.truncate(filterObjects(event.getMatch().getObjects()), MAX_LOG_LENGTH));
+        }
+
+        @Override
+        public void matchCancelled(final MatchCancelledEvent event)
+        {
+            String cause = "Unknown";
+            try
+            {
+                Object reason = event.getCause(); // Cause may be null or unsupported in older versions
+                if (reason != null)
+                    cause = reason.toString();
+            }
+            catch (Exception ignored)
+            {
+                // Compatibility fallback
+            }
+
+            droolsEventsLogger.debug("Match cancelled: {}. Cause={}. Objects={}", event.getMatch().getRule().getName(), cause,
+                    StringUtils.truncate(filterObjects(event.getMatch().getObjects()), MAX_LOG_LENGTH));
+        }
+
+        @Override
+        public void beforeMatchFired(final BeforeMatchFiredEvent event)
+        {
+            droolsEventsLogger.info("Before match fired: {}. Objects={}", event.getMatch().getRule().getName(),
+                    StringUtils.truncate(filterObjects(event.getMatch().getObjects()), MAX_LOG_LENGTH));
+        }
+
+        @Override
+        public void afterMatchFired(final AfterMatchFiredEvent event)
+        {
+            droolsEventsLogger.info("After match fired: {}\n", event.getMatch().getRule().getName());
+        }
+
+        @Override
+        public void agendaGroupPopped(final AgendaGroupPoppedEvent event)
+        {
+            final String popped = focusQueue.pop();
+            droolsEventsLogger.info("Agenda group popped {}: queue={}", popped, focusQueue);
+        }
+
+        @Override
+        public void agendaGroupPushed(final AgendaGroupPushedEvent event)
+        {
+            focusQueue.push(event.getAgendaGroup().getName());
+            droolsEventsLogger.info("Agenda group pushed {}: queue={}", event.getAgendaGroup().getName(), focusQueue);
+        }
+
+        @Override
+        public void beforeRuleFlowGroupActivated(final RuleFlowGroupActivatedEvent event)
+        {
+            droolsEventsLogger.info("Before rule flow group activated: {}", event.getRuleFlowGroup().getName());
+        }
+
+        @Override
+        public void afterRuleFlowGroupActivated(final RuleFlowGroupActivatedEvent event)
+        {
+            droolsEventsLogger.info("After rule flow group activated: {}", event.getRuleFlowGroup().getName());
+        }
+
+        @Override
+        public void beforeRuleFlowGroupDeactivated(final RuleFlowGroupDeactivatedEvent event)
+        {
+            droolsEventsLogger.info("Before rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
+        }
+
+        @Override
+        public void afterRuleFlowGroupDeactivated(final RuleFlowGroupDeactivatedEvent event)
+        {
+            droolsEventsLogger.info("After rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
+        }
+    }
+
+    private static class DroolsRuleRuntimeEventLogger implements RuleRuntimeEventListener
+    {
+        private static final int MAX_LOG_LENGTH = 1024;
+
+        private static String log(final Object object)
+        {
+            return object instanceof ICEFactTypeFinding ? logObject(object) : object.toString();
+        }
+
+        @Override
+        public void objectInserted(final ObjectInsertedEvent event)
+        {
+            droolsEventsLogger.info("Object inserted: {} - {}", event.getObject().getClass().getSimpleName(),
+                    StringUtils.truncate(log(event.getObject()), MAX_LOG_LENGTH));
+        }
+
+        @Override
+        public void objectUpdated(final ObjectUpdatedEvent event)
+        {
+            droolsEventsLogger.info("Object updated: {} - {}", event.getObject().getClass().getSimpleName(),
+                    StringUtils.truncate(log(event.getObject()), MAX_LOG_LENGTH));
+        }
+
+        @Override
+        public void objectDeleted(final ObjectDeletedEvent event)
+        {
+            droolsEventsLogger.info("Object deleted: {} - {}", event.getOldObject().getClass().getSimpleName(),
+                    StringUtils.truncate(log(event.getOldObject()), MAX_LOG_LENGTH));
+        }
+    }
+
     @Override
     public ExecutionEngineContext<List<Command<?>>, ExecutionResults> execute(final IceKnowledgePackage knowledgePackage,
             final ExecutionEngineContext<List<Command<?>>, ExecutionResults> context) throws DSSRuntimeExceptionFault
@@ -61,6 +229,14 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
             if (log.isDebugEnabled())
                 log.debug("KM (Drools) execution...");
             long d0 = 0L;
+
+            if (!IceSupportingDataProperties.create(new ICEPropertiesDataConfiguration().getProperties())
+                    .disableDroolsEventLogging())
+            {
+                knowledgeSession.addEventListener(new DroolsAgendaEventLogger());
+                knowledgeSession.addEventListener(new DroolsRuleRuntimeEventLogger());
+            }
+
             if (log.isInfoEnabled())
                 d0 = System.nanoTime();
             results = knowledgeSession.execute(CommandFactory.newBatchExecution(context.getInput()));

@@ -38,7 +38,8 @@ public record IceSupportingDataProperties(Boolean outputEarliestOverdueDates,
                                           List<String> vaccineGroupExclusions,
                                           Boolean enableUnsupportedVaccinesGroup,
                                           Boolean disableCovid19DoseNumberReset,
-                                          Boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries)
+                                          Boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries,
+                                          Boolean disableDroolsEventLogging)
 {
     public static IceSupportingDataProperties create(final Properties props)
     {
@@ -91,8 +92,14 @@ public record IceSupportingDataProperties(Boolean outputEarliestOverdueDates,
             log.info(_METHODNAME + "disable_output_earliest_and_overdue_dates_for_pneumococcal_adult_series set to {}",
                     disableOutputEarliestOverdueDatesForPneumococcalAdultSeries);
 
+        // Disable Drools Event Logging
+        final String lDisableDroolsEventLogging = props.getProperty("disable_drools_event_logging");
+        final boolean disableDroolsEventLogging = lDisableDroolsEventLogging != null && lDisableDroolsEventLogging.equals("Y");
+        if (log.isInfoEnabled())
+            log.info(_METHODNAME + "disable_drools_event_logging set to {}", disableDroolsEventLogging);
+
         return new IceSupportingDataProperties(outputEarliestOverdueDates, doseOverrideFeatureEnabled, outputSupplementalText,
                 vaccineGroupExclusions, enableUnsupportedVaccinesGroup, disableCovid19DoseNumberReset,
-                disableOutputEarliestOverdueDatesForPneumococcalAdultSeries);
+                disableOutputEarliestOverdueDatesForPneumococcalAdultSeries, disableDroolsEventLogging);
     }
 }
