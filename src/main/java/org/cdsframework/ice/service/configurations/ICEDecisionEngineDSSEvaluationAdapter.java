@@ -188,6 +188,7 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
                     StringUtils.truncate(log(event.getOldObject()), MAX_LOG_LENGTH));
         }
     }
+
     private static final Logger droolsEventsLogger = LoggerFactory.getLogger("drools-events");
 
     private static String logObject(final Object object)

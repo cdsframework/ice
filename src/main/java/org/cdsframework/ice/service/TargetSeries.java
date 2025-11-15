@@ -252,7 +252,7 @@ public class TargetSeries
      * Constructs a TargetSeries for a single invocation. If the Season parameter is not valid (i.e. - is not supported by the underlying SeriesRules),
      * an IllegalArgumentException is thrown
      */
-    /////// public TargetSeries(SeriesRules pSeriesRules, Schedule pScheduleBackingSeries, Season pTargetSeason, Date pEvalTime) {
+    // public TargetSeries(SeriesRules pSeriesRules, Schedule pScheduleBackingSeries, Season pTargetSeason, Date pEvalTime) {
     public TargetSeries(final SeriesRules pSeriesRules, final Schedule pScheduleBackingSeries, final Season pTargetSeason,
             final EvaluatedPerson pP)
     {

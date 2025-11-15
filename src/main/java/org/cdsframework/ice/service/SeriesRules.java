@@ -134,7 +134,7 @@ public class SeriesRules
     /**
      * Instantiate a series rules instance with the specified Seasons. If seasons are not specified, then the series is not treated as a Seasonal series.
      */
-    /////// public SeriesRules(String pSeriesName, String pVaccineGroup, List<Season> pApplicableSeasons) {
+    // public SeriesRules(String pSeriesName, String pVaccineGroup, List<Season> pApplicableSeasons) {
     public SeriesRules(final String pSeriesName, final CdsConcept pVaccineGroup, final List<Season> pApplicableSeasons)
     {
         this(pSeriesName, pVaccineGroup);
