@@ -1,19 +1,19 @@
 package org.cdsframework.rules.packager;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.drools.core.common.DroolsObjectOutputStream;
@@ -26,6 +26,9 @@ import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieContainer;
 import org.opencds.config.api.model.KMId;
+import org.springframework.util.ObjectUtils;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The Packager class is responsible for packaging Drools knowledge modules into serialized .pkg files
@@ -45,57 +48,9 @@ import org.opencds.config.api.model.KMId;
  *
  * @author sdn
  */
+@Slf4j
 public class Packager
 {
-
-    /**
-     * FilenameFilter implementation that filters files based on a prefix and allowed extensions.
-     * This filter is used to identify rule files (DRL/DSLR) that belong to a specific knowledge module.
-     */
-    public class FileNameWithExtensionFilterImpl implements FilenameFilter
-    {
-        private final String startsWith;
-        private final String[] validExtensions;
-
-        /**
-         * Creates a new filename filter.
-         *
-         * @param pStartsWith          The prefix that filenames must start with (knowledge module ID)
-         * @param pValidFileExtensions Array of valid file extensions (e.g., "drl", "dslr")
-         */
-        public FileNameWithExtensionFilterImpl(final String pStartsWith, final String[] pValidFileExtensions)
-        {
-            this.startsWith = pStartsWith;
-            this.validExtensions = pValidFileExtensions != null ? pValidFileExtensions.clone() : new String[0];
-        }
-
-        /**
-         * Tests whether or not the specified file should be included in a file list.
-         *
-         * @param dir  The directory in which the file was found
-         * @param name The name of the file
-         * @return true if the file matches the criteria, false otherwise
-         */
-        @Override
-        public boolean accept(final File dir, final String name)
-        {
-            if (startsWith != null && !name.startsWith(startsWith))
-                return false;
-
-            if (validExtensions.length == 0)
-                return true;
-
-            // Check if file has one of the valid extensions
-            for (String extension : validExtensions)
-                if (name.toLowerCase().endsWith("." + extension.toLowerCase()))
-                    return true;
-
-            return false;
-        }
-    }
-
-    private static final Logger logger = LogManager.getLogger();
-
     /**
      * Main entry point for the Packager utility.
      *
@@ -106,10 +61,9 @@ public class Packager
      *             args[3]: base rules scoping module ID (default: org.cdsframework^ICE^1.0.0)
      * @throws Exception if packaging fails
      */
-    public static void main(String[] args) throws Exception
+    public static void main(final String[] args) throws Exception
     {
-        final Packager packager = new Packager();
-        packager.run(args);
+        new Packager().run(args);
     }
 
     /**
@@ -119,7 +73,7 @@ public class Packager
      * @param args Command line arguments containing configuration parameters
      * @throws Exception if any step of the packaging process fails
      */
-    public void run(String[] args) throws Exception
+    public void run(final String[] args) throws Exception
     {
         // Parse command line arguments
         final boolean writeOutputFile = args.length > 0 && args[0].equals("--output-file");
@@ -134,8 +88,8 @@ public class Packager
                 args.length > 2 && !args[2].equals("org.nyc.cir^ICE^1.0.0") ? args[2] : "gov.nyc.cir^ICE^1.0.0";
         final String lBaseRulesScopingKmId = args.length > 3 ? args[3] : "org.cdsframework^ICE^1.0.0";
 
-        logger.info("loading knowledge from source files");
-        logger.info("Initializing ICE3 Drools 7 KnowledgeBase");
+        log.info("loading knowledge from source files");
+        log.info("Initializing ICE3 Drools 7 KnowledgeBase");
 
         // Convert string IDs to KMId objects for validation
         final KMId lKMId = KnowledgeModuleUtils.returnKMIdRepresentationOfKnowledgeModule(lRequestedKmId);
@@ -144,10 +98,10 @@ public class Packager
         // Validate knowledge module IDs are properly formatted
         if (lKMId == null || lKMIdBase == null)
         {
-            String lErrStr =
+            final String lErrStr =
                     "One or both incorrectly formatted knowledge module passed in; cannot continue. KMId: %s; KMIdBase: %s".formatted(
                             lRequestedKmId, lBaseRulesScopingKmId);
-            logger.error(lErrStr);
+            log.error(lErrStr);
             throw new RuntimeException(lErrStr);
         }
 
@@ -157,12 +111,12 @@ public class Packager
                 .orElseThrow(() ->
                 {
                     final String lErrStr = "ICE knowledge repository data location not specified in properties file";
-                    logger.error(lErrStr);
-                    throw new RuntimeException(lErrStr);
+                    log.error(lErrStr);
+                    return new RuntimeException(lErrStr);
                 });
 
-        if (logger.isInfoEnabled())
-            logger.info("ICE knowledge repository data location specified in properties file: {}", baseConfigurationLocation);
+        if (log.isInfoEnabled())
+            log.info("ICE knowledge repository data location specified in properties file: {}", baseConfigurationLocation);
 
         ////////////////////////////////////////////////////////////////////////////////////
         // START - Get the ICE knowledge modules subdirectory location
@@ -172,31 +126,31 @@ public class Packager
                 .orElseThrow(() ->
                 {
                     final String lErrStr = "ICE knowledge modules subdirectory location not specified in properties file";
-                    logger.error(lErrStr);
-                    throw new RuntimeException(lErrStr);
+                    log.error(lErrStr);
+                    return new RuntimeException(lErrStr);
                 });
 
-        if (logger.isDebugEnabled())
-            logger.info("ICE knowledge modules data location specified in properties file: {}", knowledgeModulesSubDirectory);
+        if (log.isDebugEnabled())
+            log.info("ICE knowledge modules data location specified in properties file: {}", knowledgeModulesSubDirectory);
 
         ////////////////////////////////////////////////////////////////////////////////////
         // Determine Knowledge Modules Directory Location
         /// /////////////////////////////////////////////////////////////////////////////////
-        final File lKnowledgeModulesDirectory = new File(new File(baseConfigurationLocation, knowledgeModulesSubDirectory),
+        final Path lKnowledgeModulesDirectory = Path.of(baseConfigurationLocation, knowledgeModulesSubDirectory,
                 KnowledgeModuleUtils.returnPackageNameForKnowledgeModule(lKMId.getScopingEntityId(), lKMId.getBusinessId(),
                         lKMId.getVersion()));
 
-        if (!lKnowledgeModulesDirectory.exists())
+        if (!Files.exists(lKnowledgeModulesDirectory))
         {
-            final String lErrStr = "Requested ICE knowledge module does not exist: " + lKnowledgeModulesDirectory.getAbsolutePath()
-                    + " for knowledge module " + lRequestedKmId;
-            logger.error(lErrStr);
+            final String lErrStr = "Requested ICE knowledge module does not exist: %s for knowledge module %s".formatted(
+                    lKnowledgeModulesDirectory, lRequestedKmId);
+            log.error(lErrStr);
             throw new RuntimeException(lErrStr);
         }
-        else
-            if (logger.isDebugEnabled())
-                logger.debug("Requested ICE knowledge module directory: {} for knowledge module {}",
-                        lKnowledgeModulesDirectory.getAbsolutePath(), lRequestedKmId);
+
+        if (log.isDebugEnabled())
+            log.debug("Requested ICE knowledge module directory: {} for knowledge module {}", lKnowledgeModulesDirectory,
+                    lRequestedKmId);
 
         ////////////////////////////////////////////////////////////////////////////////////
         // END - Get the ICE knowledge modules subdirectory location
@@ -209,28 +163,28 @@ public class Packager
         if (knowledgeCommonSubDirectory == null)
         {
             final String lErrStr = "ICE common knowledge subdirectory location not specified in properties file";
-            logger.error(lErrStr);
+            log.error(lErrStr);
             throw new RuntimeException(lErrStr);
         }
-        else
-            if (logger.isDebugEnabled())
-                logger.info("ICE common knowledge data location specified in properties file: {}", knowledgeCommonSubDirectory);
 
-        final File lKnowledgeCommonDirectory = new File(new File(baseConfigurationLocation, knowledgeCommonSubDirectory),
+        if (log.isDebugEnabled())
+            log.info("ICE common knowledge data location specified in properties file: {}", knowledgeCommonSubDirectory);
+
+        final Path lKnowledgeCommonDirectory = Path.of(baseConfigurationLocation, knowledgeCommonSubDirectory,
                 KnowledgeModuleUtils.returnPackageNameForKnowledgeModule(lKMIdBase.getScopingEntityId(), lKMIdBase.getBusinessId(),
                         lKMIdBase.getVersion()));
-        if (!lKnowledgeCommonDirectory.exists())
+        if (!Files.exists(lKnowledgeCommonDirectory))
         {
             final String lErrStr =
-                    "Base ICE knowledge module does not exist" + lKnowledgeCommonDirectory.getAbsolutePath() + "for common logic: "
-                            + lBaseRulesScopingKmId;
-            logger.error(lErrStr);
+                    "Base ICE knowledge module does not exist%sfor common logic: %s".formatted(lKnowledgeCommonDirectory,
+                            lBaseRulesScopingKmId);
+            log.error(lErrStr);
             throw new RuntimeException(lErrStr);
         }
-        else
-            if (logger.isDebugEnabled())
-                logger.debug("Base knowledge modules directory: {} for common logic: {}",
-                        lKnowledgeCommonDirectory.getAbsolutePath(), lBaseRulesScopingKmId);
+
+        if (log.isDebugEnabled())
+            log.debug("Base knowledge modules directory: {} for common logic: {}", lKnowledgeCommonDirectory,
+                    lBaseRulesScopingKmId);
 
         ////////////////////////////////////////////////////////////////////////////////////
         // END - Get the ICE Common rules subdirectory location
@@ -239,65 +193,61 @@ public class Packager
         // Initialize Drools KIE services for knowledge base creation
         final KieServices kieServices = KieServices.Factory.get();
         KieBase kieBase = null;
-        logger.info("loading knowledge from source files");
+        log.info("loading knowledge from source files");
 
         // Locate base rule files (DSL, DRL, BPMN) in common directory
-        File dslFile = new File(lKnowledgeCommonDirectory, lBaseRulesScopingKmId + ".dsl");
-        File drlFile = new File(lKnowledgeCommonDirectory, lBaseRulesScopingKmId + ".drl");
-        File drlFileDuplicateShotSameDay = new File(lKnowledgeCommonDirectory, lBaseRulesScopingKmId + "^DuplicateShotSameDay.drl");
-        File bpmnFile = new File(lKnowledgeCommonDirectory, lBaseRulesScopingKmId + ".bpmn");
+        Path dslFile = lKnowledgeCommonDirectory.resolve(lBaseRulesScopingKmId + ".dsl");
+        Path drlFile = lKnowledgeCommonDirectory.resolve(lBaseRulesScopingKmId + ".drl");
+        Path drlFileDuplicateShotSameDay = lKnowledgeCommonDirectory.resolve(lBaseRulesScopingKmId + "^DuplicateShotSameDay.drl");
+        Path bpmnFile = lKnowledgeCommonDirectory.resolve(lBaseRulesScopingKmId + ".bpmn");
 
-        if (!dslFile.exists() || !drlFile.exists() || !drlFileDuplicateShotSameDay.exists() || !bpmnFile.exists())
+        if (!Files.exists(dslFile) || !Files.exists(drlFile) || !Files.exists(drlFileDuplicateShotSameDay) || !Files.exists(
+                bpmnFile))
         {
             // Try in the knowledge module directory
-            dslFile = new File(lKnowledgeModulesDirectory, lRequestedKmId + ".dsl");
-            drlFile = new File(lKnowledgeModulesDirectory, lRequestedKmId + ".drl");
-            drlFileDuplicateShotSameDay = new File(lKnowledgeModulesDirectory, lRequestedKmId + "^DuplicateShotSameDay.drl");
-            bpmnFile = new File(lKnowledgeModulesDirectory, lRequestedKmId + ".bpmn");
-            if (!dslFile.exists() || !drlFile.exists() || !drlFileDuplicateShotSameDay.exists() || !bpmnFile.exists())
+            dslFile = lKnowledgeModulesDirectory.resolve(lRequestedKmId + ".dsl");
+            drlFile = lKnowledgeModulesDirectory.resolve(lRequestedKmId + ".drl");
+            drlFileDuplicateShotSameDay = lKnowledgeModulesDirectory.resolve(lRequestedKmId + "^DuplicateShotSameDay.drl");
+            bpmnFile = lKnowledgeModulesDirectory.resolve(lRequestedKmId + ".bpmn");
+            if (!Files.exists(dslFile) || !Files.exists(drlFile) || !Files.exists(drlFileDuplicateShotSameDay) || !Files.exists(
+                    bpmnFile))
             {
                 final String lErrStr =
                         "Some or all ICE base rules not found; base repository location: %s; base rules scoping entity id: %s; knowledge module location: %s".formatted(
                                 baseConfigurationLocation, lBaseRulesScopingKmId, lRequestedKmId);
-                logger.error(lErrStr);
+                log.error(lErrStr);
                 throw new RuntimeException(lErrStr);
             }
         }
 
-        logger.info("Loading knowledge base BPMN, DSL, DRL and DSLR rules");
+        log.info("Loading knowledge base BPMN, DSL, DRL and DSLR rules");
         final KieFileSystem kfs = kieServices.newKieFileSystem();
         // BPMN file
-        if (bpmnFile != null)
-        {
-            final Resource bpmnResource = kieServices.getResources().newFileSystemResource(bpmnFile);
-            bpmnResource.setResourceType(ResourceType.BPMN2);
-            kfs.write(bpmnResource);
-            logger.info("Loaded BPMN file {}", bpmnFile.getPath());
-        }
+        final Resource bpmnResource = kieServices.getResources().newFileSystemResource(bpmnFile.toFile());
+        bpmnResource.setResourceType(ResourceType.BPMN2);
+        kfs.write(bpmnResource);
+        log.info("Loaded BPMN file {}", bpmnFile);
 
         // DSL file
-        if (dslFile != null)
-        {
-            final Resource dslResource = kieServices.getResources().newFileSystemResource(dslFile);
-            dslResource.setResourceType(ResourceType.DSL);
-            kfs.write(dslResource);
-            logger.info("Loaded DSL file {}", dslFile.getPath());
-        }
+        final Resource dslResource = kieServices.getResources().newFileSystemResource(dslFile.toFile());
+        dslResource.setResourceType(ResourceType.DSL);
+        kfs.write(dslResource);
+        log.info("Loaded DSL file {}", dslFile);
 
         //////////////////////////////////////////////////////////////////////
         // Now load the Knowledge Module specific rules - Do so by reading all of the files that fit the filter for the knowledge module directory
         /// ///////////////////////////////////////////////////////////////////
-        final List<File> lFilesToExcludeFromKB = new ArrayList<File>();
+        final Set<Path> lFilesToExcludeFromKB = new HashSet<>();
 
         // Add base rules to knowledge base
-        final List<File> lBaseFilesToLoad =
+        final List<Path> lBaseFilesToLoad =
                 retrieveCollectionOfDSLRsToAddToKnowledgeBase(lBaseRulesScopingKmId, lKnowledgeCommonDirectory,
                         lFilesToExcludeFromKB);
 
         if (lBaseFilesToLoad.isEmpty())
         {
             final String lErrStr = "No base ICE rules found; cannot continue";
-            logger.error(lErrStr);
+            log.error(lErrStr);
             throw new InconsistentConfigurationException(lErrStr);
         }
 
@@ -305,31 +255,32 @@ public class Packager
         loadRuleFiles(kieServices, kfs, lBaseFilesToLoad, "Base");
 
         // Add custom rules to knowledge base - both DRL and DSLR files permitted, DRL files loaded first.
-        final List<File> lFilesToLoad =
+        final List<Path> lFilesToLoad =
                 retrieveCollectionOfDSLRsToAddToKnowledgeBase(lRequestedKmId, lKnowledgeModulesDirectory, lFilesToExcludeFromKB);
 
         // Load custom rule files using helper method
         loadRuleFiles(kieServices, kfs, lFilesToLoad, "Custom");
 
         /// ///////////////////////////////////////////////////////////////////
-        logger.info("Running KieBuilder build...");
+        log.info("Running KieBuilder build...");
         final KieBuilder kieBuilder = kieServices.newKieBuilder(kfs).buildAll();
         if (!kieBuilder.getResults().getMessages(Message.Level.ERROR).isEmpty())
         {
-            String lErrStr = "KieBuilder had errors on build of: " + lRequestedKmId + ", as follows:";
+            final StringBuilder lErrStr = new StringBuilder();
+            lErrStr.append("KieBuilder had errors on build of: ").append(lRequestedKmId).append(", as follows:");
             int i = 1;
-            for (Message lMessage : kieBuilder.getResults().getMessages())
-                lErrStr += "\n(%d) %s %s, line %d: %s".formatted(i++, lMessage.getLevel().toString(),
+            for (final Message lMessage : kieBuilder.getResults().getMessages())
+                lErrStr.append("\n(%d) %s %s, line %d: %s".formatted(i++, lMessage.getLevel().toString(),
                         lMessage.getPath().replaceAll("^.*%s/".formatted(baseConfigurationLocation), ""), lMessage.getLine(),
-                        lMessage.getText());
+                        lMessage.getText()));
 
-            logger.error(lErrStr);
+            log.error(lErrStr.toString());
             throw new RuntimeException("Completed with build errors");
         }
 
         if (!writeOutputFile)
         {
-            logger.info("Completed without generating the pkg file (due to --output-file option not specified)");
+            log.info("Completed without generating the pkg file (due to --output-file option not specified)");
             System.exit(0);
         }
 
@@ -339,18 +290,17 @@ public class Packager
         final KieContainer kieContainer = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId());
         kieBase = kieContainer.getKieBase();
 
-        final File pkgFile = new File(lKnowledgeModulesDirectory, lRequestedKmId + ".pkg");
-        try (final OutputStream fos = new FileOutputStream(pkgFile.getAbsolutePath());
-                final ObjectOutputStream out = new DroolsObjectOutputStream(fos))
+        final Path pkgFile = lKnowledgeModulesDirectory.resolve(lRequestedKmId + ".pkg");
+        try (final ObjectOutputStream out = new DroolsObjectOutputStream(Files.newOutputStream(pkgFile)))
         {
             out.writeObject(kieBase);
         }
-        catch (Exception e)
+        catch (final Exception e)
         {
             throw new RuntimeException("Failed to write serialized pkg file", e);
         }
 
-        logger.info("Completed generation of pkg file {}", pkgFile.getAbsolutePath());
+        log.info("Completed generation of pkg file {}", pkgFile);
     }
 
     /**
@@ -362,30 +312,30 @@ public class Packager
      * @param filesToLoad List of files to be loaded
      * @param logPrefix   Prefix for log messages (e.g., "Base" for base files)
      */
-    private void loadRuleFiles(final KieServices kieServices, final KieFileSystem kfs, final List<File> filesToLoad,
+    private void loadRuleFiles(final KieServices kieServices, final KieFileSystem kfs, final List<Path> filesToLoad,
             final String logPrefix)
     {
         // Load DRL files first
-        for (File fileToLoad : filesToLoad)
+        for (final Path fileToLoad : filesToLoad)
         {
-            if (fileToLoad != null && (fileToLoad.getName().toLowerCase().endsWith(".drl")))
+            if (fileToLoad != null && (fileToLoad.getFileName().toString().toLowerCase().endsWith(".drl")))
             {
-                final Resource drlFile = kieServices.getResources().newFileSystemResource(fileToLoad);
+                final Resource drlFile = kieServices.getResources().newFileSystemResource(fileToLoad.toFile());
                 drlFile.setResourceType(ResourceType.DRL);
                 kfs.write(drlFile);
-                logger.info("Loaded {} DRL file {}", logPrefix, fileToLoad.getPath());
+                log.info("Loaded {} DRL file {}", logPrefix, fileToLoad);
             }
         }
 
         // Load DSLR files second
-        for (File fileToLoad : filesToLoad)
+        for (final Path fileToLoad : filesToLoad)
         {
-            if (fileToLoad != null && (fileToLoad.getName().toLowerCase().endsWith(".dslr")))
+            if (fileToLoad != null && (fileToLoad.getFileName().toString().toLowerCase().endsWith(".dslr")))
             {
-                final Resource dslrFile = kieServices.getResources().newFileSystemResource(fileToLoad);
+                final Resource dslrFile = kieServices.getResources().newFileSystemResource(fileToLoad.toFile());
                 dslrFile.setResourceType(ResourceType.DSLR);
                 kfs.write(dslrFile);
-                logger.info("Loaded {} DSLR file {}", logPrefix, fileToLoad.getPath());
+                log.info("Loaded {} DSLR file {}", logPrefix, fileToLoad);
             }
         }
     }
@@ -399,62 +349,50 @@ public class Packager
      * @param pFilesToExcludeFromKB List of files to exclude from the knowledge base
      * @return List of File objects representing valid rule files to include
      */
-    private List<File> retrieveCollectionOfDSLRsToAddToKnowledgeBase(final String pRequestedKmId, final File pDSLRFileDirectory,
-            final List<File> pFilesToExcludeFromKB)
+    private List<Path> retrieveCollectionOfDSLRsToAddToKnowledgeBase(final String pRequestedKmId, final Path pDSLRFileDirectory,
+            final Set<Path> pFilesToExcludeFromKB)
     {
         final String _METHODNAME = "retrieveCollectionOfDSLRsToAddToKnowledgeBase(): ";
 
-        if (pDSLRFileDirectory == null || pDSLRFileDirectory.exists() == false || pDSLRFileDirectory.isDirectory() == false)
+        if (pDSLRFileDirectory == null || !Files.exists(pDSLRFileDirectory) || !Files.exists(pDSLRFileDirectory))
         {
-            final String lErrStr = "Knowledge module specific directory does not exist; cannot continue. Directory: "
-                    + pDSLRFileDirectory.getAbsolutePath();
-            logger.error(_METHODNAME + lErrStr);
+            final String lErrStr =
+                    "Knowledge module specific directory does not exist; cannot continue. Directory: " + pDSLRFileDirectory;
+            log.error(_METHODNAME + "{}", lErrStr);
             throw new RuntimeException(lErrStr);
         }
 
+        log.info(_METHODNAME + "Determining knowledge base with custom DRL and DSLR files");
+
         // Obtain the files in this directory that adheres to the base and extension, ordered.
-        final String[] lValidFileExtensionsForCustomRules = { "drl", "dslr" };
-        final String[] lResultFiles =
-                pDSLRFileDirectory.list(new FileNameWithExtensionFilterImpl(pRequestedKmId, lValidFileExtensionsForCustomRules));
-        if (lResultFiles != null && lResultFiles.length > 0)
-            Arrays.sort(lResultFiles);
-
-        if (logger.isDebugEnabled())
+        final List<Path> lResultFiles;
+        try (final Stream<Path> stream = Files.list(pDSLRFileDirectory))
         {
-            String lDebugStr = "Custom rule files to be loaded into this knowledge module:\n";
-            for (int i = 0; i < lResultFiles.length; i++)
-                lDebugStr += i == lResultFiles.length - 1 ? lResultFiles[i] : lResultFiles[i] + "\n";
+            final List<String> lValidFileExtensionsForCustomRules = List.of(".drl", ".dslr");
 
-            logger.debug(lDebugStr);
+            lResultFiles = stream.filter(p -> p.getFileName().toString().startsWith(pRequestedKmId))
+                    .filter(p -> lValidFileExtensionsForCustomRules.stream()
+                            .anyMatch(extension -> p.getFileName().toString().toLowerCase().endsWith(extension)))
+                    .filter(Predicate.not(pFilesToExcludeFromKB::contains))
+                    .sorted()
+                    .toList();
+        }
+        catch (final IOException ignored)
+        {
+            final String lErrStr = "Failed to retrieve list of files in directory: " + pDSLRFileDirectory;
+            log.error(_METHODNAME + "{}", lErrStr);
+            throw new RuntimeException(lErrStr);
         }
 
-        logger.info(_METHODNAME + "Determining knowledge base with custom DRL and DSLR files");
-        final List<File> drlFilesToAddToKB = new ArrayList<>();
-        File customRuleFile = null;
-        if (lResultFiles != null)
-            // Add DRL files first to KB
-            for (int i = 0; i < lResultFiles.length; i++)
-            {
-                boolean exclusionFound = false;
-                final String lResultFile = lResultFiles[i];
-                customRuleFile = new File(pDSLRFileDirectory, lResultFile);
-                for (File lExclusion : pFilesToExcludeFromKB)
-                    if (customRuleFile.equals(lExclusion))
-                    {
-                        exclusionFound = true;
-                        break;
-                    }
+        if (ObjectUtils.isEmpty(lResultFiles))
+            return List.of();
 
-                if (exclusionFound)
-                    continue;
+        if (log.isDebugEnabled())
+        {
+            log.debug("Custom rule files to be loaded into this knowledge module:\n{}",
+                    lResultFiles.stream().map(Path::getFileName).map(Path::toString).collect(Collectors.joining("\n")));
+        }
 
-                if (customRuleFile != null && customRuleFile.exists())
-                    if (lResultFile.endsWith(".drl") || lResultFile.endsWith(".DRL") || lResultFile.endsWith(".dslr")
-                            || lResultFile.endsWith(".DSLR"))
-                        drlFilesToAddToKB.add(customRuleFile);
-            }
-
-        return drlFilesToAddToKB;
+        return lResultFiles;
     }
-
 }
