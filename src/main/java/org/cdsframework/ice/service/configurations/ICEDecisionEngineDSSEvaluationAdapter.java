@@ -75,7 +75,10 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
 
         private static String filterObjects(final List<Object> objects)
         {
-            return objects.stream().map(obj -> "<%s>".formatted(logObject(obj))).collect(Collectors.joining(" | ", "[", "]"));
+            return objects.stream()
+                    .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
+                    .map("<%s>"::formatted)
+                    .collect(Collectors.joining(" | ", "[", "]"));
         }
 
         private final Deque<String> focusQueue = new ArrayDeque<>();
@@ -93,11 +96,11 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
             String cause = "Unknown";
             try
             {
-                Object reason = event.getCause(); // Cause may be null or unsupported in older versions
+                final Object reason = event.getCause(); // Cause may be null or unsupported in older versions
                 if (reason != null)
                     cause = reason.toString();
             }
-            catch (Exception ignored)
+            catch (final Exception ignored)
             {
                 // Compatibility fallback
             }
@@ -195,11 +198,13 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
     {
         return switch (object)
         {
-            case TargetSeries series -> "TargetSeries=%s".formatted(series.getSeriesName());
-            case TargetDose dose -> "TargetDose uniqueId=%s, Vaccine=%s, TargetSeries=%s, Status=%s".formatted(dose.getUniqueId(),
-                    dose.getAdministeredVaccine().getCdsConceptName(), dose.getTargetSeries().getSeriesName(), dose.getStatus());
-            case SeriesRules rules -> "SeriesRules=%s".formatted(rules.getSeriesName());
-            case ICEFactTypeFinding fact -> "Fact=%s, %s, %s, %s".formatted(fact.getIceResultFinding(),
+            case final TargetSeries series -> "TargetSeries=%s".formatted(series.getSeriesName());
+            case final TargetDose dose ->
+                    "TargetDose uniqueId=%s, Vaccine=%s, TargetSeries=%s, Status=%s".formatted(dose.getUniqueId(),
+                            dose.getAdministeredVaccine().getCdsConceptName(), dose.getTargetSeries().getSeriesName(),
+                            dose.getStatus());
+            case final SeriesRules rules -> "SeriesRules=%s".formatted(rules.getSeriesName());
+            case final ICEFactTypeFinding fact -> "Fact=%s, %s, %s, %s".formatted(fact.getIceResultFinding(),
                     Optional.ofNullable(fact.getAssociatedTargetDose())
                             .map(ICEDecisionEngineDSSEvaluationAdapter::logObject)
                             .orElse(null), Optional.ofNullable(fact.getAssociatedTargetSeries())
