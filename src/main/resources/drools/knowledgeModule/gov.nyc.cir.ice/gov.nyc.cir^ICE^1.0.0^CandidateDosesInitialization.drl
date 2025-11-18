@@ -1,0 +1,210 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
+import org.opencds.vmr.v1_0.internal.concepts.ImmunizationConcept;
+import org.cdsframework.cds.CdsConcept;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetDoseInitializationTracker;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.service.VaccineComponent;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
+/**
+ * Specialized initialization rule for Meningococcal and Meningococcal B vaccine group
+ * This catchall rule should not fire, because all vaccines should either be explicitly placed into the Meningococcal ACWY or
+ * Meningococcal B vaccine group per other rules (below). But if it does fire, it will be placed into the vaccine group if it has at
+ * least one series that accepts that vaccine. This is actually more restrictive than the default cdsframework rule, which will
+ * initialize a TargetDose into a TargetSeries is both target the same disease (as specified by the disease code)
+ */
+rule "CandidateDosesIdentification: Initialize TargetDose in Meningococcal or Meningococcal B Vaccine Group Series"
+	dialect "java"
+	ruleflow-group "CandidateDosesIdentification^customCandidateDosesIdentificationRule"
+	salience 55
+	no-loop true
+	when
+		$i : ImmunizationConcept($ctid : getConceptTargetId(), $occ : getOpenCdsConceptCode(), $occ not in ("ICE316", "ICE328"))
+		$sae : SubstanceAdministrationEvent(id == $ctid)
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.830" || getVaccineGroup() == "VACCINE_GROUP_CONCEPT.835",
+			vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
+		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
+		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
+	then
+		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
+		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule)) {
+			insert(initializedTargetDose);
+		}
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "completed");
+end
+
+/**
+ * Meningococcal B vaccines (CVX 162, 163) always initializes the Meningococcal B vaccine group
+ */
+rule "CandidateDosesIdentification: Initialize Meningococcal B vaccines (CVX 162, 163) in the Meningococcal B vaccine group"
+	dialect "java"
+	ruleflow-group "CandidateDosesIdentification^customCandidateDosesIdentificationRule"
+	salience 60
+	no-loop true
+	when
+		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() in ("ICE162", "ICE163"), $occ : getOpenCdsConceptCode())
+		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval())
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.835",	vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
+		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
+		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
+	then
+		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
+		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule)) {
+			insert(initializedTargetDose);
+		}
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.getSeriesName() + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $saeAdminDate);
+end
+
+/**
+ * Meningococcal B (CVX 316) initialization in Meningococcal B vaccine group
+ */
+rule "CandidateDosesIdentification: Initialize Meningococcal vaccine (CVX 316) in the Meningococcal B vaccine group"
+	dialect "java"
+	ruleflow-group "CandidateDosesIdentification^customCandidateDosesIdentificationRule"
+	salience 60
+	no-loop true
+	when
+		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() == "ICE316", $occ : getOpenCdsConceptCode())
+		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval())
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.835")
+		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
+		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
+		eval($tdit.isTargetDoseInitializedInSeries($sae, new VaccineComponent(new CdsConcept("ICE162"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.835")), $ts) == false)
+
+	then
+		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
+		VaccineComponent vaccineComponentOfInterest = new VaccineComponent(new CdsConcept("ICE162"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.835"));
+		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule, vaccineComponentOfInterest)) {
+			insert(initializedTargetDose);
+		}
+		update($ts);
+		update($tdit);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.getSeriesName() + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $saeAdminDate);
+end
+
+/**
+ * Meningococcal B (CVX 316) initialization in Meningococcal B vaccine group
+ */
+rule "CandidateDosesIdentification: Initialize Meningococcal vaccine (CVX 328) in the Meningococcal B vaccine group"
+	dialect "java"
+	ruleflow-group "CandidateDosesIdentification^customCandidateDosesIdentificationRule"
+	salience 60
+	no-loop true
+	when
+		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() == "ICE328", $occ : getOpenCdsConceptCode())
+		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval())
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.835")
+		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
+		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
+		eval($tdit.isTargetDoseInitializedInSeries($sae, new VaccineComponent(new CdsConcept("ICE163"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.835")), $ts) == false)
+	then
+		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
+		VaccineComponent vaccineComponentOfInterest = new VaccineComponent(new CdsConcept("ICE163"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.835"));
+		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule, vaccineComponentOfInterest)) {
+			insert(initializedTargetDose);
+		}
+		update($ts);
+		update($tdit);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.getSeriesName() + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $saeAdminDate);
+end
+
+/**
+ * Meningococcal ACWY vaccines (CVX 114, 136, 32, 108, 147) always initializes the Meningococcal B vaccine group
+ */
+rule "CandidateDosesIdentification: Initialize Meningococcal vaccines (CVX 114, 136, 32, 108, 147) in the Meningococcal ACWY vaccine group"
+	dialect "java"
+	ruleflow-group "CandidateDosesIdentification^customCandidateDosesIdentificationRule"
+	salience 60
+	no-loop true
+	when
+		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() in ("ICE114","ICE136","ICE32","ICE108","ICE147"), $occ : getOpenCdsConceptCode())
+		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval())
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.830",
+			vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
+		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
+		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
+	then
+		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
+		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule)) {
+			insert(initializedTargetDose);
+		}
+		update($ts);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.getSeriesName() + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $saeAdminDate);
+end
+
+/**
+ * Meningococcal B (CVX 316) initialization in Meningococcal ACWY vaccine group
+ */
+rule "CandidateDosesIdentification: Initialize Meningococcal vaccine (CVX 316) in the Meningococcal ACWY vaccine group"
+	dialect "java"
+	ruleflow-group "CandidateDosesIdentification^customCandidateDosesIdentificationRule"
+	salience 60
+	no-loop true
+	when
+		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() == "ICE316", $occ : getOpenCdsConceptCode())
+		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval())
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.830")
+		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
+		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
+		eval($tdit.isTargetDoseInitializedInSeries($sae, new VaccineComponent(new CdsConcept("ICE147"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.830")), $ts) == false)
+	then
+		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
+		VaccineComponent vaccineComponentOfInterest = new VaccineComponent(new CdsConcept("ICE147"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.830"));
+		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule, vaccineComponentOfInterest)) {
+			insert(initializedTargetDose);
+		}
+		update($ts);
+		update($tdit);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.getSeriesName() + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $saeAdminDate);
+end
+
+/**
+ * Meningococcal B (CVX 328) initialization in Meningococcal ACWY vaccine group
+ */
+rule "CandidateDosesIdentification: Initialize Meningococcal vaccine (CVX 328) in the Meningococcal ACWY vaccine group"
+	dialect "java"
+	ruleflow-group "CandidateDosesIdentification^customCandidateDosesIdentificationRule"
+	salience 60
+	no-loop true
+	when
+		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() == "ICE328", $occ : getOpenCdsConceptCode())
+		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval())
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.830")
+		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
+		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
+		eval($tdit.isTargetDoseInitializedInSeries($sae, new VaccineComponent(new CdsConcept("ICE136"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.830")), $ts) == false)
+	then
+		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
+		VaccineComponent vaccineComponentOfInterest = new VaccineComponent(new CdsConcept("ICE136"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.830"));
+		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule, vaccineComponentOfInterest)) {
+			insert(initializedTargetDose);
+		}
+		update($ts);
+		update($tdit);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.getSeriesName() + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $saeAdminDate);
+end

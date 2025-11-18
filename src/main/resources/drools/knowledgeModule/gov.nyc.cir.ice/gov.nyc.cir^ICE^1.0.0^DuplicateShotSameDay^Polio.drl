@@ -1,0 +1,47 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+global java.util.Date evalTime;
+
+rule "Duplicate Shots/Same Day Polio Rule: If one of those shots is OPV (CVX 02, 182) and the other is not, evaluate the OPV as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other as Valid"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.400",
+			vaccineComponent.cdsConceptName in ("ICE02","ICE182"), $tdAdministrationDate : administrationDate, $tdAssociatedTargetSeries : associatedTargetSeries, $tddosenumber : doseNumberInSeries)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $tdAssociatedTargetSeries,
+			doseNumberInSeries == $tddosenumber, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.400", vaccineComponent.isUnspecifiedFormulation() == false,
+			vaccineComponent.cdsConceptName != $td.vaccineComponent.cdsConceptName, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $tdAssociatedTargetSeries);
+end

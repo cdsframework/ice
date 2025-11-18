@@ -1,0 +1,128 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+global java.util.Date evalTime;
+
+/**
+ * If the date of administration is >= 1/1/2000, then:
+ *   + If one of the shots is CVX 74 (rotavirus, tetravalent), then:
+ *     = evaluate CVX 74 as Invalid with a reason code of DUPLICATE_SAME_DAY
+ *     = evaluate the other rotavirus CVX as Valid
+ *   + If neither shot is CVX 74 and one of the shots is CVX 119 (rotavirus, monovalent), then:
+ *     = evaluate the CVX 119 as Invalid with a reason code of DUPLICATE_SAME_DAY
+ *     = evaluate the other rotavirus CVX as Valid
+ */
+rule "Duplicate Shots/Same Day Rotavirus Rule #1a: If shot administered >= 1/1/2000 and one of the doses is CVX 74, evaluate CVX 74 as Invalid / DUPLICATE_SAME_DAY and other Rotavirus CVX as Valid"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE74", administrationDate >= "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName != "ICE74",
+			vaccineComponent.isUnspecifiedFormulation() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+rule "Duplicate Shots/Same Day Rotavirus Rule #1b: If shot administered >= 1/1/2000, neither of the doses is CVX 74 and one of the doses is CVX 119, evaluate CVX 119 as Invalid / DUPLICATE_SAME_DAY and other Rotavirus CVX as Valid"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE119", administrationDate >= "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false,
+			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+		not TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE74")
+	then
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+/**
+ * If the date of administration is < 1/1/2000, then:
+ *   + If one of the of the shots is CVX 74, then:
+ *     = evaluate CVX 74 as Valid
+ *     = evaluate the other rotavirus CVX as Invalid with a reason code of DUPLICATE_SAME_DAY
+ *   + If neither shot is CVX 74 and one of the shots is CVX 119, then:
+ *     = evaluate the CVX 119 as Invalid with a reason code of DUPLICATE_SAME_DAY
+ *     = evaluate the other rotavirus CVX as Valid
+ */
+rule "Duplicate Shots/Same Day Rotavirus Rule #2a: If shot administered < 1/1/2000 and one of the doses is CVX 74, evaluate CVX 74 as Valid and other Rotavirus CVX as Invalid / DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE74", administrationDate < "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName != "ICE74",
+			vaccineComponent.isUnspecifiedFormulation() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+	then
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+rule "Duplicate Shots/Same Day Rotavirus Rule #2b: If shot administered < 1/1/2000, neither of the doses is CVX 74 and one of the doses is CVX 119, evaluate CVX 119 as Invalid / DUPLICATE_SAME_DAY and other Rotavirus CVX as Valid"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE119", administrationDate < "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false,
+			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+		not TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE74")
+	then
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end

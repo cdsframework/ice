@@ -1,0 +1,191 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
+rule "COVID-19: Invoke separate agenda group for recommendations in the COVID19Dec2020 Season"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the series belongs to the season with name "COVID19Dec2020Season"
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+end
+
+rule "COVID-19: Invoke separate agenda group for recommendations in the COVID19Sep2023/Aug2024 Season"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 10
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Season with name a member of ("COVID19Sep2023Season", "COVID19Aug2024Season")
+			- make note of the Season name as $seasonNameForSeriesToBeForecasted
+		There is a Season $sept2023season
+			- the name of the Season is $seasonNameForSeriesToBeForecasted
+			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the fully specified season start date as $dtSeasonStartDate
+		There is a Series $associatedTargetSeries identified by $targetSeries
+			- the Series is a seasonal series
+			- the season start date for the Series is == $dtSeasonStartDate
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
+end
+
+/**
+ * For all COVID-19 vaccine seasons:
+ *  * COVID-19 shots administered are evaluated based on the rules in effect as of the shot administration date.  (evaluation rule, handled in evaluation rule set)
+ *  * COVID-19 recommendations are based on the rules in effect as of the evaluation date. (recommendation rule, handled here)
+ */
+rule "COVID-19: If a seasonal COVID-19 Series that needs forecasting is complete, and there exists another COVID-19 Season with fully specified season start date > evalTime, then recommendation is NOT_RECOMMENDED / COMPLETE"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series is Complete
+			- the Series is a Seasonal Series
+			- make note of the Season Name as $seriesSeasonName
+			- make note of the Season Start Date as $targetSeasonStartDate
+		There is a Season $COVID19Sept2023Season
+		    - the name of the season is "COVID19Sep2023Season"
+		    - make note of the fully specified season start date as $sept2023StartDate
+		There is a Season $otherSeason
+			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the fully specified season start date is > evalTime
+		Confirm that the following is true: $targetSeasonStartDate >= $sept2023StartDate
+		Confirm that the following is true: $seriesSeasonName != $otherSeason.seasonName
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Agenda Groups for Post Recommendation Checks
+ */
+
+rule "COVID-19: Invoke separate agenda group for recommendations in the Aug2025+ Season"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	salience 10
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Season with name "COVID19Aug2025Season"
+			- make note of the Season name as $seasonNameForSeriesToBeForecasted
+		There is a Season $aug2025season
+			- the name of the Season is $seasonNameForSeriesToBeForecasted
+			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- make note of the fully specified season start date as $dtSeasonStartDate
+		There is a Series $associatedTargetSeries identified by $targetSeries
+			- the Series is a seasonal series
+			- the season start date for the Series is == $dtSeasonStartDate
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+end
+
+rule "COVID-19: Invoke separate agenda group for post recommendation checks in the COVID19Dec2020 Season"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the series belongs to the season with name "COVID19Dec2020Season"
+			- a forecast for the Series has been made
+			- post processing on the Series forecast has not already been run
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+		Set the Agenda Group Focus to "RecommendationForecast^postCustomRecommendationCheck^COVID19Dec2020Season"
+end
+
+rule "COVID-19: Invoke separate agenda group for post recommendation checks in the COVID19Sep2023 Season"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Season with name a member of ("COVID19Sep2023Season", "COVID19Aug2024Season")
+			- a forecast for the Series has been made
+			- post processing on the Series forecast has not already been run
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+		Set the Agenda Group Focus to "RecommendationForecast^postCustomRecommendationCheck^COVID19Sep2023Season"
+end
+
+rule "COVID-19: Invoke separate agenda group for post recommendation checks in the COVID19Aug2025 Season"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Season with name "COVID19Aug2025Season"
+			- a forecast for the Series has been made
+			- post processing on the Series forecast has not already been run
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+		Set the Agenda Group Focus to "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+end
+
+/**
+ * Other Recommendation Rule(s) common to all agenda groups
+ */
+
+rule "COVID-19: If the recommendation is NOT_RECOMMENDED, the current season series is complete and there is not already a recommendation reason supplied, add evaluation reason COMPLETE"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	// Run this after the more specific season-based rules
+	salience -1
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- a forecast for the Series has been made and a shot is not recommended
+			- post processing on the Series forecast has not already been run
+			- the Series is a Seasonal Series
+		Verify that the count of recommendations in Series $targetSeries with recommendation status RecommendationStatus.NOT_RECOMMENDED and a populated reason is == 0
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end

@@ -1,0 +1,44 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+
+rule "Polio: Modify the absolute minimum interval from dose 1 to dose 2 to 24 days if shot administered at >= 13 yrs of age"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	no-loop true
+	when
+		There is an Administered Shot $currentDose that needs to be evaluated
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+			- the dose number in the series is == 2
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the Associated Series as $associatedTargetSeries
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dateAt13yOfAge when the patient is "13y" of age
+			- the date $currentShotDate >= $dateAt13yOfAge
+	then
+		Obtain the existing DoseRule for Dose Number 1 in the Series $associatedTargetSeries as $assign_oDoseRule1
+		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "24d"
+		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule1
+		Refresh all Facts in the Series $associatedTargetSeries for Evaluation
+		Record that this Series Rule was Processed for the TargetSeries $associatedTargetSeries
+		Log that this Series Rule fired for the Series $associatedTargetSeries
+end

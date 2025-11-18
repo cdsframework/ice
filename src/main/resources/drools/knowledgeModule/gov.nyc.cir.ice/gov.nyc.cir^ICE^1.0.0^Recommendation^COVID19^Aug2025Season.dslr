@@ -1,0 +1,465 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
+/**
+ * General Rules for the 2025-2026 Season Start
+ */
+
+rule "COVID-19(Aug2025): If the patient is complete for the season, the recommendation is Not_Recommended/Complete_High_Risk"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series is complete
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * General Rules for the 2025-2026 Season End
+ */
+
+/**
+ * Series: Seasonal 1-dose COVID-19 Series (2-64 years) and Seasonal 2-dose COVID-19 Series (>= 65 years) Start
+ */
+
+/**
+ * Aug2025 2–64y/GTE65yr Series: If the patient has ≥1 COVID-19 shot on record prior to target dose 1,
+ * set the minimum and recommended interval from the most recent administered dose to target dose 1
+ * to 56 days (8 weeks)
+ */
+
+/**
+ * General case: prior shot exists → 56 days
+ */
+rule "COVID-19(Aug2025 2–64y/GTE65yr)->TargetDose 1: If ≥1 prior COVID-19 shot, set earliest & recommended interval to 56d"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    activation-group "recommendationIntervalCheck"
+when
+    There is a Series $targetSeries that needs forecasting
+        - the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+        - the name of the Series a member of ("COVID19Aug20252yTo64ySeries", "COVID19Aug2025gte65Series")
+        - the effective dose number in the series is == 1
+        - the Series is not complete
+        - make note of the season name as $seasonName
+        - the string $seasonName == "COVID19Aug2025Season"
+    There is an administered shot $mostRecentShot
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - make note of the date this shot was administered as $mostRecentShotDate
+        - the shot is not ignored
+    There does not exist an administered shot
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the administration date of the shot is > $mostRecentShotDate
+        - the shot is not ignored
+then
+    Create a Recommendation as $recommendation for the Series $targetSeries
+    Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculated
+    Set the recommendation Earliest Forecast Date for $recommendation to $dtCalculated
+    Set the recommendation Recommended Forecast Date for $recommendation to $dtCalculated
+    Include the Recommendation $recommendation for Consideration in the final forecast of the Series
+    Record that this Series Rule was Processed for the TargetSeries $targetSeries
+    Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Aug2025 2–64y Series / GTE65 Series: If the patient age is >= 12 years - 8 weeks and has a prior shot, include (different) SUPPLEMENTAL_TEXT with guidance on intervals.
+ */
+rule "COVID-19(Aug2025 2–64y): If the patient is >= 12 years - 8 weeks and the most recent shot was <= 12 weeks from the assessment date, include SUPPLEMENTAL_TEXT describing interval options"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+when
+    There is a Series $targetSeries
+        - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the name of the Series is "COVID19Aug20252yTo64ySeries"
+        - the effective dose number in the series is == 1
+        - post processing on the Series forecast has not already been run
+        - a forecast for the Series has been made
+        - make note of the recommendation status as $recommendationStatus
+    There is an administered shot $mostRecentShot
+            - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+            - the shot is not ignored
+            - make note of the date this shot was administered as $mostRecentShotDate
+    There does not exist an administered shot
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the administration date of the shot is > $mostRecentShotDate
+        - the shot is not ignored
+    The patient information $oEvaluatedPerson must be known to complete writing this rule
+        - make note of the date as $dtAge12yMinus8w when the patient is "12y-8w" of age
+        - the Date evalTime >= $dtAge12yMinus8w
+    Confirm elapsed time between $mostRecentShotDate and evalTime <= "12w"
+then
+    Create a Recommendation as $supplementalText for the Series $targetSeries
+    Set the Recommendation Supplemental text for $supplementalText to "The interval to target dose 1 depends on the patient's prior history and product to be used. If the last shot was an updated Novavax, Novavax can be administered in 3 weeks (as long as the patient is 12 years of age). If the last shot was not Novavax, administer at an interval of 8 weeks (for administration of Comirnaty, Novavax, or Spikevax) or 12 weeks (for administration of mNEXSPIKE)."
+    Set the Recommendation Status for $supplementalText to $recommendationStatus
+    Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
+    Record that this Series Rule was Processed for the TargetSeries $targetSeries
+    Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "COVID-19(GTE65 Series): If the most recent shot was <= 12 weeks from the assessment date, include SUPPLEMENTAL_TEXT describing interval options"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+when
+    There is a Series $targetSeries
+        - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the name of the Series is "COVID19Aug2025gte65Series"
+        - the effective dose number in the series is == 1
+        - post processing on the Series forecast has not already been run
+        - a forecast for the Series has been made
+        - make note of the recommendation status as $recommendationStatus
+    There is an administered shot $mostRecentShot
+            - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+            - the shot is not ignored
+            - make note of the date this shot was administered as $mostRecentShotDate
+    There does not exist an administered shot
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the administration date of the shot is > $mostRecentShotDate
+        - the shot is not ignored
+    Confirm elapsed time between $mostRecentShotDate and evalTime <= "12w"
+then
+    Create a Recommendation as $supplementalText for the Series $targetSeries
+    Set the Recommendation Supplemental text for $supplementalText to "The interval to target dose 1 depends on the patient's prior history and product to be used. If the last shot was an updated Novavax, Novavax can be administered in 3 weeks. If the last shot was not Novavax, administer at an interval of 8 weeks (for administration of Comirnaty, Novavax, or Spikevax) or 12 weeks (for administration of mNEXSPIKE)."
+    Set the Recommendation Status for $supplementalText to $recommendationStatus
+    Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
+    Record that this Series Rule was Processed for the TargetSeries $targetSeries
+    Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Series: Seasonal 1-dose COVID-19 Series (2-64 years) and Seasonal 2-dose COVID-19 Series (>= 65 years) End
+ */
+
+/**
+ * Series: Seasonal 1-dose COVID-19 Series (2-64 years) Start
+ */
+
+/**
+ * Aug2025 2–64y Series: If patient is < 19 years, has ≥ 1 COVID-19 dose prior to the season start date and no in-season doses,
+ * then recommend Conditional with reason codes HIGH_RISK and CLINICAL_PATIENT_DISCRETION. Earliest and Recommended dates are
+ * returned per the series rules.
+ */
+rule "COVID-19(Aug2025 2–64y Series): If <19y, ≥1 pre-season valid dose and no in-season dose, recommend CONDITIONAL / HIGH_RISK and CLINICAL_PATIENT_DISCRETION"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    when
+        There is a Series $targetSeries that needs forecasting
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+            - the name of the Series is "COVID19Aug20252yTo64ySeries"
+            - the Series is not Complete
+            - make note of the season start date as $seasonStartDate
+        There is an administered shot $previousShot
+            - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+            - that has already been evaluated and whose Shot Validity Status is VALID
+            - the administration date of the shot is < $seasonStartDate
+        There does not exist an administered shot
+            - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+            - that has already been evaluated and whose Shot Validity Status is VALID
+            - the administration date of the shot is >= $seasonStartDate
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+            - make note of the patient's birthdate as $dtBirthDate
+        Confirm elapsed time between $dtBirthDate and evalTime < "19y"
+    then
+        // Create a base recommendation to populate earliest/recommended dates
+        Create a Recommendation as $recommendation_dates for the Series $targetSeries
+        Include the Recommendation $recommendation_dates for Consideration in the final forecast of the Series
+        
+        // Add required Conditional reasons
+        Create a Recommendation as $recommendation_hr with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+        Set the Recommendation Reason for $recommendation_hr to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+        Include the Recommendation $recommendation_hr for Consideration in the final forecast of the Series
+        
+        Create a Recommendation as $recommendation_cpd with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+        Set the Recommendation Reason for $recommendation_cpd to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
+        Include the Recommendation $recommendation_cpd for Consideration in the final forecast of the Series
+
+        // Enable returning of forecast dates for conditional recommendations
+        Mark the series $targetSeries to include forecast dates for conditional recommendations
+
+        Record that this Series Rule was Processed for the TargetSeries $targetSeries
+        Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Series: Seasonal 1-dose COVID-19 Series (2-64 years) End
+ */
+
+/**
+ * Series: Seasonal 2-dose COVID-19 Series (>= 65 years) Start
+ */
+
+/**
+ * Aug2025 GTE65 Series: Include SUPPLEMENTAL_TEXT with guidance on intervals for target dose 2
+ */
+rule "COVID-19(Aug2025 GTE65 Series): If age >= 12y-8w, include SUPPLEMENTAL_TEXT describing interval options"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+when
+    There is a Series $targetSeries
+        - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the name of the Series is "COVID19Aug2025gte65Series"
+        - the effective dose number in the series is == 2
+        - post processing on the Series forecast has not already been run
+        - a forecast for the Series has been made
+        - make note of the recommendation status as $recommendationStatus
+then
+    Create a Recommendation as $supplementalText for the Series $targetSeries
+    Set the Recommendation Supplemental text for $supplementalText to "The recommended interval to target dose 2 is 6 months. The minimum interval to target dose 2 depends on the product to be used. For administration of Comirnaty, Novavax, or Spikevax, minimum interval = 8 weeks. For administration of mNEXSPIKE, minimum interval = 12 weeks."
+    Set the Recommendation Status for $supplementalText to $recommendationStatus
+    Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
+    Record that this Series Rule was Processed for the TargetSeries $targetSeries
+    Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Series: Seasonal 2-dose COVID-19 Series (>= 65 years) End
+ */
+
+/**
+ * Series: Seasonal 2-dose COVID-19 Series (< 2 years) Start
+ */
+
+/**
+ * Always recommend CVX 311 when recommending in the Seasonal 2-dose < 2 years series
+ */
+rule "COVID-19(Aug2025 < 2yrs Series): When a shot is recommended for this series, specifically recommend CVX 311"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+when
+    There is a Series $targetSeries
+        - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the name of the Series is "COVID19Aug2025lt2Series"
+        - post processing on the Series forecast has not already been run
+        - a forecast for the Series has been made and a shot is recommended
+then
+    Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE311"
+    Record that this Series Rule was Processed for the TargetSeries $targetSeries
+    Log that this Series Rule fired for the Series $targetSeries
+end
+ 
+/**
+ * If a shot was administered below the series absolute minimum age (< 6m - 4 days), the minimum and recommended intervals are 28 days
+ */
+rule "COVID-19(Aug2025 < 2yrs Series): If a shot was previously administered and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationIntervalCheck*)"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+	activation-group "recommendationIntervalCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the name of the Series is "COVID19Aug2025lt2Series"
+			- the Series is not complete
+			- the effective dose number in the Series is == 1
+		There is an administered shot $mostRecentShot
+			- the shot belongs to the series $targetSeries
+			- make note of the date this shot was administered as $mostRecentShotDate
+			- the shot is not ignored
+		There does not exist an administered shot
+			- the shot belongs to the series $targetSeries
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the administration date of the shot is > $mostRecentShotDate
+			- the shot is not ignored
+		There exists an IceFact
+			- that has associated administered shot $mostRecentShot
+			- that has finding SupportedFactConcept._BELOW_MINIMUM_AGE.conceptCodeValue
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "28d" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * If the patient has 1 dose of any of the following COVID-19 vaccines (CVX 213, CVX 308, CVX 309, CVX 310, CVX 313) administered prior to the season start date,
+ * intervals to target dose 1:
+ *   Absolute minimum interval = 24 days
+ *   Minimum interval = 28 days
+ *   Recommended interval = 28 days
+ *   Latest recommended interval (less than) = N/A
+ */
+rule "COVID-19(Aug2025 < 2yrs Series): If patient has any of CVX 213, 308, 309, 310, 313 administered prior to the season start date, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationIntervalCheck*)"
+		dialect "mvel"
+		ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+		activation-group "recommendationIntervalCheck"
+		when
+			There is a Series $targetSeries that needs forecasting
+				- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+				- the name of the Series is "COVID19Aug2025lt2Series"
+				- the Series is not complete
+				- the effective dose number in the Series is == 1
+				- make note of the season start date as $seasonStartDate
+			There is an administered shot $mostRecentShot
+                - the shot does not belong to the series $targetSeries
+                - the vaccine administered a member of ("ICE213","ICE308","ICE309","ICE310","ICE313")
+                - the shot is not ignored
+				- make note of the date this shot was administered as $mostRecentShotDate
+				- the administration date of the shot is < $seasonStartDate
+			There does not exist an administered shot
+				- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+				- the administration date of the shot is > $mostRecentShotDate
+				- the shot is not ignored
+		then
+			Create a Recommendation as $r for the Series $targetSeries
+			Add "28d" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculated
+			Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+			Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+			Include the Recommendation $r for Consideration in the final forecast of the Series
+			Record that this Series Rule was Processed for the TargetSeries $targetSeries
+			Log that this Series Rule fired for the Series $targetSeries
+	end
+
+/**
+ * Skip Dose Rules:
+ *
+ * Target Dose 1:
+ *
+ * If the patient has 1 dose of any of the following Moderna COVID-19 vaccines (CVX 311, CVX 312) administered prior to the season start date, target dose 1 is not needed. Skip to target dose 2.
+ *    Absolute minimum interval = 24 days
+ *    Minimum interval = 28 days
+ *    Recommended interval = 28 days
+ *    Latest recommended interval (less than) = N/A
+ *    (1 prior season dose of Moderna means only 1 dose is needed 28d later).
+ *
+ *  If the patient has >= 2 doses of any of the following COVID-19 vaccines (CVX 213, CVX 308, CVX 309, CVX 310, CVX 311, CVX 312, CVX 313) administered prior to the season start date, target dose 1 is not needed. Skip to target dose 2.
+ *    Absolute minimum interval = 8 weeks - 4 days
+ *    Minimum interval = 8 weeks
+ *    Recommended interval = 8 weeks
+ *    (2+ prior season doses (of anything) means only 1 dose is needed 8w later).
+ */
+rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 2: If exactly one prior CVX 311/312 before season start, set earliest and recommended interval to 28 days"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    when
+        There is a Series $targetSeries that needs forecasting
+            - the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+            - the name of the Series is "COVID19Aug2025lt2Series"
+            - the effective dose number in the series is == 2
+            - the Series is not complete
+            - make note of the season start date as $seasonStartDate
+        There does not exist an administered shot
+            - the shot belongs to the series $targetSeries
+            - that has already been evaluated
+        There is an administered shot $mostRecentShot
+            - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+            - the shot does not belong to the series $targetSeries
+            - the vaccine administered a member of ("ICE311","ICE312")
+            - the administration date of the shot is < $seasonStartDate
+            - make note of the date this shot was administered as $mostRecentShotDate
+        There does not exist another administered shot
+            - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+            - the vaccine administered a member of ("ICE311","ICE312")
+            - the shot is not ignored
+            - the administration date of the shot is < $mostRecentShotDate
+            - the administration date of the shot is < $seasonStartDate
+            - that has already been evaluated and whose Shot Validity Status is VALID
+    then
+        Insert a Recommendation IceIntervalFact SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue with TargetDose $mostRecentShot into working memory
+        Create a Recommendation as $recommendation for the Series $targetSeries
+        Add "28d" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculated
+        Set the recommendation Earliest Forecast Date for $recommendation to the latter of $dtCalculated and $seasonStartDate
+        Set the recommendation Recommended Forecast Date for $recommendation to the latter of $dtCalculated and $seasonStartDate
+        Include the Recommendation $recommendation for Consideration in the final forecast of the Series
+        Record that this Series Rule was Processed for the TargetSeries $targetSeries
+        Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * If the patient has ≥ 2 doses of CVX {213, 308, 309, 310, 311, 312, 313}
+ * administered prior to the season start date and no valid in-season doses, target dose 1 is not needed.
+ * Set the minimum and recommended interval to target dose 2 from the most recent qualifying pre-season dose to 8 weeks.
+ * (Absolute minimum interval is 8 weeks - 4 days; enforced by evaluation rules.)
+ *
+ * Salience used to ensure this rule takes precedence over the above rule "TargetDose 2: If exactly one prior CVX 311/312 before season start,
+ * set earliest and recommended interval to 28 days" which inserts a DOSE_INTERVAL_OVERRIDE which would prevent this rule from firing.
+ */
+rule "COVID-19(Aug2025 LT2y Series)->TargetDose 2: If ≥2 valid pre-season doses, set earliest & recommended interval to 8w"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    salience 20
+when
+    There is a Series $targetSeries that needs forecasting
+        - the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+        - the name of the Series is "COVID19Aug2025lt2Series"
+        - the effective dose number in the series is == 2
+        - the Series is not complete
+        - make note of the season start date as $seasonStartDate
+    There does not exist an administered shot
+    	- the shot belongs to the series $targetSeries
+        - that has already been evaluated and whose Shot Validity Status is VALID
+    There is an administered shot $mostRecentPriorSeasonShot
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the vaccine administered a member of ("ICE213","ICE308","ICE309","ICE310","ICE311","ICE312","ICE313")
+        - the shot is not ignored
+        - that has already been evaluated and whose Shot Validity Status is VALID
+        - the administration date of the shot is < $seasonStartDate
+        - make note of the date this shot was administered as $mostRecentPriorSeasonShotDate
+    There does not exist an administered shot
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the vaccine administered a member of ("ICE213","ICE308","ICE309","ICE310","ICE311","ICE312","ICE313")
+        - the shot is not ignored
+        - the administration date of the shot is > $mostRecentPriorSeasonShotDate
+        - the administration date of the shot is < $seasonStartDate
+    There exists another administered shot
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the vaccine administered a member of ("ICE213","ICE308","ICE309","ICE310","ICE311","ICE312","ICE313")
+        - the shot is not ignored
+        - the administration date of the shot is < $mostRecentPriorSeasonShotDate
+    There is an administered shot $mostRecentShot
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+        - the shot is not ignored
+        - make note of the date this shot was administered as $mostRecentShotDate
+    There does not exist an IceIntervalFact
+        - that has IceIntervalFact type IntervalFactType.RECOMMENDED
+        - that has IceIntervalFact finding SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue
+        - that has IceIntervalFact current administered shot $mostRecentShot
+then
+    Insert a Recommendation IceIntervalFact SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue with TargetDose $mostRecentShot into working memory
+    Create a Recommendation as $recommendation for the Series $targetSeries
+    Add "8w" to $mostRecentShotDate and make note of the newly calculated date as $dtCalculated
+    Set the recommendation Earliest Forecast Date for $recommendation to the latter of $dtCalculated and $seasonStartDate
+    Set the recommendation Recommended Forecast Date for $recommendation to the latter of $dtCalculated and $seasonStartDate
+    Include the Recommendation $recommendation for Consideration in the final forecast of the Series
+    Record that this Series Rule was Processed for the TargetSeries $targetSeries
+    Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Series: Seasonal 2-dose COVID-19 Series (< 2 years) End
+ */

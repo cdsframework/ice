@@ -1,0 +1,116 @@
+package knowledgeModule.gov.nyc.cir.ice;
+
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+
+global java.util.Date evalTime;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+/**
+ * For persons born prior to 01-01-1980, if the series is not complete, recommendation should be conditional/recommended for
+ * high-risk groups.
+ * Overrides routine recommendationAgeCheck
+ */
+rule "Varicella: Recommend conditional/high risk if born prior to 1/1/1980 and series not complete"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+    when
+        There is a Series $targetSeries that needs forecasting
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+        	- the Series is not complete
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+        	- the patient's birthdate is < "01-Jan-1980"
+    then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Overrides generic earliest interval check, as per the value defined in the series XML configuration
+ */
+rule "Varicella: 28 day Earliest Interval From Dose 1 to Dose 2 if >= 13 Years of Age"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+    when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+        	- the Series is not Complete
+        	- the effective dose number in the Series is == 2
+        	- make note of the date that the most recent shot was administered as $dtAdministrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "13y"
+	then
+		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Overrides generic interval check, as per the value defined in the series XML configuration
+ */
+rule "Varicella: 28 day Recommended Interval From Dose 1 to Dose 2 if >= 13 Years of Age"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationIntervalCheck"
+    when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+        	- the Series is not Complete
+        	- the effective dose number in the Series is == 2
+        	- make note of the date that the most recent shot was administered as $dtAdministrationDate
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "13y"
+	then
+		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Varicella: 28-day Earliest Interval for Valid Dose 1 When Previously Administered Shots are Invalid"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "earliestIntervalCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+        	- the Series is not Complete
+        	- the effective dose number in the Series is == 1
+			- the Number of Administered Shots is > 0
+			- make note of the date that the most recent shot was administered as $dtAdministrationDate
+	then
+		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Varicella: 28-day Recommended Interval for Valid Dose 1 When Previously Administered Shots are Invalid"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationIntervalCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.600"
+        	- the Series is not Complete
+        	- the effective dose number in the Series is == 1
+			- the Number of Administered Shots is > 0
+			- make note of the date that the most recent shot was administered as $dtAdministrationDate
+	then
+		Add 28 DurationType.DAYS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end

@@ -1,235 +1,520 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cdsframework</groupId>
-    <artifactId>ice</artifactId>
-    <version>2.48.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <artifactId>opencds-ice-service</artifactId>
+    <version>2.51.1-SNAPSHOT</version>
+    <packaging>war</packaging>
 
-    <modules>
-        <module>ice-support-client</module>
-        <module>ice-support-xml</module>
-        <module>opencds-rest-service</module>
-        <module>opencds-ice-service</module>
-        <module>rules-packager</module>
-    </modules>
-    
+    <name>Immunization Calculation Engine</name>
+    <description>ICE Implementation of DSS Evaluation Operation using Drools</description>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        
-        <opencds.version>6.2.3-SNAPSHOT</opencds.version>
-        
-        <!-- build dep versions -->
-        <java.version>17</java.version>
-        
-        <git-commit-id-plugin.version>2.2.1</git-commit-id-plugin.version>
-        <gmavenplus.plugin.version>3.0.2</gmavenplus.plugin.version>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+
+        <opencds.version>6.2.3</opencds.version>
+
+        <jakarta-servlet-api.version>6.1.0</jakarta-servlet-api.version>
+        <jakarta-activation-api.version>2.1.3</jakarta-activation-api.version>
+        <jakarta-xml-bind-api.version>4.0.2</jakarta-xml-bind-api.version>
+        <jaxb-runtime.version>4.0.5</jaxb-runtime.version>
+        <cxf.version>4.1.3</cxf.version>
+        <jersey.version>3.1.11</jersey.version>
+        <log4j.version>2.25.2</log4j.version>
+        <drools.version>7.74.1.Final</drools.version>
+        <jackson.version>2.19.2</jackson.version>
+        <lombok.version>1.18.38</lombok.version>
+        <guava.version>33.4.8-jre</guava.version>
+        <spring-framework.version>6.2.13</spring-framework.version>
+        <spring-security.version>6.5.6</spring-security.version>
+        <spring-ws.version>4.1.2</spring-ws.version>
+
+        <xstream.version>1.4.21</xstream.version>
+        <commons-lang3.version>3.19.0</commons-lang3.version>
+        <protobuf-java.version>3.25.8</protobuf-java.version>
+
+        <junit.version>4.13.2</junit.version>
+
         <jaxb-maven-plugin.version>4.0.3</jaxb-maven-plugin.version>
         <jaxws-maven-plugin.version>3.0.2</jaxws-maven-plugin.version>
-        <jetty-maven-plugin.version>11.0.21</jetty-maven-plugin.version>
-        <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
-        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
-        <maven-javadoc-plugin.version>2.9</maven-javadoc-plugin.version>
-        <maven-license-plugin.version>1.9.0</maven-license-plugin.version>
-        <maven-resources-plugin.version>2.7</maven-resources-plugin.version>
-        <maven-scripting-plugin.version>3.0.0</maven-scripting-plugin.version>
-        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
-        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
-        <versions-maven-plugin.version>2.16.2</versions-maven-plugin.version>
-
-        <!-- dep versions -->
-        <aether.version>1.1.0</aether.version>
-        <commons-codec.version>1.16.1</commons-codec.version>
-        <commons-logging.version>1.3.0</commons-logging.version>
-        <drools.version>7.74.1.Final</drools.version>
-        <jackson-jaxrs-json-provider.version>2.17.1</jackson-jaxrs-json-provider.version>
-        <jbpm.version>7.74.1.Final</jbpm.version>
-        <joda.time.version>2.12.7</joda.time.version>
-        <jsoup.version>1.15.3</jsoup.version>
-        <plexus.cipher.version>1.7</plexus.cipher.version>
-        <plexus-component-annotations.version>2.2.0</plexus-component-annotations.version>
-        <plexus-utils.version>3.6.0</plexus-utils.version>
-        <protobuf.version>3.25.5</protobuf.version>
-        <wagon.http.version>3.5.2</wagon.http.version>
-        <wagon.provider.api.version>3.5.3</wagon.provider.api.version>
-
-        <!-- test dep versions -->
-        <groovy.version>4.0.21</groovy.version>
-        <hamcrest-core.version>2.2</hamcrest-core.version>
+        <git-commit-id-maven-plugin.version>9.0.2</git-commit-id-maven-plugin.version>
+        <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
     </properties>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.opencds</groupId>
-                <artifactId>opencds-bom</artifactId>
-                <version>${opencds.version}</version>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring-framework.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-bom</artifactId>
+                <version>${spring-security.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ws</groupId>
+                <artifactId>spring-ws-bom</artifactId>
+                <version>${spring-ws.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-bom</artifactId>
+                <version>${cxf.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey</groupId>
+                <artifactId>jersey-bom</artifactId>
+                <version>${jersey.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
 
+            <!-- drools -->
             <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
+                <groupId>com.thoughtworks.xstream</groupId>
+                <artifactId>xstream</artifactId>
+                <version>${xstream.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opencds</groupId>
-                <artifactId>dss-java-stub</artifactId>
-                <version>${opencds.version}</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.opencds</groupId>
-                <artifactId>opencds-config-mappers</artifactId>
-                <version>${opencds.version}</version>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf-java.version}</version>
             </dependency>
+
+            <!-- needed for jdk 21 and kie <10.1 -->
             <dependency>
-                <groupId>org.opencds</groupId>
-                <artifactId>opencds-config-schema</artifactId>
-                <version>${opencds.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opencds</groupId>
-                <artifactId>opencds-dss-evaluation</artifactId>
-                <version>${opencds.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opencds</groupId>
-                <artifactId>opencds-webapp-config-base</artifactId>
-                <version>${opencds.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opencds</groupId>
-                <artifactId>opencds-webapp-config-dss</artifactId>
-                <version>${opencds.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.opencds</groupId>
-                <artifactId>opencds-webapp-config-vmr</artifactId>
-                <version>${opencds.version}</version>
+                <groupId>org.mvel</groupId>
+                <artifactId>mvel2</artifactId>
+                <version>2.5.2.Final</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.opencds</groupId>
+            <artifactId>opencds-webapp-config-base</artifactId>
+            <version>${opencds.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jakarta.annotation-api</artifactId>
+                    <groupId>jakarta.annotation</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+                    <groupId>org.apache.cxf</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hibernate-validator</artifactId>
+                    <groupId>org.hibernate.validator</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-lang3</artifactId>
+                    <groupId>org.apache.commons</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-pool2</artifactId>
+                    <groupId>org.apache.commons</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-api</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-core</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-slf4j2-impl</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>objenesis</artifactId>
+                    <groupId>org.objenesis</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jakarta.servlet-api</artifactId>
+                    <groupId>jakarta.servlet</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-jcl</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jaxb-impl</artifactId>
+                    <groupId>com.sun.xml.bind</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jaxb-ri</artifactId>
+                    <groupId>com.sun.xml.bind</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                    <groupId>jakarta.xml.bind</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-security-core</artifactId>
+                    <groupId>org.springframework.security</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jakarta.ws.rs-api</artifactId>
+                    <groupId>jakarta.ws.rs</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jakarta.activation-api</artifactId>
+                    <groupId>jakarta.activation</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jaxb-runtime</artifactId>
+                    <groupId>org.glassfish.jaxb</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-core</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-security-config</artifactId>
+                    <groupId>org.springframework.security</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-security-web</artifactId>
+                    <groupId>org.springframework.security</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>je</artifactId>
+                    <groupId>com.sleepycat</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-context</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-web</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds</groupId>
+            <artifactId>opencds-webapp-config-dss</artifactId>
+            <version>${opencds.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>cxf-rt-frontend-jaxws</artifactId>
+                    <groupId>org.apache.cxf</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-api</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-core</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-slf4j2-impl</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>objenesis</artifactId>
+                    <groupId>org.objenesis</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jakarta.annotation-api</artifactId>
+                    <groupId>jakarta.annotation</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jakarta.jws-api</artifactId>
+                    <groupId>jakarta.jws</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                    <groupId>jakarta.xml.bind</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jakarta.xml.ws-api</artifactId>
+                    <groupId>jakarta.xml.ws</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-core</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.opencds</groupId>
+            <artifactId>opencds-webapp-config-vmr</artifactId>
+            <version>${opencds.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>log4j-api</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-core</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-slf4j2-impl</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>objenesis</artifactId>
+                    <groupId>org.objenesis</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                    <groupId>jakarta.xml.bind</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jaxb-impl</artifactId>
+                    <groupId>com.sun.xml.bind</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jaxb-ri</artifactId>
+                    <groupId>com.sun.xml.bind</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta-servlet-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.activation</groupId>
+            <artifactId>jakarta.activation-api</artifactId>
+            <version>${jakarta-activation-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>${jakarta-xml-bind-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>${jaxb-runtime.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-bindings-soap</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-spring6</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.ws</groupId>
+            <artifactId>spring-ws-support</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.drools</groupId>
+            <artifactId>drools-core</artifactId>
+            <version>${drools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jbpm</groupId>
+            <artifactId>jbpm-bpmn2</artifactId>
+            <version>${drools.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>pl.project13.maven</groupId>
-                    <artifactId>git-commit-id-plugin</artifactId>
-                    <version>${git-commit-id-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.jvnet.jaxb</groupId>
-                    <artifactId>jaxb-maven-plugin</artifactId>
-                    <version>${jaxb-maven-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>com.sun.xml.ws</groupId>
-                    <artifactId>jaxws-maven-plugin</artifactId>
-                    <version>${jaxws-maven-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>jetty-maven-plugin</artifactId>
-                    <version>${jetty-maven-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>${maven-clean-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
-                    <configuration>
-                        <release>${java.version}</release>
-                        <encoding>${project.build.sourceEncoding}</encoding>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${maven-enforcer-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>enforce</id>
-                            <configuration>
-                                <rules>
-                                    <DependencyConvergence />
-                                </rules>
-                            </configuration>
-                            <goals>
-                                <goal>enforce</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>${maven-failsafe-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.gmavenplus</groupId>
-                    <artifactId>gmavenplus-plugin</artifactId>
-                    <version>${gmavenplus.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>${maven-javadoc-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>com.mycila.maven-license-plugin</groupId>
-                    <artifactId>maven-license-plugin</artifactId>
-                    <version>${maven-license-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>${maven-resources-plugin.version}</version>
-                    <configuration>
-                        <encoding>${project.build.sourceEncoding}</encoding>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-scripting-plugin</artifactId>
-                    <version>${maven-scripting-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>${maven-source-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven-surefire-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-war-plugin</artifactId>
-                    <version>${maven-war-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>versions-maven-plugin</artifactId>
-                    <version>${versions-maven-plugin.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
+        <finalName>${project.artifactId}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/*</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>ice.properties</include>
+                    <include>log4j2.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
+                <version>${versions-maven-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>${git-commit-id-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <commitIdGenerationMode>full</commitIdGenerationMode>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/org/cdsframework/ice/util/git.properties
+                    </generateGitPropertiesFilename>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
+                <version>${jaxb-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>jaxb-generate-cdsframework</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>-extension</arg>
+                            </args>
+                            <schemaDirectory>src/main/resources/xml</schemaDirectory>
+                            <schemaIncludes>
+                                <include>*.xsd</include>
+                            </schemaIncludes>
+                            <bindingIncludes>
+                                <include>*.xjb.xml</include>
+                            </bindingIncludes>
+                            <generateDirectory>${project.build.directory}/generated-sources/xml</generateDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <extension>true</extension>
+                    <verbose>true</verbose>
+                    <markGenerated>true</markGenerated>
+                </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>my-local-repo</id>
+            <url>file://${project.basedir}/local-repo</url>
+            <releases>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+    </repositories>
 </project>
