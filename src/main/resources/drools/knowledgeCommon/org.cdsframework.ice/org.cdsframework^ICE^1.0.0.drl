@@ -2721,7 +2721,7 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - always rese
 	salience 11
 	when
 		not ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
-		$covidSeason : Season(seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"), fullySpecifiedSeasonStartDate != null, fullySpecifiedSeasonEndDate != null, $seasonStartDate : ICELogicHelper.toDate(fullySpecifiedSeasonStartDate), $seasonEndDate : ICELogicHelper.toDate(fullySpecifiedSeasonEndDate))
+		$covidSeason : Season(seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season", "COVID19Aug2025Season"), fullySpecifiedSeasonStartDate != null, fullySpecifiedSeasonEndDate != null, $seasonStartDate : ICELogicHelper.toDate(fullySpecifiedSeasonStartDate), $seasonEndDate : ICELogicHelper.toDate(fullySpecifiedSeasonEndDate))
 		$sae : SubstanceAdministrationEvent()
 		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.targetSeason.seasonName == $covidSeason.seasonName, administrationDate >= $seasonStartDate, administrationDate <= $seasonEndDate)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == $covidSeason.seasonName)
