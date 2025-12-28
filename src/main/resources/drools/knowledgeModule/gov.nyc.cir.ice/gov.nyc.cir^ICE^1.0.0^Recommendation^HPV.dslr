@@ -34,7 +34,7 @@ rule "HPV: Set the recommended interval of 6m between doses 1 & 3 for the HPV 3-
 		There is a Series $targetSeries that needs Forecasting
 			- the name of the Series is "HPV3DoseSeries"
 			- the effective dose number in the Series is == 3
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HPV"
 			- the Series is not Complete
 		There is an Administered Shot $dose1
 			- the Shot belongs to the Series $targetSeries
@@ -58,7 +58,7 @@ rule "HPV: Set the earliest interval of 5m between doses 1 & 3 for the HPV 3-Dos
 		There is a Series $targetSeries that needs Forecasting
 			- the name of the Series is "HPV3DoseSeries"
 			- the effective dose number in the Series is == 3
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HPV"
 			- the Series is not Complete
 		There is an Administered Shot $dose1
 			- the Shot belongs to the Series $targetSeries
@@ -79,7 +79,7 @@ rule "HPV: Set the latest recommended interval of 7m+4w between doses 1 & 3 for 
 		There is a Series $targetSeries that needs Forecasting
 			- the name of the Series is "HPV3DoseSeries"
 			- the effective dose number in the Series is == 3
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HPV"
 			- the Series is not Complete
 		There is an Administered Shot $dose1
 			- the Shot belongs to the Series $targetSeries
@@ -103,7 +103,7 @@ rule "HPV: Set the latest recommended interval of 13m+4w between doses 1 & 3 for
 		There is a Series $targetSeries that needs Forecasting
 			- the name of the Series is "HPV3DoseSeries"
 			- the effective dose number in the Series is == 3
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HPV"
 			- the Series is not Complete
 		There is an Administered Shot $dose1
 			- the Shot belongs to the Series $targetSeries
@@ -126,7 +126,7 @@ rule "HPV: Recommend NOT_RECOMMENDED / TOO_OLD If Patient >=46 yrs"
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HPV"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm elapsed time between $dtBirthDate and evalTime >= "46y"
@@ -143,7 +143,7 @@ rule "HPV: Recommend NOT_RECOMMENDED / TOO_OLD if will be >= 46 Years of Age as 
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HPV"
 			- a forecast for the Series has been made and a recommendation date has been determined
 			- make note of the recommendation date as $recommendationDate
 			- post processing on the Series forecast has not already been run
@@ -165,7 +165,7 @@ rule "HPV: Recommend CONDITIONAL / CLINICAL_PATIENT_DISCRETION if Series is Not 
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HPV"
 			- the Series is Not Complete
 			- the Number of Doses Administered is == 0
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -189,7 +189,7 @@ rule "HPV: If Patient >= 15 yrs and number of doses administered <= 1, modify HP
 	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.840"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HPV"
 			- the name of the Series is "HPV3DoseSeries"
 			- the effective dose number in the Series is <= 2
 		The patient information $oEvaluatedPerson must be known to complete writing this rule

@@ -35,6 +35,7 @@ import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
+import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.supportingdata.ICESupportingDataConfiguration;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
@@ -55,6 +56,7 @@ public class Schedule
     private final ICESupportingDataConfiguration iceSupportingDataConfiguration;
     private String scheduleId;
     private boolean scheduleHasBeenInitialized;
+    private IceProperties.SupplementalTextMode supplementalTextMode;
 
     /**
      * Initialize the Immunization Schedule. Throws an IllegalArgumentException if any data (including supporting data) is improperly specified. Throws an
@@ -65,7 +67,8 @@ public class Schedule
      * @param pKnowledgeRepositoryLocation the knowledge base directory location; where all of the knowledge modules are
      */
     public Schedule(final String pScheduleId, final String pCommonLogicModule, final Path pCommonLogicModuleLocation,
-            final List<String> pKnowledgeModules, final Path pKnowledgeRepositoryLocation)
+            final List<String> pKnowledgeModules, final Path pKnowledgeRepositoryLocation,
+            final IceProperties.SupplementalTextMode supplementalTextMode)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         final String _METHODNAME = "ScheduleImpl(): ";
@@ -82,13 +85,14 @@ public class Schedule
         this.scheduleId = pScheduleId;
 
         // Initialize the supporting data for the common logic and knowledge modules specified and available
-        /////// this.iceSupportingDataConfiguration = new ICESupportingDataConfiguration(lCommonLogicModuleSubdirectory, pCommonLogicModuleLocation, lKnowledgeModulesSubDirectoryList, pKnowledgeRepositoryLocation);
         this.iceSupportingDataConfiguration =
                 new ICESupportingDataConfiguration(pCommonLogicModule, pCommonLogicModuleLocation, pKnowledgeModules,
                         pKnowledgeRepositoryLocation);
 
+        this.supplementalTextMode = supplementalTextMode;
+
         // Log initialization of Schedule
-        log.info(_METHODNAME + "Completed Initialization of Schedule: {}", this.scheduleId);
+        log.debug(_METHODNAME + "Completed Initialization of Schedule: {}", this.scheduleId);
         this.scheduleHasBeenInitialized = true;
     }
 
@@ -254,7 +258,7 @@ public class Schedule
                 .sum();
     }
 
-    // Get a List of all Seasons supported by this Schedule excluding vaccine group exlusions
+    // Get a List of all Seasons supported by this Schedule excluding vaccine group exclusions
     public List<Season> getSeasonsExcludingVaccineGroupExclusions(final List<String> vgExclusions)
     {
         if (ObjectUtils.isEmpty(vgExclusions))
@@ -267,7 +271,7 @@ public class Schedule
                 .toList();
     }
 
-    // Get a List of all SeriesRules supported by this Schedule excluding vaccine group exlusions
+    // Get a List of all SeriesRules supported by this Schedule excluding vaccine group exclusions
     public List<SeriesRules> getSeriesRulesExcludingVaccineGroupExclusions(final List<String> vgExclusions)
     {
         if (ObjectUtils.isEmpty(vgExclusions))

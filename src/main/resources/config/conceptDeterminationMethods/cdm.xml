@@ -1,12 +1,36 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns2:conceptDeterminationMethods
-        xmlns:ns2="org.opencds.dss.config_rest.v1_0">
+        xmlns:ns2="org.opencds.config.rest.v2">
     <conceptDeterminationMethod code="C36"
                                 displayName="Best available OpenCDS concept determination method"
                                 codeSystem="2.16.840.1.113883.3.795.12.1.1" version="1.0">
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE17" displayName="Hib NOS"/>
+                       codeSystemName="OpenCDS concepts" code="C31" displayName="Female"/>
+            <fromConcepts codeSystem="2.16.840.1.113883.5.1"
+                          codeSystemName="HL7 administrative gender" displayName="Female">
+                <concept code="F" displayName="Female"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.18.2"
+                          codeSystemName="HL7 administrative sex" displayName="Female">
+                <concept code="F" displayName="Female"/>
+            </fromConcepts>
+        </conceptMapping>
+        <conceptMapping>
+            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
+                       codeSystemName="OpenCDS concepts" code="C30" displayName="Male"/>
+            <fromConcepts codeSystem="2.16.840.1.113883.5.1"
+                          codeSystemName="HL7 administrative gender" displayName="Male">
+                <concept code="M" displayName="Male"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.18.2"
+                          codeSystemName="HL7 administrative sex" displayName="Male">
+                <concept code="M" displayName="Male"/>
+            </fromConcepts>
+        </conceptMapping>
+        <conceptMapping>
+            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_17" displayName="Hib NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Hib NOS">
                 <concept code="17" displayName="Hib NOS"/>
@@ -14,7 +38,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE04" displayName="Measles/Rubella"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_04" displayName="Measles/Rubella"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Measles/Rubella">
                 <concept code="04" displayName="Measles/Rubella"/>
@@ -22,7 +46,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE121" displayName="Zoster vaccine, live"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_121" displayName="Zoster vaccine, live"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Zoster vaccine, live">
                 <concept code="121" displayName="Zoster vaccine, live"/>
@@ -30,7 +54,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE187" displayName="Zoster recombinant"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_187" displayName="Zoster recombinant"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Zoster recombinant">
                 <concept code="187" displayName="Zoster recombinant"/>
@@ -38,7 +62,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE188" displayName="Zoster, unspecified formulation"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_188" displayName="Zoster, unspecified formulation"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Zoster, unspecified formulation">
                 <concept code="188" displayName="Zoster, unspecified formulation"/>
@@ -46,7 +70,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE122" displayName="Rotavirus NOS"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_122" displayName="Rotavirus NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Rotavirus NOS">
                 <concept code="122" displayName="Rotavirus NOS"/>
@@ -54,7 +78,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE100"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_100"
                        displayName="Pneumococcal Conjugate 7 valent (PCV 7)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Pneumococcal Conjugate 7 valent (PCV 7)">
@@ -63,24 +87,36 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE995"
+                       codeSystemName="OpenCDS concepts" code="DISEASE_CONCEPT_MEASLES"
                        displayName="Disease Immunity Focus (Measles)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9-CM"
-                          displayName="ICE3 Disease Immunity Focus (ICD-9-CM)">
+                          displayName="Disease Immunity Focus (ICD-9-CM)">
                 <concept code="055.9" displayName="Measles without mention of complication"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.90" codeSystemName="ICD-10-CM"
-                          displayName="ICE Disease Immunity Focus (ICD-10-CM)">
+                          displayName="Disease Immunity Focus (ICD-10-CM)">
                 <concept code="B05.9" displayName="Measles without complication"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
-                          displayName="ICE Disease Immunity Focus (SNOMED-CT)">
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
                 <concept code="371111005" displayName="Serology confirmed measles"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="14189004" displayName="Measles (disorder)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="161278002" displayName="History of measles (situation)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
+                          displayName="Disease Immunity Focus (LOINC)">
+                <concept code="22502-9" displayName="Measles virus IgG Ab [Presence] in Serum by Immunoassay"/>
             </fromConcepts>
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE102" displayName="DTP-Hib-HepB"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_102" displayName="DTP-Hib-HepB"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="DTP-Hib-HepB">
                 <concept code="102" displayName="DTP-Hib-HepB"/>
@@ -88,7 +124,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE177" displayName="Pneumococcal conjugate PCV10"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_177" displayName="Pneumococcal conjugate PCV10"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Pneumococcal conjugate PCV10">
                 <concept code="177" displayName="Pneumococcal conjugate PCV10"/>
@@ -96,7 +132,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE133" displayName="Pneumococcal Conjugate 13 valent (PCV 13)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_133"
+                       displayName="Pneumococcal Conjugate 13 valent (PCV 13)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Pneumococcal Conjugate 13 valent (PCV 13)">
                 <concept code="133" displayName="Pneumococcal Conjugate 13 valent (PCV 13)"/>
@@ -104,7 +141,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE215" displayName="Pneumococcal conjugate PCV15"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_215" displayName="Pneumococcal conjugate PCV15"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Pneumococcal conjugate PCV15">
                 <concept code="215" displayName="Pneumococcal conjugate PCV15"/>
@@ -112,7 +149,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE216" displayName="Pneumococcal conjugate PCV16"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_216" displayName="Pneumococcal conjugate PCV16"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Pneumococcal conjugate PCV16">
                 <concept code="216" displayName="Pneumococcal conjugate PCV16"/>
@@ -120,7 +157,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE327"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_327"
                        displayName="Pneumococcal conjugate PCV21, polysaccharide CRM197 conjugate, PF"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -130,7 +167,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE43" displayName="HepB adult &gt;= 20yrs"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_43" displayName="HepB adult &gt;= 20yrs"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepB adult &gt;= 20yrs">
                 <concept code="43" displayName="HepB adult &gt;= 20yrs"/>
@@ -138,7 +175,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE114"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_114"
                        displayName="Meningococcal MCV4P (Menactra)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal MCV4P (Menactra)">
@@ -147,7 +184,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE08" displayName="HepB peds &lt;20yrs"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_08" displayName="HepB peds &lt;20yrs"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepB peds &lt; 20yrs">
                 <concept code="08" displayName="HepB peds &lt; 20yrs"/>
@@ -155,7 +192,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE135"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_135"
                        displayName="influenza, high dose, seasonal"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="influenza, high dose, seasonal">
@@ -164,7 +201,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE22"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_22"
                        displayName="DTP-Hib (Tetramune; OmniHib-DTP)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="DTP-Hib (Tetramune; OmniHib-DTP)">
@@ -173,7 +210,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE119"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_119"
                        displayName="Rotavirus RV1 (Rotarix, 2 dose)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Rotavirus RV1 (Rotarix, 2 dose)">
@@ -182,7 +219,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE161"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_161"
                        displayName="influenza, injectable, quadrivalent, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -193,7 +230,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE166"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_166"
                        displayName="influenza, injectable, quadrivalent, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -204,7 +241,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE168"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_168"
                        displayName="Influenza, trivalent, adjuvanted, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -215,7 +252,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE170" displayName="DTaP-IPV-Hib"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_170" displayName="DTaP-IPV-Hib"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="DTaP-IPV-Hib">
                 <concept code="170" displayName="DTaP-IPV-Hib"/>
@@ -223,7 +260,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE171"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_171"
                        displayName="Influenza, injectable, Madin Darby Canine Kidney, preservative free, quadrivalent"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -234,7 +271,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE118" displayName="HPV Bivalent (Cervarix)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_118" displayName="HPV Bivalent (Cervarix)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HPV Bivalent (Cervarix)">
                 <concept code="118" displayName="HPV Bivalent (Cervarix)"/>
@@ -242,7 +279,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE165" displayName="HPV9"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_165" displayName="HPV9"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="165" displayName="HPV9"/>
@@ -250,7 +287,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE48" displayName="Hib-PRP-T (ActHIB, Hiberix)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_48" displayName="Hib-PRP-T (ActHIB, Hiberix)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Hib-PRP-T">
                 <concept code="48" displayName="Hib-PRP-T"/>
@@ -258,7 +295,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE44" displayName="HepB Dialysis"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_44" displayName="HepB Dialysis"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepB Dialysis">
                 <concept code="44" displayName="HepB Dialysis"/>
@@ -266,7 +303,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE104" displayName="HepA-HepB (Twinrix)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_104" displayName="HepA-HepB (Twinrix)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepA-HepB (Twinrix)">
                 <concept code="104" displayName="HepA-HepB (Twinrix)"/>
@@ -274,7 +311,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE153"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_153"
                        displayName="influenza, injectable, MDCK, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="influenza, injectable, MDCK, preservative free">
@@ -284,7 +321,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE83" displayName="HepA peds/adol 2 dose"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_83" displayName="HepA peds/adol 2 dose"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepA ped/adol 2 dose">
                 <concept code="83" displayName="HepA ped/adol 2 dose"/>
@@ -292,7 +329,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE126"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_126"
                        displayName="Novel influenza-H1N1-09, preservative-free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Novel influenza-H1N1-09, preservative-free">
@@ -301,7 +338,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE152" displayName="Pneumococcal Conjugate NOS"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_152" displayName="Pneumococcal Conjugate NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Pneumococcal Conjugate NOS">
                 <concept code="152" displayName="Pneumococcal Conjugate NOS"/>
@@ -309,7 +346,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE158"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_158"
                        displayName="Influenza, injectable, quadrivalent"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Influenza, injectable, quadrivalent">
@@ -318,7 +355,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE05" displayName="Measles"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_05" displayName="Measles"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Measles">
                 <concept code="05" displayName="Measles"/>
@@ -326,7 +363,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE15" displayName="Influenza, split"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_15" displayName="Influenza, split"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Influenza, split">
                 <concept code="15" displayName="Influenza, split (incl. purified surface antigen)"/>
@@ -334,7 +371,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE331"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_331"
                        displayName="Influenza, Southern Hemisphere, trivalent, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -343,7 +380,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE333"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_333"
                        displayName="Influenza, live, intranasal, self-caregiver admin"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -352,7 +389,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE03" displayName="MMR"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_03" displayName="MMR"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="MMR">
                 <concept code="03" displayName="MMR"/>
@@ -360,7 +397,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE51" displayName="Hib-HepB (Comvax)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_51" displayName="Hib-HepB (Comvax)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Hib-HepB (Comvax)">
                 <concept code="51" displayName="Hib-HepB (Comvax)"/>
@@ -368,7 +405,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE31" displayName="HepA pediatric NOS"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_31" displayName="HepA pediatric NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepA pediatric NOS">
                 <concept code="31" displayName="HepA pediatric NOS"/>
@@ -376,7 +413,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE144"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_144"
                        displayName="influenza, seasonal, intradermal, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -387,7 +424,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE137" displayName="HPV NOS"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_137" displayName="HPV NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HPV NOS">
                 <concept code="137" displayName="HPV NOS"/>
@@ -395,7 +432,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE128"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_128"
                        displayName="Novel Influenza-H1N1-09, all formulations"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Novel Influenza-H1N1-09, all formulations">
@@ -404,7 +441,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE85" displayName="HepA NOS"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_85" displayName="HepA NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepA NOS">
                 <concept code="85" displayName="HepA NOS"/>
@@ -422,7 +459,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE125"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_125"
                        displayName="Novel Influenza-H1N1-09, nasal"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Novel Influenza-H1N1-09, nasal">
@@ -431,7 +468,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE46" displayName="Hib-PRP-D (ProHIBIT)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_46" displayName="Hib-PRP-D (ProHIBIT)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Hib-PRP-D (ProHIBIT)">
                 <concept code="46" displayName="Hib-PRP-D (ProHIBIT)"/>
@@ -439,64 +476,64 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE990" displayName="Disease Immunity Focus"/>
-            <fromConcepts codeSystem="2.16.840.1.113883.6.103"
-                          codeSystemName="ICE3 Disease Immunity Focus" displayName="Hib">
-                <concept code="482.2" displayName="Hib"/>
-            </fromConcepts>
-        </conceptMapping>
-        <conceptMapping>
-            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE1011" displayName="Disease Immunity Focus"/>
-            <fromConcepts codeSystem="2.16.840.1.113883.6.103"
-                          codeSystemName="ICE3 Disease Immunity Focus" displayName="Zoster">
-                <concept code="053.9" displayName="Zoster"/>
-            </fromConcepts>
-        </conceptMapping>
-        <!--
-        <conceptMapping>
-            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" code="ICE07989" displayName="Coronavirus (unspecified)" />
-            <fromConcepts codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9-CM" displayName="ICD-9-CM">
-                <concept code="079.89" displayName="Coronavirus (unspecified)" />
-            </fromConcepts>
-        </conceptMapping>
-        -->
-        <conceptMapping>
-            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE996"
+                       codeSystemName="OpenCDS concepts" code="DISEASE_CONCEPT_HEP_A"
                        displayName="Disease Immunity Focus (HepA)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9-CM"
-                          displayName="ICE3 Disease Immunity Focus (ICD-9-CM)">
+                          displayName="Disease Immunity Focus (ICD-9-CM)">
                 <concept code="070.1" displayName="Viral hepatitis A without mention of hepatic coma"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.90" codeSystemName="ICD-10-CM"
-                          displayName="ICE Disease Immunity Focus (ICD-10-CM)">
+                          displayName="Disease Immunity Focus (ICD-10-CM)">
                 <concept code="B15.9" displayName="Hepatitis A without hepatic coma applicable to Hepatitis A (acute)(viral) NOS"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
-                          displayName="ICE Disease Immunity Focus (SNOMED-CT)">
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
                 <concept code="278971009" displayName="Serology confirmed hepatitis A"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="40468003" displayName="Hepatitis A (disorder)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="161466003" displayName="History of hepatitis A (situation)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
+                          displayName="Disease Immunity Focus (LOINC)">
+                <concept code="13950-1" displayName="Hepatitis A virus Ab [Presence] in Serum by Immunoassay"/>
             </fromConcepts>
         </conceptMapping>
         <conceptMapping>
-            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" code="ICE994"
+            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1" codeSystemName="OpenCDS concepts" code="DISEASE_CONCEPT_MUMPS"
                        displayName="Disease Immunity Focus (Mumps)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9-CM"
-                          displayName="ICE3 Disease Immunity Focus (ICD-9-CM)">
+                          displayName="Disease Immunity Focus (ICD-9-CM)">
                 <concept code="072.9" displayName="Mumps without mention of complication"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.90" codeSystemName="ICD-10-CM"
-                          displayName="ICE Disease Immunity Focus (ICD-10-CM)">
+                          displayName="Disease Immunity Focus (ICD-10-CM)">
                 <concept code="B26.9" displayName="Mumps without complication"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
-                          displayName="ICE Disease Immunity Focus (SNOMED-CT)">
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
                 <concept code="371112003" displayName="Serology confirmed mumps"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="36989005" displayName="Mumps (disorder)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="161279005" displayName="History of mumps (situation)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
+                          displayName="Disease Immunity Focus (LOINC)">
+                <concept code="22504-5" displayName="Mumps virus IgG Ab [Presence] in Serum by Immunoassay"/>
             </fromConcepts>
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE140"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_140"
                        displayName="influenza, seasonal, injectable, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -507,15 +544,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="C30" displayName="Male"/>
-            <fromConcepts codeSystem="2.16.840.1.113883.5.1"
-                          codeSystemName="HL7 administrative gender" displayName="Male">
-                <concept code="M" displayName="Male"/>
-            </fromConcepts>
-        </conceptMapping>
-        <conceptMapping>
-            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE62" displayName="HPV Quadrivalent (Gardasil)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_62" displayName="HPV Quadrivalent (Gardasil)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HPV Quadrivalent (Gardasil)">
                 <concept code="62" displayName="HPV Quadrivalent (Gardasil)"/>
@@ -523,7 +552,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE89"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_89"
                        displayName="Polio, unspecified formulation"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Polio Unspecified forumulation">
@@ -532,23 +561,23 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE998" displayName="Disease Immunity Documented"/>
+                       codeSystemName="OpenCDS concepts" code="DISEASE_DOCUMENTED" displayName="Disease Immunity Documented"/>
             <fromConcepts codeSystem="2.16.840.1.113883.3.795.12.100.8"
-                          codeSystemName="ICE3 Disease Immunity Source" displayName="Disease Documented">
+                          codeSystemName="Disease Immunity Source" displayName="Disease Documented">
                 <concept code="DISEASE_DOCUMENTED" displayName="Disease Documented"/>
             </fromConcepts>
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE1000" displayName="Proof of Immunity"/>
+                       codeSystemName="OpenCDS concepts" code="PROOF_OF_IMMUNITY" displayName="Proof of Immunity"/>
             <fromConcepts codeSystem="2.16.840.1.113883.3.795.12.100.8"
-                          codeSystemName="ICE3 Disease Immunity Source" displayName="Proof of Immunity">
+                          codeSystemName="Disease Immunity Source" displayName="Proof of Immunity">
                 <concept code="PROOF_OF_IMMUNITY" displayName="Proof of Immunity"/>
             </fromConcepts>
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE74" displayName="Rotavirus"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_74" displayName="Rotavirus"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Rotavirus">
                 <concept code="74" displayName="Rotavirus"/>
@@ -556,7 +585,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE45" displayName="HepB NOS"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_45" displayName="HepB NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepB NOS">
                 <concept code="45" displayName="HepB NOS"/>
@@ -564,7 +593,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE189" displayName="Hep B, adjuvanted"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_189" displayName="Hep B, adjuvanted"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Hep B, adjuvanted">
                 <concept code="189" displayName="Hep B, adjuvanted"/>
@@ -572,7 +601,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE198" displayName="DTP-Hep B-Hib, Pentavalent"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_198" displayName="DTP-Hep B-Hib, Pentavalent"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="DTP-Hep B-Hib, Pentavalent">
                 <concept code="198" displayName="Hep B, adjuvanted"/>
@@ -580,7 +609,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE220" displayName="HepB recombinant, 3-antigen, Al(OH)3"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_220" displayName="HepB recombinant, 3-antigen, Al(OH)3"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepB recombinant, 3-antigen, Al(OH)3">
                 <concept code="220" displayName="HepB recombinant, 3-antigen, Al(OH)3"/>
@@ -588,7 +617,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE94" displayName="MMR-Varicella"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_94" displayName="MMR-Varicella"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="MMR-Varicella">
                 <concept code="94" displayName="MMR-Varicella"/>
@@ -596,7 +625,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE50" displayName="DTaP-Hib (TriHiBit)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_50" displayName="DTaP-Hib (TriHiBit)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="DTaP-Hib (TriHiBit)">
                 <concept code="50" displayName="DTaP-Hib (TriHiBit)"/>
@@ -604,7 +633,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE109" displayName="Pneumococcal Conjugate NOS"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_109" displayName="Pneumococcal Conjugate NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Pneumococcal Conjugate NOS">
                 <concept code="109" displayName="Pneumococcal Conjugate NOS"/>
@@ -612,7 +641,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE07" displayName="Mumps"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_07" displayName="Mumps"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Mumps">
                 <concept code="07" displayName="Mumps"/>
@@ -620,7 +649,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE16" displayName="Influenza, whole"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_16" displayName="Influenza, whole"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Influenza, whole">
                 <concept code="16" displayName="Influenza, whole"/>
@@ -628,7 +657,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE21" displayName="Varicella"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_21" displayName="Varicella"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Varicella">
                 <concept code="21" displayName="Varicella"/>
@@ -636,7 +665,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE33"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_33"
                        displayName="Pneumococcal Polysaccharide 23 Valent"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Pneumococcal Polysaccharide 23 Valent">
@@ -645,7 +674,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE155"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_155"
                        displayName="influenza, recombinant, injectable, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -656,7 +685,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE136"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_136"
                        displayName="Meningococcal MCV4O (Menveo)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal MCV4O (Menveo)">
@@ -665,7 +694,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE130" displayName="DTaP/IPV"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_130" displayName="DTaP/IPV"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="DTaP/IPV">
                 <concept code="130" displayName="DTaP/IPV"/>
@@ -673,7 +702,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE148"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_148"
                        displayName="Mening C&amp;Y-Hib PRP-T (Menhibrix)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal C/Y-HIB PRP (Menhibrix)">
@@ -682,7 +711,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE223"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_223"
                        displayName="Immunization Recommended (Due Now)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.3.795.12.100.6"
                           codeSystemName="ICE3 Immunization Recommendation Reason"
@@ -692,7 +721,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE110" displayName="DTaP-Hep B-IPV"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_110" displayName="DTaP-Hep B-IPV"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="DTaP-Hep B-IPV">
                 <concept code="110" displayName="DTaP-Hep B-IPV"/>
@@ -700,7 +729,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE38" displayName="Mumps/Rubella"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_38" displayName="Mumps/Rubella"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Mumps/Rubella">
                 <concept code="38" displayName="Mumps/Rubella"/>
@@ -708,7 +737,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE116"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_116"
                        displayName="Rotavirus RV5 (RotaTeq, 3 dose)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Rotavirus RV5 (RotaTeq, 3 dose)">
@@ -717,7 +746,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE47" displayName="Hib-HbOC (HibTITER)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_47" displayName="Hib-HbOC (HibTITER)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Hib-HbOC">
                 <concept code="47" displayName="Hib-HbOC"/>
@@ -725,7 +754,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE120" displayName="DTaP-Hib (PRP-T)-IPV"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_120" displayName="DTaP-Hib (PRP-T)-IPV"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="DTaP-Hib (PRP-T)-IPV">
                 <concept code="120" displayName="DTaP-Hib (PRP-T)-IPV"/>
@@ -733,7 +762,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE195" displayName="DT-IPV adsorbed Non-US"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_195" displayName="DT-IPV adsorbed Non-US"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="DT-IPV adsorbed Non-US">
                 <concept code="195" displayName="DT-IPV adsorbed Non-US"/>
@@ -741,16 +770,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE991"
-                       displayName="Disease Immunity Focus (Rotavirus)"/>
-            <fromConcepts codeSystem="2.16.840.1.113883.6.103"
-                          codeSystemName="ICE3 Disease Immunity Focus" displayName="Rotavirus">
-                <concept code="008.61" displayName="Rotavirus"/>
-            </fromConcepts>
-        </conceptMapping>
-        <conceptMapping>
-            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE151"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_151"
                        displayName="influenza nasal, unspecified formulation"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="influenza nasal, unspecified formulation">
@@ -759,15 +779,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="C31" displayName="Female"/>
-            <fromConcepts codeSystem="2.16.840.1.113883.5.1"
-                          codeSystemName="HL7 administrative gender" displayName="Female">
-                <concept code="F" displayName="Female"/>
-            </fromConcepts>
-        </conceptMapping>
-        <conceptMapping>
-            <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE150"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_150"
                        displayName="influenza, injectable, quadrivalent, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -778,7 +790,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE149"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_149"
                        displayName="influenza, live, intranasal, quadrivalent"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="influenza, live, intranasal, quadrivalent">
@@ -787,7 +799,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE52" displayName="HepA adult"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_52" displayName="HepA adult"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepA adult">
                 <concept code="52" displayName="HepA adult"/>
@@ -795,7 +807,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE02" displayName="OPV, trivalent"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_02" displayName="OPV, trivalent"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="OPV, trivalent">
                 <concept code="02" displayName="OPV, trivalent"/>
@@ -803,7 +815,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE178" displayName="OPV bivalent"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_178" displayName="OPV bivalent"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="OPV bivalent">
                 <concept code="178" displayName="OPV bivalent"/>
@@ -811,7 +823,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE179" displayName="OPV, monovalent, unspecified"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_179" displayName="OPV, monovalent, unspecified"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="OPV, monovalent, unspecified">
                 <concept code="179" displayName="OPV, monovalent, unspecified"/>
@@ -819,7 +831,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE182" displayName="OPV, Unspecified"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_182" displayName="OPV, Unspecified"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="OPV, Unspecified">
                 <concept code="182" displayName="OPV"/>
@@ -827,7 +839,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE185"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_185"
                        displayName="influenza, recombinant, quadrivalent,injectable, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -837,7 +849,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE186"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_186"
                        displayName="Influenza, injectable, MDCK, quadrivalent, preservative"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -847,7 +859,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE194"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_194"
                        displayName="Influenza, Southern Hemisphere, unspecified formulation"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -857,7 +869,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE197" displayName="Influenza, high dose, quadrivalent"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_197" displayName="Influenza, high dose, quadrivalent"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Influenza, high dose, quadrivalent">
                 <concept code="197" displayName="Influenza, high dose, quadrivalent"/>
@@ -865,7 +877,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE200"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_200"
                        displayName="Influenza, Southern Hemisphere, pediatric, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -875,7 +887,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE201"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_201"
                        displayName="Influenza, Southern Hemisphere, quadrivalent, preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -885,7 +897,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE202"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_202"
                        displayName="Influenza, Southern Hemisphere, quadrivalent, with preservative"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -895,7 +907,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE205" displayName="Influenza, quadrivalent, adjuvanted"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_205" displayName="Influenza, quadrivalent, adjuvanted"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Influenza, quadrivalent, adjuvanted">
                 <concept code="205" displayName="Influenza, quadrivalent, adjuvanted"/>
@@ -903,7 +915,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE231"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_231"
                        displayName="Influenza, Southern Hemisphere, high-dose, quadrivalent"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -913,7 +925,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE320" displayName="Influenza, MDCK, trivalent, preservative"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_320"
+                       displayName="Influenza, MDCK, trivalent, preservative"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Influenza, MDCK, trivalent, preservative">
                 <concept code="320" displayName="Influenza, MDCK, trivalent, preservative"/>
@@ -921,7 +934,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE162" displayName="Meningococcal B FHbp, recombinant (Trumenba)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_162"
+                       displayName="Meningococcal B FHbp, recombinant (Trumenba)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal B FHbp, recombinant (Trumenba)">
                 <concept code="162" displayName="Meningococcal B FHbp, recombinant (Trumenba)"/>
@@ -929,7 +943,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE163" displayName="Meningococcal B 4C, OMV (Bexsero)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_163" displayName="Meningococcal B 4C, OMV (Bexsero)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal B 4C, OMV (Bexsero)">
                 <concept code="163" displayName="Meningococcal B 4C, OMV (Bexsero)"/>
@@ -937,7 +951,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE316"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_316"
                        displayName="Meningococcal polysaccharide (MenACWY-TT conjugate), (MenB), PF"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -947,7 +961,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE328" displayName="Meningococcal MenABCWY (Penmenvy)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_328" displayName="Meningococcal MenABCWY (Penmenvy)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal MenABCWY (Penmenvy)">
                 <concept code="328" displayName="Meningococcal MenABCWY (Penmenvy)"/>
@@ -955,7 +969,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE111" displayName="influenza, live, intranasal"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_111" displayName="influenza, live, intranasal"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="influenza, live, intranasal">
                 <concept code="111" displayName="influenza, live, intranasal"/>
@@ -963,7 +977,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE10" displayName="IPV"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_10" displayName="IPV"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="IPV">
                 <concept code="10" displayName="IPV"/>
@@ -971,7 +985,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE108"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_108"
                        displayName="Meningococcal ACWY, unspecified formulation"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal ACWY, unspecified formulation">
@@ -980,7 +994,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE06" displayName="Rubella"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_06" displayName="Rubella"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Rubella">
                 <concept code="06" displayName="Rubella"/>
@@ -988,7 +1002,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE141"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_141"
                        displayName="influenza, seasonal, injectable"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="influenza, seasonal, injectable">
@@ -997,7 +1011,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE84"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_84"
                        displayName="HepA pediatric/adolescent (3 dose)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepA pediatric/adolescent (3 dose)">
@@ -1006,24 +1020,36 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE993"
+                       codeSystemName="OpenCDS concepts" code="DISEASE_CONCEPT_RUBELLA"
                        displayName="Disease Immunity Focus (Rubella)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9-CM"
-                          displayName="ICE3 Disease Immunity Focus (ICD-9-CM)">
+                          displayName="Disease Immunity Focus (ICD-9-CM)">
                 <concept code="056.9" displayName="Rubella without mention of complication"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.90" codeSystemName="ICD-10-CM"
-                          displayName="ICE Disease Immunity Focus (ICD-10-CM)">
+                          displayName="Disease Immunity Focus (ICD-10-CM)">
                 <concept code="B06.9" displayName="Rubella without complication"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
-                          displayName="ICE Disease Immunity Focus (SNOMED-CT)">
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
                 <concept code="278968001" displayName="Serology confirmed rubella"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="36653000" displayName="Rubella (disorder)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="161280008" displayName="History of rubella (situation)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
+                          displayName="Disease Immunity Focus (LOINC)">
+                <concept code="22510-7" displayName="Rubella virus IgG Ab [Presence] in Serum by Immunoassay"/>
             </fromConcepts>
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE49" displayName="Hib-PRP-OMP (PedvaxHIB)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_49" displayName="Hib-PRP-OMP (PedvaxHIB)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Hib-PRP-OMP (PedvaxHIB)">
                 <concept code="49" displayName="Hib-PRP-OMP (PedvaxHIB)"/>
@@ -1031,7 +1057,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE32"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_32"
                        displayName="Meningococcal MPSV4 (Menomune) "/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal MPSV4 (Menomune) ">
@@ -1040,7 +1066,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE147"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_147"
                        displayName="Meningococcal MCV4, unspecified formulation"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal MCV4, unspecified formulation">
@@ -1049,7 +1075,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE203"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_203"
                        displayName="Meningococcal MenACWY-TT (MenQuadfi)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Meningococcal MenACWY-TT (MenQuadfi)">
@@ -1058,32 +1084,44 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE999" displayName="Disease Immunity Reason"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_999" displayName="Disease Immunity Reason"/>
             <fromConcepts codeSystem="2.16.840.1.113883.3.795.12.100.9"
-                          codeSystemName="ICE3 Disease Immunity Reason" displayName="Is Immune">
+                          codeSystemName="Disease Immunity Reason" displayName="Is Immune">
                 <concept code="IS_IMMUNE" displayName="Is Immune"/>
             </fromConcepts>
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE997" displayName="Disease Immunity Focus"/>
+                       codeSystemName="OpenCDS concepts" code="DISEASE_CONCEPT_HEP_B" displayName="Disease Immunity Focus"/>
             <fromConcepts codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9-CM"
-                          displayName="ICE3 Disease Immunity Focus (ICD-9-CM)">
+                          displayName="Disease Immunity Focus (ICD-9-CM)">
                 <concept code="070.30" displayName="Viral hepatitis B without mention of hepatic coma"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.90" codeSystemName="ICD-10-CM"
-                          displayName="ICE Disease Immunity Focus (ICD-10-CM)">
+                          displayName="Disease Immunity Focus (ICD-10-CM)">
                 <concept code="B19.10"
                          displayName="Unspecified viral hepatitis B without hepatic coma applicable to unspecified viral hepatitis B NOS"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
-                          displayName="ICE Disease Immunity Focus (SNOMED-CT)">
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
                 <concept code="271511000" displayName="Serology confirmed hepatitis B"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="66071002" displayName="Hepatitis B (disorder)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="161467007" displayName="History of hepatitis B (situation)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
+                          displayName="Disease Immunity Focus (LOINC)">
+                <concept code="22322-2" displayName="Hepatitis B virus surface Ab [Presence] in Serum by Immunoassay"/>
             </fromConcepts>
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE42" displayName="HepB high risk infant"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_42" displayName="HepB high risk infant"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="HepB high risk infant">
                 <concept code="42" displayName="HepB high risk infant"/>
@@ -1091,7 +1129,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE88"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_88"
                        displayName="Influenza, unspecified formulation"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="Influenza, unspecified formulation">
@@ -1100,27 +1138,35 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE992" displayName="Disease Immunity Focus"/>
+                       codeSystemName="OpenCDS concepts" code="DISEASE_CONCEPT_VARICELLA" displayName="Disease Immunity Focus"/>
             <fromConcepts codeSystem="2.16.840.1.113883.6.103" codeSystemName="ICD-9-CM"
-                          displayName="ICE3 Disease Immunity Focus (ICD-9-CM)">
+                          displayName="Disease Immunity Focus (ICD-9-CM)">
                 <concept code="052.9" displayName="Varicella without mention of complication"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.90" codeSystemName="ICD-10-CM"
-                          displayName="ICE Disease Immunity Focus (ICD-10-CM)">
+                          displayName="Disease Immunity Focus (ICD-10-CM)">
                 <concept code="B01.9" displayName="Varicella without complication"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
-                          displayName="ICE Disease Immunity Focus (SNOMED-CT)">
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
                 <concept code="371113008" displayName="Serology confirmed varicella"/>
             </fromConcepts>
             <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
-                          displayName="ICE Disease Immunity Focus (SNOMED-CT)">
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
                 <concept code="38907003" displayName="History of Varicella infection"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED-CT"
+                          displayName="Disease Immunity Focus (SNOMED-CT)">
+                <concept code="161719005" displayName="History of varicella (situation)"/>
+            </fromConcepts>
+            <fromConcepts codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
+                          displayName="Disease Immunity Focus (LOINC)">
+                <concept code="15410-4" displayName="Varicella zoster virus IgG Ab [Presence] in Serum by Immunoassay"/>
             </fromConcepts>
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE127" displayName="Novel influenza-H1N1-09"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_127" displayName="Novel influenza-H1N1-09"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="127" displayName="Novel influenza-H1N1-09"/>
@@ -1128,7 +1174,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE01" displayName="DTP"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_01" displayName="DTP"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="01" displayName="DTP"/>
@@ -1136,7 +1182,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE09"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_09"
                        displayName="Td (adult), 2 Lf tetanus toxoid, preservative free, adsorbed"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -1146,7 +1192,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE196"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_196"
                        displayName="Td (adult) adsorbed, preservative free, Lf unspecified"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)"
@@ -1156,7 +1202,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE20" displayName="DTaP"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_20" displayName="DTaP"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="20" displayName="DTaP"/>
@@ -1164,7 +1210,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE28" displayName="DT"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_28" displayName="DT"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="28" displayName="DT"/>
@@ -1172,7 +1218,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE106" displayName="DTaP, 5 pertussis antigens"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_106" displayName="DTaP, 5 pertussis antigens"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="106" displayName="DTaP, 5 pertussis antigens"/>
@@ -1180,7 +1226,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE107" displayName="DTaP, unspecified formulation"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_107" displayName="DTaP, unspecified formulation"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="107" displayName="DTaP, 5 pertussis antigens"/>
@@ -1188,7 +1234,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE113" displayName="Td (adult) preservative free"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_113" displayName="Td (adult) preservative free"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="113" displayName="Td (adult) preservative free"/>
@@ -1196,7 +1242,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE115" displayName="Tdap"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_115" displayName="Tdap"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="115" displayName="Tdap"/>
@@ -1204,7 +1250,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE138" displayName="Td (adult not absorbed)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_138" displayName="Td (adult not absorbed)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="138" displayName="Td (adult not absorbed)"/>
@@ -1212,7 +1258,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE139" displayName="Td (adult) NOS"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_139" displayName="Td (adult) NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="139" displayName="Td (adult) NOS"/>
@@ -1220,7 +1266,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE132" displayName="DTaP-IPV-Hib-Hep B, historical"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_132" displayName="DTaP-IPV-Hib-Hep B, historical"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="132" displayName="DTaP-IPV-Hib-Hep B, historical"/>
@@ -1228,7 +1274,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE146" displayName="DTaP-IPV-Hib-Hep B"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_146" displayName="DTaP-IPV-Hib-Hep B"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="146" displayName="DTaP-IPV-Hib-Hep B"/>
@@ -1236,7 +1282,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE207" displayName="COVID-19, mRNA LNP-S, PF, Moderna"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_207" displayName="COVID-19, mRNA LNP-S, PF, Moderna"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="207" displayName="COVID-19, mRNA LNP-S, PF, Moderna"/>
@@ -1244,7 +1290,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE208" displayName="COVID-19, mRNA LNP-S, PF, Pfizer"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_208" displayName="COVID-19, mRNA LNP-S, PF, Pfizer"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="208" displayName="COVID-19, mRNA LNP-S, PF, Pfizer"/>
@@ -1252,7 +1298,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE210"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_210"
                        displayName="COVID-19, vector-nr,rS-ChadOx1, PF, 0.5 mL, AstraZeneca"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1261,7 +1307,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE211" displayName="COVID-19, rS-nanoparticle, Novavax"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_211" displayName="COVID-19, rS-nanoparticle, Novavax"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="211" displayName="COVID-19, rS-nanoparticle, Novavax"/>
@@ -1269,7 +1315,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE212"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_212"
                        displayName="COVID-19, vector-nr, rS-Ad26, PF, 0.5 mL, Janssen"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1278,7 +1324,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE213" displayName="COVID-19, NOS"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_213" displayName="COVID-19, NOS"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="213" displayName="COVID-19 (NOS)"/>
@@ -1286,7 +1332,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE217" displayName="COVID-19, mRNA, 12+ yrs, Pfizer"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_217" displayName="COVID-19, mRNA, 12+ yrs, Pfizer"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="217" displayName="COVID-19, mRNA, 12+ yrs, Pfizer"/>
@@ -1294,7 +1340,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE218" displayName="COVID-19, mRNA, 5-11 yrs, Pfizer"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_218" displayName="COVID-19, mRNA, 5-11 yrs, Pfizer"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="218" displayName="COVID-19, mRNA, 5-11 yrs, Pfizer"/>
@@ -1302,7 +1348,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE219" displayName="COVID-19, mRNA, 6mos-4yrs, Pfizer"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_219" displayName="COVID-19, mRNA, 6mos-4yrs, Pfizer"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="219" displayName="COVID-19, mRNA, 6mos-4yrs, Pfizer"/>
@@ -1310,7 +1356,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE221" displayName="COVID-19, mRNA, 6-11 yrs, Moderna"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_221" displayName="COVID-19, mRNA, 6-11 yrs, Moderna"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="221" displayName="COVID-19, mRNA, 6-11 yrs, Moderna"/>
@@ -1318,7 +1364,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE227"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_227"
                        displayName="COVID-19, mRNA, LNP-S, PF, pediatric 50 mcg/0.5 mL dose, Moderna"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1327,7 +1373,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE228" displayName="COVID-19, mRNA, 6mos-&lt;6yr, Moderna"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_228"
+                       displayName="COVID-19, mRNA, 6mos-&lt;6yr, Moderna"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="228" displayName="COVID-19, mRNA, 6mos-&lt;6yr, Moderna"/>
@@ -1335,7 +1382,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE229" displayName="COVID-19, mRNA booster, 6+ yrs, Moderna"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_229"
+                       displayName="COVID-19, mRNA booster, 6+ yrs, Moderna"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="229" displayName="COVID-19, mRNA booster, 6+ yrs, Moderna"/>
@@ -1343,7 +1391,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE230" displayName="COVID-19, mRNA, booster, 6 mos-5yrs, Moderna"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_230"
+                       displayName="COVID-19, mRNA, booster, 6 mos-5yrs, Moderna"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="230" displayName="COVID-19, mRNA, booster, 6 mos-5yrs, Moderna"/>
@@ -1351,7 +1400,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE300" displayName="COVID-19, mRNA booster, 12+ yrs, Pfizer"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_300"
+                       displayName="COVID-19, mRNA booster, 12+ yrs, Pfizer"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="300" displayName="COVID-19, mRNA booster, 12+ yrs, Pfizer"/>
@@ -1359,7 +1409,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE301" displayName="COVID-19, mRNA booster, 5-11 yrs, Pfizer"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_301"
+                       displayName="COVID-19, mRNA booster, 5-11 yrs, Pfizer"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="301" displayName="COVID-19, mRNA booster, 5-11 yrs, Pfizer"/>
@@ -1367,7 +1418,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE302" displayName="COVID-19, mRNA, booster, 6 mos-4 yrs, Pfizer"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_302"
+                       displayName="COVID-19, mRNA, booster, 6 mos-4 yrs, Pfizer"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="302" displayName="COVID-19, mRNA, booster, 6 mos-4 yrs, Pfizer"/>
@@ -1375,7 +1427,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE303" displayName="RSV, recombinant (Adult)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_303" displayName="RSV, recombinant (Adult)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="303" displayName="RSV, recombinant (Adult)"/>
@@ -1383,7 +1435,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE304"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_304"
                        displayName="Respiratory syncytial virus (RSV), unspecified"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1392,7 +1444,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE305" displayName="RSV, bivalent, PF (Adult)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_305" displayName="RSV, bivalent, PF (Adult)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="305" displayName="RSV, bivalent, PF (Adult)"/>
@@ -1400,7 +1452,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE306"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_306"
                        displayName="RSV, mAb, 0.5 mL, age 0 - &lt; 8 mos. (nirsevimab)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1409,7 +1461,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE307" displayName="RSV, mAb, 1 mL, age 0 - 19 mos. (nirsevimab)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_307"
+                       displayName="RSV, mAb, 1 mL, age 0 - 19 mos. (nirsevimab)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="307" displayName="RSV, mAb, 1 mL, age 0 - 19 mos. (nirsevimab)"/>
@@ -1417,7 +1470,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE308"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_308"
                        displayName="COVID-19, mRNA, LNP-S, PF, tris-sucrose, 3 mcg/0.3 mL, Pfizer (Comirnaty, 6 mos-4 yrs)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1427,7 +1480,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE309"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_309"
                        displayName="COVID-19, mRNA, LNP-S, PF, tris-sucrose, 30 mcg/0.3 mL, Pfizer (Comirnaty, 12+ yrs)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1437,7 +1490,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE310"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_310"
                        displayName="COVID-19, mRNA, LNP-S, PF, tris-sucrose,  10 mcg/0.3 mL, Pfizer (Comirnaty, 5-11 yrs)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1447,7 +1500,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE311"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_311"
                        displayName="COVID-19, mRNA, LNP-S, PF, Moderna (Spikevax, 6 mos-11 yrs)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1456,7 +1509,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE312"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_312"
                        displayName="COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna (Spikevax, 12+ yrs)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1465,7 +1518,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE313"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_313"
                        displayName="COVID-19, subunit, rS-nanoparticle, adjuvanted, PF, 5 mcg/0.5 mL, Novavax (12+ yrs)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1475,7 +1528,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE334"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_334"
                        displayName="COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna (mNEXSPIKE, 12+ yrs)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1484,7 +1537,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE314"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_314"
                        displayName="Respiratory syncytial virus (RSV) vaccine, unspecified"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1493,7 +1546,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE315"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_315"
                        displayName="Respiratory syncytial virus (RSV) MAB, unspecified"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1502,7 +1555,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE326" displayName="RSV, mRNA, injectable, PF"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_326" displayName="RSV, mRNA, injectable, PF"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="326" displayName="RSV, mRNA, injectable, PF"/>
@@ -1510,7 +1563,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE332"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_332"
                        displayName="RSV, mAb, 0.7 mL, age 0 - &lt; 8 mos. (clesrovimab)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1519,7 +1572,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE500" displayName="COVID-19 Non-US, Product Unknown"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_500" displayName="COVID-19 Non-US, Product Unknown"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="500" displayName="COVID-19 Non-US, Product Unknown"/>
@@ -1527,7 +1580,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE501" displayName="COVID-19 IV Non-US (QAZCOVID-IN)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_501" displayName="COVID-19 IV Non-US (QAZCOVID-IN)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="501" displayName="COVID-19 IV Non-US (QAZCOVID-IN)"/>
@@ -1535,7 +1588,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE502" displayName="COVID-19 IV Non-US (COVAXIN)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_502" displayName="COVID-19 IV Non-US (COVAXIN)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="502" displayName="COVID-19 IV Non-US (COVAXIN)"/>
@@ -1543,7 +1596,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE503" displayName="COVID-19 LAV Non-US (COVIVAC)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_503" displayName="COVID-19 LAV Non-US (COVIVAC)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="503" displayName="COVID-19 LAV Non-US (COVIVAC)"/>
@@ -1551,7 +1604,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE504" displayName="COVID-19 VVnr Non-US (Sputnik Light)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_504" displayName="COVID-19 VVnr Non-US (Sputnik Light)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="504" displayName="COVID-19 VVnr Non-US (Sputnik Light)"/>
@@ -1559,7 +1612,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE505" displayName="COVID-19 VVnr Non-US (Sputnik V)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_505" displayName="COVID-19 VVnr Non-US (Sputnik V)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="505" displayName="COVID-19 VVnr Non-US (Sputnik V)"/>
@@ -1567,7 +1620,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE506"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_506"
                        displayName="COVID-19 VVnr Non-US Vaccine (CanSino Biological Inc./Beijing Institute of Biotechnology)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1577,7 +1630,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE507"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_507"
                        displayName="COVID-19 vaccine, PS, non-US, Anhui Zhifei Longcom Biopharmaceutical, Chinese Academy of Sciences"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1587,7 +1640,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE508"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_508"
                        displayName="COVID-19 PS Non-US (Jiangsu Province Centers for Disease Control and Prevention)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1596,7 +1649,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE509" displayName="COVID-19 PS Non-US (EpiVacCorona)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_509" displayName="COVID-19 PS Non-US (EpiVacCorona)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="509" displayName="COVID-19 PS Non-US (EpiVacCorona)"/>
@@ -1604,7 +1657,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE510" displayName="COVID-19 IV Non-US (BIBP, Sinopharm)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_510" displayName="COVID-19 IV Non-US (BIBP, Sinopharm)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="510" displayName="COVID-19 IV Non-US (BIBP, Sinopharm)"/>
@@ -1612,7 +1665,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE511" displayName="COVID-19 IV Non-US (CoronaVac, Sinovac)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_511"
+                       displayName="COVID-19 IV Non-US (CoronaVac, Sinovac)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="511" displayName="COVID-19 IV Non-US (CoronaVac, Sinovac)"/>
@@ -1620,7 +1674,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE512"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_512"
                        displayName="COVID-19 VLP Non-US Vaccine (Medicago, Covifenz)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1629,7 +1683,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE513"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_513"
                        displayName="COVID-19 PS Non-US Vaccine (Anhui Zhifei Longcom, Zifivax)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1638,7 +1692,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE514"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_514"
                        displayName="COVID-19 DNA Non-US Vaccine (Zydus Cadila, ZyCoV-D)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1647,7 +1701,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE515"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_515"
                        displayName="COVID-19 PS Non-US Vaccine (Medigen, MVC-COV1901)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1656,7 +1710,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE516"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_516"
                        displayName="COVID-19 Inactivated Non-US Vaccine (Minhai Biotechnology Co, KCONVAC)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1665,7 +1719,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE517"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_517"
                        displayName="COVID-19 PS Non-US Vaccine (Biological E Limited, Corbevax)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1674,7 +1728,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE518"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_518"
                        displayName="COVID-19, Inactivated, Non-US (VLA2001, Valneva)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1683,7 +1737,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE519"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_519"
                        displayName="COVID-19, mRNA bivalent, Non-US (Spikevax Bivalent)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1692,7 +1746,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE520"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_520"
                        displayName="COVID-19, mRNA bivalent, Non-US (Comirnaty Bivalent)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1701,7 +1755,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE521"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_521"
                        displayName="COVID-19 SP, protein-based, adjuvanted (VidPrevtyn Beta), Sanofi-GSK"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1710,7 +1764,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE75" displayName="Vaccinia (smallpox, mpox), live"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_75" displayName="Vaccinia (smallpox, mpox), live"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="75" displayName="Vaccinia (smallpox, mpox), live"/>
@@ -1718,7 +1772,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE105" displayName="Vaccinia (smallpox) vaccine, diluted"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_105" displayName="Vaccinia (smallpox) vaccine, diluted"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="105" displayName="Vaccinia (smallpox) vaccine, diluted"/>
@@ -1726,7 +1780,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE206"
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_206"
                        displayName="Vaccinia, smallpox Mpox vaccine live, PF, SQ or ID injection"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
@@ -1735,7 +1789,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE174" displayName="Cholera, live attenuated (Vaxchora)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_174" displayName="Cholera, live attenuated (Vaxchora)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="174" displayName="Cholera, live attenuated (Vaxchora)"/>
@@ -1743,7 +1797,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE25" displayName="Typhoid, oral"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_25" displayName="Typhoid, oral"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="25" displayName="Typhoid, oral"/>
@@ -1751,7 +1805,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE101" displayName="Typhoid, Vi capsular polysaccharide (ViCPS)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_101"
+                       displayName="Typhoid, Vi capsular polysaccharide (ViCPS)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="101" displayName="Typhoid, Vi capsular polysaccharide (ViCPS)"/>
@@ -1759,7 +1814,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE37" displayName="Yellow fever live"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_37" displayName="Yellow fever live"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="37" displayName="Yellow fever live"/>
@@ -1767,7 +1822,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE183" displayName="Yellow fever vaccine live - alt"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_183" displayName="Yellow fever vaccine live - alt"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="183" displayName="Yellow fever vaccine live - alt"/>
@@ -1775,7 +1830,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE184" displayName="Yellow fever, unspecified formulation (NOS)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_184"
+                       displayName="Yellow fever, unspecified formulation (NOS)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="184" displayName="Yellow fever, unspecified formulation (NOS)"/>
@@ -1783,7 +1839,7 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE134" displayName="Japanese Encephalitis IM (Ixiaro)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_134" displayName="Japanese Encephalitis IM (Ixiaro)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="134" displayName="Japanese Encephalitis IM (Ixiaro)"/>
@@ -1791,7 +1847,8 @@
         </conceptMapping>
         <conceptMapping>
             <toConcept codeSystem="2.16.840.1.113883.3.795.12.1.1"
-                       codeSystemName="OpenCDS concepts" code="ICE325" displayName="Vaccinia (smallpox, mpox), unspecified (NOS)"/>
+                       codeSystemName="OpenCDS concepts" code="VACCINE_CVX_325"
+                       displayName="Vaccinia (smallpox, mpox), unspecified (NOS)"/>
             <fromConcepts codeSystem="2.16.840.1.113883.12.292"
                           codeSystemName="Vaccines administered (CVX)" displayName="CVX">
                 <concept code="325" displayName="Vaccinia (smallpox, mpox), unspecified (NOS)"/>

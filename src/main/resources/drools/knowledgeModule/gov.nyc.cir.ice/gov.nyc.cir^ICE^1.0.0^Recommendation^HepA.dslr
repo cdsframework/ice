@@ -26,7 +26,7 @@ rule "HepA: Recommend Conditional/High Risk when >= 19 years old and no shots"
 	activation-group "recommendationAgeCheck"
     when
 		There is a Series $targetSeries that needs forecasting
-        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.810"
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
         	- the number of Administered Shots is == 0
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate

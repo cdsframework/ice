@@ -30,10 +30,10 @@ rule "RSV: If an Adult or otherwise unspecified RSV vaccine (CVX 303, CVX 304, C
 	salience 10
 	when
 		There is an administered shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- the shot belongs to the Series with name "RSVAdultSeries"
 			- that has already been evaluated
-			- the vaccine administered a member of ("ICE303", "ICE304", "ICE305", "ICE314", "ICE326")
+			- the vaccine administered a member of ("VACCINE_CVX_303", "VACCINE_CVX_304", "VACCINE_CVX_305", "VACCINE_CVX_314", "VACCINE_CVX_326")
 			- the administration date of the shot is < "21-Jun-2023"
 			- make note of all evaluation reasons for this shot as $oEvaluationReasons
 			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
@@ -54,10 +54,10 @@ rule "RSV: If an Infant RSV vaccine (CVX 332) is administered prior to 6/9/2025,
 	salience 10
 	when
 		There is an administered shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- the shot belongs to the Series with name "RSVInfantSeries"
 			- that has already been evaluated
-			- the vaccine administered is "ICE332"
+			- the vaccine administered is "VACCINE_CVX_332"
 			- the administration date of the shot is < "09-Jun-2025"
 			- make note of all evaluation reasons for this shot as $oEvaluationReasons
 			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
@@ -78,10 +78,10 @@ rule "RSV: If an Infant RSV vaccine or otherwise unspecified RSV vaccine (CVX 30
 	salience 10
 	when
 		There is an administered shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- the shot belongs to the Series with name "RSVInfantSeries"
 			- that has already been evaluated
-			- the vaccine administered a member of ("ICE304", "ICE306", "ICE307", "ICE315")
+			- the vaccine administered a member of ("VACCINE_CVX_304", "VACCINE_CVX_306", "VACCINE_CVX_307", "VACCINE_CVX_315")
 			- the administration date of the shot is < "03-Aug-2023"
 			- make note of all evaluation reasons for this shot as $oEvaluationReasons
 			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
@@ -106,7 +106,7 @@ rule "RSV: If an RSV shot is administered in the Infant Series to a patient < 8 
 	activation-group "doseInSeasonCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- the shot belongs to the Series with name "RSVInfantSeries"
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
@@ -129,13 +129,13 @@ rule "RSV: If a shot was administered in the current season of the RSV Infant Se
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- the shot belongs to the Series with name "RSVInfantSeries"
 			- the Series that the shot belongs to is not complete
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
 		There is an administered shot $otherShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- the shot belongs to the Series with name "RSVInfantSeries"
 			- that has already been evaluated and whose shot validity is VALID
 			- make note of the associated series as $associatedPriorTargetSeries
@@ -155,11 +155,11 @@ rule "RSV: If the RSV Infant Series was completed in a prior season, mark the cu
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an administered shot $priorSeasonShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- the shot belongs to the Series with name "RSVInfantSeries"
 			- that has already been evaluated and whose shot validity is VALID
 		There is a Series $currentSeasonSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- the name of the Series is "RSVInfantSeries"
 			- the Series is not complete
 			- the current date falls between the season start and offseason stop dates of the Series
@@ -181,7 +181,7 @@ rule "RSV(Abstract): Evaluate shot >= 8 months and < 50 years of age as Accepted
 	no-loop true
 	when
 		There is an Administered Shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- that has already been evaluated
 			- make note of the date this shot was Administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
@@ -239,7 +239,7 @@ rule "RSV: If shot administered was evaluated in the Adult Series as Invalid wit
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an administered shot $administeredShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- the shot belongs to the Series with name "RSVAdultSeries"
 			- that has already been evaluated and whose shot validity is INVALID
 			- make note of Invalid evaluation reasons for this shot as $oEvaluationReasons
@@ -259,7 +259,7 @@ rule "RSV: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE if there a
 	no-loop true
 	when
 		There is an administered shot $notAllowedShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.875"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
 			- that has already been evaluated and whose shot validity is INVALID
 			- make note of Invalid evaluation reasons for this shot as $oEvaluationReasons
 			- the size of the collection $oEvaluationReasons is > 1

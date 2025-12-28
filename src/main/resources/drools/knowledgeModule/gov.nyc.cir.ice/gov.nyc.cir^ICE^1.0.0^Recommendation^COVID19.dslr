@@ -33,7 +33,7 @@ rule "COVID-19: Invoke separate agenda group for recommendations in the COVID19D
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series belongs to the season with name "COVID19Dec2020Season"
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -47,12 +47,12 @@ rule "COVID-19: Invoke separate agenda group for recommendations in the COVID19S
 	salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series belongs to the Season with name a member of ("COVID19Sep2023Season", "COVID19Aug2024Season")
 			- make note of the Season name as $seasonNameForSeriesToBeForecasted
 		There is a Season $sept2023season
 			- the name of the Season is $seasonNameForSeriesToBeForecasted
-			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the fully specified season start date as $dtSeasonStartDate
 		There is a Series $associatedTargetSeries identified by $targetSeries
 			- the Series is a seasonal series
@@ -73,7 +73,7 @@ rule "COVID-19: If a seasonal COVID-19 Series that needs forecasting is complete
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is Complete
 			- the Series is a Seasonal Series
 			- make note of the Season Name as $seriesSeasonName
@@ -82,7 +82,7 @@ rule "COVID-19: If a seasonal COVID-19 Series that needs forecasting is complete
 		    - the name of the season is "COVID19Sep2023Season"
 		    - make note of the fully specified season start date as $sept2023StartDate
 		There is a Season $otherSeason
-			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the fully specified season start date is > evalTime
 		Confirm that the following is true: $targetSeasonStartDate >= $sept2023StartDate
 		Confirm that the following is true: $seriesSeasonName != $otherSeason.seasonName
@@ -105,12 +105,12 @@ rule "COVID-19: Invoke separate agenda group for recommendations in the Aug2025+
 	salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series belongs to the Season with name "COVID19Aug2025Season"
 			- make note of the Season name as $seasonNameForSeriesToBeForecasted
 		There is a Season $aug2025season
 			- the name of the Season is $seasonNameForSeriesToBeForecasted
-			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the fully specified season start date as $dtSeasonStartDate
 		There is a Series $associatedTargetSeries identified by $targetSeries
 			- the Series is a seasonal series
@@ -126,7 +126,7 @@ rule "COVID-19: Invoke separate agenda group for post recommendation checks in t
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series belongs to the season with name "COVID19Dec2020Season"
 			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
@@ -141,7 +141,7 @@ rule "COVID-19: Invoke separate agenda group for post recommendation checks in t
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series belongs to the Season with name a member of ("COVID19Sep2023Season", "COVID19Aug2024Season")
 			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
@@ -156,7 +156,7 @@ rule "COVID-19: Invoke separate agenda group for post recommendation checks in t
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series belongs to the Season with name "COVID19Aug2025Season"
 			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
@@ -177,7 +177,7 @@ rule "COVID-19: If the recommendation is NOT_RECOMMENDED, the current season ser
 	salience -1
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- a forecast for the Series has been made and a shot is not recommended
 			- post processing on the Series forecast has not already been run
 			- the Series is a Seasonal Series

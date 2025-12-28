@@ -81,38 +81,6 @@ public class CdsConcept extends VmrOpenCdsConcept
     }
 
     /**
-     * Instantiate an OpenCdsConceptCode object. It does not set the conceptTargetId, displayName or determinationMethodCode attributes of the VmrOpenCdsConcept
-     *
-     * @throws IllegalArgumentException if concept code is null
-     */
-    private CdsConcept(final String pOpenCdsConceptCode, final boolean pIsOpenCdsSupportedConcept)
-    {
-        if (pOpenCdsConceptCode == null)
-        {
-            final String _METHODNAME = "OpenCdsICEConcept(): ";
-            final String errStr = "concept code not supplied";
-            log.warn(_METHODNAME + errStr);
-            throw new IllegalArgumentException(errStr);
-        }
-
-        setOpenCdsConceptCode(pOpenCdsConceptCode);
-        setIsOpenCdsSupportedConcept(pIsOpenCdsSupportedConcept);
-    }
-
-    /**
-     * Instantiate an CdsConcept object. It does not set the conceptTargetId or determinationMethodCode attributes of the VmrOpenCdsConcept
-     *
-     * @param pOpenCdsConceptCode Concept Code; mandatory
-     * @param pDisplayName        Display Name
-     * @throws IllegalArgumentException if concept code is null
-     */
-    private CdsConcept(final String pOpenCdsConceptCode, final boolean pIsOpenCdsSupportedConcept, final String pDisplayName)
-    {
-        this(pOpenCdsConceptCode, pIsOpenCdsSupportedConcept);
-        setDisplayName(pDisplayName);
-    }
-
-    /**
      * Instantiate an CdsConcept object. It does not set the conceptTargetId or determinationMethodCode attributes of the VmrOpenCdsConcept
      *
      * @param pOpenCdsConceptCode Concept Code; mandatory

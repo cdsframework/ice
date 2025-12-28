@@ -26,7 +26,7 @@ rule "Meningococcal: Mark the Series Complete if Dose 1 is Administered >= 16yrs
 	salience 100
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_ACWY"
 			- the name of the Series is "MCV42DoseSeries"
 			- the Series is Not Complete
 			- the number of Doses Administered is == 1
@@ -52,7 +52,7 @@ rule "Meningococcal: Recommend Dose 1 at 16yrs of age if Patient >= 16yrs and < 
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.830"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_ACWY"
 			- the name of the Series is "MCV42DoseSeries"
 			- the Series is Not Complete
 			- the number of Doses Administered is == 0
@@ -71,7 +71,7 @@ rule "Meningococcal: If a patient completed the series, recommendation is Not Re
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.830"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_ACWY"
 			- the Series is Complete
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
@@ -87,7 +87,7 @@ rule "Meningococcal: If a patient is >= 19 years and did NOT complete the series
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
     when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.830"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_ACWY"
 			- the Series is Not Complete
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate

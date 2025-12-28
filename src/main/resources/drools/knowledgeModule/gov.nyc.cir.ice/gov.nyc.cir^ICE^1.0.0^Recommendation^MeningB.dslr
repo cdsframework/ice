@@ -36,7 +36,7 @@ rule "Mening B: Do not recommend a specific vaccine if no (valid) doses have bee
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made and a Specific Vaccine is Recommended
 		There does not exist an administered shot
@@ -56,13 +56,13 @@ rule "Mening B: Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose 
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the name of the series is "MenB4C2DoseSeries"
 			- the Series is not complete
 			- the dose number to recommend is > 1
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE163"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_163"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -76,13 +76,13 @@ rule "Mening B: Recommend CVX 163 for the 2nd target dose and later in the MenB 
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the name of the series is "MenB4C3DoseSeries"
 			- the series is not complete
 			- the dose number to recommend is > 1
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE163"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_163"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -96,13 +96,13 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-do
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the name of the series is "MenBFHbp3DoseSeries"
 			- the Series is not complete
 			- the dose number to recommend is > 1
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_162"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -116,13 +116,13 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-do
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the name of the series is "MenBFHbp2DoseSeries"
 			- the Series is not complete
 			- the dose number to recommend is > 1
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE162"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_162"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -139,14 +139,14 @@ rule "Mening B: If a patient has at least one CVX 162 or CVX 316 and at least on
 	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a shot is recommended
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- post processing on the Series forecast has not already been run
 		There exists an administered shot
 			- the shot belongs to the series $targetSeries
-			- the vaccine administered a member of ("ICE162", "ICE316")
+			- the vaccine administered a member of ("VACCINE_CVX_162", "VACCINE_CVX_316")
 		There exists another administered shot
 			- the shot belongs to the series $targetSeries
-			- the vaccine administered a member of ("ICE163", "ICE328")
+			- the vaccine administered a member of ("VACCINE_CVX_163", "VACCINE_CVX_328")
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.OTHER_VACCINE_PRODUCT_POSSIBLE"
@@ -164,7 +164,7 @@ rule "Mening B: If the patient < 10yrs and no doses on record, recommendation is
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the number of doses administered is == 0
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
@@ -182,7 +182,7 @@ rule "Mening B: If the patient >= 10yrs and < 16yrs and no doses on record, reco
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the number of doses administered is == 0
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
@@ -201,7 +201,7 @@ rule "Mening B: If the patient >= 16yrs and < 24yrs and no doses on record, reco
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the number of doses administered is == 0
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
@@ -220,7 +220,7 @@ rule "Mening B: If the patient >= 24yrs and no doses on record, recommendation i
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the number of doses administered is == 0
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthdate
@@ -241,7 +241,7 @@ rule "MeningB: Recommend minimum interval & recommended interval of at 6 months 
 	when
 		There is a Series $targetSeries that needs Forecasting
 			- the name of the Series is "MenBFHbp3DoseSeries"
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
 		There is an Administered Shot $dose1
@@ -265,7 +265,7 @@ rule "MenB(4C 3-Dose Series): Recommend minimum & recommended interval of at 6 m
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the name of the Series is "MenB4C3DoseSeries"
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
 		There is an Administered Shot $dose1
@@ -286,7 +286,7 @@ rule "MenB(4C 2-Dose Series): If (valid) dose 1 was >= 10/25/2024, the minimum i
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the name of the Series is "MenB4C2DoseSeries"
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 2
 		 There is an Administered Shot $dose1
@@ -322,7 +322,7 @@ rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If no shots were administered 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the name of the Series is "MenB4C2DoseSeries"
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the number of administered shots is == 0
 		Confirm the date evalTime is before "25-Oct-2024"
@@ -345,7 +345,7 @@ rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If an (invalid) shot was 1 was
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the name of the Series is "MenB4C2DoseSeries"
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the number of doses administered is == 0
 		There exists an administered shot
@@ -373,7 +373,7 @@ rule "MenB(4C 2-Dose Series; Target Dose 2; CRR): If a (valid) dose 1 administer
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the name of the Series is "MenB4C2DoseSeries"
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the number of doses administered is == 1
 		There exists an administered shot

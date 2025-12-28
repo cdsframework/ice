@@ -34,7 +34,7 @@ rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, 
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- a forecast for the Series has been made and a recommendation date has been determined
 			- the Series is not complete
 			- a forecast for the Series has been made and a specific vaccine is not recommended
@@ -45,7 +45,7 @@ rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, 
 		Confirm elapsed time between $birthDate and evalTime < "7y" && elapsed time between $birthDate and $recommendationDate < "7y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE107"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_107"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -59,7 +59,7 @@ rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, 
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- a forecast for the Series has been made and a recommendation date has been determined
 			- the Series is not complete
 			- a forecast for the Series has been made and a specific vaccine is not recommended
@@ -70,7 +70,7 @@ rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, 
 		Confirm elapsed time between $birthDate and evalTime < "7y" && elapsed time between $birthDate and $recommendationDate >= "7y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE115"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_115"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -86,7 +86,7 @@ rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if s
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is not complete
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthdate
@@ -105,7 +105,7 @@ rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if s
 		Set the Recommendation Reason for $rReason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_TDAP_OR_TD"
 		Include the Recommendation $rReason for Consideration in the final Forecast of the Series
 		Create a recommendation as $rSupplementalText for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $rSupplementalText to "Administer either Tdap or Td."
+		Set the Recommendation Supplemental Text for $rSupplementalText to "RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT_ADMINISTER_TDAP_OR_TD"
 		Include the Recommendation $rSupplementalText for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -121,7 +121,7 @@ rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) at age 7yrs if 
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is not complete
 		The Patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthdate
@@ -132,7 +132,7 @@ rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) at age 7yrs if 
 		Confirm elapsed time between $dtBirthdate and evalTime >= "7y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE115"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_115"
 		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Overdue Forecast Date for $oRecommendation to $dtDateAtAge
@@ -150,7 +150,7 @@ rule "DTP: If the 5-Dose Series is Complete and the patient has NOT received a p
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
 			- the name of the series is "DTP5DoseSeries"
 		There exists an IceFact
@@ -179,7 +179,7 @@ rule "DTP: If the primary series is complete and the patient has received a pert
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
@@ -202,7 +202,7 @@ rule "DTP: If the primary series is complete and the patient has received a pert
 		Set the Recommendation Earliest Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Overdue Forecast Date for $oRecommendationAge to $dtOverdueDateAtAge
-		Set the Recommendation Vaccine for $oRecommendationAge to "ICE115"
+		Set the Recommendation Vaccine for $oRecommendationAge to "VACCINE_CVX_115"
 		Include the Recommendation $oRecommendationAge for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -221,7 +221,7 @@ rule "DTP: If the 5-dose series is complete and a Tdap 5-dose series recommendat
 	ruleflow-group "RecommendationForecast^customRecommendationAdolescentTdapExceptionRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
 			- the name of the series is "DTP5DoseSeries"
 		There exists an IceFact
@@ -236,7 +236,7 @@ rule "DTP: If the 5-dose series is complete and a Tdap 5-dose series recommendat
 		Set the Recommendation Earliest Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Overdue Forecast Date for $oRecommendationAge to $dtOverdueDateAtAge
-		Set the Recommendation Vaccine for $oRecommendationAge to "ICE115"
+		Set the Recommendation Vaccine for $oRecommendationAge to "VACCINE_CVX_115"
 		Include the Recommendation $oRecommendationAge for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -250,7 +250,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If the 5-Dose
 	dialect "mvel"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the name of the series is "DTP5DoseSeries"
 			- the Series is complete
 		There exists an IceFact
@@ -264,7 +264,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If the 5-Dose
 		Set the Recommendation Earliest Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendationAge to $dtDateAtAge
 		Set the Recommendation Overdue Forecast Date for $oRecommendationAge to $dtDateAtAge
-		Set the Recommendation Vaccine for $oRecommendationAge to "ICE115"
+		Set the Recommendation Vaccine for $oRecommendationAge to "VACCINE_CVX_115"
 		Include the Recommendation $oRecommendationAge for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -280,7 +280,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not 
 	salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
 			- the name of the series is "DTP5DoseSeries"
 			- make note of the date that the most recent shot was administered as $dtAdministrationDate
@@ -307,7 +307,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception B)- If the patient DOES 
 	salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
 			- the name of the series is "DTP5DoseSeries"
 			- make note of the date that the most recent shot was administered as $dtAdministrationDate
@@ -330,7 +330,7 @@ rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent T
 	dialect "mvel"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
@@ -338,18 +338,18 @@ rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent T
 		There is an administered shot $administeredShotContainsNonPertussis
 			- the shot belongs to the series $targetSeries
 			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
-			- the collection $diseasesTargeted does not contain "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the collection $diseasesTargeted does not contain "SUPPORTED_DISEASE_CONCEPT.PERTUSSIS"
 			- make note of the date this shot was administered as $dtAdministrationDate
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
 			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedOther
-			- the collection $diseasesTargetedOther does not contain "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the collection $diseasesTargetedOther does not contain "SUPPORTED_DISEASE_CONCEPT.PERTUSSIS"
 			- the administration date of the shot is > $dtAdministrationDate
 	then
 		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
 		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtAdministrationDate
 		Set the Recommendation Earliest Forecast Date for $oRecommendationInterval to $dtAdministrationDate
-		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
+		Set the Recommendation Vaccine for $oRecommendationInterval to "VACCINE_CVX_115"
 		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -360,7 +360,7 @@ rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent T
 	dialect "mvel"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
@@ -368,19 +368,19 @@ rule "DTP: If either the 3-Dose or 5-Dose Series is Complete and an Adolescent T
 		There is an administered shot $administeredShotContainsPertussis
 			- the shot belongs to the Series $targetSeries
 			- make note of the diseases targeted by the vaccine administered as $diseasesTargeted
-			- the collection $diseasesTargeted contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the collection $diseasesTargeted contains "SUPPORTED_DISEASE_CONCEPT.PERTUSSIS"
 			- make note of the date this shot was administered as $dtAdministrationDate
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- make note of the diseases targeted by the vaccine administered as $diseasesTargetedOther
-			- the collection $diseasesTargetedOther contains "SUPPORTED_DISEASE_CONCEPT.033.9"
+			- the collection $diseasesTargetedOther contains "SUPPORTED_DISEASE_CONCEPT.PERTUSSIS"
 			- the administration date of the shot is > $dtAdministrationDate
 	then
 		Add 6 DurationType.MONTHS to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Create a Recommendation as $oRecommendationInterval for the Series $targetSeries
 		Set the Recommendation Recommended Forecast Date for $oRecommendationInterval to $dtCalculated
 		Set the Recommendation Earliest Forecast Date for $oRecommendationInterval to $dtCalculated
-		Set the Recommendation Vaccine for $oRecommendationInterval to "ICE115"
+		Set the Recommendation Vaccine for $oRecommendationInterval to "VACCINE_CVX_115"
 		Include the Recommendation $oRecommendationInterval for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -396,7 +396,7 @@ rule "DTP: Recommend booster at earliest interval of 5y, recommended interval of
 	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
 			- make note of the date that the most recent shot was administered as $dtAdministrationDate
 		There exists an IceFact
@@ -415,7 +415,7 @@ rule "DTP: Recommend booster at earliest interval of 5y, recommended interval of
 		Set the Recommendation Reason for $rReason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_TDAP_OR_TD"
 		Include the Recommendation $rReason for Consideration in the final Forecast of the Series
 		Create a recommendation as $rSupplementalText for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $rSupplementalText to "Administer either Tdap or Td."
+		Set the Recommendation Supplemental Text for $rSupplementalText to "RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT_ADMINISTER_TDAP_OR_TD"
 		Include the Recommendation $rSupplementalText for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -432,7 +432,7 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for
  	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the name of the series is "DTP5DoseSeries"
 			- the number of doses administered is == 3
 			- make note of the Recommendation Date as $recommendationDate
@@ -465,7 +465,7 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Skip to Dose 4 if patient >= 7yrs a
 	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the name of the Series is "DTP5DoseSeries"
 			- the number of doses administered is == 2
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
@@ -502,7 +502,7 @@ rule "DTP: (Six by Seven Rule)- Recommend next dose at age 7yrs for 5-dose serie
 	dialect "mvel"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the name of the Series is "DTP5DoseSeries"
 			- the Series is not complete
 			- the number of administered shots excluding duplicate shots on the same day is >= 6
@@ -524,7 +524,7 @@ rule "DTP: (3-Dose Series Exception Rule[Recommendation])- If none of the 3 or m
 	dialect "mvel"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.200"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the name of the Series is "DTP3DoseSeries"
 			- the Series is not complete
 			- the number of Doses administered is >= 3

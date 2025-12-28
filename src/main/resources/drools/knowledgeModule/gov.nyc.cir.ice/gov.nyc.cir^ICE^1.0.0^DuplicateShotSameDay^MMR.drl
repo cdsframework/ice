@@ -28,8 +28,8 @@ rule "Duplicate Shots/Same Day(MMR): If any MMR vaccine other than MMRV is admin
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	activation-group "duplicateShotEvaluationOrder"
 	when
-		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", administeredVaccine.cdsConceptName != "ICE94")
-		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName == "ICE94")
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MMR", administeredVaccine.cdsConceptName != "VACCINE_CVX_94")
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName == "VACCINE_CVX_94")
 	then
 		modify($td) {
 			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
@@ -48,8 +48,8 @@ rule "Duplicate Shots/Same Day(MMR): If a measles/mumps/rubella vaccine other th
 	activation-group "duplicateShotEvaluationOrder"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", vaccineComponent.cdsConceptName != "ICE03")
-		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName == "ICE03")
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MMR", vaccineComponent.cdsConceptName != "VACCINE_CVX_03")
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName == "VACCINE_CVX_03")
 	then
 		modify($td) {
 			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
@@ -68,9 +68,9 @@ rule "Duplicate Shots/Same Day(MMR): If one of those shots is an MMR (CVX 03) an
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", administeredVaccine.cdsConceptName == "ICE03")
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MMR", administeredVaccine.cdsConceptName == "VACCINE_CVX_03")
 		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries,
-			doseNumberInSeries == $td.doseNumberInSeries, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.cdsConceptName != "ICE94",
+			doseNumberInSeries == $td.doseNumberInSeries, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MMR", vaccineComponent.isUnspecifiedFormulation() == false, administeredVaccine.cdsConceptName != "VACCINE_CVX_94",
 			administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdother) {
@@ -90,9 +90,9 @@ rule "Duplicate Shots/Same Day(MMR): If one of those shots is an MMRV (CVX 94) a
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", administeredVaccine.cdsConceptName == "ICE94")
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MMR", administeredVaccine.cdsConceptName == "VACCINE_CVX_94")
 		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries,
-			doseNumberInSeries == $td.doseNumberInSeries, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.500", vaccineComponent.isUnspecifiedFormulation() == false,
+			doseNumberInSeries == $td.doseNumberInSeries, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MMR", vaccineComponent.isUnspecifiedFormulation() == false,
 			administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdother) {

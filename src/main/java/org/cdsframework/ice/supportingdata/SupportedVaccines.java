@@ -107,6 +107,7 @@ public class SupportedVaccines implements SupportingData
         return this.cdsListItemNameToVaccineItem.get(pCdsVaccineItemName);
     }
 
+    @Override
     public boolean isEmpty()
     {
         return this.cdsListItemNameToVaccineItem.isEmpty();
@@ -151,6 +152,7 @@ public class SupportedVaccines implements SupportingData
         return this.supportedCdsLists;
     }
 
+    @Override
     public boolean isSupportingDataConsistent()
     {
         return this.vaccineComponentCDToVaccinesNotFullySpecified.isEmpty();
@@ -208,11 +210,8 @@ public class SupportedVaccines implements SupportingData
         if (ObjectUtils.isEmpty(lIntersectionOfSupportedCdsVersions))
             return;
 
-        ////////////// Determine Primary OpenCDS Concept START //////////////
-        ///////
         // The Vaccine Concept will be stored as a Concept; doublecheck that a SupportedCdsConcept with the specified primary OpenCDS Concept for this Vaccine exists
         // That is, check to make sure that the ICEConcept associated with this Vaccine (CdsListItem) is also a OpenCDS concept
-        ///////
         final org.opencds.vmr.v1_0.schema.CD lPrimaryOpenCdsConcept = pIceVaccineSpecificationFile.getPrimaryOpenCdsConcept();
         if (lPrimaryOpenCdsConcept == null)
         {
@@ -245,9 +244,6 @@ public class SupportedVaccines implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ////////////// Determine Primary OpenCDS Concept END //////////////
-
-        ////////////// Vaccine properties to track START //////////////
         boolean lVaccineAndOnlyVaccineComponentNotEqual = false;
         final List<CD> lVaccineComponentsNotSpecified = new ArrayList<>();
 
@@ -263,10 +259,8 @@ public class SupportedVaccines implements SupportingData
         // Combination vaccine?
         boolean lCombinationVaccine = false;
 
-        ////////
         // START RELATED DISEASES: Get all the related diseases that the vaccine targets (as specified in the configuration data).
         // Related diseases is only used for monovalent vaccines; for combination vaccines, the related diseases are determined by the vaccine components
-        ///////
         final List<org.opencds.vmr.v1_0.schema.CD> lRelatedDiseases = pIceVaccineSpecificationFile.getDiseaseImmunities();
         final List<String> lRelatedDiseasesCdsListItems = new ArrayList<>();
         if (ObjectUtils.isEmpty(lRelatedDiseases))
@@ -298,9 +292,7 @@ public class SupportedVaccines implements SupportingData
 
             lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getCdsListItemName());
         }
-        ////////
         // END RELATED DISEASES: Get all the related diseases that the vaccine targets (as specified in the configuration data).
-        ///////
 
         // Vaccine Components
         final List<VaccineComponent> lVaccineComponentsToAddToVaccine = new ArrayList<>();
@@ -315,11 +307,7 @@ public class SupportedVaccines implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ////////////// Vaccine properties to track END //////////////
-
-        ///////
         // START to Determine which vaccine components can be incorporated now in the initialization of this vaccine
-        ///////
         // If the vaccine code of the component is the same as that of the vaccine (or there is only one vaccine component?), then add the vaccine component with the specified diseases
         if (lVaccineComponentsCD.size() == 1)
         {
@@ -357,10 +345,8 @@ public class SupportedVaccines implements SupportingData
 
             if (!lVaccineAndOnlyVaccineComponentNotEqual)
             {
-                ///////
                 // Create the new VaccineComponent, and make note of this a vaccine component; record and will be a part of this Vaccine
                 final VaccineComponent lVaccineComponent = new VaccineComponent(ic, lRelatedDiseasesCdsListItems);
-                /////// VaccineComponent lVaccineComponent = new VaccineComponent(llccli.getCdsListItemName(), lRelatedDiseasesCdsListItems);
                 addPropertiesFromSDToVaccineComponent(lVaccineComponent, pIceVaccineSpecificationFile);
                 lVaccineComponentsToAddToVaccine.add(lVaccineComponent);
 
@@ -410,13 +396,9 @@ public class SupportedVaccines implements SupportingData
                 }
             }
         }
-        ///////
         // END of Determine which vaccine components can be incorporated now in the initialization of this vaccine
-        ///////
 
-        ///////
         // START Create the Vaccine and store it this object
-        ///////
         final Vaccine lVaccine = lVaccineComponentsToAddToVaccine.isEmpty()
                                  ? new Vaccine(ic)
                                  : new Vaccine(ic, lVaccineComponentsToAddToVaccine, true);
@@ -440,11 +422,8 @@ public class SupportedVaccines implements SupportingData
         this.cdsListItemNameToVaccineItem.put(llccli.getCdsListItemName(),
                 new LocallyCodedVaccineItem(llccli.getCdsListItemName(), ic, lIntersectionOfSupportedCdsVersions, lVaccine));
 
-        ///////
         // END Creating and persisting the Vaccine
-        ///////
 
-        ///////
         // For those vaccine components not specified in this combination vaccine, add this vaccine we're dealing with now to the list of vaccines that contain this unspecified
         // vaccine component
         //
@@ -455,8 +434,6 @@ public class SupportedVaccines implements SupportingData
             lVaccinesNotFullySpecifiedSet.add(lVaccine);
             this.vaccineComponentCDToVaccinesNotFullySpecified.put(lVaccineComponentCD, lVaccinesNotFullySpecifiedSet);
         }
-        ///////
-
     }
 
     private void populatePreviouslyDefinedVaccinesAssociatedWithVaccineComponentWithSpecifiedVaccineComponentInfo(

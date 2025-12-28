@@ -58,6 +58,7 @@ public class TargetSeasons
      */
     private static class TargetSeasonComparator implements Comparator<Season>
     {
+        @Override
         public int compare(final Season a, final Season b)
         {
             // String _METHODNAME = "TargetSeasonComparator.compare(): ";
@@ -192,8 +193,6 @@ public class TargetSeasons
                                 final LocalDate lOffSeasonEndDateBasedOnDefault =
                                         determineOffSeasonEndDateForFullySpecifiedSeasonBasedOnDefaultSeason(
                                                 lMostRecentSeasonExamined, lIdentifiedDefaultSeason);
-                                /////// if (lMostRecentExaminedOffSeasonEndDate.isAfter(lOffSeasonEndDateBasedOnDefault) &&
-                                ////// DEBUG: first line
                                 if (lOffSeasonEndDateBasedOnDefault == null || (
                                         lMostRecentExaminedOffSeasonEndDate.isAfter(lOffSeasonEndDateBasedOnDefault)
                                                 && lMostRecentExaminedOffSeasonEndDate.isBefore(

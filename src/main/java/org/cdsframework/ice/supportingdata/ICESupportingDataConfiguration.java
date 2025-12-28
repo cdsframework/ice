@@ -112,9 +112,7 @@ public class ICESupportingDataConfiguration
         lSbSDlocation.append("Supporting Data Directories: ");
         lSbCdsVersion.append("CDS versions: ");
 
-        ///////
         // First the common logic
-        ///////
         final KMId lCommonLogicKMId = KnowledgeModuleUtils.returnKMIdRepresentationOfKnowledgeModule(pCommonLogicModule);
         if (lCommonLogicKMId == null)
         {
@@ -144,11 +142,9 @@ public class ICESupportingDataConfiguration
         supportedCdsVersions.add(pCommonLogicModule);
 
         if (log.isDebugEnabled())
-            log.info(_METHODNAME + "Added supporting data directory: {}", lCommonSupportingDataDirectory);
+            log.debug(_METHODNAME + "Added supporting data directory: {}", lCommonSupportingDataDirectory);
 
-        ///////
         // Then the knowledge module logic for each specified knowledge module
-        ///////
         for (final String lCdsVersion : pSupportedKnowledgeModules)
         {
             final KMId lKMId = KnowledgeModuleUtils.returnKMIdRepresentationOfKnowledgeModule(lCdsVersion);
@@ -178,12 +174,10 @@ public class ICESupportingDataConfiguration
             supportedCdsVersions.add(lCdsVersion);
 
             if (log.isDebugEnabled())
-                log.info(_METHODNAME + "Added supporting data directory: {}", lSupportingDataDirectory);
+                log.debug(_METHODNAME + "Added supporting data directory: {}", lSupportingDataDirectory);
         }
 
-        ///////
         // Initialize Code Systems/Value Sets supporting data
-        ///////
         this.supportedCdsLists = new SupportedCdsLists(supportedCdsVersions);
         try
         {
@@ -217,9 +211,8 @@ public class ICESupportingDataConfiguration
             log.error(_METHODNAME + lErrStr);
             throw new InconsistentConfigurationException(lErrStr);
         }
-        ///////
+
         // Initialize the Vaccine Group supporting data
-        ///////
         this.supportedVaccineGroups = new SupportedVaccineGroups(this);
         try
         {
@@ -245,9 +238,7 @@ public class ICESupportingDataConfiguration
             log.debug(_METHODNAME + "{}", lDebugStr);
         }
 
-        ///////
         // Initialize the Vaccine supporting data
-        ///////
         this.supportedVaccines = new SupportedVaccines(this);
         try
         {
@@ -281,9 +272,7 @@ public class ICESupportingDataConfiguration
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ///////
         // Initialize Seasons supporting data
-        ///////
         this.supportedSeasons = new SupportedSeasons(this);
         try
         {
@@ -310,9 +299,7 @@ public class ICESupportingDataConfiguration
             log.debug(_METHODNAME + "{}", lDebugStr);
         }
 
-        ///////
         // Initialize Series supporting data
-        ///////
         this.supportedSeries = new SupportedSeries(this);
         try
         {
@@ -342,7 +329,7 @@ public class ICESupportingDataConfiguration
         lSbCdsVersion.append("; ");
         lSbSDlocation.insert(0, lSbCdsVersion);
         lSbSDlocation.insert(0, _METHODNAME);
-        log.info(lSbSDlocation.toString());
+        log.debug(lSbSDlocation.toString());
     }
 
     /**
@@ -571,9 +558,8 @@ public class ICESupportingDataConfiguration
             }
             else
                 lDebugStrb.append("\n\tNo CdsVersion information supplied");
-            ///////
+
             // Series Dose Specifications
-            ///////
             final List<IceSeriesDoseSpecification> lIceSeriesDoses = pIceSeriesSpecificationFile.getIceSeriesDoses();
             lDebugStrb.append("\ngetIceSeriesDoses(): ");
             if (lIceSeriesDoses != null)
@@ -595,9 +581,8 @@ public class ICESupportingDataConfiguration
             }
             else
                 lDebugStrb.append("\t\nNo IceSeriesDoses specified");
-            ///////
+
             // Series Dose Intervals
-            ///////
             final List<IceDoseIntervalSpecification> lIceDoseIntervals = pIceSeriesSpecificationFile.getDoseIntervals();
             lDebugStrb.append("\ngetDoseIntervals(): ");
             if (lIceDoseIntervals != null)

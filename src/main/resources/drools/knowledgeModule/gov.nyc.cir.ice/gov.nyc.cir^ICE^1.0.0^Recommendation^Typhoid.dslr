@@ -40,14 +40,14 @@ rule "Typhoid: Always include supplemental text with the recommendation indicati
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.904"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.TYPHOID"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made
 			- make note of the recommendation status as $recommendationStatus
 			- make note of the final recommendations as $allFinalRecommendations
 	then
 		Create a Recommendation as $supplementalText for the Series $targetSeries
-    	Set the Recommendation Supplemental text for $supplementalText to "Cholera vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk. Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information."
+    	Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.TYPHOID_NOT_ROUTINE_SEE_ACIP"
     	Set the Recommendation Status for $supplementalText to $recommendationStatus
     	Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
     	Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -71,7 +71,7 @@ rule "Typhoid: Patient < 2 years old, Not Recommended with SUPPLEMENTAL_TEXT"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.904"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.TYPHOID"
 			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -90,7 +90,7 @@ rule "Typhoid: Patient >= 2 years old and not complete, Conditional/High Risk"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.904"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.TYPHOID"
 			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -109,7 +109,7 @@ rule "Typhoid: Patient is complete for typhoid, Conditional/Complete_High_Risk"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.904"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.TYPHOID"
 			- the Series is complete
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries

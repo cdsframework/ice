@@ -33,10 +33,10 @@ rule "Duplicate Shots/Same Day DTP: If one of the shots is pertussis-containing 
 	activation-group "duplicateShotEvaluationOrder"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200",
-			vaccineComponent.allDiseasesTargetedForImmunity not contains "SUPPORTED_DISEASE_CONCEPT.033.9")
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.DTP",
+			vaccineComponent.allDiseasesTargetedForImmunity not contains "SUPPORTED_DISEASE_CONCEPT.PERTUSSIS")
 		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate,
-			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.033.9", isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false)
+			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.PERTUSSIS", isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false)
 	then
 		modify($td) {
 			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
@@ -56,12 +56,12 @@ rule "Duplicate Shot/Same Day Overview Abstract DTP Rule #4: Make note if all sh
 	salience 10
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == true,
-			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.033.9",	associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200")
+			vaccineComponent.allDiseasesTargetedForImmunity contains "SUPPORTED_DISEASE_CONCEPT.PERTUSSIS",	associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.DTP")
 		$tdother : TargetDose(hasBeenEvaluated == true, this != $td, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries,
-			vaccineComponent.isUnspecifiedFormulation() == true, vaccineComponent.allDiseasesTargetedForImmunity not contains "SUPPORTED_DISEASE_CONCEPT.033.9",
+			vaccineComponent.isUnspecifiedFormulation() == true, vaccineComponent.allDiseasesTargetedForImmunity not contains "SUPPORTED_DISEASE_CONCEPT.PERTUSSIS",
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries VACCINE_GROUP_CONCEPT.200 (DTP)");
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries VACCINE_GROUP_CONCEPT.DTP (DTP)");
 end
 
 rule "Duplicate Shots/Same Day Overview Rule #4-DTP-Pertussis (BOTH Primary Series Doses): If both shots are NOS and one of them contains Pertussis and the other does not, then evaluate shot with Pertussis as Valid and evaluate the other as Invalid with a reason code of DUPLICATE_SAME_DAY"
@@ -110,12 +110,12 @@ rule "Duplicate Shot/Same Day Overview Abstract DTP Rule #5: Make note if neithe
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.200", vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.DTP", vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
 		$tdother : TargetDose(this != $td, hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.isUnspecifiedFormulation() == false,
 			$tdOtherIsCombination : administeredVaccine.isCombinationVaccine(), isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 		eval($tdIsCombination == true && $tdOtherIsCombination == true || $tdIsCombination == false && $tdOtherIsCombination == false)
 	then
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries VACCINE_GROUP_CONCEPT.200 (DTP)");
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries VACCINE_GROUP_CONCEPT.DTP (DTP)");
 end
 
 rule "Duplicate Shots/Same Day DTP Rule 5a (BOTH Primary Series Doses): If one DTP shot is pertussis-containing vaccine and other is not pertussis-containing, evaluate the non-pertussis containing vaccine as Invalid w/ DUPLICATE_SHOT_SAME_DAY"
@@ -127,7 +127,7 @@ rule "Duplicate Shots/Same Day DTP Rule 5a (BOTH Primary Series Doses): If one D
 	when
 		TargetDose(this == $td, isPrimarySeriesShot() == true)
 		TargetDose(this == $tdother, isPrimarySeriesShot() == true)
-		eval($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && ! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9"))
+		eval($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS") && ! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS"))
 	then
 		modify($tdother) {
 			setStatus(DoseStatus.INVALID),
@@ -153,7 +153,7 @@ rule "Duplicate Shots/Same Day DTP Rule 5a (_NOT_ BOTH Primary Series Doses): If
 	salience 10
 	when
 		TargetDose(this == $tdother, ((isPrimarySeriesShot() == true || isPrimarySeriesShot() == false) && $td.isPrimarySeriesShot() == false) || (isPrimarySeriesShot() == false && ($td.isPrimarySeriesShot() == true || $td.isPrimarySeriesShot() == false)))
-		eval($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") && ! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9"))
+		eval($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS") && ! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS"))
 	then
 		modify($tdother) {
 			setDuplicateShotSameDayCheckCompleted(true)
@@ -173,10 +173,10 @@ rule "Duplicate Shot/Same Day DTP Rule 5b (BOTH Primary Series Doses): If neithe
 	when
 		TargetDose(this == $td, isPrimarySeriesShot() == true)
 		TargetDose(this == $tdother, isPrimarySeriesShot() == true)
-		eval(($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") &&
-			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9")) ||
-			(! $td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") &&
-			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9")))
+		eval(($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS") &&
+			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS")) ||
+			(! $td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS") &&
+			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS")))
 	then
 		TargetDose tdToModifyInvalid = null;
 		TargetDose tdToModifyValid = null;
@@ -212,10 +212,10 @@ rule "Duplicate Shot/Same Day DTP Rule 5b (_NOT_ BOTH Primary Series Doses): If 
 	salience 10
 	when
 		TargetDose(this == $tdother, ((isPrimarySeriesShot() == true || isPrimarySeriesShot() == false) && $td.isPrimarySeriesShot() == false) || (isPrimarySeriesShot() == false && ($td.isPrimarySeriesShot() == true || $td.isPrimarySeriesShot() == false)))
-		eval(($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") &&
-			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9")) ||
-			(! $td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9") &&
-			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.033.9")))
+		eval(($td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS") &&
+			$tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS")) ||
+			(! $td.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS") &&
+			! $tdother.getVaccineComponent().getAllDiseasesTargetedForImmunity().contains("SUPPORTED_DISEASE_CONCEPT.PERTUSSIS")))
 	then
 		modify($tdother) {
 			setDuplicateShotSameDayCheckCompleted(true)

@@ -205,9 +205,7 @@ public class SupportedSeries implements SupportingData
             return;
         }
 
-        ///////
         // CDS Version validation checks
-        ///////
         // Validation Check: If no cdsVersions are specified, thrown an error
         if (ObjectUtils.isEmpty(pIceSeriesSpecificationFile.getCdsVersions()))
         {
@@ -223,9 +221,7 @@ public class SupportedSeries implements SupportingData
         if (ObjectUtils.isEmpty(lCdsVersions))
             return;
 
-        ///////
         // Series code must be specified and not previously specified (unique)
-        ///////
         String lSeriesCode = pIceSeriesSpecificationFile.getCode();
         if (ObjectUtils.isEmpty(lSeriesCode))
         {
@@ -244,9 +240,7 @@ public class SupportedSeries implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ///////
         // Get the associated Vaccine Group for this series. (Must specify one and it must have been previously specified LocallyCodedVaccineGroupItem)
-        ///////
         final Collection<org.opencds.vmr.v1_0.schema.CD> lVaccineGroups = pIceSeriesSpecificationFile.getVaccineGroups();
         if (ObjectUtils.isEmpty(lVaccineGroups))
         {
@@ -276,9 +270,7 @@ public class SupportedSeries implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ///////
         // At least one dose must be specified and the number of doses must match the IceSeriesDoseSpecification elements
-        ///////
         final Collection<IceSeriesDoseSpecification> isdss = pIceSeriesSpecificationFile.getIceSeriesDoses();
         if (ObjectUtils.isEmpty(isdss))
         {
@@ -306,9 +298,7 @@ public class SupportedSeries implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ///////
         // Gather the Seasons from this supporting data
-        ///////
         // Plus, if any Seasons are specified, verify that they are seasons that have been previously specified
         final Collection<String> lSeasonCodesFromIceSeriesSpecificationFile = pIceSeriesSpecificationFile.getSeasonCodes();
         final List<Season> lSeasons = new ArrayList<>();
@@ -329,26 +319,17 @@ public class SupportedSeries implements SupportingData
             }
         }
 
-        ///////
         // Create the SeriesRules object
-        ///////
-        /////// SeriesRules series1Rules = (lSeasons.isEmpty()) ? new SeriesRules(lSeriesCode, lVGI.getCdsItemName()) : new SeriesRules(lSeriesCode, lVGI.getCdsItemName(), lSeasons);
         final SeriesRules series1Rules = (lSeasons.isEmpty())
                                          ? new SeriesRules(lSeriesCode, lVGI.getCdsConcept())
                                          : new SeriesRules(lSeriesCode, lVGI.getCdsConcept(), lSeasons);
 
-        ////////////// Gather the DoseRules START //////////////
-
-        ///////
         // Add each dose. Check that each TimePeriod specified is a valid time period, and every vaccine specified is a vaccine that has been previously defined.
-        ///////
         final List<DoseRule> seriesDoseRules = new ArrayList<>();
         int icseSeriesDoseSpecificationNumber = 1;
         for (final IceSeriesDoseSpecification isds : isdss)
         {
-            ///////
             // Basic validation checks
-            ///////
             if (isds == null)
             {
                 final String lErrStr = "Encountered a null IceSeriesDoseSpecification; this should not happen. Cannot continue.";
@@ -383,9 +364,8 @@ public class SupportedSeries implements SupportingData
                 this.isSupportingDataConsistent = false;
                 throw new InconsistentConfigurationException(lWarnStr);
             }
-            ///////
+
             // Obtain the permitted and allowable vaccines for inclusion in the series
-            ///////
             final List<Vaccine> lPreferredDoseVaccines = new ArrayList<>();
             final List<Vaccine> lAllowableDoseVaccines = new ArrayList<>();
             final Map<VaccineComponent, TimePeriod> lAllowableVaccineMinimumAges = new HashMap<>();
@@ -473,20 +453,16 @@ public class SupportedSeries implements SupportingData
                     }
                 }
             }
-            ///////
             // Obtain the allowable minimum and maximum ages for the vaccine in the series, if any
-            ///////
 
-            ///////
             // Get absolute minimum age, minimum age, maximum age, earliest recommended age, latest recommended age, absolute minimum interval, minimum interval,
             // earliest recommended interval, latest recommended interval...
-            ///////
             final String absoluteMinimumAge = isds.getAbsoluteMinimumAge();
             final String minimumAge = isds.getMinimumAge();
             final String earliestRecommendedAge = isds.getEarliestRecommendedAge();
             // absolute minimum age, minimum age and earliest recommended age are mandatory
             if (absoluteMinimumAge == null || minimumAge == null)
-                log.warn(_METHODNAME + "Absolute minimum age and/or minimum age not specified in a dose: {}; Series {}",
+                log.debug(_METHODNAME + "Absolute minimum age and/or minimum age not specified in a dose: {}; Series {}",
                         lDoseNumber, lSeriesCode);
 
             final String maximumAge = isds.getAbsoluteMaximumAge();
@@ -498,7 +474,6 @@ public class SupportedSeries implements SupportingData
             final List<IceDoseIntervalSpecification> idiss = pIceSeriesSpecificationFile.getDoseIntervals();
             if (idiss != null)
             {
-                ///////
                 // Cycle through the intervals (IceDoseIntervalSpecifications) from this dose to the next (doseNumber+1) dose
                 boolean thisDoseToNextDoseIntervalFound = false;
                 for (final IceDoseIntervalSpecification idis : idiss)
@@ -547,15 +522,13 @@ public class SupportedSeries implements SupportingData
                     }
                     else
                         if (fromDoseNumber == icseSeriesDoseSpecificationNumber && toDoseNumber != fromDoseNumber + 1)
-                            log.warn(_METHODNAME
+                            log.debug(_METHODNAME
                                             + "Warning: skipping interval from dose number {} to non-consecutive dose number {}found for Series {}; only consecutive intervals currently supported",
                                     fromDoseNumber, fromDoseNumber + 1, lSeriesCode);
                 }
             }
 
-            ///////
             // Create the SeriesRules and DoseRule and add it to the list of Doses for this Series
-            ///////
 
             final DoseRule dr = new DoseRule(series1Rules);
             // Mandatory
@@ -608,23 +581,17 @@ public class SupportedSeries implements SupportingData
             icseSeriesDoseSpecificationNumber++;
         }
 
-        ////////////// Gather the DoseRules END //////////////
-
         // Series Group Info
         if (pIceSeriesSpecificationFile.getSeriesGroup() != null)
             series1Rules.setSeriesGroup(pIceSeriesSpecificationFile.getSeriesGroup().intValue());
 
-        ///////
         // Gather patient age information and the associated start/end ages for the series (if any), and add to the SeriesRules object
-        ///////
         if (pIceSeriesSpecificationFile.getPatientStartAge() != null)
             series1Rules.setSeriesStartAge(new TimePeriod(pIceSeriesSpecificationFile.getPatientStartAge()));
         if (pIceSeriesSpecificationFile.getPatientEndAge() != null)
             series1Rules.setSeriesEndAge(new TimePeriod(pIceSeriesSpecificationFile.getPatientEndAge()));
 
-        ///////
         // Add the DoseRule information to the SeriesRules object
-        ///////
         series1Rules.setSeriesDoseRules(seriesDoseRules);
         // Determine whether or not there are recurring doses for this series (**default false if not specified**)
         if (pIceSeriesSpecificationFile.isRecurringDosesAfterSeriesComplete() != null)
@@ -643,9 +610,7 @@ public class SupportedSeries implements SupportingData
         else
             series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(true);
 
-        ///////
         // Create the SeriesItem and store it
-        ///////
         final LocallyCodedSeriesItem lcsi;
         try
         {
@@ -663,9 +628,7 @@ public class SupportedSeries implements SupportingData
         // Add the mapping from the String to reference the Series to LocallyCodedSeriesItem
         this.cdsListItemNameToSeriesItem.put(lSeriesCode, lcsi);
 
-        ///////
         // Add the Series to the list of Series being tracked for each vaccine group START
-        ///////
         List<SeriesRules> lSeriesRulesListForVG = this.vaccineGroupItemToSeriesRules.get(lVGI);
         if (lSeriesRulesListForVG == null)
             lSeriesRulesListForVG = new ArrayList<>();

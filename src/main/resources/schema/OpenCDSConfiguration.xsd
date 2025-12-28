@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:config="org.opencds.dss.config.v1_0"
-           targetNamespace="org.opencds.dss.config.v1_0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:config="org.opencds.config.v2"
+           targetNamespace="org.opencds.config.v2">
     <xs:annotation>
         <xs:documentation>
             This schema is meant to specify the
             operational aspects of DSS.
         </xs:documentation>
     </xs:annotation>
+    <xs:simpleType name="Token">
+        <xs:restriction base="xs:string">
+            <xs:pattern value=".+"/>
+        </xs:restriction>
+    </xs:simpleType>
     <xs:complexType name="Link">
         <xs:annotation>
             <xs:documentation>Used externally. This element is not
                 intended to be used for storage.
             </xs:documentation>
         </xs:annotation>
-        <xs:attribute name="rel" type="xs:string"/>
+        <xs:attribute name="rel" type="config:Token"/>
         <xs:attribute name="href" type="xs:anyURI"/>
     </xs:complexType>
     <xs:complexType name="Concept">
@@ -106,7 +112,7 @@
         <xs:attribute name="businessId" type="xs:string" use="required"/>
         <xs:attribute name="version" type="xs:string" use="required"/>
     </xs:complexType>
-    <xs:complexType name="ExecutionEngine" abstract="false">
+    <xs:complexType name="ExecutionEngine">
         <xs:annotation>
             <xs:documentation>Metadata about individual inference
                 engines
@@ -114,16 +120,16 @@
         </xs:annotation>
         <xs:sequence>
             <xs:element name="link" type="config:Link" minOccurs="0"/>
-            <xs:element name="identifier" type="config:ExecutionEngineIdentifier" minOccurs="1"/>
+            <xs:element name="identifier" type="config:ExecutionEngineIdentifier"/>
             <xs:sequence minOccurs="0">
                 <xs:annotation>
                     <xs:documentation>The minOccurs="0" attribute is deprecated. In a future version, this requirement
                         will change to default (all fields required).
                     </xs:documentation>
                 </xs:annotation>
-                <xs:element name="adapter" type="config:ExecutionEngineAdapter" minOccurs="1"/>
-                <xs:element name="context" type="config:ExecutionEngineContext" minOccurs="1"/>
-                <xs:element name="knowledgeLoader" type="config:KnowledgeLoader" minOccurs="1"/>
+                <xs:element name="adapter" type="config:ExecutionEngineAdapter"/>
+                <xs:element name="context" type="config:ExecutionEngineContext"/>
+                <xs:element name="knowledgeLoader" type="config:KnowledgeLoader"/>
             </xs:sequence>
             <xs:element name="description" type="xs:string"/>
             <xs:element name="timestamp" type="xs:dateTime"/>
@@ -136,7 +142,7 @@
             <xs:extension base="config:EntityIdentifier"/>
         </xs:complexContent>
     </xs:complexType>
-    <xs:complexType name="KnowledgeModule" abstract="false">
+    <xs:complexType name="KnowledgeModule">
         <xs:annotation>
             <xs:documentation>Metadata about individual knowledge
                 modules (KMs).
@@ -164,8 +170,7 @@
             <xs:element name="conceptDeterminationMethods" minOccurs="0">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element name="primaryCDM" type="config:ConceptDeterminationMethodBase"
-                                    minOccurs="1"/>
+                        <xs:element name="primaryCDM" type="config:ConceptDeterminationMethodBase"/>
                         <xs:element name="secondaryCDM" minOccurs="0" maxOccurs="unbounded">
                             <xs:complexType>
                                 <xs:complexContent>
@@ -237,35 +242,62 @@
         <xs:sequence>
             <xs:element name="hook" type="xs:string">
                 <xs:annotation>
-                    <xs:documentation>REQUIRED</xs:documentation>
+                    <xs:documentation>
+                        REQUIRED. The hook this service should be invoked on.
+                    </xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="title" type="xs:string" minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation>RECOMMENDED</xs:documentation>
+                    <xs:documentation>
+                        RECOMMENDED.
+                        The human-friendly name of this service.
+                    </xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="description" type="xs:string">
                 <xs:annotation>
-                    <xs:documentation>REQUIRED</xs:documentation>
+                    <xs:documentation>
+                        REQUIRED.
+                        The description of this service.
+                    </xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element name="id" type="xs:string">
                 <xs:annotation>
-                    <xs:documentation>REQUIRED</xs:documentation>
+                    <xs:documentation>
+                        REQUIRED. The {id} portion of the URL to this
+                        service which is available at
+                        {baseUrl}/cds-services/{id}
+                    </xs:documentation>
                 </xs:annotation>
+            </xs:element>
+            <xs:element name="cdsHookClientIds" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="clientId" type="config:Token" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
             </xs:element>
             <xs:element name="prefetch" minOccurs="0">
                 <xs:annotation>
-                    <xs:documentation>OPTIONAL</xs:documentation>
+                    <xs:documentation>
+                        OPTIONAL. An object containing key/value pairs
+                        of FHIR queries that this service is requesting
+                        that the CDS Client prefetch and provide on
+                        each service call. The key is a string that
+                        describes the type of data being requested and
+                        the value is a string representing the FHIR
+                        query.
+                    </xs:documentation>
                 </xs:annotation>
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element name="resource" maxOccurs="unbounded">
                             <xs:complexType>
                                 <xs:sequence>
-                                    <xs:element name="name" type="xs:string"/>
-                                    <xs:element name="query" type="xs:string"/>
+                                    <xs:element name="name" type="config:Token"/>
+                                    <xs:element name="query" type="config:Token"/>
                                 </xs:sequence>
                             </xs:complexType>
                         </xs:element>
@@ -278,11 +310,48 @@
                         <xs:enumeration value="DSTU2"/>
                         <xs:enumeration value="STU3"/>
                         <xs:enumeration value="R4"/>
+                        <xs:enumeration value="R5"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+    <xs:complexType name="CDSHooksClient">
+        <xs:sequence>
+            <xs:element name="link" type="config:Link" minOccurs="0"/>
+            <xs:element name="id" type="config:Token"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="issuers" type="config:Issuers"/>
+            <xs:element name="tenant" type="config:Token" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Issuers">
+        <xs:sequence>
+            <xs:element name="issuer" type="config:Issuer" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Issuer">
+        <xs:sequence>
+            <xs:element name="iss" type="config:Token"/>
+            <xs:choice>
+                <xs:element name="jku" type="config:Token"/>
+                <xs:element name="jwk" type="config:Token"/>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="accessType" type="config:AccessType" default="ALLOW"/>
+    </xs:complexType>
+    <xs:simpleType name="AccessType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ALLOW"/>
+            <xs:enumeration value="DENY"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="Operator">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="AND"/>
+            <xs:enumeration value="OR"/>
+        </xs:restriction>
+    </xs:simpleType>
     <xs:complexType name="Package">
         <xs:sequence>
             <xs:element name="link" type="config:Link" minOccurs="0"/>
@@ -305,7 +374,7 @@
             </xs:element>
         </xs:sequence>
     </xs:complexType>
-    <xs:complexType name="SemanticSignifier" abstract="false">
+    <xs:complexType name="SemanticSignifier">
         <xs:annotation>
             <xs:documentation>Attributes of individual semantic
                 signifiers (SSs).
@@ -316,7 +385,6 @@
             <xs:element name="identifier" type="config:SemanticSignifierId"/>
             <xs:element name="name" type="xs:string"/>
             <xs:element name="description" type="xs:string"/>
-            <xs:element name="xsdComputableDefinition" type="config:XSDComputableDefinition" minOccurs="0"/>
             <xs:element name="entryPoint" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>
@@ -398,7 +466,9 @@
     </xs:complexType>
     <xs:complexType name="Plugin">
         <xs:annotation>
-            <xs:documentation/>
+            <xs:documentation>
+                Metadata for OpenCDS to resolve the Plugin.
+            </xs:documentation>
         </xs:annotation>
         <xs:sequence>
             <xs:element name="identifier" type="config:PluginId">
@@ -406,7 +476,7 @@
                     <xs:documentation>Intended to guarantee uniqueness across plugins.</xs:documentation>
                 </xs:annotation>
             </xs:element>
-            <xs:element name="className" type="xs:string"/>
+            <xs:element name="className" type="config:Token"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="PluginId">
@@ -446,7 +516,11 @@
     </xs:simpleType>
     <xs:complexType name="SupportingData">
         <xs:annotation>
-            <xs:documentation/>
+            <xs:documentation>
+                SupportingData used by Plugins to support
+                additional payload processing that is not
+                intended by be done by the rules engine.
+            </xs:documentation>
         </xs:annotation>
         <xs:sequence>
             <xs:element name="link" type="config:Link" minOccurs="0"/>
@@ -463,14 +537,6 @@
             </xs:element>
             <xs:element name="timestamp" type="xs:dateTime"/>
             <xs:element name="userId" type="config:UserId"/>
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="XSDComputableDefinition">
-        <xs:sequence>
-            <xs:element name="xsdRootGlobalElementName" type="xs:string"/>
-            <xs:element name="xsdURL" type="xs:string"/>
-            <xs:element name="schematronURL" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="narrativeModelRestrictionGuideURL" type="xs:string" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
     <xs:simpleType name="ExecutionEngineIdentifier">
@@ -542,7 +608,7 @@
             <xs:enumeration value="RETIRED">
                 <xs:annotation>
                     <xs:documentation>The KM was historically promoted,
-                        but should not be used any more.
+                        but should not be used anymore.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>
@@ -595,8 +661,7 @@
                 <xs:annotation>
                     <xs:documentation>Indicating a CDM will retract
                         contents supplied by the default or primary CDM
-                        or
-                        secondary CDMs.
+                        or secondary CDMs.
                     </xs:documentation>
                 </xs:annotation>
             </xs:enumeration>

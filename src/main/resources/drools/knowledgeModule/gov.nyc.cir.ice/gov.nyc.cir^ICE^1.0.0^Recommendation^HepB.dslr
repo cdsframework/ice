@@ -27,7 +27,7 @@ rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 60 Years and No
 	activation-group "recommendationAgeCheck"
     when
         There is a Series $targetSeries that needs forecasting
-        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
         	- the number of Administered Shots is == 0
         The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- make note of the patient's birthdate as $dtBirthDate
@@ -46,7 +46,7 @@ rule "HepB: Recommend both an earliest interval and recommended interval of 112 
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
 			- the name of the series is "HepBChildAdolescentSeries"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
@@ -72,7 +72,7 @@ rule "HepB: Recommend both an earliest interval of 112 days and recommended inte
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
 			- the name of the series is "HepBAdult3DoseSeries"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
@@ -99,12 +99,12 @@ rule "Hep B: Recommend CVX 189 (Hep B adjuvanted) for the Hep B 2-dose Adult Ser
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.100"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
 			- the Name of the Series is "HepBAdult2DoseSeries"
 			- the Series is Not Complete
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE189"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_189"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries

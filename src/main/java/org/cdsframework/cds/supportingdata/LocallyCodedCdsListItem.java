@@ -1,34 +1,9 @@
-/*
- * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
- * Contributions by HLN Consulting, LLC
- *
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
- * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
- * details.
- *
- * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
- * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
- * limitation, and warranty) complete irrevocable access and rights to this project.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
- *
- * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
- * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
- * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- * For more information about this software, see http://www.hln.com/ice or send
- * correspondence to ice@hln.com.
- */
-
 package org.cdsframework.cds.supportingdata;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.cdsframework.cds.CdsConcept;
@@ -75,10 +50,8 @@ public class LocallyCodedCdsListItem
     private String cdsListItemName;
     private String cdsListId;
     private String cdsListCode;
-    private String cdsListName;
     private String cdsListType;
     private String cdsListDescription;
-    // private String cdsListEnumClass;
     private String cdsListCodeSystem;
     private String cdsListCodeSystemName;
     private String cdsListValueSet;
@@ -87,13 +60,15 @@ public class LocallyCodedCdsListItem
     private String cdsListItemValue;
     private Collection<CdsConcept> opencdsConceptMappings;
     private Collection<String> cdsListVersions;
+    private CD cdsListItemOutboundCD;
     private CD cdsListItemCD;
+    private boolean supplementalText;
 
     /**
      * Create a SupportedListConceptItem object based on the CdsListSpecificationFile and a CdsListItem. The CdsListItem object must be one that is in the CdsListSpecificationFile,
      * based on its cdsListItemKey value. It must conform to _attributeNamingConvention.
      * <p>
-     * The CdsList must contain populated cdsListCode and a cdsListCodeSystem values (required values).
+     * The CdsList must contain populated cdsListCode and cdsListCodeSystem values (required values).
      * <p>
      * If any of these things occur, an IllegalArgumentException is thrown.
      *
@@ -202,7 +177,20 @@ public class LocallyCodedCdsListItem
         this.cdsListVersions = pCdsLsf.getCdsVersions();
         this.cdsListItemName = "%s.%s".formatted(this.cdsListCode, this.cdsListItemKey);
 
-        // Create CD
+        // Create
+        if (pCdsLi.getOutboundCoding() != null)
+        {
+            this.cdsListItemOutboundCD = new CD();
+            this.cdsListItemOutboundCD.setCode(pCdsLi.getOutboundCoding().getCode());
+            this.cdsListItemOutboundCD.setDisplayName(pCdsLi.getOutboundCoding().getDisplayName());
+            this.cdsListItemOutboundCD.setCodeSystem(pCdsLi.getOutboundCoding().getCodeSystem());
+            this.cdsListItemOutboundCD.setCodeSystemName(pCdsLi.getOutboundCoding().getCodeSystemName());
+            this.cdsListItemOutboundCD.setOriginalText(Optional.ofNullable(pCdsLi.getOutboundCoding().getOriginalText())
+                    .map(text -> text.replaceAll("\\s+", " "))
+                    .orElse(null));
+            this.supplementalText =
+                    Optional.ofNullable(this.cdsListItemOutboundCD.getCode()).map("SUPPLEMENTAL_TEXT"::equals).orElse(false);
+        }
         this.cdsListItemCD = new CD();
         this.cdsListItemCD.setCode(this.cdsListItemKey);
         this.cdsListItemCD.setDisplayName(this.cdsListItemValue);
@@ -252,8 +240,6 @@ public class LocallyCodedCdsListItem
                 .append(cdsListId)
                 .append("\ncdsListCode=")
                 .append(cdsListCode)
-                .append("\ncdsListName=")
-                .append(cdsListName)
                 .append("\ncdsListType=")
                 .append(cdsListType)
                 .append("\ncdsListDescription=")

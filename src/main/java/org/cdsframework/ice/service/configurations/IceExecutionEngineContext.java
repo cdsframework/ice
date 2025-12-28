@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.cdsframework.ice.util.ICEVersionUtil;
 import org.kie.api.command.Command;
 import org.kie.api.runtime.ExecutionResults;
 import org.kie.internal.command.CommandFactory;
@@ -42,6 +41,7 @@ import org.opencds.config.api.EvaluationContext;
 import org.opencds.config.api.ExecutionEngineContext;
 import org.springframework.util.ObjectUtils;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -57,7 +57,8 @@ public class IceExecutionEngineContext implements ExecutionEngineContext<List<Co
     private static final Set<String> ALL_GLOBALS =
             Set.of(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID, ASSERTIONS, NAMED_OBJECTS);
     private static final Set<String> FILTERED_GLOBALS = Set.of(EVAL_TIME, CLIENT_LANG, CLIENT_TZ_OFFSET, FOCAL_PERSON_ID);
-
+    @Setter
+    private static String iceVersion;
     private EvaluationContext evaluationContext;
     private Map<String, List<?>> resultFactLists = new ConcurrentHashMap<>();
 
@@ -69,7 +70,6 @@ public class IceExecutionEngineContext implements ExecutionEngineContext<List<Co
         // Date evalTime = new Date();
         final String clientLanguage = evaluationContext.getClientLanguage();
         final String clientTimeZoneOffset = evaluationContext.getClientTimeZoneOffset();
-        final String iceVersion = ICEVersionUtil.getIceVersion();
 
         final Map<Class<?>, List<?>> allFactLists = evaluationContext.getAllFactLists();
 

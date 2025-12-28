@@ -27,7 +27,7 @@ rule "MMR: Recommend conditional/high risk if born prior to 1/1/1957 and series 
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
     when
         There is a Series $targetSeries that needs forecasting
-        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MMR"
         	- the Series is not complete
         The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- the patient's birthdate is < "01-Jan-1957"
@@ -47,7 +47,7 @@ rule "MMR: If a patient completed the series, recommendation is Not Recommended 
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MMR"
 			- the Series is Complete
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
@@ -68,7 +68,7 @@ rule "MMR: If the recommended due date for Target Dose 2 is >= 19 years old, the
 	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MMR"
 			- the Series is not complete
 			- the effective dose number in the series is == 2
 			- make note of the Recommendation Date as $recommendationDate

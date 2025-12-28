@@ -32,7 +32,7 @@ rule "Polio: (Series Complete with 3 Doses Rule 2)- Series is Complete if 3 prio
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an Administered Shot $dose3
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- that has already been evaluated and whose Shot Validity is VALID
 			- the dose number in the series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDate
@@ -43,7 +43,7 @@ rule "Polio: (Series Complete with 3 Doses Rule 2)- Series is Complete if 3 prio
 			- the dose number in the series is == 2
 			- make note of the date this shot was administered as $dtAdministrationDatePrev
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- the series is not complete
 			- the number of doses administered is == 3
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -61,7 +61,7 @@ rule "Polio: Modify DoseRule4 Absolute minimum age and Absolute Minimum Interval
 	no-loop true
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400" and the Series with name "Polio4DoseSeries"
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO" and the Series with name "Polio4DoseSeries"
 			- the dose number in the series is == 4
 			- the administration date of the shot is < "07-Aug-2009"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
@@ -88,13 +88,13 @@ rule "Polio: Mark target dose 4 administered >= 8/7/2009 and before absolute min
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $targetDose4 that needs to be evaluated
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400" and the Series with name "Polio4DoseSeries"
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO" and the Series with name "Polio4DoseSeries"
 			- the dose number in the series is == 4
 			- the administration date of the shot is >= "07-Aug-2009"
 			- make note of the date this shot was administered as $dtAdministrationDate
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- the name of the Series is "Polio4DoseSeries"
 			- make note of the absolute minimum age for dose 4 in this series as $absoluteMinimumAge
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -114,11 +114,11 @@ rule "Polio: Mark OPV shots (CVX 178 or CVX 179) as INVALID with reason MISSING_
 	activation-group "allowableVaccineCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
-			- the vaccine administered a member of ("ICE178","ICE179")
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
+			- the vaccine administered a member of ("VACCINE_CVX_178","VACCINE_CVX_179")
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- the Series is Not Complete
 	then
 		Include the reason for shot $currentShot Invalid due to "Missing Antigen"
@@ -134,12 +134,12 @@ rule "Polio: Mark OPV shots administered >= 4/1/2016 as INVALID with reason MISS
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- the administration date of the shot is >= "01-Apr-2016"
-			- the vaccine administered a member of ("ICE02","ICE178","ICE179","ICE182")
+			- the vaccine administered a member of ("VACCINE_CVX_02","VACCINE_CVX_178","VACCINE_CVX_179","VACCINE_CVX_182")
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- the Series is Not Complete
 	then
 		Include the reason for shot $currentShot Invalid due to "Missing Antigen"

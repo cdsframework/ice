@@ -36,8 +36,8 @@ rule "Duplicate Shots/Same Day (Hep A): If a pediatric vaccine is administered t
 	activation-group "duplicateShotEvaluationOrder"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", associatedSeriesName == "HepA2DoseChildAdultSeries", vaccineComponent.cdsConceptName in ("ICE83", "ICE84", "ICE31"))
-		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.cdsConceptName not in ("ICE83", "ICE84", "ICE31"))
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEP_A", associatedSeriesName == "HepA2DoseChildAdultSeries", vaccineComponent.cdsConceptName in ("VACCINE_CVX_83", "VACCINE_CVX_84", "VACCINE_CVX_31"))
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.cdsConceptName not in ("VACCINE_CVX_83", "VACCINE_CVX_84", "VACCINE_CVX_31"))
 		$oEvaluatedPerson : EvaluatedPerson($dtBirthDate : demographics.birthTime)
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($dtBirthDate, $td.administrationDate, "19y") >= 0)
 	then
@@ -67,11 +67,11 @@ rule "Duplicate Shot/Same Day (Abstract Hep A): Make note if the adult vaccine (
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.810", status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "ICE52")
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEP_A", status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "VACCINE_CVX_52")
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
-			vaccineComponent.cdsConceptName in ("ICE83","ICE84"), isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+			vaccineComponent.cdsConceptName in ("VACCINE_CVX_83","VACCINE_CVX_84"), isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries VACCINE_GROUP_CONCEPT.810 (Hep A)");
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries VACCINE_GROUP_CONCEPT.HEP_A (Hep A)");
 end
 
 rule "Duplicate Shot/Same Day (Hep A): If shot administered at >= 19 years, evalute the adult vaccine (CVX 52) Valid and pediatric vaccine (CVX 83 and/or CVX 84) Invalid / DUPLICATE_SAME_DAY"

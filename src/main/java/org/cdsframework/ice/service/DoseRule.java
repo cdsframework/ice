@@ -171,8 +171,6 @@ public class DoseRule
 
     public TimePeriod getAllowableVaccineMinimumAge(final VaccineComponent pVaccineComponent)
     {
-        /////// final String _METHODNAME = "getAllowableVaccineMinimumAge(): ";
-
         if (pVaccineComponent == null)
             return null;
 

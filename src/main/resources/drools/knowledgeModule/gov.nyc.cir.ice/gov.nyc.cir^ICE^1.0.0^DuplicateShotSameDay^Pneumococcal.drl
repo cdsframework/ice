@@ -59,14 +59,14 @@ rule "Duplicate Shot/Same Day Overview Abstract Pneumococcal Rule #5: Make note 
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
 			vaccineComponent.isUnspecifiedFormulation() == false, $tdIsCombination: administeredVaccine.isCombinationVaccine())
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.VALID,
 			isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false, doseNumberInSeries == $td.doseNumberInSeries, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false,
 				$tdOtherIsCombination : administeredVaccine.isCombinationVaccine())
 		eval($tdIsCombination == true && $tdOtherIsCombination == true || $tdIsCombination == false && $tdOtherIsCombination == false)
 	then
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries VACCINE_GROUP_CONCEPT.750 (Pneumococcal)");
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL (Pneumococcal)");
 end
 
 rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV21 or PCV20 and a PPSV23 are both administered for dose 1 of the Adult series on the same day, evaluate the PCV21 or PCV20 first"
@@ -75,8 +75,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV21 or PCV20 and a PPSV23
 	auto-focus true
 	salience 5
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName in ("ICE327", "ICE216"))
-		$tdother : 	TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName == "ICE33",
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", administeredVaccine.cdsConceptName in ("VACCINE_CVX_327", "VACCINE_CVX_216"))
+		$tdother : 	TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", administeredVaccine.cdsConceptName == "VACCINE_CVX_33",
 			administrationDate == $td.administrationDate, doseNumberInSeries == 6, isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false)
 	then
 		modify($td) {
@@ -96,9 +96,9 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PPSV23 and a PCV15, PCV13, 
 	auto-focus true
 	salience 5
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName == "ICE33")
-		$tdother : 	TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750",
-			administeredVaccine.cdsConceptName in ("ICE215", "ICE133", "ICE177", "ICE100"), administrationDate == $td.administrationDate, doseNumberInSeries == 6,
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", administeredVaccine.cdsConceptName == "VACCINE_CVX_33")
+		$tdother : 	TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL",
+			administeredVaccine.cdsConceptName in ("VACCINE_CVX_215", "VACCINE_CVX_133", "VACCINE_CVX_177", "VACCINE_CVX_100"), administrationDate == $td.administrationDate, doseNumberInSeries == 6,
 			isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false)
 	then
 		modify($td) {
@@ -118,8 +118,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV21 and and other vaccine
 	auto-focus true
 	salience 5
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName == "ICE327")
-		$tdother : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName != "ICE327",
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", administeredVaccine.cdsConceptName == "VACCINE_CVX_327")
+		$tdother : TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", administeredVaccine.cdsConceptName != "VACCINE_CVX_327",
 			administrationDate == $td.administrationDate, isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false)
 	then
 		modify($td) {
@@ -139,8 +139,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV20 and and other vaccine
 	auto-focus true
 	salience 5
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName == "ICE216")
-		$tdother : 	TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName not in ("ICE327", "ICE216"),
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", administeredVaccine.cdsConceptName == "VACCINE_CVX_216")
+		$tdother : 	TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", administeredVaccine.cdsConceptName not in ("VACCINE_CVX_327", "VACCINE_CVX_216"),
 			administrationDate == $td.administrationDate, isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false)
 	then
 		modify($td) {
@@ -160,8 +160,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV15 and PCV13, PCV10 or P
 	auto-focus true
 	salience 5
 	when
-		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName == "ICE215")
-		$tdother : 	TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", administeredVaccine.cdsConceptName not in ("ICE327", "ICE216", "ICE215"),
+		$td : TargetDose(status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", administeredVaccine.cdsConceptName == "VACCINE_CVX_215")
+		$tdother : 	TargetDose(status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS || status == DoseStatus.EVALUATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", administeredVaccine.cdsConceptName not in ("VACCINE_CVX_327", "VACCINE_CVX_216", "VACCINE_CVX_215"),
 			administrationDate == $td.administrationDate, doseNumberInSeries >= 6, isDuplicateShotSameDayEvaluationOrderCompleted() == false || $td.isDuplicateShotSameDayEvaluationOrderCompleted() == false)
 	then
 		modify($td) {
@@ -181,8 +181,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV21 dose and PCV20, PPSV2
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE327")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("ICE216", "ICE33", "ICE215", "ICE133", "ICE177", "ICE100", "ICE152", "ICE109"),
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_327")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("VACCINE_CVX_216", "VACCINE_CVX_33", "VACCINE_CVX_215", "VACCINE_CVX_133", "VACCINE_CVX_177", "VACCINE_CVX_100", "VACCINE_CVX_152", "VACCINE_CVX_109"),
 			isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false, associatedTargetSeries.isSeriesComplete() == false)
 	then
 		modify($td) {
@@ -204,8 +204,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV20 dose and a PPSV23, PC
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE216")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("ICE33", "ICE215", "ICE133", "ICE177", "ICE100", "ICE152", "ICE109"),
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_216")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("VACCINE_CVX_33", "VACCINE_CVX_215", "VACCINE_CVX_133", "VACCINE_CVX_177", "VACCINE_CVX_100", "VACCINE_CVX_152", "VACCINE_CVX_109"),
 			isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false, associatedTargetSeries.isSeriesComplete() == false)
 	then
 		modify($td) {
@@ -227,8 +227,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PPSV23 dose and a PCV15, PC
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE33")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("ICE215", "ICE133", "ICE177", "ICE100", "ICE152", "ICE109"),
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_33")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("VACCINE_CVX_215", "VACCINE_CVX_133", "VACCINE_CVX_177", "VACCINE_CVX_100", "VACCINE_CVX_152", "VACCINE_CVX_109"),
 			isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false, associatedTargetSeries.isSeriesComplete() == false)
 	then
 		modify($td) {
@@ -250,8 +250,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV15 dose and a PCV13, PCV
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE215")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("ICE133", "ICE177", "ICE100", "ICE152", "ICE109"),
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_215")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("VACCINE_CVX_133", "VACCINE_CVX_177", "VACCINE_CVX_100", "VACCINE_CVX_152", "VACCINE_CVX_109"),
 			isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false, associatedTargetSeries.isSeriesComplete() == false)
 	then
 		modify($td) {
@@ -273,8 +273,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV13 dose and a PCV10 are 
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE133")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("ICE177", "ICE152", "ICE109"),
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_133")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName in ("VACCINE_CVX_177", "VACCINE_CVX_152", "VACCINE_CVX_109"),
 			isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false, associatedTargetSeries.isSeriesComplete() == false)
 	then
 		modify($td) {
@@ -297,8 +297,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV13 and PCV7 and shot adm
 	auto-focus true
 	salience 20
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE133", administrationDate >= "01-Jun-2010")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE100", "ICE109", "ICE152"),
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_133", administrationDate >= "01-Jun-2010")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("VACCINE_CVX_100", "VACCINE_CVX_109", "VACCINE_CVX_152"),
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdother) {
@@ -320,8 +320,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV13 and PCV7 and shot adm
 	auto-focus true
 	salience 20
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE133", "ICE109", "ICE152"), administrationDate < "01-Jun-2010")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName == "ICE100", status == DoseStatus.VALID, isDoseStatusOverridden() == false,
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("VACCINE_CVX_133", "VACCINE_CVX_109", "VACCINE_CVX_152"), administrationDate < "01-Jun-2010")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName == "VACCINE_CVX_100", status == DoseStatus.VALID, isDoseStatusOverridden() == false,
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($td) {
@@ -343,8 +343,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV10 and PCV7 and shot adm
 	auto-focus true
 	salience 20
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE177", administrationDate >= "31-Mar-2009")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE100", "ICE152", "ICE109"),
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_177", administrationDate >= "31-Mar-2009")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("VACCINE_CVX_100", "VACCINE_CVX_152", "VACCINE_CVX_109"),
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdother) {
@@ -366,8 +366,8 @@ rule "Duplicate Shots/Same Day Pneumococcal Rule: If PCV10 and PCV7 and shot adm
 	auto-focus true
 	salience 20
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.750", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE100", administrationDate < "31-Mar-2009")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE177", "ICE152", "ICE109"),
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_100", administrationDate < "31-Mar-2009")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("VACCINE_CVX_177", "VACCINE_CVX_152", "VACCINE_CVX_109"),
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdother) {

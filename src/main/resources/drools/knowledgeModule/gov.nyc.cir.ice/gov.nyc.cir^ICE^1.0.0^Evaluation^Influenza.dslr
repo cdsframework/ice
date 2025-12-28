@@ -28,7 +28,7 @@ rule "Influenza: 24 day absolute minimum interval between target dose 1 in curre
 	activation-group "doseIntervalCheckFromPreviousSeason"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.INFLUENZA"
 			- the dose number in the series is == 1
 			- make note of the Associated Series as $associatedTargetSeries
 			- make note of the date this shot was administered as $dtAdministrationDate
@@ -36,13 +36,13 @@ rule "Influenza: 24 day absolute minimum interval between target dose 1 in curre
 			- the series is a seasonal series
 			- make note of the season start date as $dtSeasonStartDate
 		There is an administered shot $priorAdministeredShot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.INFLUENZA"
 			- the shot does not belong to the series $associatedTargetSeries
 			- that has already been evaluated
 			- the administration date of the shot is < $dtSeasonStartDate
 			- make note of the date this shot was administered as $priorAdministrationDate
 		There does not exist an administered shot
-			 - the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
+			 - the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.INFLUENZA"
 			 - the shot does not belong to the series $associatedTargetSeries
 			 - that has already been evaluated
 			 - the administration date of the shot is > $priorAdministrationDate
@@ -58,11 +58,11 @@ rule "Influenza: Evaluate the Influenza Shot as Outside Flu Season if it does no
 	activation-group "doseInSeasonCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.INFLUENZA"
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.800"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.INFLUENZA"
 			- the Shot $currentShot does not fall within the Season start and stop dates of the Series
 	then
 		Include the reason for shot $currentShot Invalid due to "Outside Flu Season"
@@ -75,8 +75,8 @@ rule "Influenza: Change invalid >= maximum age reason to Insufficient Antigen fo
 	activation-group "maximumAgeVaccineCheck"
     when
     	There is an Administered Shot $oTargetDose that needs to be evaluated
-    		- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
-       		- the vaccine administered is "ICE161"
+    		- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.INFLUENZA"
+       		- the vaccine administered is "VACCINE_CVX_161"
        		- the vaccine administered has a maximum valid age
        		- make note of the Associated Series as $associatedTargetSeries
     	The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -91,8 +91,8 @@ rule "Influenza: If CVX 194, 200, 201 202, 231, or 331 is administered, evaluate
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
     when
     	There is an Administered Shot $oTargetDose that needs to be evaluated
-    		- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.800"
-    		- the vaccine administered a member of ("ICE194", "ICE200", "ICE201", "ICE202", "ICE231", "ICE331")
+    		- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.INFLUENZA"
+    		- the vaccine administered a member of ("VACCINE_CVX_194", "VACCINE_CVX_200", "VACCINE_CVX_201", "VACCINE_CVX_202", "VACCINE_CVX_231", "VACCINE_CVX_331")
        		- make note of the Associated Series as $associatedTargetSeries
     then
     	Include the reason for shot $oTargetDose Invalid due to "Vaccine not Allowed in U.S."

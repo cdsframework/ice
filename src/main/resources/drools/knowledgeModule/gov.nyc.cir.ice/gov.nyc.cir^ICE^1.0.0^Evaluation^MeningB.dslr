@@ -34,8 +34,8 @@ rule "Mening B / FHbp 2-dose series: Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_CO
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp2DoseSeries"
-			- the vaccine administered a member of ("ICE163", "ICE328")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenBFHbp2DoseSeries"
+			- the vaccine administered a member of ("VACCINE_CVX_163", "VACCINE_CVX_328")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -62,8 +62,8 @@ rule "Mening B / FBhp 2-dose series: Do not invoke default Absolute Minimum Age 
 	activation-group "doseAgeCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp2DoseSeries"
-			- the vaccine administered a member of ("ICE163", "ICE328")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenBFHbp2DoseSeries"
+			- the vaccine administered a member of ("VACCINE_CVX_163", "VACCINE_CVX_328")
 			- make note of the date this shot was administered as $shotDate
 			- make note of the associated series as $targetSeries
 		The Patient information $patientInfo must be known to complete writing this rule
@@ -86,8 +86,8 @@ rule "MenB(FHbp 3-Dose Series): Evaluate CVX 163 as ACCEPTED/VACCINE_NOT_COUNTED
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp3DoseSeries"
-			- the vaccine administered a member of ("ICE163", "ICE328")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenBFHbp3DoseSeries"
+			- the vaccine administered a member of ("VACCINE_CVX_163", "VACCINE_CVX_328")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -118,7 +118,7 @@ rule "MenB(FHbp 3-Dose Series): Regardless of the interval between dose 2 and ta
 	activation-group "doseIntervalCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenBFHbp3DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenBFHbp3DoseSeries"
 			- the series that the shot belongs to is not complete
 			- the dose number in the Series is == 3
 			- make note of the date this shot was administered as $currentShotDate
@@ -147,8 +147,8 @@ rule "MenB(4C 2-Dose Series): Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NO
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
-			- the vaccine administered a member of ("ICE162", "ICE316")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenB4C2DoseSeries"
+			- the vaccine administered a member of ("VACCINE_CVX_162", "VACCINE_CVX_316")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -175,8 +175,8 @@ rule "MenB(4C 2-Dose Series): Do not invoke default Absolute Minimum Age check f
 	activation-group "doseAgeCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
-			- the vaccine administered a member of ("ICE162", "ICE316")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenB4C2DoseSeries"
+			- the vaccine administered a member of ("VACCINE_CVX_162", "VACCINE_CVX_316")
 			- the administration date of the shot is >= "25-Oct-2024"
 			- make note of the date this shot was administered as $shotDate
 			- make note of the associated series as $targetSeries
@@ -200,7 +200,7 @@ rule "MenB(4C 2-Dose Series): If dose 2 was administered >= 10/25/2024, the abso
 	activation-group "doseIntervalCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenB4C2DoseSeries"
 			- the dose number in the Series is == 2
 			- the administration date of the shot is >= "25-Oct-2024"
 			- the Series that the shot belongs to is not complete
@@ -228,7 +228,7 @@ rule "MenB(4C 2-Dose Series): If target dose 1 is administered < 10/25/2024, the
 	salience 999
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenB4C2DoseSeries"
 			- the dose number in the Series is == 1
 			- the administration date of the shot is < "25-Oct-2024"
 			- the Series that the shot belongs to is not complete
@@ -254,7 +254,7 @@ rule "MenB(4C 2-Dose Series): If target dose 2 is administered < 10/25/2024, the
 	salience 999
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenB4C2DoseSeries"
 			- the dose number in the Series is == 2
 			- the administration date of the shot is < "25-Oct-2024"
 			- the Series that the shot belongs to is not complete
@@ -282,7 +282,7 @@ rule "MenB(4C 2-Dose Series): If dose 1 was administered < 10/25/2024, target do
 	no-loop true
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C2DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenB4C2DoseSeries"
 			- the dose number in the Series is == 2
 			- the administration date of the shot is >= "25-Oct-2024"
 			- make note of the date this shot was administered as $currentShotDate
@@ -308,7 +308,7 @@ rule "MenB(4C 2-Dose Series): If dose 1 was administered < 10/25/2024, target do
 			- the shot is not ignored
 			- the administration date of the shot is > $previousShotDate
 		There is a Series $seriesToSwitchTo
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.835"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the name of the Series is "MenB4C3DoseSeries"
 		Confirm that the following is true: elapsed time between $dose1Date and $currentShotDate < "6m-4d" || elapsed time between $previousShotDate and $currentShotDate >= "4w-4d" && elapsed time between $previousShotDate and $currentShotDate < "4m-4d"
 	then
@@ -330,8 +330,8 @@ rule "MenB(4C 3-dose Series): Evaluate CVX 162 or CVX 316 as ACCEPTED/VACCINE_NO
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C3DoseSeries"
-			- the vaccine administered a member of ("ICE162", "ICE316")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenB4C3DoseSeries"
+			- the vaccine administered a member of ("VACCINE_CVX_162", "VACCINE_CVX_316")
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $targetSeries
 	then
@@ -362,7 +362,7 @@ rule "MenB(4C 3-dose Series): If a shot is administered < 10/25/2024 and the ser
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C3DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenB4C3DoseSeries"
 			- the series that the shot belongs to is not complete
 			- make note of the associated series as $associatedTargetSeries
 			- the administration date of the shot is < "25-Oct-2024"
@@ -382,7 +382,7 @@ rule "MenB(4C 3-Dose Series): Regardless of the interval between dose 2 and targ
 	activation-group "doseIntervalCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.835" and the Series with name "MenB4C3DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "MenB4C3DoseSeries"
 			- the series that the shot belongs to is not complete
 			- the dose number in the Series is == 3
 			- make note of the date this shot was administered as $currentShotDate

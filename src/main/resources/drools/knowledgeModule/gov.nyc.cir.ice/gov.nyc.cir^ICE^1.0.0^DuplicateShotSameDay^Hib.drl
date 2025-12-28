@@ -37,10 +37,10 @@ rule "Duplicate Shots/Same Day Hib: If one of the shots is a non-combination vac
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
-			vaccineComponent.cdsConceptName == "ICE49",	administeredVaccine.isCombinationVaccine() == false)
-		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID,
-			isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "ICE49",
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
+			vaccineComponent.cdsConceptName == "VACCINE_CVX_49",	administeredVaccine.isCombinationVaccine() == false)
+		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID,
+			isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "VACCINE_CVX_49",
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($td) {
@@ -68,10 +68,10 @@ rule "Duplicate Shots/Same Day Hib: If one of the shots is a combination vaccine
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.cdsConceptName == "ICE49",
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.cdsConceptName == "VACCINE_CVX_49",
 			isDoseStatusOverridden() == false, administeredVaccine.isCombinationVaccine() == true)
-		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.300", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID,
-			isDoseStatusOverridden() == false, administeredVaccine.isCombinationVaccine() == true, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "ICE49",
+		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID,
+			isDoseStatusOverridden() == false, administeredVaccine.isCombinationVaccine() == true, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "VACCINE_CVX_49",
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($td) {

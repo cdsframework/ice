@@ -57,6 +57,7 @@ public class SupportedCdsLists implements SupportingData
         this.cdsVersions = Objects.requireNonNullElseGet(pCdsVersions, ArrayList::new);
     }
 
+    @Override
     public boolean isEmpty()
     {
         return this.cdsListItemNameToCdsListItem.isEmpty();
@@ -125,36 +126,25 @@ public class SupportedCdsLists implements SupportingData
         if (lPreviousMappedCdsListName == null)
             this.codeSystemToCdsListName.put(slci.getCdsListCodeSystem(), slci.getCdsListCode());
 
-        ///////
         // Add the mapping from the CdsListItem Name to CdsListItem
-        ///////
         this.cdsListItemNameToCdsListItem.put(lSupportedListItemName, slci);
 
-        ///////
         // Keep track of the number of mappings of Cds List Items per locally coded cds lists
-        ///////
         this.countOfCdsListItemsPerCdsList.merge(lSLCCdsListCode, 1, Integer::sum);
 
-        ///////
         // Keep track of all of the CdsListItems associated with the CdsList
-        ///////
         final Set<LocallyCodedCdsListItem> lcclis = this.cdsListNameToCdsListItems.getOrDefault(lSLCCdsListCode, new HashSet<>());
         lcclis.add(slci);
         this.cdsListNameToCdsListItems.put(lSLCCdsListCode, lcclis);
 
-        ////////////// Supported Concepts initialization START //////////////
-        ///////
         // Add the OpenCDS Concepts (if any) to SupportedConcepts, only if the CdsList is of an IceConceptType
-        ///////
         for (final CdsConcept lC : slci.getCdsListItemOpencdsConceptMappings())
         {
             lC.setIsOpenCdsSupportedConcept(true);
             this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(ICEConceptType.OPENCDS, lC, slci);
         }
 
-        ///////
         // Add this CdsListItem as an ICEConcept of the correct type (Disease, Evaluation, Recommendation, etc. (that is, only if the CdsList is of an IceConceptType)
-        ///////
         final ICEConceptType lIceConceptType = ICEConceptType.getSupportedIceConceptType(lSLCCdsListCode);
         if (lIceConceptType != null)
         {
@@ -162,8 +152,6 @@ public class SupportedCdsLists implements SupportingData
             lIC.setIsOpenCdsSupportedConcept(false);
             this.supportedCdsConcepts.addSupportedCdsConceptWithCdsListItem(lIceConceptType, lIC, slci);
         }
-
-        ////////////// Supported Concepts initialization END //////////////
 
     }
 

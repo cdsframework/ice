@@ -26,7 +26,7 @@ rule "Hib: Recommend Hib Conditional High Risk if Patient Age >=5yrs and Series 
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.300"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- make note of the number of doses required to complete this series as $assign_nNumberOfDosesRequired
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -51,7 +51,7 @@ rule "Hib: Include Recommendation with Date 7months in 4-Dose Hib Series and Tar
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.300"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 2
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -75,7 +75,7 @@ rule "Hib: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose 
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.300"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 3
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -100,7 +100,7 @@ rule "Hib: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose Hib Se
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.300"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 4
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -124,7 +124,7 @@ rule "Hib: Set Recommendation Date to 15months and TargetDose 4 in 4-Dose Hib Se
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.300"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
 			- the name of the Series is "Hib4DoseSeries"
 			- the effective dose number in the Series is <= 4
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule

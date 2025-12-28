@@ -29,10 +29,10 @@ rule "Duplicate Shots/Same Day (Sep2023/Aug2024 >= 5yrs): If a CVX 213 and CVX 3
 	activation-group "duplicateShotEvaluationOrder"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850",
-		associatedTargetSeries!.targetSeason.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"), vaccineComponent.cdsConceptName == "ICE313")
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19",
+		associatedTargetSeries!.targetSeason.seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season"), vaccineComponent.cdsConceptName == "VACCINE_CVX_313")
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true,
-		status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "ICE213")
+		status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "VACCINE_CVX_213")
 	then
 		modify($td) {
 			setStatus(DoseStatus.INVALID),
@@ -53,9 +53,9 @@ rule "Duplicate Shots/Same Day (COVID-19): If a Janssen is administered on the s
 	activation-group "duplicateShotEvaluationOrder"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", vaccineComponent.cdsConceptName == "ICE212")
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", vaccineComponent.cdsConceptName == "VACCINE_CVX_212")
 		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate,
-			vaccineComponent.cdsConceptName in ("ICE207", "ICE208", "ICE211", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302"))
+			vaccineComponent.cdsConceptName in ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302"))
 	then
 		modify($td) {
 			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
@@ -72,7 +72,7 @@ rule "Duplicate Shots/Same Day (COVID-19): For shots prior to 10/25/2021, bypass
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customMakeNoteOfDuplicateShotSameDayIfAny"
 	when
-		$td: TargetDose(hasBeenEvaluated == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS)
+		$td: TargetDose(hasBeenEvaluated == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS)
 		EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y"), $td.administrationDate >= $dtDateAtAge)
 		eval($td.administrationDate.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat("25-Oct-2021")) < 0)
 	then
@@ -91,7 +91,7 @@ rule "Duplicate Shots/Same Day (COVID-19): If shot is marked valid but another s
 	no-loop true
 	salience 5
 	when
-		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", isDoseStatusOverridden() == false)
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", isDoseStatusOverridden() == false)
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, doseNumberInSeries == $td.doseNumberInSeries,
 			status == DoseStatus.ACCEPTED, isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
@@ -113,7 +113,7 @@ rule "Duplicate Shots/Same Day (COVID-19): If one of those shots is Valid and an
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850")
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19")
 		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.INVALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries,
 			doseNumberInSeries == $td.doseNumberInSeries, containsInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.cdsListItemName), invalidReasons.size() == 1, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
@@ -135,9 +135,9 @@ rule "Duplicate Shots/Same Day (COVID-19): If a Moderna shot and Pfizer shot are
 	auto-focus true
 	salience 10
 	when
-		$tdpfizer: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302"))
+		$tdpfizer: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302"))
 		$tdmoderna : TargetDose(this != $tdpfizer, associatedTargetSeries == $tdpfizer.associatedTargetSeries, doseNumberInSeries == $tdpfizer.doseNumberInSeries, administrationDate == $tdpfizer.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
-			administeredVaccine.cdsConceptName in ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230"), isDuplicateShotSameDayCheckCompleted() == false || $tdpfizer.isDuplicateShotSameDayCheckCompleted() == false)
+			administeredVaccine.cdsConceptName in ("VACCINE_CVX_207", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230"), isDuplicateShotSameDayCheckCompleted() == false || $tdpfizer.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdpfizer) {
 			setStatus(DoseStatus.INVALID),
@@ -158,9 +158,9 @@ rule "Duplicate Shots/Same Day (COVID-19): If an FDA-approved vaccine and a WHO-
 	auto-focus true
 	salience 10
 	when
-		$tdfda: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.850", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("ICE207", "ICE208", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301", "ICE302"))
+		$tdfda: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302"))
 		$tdwho : TargetDose(this != $tdfda, associatedTargetSeries == $tdfda.associatedTargetSeries, doseNumberInSeries == $tdfda.doseNumberInSeries, administrationDate == $tdfda.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
-			administeredVaccine.cdsConceptName not in ("ICE207", "ICE208", "ICE211", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302"), isDuplicateShotSameDayCheckCompleted() == false || $tdfda.isDuplicateShotSameDayCheckCompleted() == false)
+			administeredVaccine.cdsConceptName not in ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302"), isDuplicateShotSameDayCheckCompleted() == false || $tdfda.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdwho) {
 			setStatus(DoseStatus.INVALID),

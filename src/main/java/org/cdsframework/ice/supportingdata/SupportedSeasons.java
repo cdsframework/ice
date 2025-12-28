@@ -86,6 +86,7 @@ public class SupportedSeasons implements SupportingData
         this.isSupportingDataConsistent = true;
     }
 
+    @Override
     public boolean isEmpty()
     {
         return this.cdsListItemNameToSeasonItem.isEmpty();
@@ -143,9 +144,7 @@ public class SupportedSeasons implements SupportingData
             return;
         }
 
-        ///////
         // Check to make sure that this season code has not already been defined
-        ///////
         if (this.cdsListItemNameToSeasonItem.containsKey(lSeasonCode))
         {
             final String lErrStr = "Attempt to add a Season that was already specified previously: " + lSeasonCode;
@@ -154,7 +153,6 @@ public class SupportedSeasons implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ///////
         // Check to make sure that the vaccine group specified is a valid vaccine group; one that has been previously specified
         final CD lVaccineGroupCD = ConceptUtils.toInternalCD(pIceSeasonSpecificationFile.getVaccineGroup());
         if (!ConceptUtils.requiredAttributesForCDSpecified(lVaccineGroupCD))
@@ -193,15 +191,12 @@ public class SupportedSeasons implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ////////////// Create new season and add it to the list of seasons being tracked for each vaccine group START //////////////
         List<Season> lSeasonsListForVG = this.vaccineGroupItemToSeasons.get(lcvgi);
         if (lSeasonsListForVG == null)
             lSeasonsListForVG = new ArrayList<>();
         if (!pIceSeasonSpecificationFile.isDefaultSeason())
         {
-            ///////
             // Add fully-specified season
-            ///////
             if (pIceSeasonSpecificationFile.getStartDate() == null || pIceSeasonSpecificationFile.getEndDate() == null)
             {
                 final String lErrStr =
@@ -232,9 +227,7 @@ public class SupportedSeasons implements SupportingData
         }
         else
         {
-            ///////
             // Add default season
-            ///////
             final String lDefaultSeasonStartDate = pIceSeasonSpecificationFile.getDefaultStartMonthAndDay();
             final String lDefaultSeasonEndDate = pIceSeasonSpecificationFile.getDefaultStopMonthAndDay();
             if (lDefaultSeasonStartDate == null || lDefaultSeasonEndDate == null)

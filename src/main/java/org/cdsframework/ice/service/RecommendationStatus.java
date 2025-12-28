@@ -26,6 +26,8 @@
 
 package org.cdsframework.ice.service;
 
+import java.util.Set;
+
 import org.cdsframework.ice.supportingdata.BaseData;
 
 import lombok.Getter;
@@ -44,6 +46,22 @@ public enum RecommendationStatus implements BaseData
     NOT_RECOMMENDED("RECOMMENDATION_STATUS_CONCEPT.NOT_RECOMMENDED"),
     RECOMMENDED_IN_FUTURE("RECOMMENDATION_STATUS_CONCEPT.FUTURE_RECOMMENDED"),
     RECOMMENDATION_NOT_AVAILABLE("RECOMMENDATION_STATUS_CONCEPT.NOT_AVAILABLE");
+
+    @SuppressWarnings("unused")
+    public static final Set<RecommendationStatus> NOT_FORECASTED_YET =
+            Set.of(NOT_FORECASTED, EVALUATION_OF_HISTORY_REQUIRED, FORECASTING_IN_PROGRESS);
+    @SuppressWarnings("unused")
+    public static final Set<RecommendationStatus> HAS_RECOMMENDATION =
+            Set.of(RECOMMENDED, CONDITIONALLY_RECOMMENDED, NOT_RECOMMENDED, RECOMMENDED_IN_FUTURE);
+    @SuppressWarnings("unused")
+    public static final Set<RecommendationStatus> HAS_CURRENT_OR_FUTURE_RECOMMENDATION =
+            Set.of(RECOMMENDED, CONDITIONALLY_RECOMMENDED, RECOMMENDED_IN_FUTURE);
+    @SuppressWarnings("unused")
+    public static final Set<RecommendationStatus> HAS_NON_CONDITIONAL_RECOMMENDATION =
+            Set.of(RECOMMENDED, NOT_RECOMMENDED, RECOMMENDED_IN_FUTURE);
+    @SuppressWarnings("unused")
+    public static final Set<RecommendationStatus> STATUS_NOT_EQUAL_RECOMMENDED =
+            Set.of(CONDITIONALLY_RECOMMENDED, NOT_RECOMMENDED, RECOMMENDED_IN_FUTURE);
 
     private final String cdsListItemName;
 }

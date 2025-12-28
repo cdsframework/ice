@@ -1,29 +1,3 @@
-/**
- * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
- * Contributions by HLN Consulting, LLC
- * <p>
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
- * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
- * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
- * details.
- * <p>
- * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
- * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
- * limitation, and warranty) complete irrevocable access and rights to this project.
- * <p>
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
- * <p>
- * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
- * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
- * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
- * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * <p>
- * For more information about this software, see http://www.hln.com/ice or send
- * correspondence to ice@hln.com.
- */
-
 package org.cdsframework.ice.service;
 
 import java.util.ArrayList;
@@ -31,12 +5,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
-import org.drools.core.spi.KnowledgeHelper;
+import org.drools.model.Drools;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
 import org.opencds.vmr.v1_0.internal.ClinicalStatementRelationship;
 import org.opencds.vmr.v1_0.internal.EvalTime;
@@ -73,7 +48,7 @@ public record PayloadHelper(Schedule backingSchedule)
         final LocallyCodedCdsListItem sv = s.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(pReasonCode);
         if (sv == null)
         {
-            log.warn(_METHODNAME + "reason code supplied is not one that is defined in the supporting data; returning null");
+            log.debug(_METHODNAME + "reason code supplied is not one that is defined in the supporting data; returning null");
             return null;
         }
 
@@ -90,14 +65,9 @@ public record PayloadHelper(Schedule backingSchedule)
     }
     // TODO: CDSOutput Template codes... Make configurable
 
-    /**
-     * Return local ICE3 code for the OpenCDS reason code value.
-     *
-     * @return local ICE3 code value, null if parameter supplied is null, null if local code value for supplied code is not found
-     */
-    public static CD getLocalCodeForEvaluationReason(final String pReasonCode, final Schedule s)
+    public static LocallyCodedCdsListItem getCdsListItemForReasonCode(final String pReasonCode, final Schedule s)
     {
-        final String _METHODNAME = "getLocalCodeForEvaluationReason(): ";
+        final String _METHODNAME = "getCdsListItemForReasonCode(): ";
         if (pReasonCode == null || s == null)
         {
             log.warn(_METHODNAME + "no concept code or schedule supplied; returning null");
@@ -107,13 +77,29 @@ public record PayloadHelper(Schedule backingSchedule)
         final LocallyCodedCdsListItem sv = s.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(pReasonCode);
         if (sv == null)
         {
-            log.warn(_METHODNAME + "reason code supplied is not one that is defined in the supporting data; returning null");
+            log.debug(_METHODNAME + "reason code supplied is not one that is defined in the supporting data; returning null");
             return null;
         }
 
+        return sv;
+    }
+
+    /**
+     * Return local ICE3 code for the OpenCDS reason code value.
+     *
+     * @return local ICE3 code value, null if parameter supplied is null, null if local code value for supplied code is not found
+     */
+    public static CD getLocalCodeForEvaluationReason(final String pReasonCode, final Schedule s)
+    {
+        final String _METHODNAME = "getLocalCodeForEvaluationReason(): ";
+        final LocallyCodedCdsListItem sv = getCdsListItemForReasonCode(pReasonCode, s);
+
+        if (sv == null)
+            return null;
+
         if ("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON".equals(sv.getCdsListItemName()))
         {
-            log.info(_METHODNAME + "Unspecified reason for this this shot; no reason for this evaluated shot will be returned");
+            log.debug(_METHODNAME + "Unspecified reason for this this shot; no reason for this evaluated shot will be returned");
             return null;
         }
 
@@ -121,7 +107,90 @@ public record PayloadHelper(Schedule backingSchedule)
     }
 
     /**
-     * Return local ICE3 code value for the DoseStatus.
+     * Determine if the specified reason code is a supplemental text reason.
+     *
+     * @param pReasonCode The reason code (e.g., "EVALUATION_REASON_CONCEPT.COVID_INTERVAL_5M_BOOSTER")
+     * @param s           The schedule containing supporting data
+     * @return true if supplemental text, false otherwise
+     */
+    private static boolean isSupplementalTextReason(final String pReasonCode, final Schedule s)
+    {
+        final String _METHODNAME = "isSupplementalTextReason(): ";
+
+        if (pReasonCode == null || s == null)
+        {
+            log.warn(_METHODNAME + "no reason code or schedule supplied; returning false");
+            return false;
+        }
+
+        final LocallyCodedCdsListItem sv = getCdsListItemForReasonCode(pReasonCode, s);
+
+        return Optional.ofNullable(sv).map(LocallyCodedCdsListItem::isSupplementalText).orElse(false);
+    }
+
+    /**
+     * Retrieve the outbound CD with originalText for an evaluation supplemental text reason code.
+     * Similar to how getLocalCodeForEvaluationConcept works for vaccine groups.
+     *
+     * @param pReasonCode The reason code (e.g., "EVALUATION_REASON_CONCEPT.COVID_INTERVAL_5M_BOOSTER")
+     * @param s           The schedule containing supporting data
+     * @return CD with code=SUPPLEMENTAL_TEXT and originalText set to the supplemental text message, or null if not found
+     */
+    private static List<CD> getOutboundCDForSupplementalTextReason(final String pReasonCode, final Schedule s)
+    {
+        final String _METHODNAME = "getOutboundCDForSupplementalTextReason(): ";
+
+        if (pReasonCode == null || s == null)
+        {
+            log.warn(_METHODNAME + "no reason code or schedule supplied; returning null");
+            return null;
+        }
+
+        final LocallyCodedCdsListItem sv = getCdsListItemForReasonCode(pReasonCode, s);
+
+        if (sv == null)
+            return null;
+
+        // Get the outbound CD which contains the SUPPLEMENTAL_TEXT code and originalText
+        final CD outboundCD = sv.getCdsListItemOutboundCD();
+        if (outboundCD == null)
+        {
+            log.warn(_METHODNAME + "no outbound coding defined for reason code: {}", pReasonCode);
+            return null;
+        }
+
+        // Verify this is actually a supplemental text reason
+        if (!sv.isSupplementalText())
+        {
+            log.warn(_METHODNAME + "outbound coding for reason code {} does not have code=SUPPLEMENTAL_TEXT; found: {}",
+                    pReasonCode, outboundCD.getCode());
+            return null;
+        }
+
+        // Create a copy to avoid modifying the cached version
+        final CD legacyResult = new CD();
+        legacyResult.setCode(outboundCD.getCode());
+        legacyResult.setDisplayName(outboundCD.getDisplayName());
+        legacyResult.setCodeSystem(outboundCD.getCodeSystem());
+        legacyResult.setCodeSystemName(outboundCD.getCodeSystemName());
+        legacyResult.setOriginalText(outboundCD.getOriginalText());
+
+        final CD newResult = new CD();
+        newResult.setCode(sv.getCdsListItemKey());
+        newResult.setDisplayName(outboundCD.getOriginalText());
+        newResult.setCodeSystem(outboundCD.getCodeSystem());
+        newResult.setCodeSystemName(outboundCD.getCodeSystemName());
+
+        return (switch (s.getSupplementalTextMode())
+        {
+            case LEGACY -> List.of(legacyResult);
+            case NEW -> List.of(newResult);
+            case BOTH -> List.of(legacyResult, newResult);
+        });
+    }
+
+    /**
+     * Return the local ICE3 code value for the DoseStatus.
      *
      * @return local ICE3 code value, null if DoseStatus is null, "" if local code value for DoseStatus is not found
      */
@@ -152,7 +221,7 @@ public record PayloadHelper(Schedule backingSchedule)
     /**
      * Return local ICE3 code value for Recommendation
      *
-     * @return null if provided value is null; local ICE3 CD code value; CD with no code value set if provided recommendation status is not either
+     * @return null if the provided value is null; local ICE3 CD code value; CD with no code value set if the provided recommendation status is not either
      * RecommendationStatus.RECOMMENDED, RecommendationStatus.RECOMMENDED_IN_FUTURE, RecommendationStatus.CONDITIONALLY_RECOMMENDED,
      * or RecommendationStatus.NOT_RECOMMENDED
      */
@@ -191,19 +260,18 @@ public record PayloadHelper(Schedule backingSchedule)
         }
     }
 
-    public void outputNestedImmEvaluationResult(final KnowledgeHelper k, final Map<String, Object> pNamedObjects,
-            final EvalTime evalTime, final String focalPersonId, final String cdsSource, final SubstanceAdministrationEvent sae,
-            final String vg, final TargetDose d, final boolean outputSupplementalText,
-            final boolean outputDoseCountInsteadOfDoseNumberInSeries)
+    public void outputNestedImmEvaluationResult(final Drools k, final Map<String, Object> pNamedObjects, final EvalTime evalTime,
+            final String focalPersonId, final String cdsSource, final SubstanceAdministrationEvent sae, final String vg,
+            final TargetDose d, final boolean outputSupplementalText, final boolean outputDoseCountInsteadOfDoseNumberInSeries)
     {
         outputNestedImmEvaluationResult(k, pNamedObjects, evalTime, focalPersonId, cdsSource, sae, vg, d, outputSupplementalText,
                 outputDoseCountInsteadOfDoseNumberInSeries, -1);
     }
 
-    public void outputNestedImmEvaluationResult(final KnowledgeHelper k, final Map<String, Object> pNamedObjects,
-            final EvalTime evalTime, final String focalPersonId, final String cdsSource, final SubstanceAdministrationEvent sae,
-            final String vg, final TargetDose d, final boolean outputSupplementalText,
-            final boolean outputDoseCountInsteadOfDoseNumberInSeries, final int doseNumberCountToOutput)
+    public void outputNestedImmEvaluationResult(final Drools k, final Map<String, Object> pNamedObjects, final EvalTime evalTime,
+            final String focalPersonId, final String cdsSource, final SubstanceAdministrationEvent sae, final String vg,
+            final TargetDose d, final boolean outputSupplementalText, final boolean outputDoseCountInsteadOfDoseNumberInSeries,
+            final int doseNumberCountToOutput)
     {
         final String _METHODNAME = "outputNestedImmEvaluationResult: ";
         if (k == null || pNamedObjects == null || evalTime == null || sae == null || d == null)
@@ -334,38 +402,18 @@ public record PayloadHelper(Schedule backingSchedule)
         childObs.setObservationValue(childObsValue);
 
         // Observation interpretation
-        final List<CD> interpretations = new ArrayList<>();
         if (doseStatus == DoseStatus.VALID || doseStatus == DoseStatus.INVALID || doseStatus == DoseStatus.ACCEPTED
                 || doseStatus == DoseStatus.NOT_EVALUATED)
         {
-            final Collection<String> lReasons;
-            final Collection<String> lSupplementalTexts = switch (doseStatus)
+            final List<CD> interpretations = new ArrayList<>();
+
+            final Collection<String> lReasons = switch (doseStatus)
             {
-                case VALID ->
-                {
-                    lReasons = d.getValidReasons();
-                    yield d.getSupplementalTextsForValidShot();
-                }
-                case INVALID ->
-                {
-                    lReasons = d.getInvalidReasons();
-                    yield d.getSupplementalTextsForInvalidShot();
-                }
-                case ACCEPTED ->
-                {
-                    lReasons = d.getAcceptedReasons();
-                    yield d.getSupplementalTextsForAcceptedShot();
-                }
-                case NOT_EVALUATED ->
-                {
-                    lReasons = d.getNotEvaluatedReasons();
-                    yield new ArrayList<>();
-                }
-                default ->
-                {
-                    lReasons = new ArrayList<>();
-                    yield new ArrayList<>();
-                }
+                case VALID -> d.getValidReasons();
+                case INVALID -> d.getInvalidReasons();
+                case ACCEPTED -> d.getAcceptedReasons();
+                case NOT_EVALUATED -> d.getNotEvaluatedReasons();
+                default -> new ArrayList<>();
             };
 
             for (final String interp : lReasons)
@@ -373,39 +421,23 @@ public record PayloadHelper(Schedule backingSchedule)
                 if (interp == null)
                     continue;
 
-                final boolean lSupplementalTextToOutput =
-                        interp.equals(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName())
-                                && !lSupplementalTexts.isEmpty();
+                final boolean lSupplementalTextToOutput = isSupplementalTextReason(interp, this.backingSchedule);
                 if (outputSupplementalText || !lSupplementalTextToOutput)
                 {
-                    final CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
                     if (lSupplementalTextToOutput)
-                    {
-                        // Output supplemental text - multiple supplemental texts are permitted for shots
-                        if (localCDInterp != null)
-                        {
-                            for (final String lSupplementalText : lSupplementalTexts)
-                            {
-                                if (!ObjectUtils.isEmpty(lSupplementalText))
-                                {
-                                    final CD lSupplInterp = new CD();
-                                    lSupplInterp.setCode(localCDInterp.getCode());
-                                    lSupplInterp.setCodeSystem(localCDInterp.getCodeSystem());
-                                    lSupplInterp.setCodeSystemName(localCDInterp.getCodeSystemName());
-                                    lSupplInterp.setDisplayName(localCDInterp.getDisplayName());
-                                    lSupplInterp.setOriginalText(lSupplementalText);
-                                    interpretations.add(lSupplInterp);
-                                }
-                            }
-                        }
-                    }
+                        interpretations.addAll(
+                                Optional.ofNullable(getOutboundCDForSupplementalTextReason(interp, this.backingSchedule))
+                                        .orElseGet(ArrayList::new));
                     else
                     {
+                        final CD localCDInterp = getLocalCodeForEvaluationReason(interp, this.backingSchedule);
+
                         if (localCDInterp != null && !interpretations.contains(localCDInterp))
                             interpretations.add(localCDInterp);
                     }
                 }
             }
+
             if (!interpretations.isEmpty())
                 childObs.setInterpretation(interpretations);
         }
@@ -413,7 +445,7 @@ public record PayloadHelper(Schedule backingSchedule)
         // This is a nested clinical statement
         childObs.setClinicalStatementToBeRoot(false);
         childObs.setToBeReturned(true);
-        /////// k.insert(childObs);
+        // k.insert(childObs);
         k.insert(childObs);
         pNamedObjects.put("childObs" + nestedIdValue, childObs);
 
@@ -426,12 +458,12 @@ public record PayloadHelper(Schedule backingSchedule)
         relCodeSO.setCode("PERT");
         relCodeSO.setDisplayName("has pertinent information");
         rel.setTargetRelationshipToSource(relCodeSO);
-        /////// k.insert(relO);
+        // k.insert(relO);
         k.insert(relO);
         pNamedObjects.put("rel" + nestedIdValue, relO);
     }
 
-    public void outputNestedImmEvaluationNotSupported(final KnowledgeHelper k, final Map<String, Object> pNamedObjects,
+    public void outputNestedImmEvaluationNotSupported(final Drools k, final Map<String, Object> pNamedObjects,
             final EvalTime evalTime, final String focalPersonId, final String cdsSource, final SubstanceAdministrationEvent sae,
             final String vg)
     {
@@ -484,7 +516,7 @@ public record PayloadHelper(Schedule backingSchedule)
         // This is a nested clinical statement
         lSAE.setClinicalStatementToBeRoot(false);
         lSAE.setToBeReturned(true);
-        /////// k.insert(lSAE);
+        // k.insert(lSAE);
         k.insert(lSAE);
         pNamedObjects.put("lSAE" + uniqueSarIdValue, lSAE);
 
@@ -497,7 +529,7 @@ public record PayloadHelper(Schedule backingSchedule)
         relCodeSR.setCode("PERT");
         relCodeSR.setDisplayName("has pertinent information");
         rel.setTargetRelationshipToSource(relCodeSR);
-        /////// k.insert(rel);
+        // k.insert(rel);
         k.insert(rel);
         pNamedObjects.put("rel" + uniqueSarIdValue, rel);
 
@@ -538,7 +570,7 @@ public record PayloadHelper(Schedule backingSchedule)
         // This is a nested clinical statement
         childObs.setClinicalStatementToBeRoot(false);
         childObs.setToBeReturned(true);
-        /////// k.insert(childObs);
+        // k.insert(childObs);
         k.insert(childObs);
         pNamedObjects.put("childObs" + nestedIdValue, childObs);
 
@@ -551,7 +583,7 @@ public record PayloadHelper(Schedule backingSchedule)
         relCodeSO.setCode("PERT");
         relCodeSO.setDisplayName("has pertinent information");
         rel.setTargetRelationshipToSource(relCodeSO);
-        /////// k.insert(relO);
+        // k.insert(relO);
         k.insert(relO);
         pNamedObjects.put("rel" + nestedIdValue, relO);
     }
@@ -582,7 +614,7 @@ public record PayloadHelper(Schedule backingSchedule)
      * </relatedClinicalStatement>
      * </substanceAdministrationProposal>
      */
-    public SubstanceAdministrationProposal outputRootImmRecommendationSubstanceAdministrationProposal(final KnowledgeHelper drools,
+    public SubstanceAdministrationProposal outputRootImmRecommendationSubstanceAdministrationProposal(final Drools drools,
             final Map<String, Object> pNamedObjects, final String focalPersonId, final String cdsSource, final TargetSeries ts,
             final boolean outputEarliestOverdue, final boolean outputSupplementalText)
             throws IllegalArgumentException, InconsistentConfigurationException
@@ -624,14 +656,12 @@ public record PayloadHelper(Schedule backingSchedule)
         subsAdmGeneralPurposeCD.setDisplayName("Immunization/vaccination management (procedure)");
         sap.setSubstanceAdministrationGeneralPurpose(subsAdmGeneralPurposeCD);
 
-        //////////////
-        // Set Earliest valid date, recommendation date and/or latest recommendation date
-        //////////////
+        // Set the Earliest valid date, recommendation date and/or latest recommendation date
         final Date finalEarliestDate = ts.getFinalEarliestDate();
         final Date finalRecommendationDate = ts.getFinalRecommendationDate();
         if (!outputEarliestOverdue)
         {
-            // Only recommended forecast date should be set
+            // Only the recommended forecast date should be set
             if (finalRecommendationDate != null)
             {
                 final IVLDate obsTime = new IVLDate();
@@ -642,10 +672,9 @@ public record PayloadHelper(Schedule backingSchedule)
         }
         else
         {
-            // Earliest, recommended and latest recommended should be set
+            // The earliest, recommended and latest recommended should be set
             final Date finalLatestRecommendationDate = ts.getFinalOverdueDate();
-            final Date finalLatestDate =
-                    null;        // We do not support returning "latest" possible date separately in payload, as of now
+            // We do not support returning the "latest" possible date separately in payload, as of now
             if (finalRecommendationDate != null || finalLatestRecommendationDate != null)
             {
                 final IVLDate obsTime = new IVLDate();
@@ -717,21 +746,23 @@ public record PayloadHelper(Schedule backingSchedule)
             for (final Recommendation rec : recs)
             {
                 final String recommendationReasonCode = rec.getRecommendationReason();
-                if (recommendationReasonCode != null)
+                if (recommendationReasonCode != null && (rec.getRecommendationStatus() == RecommendationStatus.FORECASTING_COMPLETE
+                        || rec.getRecommendationStatus() == rs))
                 {
-                    final boolean lSupplementalTextFound =
-                            rec.getRecommendationSupplementalText() != null && recommendationReasonCode.equals(
-                                    BaseDataRecommendationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
+                    final boolean lSupplementalTextFound = isSupplementalTextReason(recommendationReasonCode, this.backingSchedule);
                     if (outputSupplementalText || !lSupplementalTextFound)
                     {
-                        final CD localCDInterp =
-                                getLocalCodeForRecommendationReason(recommendationReasonCode, this.backingSchedule);
-                        if (localCDInterp != null && (rec.getRecommendationStatus() == RecommendationStatus.FORECASTING_COMPLETE
-                                || rec.getRecommendationStatus() == rs) && !interpretations.contains(localCDInterp))
+                        if (lSupplementalTextFound)
                         {
-                            if (lSupplementalTextFound)
-                                localCDInterp.setOriginalText(rec.getRecommendationSupplementalText());
-                            if (!interpretations.contains(localCDInterp))
+                            interpretations.addAll(Optional.ofNullable(
+                                            getOutboundCDForSupplementalTextReason(recommendationReasonCode, this.backingSchedule))
+                                    .orElseGet(ArrayList::new));
+                        }
+                        else
+                        {
+                            final CD localCDInterp =
+                                    getLocalCodeForRecommendationReason(recommendationReasonCode, this.backingSchedule);
+                            if (localCDInterp != null && !interpretations.contains(localCDInterp))
                                 interpretations.add(localCDInterp);
                         }
                     }
@@ -740,6 +771,7 @@ public record PayloadHelper(Schedule backingSchedule)
             if (!interpretations.isEmpty())
                 childObs.setInterpretation(interpretations);
         }
+
         childObs.setClinicalStatementToBeRoot(false);
         childObs.setToBeReturned(true);
         drools.insert(childObs);
@@ -760,7 +792,7 @@ public record PayloadHelper(Schedule backingSchedule)
         return sap;
     }
 
-    public SubstanceAdministrationProposal outputOtherImmRecommendationSubstanceAdministrationProposal(final KnowledgeHelper drools,
+    public SubstanceAdministrationProposal outputOtherImmRecommendationSubstanceAdministrationProposal(final Drools drools,
             final Map<String, Object> pNamedObjects, final String focalPersonId, final String cdsSource)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
@@ -803,7 +835,7 @@ public record PayloadHelper(Schedule backingSchedule)
         sap.setSubstanceAdministrationGeneralPurpose(subsAdmGeneralPurposeCD);
 
         // Set the AdministrableSubstance - may be a vaccine or a vaccine group
-        final CD localObservationFocusCD = getLocalCodeForRecommendationReason("VACCINE_GROUP_CONCEPT.999", this.backingSchedule);
+        final CD localObservationFocusCD = getLocalCodeForRecommendationReason("VACCINE_GROUP_CONCEPT.OTHER", this.backingSchedule);
         final AdministrableSubstance substance = new AdministrableSubstance();
         substance.setId(ICELogicHelper.generateUniqueString());
         substance.setSubstanceCode(localObservationFocusCD);
@@ -861,7 +893,7 @@ public record PayloadHelper(Schedule backingSchedule)
         return sap;
     }
 
-    public void outputEmbeddedDosesRemainingInSubstanceAdministrationProposal(final KnowledgeHelper drools,
+    public void outputEmbeddedDosesRemainingInSubstanceAdministrationProposal(final Drools drools,
             final Map<String, Object> pNamedObjects, final String focalPersonId, final String pDosesRemaining,
             final SubstanceAdministrationProposal pSAP) throws IllegalArgumentException
     {
@@ -922,10 +954,9 @@ public record PayloadHelper(Schedule backingSchedule)
         return lObservationResult;
     }
 
-    public void outputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(
-            final KnowledgeHelper drools, final Map<String, Object> pNamedObjects, final String focalPersonId,
-            final List<SeriesDisplaySelection> pSeriesDisplays, final SubstanceAdministrationProposal pSAP)
-            throws IllegalArgumentException
+    public void outputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(final Drools drools,
+            final Map<String, Object> pNamedObjects, final String focalPersonId, final List<SeriesDisplaySelection> pSeriesDisplays,
+            final SubstanceAdministrationProposal pSAP) throws IllegalArgumentException
     {
         final String _METHODNAME = "outputEmbeddedDosesRemainingInSubstanceAdministrationProposal: ";
         if (drools == null || pNamedObjects == null || pSAP == null || pSeriesDisplays == null)
@@ -938,31 +969,23 @@ public record PayloadHelper(Schedule backingSchedule)
         if (pSeriesDisplays.isEmpty())
             return;
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // START - Top Level Observation for the Series Display
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         final ObservationResult lCollectionOfSeriesDisplaysObs =
                 generateObservationResult(ICELogicHelper.generateUniqueString(), focalPersonId, true);
 
-        ///////
         // Set the Observation Focus for the Series Display
-        ///////
         final CD localCD = new CD();    // TODO: incorporate into and pull from supporting data
         localCD.setCodeSystem("2.16.840.1.113883.3.795.12.100.500");
         localCD.setCode("SERIES_DISPLAY_OPTIONS");
         localCD.setDisplayName("Series Options for Display");
         lCollectionOfSeriesDisplaysObs.setObservationFocus(localCD);
 
-        // Loop through all of the scored series selections for display
+        // Loop through all the scored series selections for display
         for (final SeriesDisplaySelection lSDS : pSeriesDisplays)
         {
-            ////////////////////////////
-            // Create ObservationResult containing the Series Display Selection and its series display type
-            ////////////////////////////
-            //////////////
+            // Create an ObservationResult containing the Series Display Selection and its series display type
             // Set the ObservationFocus to the Series Display Type, and its ObservationValue to the coded value representing the Series itself
-            //////////////
             final ObservationResult lSeriesToDisplayObs =
                     generateObservationResult(ICELogicHelper.generateUniqueString(), focalPersonId, true);
             final CD lSeriesToDisplayFocusCD = new CD();    // TODO: incorporate into and pull from supporting data
@@ -976,9 +999,7 @@ public record PayloadHelper(Schedule backingSchedule)
             lSeriesToDisplayObsValue.setConcept(lSeriesCD);
             lSeriesToDisplayObs.setObservationValue(lSeriesToDisplayObsValue);
 
-            //////////////
             // Doses Remaining - Embed the number of doses remaining for the series within the series display type, with the observation value as text representing the number of doses remaining
-            //////////////
             final ObservationResult lDosesRemainingObs =
                     generateObservationResult(ICELogicHelper.generateUniqueString(), focalPersonId, true);
             final CD lDosesRemainingCD = new CD();    // TODO: incorporate into and pull from supporting data
@@ -1005,21 +1026,15 @@ public record PayloadHelper(Schedule backingSchedule)
             relDR.setTargetRelationshipToSource(relCodeDR);
             drools.insert(relDR);
             pNamedObjects.put("rel" + lDosesRemainingObs.getId(), relDR);
-            //////////////
             // END Doses Remaining - Embed the number of doses remaining for the series...
-            //////////////
 
-            ///////
             // Place the display series and designated display score on the named objects list
-            ///////
             lSeriesToDisplayObs.setClinicalStatementToBeRoot(false);
             lSeriesToDisplayObs.setToBeReturned(true);
             drools.insert(lSeriesToDisplayObs);
             pNamedObjects.put("childObs" + lSeriesToDisplayObs.getId(), lSeriesToDisplayObs);
 
-            ///////
             // Relate the display series with the collection of series
-            ///////
             final ClinicalStatementRelationship srel = new ClinicalStatementRelationship();
             srel.setSourceId(lCollectionOfSeriesDisplaysObs.getId());
             srel.setTargetId(lSeriesToDisplayObs.getId());
@@ -1032,17 +1047,13 @@ public record PayloadHelper(Schedule backingSchedule)
             pNamedObjects.put("rel" + lSeriesToDisplayObs.getId(), srel);
         }
 
-        //////////////
         // Place Collection of Series Displays on the named objects list
-        //////////////
         lCollectionOfSeriesDisplaysObs.setClinicalStatementToBeRoot(false);
         lCollectionOfSeriesDisplaysObs.setToBeReturned(true);
         drools.insert(lCollectionOfSeriesDisplaysObs);
         pNamedObjects.put("childObs" + lCollectionOfSeriesDisplaysObs.getId(), lCollectionOfSeriesDisplaysObs);
 
-        ///////
         // Finally, relate the top-level ObservationResult collection to the SubstanceAdministrationProposal
-        ///////
         final ClinicalStatementRelationship rel = new ClinicalStatementRelationship();
         rel.setSourceId(pSAP.getId());
         rel.setTargetId(lCollectionOfSeriesDisplaysObs.getId());
@@ -1078,7 +1089,7 @@ public record PayloadHelper(Schedule backingSchedule)
             throw new ICECoreError(lErrStr);
         }
 
-        return lccli.getCdsListItemCD();
+        return lccli.getCdsListItemOutboundCD();
     }
 
     /**
@@ -1104,10 +1115,9 @@ public record PayloadHelper(Schedule backingSchedule)
                     .getSupportedCdsConcepts()
                     .getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.OPENCDS,
                             lRecommendedVaccine.getCdsConcept());
-            /////// LocallyCodedCdsListItem sv = this.backingSchedule.getSupportedCdsLists().getCdsListItem(lRecommendedVaccine.getCdsListItemName());
             if (sv != null)
             {
-                // A specific vaccine was recommended; indicate the vaccine recommended instead of othe vaccine group
+                // A specific vaccine was recommended; indicate the vaccine recommended instead of the vaccine group
                 return sv.getCdsListItemCD();
             }
 
@@ -1135,6 +1145,6 @@ public record PayloadHelper(Schedule backingSchedule)
             throw new ICECoreError(lErrStr);
         }
 
-        return lcvgi.getCdsListItemCD();
+        return lcvgi.getCdsListItemOutboundCD();
     }
 }

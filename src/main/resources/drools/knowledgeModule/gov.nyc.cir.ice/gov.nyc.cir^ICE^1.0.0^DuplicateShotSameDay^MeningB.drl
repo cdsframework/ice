@@ -42,7 +42,7 @@ rule "Duplicate Shots/Same Day(MenB Abstract): If CVX 162 or CVX 316 is administ
 	auto-focus true
 	no-loop true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.835", administrationDate >= "25-Oct-2024", doseNumberInSeries <= associatedTargetSeries.seriesRules.numberOfDosesInSeries, isDoseStatusOverridden() == false)
+		$td: TargetDose(hasBeenEvaluated == true, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", administrationDate >= "25-Oct-2024", doseNumberInSeries <= associatedTargetSeries.seriesRules.numberOfDosesInSeries, isDoseStatusOverridden() == false)
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, administeredVaccine.cdsConceptName != $td.administeredVaccine.cdsConceptName, hasBeenEvaluated == true, isDoseStatusOverridden() == false,
 			doseNumberInSeries == $td.doseNumberInSeries, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 
@@ -105,14 +105,14 @@ rule "Duplicate Shots/Same Day (MenB- Series is Not Complete): If CVX 162 or CVX
 			setDuplicateShotSameDayCheckCompleted(true),
 			removeAllEvaluationReasonsFromAllReasonSets(),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName()),
-			addSupplementalTextForInvalidShot("The patient record indicates that different Meningococcal B products were administered on the same day. Based on the available information, the product administered is undetermined and therefore unable to be evaluated.")
+			addInvalidReason("EVALUATION_REASON_CONCEPT.MENB_SAME_DAY_DIFFERENT_PRODUCTS_UNDETERMINED")
 		};
 		modify($td) {
 			setStatus(DoseStatus.INVALID),
 			setDuplicateShotSameDayCheckCompleted(true),
 			removeAllEvaluationReasonsFromAllReasonSets(),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName()),
-			addSupplementalTextForInvalidShot("The patient record indicates that different Meningococcal B products were administered on the same day. Based on the available information, the product administered is undetermined and therefore unable to be evaluated.")
+			addInvalidReason("EVALUATION_REASON_CONCEPT.MENB_SAME_DAY_DIFFERENT_PRODUCTS_UNDETERMINED")
 		};
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries " + $td.associatedTargetSeries);
 
@@ -134,10 +134,10 @@ rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162 (or CVX 316) / CVX 163 (
 	auto-focus true
 	no-loop true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", associatedTargetSeries.seriesName == "MenB4C2DoseSeries", vaccineComponent.cdsConceptName == "ICE163",
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", associatedTargetSeries.seriesName == "MenB4C2DoseSeries", vaccineComponent.cdsConceptName == "VACCINE_CVX_163",
 			administrationDate < "25-Oct-2024", isDoseStatusOverridden() == false)
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, doseNumberInSeries == $td.doseNumberInSeries,
-			vaccineComponent.cdsConceptName == "ICE162", isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+			vaccineComponent.cdsConceptName == "VACCINE_CVX_162", isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdother) {
 			setStatus(DoseStatus.INVALID),
@@ -157,10 +157,10 @@ rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162 (or CVX 316) / CVX 163 (
 	auto-focus true
 	no-loop true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.835", vaccineComponent.cdsConceptName == "ICE162", administrationDate < "25-Oct-2024", isDoseStatusOverridden() == false,
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", vaccineComponent.cdsConceptName == "VACCINE_CVX_162", administrationDate < "25-Oct-2024", isDoseStatusOverridden() == false,
 			associatedTargetSeries.seriesName == "MenBFHbp2DoseSeries" || associatedTargetSeries.seriesName == "MenBFHbp3DoseSeries")
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false,
-			doseNumberInSeries == $td.doseNumberInSeries, vaccineComponent.cdsConceptName == "ICE163", isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+			doseNumberInSeries == $td.doseNumberInSeries, vaccineComponent.cdsConceptName == "VACCINE_CVX_163", isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdother) {
 			setStatus(DoseStatus.INVALID),

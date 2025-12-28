@@ -40,13 +40,13 @@ rule "Japanese Encephalitis: Always include supplemental text with the recommend
     ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
     when
         There is a Series $targetSeries
-            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.902"
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
             - post processing on the Series forecast has not already been run
             - a forecast for the Series has been made and the status is not Recommended
             - make note of the recommendation status as $recommendationStatus
     then
         Create a Recommendation as $supplementalText for the Series $targetSeries
-        Set the Recommendation Supplemental text for $supplementalText to "Japanese Encephalitis vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk. The only age group for which an accelerated schedule is approved is 18-65 years old. Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information."
+        Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"
         Set the Recommendation Status for $supplementalText to $recommendationStatus
         Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
         Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -70,7 +70,7 @@ rule "Japanese Encephalitis: Patient < 2 months old, Not Recommended with SUPPLE
     ruleflow-group "RecommendationForecast^customRecommendationRule"
     when
         There is a Series $targetSeries that needs forecasting
-            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.902"
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
             - the Series is not complete
             - The number of doses administered is == 0
         The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -90,7 +90,7 @@ rule "Japanese Encephalitis: Patient >= 2 months old and not complete, Condition
     ruleflow-group "RecommendationForecast^customRecommendationRule"
     when
         There is a Series $targetSeries that needs forecasting
-            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.902"
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
             - the Series is not complete
             - The number of doses administered is == 0
         The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -110,7 +110,7 @@ rule "Japanese Encephalitis: Patient is complete for Japanese Encephalitis, Cond
     ruleflow-group "RecommendationForecast^customRecommendationRule"
     when
         There is a Series $targetSeries that needs forecasting
-            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.902"
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
             - the Series is complete
     then
         Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
@@ -131,7 +131,7 @@ rule "Japanese Encephalitis: Suppress Latest Recommended Interval Check for acce
 	activation-group "latestRecommendedIntervalCheck"
 	when
         There is a Series $targetSeries that needs forecasting
-            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.902"
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
             - The name of the series is "JEVCRisk2DoseAcceleratedSeries"
             - the Series is not complete
             - The number of doses administered is == 1
@@ -153,7 +153,7 @@ rule "Japanese Encephalitis: Patient on accelerated schedule is 66 or older for 
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
         There is a Series $targetSeries
-            - The Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.902"
+            - The Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
             - The name of the series is "JEVCRisk2DoseAcceleratedSeries"
             - A Forecast for the Series has been made and a Recommendation Date has been determined
 			- Make note of the date that the most recent shot was administered as $previousShotDate

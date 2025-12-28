@@ -36,7 +36,7 @@ rule "COVID-19: If a previous shot was evaluated and Not Valid due to ABOVE_MAXI
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an administered shot $administeredShot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated and whose Shot Validity Status is not VALID
 			- the shot is not ignored
 			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
@@ -55,7 +55,7 @@ rule "COVID-19(Sep2023+): Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_
 	no-loop true
 	when
 		There is an administered shot $notAllowedShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is >= "12-Sep-2023"
 			- that has already been evaluated
 			- make note of all evaluation reasons for this shot as $oEvaluationReasons
@@ -93,19 +93,19 @@ rule "COVID-19(9/12/2023+ Abstract): If a COVID-19 shot that does not count towa
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
 		There is an administered shot $previousShot distinct from $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated
 			- the administration date of the shot is >= "12-Sep-2023"
 			- the administration date of the shot is < $currentShotDate
-			- the vaccine administered a member of ("ICE500", "ICE501", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517", "ICE518", "ICE521")
+			- the vaccine administered a member of ("VACCINE_CVX_500", "VACCINE_CVX_501", "VACCINE_CVX_503", "VACCINE_CVX_504", "VACCINE_CVX_505", "VACCINE_CVX_506", "VACCINE_CVX_507", "VACCINE_CVX_508", "VACCINE_CVX_509", "VACCINE_CVX_513", "VACCINE_CVX_514", "VACCINE_CVX_515", "VACCINE_CVX_516", "VACCINE_CVX_517", "VACCINE_CVX_518", "VACCINE_CVX_521")
 			- make note of the date this shot was administered as $previousShotDate
 		There does not exist another administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE500", "ICE501", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517", "ICE518", "ICE521")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the vaccine administered a member of ("VACCINE_CVX_500", "VACCINE_CVX_501", "VACCINE_CVX_503", "VACCINE_CVX_504", "VACCINE_CVX_505", "VACCINE_CVX_506", "VACCINE_CVX_507", "VACCINE_CVX_508", "VACCINE_CVX_509", "VACCINE_CVX_513", "VACCINE_CVX_514", "VACCINE_CVX_515", "VACCINE_CVX_516", "VACCINE_CVX_517", "VACCINE_CVX_518", "VACCINE_CVX_521")
 			- the administration date of the shot is > $previousShotDate
 			- the administration date of the shot is < $currentShotDate
 		There does not exist an IceIntervalFact
@@ -149,8 +149,8 @@ rule "COVID-19(9/12/2023+): For any prior formulation administered in a COVID-19
 	activation-group "minimumAgeVaccineCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE502", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520", "ICE521")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_212", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_502", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_512", "VACCINE_CVX_519", "VACCINE_CVX_520", "VACCINE_CVX_521")
 		    - the administration date of the shot is >= "12-Sep-2023"
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
@@ -166,8 +166,8 @@ rule "COVID-19(9/12/2023+): If a prior formulation is administered (excluding CV
 	salience 10
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE212", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE500", "ICE501", "ICE502", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE510", "ICE511", "ICE512", "ICE513", "ICE514", "ICE515",  "ICE516", "ICE517", "ICE518", "ICE519", "ICE520", "ICE521")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_212", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_500", "VACCINE_CVX_501", "VACCINE_CVX_502", "VACCINE_CVX_503", "VACCINE_CVX_504", "VACCINE_CVX_505", "VACCINE_CVX_506", "VACCINE_CVX_507", "VACCINE_CVX_508", "VACCINE_CVX_509", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_512", "VACCINE_CVX_513", "VACCINE_CVX_514", "VACCINE_CVX_515",  "VACCINE_CVX_516", "VACCINE_CVX_517", "VACCINE_CVX_518", "VACCINE_CVX_519", "VACCINE_CVX_520", "VACCINE_CVX_521")
 			- the administration date of the shot is >= "12-Sep-2023"
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
@@ -192,22 +192,22 @@ rule "COVID-19(9/12/2023+): For the 2023-2024 season, if the patient has >= 1 (i
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the dose number in the Series is == 1
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series belongs to the Season with name "COVID19Sep2023Season"
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated and whose shot validity is VALID
 		There is an administered shot $previousDose
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < "12-Sep-2023"
 			- that has already been evaluated
 			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $dtAdministrationDatePreviousDose
 			- the administration date of the shot is < "12-Sep-2023"
 		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentShot < "8w-4d"
@@ -236,7 +236,7 @@ rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVI
 	no-loop true
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the Associated Series as $associatedTargetSeries
 			- make note of the unique ID of the shot as $uniqueShotId
 		There is a Series $targetSeries identified by $associatedTargetSeries
@@ -258,7 +258,7 @@ rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVI
 	no-loop true
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the Associated Series as $associatedTargetSeries
 			- make note of the unique ID of the shot as $uniqueShotId
 		There is a Series $targetSeries identified by $associatedTargetSeries
@@ -280,7 +280,7 @@ rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVI
 	no-loop true
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the Associated Series as $associatedTargetSeries
 			- make note of the unique ID of the shot as $uniqueShotId
 		There is a Series $targetSeries identified by $associatedTargetSeries
@@ -301,7 +301,7 @@ rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in
 	salience 999
 	when
 		There is an administered shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated
 			- make note of the administered shot number as $administeredShotNumberFocus
 			- make note of the associated series as $associatedTargetSeries
@@ -323,7 +323,7 @@ rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in
 	salience 999
 	when
 		There is an administered shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated
 			- make note of the administered shot number as $administeredShotNumberFocus
 			- make note of the associated series as $associatedTargetSeries
@@ -345,7 +345,7 @@ rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in
 	salience 999
 	when
 		There is an administered shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated
 			- make note of the administered shot number as $administeredShotNumberFocus
 			- make note of the associated series as $associatedTargetSeries

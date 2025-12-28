@@ -35,8 +35,8 @@ rule "HPV: Evaluate CVX 118 administered to male patient as Accepted with reason
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.840"
-			- the vaccine administered is "ICE118"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV"
+			- the vaccine administered is "VACCINE_CVX_118"
 			- make note of the Associated Series as $associatedTargetSeries
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- the patient is male
@@ -53,7 +53,7 @@ rule "Evaluate HPV Shot as Accepted / ABOVE_REC_AGE_SERIES if Patient >= 46 yrs 
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.840"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV"
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
@@ -73,7 +73,7 @@ rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.840" and the Series with name "HPV3DoseSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV" and the Series with name "HPV3DoseSeries"
 			- the dose number in the series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries

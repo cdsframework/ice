@@ -29,8 +29,8 @@ package org.opencds.support.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,7 +48,7 @@ public class DateUtilsTest
     {
         log.info("getISODateFormat");
         final Date date = new Date();
-        Assert.assertEquals(new SimpleDateFormat("yyyyMMdd").format(date), DateUtils.getISODateFormat(date));
+        Assertions.assertEquals(new SimpleDateFormat("yyyyMMdd").format(date), DateUtils.getISODateFormat(date));
     }
 
     /**
@@ -60,6 +60,6 @@ public class DateUtilsTest
         log.info("parseISODateFormat");
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
         final String expResult = formatter.format(new Date());
-        Assert.assertEquals(expResult, formatter.format(DateUtils.parseISODateFormat(expResult)));
+        Assertions.assertEquals(expResult, formatter.format(DateUtils.parseISODateFormat(expResult)));
     }
 }

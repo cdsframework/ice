@@ -549,7 +549,7 @@ rule "CandidateDosesIdentification: Initialize TargetDose in *Non-Seasonal* Targ
 	salience 50
 	no-loop true
 	when
-		$i : ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode, $occ not in ("ICE316", "ICE328"))
+		$i : ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode, $occ not in ("VACCINE_CVX_316", "VACCINE_CVX_328"))
 		$sae : SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
 		$ts : TargetSeries($vg : vaccineGroup, targetSeasonExists() == false, $tsid : targetSeriesIdentifier)
 		// Condition: the tracking map must either NOT contain a key with this SubstanceAdministrationEvent and this OpenCDS concept, or if it does contain 
@@ -2723,10 +2723,10 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - always rese
 		not ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
 		$covidSeason : Season(seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season", "COVID19Aug2025Season"), fullySpecifiedSeasonStartDate != null, fullySpecifiedSeasonEndDate != null, $seasonStartDate : ICELogicHelper.toDate(fullySpecifiedSeasonStartDate), $seasonEndDate : ICELogicHelper.toDate(fullySpecifiedSeasonEndDate))
 		$sae : SubstanceAdministrationEvent()
-		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.targetSeason.seasonName == $covidSeason.seasonName, administrationDate >= $seasonStartDate, administrationDate <= $seasonEndDate)
+		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.targetSeason.seasonName == $covidSeason.seasonName, administrationDate >= $seasonStartDate, administrationDate <= $seasonEndDate)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == $covidSeason.seasonName)
 		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
-		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries == $ts, isValid == true, administrationDate >= $seasonStartDate, administrationDate <= $td.administrationDate,
+		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", associatedTargetSeries == $ts, isValid == true, administrationDate >= $seasonStartDate, administrationDate <= $td.administrationDate,
 			administeredShotNumberInSeries < $td.administeredShotNumberInSeries), count($acctd))
 		$evalTime: EvalTime()
 	then
@@ -2749,10 +2749,10 @@ rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do no
 	when
 		exists ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
 		$sae : SubstanceAdministrationEvent()
-		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", associatedTargetSeries.targetSeasonExists() == true, administrationDate >= "12-Sep-2023")
+		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", associatedTargetSeries.targetSeasonExists() == true, administrationDate >= "12-Sep-2023")
 		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true)
 		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
-		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.850", administrationDate < $td.administrationDate, isValid == true), count($acctd))
+		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", administrationDate < $td.administrationDate, isValid == true), count($acctd))
 		$evalTime: EvalTime()
 	then
 		PayloadHelper p = new PayloadHelper(schedule);
@@ -2778,7 +2778,7 @@ rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
 		$evalTime: EvalTime()
 	then
 		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputNestedImmEvaluationNotSupported(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, "VACCINE_GROUP_CONCEPT.999");
+		p.outputNestedImmEvaluationNotSupported(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, "VACCINE_GROUP_CONCEPT.OTHER");
 		$sae.setToBeReturned(true);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $sae);
 end

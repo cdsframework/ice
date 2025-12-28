@@ -31,12 +31,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
-import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
+import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
+import org.drools.model.codegen.ExecutableModelProject;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
@@ -49,11 +49,17 @@ import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.KnowledgeModule;
 import org.opencds.config.api.model.impl.KMIdImpl;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowledgePackage>
 {
+    @Setter
+    private static IceProperties iceProperties;
+    @Setter
+    private static Path droolsPath;
+
     @Override
     public IceKnowledgePackage loadKnowledgePackage(final KnowledgeModule knowledgeModule,
             final Function<KnowledgeModule, InputStream> knowledgeModuleInputSreamFunction)
@@ -88,18 +94,14 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
             lRequestedKmId = "gov.nyc.cir^ICE^1.0.0";
             lKMId = KMIdImpl.create("gov.nyc.cir", "ICE", "1.0.0");
         }
-        log.info("Initializing ICE3 Drools KnowledgeBase - Knowledge Module {}", lRequestedKmId);
-
-        final ICEPropertiesDataConfiguration iceConfig = new ICEPropertiesDataConfiguration();
-        final Properties lProps = iceConfig.getProperties();
+        log.debug("Initializing ICE3 Drools KnowledgeBase - Knowledge Module {}", lRequestedKmId);
 
         final String lBaseRulesScopingKmId =
-                KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceConfig.getBaseRulesScopingEntityId(),
-                        lKMId.getBusinessId(), iceConfig.getBaseRulesVersion());
+                KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceProperties.getIceBaseRulesScopingEntityId(),
+                        lKMId.getBusinessId(), iceProperties.getIceBaseRulesVersion());
 
         final KieServices kieServices = KieServices.Factory.get();
         final KieFileSystem kfs = kieServices.newKieFileSystem();
-        final Path droolsPath = Path.of(lProps.getProperty("ice_knowledge_drools_location"));
 
         try (final Stream<Path> stream = Files.find(droolsPath, Integer.MAX_VALUE, (p, a) -> a.isRegularFile()))
         {
@@ -120,13 +122,13 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
             throw new RuntimeException(e);
         }
 
-        final KieBuilder kieBuilder = kieServices.newKieBuilder(kfs, getClass().getClassLoader()).buildAll();
+        final KieBuilder kieBuilder = kieServices.newKieBuilder(kfs).buildAll(ExecutableModelProject.class);
         if (kieBuilder.getResults().hasMessages(Message.Level.ERROR))
             throw new RuntimeException("KieBuilder had errors: " + kieBuilder.getResults().getMessages());
 
         final KieBase kieBase = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId()).getKieBase();
 
-        log.info("Date/Time {}; Base Rules Scoping Km Id: {}; Initialized: {}", lRequestedKmId, lBaseRulesScopingKmId, new Date());
+        log.debug("Date/Time {}; Base Rules Scoping Km Id: {}; Initialized: {}", lRequestedKmId, lBaseRulesScopingKmId, new Date());
 
         return new IceKnowledgePackage(lKMId, kieBase);
     }

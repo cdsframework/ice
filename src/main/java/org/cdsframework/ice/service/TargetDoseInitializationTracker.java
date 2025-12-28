@@ -141,13 +141,10 @@ public class TargetDoseInitializationTracker
         for (final VaccineComponent vc : vcsContainingTargetedDiseases)
         {
             final String ctid = sae.getId();
-            /////// String ctidvcc = ctid + vc.getVaccineConcept().getOpenCdsConceptCode();
             final String ctidvcc = ctid + vc.getCdsConceptName();
             if (!initializedTargetDoseByVgMap.containsKey(ctidvcc) || initializedTargetDoseByVgMap.get(ctidvcc)
                     .equals(vaccineGroupStr))
             {
-                /////// TODO: For seasons, only add the TargetDose to the TargetSeries if the dose was administered during timeframe permitted by the Series
-                /////// TargetDose td = new TargetDose(ctid, vaccineAdministered, vc, adminDate);
                 final TargetDose td = new TargetDose(vaccineAdministered, vc, adminDate, ts, sae);
                 final boolean lTargetDoseAdded;
                 if (overrideSeasonalDateRestriction)

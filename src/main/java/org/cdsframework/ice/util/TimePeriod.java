@@ -37,14 +37,14 @@ import java.util.Date;
 import org.cdsframework.ice.service.ICELogicHelper;
 import org.springframework.util.ObjectUtils;
 
-import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Getter
-@ToString(onlyExplicitlyIncluded = true)
-public class TimePeriod
+public record TimePeriod(DurationType durationType,
+                         int duration,
+                         @ToString.Include
+                         String timePeriodRepresentation)
 {
     public enum DurationType
     {
@@ -68,7 +68,7 @@ public class TimePeriod
         if (pTP == null)
             return null;
 
-        return new TimePeriod(pTP.getDurationType(), pTP.getDuration(), pTP.getTimePeriodRepresentation());
+        return new TimePeriod(pTP.durationType(), pTP.duration(), pTP.timePeriodRepresentation());
     }
 
     /**
@@ -164,8 +164,8 @@ public class TimePeriod
         if (pTP == null)
             return startDate;
 
-        final int duration = pTP.getDuration();
-        final DurationType tpType = pTP.getDurationType();
+        final int duration = pTP.duration();
+        final DurationType tpType = pTP.durationType();
 
         return Date.from((switch (tpType)
         {
@@ -508,12 +508,7 @@ public class TimePeriod
         };
     }
 
-    private final DurationType durationType;
-    private final int duration;
-    @ToString.Include
-    private final String timePeriodRepresentation;
-
-    private TimePeriod(final DurationType durationType, final int duration, final String timePeriodRepresentation)
+    public TimePeriod
     {
         if (!isTimePeriodStringInCorrectFormat(timePeriodRepresentation))
         {
@@ -522,10 +517,6 @@ public class TimePeriod
             log.error(str);
             throw new IllegalArgumentException(str);
         }
-
-        this.durationType = durationType;
-        this.duration = duration;
-        this.timePeriodRepresentation = timePeriodRepresentation;
     }
 
     /**

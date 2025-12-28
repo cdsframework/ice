@@ -24,7 +24,7 @@ public class ConceptUtils
         {
             final String lErrStr = "argument \"" + pAttributeName + "\"  contains invalid characters; must conform to "
                     + _attributeNamingConvention;
-            log.info(_METHODNAME + "{}", lErrStr);
+            log.debug(_METHODNAME + "{}", lErrStr);
             throw new IllegalArgumentException(lErrStr);
         }
 

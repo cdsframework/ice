@@ -38,8 +38,8 @@ rule "Duplicate Shots/Same Day Rotavirus Rule #1a: If shot administered >= 1/1/2
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE74", administrationDate >= "01-Jan-2000")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName != "ICE74",
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_74", administrationDate >= "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName != "VACCINE_CVX_74",
 			vaccineComponent.isUnspecifiedFormulation() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($td) {
@@ -59,10 +59,10 @@ rule "Duplicate Shots/Same Day Rotavirus Rule #1b: If shot administered >= 1/1/2
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE119", administrationDate >= "01-Jan-2000")
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_119", administrationDate >= "01-Jan-2000")
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false,
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
-		not TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE74")
+		not TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "VACCINE_CVX_74")
 	then
 		modify($td) {
 			setStatus(DoseStatus.INVALID),
@@ -90,8 +90,8 @@ rule "Duplicate Shots/Same Day Rotavirus Rule #2a: If shot administered < 1/1/20
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE74", administrationDate < "01-Jan-2000")
-		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName != "ICE74",
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_74", administrationDate < "01-Jan-2000")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName != "VACCINE_CVX_74",
 			vaccineComponent.isUnspecifiedFormulation() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	then
 		modify($tdother) {
@@ -111,10 +111,10 @@ rule "Duplicate Shots/Same Day Rotavirus Rule #2b: If shot administered < 1/1/20
 	auto-focus true
 	salience 10
 	when
-		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.820", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "ICE119", administrationDate < "01-Jan-2000")
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.ROTAVIRUS", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName == "VACCINE_CVX_119", administrationDate < "01-Jan-2000")
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false,
 			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
-		not TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "ICE74")
+		not TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, status == DoseStatus.VALID, administeredVaccine.cdsConceptName == "VACCINE_CVX_74")
 	then
 		modify($td) {
 			setStatus(DoseStatus.INVALID),

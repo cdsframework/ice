@@ -28,10 +28,10 @@ rule "MMR: If a CVX 03, CVX 04, or CVX 05 is administered at >= 6 months-4 days 
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.500"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MMR"
 			- the dose number in the Series is == 1
-			- the vaccine administered a member of ("ICE03", "ICE04", "ICE05")
-			- the vaccine administered is not "ICE94"
+			- the vaccine administered a member of ("VACCINE_CVX_03", "VACCINE_CVX_04", "VACCINE_CVX_05")
+			- the vaccine administered is not "VACCINE_CVX_94"
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the absolute minimum age of this dose as $absMinAgeDose1
 			- make note of the associated series as $associatedTargetSeries
@@ -51,7 +51,7 @@ rule "MMR: Mark Target Dose 2 as Accepted / EXTRA_DOSE if the shot is administer
 	activation-group "doseAgeCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.500"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MMR"
 			- the dose number in the Series is == 2
 			- make note of the date this Shot was Administered as $assign_dtAdministrationDate
 			- make note of the associated series as $associatedTargetSeries
@@ -70,11 +70,11 @@ rule "MMR: Mark the series complete if Patient >= 19 yrs and there is 1 dose in 
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MMR"
 			- the series is not complete
 			- the effective dose number in the series is == 2
 		There does not exist an Administered Shot
-			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.500"
+			- the Shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MMR"
 			- that has not already been Evaluated
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -91,7 +91,7 @@ rule "Live Vaccine interval between MMR and MMRV is 28 days"
 		There is an Administered Shot $targetDose that needs to be evaluated
 			- the Vaccine Administered is a Live Virus Vaccine
 			- the Shot has not already been marked as a Live Virus Conflict (as we do not want this rule executing more than necessary)
-			- the vaccine administered is "ICE94"
+			- the vaccine administered is "VACCINE_CVX_94"
 			- make note of the Date this Shot was Administered as $administrationDate
 			- make note of the Associated Vaccine Group as $associatedVaccineGroup
 			- make note of the Associated Series as $associatedTargetSeries
@@ -99,7 +99,7 @@ rule "Live Vaccine interval between MMR and MMRV is 28 days"
 			- the Vaccine Administered is a Live Virus Vaccine
 			- the shot belongs to the Vaccine Group $associatedVaccineGroup
 			- the dose number in the series is == 1
-			- the vaccine administered a member of ("ICE94", "ICE21", "ICE03")
+			- the vaccine administered a member of ("VACCINE_CVX_94", "VACCINE_CVX_21", "VACCINE_CVX_03")
 			- the Administration Date of the shot is < $administrationDate
 			- make note of the Date this Shot was Administered as $previousShotDate
 		Confirm elapsed time between $previousShotDate and $administrationDate < "28d"

@@ -50,19 +50,19 @@ rule "COVID-19(Sep2023/Aug2024): If a prior formulation that does not count towa
 	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is not Complete
 		There is an administered shot $priorShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated
-			- the vaccine administered a member of ("ICE500", "ICE501", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517", "ICE518", "ICE521")
+			- the vaccine administered a member of ("VACCINE_CVX_500", "VACCINE_CVX_501", "VACCINE_CVX_503", "VACCINE_CVX_504", "VACCINE_CVX_505", "VACCINE_CVX_506", "VACCINE_CVX_507", "VACCINE_CVX_508", "VACCINE_CVX_509", "VACCINE_CVX_513", "VACCINE_CVX_514", "VACCINE_CVX_515", "VACCINE_CVX_516", "VACCINE_CVX_517", "VACCINE_CVX_518", "VACCINE_CVX_521")
 			- the administration date of the shot is >= "12-Sep-2023"
 			- make note of the Date this Shot was Administered as $previousShotDate
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated
 			- the administration date of the shot is > $previousShotDate
-			- the vaccine administered a member of ("ICE500", "ICE501", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517", "ICE518", "ICE521")
+			- the vaccine administered a member of ("VACCINE_CVX_500", "VACCINE_CVX_501", "VACCINE_CVX_503", "VACCINE_CVX_504", "VACCINE_CVX_505", "VACCINE_CVX_506", "VACCINE_CVX_507", "VACCINE_CVX_508", "VACCINE_CVX_509", "VACCINE_CVX_513", "VACCINE_CVX_514", "VACCINE_CVX_515", "VACCINE_CVX_516", "VACCINE_CVX_517", "VACCINE_CVX_518", "VACCINE_CVX_521")
 	then
 		Create a Recommendation as $r for the Series $targetSeries
 		Add "8w" to $previousShotDate and make note of the newly calculated date as $dtCalculated
@@ -84,7 +84,7 @@ end
 //	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 //	when
 //		There is a Series $targetSeries that needs forecasting
-//			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+//			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 //			- the Series is Complete
 //			- the Series belongs to the Season with name "COVID19Sep2023Season"
 //		There exists a Season
@@ -110,7 +110,7 @@ rule "COVID-19(Sep2023/Aug2024 Moderna < 5yrs Series Abstract): Recommend the ap
 	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023ModernaLT5ySeries"
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
@@ -130,7 +130,7 @@ rule "COVID-19(Sep2023/Aug2024 Moderna < 5yrs Series): If the next recommended d
 		Confirm elapsed time between $dtBirthDate and $recommendationDate >= "6m" && elapsed time between $dtBirthDate and $recommendationDate < "12y" && elapsed time between $dtBirthDate and evalTime < "12y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE311"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_311"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -145,7 +145,7 @@ rule "COVID-19(Sep2023/Aug2024 Moderna < 5yrs Series): If the next recommended d
 		Confirm elapsed time between $dtBirthDate and $recommendationDate >= "12y" || $recommendationDate <= evalTime && elapsed time between $dtBirthDate and evalTime >= "12y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE312"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_312"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -157,7 +157,7 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer < 5yrs Series Abstract): Recommend the app
 	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023PfizerLT5ySeries"
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
@@ -177,7 +177,7 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer < 5yrs Series): If the next recommended do
 		Confirm elapsed time between $dtBirthDate and $recommendationDate >= "6m" && elapsed time between $dtBirthDate and $recommendationDate < "5y" && elapsed time between $dtBirthDate and evalTime < "5y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE308"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_308"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -192,7 +192,7 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer < 5yrs Series): If the next recommended do
 		Confirm elapsed time between $dtBirthDate and $recommendationDate >= "5y" && elapsed time between $dtBirthDate and $recommendationDate < "12y" || $recommendationDate <= evalTime && elapsed time between $dtBirthDate and evalTime >= "5y" && elapsed time between $dtBirthDate and evalTime < "12y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE310"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_310"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -207,7 +207,7 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer < 5yrs Series): If the next recommended do
 		Confirm elapsed time between $dtBirthDate and $recommendationDate >= "12y" || $recommendationDate <= evalTime && elapsed time between $dtBirthDate and evalTime >= "12y"
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "ICE309"
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_309"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -234,15 +234,15 @@ rule "COVID-19(Sep2023/Aug2024): If the patient is >= 5 years as of the recommen
 	when
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023ModernaLT5ySeries")
 			- post processing on the Series forecast has not already been run
 			- make note of the recommendation date as $recommendationDate
 		There is an administered shot $mostRecentShot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the date this shot was administered as $lastAdministeredShotDate
 		There does not exist another administered shot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $lastAdministeredShotDate
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -266,7 +266,7 @@ rule "COVID-19(Sep2023/Aug2024): If there are no shots administered, set the ear
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is not complete
 			- the number of administered shots is == 0
 			- make note of the season start date as $seriesSeasonStartDate
@@ -320,20 +320,20 @@ rule "COVID-19(Sep2023/Aug2024): For the 2023-2024 season, the minimum interval 
 	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series belongs to the Season with name "COVID19Sep2023Season"
 			- the Series is not Complete
 			// (dose number check not needed; as there have not been any prior valid shots) - the effective dose number in the Series is == 1
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated and whose shot validity is VALID
 		There is an administered shot $mostRecentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < "12-Sep-2023"
 			- the shot is not ignored
 			- make note of the date this shot was administered as $mostRecentShotDate
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $mostRecentShotDate
 			- the administration date of the shot is < "12-Sep-2023"
 			- the shot is not ignored
@@ -382,20 +382,20 @@ rule "COVID-19(Sep2023/Aug2024 >= 5yrs): For the 2023-2024 season, the minimum i
 	salience -1
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the series is "COVID19Sep2023gte5Series"
 			- the Series belongs to the Season with name "COVID19Sep2023Season"
 			- the Series is not Complete
 			- the effective dose number in the Series is <= 2
 		There is an administered shot $mostRecentShot
 			// - the shot belongs to the Series $targetSeries
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated
 			- the shot is not ignored
 			- make note of the date this shot was administered as $mostRecentShotDate
 		There does not exist an administered shot
 			// - the shot belongs to the Series $targetSeries
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $mostRecentShotDate
 			- the shot is not ignored
 		There does not exist an IceIntervalFact
@@ -443,16 +443,16 @@ rule "COVID-19(Sep2023/Aug2024 >= 5yrs): If the patient has >= 1 COVID-19 shot(s
 	salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023gte5Series"
 			- the effective dose number in the series is == 1
 			- the Series is not complete
 		There is an administered shot $mostRecentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the date this shot was administered as $mostRecentShotDate
 			- the shot is not ignored
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $mostRecentShotDate
 			- the shot is not ignored
 		There does not exist an IceIntervalFact
@@ -499,19 +499,19 @@ rule "COVID-19(Sep2023/Aug2024 >= 5yrs): If the interval from the most recent sh
 	when
 		// Series Table Recommended Age will be overridden by this rule and not be enforced
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023gte5Series"
 			- the effective dose number in the series is == 1
 			- the Series is not complete
 			- make note of the season start date as $seasonStartDate
 		There is an administered shot $mostRecentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the date this shot was administered as $mostRecentShotDate
 			- the date $mostRecentShotDate >= $seasonStartDate
 			- the shot is not ignored
 			- make note of the recommended interval from this dose to the next dose as $recommendedInterval
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $mostRecentShotDate
 			- the shot is not ignored
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -559,17 +559,17 @@ rule "COVID-19(Sep2023/Aug2024 >= 5yrs)->TargetDose 1: If there are no shots in 
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023gte5Series"
 			- the effective dose number in the series is == 1
 			- the Series is not complete
 			- make note of the season start date as $seasonStartDate
 		There is an administered shot $mostRecentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the date this shot was administered as $mostRecentShotDate
 			- the administration date of the shot is < $seasonStartDate
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is > $mostRecentShotDate
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -631,7 +631,7 @@ rule "COVID-19(Sep2023/Aug2024 >= 5yrs)->TargetDose 1/Exception 2: If a previous
 	salience 20
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023gte5Series"
 			- the effective dose number in the series is == 1
 			- the Series is not complete
@@ -676,7 +676,7 @@ rule "COVID-19(Sep2023/Aug2024 >= 5yrs)->TargetDose 1/Exception 2: If the patien
 	when
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a recommendation date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023gte5Series"
 			- the effective dose number in the series is == 1
 			- make note of the recommendation date as $recommendationDate
@@ -702,14 +702,14 @@ rule "COVID-19(Sep2023/Aug2024 >= 5yrs)->TargetDose 1/Exception 3: If a shot of 
 	salience 20
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023gte5Series"
 			- the number of doses administered is == 0
 			- the Series is not complete
 		There is an administered shot $shotOfInterest
 			- the shot belongs to the Series $targetSeries
 			- the dose number in the series is == 1
-			- the vaccine administered is "ICE211"
+			- the vaccine administered is "VACCINE_CVX_211"
 			- that has already been evaluated and whose shot validity is ACCEPTED
 			- make note of the date this shot was administered as $cvx211administrationDate
 			- make note of Accepted evaluation reasons for this shot as $acceptedReasons
@@ -731,7 +731,7 @@ rule "COVID-19(Sep2023/Aug2024 >= 5yrs)->TargetDose 1/Exception 3: There are no 
 		There does not exist an administered shot
 			- the shot belongs to the Series $targetSeries
 			- the administration date of the shot is >= $cvx211administrationDate
-			- the vaccine administered is not "ICE211"
+			- the vaccine administered is not "VACCINE_CVX_211"
 	then
 		Insert a Recommendation IceIntervalFact SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue with TargetDose $shotOfInterest into working memory
 		Create a Recommendation as $r for the Series $targetSeries
@@ -770,7 +770,7 @@ rule "COVID-19(Sep2023/Aug2024 >= 5yrs): The recommended age of dose 2 is the la
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023gte5Series"
 			- the Series belongs to the season with name "COVID19Sep2023Season"
 			- the effective dose number in the series is == 2
@@ -805,7 +805,7 @@ rule "COVID-19(Sep2023/Aug2024 >= 5ys): If the recommendation date for dose 2 is
 	when
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a recommendation date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023gte5Series"
 			- the effective dose number in the Series is == 2
 			- make note of the recommendation date as $recommendationDate
@@ -847,18 +847,18 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer < 5yrs Series): If a prior formulation COV
 	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023PfizerLT5ySeries"
 			- the effective dose number in the Series is <= 2
 			- the Series is not complete
 		There is an administered shot $mostRecentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is >= "12-Sep-2023"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE311", "ICE312", "ICE313", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_313", "VACCINE_CVX_520")
 			- the shot is not ignored
 			- make note of the date this shot was administered as $mostRecentShotDate
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $mostRecentShotDate
 			- the shot is not ignored
 	then
@@ -898,7 +898,7 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer < 5yrs Series): If a shot was previously a
 	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023PfizerLT5ySeries"
 			- the Series is not complete
 			- the effective dose number in the Series is <= 2
@@ -908,7 +908,7 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer < 5yrs Series): If a shot was previously a
 			- the shot is not ignored
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $mostRecentShotDate
 			- the shot is not ignored
 		There exists an IceFact
@@ -959,7 +959,7 @@ rule "COVID-19(Sep2023/Aug2024 Moderna < 5yrs Series): If a shot was previously 
 	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023ModernaLT5ySeries"
 			- the Series is not complete
 		There is an administered shot $mostRecentShot
@@ -968,7 +968,7 @@ rule "COVID-19(Sep2023/Aug2024 Moderna < 5yrs Series): If a shot was previously 
 			- the shot is not ignored
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $mostRecentShotDate
 			- the shot is not ignored
 		There exists an IceFact
@@ -1018,7 +1018,7 @@ rule "COVID-19(Sep2023/Aug2024 Mixed Product < 5yrs Series): If a shot was previ
 	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023MixedProductLT5ySeries"
 			- the Series is not complete
 			- the effective number of doses administered in the Series is <= 2
@@ -1028,7 +1028,7 @@ rule "COVID-19(Sep2023/Aug2024 Mixed Product < 5yrs Series): If a shot was previ
 			- the shot is not ignored
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $mostRecentShotDate
 			- the shot is not ignored
 		There exists an IceFact
@@ -1066,13 +1066,13 @@ rule "COVID-19(Sep2023/Aug2024 Mixed Product < 5yrs Series): If the most recent 
 	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023MixedProductLT5ySeries"
 			- the Series is not complete
 			- make note of the last shot administered in the Series as $lastShotAdministered
 		There is an administered shot $sameShot
 			- that is the same shot as $lastShotAdministered
-			- the vaccine administered is "ICE313"
+			- the vaccine administered is "VACCINE_CVX_313"
 			- make note of the minimum vaccine age for this shot as $absMinVaccineAge
 			- make note of the date this shot was administered as $shotAdministrationDate
 		The patient information $patient must be known to complete writing this rule
@@ -1109,7 +1109,7 @@ rule "COVID-19(Sep2023/Aug2024 Novavax Series): For the 2023-2024 season, the mi
 	salience -1
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the series is "COVID19Sep2023NovavaxSeries"
 			- the Series belongs to the Season with name "COVID19Sep2023Season"
 			- the Series is not Complete
@@ -1162,14 +1162,14 @@ rule "COVID-19(Sep2023/Aug2024 Novavax Series): If a CVX 313 is administered as 
 	activation-group "recommendationAgeCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023NovavaxSeries"
 			- the number of administered shots is >= 1
 			- the effective number of doses administered in the Series is == 1
 			- Make note of the last shot administered in the Series as $lastShotAdministered
 		There is an administered shot $CVX313Dose1
 			- the shot belongs to the Series $targetSeries
-			- the vaccine administered is "ICE313"
+			- the vaccine administered is "VACCINE_CVX_313"
 			- that has already been evaluated and whose shot validity is VALID
 			- the dose number in the series is == 1
 		There is an administered shot $mostRecentShot
@@ -1209,7 +1209,7 @@ rule "COVID-19(Sep2023/Aug2024 Novavax Series): If the patient is < 12 years as 
 	when
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a recommendation date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023NovavaxSeries"
 			- make note of the recommendation date as $recommendationDate
 			- post processing on the Series forecast has not already been run
@@ -1233,7 +1233,7 @@ rule "COVID-19(Sep2023/Aug2024 Novavax Series): If the recommendation date for d
 	when
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a recommendation date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023NovavaxSeries"
 			- the effective dose number in the Series is == 4
 			- make note of the recommendation date as $recommendationDate
@@ -1257,7 +1257,7 @@ rule "COVID-19(Sep2023/Aug2024 Novavax Series): For target dose 4, the earliest 
 	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023NovavaxSeries"
 			- the effective dose number in the Series is == 4
 			The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -1290,23 +1290,23 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer/Moderna/Mixed Product < 5yrs): For target 
 	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023ModernaLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries")
 			- the Series belongs to the Season with name "COVID19Sep2023Season"
 			- the Series is not complete
 			- the effective dose number in the Series is == 1
 			- make note of the season start date as $seasonStartDate
 		There does not exist an administered shot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- that has already been evaluated and whose shot validity is VALID
 		There is an administered shot $previousShot
 			- the administration date of the shot is < $seasonStartDate
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot is not ignored
 			- make note of the date this shot was administered as $previousShotDate
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is > $previousShotDate
 			- the administration date of the shot is < $seasonStartDate
 		There exists a Season
@@ -1328,7 +1328,7 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer/Moderna/Mixed Product < 5yrs Series): For 
 	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries", "COVID19Sep2023ModernaLT5ySeries")
 			- the Series is not complete
 			- the number of administered shots is == 0
@@ -1336,11 +1336,11 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer/Moderna/Mixed Product < 5yrs Series): For 
 			- the numeric $effectiveDoseNumber is == 1
 			- make note of the season start date as $seasonStartDate
 		There is an administered shot $mostRecentShotPreviousSeason
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- make note of the date this shot was administered as $mostRecentShotDate
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is > $mostRecentShotDate
 	then
@@ -1363,7 +1363,7 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer/Moderna/Mixed Product < 5yrs Series): For 
 	activation-group "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season^CustomIntervals"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19Sep2023PfizerLT5ySeries", "COVID19Sep2023MixedProductLT5ySeries", "COVID19Sep2023ModernaLT5ySeries")
 			- the Series is not complete
 			- the number of administered shots is == 0
@@ -1373,11 +1373,11 @@ rule "COVID-19(Sep2023/Aug2024 Pfizer/Moderna/Mixed Product < 5yrs Series): For 
 			- the numeric $effectiveDoseNumber is <= $numberOfDosesInSeries
 			- make note of the season start date as $seasonStartDate
 		There is an administered shot $mostRecentShotPreviousSeason
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- make note of the date this shot was administered as $mostRecentShotDate
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is > $mostRecentShotDate
 	then
@@ -1413,7 +1413,7 @@ rule "COVID-19(Sep2023/Aug2024 __Moderna__ < 5yrs Series): For target dose > 1: 
 	salience 10
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023ModernaLT5ySeries"
 			- the Series is not complete
 			// - at least one shot has been administered
@@ -1422,22 +1422,22 @@ rule "COVID-19(Sep2023/Aug2024 __Moderna__ < 5yrs Series): For target dose > 1: 
 			- make note of the season start date as $seasonStartDate
 		// Obtain the most recent dose in the prior season
 		There is an administered shot $previousShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE311", "ICE312", "ICE519")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_519")
 			- make note of the date this shot was administered as $mostRecentShotDatePriorSeason
 			- make note of the associated series as $priorSeasonSeries
 		// We want to run this rule for one and only one dose from the prior season; therefore, make sure we're looking at the most recent dose in that season
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the series $priorSeasonSeries
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is > $mostRecentShotDatePriorSeason
 			- that has already been evaluated and whose shot validity is VALID
 		// Now check to make sure there is a different dose in the prior season in the same series
 		There exists an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that is not the same shot as $previousShot
 			- the shot belongs to the series $priorSeasonSeries
 			- the administration date of the shot is < $seasonStartDate
@@ -1482,7 +1482,7 @@ rule "COVID-19(Sep2023/Aug2024 __Pfizer__ < 5yrs Series): if the patient has 1 d
 	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023PfizerLT5ySeries"
 			- the Series is not complete
 			- make note of the effective dose number in the Series as $effectiveDoseNumber
@@ -1491,29 +1491,29 @@ rule "COVID-19(Sep2023/Aug2024 __Pfizer__ < 5yrs Series): if the patient has 1 d
 			- make note of the season start date as $seasonStartDate
 		// Obtain the most recent dose in the prior season
 		There is an administered shot $previousShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedPriorSeasonSeries
 		// We want to run this rule for one and only one dose from the prior season; therefore, make sure we're looking at the most recent dose in that season
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is > $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_520")
 		// Now check to make sure there is not a different dose in the prior season
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that is not the same shot as $previousShot
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is != $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_520")
 	then
-		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $targetSeries but do not refresh series facts
+		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.COVID_19" in Series $targetSeries but do not refresh series facts
 		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries
 		Refresh all facts in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -1527,7 +1527,7 @@ rule "COVID-19(Sep2023/Aug2024 __Pfizer__ < 5yrs Series): if the patient has >= 
 	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023PfizerLT5ySeries"
 			- the Series is not complete
 			- make note of the effective dose number in the Series as $effectiveDoseNumber
@@ -1536,30 +1536,30 @@ rule "COVID-19(Sep2023/Aug2024 __Pfizer__ < 5yrs Series): if the patient has >= 
 			- make note of the season start date as $seasonStartDate
 		// Obtain the most recent dose in the prior season
 		There is an administered shot $previousShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $priorSeasonSeries
 		// We want to run this rule for one and only one dose from the prior season; therefore, make sure we're looking at the most recent dose in that season
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the series $priorSeasonSeries
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is > $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_520")
 		// Now check to make sure there is a different dose in the prior season in the same series
 		There exists an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that is not the same shot as $previousShot
 			- the shot belongs to the series $priorSeasonSeries
 			- the administration date of the shot is < $seasonStartDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE219", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_520")
 	then
-		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $targetSeries but do not refresh series facts
+		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.COVID_19" in Series $targetSeries but do not refresh series facts
 		Set the Dose Number of Recommendation Forecast to 3 in Series $targetSeries
 		Refresh all facts in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -1573,7 +1573,7 @@ rule "COVID-19(Sep2023/Aug2024 __Mixed Product__ < 5yrs Series): if the patient 
 	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023MixedProductLT5ySeries"
 			- the Series is not complete
 			- make note of the effective dose number in the Series as $effectiveDoseNumber
@@ -1582,29 +1582,29 @@ rule "COVID-19(Sep2023/Aug2024 __Mixed Product__ < 5yrs Series): if the patient 
 			- make note of the season start date as $seasonStartDate
 		// Obtain the most recent dose in the prior season
 		There is an administered shot $previousShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312", "ICE502", "ICE510", "ICE511", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_502", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedPriorSeasonSeries
 		// We want to run this rule for one and only one dose from the prior season; therefore, make sure we're looking at the most recent dose in that season
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is > $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312", "ICE502", "ICE510", "ICE511", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_502", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_519", "VACCINE_CVX_520")
 		// Now check to make sure there is not a different dose in the prior season
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that is not the same shot as $previousShot
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is != $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312", "ICE502", "ICE510", "ICE511", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_502", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_519", "VACCINE_CVX_520")
 	then
-		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $targetSeries but do not refresh series facts
+		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.COVID_19" in Series $targetSeries but do not refresh series facts
 		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries
 		Refresh all facts in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -1618,7 +1618,7 @@ rule "COVID-19(Sep2023/Aug2024 __Mixed Product__ < 5yrs Series): if the patient 
 	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023MixedProductLT5ySeries"
 			- the Series is not complete
 			- make note of the effective dose number in the Series as $effectiveDoseNumber
@@ -1627,30 +1627,30 @@ rule "COVID-19(Sep2023/Aug2024 __Mixed Product__ < 5yrs Series): if the patient 
 			- make note of the season start date as $seasonStartDate
 		// Obtain the most recent dose in the prior season
 		There is an administered shot $previousShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312", "ICE502", "ICE510", "ICE511", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_502", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $priorSeasonSeries
 		// We want to run this rule for one and only one dose from the prior season; therefore, make sure we're looking at the most recent dose in that season
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the series $priorSeasonSeries
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is > $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312", "ICE502", "ICE510", "ICE511", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_502", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_519", "VACCINE_CVX_520")
 		// Now check to make sure there is a different dose in the prior season in the same series
 		There exists an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that is not the same shot as $previousShot
 			- the shot belongs to the series $priorSeasonSeries
 			- the administration date of the shot is < $seasonStartDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE308", "ICE309", "ICE310", "ICE311", "ICE312", "ICE502", "ICE510", "ICE511", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_308", "VACCINE_CVX_309", "VACCINE_CVX_310", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_502", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_519", "VACCINE_CVX_520")
 	then
-		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $targetSeries but do not refresh series facts
+		Skip Series Dose Number to 3 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.COVID_19" in Series $targetSeries but do not refresh series facts
 		Set the Dose Number of Recommendation Forecast to 3 in Series $targetSeries
 		Refresh all facts in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -1664,7 +1664,7 @@ rule "COVID-19(Sep2023/Aug2024 __Moderna__ < 5yrs Series): if the patient has >=
 	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023ModernaLT5ySeries"
 			- the Series is not complete
 			- make note of the effective dose number in the Series as $effectiveDoseNumber
@@ -1673,22 +1673,22 @@ rule "COVID-19(Sep2023/Aug2024 __Moderna__ < 5yrs Series): if the patient has >=
 			- make note of the season start date as $seasonStartDate
 		// Obtain the most recent dose in the prior season
 		There is an administered shot $previousShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administration date of the shot is < $seasonStartDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE311", "ICE312", "ICE519")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_519")
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $priorSeasonSeries
 		// We want to run this rule for one and only one dose from the prior season; therefore, make sure we're looking at the most recent dose in that season
 		There does not exist an administered shot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the series $priorSeasonSeries
 			- the administration date of the shot is < $seasonStartDate
 			- the administration date of the shot is > $administrationDate
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE311", "ICE312", "ICE519")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_311", "VACCINE_CVX_312", "VACCINE_CVX_519")
 	then
-		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $targetSeries but do not refresh series facts
+		Skip Series Dose Number to 2 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.COVID_19" in Series $targetSeries but do not refresh series facts
 		Set the Dose Number of Recommendation Forecast to 2 in Series $targetSeries
 		Refresh all facts in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -1702,17 +1702,17 @@ rule "COVID-19(Sep2023/Aug2024 __Novavax__ Series): If CVX 313 was administered 
 	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19Sep2023NovavaxSeries"
 			- make note of the effective dose number in the Series as $effectiveDoseNumber
 			- the numeric $effectiveDoseNumber is == 3
 		There is an administered shot $cvx313dose1or2
 			- the shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered is "ICE313"
+			- the vaccine administered is "VACCINE_CVX_313"
 			- the dose number in the Series is <= 2
 	then
-		Skip Series Dose Number to 4 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.079.89" in Series $targetSeries but do not refresh series facts
+		Skip Series Dose Number to 4 from $effectiveDoseNumber for Disease "SUPPORTED_DISEASE_CONCEPT.COVID_19" in Series $targetSeries but do not refresh series facts
 		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
 		Refresh all facts in the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries

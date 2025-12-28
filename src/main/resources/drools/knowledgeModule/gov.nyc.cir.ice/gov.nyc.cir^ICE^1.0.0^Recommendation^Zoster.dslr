@@ -33,10 +33,10 @@ rule "Zoster: Always recommend Zoster recombinant (CVX 187)"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.620"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.ZOSTER"
 			- the Series is not complete
 	then
-		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "ICE187"
+		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "VACCINE_CVX_187"
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
@@ -46,15 +46,15 @@ rule "Zoster: If patient is administered adult varicella (CVX 21) doses, the min
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.ZOSTER"
 			- the Series is not Complete
 		There is an administered shot $varicellaShot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.600"
-			- the vaccine administered is "ICE21"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.VARICELLA"
+			- the vaccine administered is "VACCINE_CVX_21"
 			- make note of the date this shot was administered as $dtAdministrationDate
 		There does not exist another administered shot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.600"
-			- the vaccine administered is "ICE21"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.VARICELLA"
+			- the vaccine administered is "VACCINE_CVX_21"
 			- the administration date of the shot is > $dtAdministrationDate
 	then
 		Add "8w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
@@ -73,15 +73,15 @@ rule "Zoster: If patient is administered a CVX 121 or 188, the minimum interval 
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
-			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
+			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.ZOSTER"
 			- the Series is not Complete
 		There is an administered shot $varicellaShot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
-			- the vaccine administered a member of ("ICE121", "ICE188")
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.ZOSTER"
+			- the vaccine administered a member of ("VACCINE_CVX_121", "VACCINE_CVX_188")
 			- make note of the date this shot was administered as $dtAdministrationDate
 		There does not exist another administered shot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.620"
-			- the vaccine administered a member of ("ICE121", "ICE188")
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.ZOSTER"
+			- the vaccine administered a member of ("VACCINE_CVX_121", "VACCINE_CVX_188")
 			- the administration date of the shot is > $dtAdministrationDate
 	then
 		Add "8w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated

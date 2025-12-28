@@ -96,7 +96,6 @@ public abstract class AbstractVaccine
             throw new IllegalArgumentException(errStr);
         }
 
-        /////// this.cdsListItemName = pCdsListItemName;
         this.cdsConcept = pCC;
         this.tradeName = null;
         this.manufacturerCode = null;

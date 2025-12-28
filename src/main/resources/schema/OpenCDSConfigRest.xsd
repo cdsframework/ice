@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:config="org.opencds.dss.config.v1_0"
-           targetNamespace="org.opencds.dss.config_rest.v1_0">
-    <xs:import namespace="org.opencds.dss.config.v1_0" schemaLocation="OpenCDSConfiguration.xsd"/>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:config="org.opencds.config.v2"
+           targetNamespace="org.opencds.config.rest.v2">
+    <xs:import namespace="org.opencds.config.v2" schemaLocation="OpenCDSConfiguration.xsd"/>
     <xs:annotation>
         <xs:documentation>Elements to support OpenCDS Configuration REST Services</xs:documentation>
     </xs:annotation>
@@ -75,6 +76,14 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="supportingData" type="config:SupportingData" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="cdsHooksClient" type="config:CDSHooksClient"/>
+    <xs:element name="cdsHooksClients">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="cdsHooksClient" type="config:CDSHooksClient" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>

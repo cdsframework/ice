@@ -1,0 +1,15 @@
+[_]
+schema-version = "0.2"
+
+[io.buildpacks]
+builder = "paketobuildpacks/builder-jammy-buildpackless-tiny"
+
+[[io.buildpacks.group]]
+id = "docker.io/paketobuildpacks/adoptium"
+
+[[io.buildpacks.group]]
+id = "docker.io/paketobuildpacks/java"
+
+[[io.buildpacks.build.env]]
+name = "BP_JVM_VERSION"
+value = "25.*"

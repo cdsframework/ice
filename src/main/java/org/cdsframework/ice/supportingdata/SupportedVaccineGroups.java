@@ -84,6 +84,7 @@ public class SupportedVaccineGroups implements SupportingData
         this.isSupportingDataConsistent = true;
     }
 
+    @Override
     public boolean isEmpty()
     {
         return this.cdsListItemNameToVaccineGroupItem.isEmpty();
@@ -130,9 +131,7 @@ public class SupportedVaccineGroups implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ///////
         // Determine the vaccine group name. No duplicates allowed; no vaccine groups that weren't previously defined LocallyCodedCdsListItem allowed.
-        ///////
         final LocallyCodedCdsListItem llccli = this.supportedCdsLists.getCdsListItem(
                 ConceptUtils.toInternalCD(pIceVaccineGroupSpecificationFile.getVaccineGroup()));
         // Now verify that there is a CdsListItem for this vaccine group (i.e. - we are tracking the codes and code systems in SupportedCdsLists - it must be there too).
@@ -164,9 +163,7 @@ public class SupportedVaccineGroups implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ///////
         // CdsListItem is a CdsConcept of type vaccine group? - check to make sure that the specified vaccine group CdsConcept has been specified with this vaccine group's cdsListItem definition
-        ///////
         final CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(lVaccineGroupCdsListItemName, llccli.getCdsListItemValue());
         if (!llccli.equals(this.supportedCdsLists.getSupportedCdsConcepts()
                 .getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE_GROUP, lPrimaryOpenCdsConcept)))
@@ -178,9 +175,7 @@ public class SupportedVaccineGroups implements SupportingData
             throw new InconsistentConfigurationException(lErrStr);
         }
 
-        ///////
         // Related Diseases
-        ///////
         final List<org.opencds.vmr.v1_0.schema.CD> lRelatedDiseases = pIceVaccineGroupSpecificationFile.getDiseaseImmunities();
         final List<String> lRelatedDiseasesCdsListItems = new ArrayList<>();
         if (!ObjectUtils.isEmpty(lRelatedDiseases))
@@ -211,17 +206,13 @@ public class SupportedVaccineGroups implements SupportingData
             }
         }
 
-        ///////
         // Vaccine group priority
-        ///////
         int lVaccineGroupPriority = 0;
         final BigInteger lVaccineGroupPriorityInt = pIceVaccineGroupSpecificationFile.getPriority();
         if (lVaccineGroupPriorityInt != null)
             lVaccineGroupPriority = lVaccineGroupPriorityInt.intValue();
 
-        ///////
         // Create and add the LocallyCodedVaccineGroupItem
-        ///////
         final LocallyCodedVaccineGroupItem lcvgi;
         try
         {

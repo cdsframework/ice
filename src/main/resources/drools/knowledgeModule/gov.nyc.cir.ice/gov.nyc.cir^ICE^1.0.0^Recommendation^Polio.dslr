@@ -27,7 +27,7 @@ rule "Polio: If a patient is >= 18 years old and has NOT completed the series, t
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
     when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- the Series is Not Complete
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -46,7 +46,7 @@ rule "Polio: If the execution date is before 8/7/2009, modify the Minimum Age of
 	no-loop true
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- the name of the Series is "Polio4DoseSeries"
 			- Post Processing on the series forecast has not already been run
 			- the Series is Not Complete
@@ -70,7 +70,7 @@ rule "Polio: If the execution date is before 8/7/2009 and the calculated Earlies
 		There is a Series $targetSeries
 			- post processing on the Series forecast has not already been run
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- the name of the Series is "Polio4DoseSeries"
 			- the effective dose number in the series is == 4
 			- make note of the Earliest Date as $earliestDate
@@ -100,7 +100,7 @@ rule "Polio: If patient >= 4 yrs (or will be >= 4 yrs for target dose 3 recommen
 	no-loop true
 	when
 		There is a Series $targetSeries
-			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.400"
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
 			- the name of the series is "Polio4DoseSeries"
 			- post processing on the series forecast has not already been run
 			- a forecast for the series has been made and a recommendation date has been determined

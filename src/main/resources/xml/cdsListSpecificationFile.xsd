@@ -94,6 +94,7 @@
             </xs:element>
             <xs:element name="cdsListItemConceptMapping" type="rl:cdsListItemConceptMapping"
                         minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="outboundCoding" type="rl:outboundCoding" minOccurs="0" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="cdsList">
@@ -170,4 +171,43 @@
             <xs:documentation xml:lang="en">The list.</xs:documentation>
         </xs:annotation>
     </xs:element>
+    <xs:complexType name="outboundCoding">
+        <xs:annotation>
+            <xs:documentation xml:lang="en">The outbound coding.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="code" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping code.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="displayName" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping display
+                        name.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="originalText" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping original text.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="codeSystem" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping code
+                        system.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="codeSystemName" type="xs:string" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">The concept mapping code system
+                        name.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
 </xs:schema>

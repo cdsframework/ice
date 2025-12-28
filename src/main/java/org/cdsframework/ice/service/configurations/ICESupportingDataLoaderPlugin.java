@@ -26,21 +26,28 @@
 
 package org.cdsframework.ice.service.configurations;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
+import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
-import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
-import org.cdsframework.ice.supportingdata.IceSupportingDataProperties;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.opencds.config.api.model.KMId;
-import org.opencds.plugin.PluginContext.PreProcessPluginContext;
-import org.opencds.plugin.PluginDataCache;
-import org.opencds.plugin.PreProcessPlugin;
-import org.opencds.plugin.SupportingData;
+import org.opencds.plugin.api.PluginDataCache;
+import org.opencds.plugin.api.PreProcessPlugin;
+import org.opencds.plugin.api.PreProcessPluginContext;
+import org.opencds.plugin.api.SupportingData;
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
+import org.springframework.util.StringUtils;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -48,13 +55,81 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
 {
     // AI: determine supportingData.identifier dynamically (fix upon OpenCDS upgrade)
     private static final String SD_ICE = "ice-supporting-data";
-
-    private static final IceSupportingDataProperties iceProps =
-            IceSupportingDataProperties.create(new ICEPropertiesDataConfiguration().getProperties());
+    // Caches per KM ID so we only compute once per knowledge module
+    private static final Map<String, Map<String, String>> cachedNumericToKeyByKmId = new HashMap<>();
+    private static final Map<String, String> cachedRawSignatureByKmId = new HashMap<>();
+    private static final Map<String, List<String>> cachedNormalizedExclusionsByKmId = new HashMap<>();
+    @Setter
+    private static IceProperties iceProperties;
+    @Setter
+    private static Path configPath;
 
     public static SupportingData getSupportingData(final PreProcessPluginContext context)
     {
         return context.getSupportingData().get(SD_ICE);
+    }
+
+    private static synchronized List<String> normalizeVaccineGroupExclusionsForSchedule(final List<String> raw,
+            final Schedule schedule, final String kmId)
+    {
+        if (raw == null || schedule == null)
+            return raw;
+
+        final List<String> p = raw.stream().filter(StringUtils::hasText).map(String::trim).toList();
+
+        final String sig = String.join("|", p), prev = cachedRawSignatureByKmId.get(kmId);
+        if (prev != null && prev.equals(sig))
+        {
+            final List<String> c = cachedNormalizedExclusionsByKmId.get(kmId);
+            if (c != null)
+                return c;
+        }
+
+        final Map<String, String> m =
+                cachedNumericToKeyByKmId.computeIfAbsent(kmId, k -> buildVaccineGroupNumericToKeyMap(schedule));
+
+        final List<String> n = p.stream().map(s ->
+        {
+            final int i = s.lastIndexOf('.');
+            final String suf = i >= 0 ? s.substring(i + 1) : s;
+            if (suf.chars().allMatch(Character::isDigit))
+            {
+                final String x = m.get(suf);
+                if (x == null)
+                    throw new IllegalArgumentException("Unknown vaccine group numeric code: " + suf + " (KM: " + kmId + ")");
+
+                return x;
+            }
+
+            return suf;
+        }).distinct().toList();
+
+        cachedRawSignatureByKmId.put(kmId, sig);
+        cachedNormalizedExclusionsByKmId.put(kmId, n);
+
+        return n;
+    }
+
+    private static Map<String, String> buildVaccineGroupNumericToKeyMap(final Schedule schedule)
+    {
+        final Map<String, String> m = new HashMap<>();
+        try
+        {
+            final Set<LocallyCodedCdsListItem> items =
+                    schedule.getSupportedCdsLists().getCdsListItemsAssociatedWithCdsListCode("VACCINE_GROUP_CONCEPT");
+            if (items != null)
+                for (final LocallyCodedCdsListItem it : items)
+                {
+                    final CD o = it.getCdsListItemOutboundCD();
+                    if (o != null && o.getCode() != null)
+                        m.put(o.getCode(), it.getCdsListItemKey());
+                }
+        }
+        catch (final Exception e)
+        {
+            log.error("Failed building vaccine group numeric-to-key map", e);
+        }
+        return m;
     }
 
     @Override
@@ -83,9 +158,9 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
         if (schedule == null)
         {
             // Schedule has not been stored in supporting data - load it - This should only happen once.
-            log.info("Loading immunization schedule for Knowledge Module: {}", lKMId);
+            log.debug("Loading immunization schedule for Knowledge Module: {}", lKMId);
             loadImmunizationSchedule(sd, cache);
-            log.info(_METHODNAME + "Immunization schedule loaded for knowledge module: {}", lKMId);
+            log.debug(_METHODNAME + "Immunization schedule loaded for knowledge module: {}", lKMId);
 
             schedule = cache.get(sd);
         }
@@ -112,71 +187,21 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
 
         context.getGlobals().put("schedule", schedule);
 
-        context.getGlobals().put("patientAgeTimeOfInterest", null);
+        //context.getGlobals().put("patientAgeTimeOfInterest", null);
 
-        if (iceProps.outputEarliestOverdueDates() == null)
-        {
-            final String lErrStr =
-                    "An error occurred: knowledge module not properly initialized: output earliest/overdue flag not set; this should not happen. Cannot continue";
-            log.error(_METHODNAME + lErrStr);
-            throw new RuntimeException(lErrStr);
-        }
+        context.getGlobals().put("outputEarliestOverdueDates", iceProperties.getOutputEarliestAndOverdueDates());
 
-        context.getGlobals().put("outputEarliestOverdueDates", iceProps.outputEarliestOverdueDates());
+        context.getGlobals().put("doseOverrideFeatureEnabled", iceProperties.getEnableDoseOverrideFeature());
 
-        if (iceProps.doseOverrideFeatureEnabled() == null)
-        {
-            final String lErrStr =
-                    "An error occurred: knowledge module not properly initialized: dose override flag not set; this should not happen. Cannot continue";
-            log.error(_METHODNAME + lErrStr);
-            throw new RuntimeException(lErrStr);
-        }
-
-        context.getGlobals().put("doseOverrideFeatureEnabled", iceProps.doseOverrideFeatureEnabled());
-
-        if (iceProps.outputSupplementalText() == null)
-        {
-            final String lErrStr =
-                    "An error occurred: knowledge module not properly initialized: dose override flag not set; this should not happen. Cannot continue";
-            log.error(_METHODNAME + lErrStr);
-            throw new RuntimeException(lErrStr);
-        }
-
-        context.getGlobals().put("outputSupplementalText", iceProps.outputSupplementalText());
-
-        context.getGlobals().put("vaccineGroupExclusions", iceProps.vaccineGroupExclusions());
-
-        if (iceProps.enableUnsupportedVaccinesGroup() == null)
-        {
-            final String lErrStr =
-                    "An error occurred: knowledge module not properly initialized: unsupported vaccine group flag not set; this should not happen. Cannot continue";
-            log.error(_METHODNAME + lErrStr);
-            throw new RuntimeException(lErrStr);
-        }
-
-        context.getGlobals().put("enableUnsupportedVaccinesGroup", iceProps.enableUnsupportedVaccinesGroup());
-
-        if (iceProps.disableCovid19DoseNumberReset() == null)
-        {
-            final String lErrStr =
-                    "An error occurred: knowledge module not properly initialized: enableCovid19DoseNumberReset flag not set; this should not happen. Cannot continue";
-            log.error(_METHODNAME + lErrStr);
-            throw new RuntimeException(lErrStr);
-        }
-
-        context.getGlobals().put("disableCovid19DoseNumberReset", iceProps.disableCovid19DoseNumberReset());
-
-        if (iceProps.disableOutputEarliestOverdueDatesForPneumococcalAdultSeries() == null)
-        {
-            final String lErrStr =
-                    "An error occurred: knowledge module not properly initialized: disableOutputEarliestOverdueDatesForPneumococcalAdultSeries flag not set; this should not happen. Cannot continue";
-            log.error(_METHODNAME + lErrStr);
-            throw new RuntimeException(lErrStr);
-        }
+        context.getGlobals().put("outputSupplementalText", iceProperties.getOutputSupplementalText());
 
         context.getGlobals()
-                .put("disableOutputEarliestOverdueDatesForPneumococcalAdultSeries",
-                        iceProps.disableOutputEarliestOverdueDatesForPneumococcalAdultSeries());
+                .put("vaccineGroupExclusions",
+                        normalizeVaccineGroupExclusionsForSchedule(iceProperties.getVaccineGroupExclusions(), schedule, lKMId));
+
+        context.getGlobals().put("enableUnsupportedVaccinesGroup", iceProperties.getEnableUnsupportedVaccinesGroup());
+
+        context.getGlobals().put("disableCovid19DoseNumberReset", iceProperties.getDisableCovid19Sep2023DoseNumberReset());
     }
 
     /**
@@ -214,21 +239,20 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
         }
 
         // Determine base rules KM ID in String format
-        final ICEPropertiesDataConfiguration iceProps = new ICEPropertiesDataConfiguration();
         final String lBaseRulesScopingKmId =
-                KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceProps.getBaseRulesScopingEntityId(),
-                        lRequestedKMIdObject.getBusinessId(), iceProps.getBaseRulesVersion());
+                KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(iceProperties.getIceBaseRulesScopingEntityId(),
+                        lRequestedKMIdObject.getBusinessId(), iceProperties.getIceBaseRulesVersion());
 
         // Initialize schedule
-        log.info("Initializing Schedule");
+        log.debug("Initializing Schedule");
         final List<String> cdsVersions = new ArrayList<>();
         final String lRequestedKmIdStr =
                 pRequestedKMIdStr.equals("org.nyc.cir^ICE^1.0.0") ? "gov.nyc.cir^ICE^1.0.0" : pRequestedKMIdStr;
         cdsVersions.add(lRequestedKmIdStr);
         try
         {
-            s = new Schedule("requestedKmId", lBaseRulesScopingKmId, iceProps.getKnowledgeCommonDirectory(), cdsVersions,
-                    iceProps.getKnowledgeModulesDirectory());
+            s = new Schedule("requestedKmId", lBaseRulesScopingKmId, configPath.resolve("knowledgeCommon"), cdsVersions,
+                    configPath.resolve("knowledgeModule"), iceProperties.getSupplementalTextMode());
         }
         catch (final IllegalArgumentException | InconsistentConfigurationException ii)
         {
@@ -236,9 +260,10 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
             log.error(_METHODNAME + lErrStr, ii);
             throw new RuntimeException(lErrStr, ii);
         }
-        log.info("Schedule Initialization complete");
+        log.debug("Schedule Initialization complete");
 
         // Store Schedule into cache
         pCache.put(supportingData, s);
     }
+
 }

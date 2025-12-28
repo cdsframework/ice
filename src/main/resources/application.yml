@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: ice
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  endpoints:
+    access:
+      max-permitted: none
+
+server:
+  servlet:
+    context-path: /opencds-decision-support-service
+
+cxf:
+  path: /evaluate
+
+logging:
+  level:
+    org.drools: ERROR
+
+ice:
+  ice-base-rules-scoping-entity-id: org.cdsframework
+  ice-base-rules-version: 1.0.0
+  output-earliest-and-overdue-dates: true
+  enable-dose-override-feature: false
+  output-supplemental-text: true
+  enable-unsupported-vaccines-group: false
+  vaccine-group-exclusions:
+    - VACCINE_GROUP_CONCEPT.991
+    - VACCINE_GROUP_CONCEPT.992
+    - VACCINE_GROUP_CONCEPT.901
+    - VACCINE_GROUP_CONCEPT.902
+    - VACCINE_GROUP_CONCEPT.904
+    - VACCINE_GROUP_CONCEPT.905
+  disable-covid19-sep2023-dose-number-reset: false
+  enable-drools-event-logging: false
+  supplemental-text-mode: LEGACY
+  fire-limit: 25000
+  ice-version: ICE_2.52.1

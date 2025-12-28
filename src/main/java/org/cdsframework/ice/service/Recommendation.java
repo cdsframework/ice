@@ -114,7 +114,6 @@ public class Recommendation
     private Date recommendationDate;
     private Date latestRecommendationDate;
     private String recommendationReason;
-    private String recommendationSupplementalText;
 
     /**
      * Initializes a Recommendation object; recommendationReason is set to empty (it is never null), TargetSeriesIdentifier to the supplied
@@ -140,7 +139,6 @@ public class Recommendation
         latestRecommendationDate = null;
         recommendationStatus = RecommendationStatus.NOT_FORECASTED;
         recommendationReason = null;
-        recommendationSupplementalText = null;
     }
 
     public Recommendation(final TargetSeries pTS, final TargetDose pTD) throws IllegalArgumentException
@@ -183,8 +181,8 @@ public class Recommendation
     @Override
     public String toString()
     {
-        return "Recommendation [recommendationIdentifier=%s, targetSeriesIdentifier=%s, recommendationStatus=%s, recommendedVaccine=%s, recommendationDate=%s, recommendationReason=%s, supplementalTest=%s ]".formatted(
+        return "Recommendation [recommendationIdentifier=%s, targetSeriesIdentifier=%s, recommendationStatus=%s, recommendedVaccine=%s, recommendationDate=%s, recommendationReason=%s]".formatted(
                 recommendationIdentifier, targetSeriesIdentifier, recommendationStatus, recommendedVaccine, recommendationDate,
-                recommendationReason, recommendationSupplementalText);
+                recommendationReason);
     }
 }

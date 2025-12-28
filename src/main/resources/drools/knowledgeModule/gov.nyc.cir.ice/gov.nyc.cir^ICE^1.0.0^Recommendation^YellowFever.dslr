@@ -44,14 +44,14 @@ rule "Yellow Fever: Always include supplemental text with the recommendation ind
 	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.YELLOW_FEVER"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made
 			- make note of the recommendation status as $recommendationStatus
 			- make note of the final recommendations as $allFinalRecommendations
 	then
 		Create a Recommendation as $supplementalText for the Series $targetSeries
-    	Set the Recommendation Supplemental text for $supplementalText to "Yellow fever vaccination is not routinely recommended in the U.S. and is only indicated for select patients at increased risk. Yellow fever is a live vaccine. An absolute minimum interval of 24 days is required between yellow fever vaccines. An absolute minimum interval of 28 days is required between a yellow fever vaccine and a live vaccine from another vaccine group. The minimum and recommended interval between yellow fever and another live vaccine is 30 days. Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information."
+    	Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.YELLOW_FEVER_LIVE_MIN_INTERVALS_SEE_ACIP"
     	Set the Recommendation Status for $supplementalText to $recommendationStatus
     	Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
     	Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -78,7 +78,7 @@ rule "Yellow Fever: Patient < 6 months old, Not Recommended with SUPPLEMENTAL_TE
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.YELLOW_FEVER"
 			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -97,7 +97,7 @@ rule "Yellow Fever: Patient >= 6 months and < 9 months and not complete, Conditi
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.YELLOW_FEVER"
 			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -120,7 +120,7 @@ rule "Yellow Fever: Patient >= 9 months months old, Conditionally Recommended HI
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.YELLOW_FEVER"
 			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -139,7 +139,7 @@ rule "Yellow Fever: Patient is complete for yellow fever, Conditional/Complete_H
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.YELLOW_FEVER"
 			- the Series is complete
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
@@ -160,7 +160,7 @@ rule "YellowFever.adjustEarliestDateDueToYellowFeverVaccine"
 	ruleflow-group "RecommendationForecast^supplementalSeriesRule"
 	when
 	 	There is a Series $yellowFeverVaccineSeries
-			- The Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.905"
+			- The Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.YELLOW_FEVER"
 			- The Series is complete
 			- Make note of the date that the most recent shot was administered as $yellowFeverDate
 		There is a Series $targetSeries distinct from $yellowFeverVaccineSeries

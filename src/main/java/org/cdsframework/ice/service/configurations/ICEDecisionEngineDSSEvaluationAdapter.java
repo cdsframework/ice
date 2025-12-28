@@ -32,12 +32,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.service.ICEFactTypeFinding;
 import org.cdsframework.ice.service.SeriesRules;
 import org.cdsframework.ice.service.TargetDose;
 import org.cdsframework.ice.service.TargetSeries;
-import org.cdsframework.ice.supportingdata.ICEPropertiesDataConfiguration;
-import org.cdsframework.ice.supportingdata.IceSupportingDataProperties;
 import org.kie.api.KieBase;
 import org.kie.api.command.Command;
 import org.kie.api.event.rule.AfterMatchFiredEvent;
@@ -54,7 +53,7 @@ import org.kie.api.event.rule.RuleFlowGroupActivatedEvent;
 import org.kie.api.event.rule.RuleFlowGroupDeactivatedEvent;
 import org.kie.api.event.rule.RuleRuntimeEventListener;
 import org.kie.api.runtime.ExecutionResults;
-import org.kie.api.runtime.StatelessKieSession;
+import org.kie.api.runtime.KieSession;
 import org.kie.internal.command.CommandFactory;
 import org.omg.dss.DSSRuntimeExceptionFault;
 import org.opencds.config.api.ExecutionEngineAdapter;
@@ -63,10 +62,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public record ICEDecisionEngineDSSEvaluationAdapter()
+public class ICEDecisionEngineDSSEvaluationAdapter
         implements ExecutionEngineAdapter<List<Command<?>>, ExecutionResults, IceKnowledgePackage>
 {
     private static class DroolsAgendaEventLogger implements AgendaEventListener
@@ -112,52 +112,52 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
         @Override
         public void beforeMatchFired(final BeforeMatchFiredEvent event)
         {
-            droolsEventsLogger.debug("Before match fired: {}. Objects={}", event.getMatch().getRule().getName(),
+            droolsEventsLogger.info("Before match fired: {}. Objects={}", event.getMatch().getRule().getName(),
                     StringUtils.truncate(filterObjects(event.getMatch().getObjects()), MAX_LOG_LENGTH));
         }
 
         @Override
         public void afterMatchFired(final AfterMatchFiredEvent event)
         {
-            droolsEventsLogger.debug("After match fired: {}\n", event.getMatch().getRule().getName());
+            droolsEventsLogger.info("After match fired: {}\n", event.getMatch().getRule().getName());
         }
 
         @Override
         public void agendaGroupPopped(final AgendaGroupPoppedEvent event)
         {
             final String popped = focusQueue.pop();
-            droolsEventsLogger.debug("Agenda group popped {}: queue={}", popped, focusQueue);
+            droolsEventsLogger.info("Agenda group popped {}: queue={}", popped, focusQueue);
         }
 
         @Override
         public void agendaGroupPushed(final AgendaGroupPushedEvent event)
         {
             focusQueue.push(event.getAgendaGroup().getName());
-            droolsEventsLogger.debug("Agenda group pushed {}: queue={}", event.getAgendaGroup().getName(), focusQueue);
+            droolsEventsLogger.info("Agenda group pushed {}: queue={}", event.getAgendaGroup().getName(), focusQueue);
         }
 
         @Override
         public void beforeRuleFlowGroupActivated(final RuleFlowGroupActivatedEvent event)
         {
-            droolsEventsLogger.debug("Before rule flow group activated: {}", event.getRuleFlowGroup().getName());
+            droolsEventsLogger.info("Before rule flow group activated: {}", event.getRuleFlowGroup().getName());
         }
 
         @Override
         public void afterRuleFlowGroupActivated(final RuleFlowGroupActivatedEvent event)
         {
-            droolsEventsLogger.debug("After rule flow group activated: {}", event.getRuleFlowGroup().getName());
+            droolsEventsLogger.info("After rule flow group activated: {}", event.getRuleFlowGroup().getName());
         }
 
         @Override
         public void beforeRuleFlowGroupDeactivated(final RuleFlowGroupDeactivatedEvent event)
         {
-            droolsEventsLogger.debug("Before rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
+            droolsEventsLogger.info("Before rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
         }
 
         @Override
         public void afterRuleFlowGroupDeactivated(final RuleFlowGroupDeactivatedEvent event)
         {
-            droolsEventsLogger.debug("After rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
+            droolsEventsLogger.info("After rule flow group deactivated: {}", event.getRuleFlowGroup().getName());
         }
     }
 
@@ -173,26 +173,28 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
         @Override
         public void objectInserted(final ObjectInsertedEvent event)
         {
-            droolsEventsLogger.debug("Object inserted: {} - {}", event.getObject().getClass().getSimpleName(),
+            droolsEventsLogger.info("Object inserted: {} - {}", event.getObject().getClass().getSimpleName(),
                     StringUtils.truncate(log(event.getObject()), MAX_LOG_LENGTH));
         }
 
         @Override
         public void objectUpdated(final ObjectUpdatedEvent event)
         {
-            droolsEventsLogger.debug("Object updated: {} - {}", event.getObject().getClass().getSimpleName(),
+            droolsEventsLogger.info("Object updated: {} - {}", event.getObject().getClass().getSimpleName(),
                     StringUtils.truncate(log(event.getObject()), MAX_LOG_LENGTH));
         }
 
         @Override
         public void objectDeleted(final ObjectDeletedEvent event)
         {
-            droolsEventsLogger.debug("Object deleted: {} - {}", event.getOldObject().getClass().getSimpleName(),
+            droolsEventsLogger.info("Object deleted: {} - {}", event.getOldObject().getClass().getSimpleName(),
                     StringUtils.truncate(log(event.getOldObject()), MAX_LOG_LENGTH));
         }
     }
 
     private static final Logger droolsEventsLogger = LoggerFactory.getLogger("drools-events");
+    @Setter
+    private static IceProperties iceProperties;
 
     private static String logObject(final Object object)
     {
@@ -228,15 +230,13 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
 
         final KieBase kieBase = knowledgePackage.kieBase();
         final ExecutionResults results;
-        try
+        try (final KieSession knowledgeSession = kieBase.newKieSession())
         {
-            final StatelessKieSession knowledgeSession = kieBase.newStatelessKieSession();
             if (log.isDebugEnabled())
                 log.debug("KM (Drools) execution...");
             long d0 = 0L;
 
-            if (!IceSupportingDataProperties.create(new ICEPropertiesDataConfiguration().getProperties())
-                    .disableDroolsEventLogging())
+            if (iceProperties.getEnableDroolsEventLogging())
             {
                 knowledgeSession.addEventListener(new DroolsAgendaEventLogger());
                 knowledgeSession.addEventListener(new DroolsRuleRuntimeEventLogger());
@@ -245,10 +245,10 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
             if (log.isInfoEnabled())
                 d0 = System.nanoTime();
             results = knowledgeSession.execute(CommandFactory.newBatchExecution(context.getInput()));
-            /////// knowledgeSession.fireAllRules();
+            // knowledgeSession.fireAllRules();
 
             if (log.isInfoEnabled())
-                log.info(_METHODNAME + "Drools Execution Duration: {} ms", (System.nanoTime() - d0) / 1e6);
+                log.debug(_METHODNAME + "Drools Execution Duration: {} ms", (System.nanoTime() - d0) / 1e6);
             if (log.isDebugEnabled())
                 log.debug("KM (Drools) execution done.");
         }
@@ -264,7 +264,7 @@ public record ICEDecisionEngineDSSEvaluationAdapter()
         if (log.isDebugEnabled())
             log.debug("KMId: {} completed Drools inferencing engine", knowledgePackage.kmId());
         if (log.isInfoEnabled())
-            log.info(_METHODNAME + "ICE Request Duration: {} ms", (System.nanoTime() - t0) / 1e6);
+            log.debug(_METHODNAME + "ICE Request Duration: {} ms", (System.nanoTime() - t0) / 1e6);
 
         return context;
     }

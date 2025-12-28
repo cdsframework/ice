@@ -33,6 +33,7 @@ import java.util.Set;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.util.TimePeriod;
+import org.kie.api.definition.type.ClassReactive;
 import org.springframework.util.ObjectUtils;
 
 import lombok.EqualsAndHashCode;
@@ -44,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Slf4j
+@ClassReactive
 public class SeriesRules
 {
     /**

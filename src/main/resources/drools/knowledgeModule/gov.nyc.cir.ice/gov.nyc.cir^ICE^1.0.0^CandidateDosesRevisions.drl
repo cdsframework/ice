@@ -40,8 +40,8 @@ rule "CandidateDosesRevisions(RSV): If there are no shots administered in the RS
 	dialect "mvel"
 	ruleflow-group "CandidateDosesRevisions^customCandidateDoseRevisionRule"
 	when
-		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries == 0, seriesRules.seriesEndAge != null)
-		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", seriesRules.seriesStartAge != null)
+		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries == 0, seriesRules.seriesEndAge != null)
+		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesRules.seriesName == "RSVAdultSeries", seriesRules.seriesStartAge != null)
 		EvaluatedPerson($birthDate : demographics.birthTime)
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $tsadult.seriesRules.seriesStartAge) >= 0)
 	then
@@ -53,8 +53,8 @@ rule "CandidateDosesRevisions(RSV): If there are no shots administered in the RS
 	dialect "mvel"
 	ruleflow-group "CandidateDosesRevisions^customCandidateDoseRevisionRule"
 	when
-		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", seriesRules.seriesEndAge != null)
-		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries == 0, seriesRules.seriesStartAge != null)
+		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesRules.seriesName == "RSVInfantSeries", seriesRules.seriesEndAge != null)
+		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries == 0, seriesRules.seriesStartAge != null)
 		EvaluatedPerson($birthDate : demographics.birthTime)
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $tsinfant.seriesRules.seriesEndAge) <= 0)
 	then
@@ -66,8 +66,8 @@ rule "CandidateDosesRevisions(RSV): If there are shots adminstered > the Series 
 	dialect "mvel"
 	ruleflow-group "CandidateDosesRevisions^customCandidateDoseRevisionRule"
 	when
-		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries > 0, seriesEndAgeDate != null)
-		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries > 0, seriesStartAgeDate != null)
+		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries > 0, seriesEndAgeDate != null)
+		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries > 0, seriesStartAgeDate != null)
 		$overlappingTd : TargetDose(associatedTargetSeries == $tsinfant, administrationDate > $tsinfant.seriesEndAgeDate)
 		exists TargetDose(associatedTargetSeries == $tsadult, doseId == $overlappingTd.doseId, administrationDate >= $tsadult.seriesStartAgeDate)
 	then
@@ -83,8 +83,8 @@ rule "CandidateDosesRevisions(RSV): If there are shots adminstered < the Series 
 	dialect "mvel"
 	ruleflow-group "CandidateDosesRevisions^customCandidateDoseRevisionRule"
 	when
-		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries > 0, seriesEndAgeDate != null)
-		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.875", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries > 0, seriesStartAgeDate != null)
+		$tsinfant : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesRules.seriesName == "RSVInfantSeries", numberOfShotsAdministeredInSeries > 0, seriesEndAgeDate != null)
+		$tsadult : TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesRules.seriesName == "RSVAdultSeries", numberOfShotsAdministeredInSeries > 0, seriesStartAgeDate != null)
 		$overlappingTd : TargetDose(associatedTargetSeries == $tsadult, administrationDate < $tsadult.seriesStartAgeDate)
 		exists TargetDose(associatedTargetSeries == $tsinfant, doseId == $overlappingTd.doseId, administrationDate <= $tsinfant.seriesEndAgeDate)
 	then

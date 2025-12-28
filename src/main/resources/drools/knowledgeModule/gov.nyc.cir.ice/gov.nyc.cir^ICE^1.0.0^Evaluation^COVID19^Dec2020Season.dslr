@@ -33,8 +33,8 @@ rule "COVID-19: If the vaccine administered is authorized neither by the FDA nor
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE500", "ICE501", "ICE503", "ICE504", "ICE505", "ICE506", "ICE507", "ICE508", "ICE509", "ICE513", "ICE514", "ICE515", "ICE516", "ICE517", "ICE518", "ICE521")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the vaccine administered a member of ("VACCINE_CVX_500", "VACCINE_CVX_501", "VACCINE_CVX_503", "VACCINE_CVX_504", "VACCINE_CVX_505", "VACCINE_CVX_506", "VACCINE_CVX_507", "VACCINE_CVX_508", "VACCINE_CVX_509", "VACCINE_CVX_513", "VACCINE_CVX_514", "VACCINE_CVX_515", "VACCINE_CVX_516", "VACCINE_CVX_517", "VACCINE_CVX_518", "VACCINE_CVX_521")
 			- make note of the associated series as $targetSeries
 	then
 		Include the reason for shot $currentShot Invalid due to "Vaccine Not Approved for Use in the U.S. or by the WHO"
@@ -52,8 +52,8 @@ rule "COVID-19: If an FDA-approved, NOS or WHO-approved vaccine, the vaccine is 
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE210", "ICE211", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE300", "ICE301", "ICE302", "ICE502", "ICE510", "ICE511", "ICE512", "ICE519", "ICE520", "ICE521")
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_211", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_502", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_512", "VACCINE_CVX_519", "VACCINE_CVX_520", "VACCINE_CVX_521")
 			- the series that the shot belongs to is not complete
 			- make note of the administered vaccine as $vaccineAdministered
 			- make note of the dose number as $doseNumber
@@ -83,10 +83,10 @@ rule "COVID-19: If a bivalent vaccine was administered prior to 9/2/2022, evalua
 	no-loop true
 	when
 		There is an administered shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated
 			- the administration date of the shot is < "02-Sep-2022"
-			- the vaccine administered a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of all evaluation reasons for this shot as $oEvaluationReasons
 			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.EXTRA_DOSE"
 			- the collection $oEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED"
@@ -109,10 +109,10 @@ rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for s
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is an administered shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated and whose shot validity is INVALID or ACCEPTED
 			- the Series that the shot belongs to is not complete
-			- the vaccine administered not a member of ("ICE229", "ICE230")
+			- the vaccine administered not a member of ("VACCINE_CVX_229", "VACCINE_CVX_230")
 			- make note of the administered shot number as $shotNumber
 			- make note of the associated series as $associatedTargetSeries
 		There is an IceFact $iceFact
@@ -135,10 +135,10 @@ rule "COVID-19: Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE for s
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is an administered shot $currentShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated and whose shot validity is INVALID or ACCEPTED
 			- the Series that the shot belongs to is not complete
-			- the vaccine administered is not "ICE230"
+			- the vaccine administered is not "VACCINE_CVX_230"
 			- make note of the administered shot number as $shotNumber
 			- make note of the associated series as $associatedTargetSeries
 		There is an IceFact $iceFact
@@ -162,9 +162,9 @@ rule "COVID-19: If CVX 229 is administered < 4/19/2023 & effective date < 4/19/2
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name a member of ("COVID19ModernaSeries", "COVID19MixedProductSeries")
-			- the vaccine administered is "ICE229"
+			- the vaccine administered is "VACCINE_CVX_229"
 			- the administration date of the shot is < "19-Apr-2023"
 			- the Series that the shot belongs to is not complete
 			- make note of the associated series as $associatedTargetSeries
@@ -185,7 +185,7 @@ rule "COVID-19: If the series is complete, override allowable vaccine check, as 
 	activation-group "allowableVaccineCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series that the shot belongs to is complete
 			- make note of the associated series as $associatedTargetSeries
 	then
@@ -207,9 +207,9 @@ rule "COVID-19: If the shot administration date is < 9/2/2022 and at >= 5 yrs an
 	activation-group "extraDoseCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name "COVID19ModernaSeries"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $currentShotDate
 			- the date $currentShotDate < "02-Sep-2022"
 			- make note of the associated series as $associatedTargetSeries
@@ -234,9 +234,9 @@ rule "COVID-19: If the shot administration date is < 9/2/2022 and at >= 18 yrs a
 	activation-group "extraDoseCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name "COVID19ModernaSeries"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $currentShotDate
 			- the date $currentShotDate < "02-Sep-2022"
 			- make note of the associated series as $associatedTargetSeries
@@ -261,9 +261,9 @@ rule "COVID-19: If the shot administration date < 9/2/2022 and at >= 5 yrs and <
 	activation-group "extraDoseCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $currentShotDate
 			- the date $currentShotDate < "02-Sep-2022"
 			- make note of the associated series as $associatedTargetSeries
@@ -288,9 +288,9 @@ rule "COVID-19: If the shot administration date is < 9/2/2022 and at >= 50 yrs o
 	activation-group "extraDoseCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $currentShotDate
 			- the date $currentShotDate < "02-Sep-2022"
 			- make note of the associated series as $associatedTargetSeries
@@ -325,9 +325,9 @@ rule "COVID-19: If the shot administration date >= 9/2/2022 and at >= 5 yrs of a
 	activation-group "extraDoseCheck"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Novavax2DoseSeries", "COVID19Medicago2DoseSeries")
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228")
 			- make note of the date this shot was administered as $currentShotDate
 			- the date $currentShotDate >= "02-Sep-2022"
 			- make note of the associated series as $associatedTargetSeries
@@ -349,11 +349,11 @@ rule "COVID-19(Abstract): Determination if additional dose and/or up to 3 booste
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
 	when
 		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series that the shot belongs to is complete
 			- the administration date of the shot is >= "02-Sep-2022"
 			- the administration date of the shot is < "19-Apr-2023"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE211", "ICE212", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_212", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the dose number as $doseNumberCurrentShot
 			- make note of the associated series as $associatedTargetSeries
@@ -461,7 +461,7 @@ rule "COVID-19: Supplemental Text- If an additional and/or 1st booster dose is a
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19Janssen1DoseSeries", "COVID19Novavax2DoseSeries")
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
@@ -487,7 +487,7 @@ rule "COVID-19: Supplemental Text- If an additional and/or 1st booster dose is a
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "8w"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 8 weeks required for the 1st Booster Dose." for Valid Shot $administeredShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_INTERVAL_8W_1ST_BOOSTER" for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
@@ -497,7 +497,7 @@ rule "COVID-19: Supplemental Text- If the shot administration date is < 9/2/2022
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
@@ -522,7 +522,7 @@ rule "COVID-19: Supplemental Text- If the shot administration date is < 9/2/2022
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "5m"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 5 months required for the 1st Booster Dose." for Valid Shot $administeredShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_INTERVAL_5M_1ST_BOOSTER" for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
@@ -532,7 +532,7 @@ rule "COVID-19: Supplemental Text- If the shot administration date is >= 9/2/202
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
@@ -558,7 +558,7 @@ rule "COVID-19: Supplemental Text- If the shot administration date is >= 9/2/202
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "8w"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 8 weeks required for the 1st Booster Dose." for Valid Shot $administeredShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_INTERVAL_8W_1ST_BOOSTER" for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
@@ -576,7 +576,7 @@ rule "COVID-19: Supplemental Text- If the shot administration date is < 9/2/2022
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
@@ -601,7 +601,7 @@ rule "COVID-19: Supplemental Text- If the shot administration date is < 9/2/2022
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "4m"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 4 months required for the 2nd Booster Dose." for Valid Shot $administeredShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_INTERVAL_4M_2ND_BOOSTER" for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
@@ -611,7 +611,7 @@ rule "COVID-19: Supplemental Text- If the shot administration date is >= 9/2/202
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the series is complete
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
@@ -637,7 +637,7 @@ rule "COVID-19: Supplemental Text- If the shot administration date is >= 9/2/202
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "8w"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 8 weeks required for the 2nd Booster Dose." for Valid Shot $administeredShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_INTERVAL_8W_2ND_BOOSTER" for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end
@@ -655,7 +655,7 @@ rule "COVID-19: If the 3rd booster dose is administered >= 9/2/2022 & < 4/19/202
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series that the shot belongs to is complete
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19AstraZeneca2DoseSeries", "COVID19BIBPSinopharm2DoseSeries", "COVID19CoronaVacSinovac2DoseSeries", "COVID19COVAXIN2DoseSeries", "COVID19Medicago2DoseSeries")
 			- the administration date of the shot is >= "02-Sep-2022"
@@ -726,7 +726,7 @@ rule "COVID-19(Administration of 1st Bivalent Dose in the Pfizer Series After Se
 	activation-group "extraDoseCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19PfizerSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19" and the Series with name "COVID19PfizerSeries"
 			- the series that the shot belongs to is complete
 			- the administration date of the shot is >= "17-Mar-2023"
 			- make note of the date this shot was administered as $currentShotDate
@@ -735,7 +735,7 @@ rule "COVID-19(Administration of 1st Bivalent Dose in the Pfizer Series After Se
 		There does not exist an administered shot
 			- the shot belongs to the series $associatedTargetSeries
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- the administration date of the shot is < "17-Mar-2023"
 		There does not exist an administered shot
 			- the shot belongs to the series $associatedTargetSeries
@@ -762,7 +762,7 @@ rule "COVID-19: If the first bivalent dose on >= 3/17/2023 after series completi
 	when
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "8w"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 8 weeks." for Valid Shot $currentShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_INTERVAL_8W" for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -773,7 +773,7 @@ rule "COVID-19(Administration of 1st Bivalent Dose in a non-Pfizer Series After 
 	activation-group "extraDoseCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name a member of ("COVID19ModernaSeries", "COVID19MixedProductSeries", "COVID19Janssen1DoseSeries", "COVID19Novavax2DoseSeries")
 			- the series that the shot belongs to is complete
 			- the administration date of the shot is >= "19-Apr-2023"
@@ -783,13 +783,13 @@ rule "COVID-19(Administration of 1st Bivalent Dose in a non-Pfizer Series After 
 		There does not exist an administered shot
 			- the shot belongs to the series $associatedTargetSeries
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- the administration date of the shot is < "19-Apr-2023"
 		There does not exist an administered shot
 			- the shot belongs to the series $associatedTargetSeries
 			- that has already been evaluated and whose shot validity is VALID
 			- the administration date of the shot is >= "19-Apr-2023"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 		There is an administered shot $priorShot
 			- the shot belongs to the series $associatedTargetSeries
 			- the administration date of the shot is < $currentShotDate
@@ -811,7 +811,7 @@ rule "COVID-19: If the first bivalent dose on >= 4/19/2023 after series completi
 	when
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "8w"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 8 weeks." for Valid Shot $currentShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_INTERVAL_8W" for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -828,14 +828,14 @@ rule "COVID-19: If a shot was administered to a patient >= 65 yrs of age, and if
 	salience 10
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series that the shot belongs to is complete
 			- the administration date of the shot is >= "19-Apr-2023"
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the dose number as $doseNumberCurrentShot
 			- make note of the Associated Series as $associatedTargetSeries
-		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where administration date < "19-Apr-2023" with vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
-		Make note of the number of doses administered $doseAccumulationApr19 in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023" with vaccine a member of ("ICE207", "ICE208", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where administration date < "19-Apr-2023" with vaccine a member of ("VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
+		Make note of the number of doses administered $doseAccumulationApr19 in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023" with vaccine a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and $currentShotDate >= "65y"
@@ -858,7 +858,7 @@ rule "COVID-19: If a 2nd bivalent dose was administered to a patient >= 65 yrs o
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is an administered shot $latestShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been Evaluated and whose Shot Validity is VALID
 			- the series that the shot belongs to is complete
 			- the administration date of the shot is >= "19-Apr-2023"
@@ -874,15 +874,15 @@ rule "COVID-19: If a 2nd bivalent dose was administered to a patient >= 65 yrs o
 			- that has already been evaluated
 			- the administration date of the shot is > $priorShotDate
 			- the administration date of the shot is < $latestShotDate
-		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where administration date < "19-Apr-2023" with vaccine a member of ("ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
-		Make note of the number of doses administered $doseAccumulationApr19 in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023" with vaccine a member of ("ICE207", "ICE208", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+		Make note of the number of doses administered $doseAccumulationBivalent in Series $associatedTargetSeries as $nNumberOfBivalentDoses where administration date < "19-Apr-2023" with vaccine a member of ("VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
+		Make note of the number of doses administered $doseAccumulationApr19 in Series $associatedTargetSeries as $nDosesAdministeredAfter041923 where administration date >= "19-Apr-2023" with vaccine a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and $latestShotDate >= "65y"
 		Confirm elapsed time between $priorShotDate and $latestShotDate < "4m"
 		Confirm that the following is true: $nDosesAdministeredAfter041923 >= 1 && $nDosesAdministeredAfter041923 <= 2 && ($nNumberOfBivalentDoses + $nDosesAdministeredAfter041923 >= 2)
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum interval of 4 months." for Valid Shot $latestShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_INTERVAL_4M" for Valid Shot $latestShot
 		Record that this dose rule was Processed for the TargetDose $latestShot
 		Log that this dose rule fired for the dose $latestShot in the Series $associatedTargetSeries
 end
@@ -902,7 +902,7 @@ rule "COVID-19: If CVX 302 is admininstered for target dose 3 in the Pfizer seri
 	activation-group "maximumAgeVaccineCheck"
 	when
 		There is an administered shot $administeredShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19PfizerSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19" and the Series with name "COVID19PfizerSeries"
 			- the series that the shot belongs to is not complete
 			- the dose number in the Series is == 3
 			- make note of the Associated Series as $associatedTargetSeries
@@ -925,7 +925,7 @@ rule "COVID-19: If the patient received a (valid) dose of _any_ vaccine allowed 
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19PfizerSeries"
 			- the series is not complete
 		There is an Administered Shot $validShot
@@ -949,9 +949,9 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ _bival
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is an Administered Shot $validShot
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19PfizerSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19" and the Series with name "COVID19PfizerSeries"
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE300", "ICE301")
+			- the vaccine administered a member of ("VACCINE_CVX_300", "VACCINE_CVX_301")
 			- make note of the Associated Series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the series is not complete
@@ -973,7 +973,7 @@ rule "COVID-19: If the patient received a (valid) dose _any_ vaccine allowed in 
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19ModernaSeries"
 			- the series is not complete
 		There is an Administered Shot $validShot
@@ -997,13 +997,13 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ _bival
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19ModernaSeries"
 			- the series is not complete
 		There is an Administered Shot $validShot
 			- the Shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered is "ICE229"
+			- the vaccine administered is "VACCINE_CVX_229"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge6y when the Patient is "6y" of age
 		There is an Administered Shot $validShotSame
@@ -1022,14 +1022,14 @@ rule "COVID-19: If the patient received a (valid) dose of _any_ vaccine allowed 
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19MixedProductSeries"
 			- the series is not complete
 		There is an Administered Shot $validShot
 			- the Shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
 			- the administration date of the shot is >= "19-Apr-2023"
-			- the vaccine administered a member of ("ICE207", "ICE208", "ICE213", "ICE217", "ICE218", "ICE219", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE300", "ICE301", "ICE302", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_519", "VACCINE_CVX_520")
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 		There is an Administered Shot $validShotSame
@@ -1047,13 +1047,13 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ Pfizer
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19MixedProductSeries"
 			- the series is not complete
 		There is an Administered Shot $validShot
 			- the Shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered a member of ("ICE300", "ICE301")
+			- the vaccine administered a member of ("VACCINE_CVX_300", "VACCINE_CVX_301")
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge5y when the Patient is "5y" of age
 		There is an Administered Shot $validShotSame
@@ -1072,7 +1072,7 @@ rule "COVID-19: If the patient received a (valid) dose of _any_ Moderna vaccine 
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19MixedProductSeries"
 			- the series is not complete
 		There is an Administered Shot $validShot
@@ -1096,13 +1096,13 @@ rule "COVID-19: If the patient received a (valid) dose of an _applicable_ Modern
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19MixedProductSeries"
 			- the series is not complete
 		There is an Administered Shot $validShot
 			- the Shot belongs to the Series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
-			- the vaccine administered is "ICE229"
+			- the vaccine administered is "VACCINE_CVX_229"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtAtAge6y when the Patient is "6y" of age
 		There is an Administered Shot $validShotSame
@@ -1126,7 +1126,7 @@ rule "COVID-19: If 2 or more doses were administered >= 5 years of age in the Pf
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
 			- the series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -1157,19 +1157,19 @@ rule "COVID-19: If 2 doses of CVX 208, CVX 217, CVX 218, CVX 300 or CVX 301 were
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is an administered shot $administeredShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
 			- that has already been evaluated and whose Shot Validity Status is VALID
 			- the series that the shot belongs to is not complete
 			- the dose number in the Series is == 2
-			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE300", "ICE301")
+			- the vaccine administered a member of ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_300", "VACCINE_CVX_301")
 			- make note of the Associated Series as $associatedTargetSeries
 		There exists another administered shot
 			- the shot belongs to the Series $associatedTargetSeries
 			- that is not the same shot as $administeredShot
 			- the dose number in the Series is == 1
 			- that has already been evaluated and whose Shot Validity is VALID
-			- the vaccine administered a member of ("ICE208", "ICE217", "ICE218", "ICE300", "ICE301")
+			- the vaccine administered a member of ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_300", "VACCINE_CVX_301")
 	then
 		Mark the Series $associatedTargetSeries complete
 		Refresh all facts in the Series $associatedTargetSeries
@@ -1182,18 +1182,18 @@ rule "COVID-19: If 2 doses of CVX 207, CVX 221, CVX 227, CVX 228, or CVX 229 wer
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is an administered shot $administeredShot
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19MixedProductSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19" and the Series with name "COVID19MixedProductSeries"
 			- the series that the shot belongs to is not complete
 			- that has already been evaluated and whose Shot Validity Status is VALID
 			- the dose number in the Series is == 2
-			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229")
 			- make note of the Associated Series as $associatedTargetSeries
 		There exists another administered shot
 			- the shot belongs to the Series $associatedTargetSeries
 			- that is not the same shot as $administeredShot
 			- the dose number in the Series is == 1
 			- that has already been evaluated and whose Shot Validity is VALID
-			- the vaccine administered a member of ("ICE207", "ICE221", "ICE227", "ICE228", "ICE229")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229")
 	then
 		Mark the Series $associatedTargetSeries complete
 		Refresh all facts in the Series $associatedTargetSeries
@@ -1209,10 +1209,10 @@ rule "COVID-19: If 2 or more doses of CVX 211 (Novavax) were administered in the
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is a Series $targetSeries
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the name of the Series is "COVID19MixedProductSeries"
 			- the series is not complete
-		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "ICE211" is == 2
+		Verify that the Count of Doses Administered in Series $targetSeries with Vaccine "VACCINE_CVX_211" is == 2
 	then
 		Mark the Series $targetSeries complete
 		Refresh all Facts in the Series $targetSeries for evaluation
@@ -1234,8 +1234,8 @@ rule "COVID-19: If CVX 229 or CVX 230 was evaluated as Not Valid due to VACCINE_
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
 	when
 		There is an administered shot $administeredShot
-			- the vaccine administered a member of ("ICE229", "ICE230")
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.850"
+			- the vaccine administered a member of ("VACCINE_CVX_229", "VACCINE_CVX_230")
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19ModernaSeries", "COVID19MixedProductSeries")
 			- that has already been evaluated and whose Shot Validity Status is not VALID
 			- the shot is not ignored
@@ -1265,15 +1265,15 @@ rule "COVID-19: If CVX 212 is administered below the age of 18y-4d in the Jansse
 	salience 5
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19Janssen1DoseSeries"
-			- the Vaccine Administered is "ICE212"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19" and the Series with name "COVID19Janssen1DoseSeries"
+			- the Vaccine Administered is "VACCINE_CVX_212"
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm Elapsed time between $dtBirthDate and $administrationDate < "18y-4d"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age." for Valid Shot $currentShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_AGE" for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -1284,7 +1284,7 @@ rule "COVID-19(Abstract): For any vaccine administered in a COVID-19 series, ove
 	activation-group "minimumAgeVaccineCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
 	then
@@ -1301,7 +1301,7 @@ rule "COVID-19: If a shot administered below the age of 6 months, override absol
 			- make note of the patient's birthdate as $dtBirthDate
 		Confirm Elapsed time between $dtBirthDate and $administrationDate < "6m"
 	then
-		Include Supplemental Text "The timing of the administration of this shot does not follow the guidelines regarding the minimum age." for Valid Shot $currentShot
+		Include Supplemental Text "EVALUATION_REASON_CONCEPT.COVID19_MIN_AGE" for Valid Shot $currentShot
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
@@ -1312,7 +1312,7 @@ rule "COVID-19: For patients >= 18 yrs of age, if shot in the Pfizer, Mixed Prod
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the administered shot number is > 1
 			- make note of the administered shot number as $administeredShotNumber
 			- make note of the date this shot was administered as $administrationDate
@@ -1344,7 +1344,7 @@ rule "COVID-19: If a shot is administered in the Moderna series >= 4/19/2023 and
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850" and the Series with name "COVID19ModernaSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19" and the Series with name "COVID19ModernaSeries"
 			- the administered shot number is > 1
 			- the dose number in the series is == 2
 			- make note of the administered shot number as $administeredShotNumber
@@ -1382,7 +1382,7 @@ rule "COVID-19: If a shot is administered in the Pfizer or Mixed Product series 
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the shot belongs to the Series with name a member of ("COVID19PfizerSeries", "COVID19MixedProductSeries")
 			- the administered shot number is > 1
 			- the dose number in the series is == 2
@@ -1423,7 +1423,7 @@ rule "COVID-19: For patients >= 18y, enforce absolute minimum interval of 24 day
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series that the shot belongs to is not complete
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
 			- make note of the dose number as $doseNumberCurrentShot
@@ -1432,7 +1432,7 @@ rule "COVID-19: For patients >= 18y, enforce absolute minimum interval of 24 day
 			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated
 			- the dose number in the series is < $doseNumberCurrentShot
-			- the vaccine administered a member of ("ICE207", "ICE213", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE519")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_213", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_519")
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
 		There is an Administered Shot $priorShot
@@ -1452,9 +1452,9 @@ rule "COVID-19: For patients >= 18y, enforce absolute minimum interval of 24 day
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series that the shot belongs to is not complete
-			- the vaccine administered a member of ("ICE207", "ICE213", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_213", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
 			- make note of the dose number as $doseNumberCurrentShot
 			- make note of the Associated Series as $associatedTargetSeries
@@ -1481,7 +1481,7 @@ rule "COVID-19: For patients < 18y, always enforce absolute minimum interval of 
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series that the shot belongs to is not complete
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
 			- make note of the dose number as $doseNumberCurrentShot
@@ -1490,7 +1490,7 @@ rule "COVID-19: For patients < 18y, always enforce absolute minimum interval of 
 			- the shot belongs to the Series $associatedTargetSeries
 			- that has already been evaluated
 			- the dose number in the series is < $doseNumberCurrentShot
-			- the vaccine administered a member of ("ICE207", "ICE213", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_213", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_519", "VACCINE_CVX_520")
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the date as $dtDateAtAge18y when the patient is "18y" of age
 		There is an Administered Shot $priorShot
@@ -1509,9 +1509,9 @@ rule "COVID-19: For patients < 18y, always enforce absolute minimum interval of 
 	ruleflow-group "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
 	when
 		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.850"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the series that the shot belongs to is not complete
-			- the vaccine administered a member of ("ICE207", "ICE213", "ICE221", "ICE227", "ICE228", "ICE229", "ICE230", "ICE519", "ICE520")
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_213", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_519", "VACCINE_CVX_520")
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
 			- make note of the dose number as $doseNumberCurrentShot
 			- make note of the Associated Series as $associatedTargetSeries
