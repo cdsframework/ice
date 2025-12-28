@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2024 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+ * Copyright (C) 2025 New York City Department of Health and Mental Hygiene, Bureau of Immunization
  * Contributions by HLN Consulting, LLC
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
@@ -27,31 +27,19 @@
 
 ICE is open source software and in active development. Please check in to http://www.cdsframework.org/ for the latest status, or e-mail questions to ice@hln.com.
 
-An overview of the capabilities of ICE is available http://www.hln.com/ice/. This distribution comes bundled with OpenCDS 6.2.0, which was released in May 2024. The ICE software will continually update to the latest versions of OpenCDS as they become available. The out of the box (default) immunization rules documentation, as well as technical documentation for ICE and CAT, can be found at http://www.cdsframework.org/.
+An overview of the capabilities of ICE is available http://www.hln.com/ice/. This distribution comes bundled with OpenCDS 7.0.1 libraries. The ICE software will continually update to the latest versions of OpenCDS as they become available. The out of the box (default) immunization rules documentation, as well as technical documentation for ICE and CAT, can be found at http://www.cdsframework.org/.
 
-This version of ICE requires Java 17, and has been tested under the latest version of Tomcat 10.
+This version of ICE requires Java 25, and has only been tested under Tomcat 11.
 
-It is recommended that at least 1GB of memory be allocated to the Tomcat instance, though in our internal performance tests, we have noted a significant performance increase when allocating 2GB of memory.
+It is recommended that at least 2GB of memory be allocated to the Tomcat instance.
 
 To install the software, please follow the directions at https://cdsframework.atlassian.net/wiki/display/ICE/Installing+ICE to configure and interact with the service. The out-of-the-box working ICE service executable is available at this location.
 
 Alternatively, to build the software via source:
-1) Edit .gcp.config/opencds.properties to suit your installation.
-    + Set km.threads to specify the number of threads allocated to each knowledgeModule. Recommended setting: twice the number of CPU cores available to this instance for Linux; equal to the number of CPU cores for Windows
-    + Set knowledge-repository.path to the location of the ICE knowledge repository as follows: /path/to/opencds-ice-service/src/main/resources
 
-2) Copy opencds.properties to $HOME/.opencds/, where $HOME is the "home" directory of the application server instance.
+1) Edit src/main/resources/application.yml to suit your installation, taking care to only modify entries you're familiar with. If you are unsure, the configuration will work without any changes.
 
-3) Edit opencds-ice-service/src/main/resources/ice.properties:
-    + Set ice_knowledge_repository_location to the same location as knowledge-repository.path of opencds.properties file
-
-4) Edit opencds-ice-service/src/main/resources/log4j2.xml to suit your installation.
-
-5) Compile the software:
-    $ cd opencds
+2) Using Java 25 and the latest release of Maven 3.9, compile the software:
     $ mvn clean
-    $ mvn -DskipTests -DskipITs -Djetty.skip=true install
-    $ cd ..
-    $ mvn clean
-    $ mvn -DskipTests -DskipITs -Djetty.skip=true install
+    $ mvn install
 
