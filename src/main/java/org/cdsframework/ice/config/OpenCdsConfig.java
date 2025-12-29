@@ -74,6 +74,7 @@ import org.opencds.config.api.service.SupportingDataPackageService;
 import org.opencds.config.api.service.SupportingDataService;
 import org.opencds.config.api.strategy.AbstractConfigStrategy;
 import org.opencds.config.api.strategy.ConfigCapability;
+import org.opencds.config.api.strategy.ConfigStrategy;
 import org.opencds.config.api.xml.JAXBContextService;
 import org.opencds.config.mapper.util.RestConfigUtil;
 import org.opencds.config.service.CacheServiceImpl;
@@ -94,6 +95,7 @@ import org.opencds.evaluation.service.util.CallableUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import jakarta.annotation.PreDestroy;
 import jakarta.xml.ws.Endpoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -521,12 +523,6 @@ public class OpenCdsConfig
     {
         private static final CacheRegion<KMId, Object> KNOWLEDGE_PACKAGE = CacheRegion.create(KMId.class, Object.class);
 
-        public ExecutorKnowledgePackageServiceImpl(final ExecutionEngineService executionEngineService,
-                final CacheService cacheService)
-        {
-            this(Executors.newCachedThreadPool(), executionEngineService, cacheService);
-        }
-
         @Override
         public void deletePackage(final KnowledgeModule knowledgeModule)
         {
@@ -571,7 +567,8 @@ public class OpenCdsConfig
         {
             final AtomicInteger counter = new AtomicInteger();
             knowledgeModules.parallelStream()
-                    .filter(KnowledgeModule::isPreload).peek(km -> log.debug("Preloading KnowledgePackage: {}", km.getKMId()))
+                    .filter(KnowledgeModule::isPreload)
+                    .peek(km -> log.debug("Preloading KnowledgePackage: {}", km.getKMId()))
                     .map(this::submitLoadTask)
                     .toList()
                     .forEach(task ->
@@ -648,6 +645,13 @@ public class OpenCdsConfig
         public ExecutorEvaluationServiceImpl(final CallableUtil callableUtil)
         {
             this(Executors.newFixedThreadPool(128), callableUtil);
+        }
+
+        @PreDestroy
+        public void preDestroy()
+        {
+            if (evalPool != null && !evalPool.isShutdown() && !evalPool.isTerminated())
+                evalPool.shutdownNow();
         }
 
         @Override
@@ -737,9 +741,18 @@ public class OpenCdsConfig
     {
         private static final String configType = "SPRING_BOOT";
 
+        private final ExecutorService evalPool = Executors.newCachedThreadPool();
+
         public SpringBootConfigStrategy()
         {
             super(Set.of(ConfigCapability.READ_ONCE), configType);
+        }
+
+        @PreDestroy
+        public void preDestroy()
+        {
+            if (!evalPool.isShutdown() && !evalPool.isTerminated())
+                evalPool.shutdownNow();
         }
 
         @Override
@@ -764,7 +777,7 @@ public class OpenCdsConfig
                     new SupportingDataServiceImpl(new SupportingDataPathDao(path.resolve("supportingData")), sdpService,
                             cacheService);
 
-            final KnowledgePackageService kpService = new ExecutorKnowledgePackageServiceImpl(eeService, cacheService);
+            final KnowledgePackageService kpService = new ExecutorKnowledgePackageServiceImpl(evalPool, eeService, cacheService);
 
             final KnowledgeModuleService kmService =
                     new KnowledgeModuleServiceImpl(new KnowledgeModulePathDao(path.resolve("knowledgeModules.xml")), kpService,
@@ -845,9 +858,18 @@ public class OpenCdsConfig
     }
 
     @Bean
-    public ConfigurationService configurationService(final IceProperties iceProperties, final Path configPath,
-            final Path droolsPath, final VersionData versionData, final ConfigData configData)
+    public ConfigStrategy configStrategy()
     {
+        return new SpringBootConfigStrategy();
+    }
+
+    @Bean
+    public ConfigurationService configurationService(final IceProperties iceProperties, final Path configPath,
+            final Path droolsPath, final VersionData versionData, final ConfigData configData, final ConfigStrategy configStrategy)
+    {
+        log.info("Setting fire limit to {}", iceProperties.getFireLimit());
+        System.setProperty("org.jbpm.rule.task.firelimit", Integer.toString(iceProperties.getFireLimit()));
+
         ICEDecisionEngineDSSEvaluationAdapter.setIceProperties(iceProperties);
 
         IceKnowledgeLoader.setIceProperties(iceProperties);
@@ -858,7 +880,7 @@ public class OpenCdsConfig
 
         IceExecutionEngineContext.setIceVersion(versionData.iceVersion());
 
-        return new ConfigurationService(Set.of(new SpringBootConfigStrategy()), CacheServiceImpl.class, configData);
+        return new ConfigurationService(Set.of(configStrategy), CacheServiceImpl.class, configData);
     }
 
     @Bean
