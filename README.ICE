@@ -29,7 +29,7 @@ ICE is open source software and in active development. Please check in to http:/
 
 An overview of the capabilities of ICE is available http://www.hln.com/ice/. This distribution comes bundled with OpenCDS 7.0.1 libraries. The ICE software will continually update to the latest versions of OpenCDS as they become available. The out of the box (default) immunization rules documentation, as well as technical documentation for ICE and CAT, can be found at http://www.cdsframework.org/.
 
-This version of ICE /requires/ Java 25. Versions of Java will not work.
+This version of ICE /requires/ Java 25. Prior versions of Java will not work.
 
 If running under Tomcat, it is recommended that at least 2GB of memory be allocated to a Tomcat 10 or Tomcat 11 instance. 
 
