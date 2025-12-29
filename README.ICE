@@ -31,7 +31,7 @@ An overview of the capabilities of ICE is available http://www.hln.com/ice/. Thi
 
 This version of ICE /requires/ Java 25. Prior versions of Java will not work.
 
-If running under Tomcat, it is recommended that at least 2GB of memory be allocated to a Tomcat 10 or Tomcat 11 instance. 
+If running under Tomcat, it is recommended that at least 2GB of memory be allocated to a Tomcat 11 or Tomcat 10 instance. 
 
 To install the software, please follow the directions at https://cdsframework.atlassian.net/wiki/display/ICE/Installing+ICE to configure and interact with the service. The out-of-the-box working ICE service executable is available at this location.
 
@@ -43,12 +43,10 @@ Alternatively, to build the software via source:
     $ mvn clean
     $ mvn install
 
-3) The service can either be run as a Spring Boot or Tomcat application.
-           + To run as a Spring Boot application:
-               $ java -jar target/opencds-decision-support-service.war org.cdsframework.ice.IceApplication
-       or
-           + To run the service under Tomcat 11 or Tomcat 10: 
-               Copy the file target/opencds-decision-support-service.tar to the Tomcat webapps directory
+3) To install into Tomcat under Tomcat 11 or Tomcat 10: 
+       - Shut down Tomcat, if running
+       - Copy the file target/opencds-decision-support-service.tar to the Tomcat webapps directory
+       - Once Tomcat is started, logs are directed to catalina.out. We suggest configuring Tomcat to rotate and/or expunge logs at periodic intervals
 
 
 
