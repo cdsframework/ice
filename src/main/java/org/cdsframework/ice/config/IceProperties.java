@@ -1,5 +1,6 @@
 package org.cdsframework.ice.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -7,7 +8,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
@@ -45,8 +45,11 @@ public class IceProperties
     @NotNull
     private Boolean enableUnsupportedVaccinesGroup;
 
-    @NotEmpty
-    private List<@NotBlank String> vaccineGroupExclusions;
+    @NotNull
+    private List<@NotBlank String> vaccineGroupExclusions = new ArrayList<>();
+
+    @NotNull
+    private List<@NotBlank String> vaccineGroupInclusions = new ArrayList<>();
 
     @NotNull
     private Boolean disableCovid19Sep2023DoseNumberReset;

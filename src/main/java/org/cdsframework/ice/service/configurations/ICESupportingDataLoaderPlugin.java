@@ -31,7 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.ice.config.IceProperties;
@@ -44,7 +45,6 @@ import org.opencds.plugin.api.PluginDataCache;
 import org.opencds.plugin.api.PreProcessPlugin;
 import org.opencds.plugin.api.PreProcessPluginContext;
 import org.opencds.plugin.api.SupportingData;
-import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.springframework.util.StringUtils;
 
 import lombok.Setter;
@@ -69,67 +69,127 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
         return context.getSupportingData().get(SD_ICE);
     }
 
-    private static synchronized List<String> normalizeVaccineGroupExclusionsForSchedule(final List<String> raw,
-            final Schedule schedule, final String kmId)
+    private static synchronized List<String> normalizeVaccineGroupExclusionsForSchedule(final List<String> vaccineGroupInclusions,
+            final List<String> vaccineGroupExclusions, final Schedule schedule, final String kmId)
     {
-        if (raw == null || schedule == null)
-            return raw;
+        // nothing to do if no inclusions or exclusions
+        if ((vaccineGroupInclusions.isEmpty() && vaccineGroupExclusions.isEmpty()) || schedule == null)
+            return List.of();
 
-        final List<String> p = raw.stream().filter(StringUtils::hasText).map(String::trim).toList();
-
-        final String sig = String.join("|", p), prev = cachedRawSignatureByKmId.get(kmId);
-        if (prev != null && prev.equals(sig))
+        // normalize and validate inclusions and exclusions
+        if (!vaccineGroupInclusions.isEmpty() && !vaccineGroupExclusions.isEmpty())
         {
-            final List<String> c = cachedNormalizedExclusionsByKmId.get(kmId);
-            if (c != null)
-                return c;
+            final String lErrStr = "Both vaccine group inclusions and exclusions specified; cannot continue";
+            log.error(lErrStr);
+            throw new ICECoreError(lErrStr);
         }
 
-        final Map<String, String> m =
-                cachedNumericToKeyByKmId.computeIfAbsent(kmId, k -> buildVaccineGroupNumericToKeyMap(schedule));
+        final List<String> filteredInclusions = vaccineGroupInclusions.stream()
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .map(String::toUpperCase)
+                .distinct()
+                .toList();
+        final List<String> filteredExclusions = vaccineGroupExclusions.stream()
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .map(String::toUpperCase)
+                .distinct()
+                .toList();
 
-        final List<String> n = p.stream().map(s ->
+        if (!filteredInclusions.isEmpty())
+            log.debug("Vaccine group inclusions: {}", filteredInclusions);
+
+        if (!filteredExclusions.isEmpty())
+            log.debug("Vaccine group exclusions: {}", filteredExclusions);
+
+        if (!filteredInclusions.isEmpty()
+                && filteredInclusions.stream().filter(inclusion -> inclusion.startsWith("HEP_")).count() == 1)
         {
-            final int i = s.lastIndexOf('.');
-            final String suf = i >= 0 ? s.substring(i + 1) : s;
-            if (suf.chars().allMatch(Character::isDigit))
+            final String lErrStr =
+                    "Inclusion of vaccine group HEP_A or HEP_B requires inclusion of both HEP_A and HEP_B; cannot continue";
+            log.error(lErrStr);
+            throw new ICECoreError(lErrStr);
+        }
+
+        if (!filteredExclusions.isEmpty()
+                && filteredExclusions.stream().filter(exclusion -> exclusion.startsWith("HEP_")).count() == 1)
+        {
+            final String lErrStr =
+                    "Exclusion of vaccine group HEP_A or HEP_B requires exclusion of both HEP_A and HEP_B; cannot continue";
+            log.error(lErrStr);
+            throw new ICECoreError(lErrStr);
+        }
+
+        // check if we have already processed this combination of inclusions and exclusions and cached the result
+        final String sig = String.join("+", String.join("|", filteredExclusions), String.join("|", filteredInclusions));
+        final String prev = cachedRawSignatureByKmId.get(kmId);
+        if (prev != null && prev.equals(sig))
+        {
+            final List<String> cachedExclusions = cachedNormalizedExclusionsByKmId.get(kmId);
+            if (cachedExclusions != null)
+                return cachedExclusions;
+        }
+
+        // build vaccine group name map (CDS item key -> CDS item name)
+        final Map<String, String> vaccineGroupNameMap =
+                cachedNumericToKeyByKmId.computeIfAbsent(kmId, _ -> buildVaccineGroupNameMap(schedule));
+
+        // check for unknown inclusions and exclusions
+        if (!vaccineGroupInclusions.isEmpty())
+        {
+            final List<String> unknownInclusions =
+                    filteredInclusions.stream().filter(inclusion -> !vaccineGroupNameMap.containsKey(inclusion)).toList();
+            if (!unknownInclusions.isEmpty())
             {
-                final String x = m.get(suf);
-                if (x == null)
-                    throw new IllegalArgumentException("Unknown vaccine group numeric code: " + suf + " (KM: " + kmId + ")");
-
-                return x;
+                final String lErrStr = "Unknown vaccine group inclusions specified: " + unknownInclusions;
+                log.error(lErrStr);
+                throw new ICECoreError(lErrStr);
             }
+        }
 
-            return suf;
-        }).distinct().toList();
+        if (!vaccineGroupExclusions.isEmpty())
+        {
+            final List<String> unknownExclusions =
+                    filteredExclusions.stream().filter(exclusion -> !vaccineGroupNameMap.containsKey(exclusion)).toList();
+            if (!unknownExclusions.isEmpty())
+            {
+                final String lErrStr = "Unknown vaccine group exclusions specified: " + unknownExclusions;
+                log.error(lErrStr);
+                throw new ICECoreError(lErrStr);
+            }
+        }
+
+        // build exclusions list
+        final List<String> exclusions = vaccineGroupNameMap.entrySet()
+                .stream()
+                .filter(e -> filteredInclusions.isEmpty() || !filteredInclusions.contains(e.getKey()))
+                .filter(e -> filteredExclusions.isEmpty() || filteredExclusions.contains(e.getKey()))
+                .map(Map.Entry::getValue)
+                .toList();
 
         cachedRawSignatureByKmId.put(kmId, sig);
-        cachedNormalizedExclusionsByKmId.put(kmId, n);
+        cachedNormalizedExclusionsByKmId.put(kmId, exclusions);
 
-        return n;
+        return exclusions;
     }
 
-    private static Map<String, String> buildVaccineGroupNumericToKeyMap(final Schedule schedule)
+    private static Map<String, String> buildVaccineGroupNameMap(final Schedule schedule)
     {
-        final Map<String, String> m = new HashMap<>();
         try
         {
-            final Set<LocallyCodedCdsListItem> items =
-                    schedule.getSupportedCdsLists().getCdsListItemsAssociatedWithCdsListCode("VACCINE_GROUP_CONCEPT");
-            if (items != null)
-                for (final LocallyCodedCdsListItem it : items)
-                {
-                    final CD o = it.getCdsListItemOutboundCD();
-                    if (o != null && o.getCode() != null)
-                        m.put(o.getCode(), it.getCdsListItemKey());
-                }
+            return Optional.ofNullable(
+                            schedule.getSupportedCdsLists().getCdsListItemsAssociatedWithCdsListCode("VACCINE_GROUP_CONCEPT"))
+                    .map(items -> items.stream()
+                            .collect(Collectors.toMap(LocallyCodedCdsListItem::getCdsListItemKey,
+                                    LocallyCodedCdsListItem::getCdsListItemName, (existing, _) -> existing)))
+                    .orElse(new HashMap<>());
         }
         catch (final Exception e)
         {
             log.error("Failed building vaccine group numeric-to-key map", e);
+            return new HashMap<>();
         }
-        return m;
     }
 
     @Override
@@ -196,8 +256,8 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
         context.getGlobals().put("outputSupplementalText", iceProperties.getOutputSupplementalText());
 
         context.getGlobals()
-                .put("vaccineGroupExclusions",
-                        normalizeVaccineGroupExclusionsForSchedule(iceProperties.getVaccineGroupExclusions(), schedule, lKMId));
+                .put("vaccineGroupExclusions", normalizeVaccineGroupExclusionsForSchedule(iceProperties.getVaccineGroupInclusions(),
+                        iceProperties.getVaccineGroupExclusions(), schedule, lKMId));
 
         context.getGlobals().put("enableUnsupportedVaccinesGroup", iceProperties.getEnableUnsupportedVaccinesGroup());
 
