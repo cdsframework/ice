@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.ConceptUtils;
@@ -217,7 +218,8 @@ public class SupportedVaccineGroups implements SupportingData
         try
         {
             lcvgi = new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lPrimaryOpenCdsConcept, lCdsVersions,
-                    lRelatedDiseasesCdsListItems, lVaccineGroupPriority);
+                    lRelatedDiseasesCdsListItems, lVaccineGroupPriority,
+                    Optional.ofNullable(pIceVaccineGroupSpecificationFile.isRoutine()).orElse(true));
         }
         catch (final IllegalArgumentException iue)
         {

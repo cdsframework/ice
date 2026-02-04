@@ -38,10 +38,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 import org.kie.api.definition.type.ClassReactive;
-
-import com.google.common.base.Predicates;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -132,9 +131,7 @@ public class TargetSeasons
         if (lAllSeasons == null)
             return null;
 
-        return lAllSeasons.stream()
-                .filter(Objects::nonNull)
-                .filter(Predicates.not(Season::isDefaultSeason))
+        return lAllSeasons.stream().filter(Objects::nonNull).filter(Predicate.not(Season::isDefaultSeason))
                 .filter(lS -> lS.dateIsApplicableToSeason(pDate, true))
                 .findFirst()
                 .orElse(null);

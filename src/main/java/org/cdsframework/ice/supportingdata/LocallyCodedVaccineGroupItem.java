@@ -60,11 +60,12 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
      */
 
     private final Collection<String> relatedDiseasesCdsListItemNames;
-    private int priority;
+    private final int priority;
+    private final boolean routine;
 
     protected LocallyCodedVaccineGroupItem(final String pVaccineGroupCdsListItemName, final CdsConcept pVaccineGroupCdsConcept,
-            final Collection<String> pCdsVersions, final Collection<String> pRelatedDiseasesCdsListItemNames)
-            throws IllegalArgumentException
+            final Collection<String> pCdsVersions, final Collection<String> pRelatedDiseasesCdsListItemNames, final int pPriority,
+            final boolean routine) throws IllegalArgumentException
     {
         super(pVaccineGroupCdsListItemName, pVaccineGroupCdsConcept, pCdsVersions);
 
@@ -79,15 +80,8 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
         }
 
         this.relatedDiseasesCdsListItemNames = pRelatedDiseasesCdsListItemNames;
-        this.priority = 0;
-    }
-
-    protected LocallyCodedVaccineGroupItem(final String pVaccineGroupCdsListItemName, final CdsConcept pVaccineGroupCdsConcept,
-            final Collection<String> pCdsVersions, final Collection<String> pRelatedDiseasesCdsListItemNames, final int pPriority)
-            throws IllegalArgumentException
-    {
-        this(pVaccineGroupCdsListItemName, pVaccineGroupCdsConcept, pCdsVersions, pRelatedDiseasesCdsListItemNames);
         this.priority = pPriority;
+        this.routine = routine;
     }
 
     protected Collection<String> getRelatedDiseasesCdsListItemNames()
@@ -108,7 +102,7 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
     {
         final StringBuilder lStr = new StringBuilder(
                 "LocallyCodedVaccineGroupItem [vaccineGroupCdsListItemName=" + getCdsItemName() + ", priority=" + priority
-                        + ", primaryOpenCdsConcept=" + getCdsConceptName());
+                        + ", primaryOpenCdsConcept=" + getCdsConceptName() + ", routine=" + routine);
 
         lStr.append("\nrelatedDiseases= [");
         for (final String lDisease : getRelatedDiseasesCdsListItemNames())

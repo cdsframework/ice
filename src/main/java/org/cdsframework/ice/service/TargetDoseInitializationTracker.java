@@ -34,12 +34,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.kie.api.definition.type.ClassReactive;
 import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
 import org.opencds.vmr.v1_0.internal.concepts.ImmunizationConcept;
-
-import com.google.common.base.Predicates;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -259,7 +258,7 @@ public class TargetDoseInitializationTracker
         return vaccine.getVaccineComponents()
                 .stream()
                 .map(vc -> conceptTargetId + vc.getCdsConceptName() + targetSeriesIdentifier)
-                .anyMatch(Predicates.not(initializedTargetDoseList::contains));
+                .anyMatch(Predicate.not(initializedTargetDoseList::contains));
     }
 
     private boolean specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(

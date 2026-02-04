@@ -16,8 +16,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -94,8 +92,9 @@ import org.opencds.evaluation.service.EvaluationService;
 import org.opencds.evaluation.service.util.CallableUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.VirtualThreadTaskExecutor;
 
-import jakarta.annotation.PreDestroy;
 import jakarta.xml.ws.Endpoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -517,7 +516,7 @@ public class OpenCdsConfig
     }
 
     @Slf4j
-    private record ExecutorKnowledgePackageServiceImpl(ExecutorService pool,
+    private record ExecutorKnowledgePackageServiceImpl(AsyncTaskExecutor pool,
                                                        ExecutionEngineService executionEngineService,
                                                        CacheService cacheService) implements KnowledgePackageService
     {
@@ -639,21 +638,9 @@ public class OpenCdsConfig
     }
 
     @Slf4j
-    private record ExecutorEvaluationServiceImpl(ExecutorService evalPool,
+    private record ExecutorEvaluationServiceImpl(AsyncTaskExecutor evalPool,
                                                  CallableUtil callableUtil) implements EvaluationService
     {
-        public ExecutorEvaluationServiceImpl(final CallableUtil callableUtil)
-        {
-            this(Executors.newFixedThreadPool(128), callableUtil);
-        }
-
-        @PreDestroy
-        public void preDestroy()
-        {
-            if (evalPool != null && !evalPool.isShutdown() && !evalPool.isTerminated())
-                evalPool.shutdownNow();
-        }
-
         @Override
         public List<EvaluationResponseKMItem> evaluate(final KnowledgeRepository knowledgeRepository,
                 final List<EvaluationRequestKMItem> evaluationRequestKMItems)
@@ -741,18 +728,13 @@ public class OpenCdsConfig
     {
         private static final String configType = "SPRING_BOOT";
 
-        private final ExecutorService evalPool = Executors.newCachedThreadPool();
+        private final AsyncTaskExecutor evalPool;
 
-        public SpringBootConfigStrategy()
+        public SpringBootConfigStrategy(final AsyncTaskExecutor evalPool)
         {
             super(Set.of(ConfigCapability.READ_ONCE), configType);
-        }
 
-        @PreDestroy
-        public void preDestroy()
-        {
-            if (!evalPool.isShutdown() && !evalPool.isTerminated())
-                evalPool.shutdownNow();
+            this.evalPool = evalPool;
         }
 
         @Override
@@ -825,7 +807,7 @@ public class OpenCdsConfig
     @Bean
     public EvaluationService evaluationService(final DSSCallableUtil dssCallableUtil)
     {
-        return new ExecutorEvaluationServiceImpl(dssCallableUtil);
+        return new ExecutorEvaluationServiceImpl(new VirtualThreadTaskExecutor(), dssCallableUtil);
     }
 
     @Bean
@@ -860,7 +842,7 @@ public class OpenCdsConfig
     @Bean
     public ConfigStrategy configStrategy()
     {
-        return new SpringBootConfigStrategy();
+        return new SpringBootConfigStrategy(new VirtualThreadTaskExecutor());
     }
 
     @Bean

@@ -140,8 +140,7 @@ public class EvaluateController
         finally
         {
             log.debug("{} eval={}; success={}; evalTime={}; totalTime={}", METHODNAME, getEvalInfo(evaluateAtSpecifiedTime),
-                    success,
-                    evalTime, timer.getTotalTimeMillis());
+                    success, evalTime, timer.getTotalTimeMillis());
         }
     }
 }
