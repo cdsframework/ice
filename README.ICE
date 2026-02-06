@@ -31,7 +31,7 @@ An overview of the capabilities of ICE is available http://www.hln.com/ice/. Thi
 
 This version of ICE /requires/ Java 25. Prior versions of Java will not work.
 
-If running under Tomcat, it is recommended that at least 2GB of memory be allocated to a Tomcat 11 or Tomcat 10 instance. 
+ICE can be run either as a standalone Spring Boot service or deployed to a Tomcat servlet container.
 
 To install the software, please follow the directions at https://cdsframework.atlassian.net/wiki/display/ICE/Installing+ICE to configure and interact with the service. The out-of-the-box working ICE service executable is available at this location.
 
@@ -43,10 +43,33 @@ Alternatively, to build the software via source:
     $ mvn clean
     $ mvn install
 
-3) To install into Tomcat under Tomcat 11 or Tomcat 10: 
-       - Shut down Tomcat, if running
-       - Copy the file target/opencds-decision-support-service.tar to the Tomcat webapps directory
-       - Once Tomcat is started, logs are directed to catalina.out. We suggest configuring Tomcat to rotate and/or expunge logs at periodic intervals
 
+OPTION A: Running as a Standalone Spring Boot Service
+------------------------------------------------------
+
+Run the application directly using Maven or the generated WAR file. It is recommended to allocate at least 2GB of memory.
+
+Using Maven:
+    $ MAVEN_OPTS="-Xmx2g" mvn spring-boot:run
+
+Using the WAR file directly:
+    $ java -Xmx2g -jar target/opencds-decision-support-service.war
+
+The service will start on port 8080 by default. To change the port, add to application.yml:
+    server:
+      port: 9080
+
+Logs are directed to standard output by default. You can configure logging in application.yml.
+
+
+OPTION B: Deploying to Tomcat
+-----------------------------
+
+If running under Tomcat, it is recommended that at least 2GB of memory be allocated to a Tomcat 11 or Tomcat 10 instance.
+
+To install into Tomcat:
+    - Shut down Tomcat, if running
+    - Copy the file target/opencds-decision-support-service.war to the Tomcat webapps directory
+    - Once Tomcat is started, logs are directed to catalina.out. We suggest configuring Tomcat to rotate and/or expunge logs at periodic intervals
 
 
