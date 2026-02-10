@@ -7,7 +7,7 @@ ICE is open source software and in active development. This distribution comes b
 - **Project Information**: https://cdsframework.atlassian.net/wiki/spaces/ICE/overview
 - **Latest News**: https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/23920670/News
 - **Capabilities Overview**: https://www.hln.com/ice/
-- **Documentation** (default immunization rules, technical docs): http://www.cdsframework.org/
+- **Documentation** (default immunization rules, technical docs for ICE and CAT): http://www.cdsframework.org/
 - **Commercial Support** (HLN Consulting): https://www.hln.com/ice/
 - **Questions**: ice@hln.com
 
@@ -23,7 +23,7 @@ This version of ICE **requires Java 25**. Prior versions of Java will not work.
 
 To install the software, please follow the directions at [Installing ICE](https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/18972687/Installing+ICE) to configure and interact with the service. The out-of-the-box working ICE service executable is available at this location.
 
-ICE can be run either as a **standalone Spring Boot service** or **deployed to a Tomcat servlet container**.
+ICE can be run either as a standalone Spring Boot service or deployed to an Apache Tomcat instance.
 
 ## Building from Source
 
@@ -36,29 +36,9 @@ ICE can be run either as a **standalone Spring Boot service** or **deployed to a
 
 ## Running ICE
 
-### Option A: Standalone Spring Boot Service
+ICE can be run standalone or deployed to Tomcat. It is recommended to allocate at least 2GB of memory regardless of the method chosen.
 
-Run the application directly using Maven or the generated WAR file. It is recommended to allocate at least 2GB of memory.
-
-**Using Maven:**
-```bash
-MAVEN_OPTS="-Xmx2g" mvn spring-boot:run
-```
-
-**Using the WAR file directly:**
-```bash
-java -Xmx2g -jar target/opencds-decision-support-service.war
-```
-
-The service will start on port 8080 by default. To change the port, add to `application.yml`:
-```yaml
-server:
-  port: 9080
-```
-
-Logs are directed to standard output by default. You can configure logging in `application.yml`.
-
-### Option B: Deploying to Tomcat
+### Option A: Deploying to Tomcat
 
 If running under Tomcat, it is recommended that at least 2GB of memory be allocated to a Tomcat 11 or Tomcat 10 instance.
 
@@ -68,6 +48,40 @@ To install into Tomcat:
 3. Start Tomcat
 
 Logs are directed to `catalina.out`. We suggest configuring Tomcat to rotate and/or expunge logs at periodic intervals.
+
+### Option B: Standalone (Exploded WAR)
+
+This is the fastest standalone method, matching Tomcat performance. It extracts the WAR so that classes load directly from the filesystem rather than from nested archives inside the WAR.
+
+```bash
+mkdir -p ice-app && cd ice-app
+jar -xf ../target/opencds-decision-support-service.war
+java -Xms512m -Xmx2g org.springframework.boot.loader.launch.WarLauncher
+```
+
+Logs are directed to standard output by default. You can configure logging in `application.yml`.
+
+The standalone options (B, C, D) start on port 8080 by default. To change the port, add to `application.yml`, for example:
+```yaml
+server:
+  port: 9080
+```
+
+### Option C: Standalone (WAR directly) — Easy Setup, Slower Performance
+
+Running `java -jar` on the WAR file is simple, but is slower than Options A and B due to Spring Boot's nested archive class loading.
+
+```bash
+java -Xms512m -Xmx2g -jar target/opencds-decision-support-service.war
+```
+
+### Option D: Maven — Easy Setup, Slowest Performance
+
+Running via Maven is convenient during development but is the slowest option due to overhead.
+
+```bash
+MAVEN_OPTS="-Xms512m -Xmx2g" mvn spring-boot:run
+```
 
 ## License
 
@@ -81,3 +95,4 @@ The above-named contributors (HLN Consulting, LLC) are also licensed by the New 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 For more information about this software, see http://www.hln.com/ice or send correspondence to ice@hln.com.
+
