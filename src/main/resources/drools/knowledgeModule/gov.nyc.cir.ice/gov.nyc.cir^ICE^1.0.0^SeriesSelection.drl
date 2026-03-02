@@ -891,7 +891,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 1-dose COVID-19 Se
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50
 	when
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", isValid == true, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", seriesRules.seriesName == "COVID19Aug20252yTo64ySeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 		eval(evalTime.compareTo($dateAt2yrs) >= 0 && evalTime.compareTo($dateAt65yrs) < 0)
 	then
@@ -909,7 +909,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Se
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50
 	when
-		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", isValid == true, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
+		not TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", seriesRules.seriesName == "COVID19Aug2025gte65Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 		eval(evalTime.compareTo($dateAt65yrs) >= 0)
 	then
@@ -927,7 +927,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 1-dose COVID-19 Se
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50
 	when
-		$td1 : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", isValid == true, doseNumberInSeries == 1, administrationDate >= $dateAt2yrs,  associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason,
+		$td1 : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", doseNumberInSeries == 1, administrationDate >= $dateAt2yrs,  associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason,
 			$dose1AdminDate : administrationDate)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", seriesRules.seriesName == "COVID19Aug20252yTo64ySeries", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 		eval($dose1AdminDate.compareTo($dateAt65yrs) < 0)
@@ -946,7 +946,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Se
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50
 	when
-		$td1 : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", isValid == true, doseNumberInSeries == 1, administrationDate >= $dateAt65yrs, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
+		$td1 : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", doseNumberInSeries == 1, administrationDate >= $dateAt65yrs, associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", seriesRules.seriesName == "COVID19Aug2025gte65Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 	then
 		$ts.setSelectedSeries(true);
@@ -963,7 +963,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Se
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50
 	when
-		$td1 : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", isValid == true, doseNumberInSeries == 1, administrationDate < $dateAt65yrs,
+		$td1 : TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", doseNumberInSeries == 1, administrationDate < $dateAt65yrs,
 		                  associatedTargetSeries!.targetSeason == $tss.seriesSelectionSeason, $seasonStartDate : associatedTargetSeries.seasonStartDate)
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", seriesRules.seriesName == "COVID19Aug2025gte65Series", targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 		eval($seasonStartDate != null && $seasonStartDate.compareTo($dateAt65yrs) < 0)

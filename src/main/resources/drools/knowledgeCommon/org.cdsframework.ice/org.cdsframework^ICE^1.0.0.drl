@@ -822,15 +822,26 @@ rule "HistoryEvaluation: If Dose Override Specified, set Dose Evaluation Status 
 		$tdsEvaluated : List() from accumulate($tdacc : TargetDose(associatedTargetSeries == $td.associatedTargetSeries, hasBeenEvaluated == true), collectList($tdacc))
 	then
 		DoseStatus evaluationStatus = $sae.getIsValid().isValue() == true ? DoseStatus.VALID : DoseStatus.INVALID;
-		String evaluationStatusReason = $sae.getIsValid().isValue() == true ? BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName(): BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName();
-		modify ($td) {
-			setDoseStatusOverridden(true),
-			setIsPrimarySeriesShot(! $ts.isSeriesComplete()),
-			setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
-			setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
-			setStatus(evaluationStatus),
-			addValidReason(evaluationStatusReason)
-		};
+		if ($sae.getIsValid().isValue() == true) {
+			modify($td) {
+				setDoseStatusOverridden(true),
+				setIsPrimarySeriesShot(! $ts.isSeriesComplete()),
+				setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
+				setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
+				setStatus(evaluationStatus),
+				addValidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_VALID.getCdsListItemName())
+			};
+		}
+		else {
+			modify($td) {
+				setDoseStatusOverridden(true),
+				setIsPrimarySeriesShot(! $ts.isSeriesComplete()),
+				setDoseNumberCount($ts.determineNumberOfDosesAdministeredInSeries()+1),
+				setAdministeredShotNumberInSeries($tdsEvaluated.size()+1),
+				setStatus(evaluationStatus),
+				addInvalidReason(BaseDataEvaluationReason._DOSE_OVERRIDE_INVALID.getCdsListItemName())
+			};
+		}
 		modify($ts) {
 			setHistoryEvaluationInitiated(true)
 		};
@@ -2713,12 +2724,12 @@ rule "ProcessResults: Return Evaluations"
 end
 
 /**
- * Supplementary rule... To be migrated to custom rule and genericize
+ * COVID-19 Supplementary rule... To be migrated to custom rule and genericize
  */
-rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - always resetting to dose 1 at the beginning of the Sept 2023 or Aug 2024 season start dates"
+rule "ProcessResults(COVID-19 Abstract): Return COVID-19 Season Evaluations - (CB1 - determine if dose number should be reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
-	salience 11
+	salience 12
 	when
 		not ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
 		$covidSeason : Season(seasonName in ("COVID19Sep2023Season", "COVID19Aug2024Season", "COVID19Aug2025Season"), fullySpecifiedSeasonStartDate != null, fullySpecifiedSeasonEndDate != null, $seasonStartDate : ICELogicHelper.toDate(fullySpecifiedSeasonStartDate), $seasonEndDate : ICELogicHelper.toDate(fullySpecifiedSeasonEndDate))
@@ -2730,6 +2741,21 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - always rese
 			administeredShotNumberInSeries < $td.administeredShotNumberInSeries), count($acctd))
 		$evalTime: EvalTime()
 	then
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $td);
+end
+
+
+/**
+ * COVID-19 Supplementary rule... To be migrated to custom rule and genericize
+ */
+rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - (CB1 - _always_ reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set and series was not started and not completed in the previous season)"
+		extends "ProcessResults(COVID-19 Abstract): Return COVID-19 Season Evaluations - (CB1 - determine if dose number should be reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set"
+	ruleflow-group "ProcessResults"
+	dialect "mvel"
+	salience 11
+	when
+		exists TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1)
+	then
 		PayloadHelper p = new PayloadHelper(schedule);
 		int doseNumberToDisplay = $numberOfPreviousDoses.intValue() == 0 ? 1 : $numberOfPreviousDoses.intValue()+1;
 		p.outputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, doseNumberToDisplay);
@@ -2739,10 +2765,33 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - always rese
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $td);
 end
 
+
 /**
- * Supplementary rule... To be migrated to custom rule
+ * COVID-19 Supplementary rule... To be migrated to custom rule and genericize
  */
-rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do not reset to 1 in the Sept 2023, Aug 2024 or later season)"
+rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - (CB1 - do _not_ reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set and series was started and not completed in the previous season)"
+		extends "ProcessResults(COVID-19 Abstract): Return COVID-19 Season Evaluations - (CB1 - determine if dose number should be reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set"
+	ruleflow-group "ProcessResults"
+	dialect "mvel"
+	salience 11
+	when
+		not TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1)
+		TargetDose(associatedTargetSeries == $ts, $tddosenumber : doseNumberInSeries)
+		not TargetDose(associatedTargetSeries == $ts, doseNumberInSeries < $tddosenumber)
+	then
+		PayloadHelper p = new PayloadHelper(schedule);
+		p.outputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $tddosenumber);
+		$sae.setToBeReturned(true);
+		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
+		insert(saeEvaluation);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $td);
+end
+
+
+/**
+ * COVID-19 Supplementary rule... To be migrated to custom rule and genericize
+ */
+rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do _not_ reset to 1 in the Sept 2023, Aug 2024, Aug 2025 or later season if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED _is_ set)"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 11
