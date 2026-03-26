@@ -1,0 +1,205 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+/**
+ * Overrides routine recommendationAgeCheck
+ */
+rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 60 Years and No Previously Administered Doses"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationAgeCheck"
+    when
+        There is a Series $targetSeries that needs forecasting
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+        	- the number of Administered Shots is == 0
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+        	- make note of the patient's birthdate as $dtBirthDate
+        Confirm elapsed time between $dtBirthDate and evalTime >= 60 DurationType.YEARS
+    then
+        Add "60y" to $dtBirthDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * The interval between dose 1 & 3 of HepB Child/Adolescent series needs to be at least 112 days for Recommendation.
+ * Routine interval rule still runs
+ */
+rule "HepB: Recommend both an earliest interval and recommended interval of 112 days between doses 1 & 3 for Child/Adolescent Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the name of the series is "SUPPORTED_SERIES.HepBChildAdolescentSeries"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "112d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * The interval between dose 1 & 3 of HepB 3-dose adult series needs to be at least 112 days for Recommendation.
+ * Routine interval rule still runs
+ */
+rule "HepB: Recommend both an earliest interval of 112 days and recommended interval of 6 months between doses 1 & 3 for Adult 3-dose Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the name of the series is "SUPPORTED_SERIES.HepBAdult3DoseSeries"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "112d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculatedMinimum
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculatedRecommended
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculatedMinimum
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculatedRecommended
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * The interval between dose 1 & 3 of HepB 3-dose Twinrix series needs to be at least 6 months for Recommendation.
+ * Routine interval rule still runs
+ */
+rule "HepB: Recommend both an earliest and recommended interval of 6 months between doses 1 & 3 for HepB 3-dose Twinrix Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the name of the series is "SUPPORTED_SERIES.HepB3DoseTwinrixSeries"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * The interval between dose 1 & 4 of HepB 4-dose Accelerated Twinrix series needs to be at least 12 months for Recommendation.
+ * Routine interval rule still runs
+ */
+rule "HepB: Recommend both an earliest and recommended interval of 12 months between doses 1 & 4 for HepB 4-dose Accelerated Twinrix Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the name of the series is "SUPPORTED_SERIES.HepB4DoseAcceleratedTwinrixSeries"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 4
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "12m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Recommend at the vaccine level, CVX 189 (Hep B adjuvanted) vaccine, when recommending for the Hep B 2-dose Adult Series
+ */
+rule "Hep B: Recommend CVX 189 (Hep B adjuvanted) for the Hep B 2-dose Adult Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the Name of the Series is "SUPPORTED_SERIES.HepBAdult2DoseSeries"
+			- the Series is Not Complete
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_189"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Recommend at the vaccine level, CVX 104 (Hep A-Hep B (Twinrix)) vaccine, when recommending for the Hep B 3-dose Twinrix Series
+ */
+rule "Hep B: Recommend CVX 104 (Hep A-Hep B (Twinrix)) for the Hep B 3-dose Twinrix Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the Name of the Series is "SUPPORTED_SERIES.HepB3DoseTwinrixSeries"
+			- the Series is Not Complete
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_104"
+		Set the Recommendation Supplemental Text for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.HEP_B_3DOSE_TWINRIX_ALT_VACCINE"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Recommend at the vaccine level, CVX 104 (Hep A-Hep B (Twinrix)) vaccine, when recommending for the Hep B 4-dose Accelerated
+ * Twinrix Series
+ */
+rule "Hep B: Recommend CVX 104 (Hep A-Hep B (Twinrix)) for the Hep B 4-dose Accelerated Twinrix Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the Name of the Series is "SUPPORTED_SERIES.HepB4DoseAcceleratedTwinrixSeries"
+			- the Series is Not Complete
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_104"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end

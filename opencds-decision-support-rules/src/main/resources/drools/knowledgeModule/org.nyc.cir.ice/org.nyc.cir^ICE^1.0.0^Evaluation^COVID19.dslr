@@ -1,0 +1,362 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+
+/**
+ * Series: ALL. General Rules.
+ */
+
+/**
+ * If a shot is evaluated as Invalid / ABOVE_MAXIMUM_AGE_VACCINE (i.e., due to the CVX code absolute maximum age ICE General Rule),
+ * then ignore the shot when calculating intervals.
+ */
+rule "COVID-19: If a previous shot was evaluated and Not Valid due to ABOVE_MAXIMUM_AGE_VACCINE, ignore the shot when calculating intervals"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+	when
+		There is an administered shot $administeredShot
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- that has already been evaluated and whose Shot Validity Status is not VALID
+			- the shot is not ignored
+			- make note of all evaluation reasons for this shot as $collectionOfStrReasons
+			- the collection $collectionOfStrReasons contains "EVALUATION_REASON_CONCEPT.ABOVE_MAXIMUM_AGE_VACCINE"
+			- make note of the Associated Series as $associatedTargetSeries
+	then
+		Mark the shot $administeredShot as Ignored
+		Refresh all facts for the shot $administeredShot
+		Record that this dose rule was Processed for the TargetDose $administeredShot
+		Log that this dose rule fired for the dose $administeredShot in the Series $associatedTargetSeries
+end
+
+rule "COVID-19(Sep2023+): Remove evaluation reason VACCINE_NOT_ALLOWED_FOR_THIS_DOSE if there are other evaluation reason codes"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+	no-loop true
+	when
+		There is an administered shot $notAllowedShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the administration date of the shot is >= "12-Sep-2023"
+			- that has already been evaluated
+			- make note of all evaluation reasons for this shot as $oEvaluationReasons
+			- the size of the collection $oEvaluationReasons is > 1
+			- the collection $oEvaluationReasons contains "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE"
+			- make note of the associated series as $associatedTargetSeries
+		There is an IceFact $iceFact
+			- that has associated series $associatedTargetSeries
+			- that has associated administered shot $notAllowedShot
+			- that has finding SupportedFactConcept._INVALID_VACCINE.conceptCodeValue
+	then
+		Remove Evaluation Reason "EVALUATION_REASON_CONCEPT.VACCINE_NOT_ALLOWED_FOR_THIS_DOSE" from Shot $notAllowedShot
+		Refresh all facts for the shot $notAllowedShot
+		Record that this dose rule was processed for the TargetDose $notAllowedShot
+		Log that this dose rule fired for the dose $notAllowedShot in the Series $associatedTargetSeries
+end
+
+/**
+ * START ===> PRIOR FORMULATION of COVID-19 Vaccine Administered on or after 9/12/2023
+ */
+
+/**
+ * Non-U.S. vaccine that does not count towards vaccination, administered on or after 9/12/2023
+ * If the patient has a prior formulation COVID-19 shot that does not count towards U.S. vaccination (CVX 500, CVX 501, CVX 503, CVX
+ * 504, CVX 505, CVX 506, CVX 507, CVX 508, CVX 509, CVX 513, CVX 514, CVX 515, CVX 516, CVX 517, CVX 518, CVX 521) administered on
+ * or after 9/12/2023, the intervals to the next target dose are:
+ * + Absolute Minimum Interval = 8 weeks - 4 days
+ * + Minimum Interval = 8 weeks
+ * + Recommended Interval = 8 weeks
+ * If a prior formulation of a COVID-19 vaccine, excluding CVX 211, is administered on or after 9/12/2023, then the Evaluation is
+ * Invalid and the reason code is VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.
+ */
+rule "COVID-19(9/12/2023+ Abstract): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 8w-4d"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the associated series as $associatedTargetSeries
+		There is an administered shot $previousShot distinct from $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- that has already been evaluated
+			- the administration date of the shot is >= "12-Sep-2023"
+			- the administration date of the shot is < $currentShotDate
+			- the vaccine administered a member of ("VACCINE_CVX_500", "VACCINE_CVX_501", "VACCINE_CVX_503", "VACCINE_CVX_504", "VACCINE_CVX_505", "VACCINE_CVX_506", "VACCINE_CVX_507", "VACCINE_CVX_508", "VACCINE_CVX_509", "VACCINE_CVX_513", "VACCINE_CVX_514", "VACCINE_CVX_515", "VACCINE_CVX_516", "VACCINE_CVX_517", "VACCINE_CVX_518", "VACCINE_CVX_521")
+			- make note of the date this shot was administered as $previousShotDate
+		There does not exist another administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the vaccine administered a member of ("VACCINE_CVX_500", "VACCINE_CVX_501", "VACCINE_CVX_503", "VACCINE_CVX_504", "VACCINE_CVX_505", "VACCINE_CVX_506", "VACCINE_CVX_507", "VACCINE_CVX_508", "VACCINE_CVX_509", "VACCINE_CVX_513", "VACCINE_CVX_514", "VACCINE_CVX_515", "VACCINE_CVX_516", "VACCINE_CVX_517", "VACCINE_CVX_518", "VACCINE_CVX_521")
+			- the administration date of the shot is > $previousShotDate
+			- the administration date of the shot is < $currentShotDate
+		There does not exist an IceIntervalFact
+			- that has IceIntervalFact type IntervalFactType.EVALUATION
+			- that has IceIntervalFact finding SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue
+			- that has IceIntervalFact previously administered shot $previousShot
+			- that has IceIntervalFact current administered shot $currentShot
+	then
+		// Nothing to do
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+rule "COVID-19(9/12/2023+): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series) is < 8w-4d, evaluate the shot as Invalid"
+	extends "COVID-19(9/12/2023+ Abstract): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 8w-4d"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	when
+		Confirm Elapsed time between $previousShotDate and $currentShotDate < "8w-4d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+rule "COVID-19(9/12/2023+): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series) is between 8w-4d and the series table interval, override the doseIntervalCheck"
+	extends "COVID-19(9/12/2023+ Abstract): If a COVID-19 shot that does not count towards U.S. vaccination is administered (for any Sept 2023+ COVID-19 Series), absolute minimum interval from the most recent shot to the current shot is 8w-4d"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	when
+		Confirm Elapsed time between $previousShotDate and $currentShotDate >= "8w-4d"
+	then
+		Insert an Evaluation IceIntervalFact SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue with TargetDoses $previousShot and $currentShot into working memory
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+rule "COVID-19(9/12/2023+): For any prior formulation administered in a COVID-19 series (excluding CVX 211), override the absolute vaccine minimum age check"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "minimumAgeVaccineCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_212", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_502", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_512", "VACCINE_CVX_519", "VACCINE_CVX_520", "VACCINE_CVX_521")
+		    - the administration date of the shot is >= "12-Sep-2023"
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+rule "COVID-19(9/12/2023+): If a prior formulation is administered (excluding CVX 211), mark the shot Invalid / VACCINE_NOT_ALLOWED (overrides VACCINE_NOT_ALLOWED_FOR_THIS_DOSE rules)"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "allowableVaccineCheck"
+	salience 10
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the vaccine administered a member of ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_210", "VACCINE_CVX_212", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302", "VACCINE_CVX_500", "VACCINE_CVX_501", "VACCINE_CVX_502", "VACCINE_CVX_503", "VACCINE_CVX_504", "VACCINE_CVX_505", "VACCINE_CVX_506", "VACCINE_CVX_507", "VACCINE_CVX_508", "VACCINE_CVX_509", "VACCINE_CVX_510", "VACCINE_CVX_511", "VACCINE_CVX_512", "VACCINE_CVX_513", "VACCINE_CVX_514", "VACCINE_CVX_515",  "VACCINE_CVX_516", "VACCINE_CVX_517", "VACCINE_CVX_518", "VACCINE_CVX_519", "VACCINE_CVX_520", "VACCINE_CVX_521")
+			- the administration date of the shot is >= "12-Sep-2023"
+			- make note of the date this shot was administered as $administrationDate
+			- make note of the associated series as $associatedTargetSeries
+	then
+		Include the reason for shot $currentShot Invalid due to "Vaccine Not Allowed"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+/**
+ * For the 2023-2024 season, if the patient has >= 1 (invalid) COVID-19 shot(s) administered PRIOR to 9/12/2023, but no doses on
+ * record, the intervals from the last shot, if prior to 9/12/2023, are:
+ * Absolute Minimum Interval = 8 weeks - 4 days
+ * Minimum Interval = 8 weeks
+ * Recommended Interval = 8 weeks
+ *
+ * NOTE that this interval should override the table-based intervals for the 2023-2024 season from target dose 1 to dose 1.
+ */
+rule "COVID-19(9/12/2023+): For the 2023-2024 season, if the patient has >= 1 (invalid) COVID-19 shot(s) administered prior to 9/12/2023, and there are no doses on record, the absolute minimum interval from (invalid) dose 1 is 8w-4d (*doseIntervalCheck*)"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		There is an Administered Shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the dose number in the Series is == 1
+			- make note of the date this shot was administered as $dtAdministrationDateCurrentShot
+			- make note of the Associated Series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the Series belongs to the Season with name "SUPPORTED_SEASON.COVID19Sep2023Season"
+		There does not exist an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- that has already been evaluated and whose shot validity is VALID
+		There is an administered shot $previousDose
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the administration date of the shot is < "12-Sep-2023"
+			- that has already been evaluated
+			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
+		There does not exist an administered shot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the administration date of the shot is > $dtAdministrationDatePreviousDose
+			- the administration date of the shot is < "12-Sep-2023"
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentShot < "8w-4d"
+	then
+		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+/**
+ * END ===> PRIOR FORMULATION of COVID-19 Vaccine Administered on or after 9/12/2023
+ */
+
+/**
+ * END Series: All. General Rules.
+ */
+
+/**
+ * Invoke Seasonal Agenda Group Logic START
+ */
+
+rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVID19Dec2020 Season"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the unique ID of the shot as $uniqueShotId
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name "SUPPORTED_SEASON.COVID19Dec2020Season"
+		There does not exist an IceFact
+			- that has finding $uniqueShotId
+			- that has associated administered shot $currentShot
+	then
+		Logically insert an IceFact $uniqueShotId with TargetDose $currentShot into Working Memory
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^customEvaluationRule^COVID19Dec2020Season"
+end
+
+rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVID19Sep2023/Aug2024 Season"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the unique ID of the shot as $uniqueShotId
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name a member of ("SUPPORTED_SEASON.COVID19Sep2023Season", "SUPPORTED_SEASON.COVID19Aug2024Season")
+		There does not exist an IceFact
+			- that has finding $uniqueShotId
+			- that has associated administered shot $currentShot
+	then
+		Logically insert an IceFact $uniqueShotId with TargetDose $currentShot into Working Memory
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^customEvaluationRule^COVID19Sep2023Season"
+end
+
+rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVID19Aug2025+ Season"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
+	no-loop true
+	when
+		There is an administered shot $currentShot that needs to be evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- make note of the Associated Series as $associatedTargetSeries
+			- make note of the unique ID of the shot as $uniqueShotId
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name "SUPPORTED_SEASON.COVID19Aug2025Season"
+		There does not exist an IceFact
+			- that has finding $uniqueShotId
+			- that has associated administered shot $currentShot
+	then
+		Logically insert an IceFact $uniqueShotId with TargetDose $currentShot into Working Memory
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^customEvaluationRule^COVID19Aug2025Season"
+end
+
+rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in the COVID19Dec2020 Season"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+	salience 999
+	when
+		There is an administered shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- that has already been evaluated
+			- make note of the administered shot number as $administeredShotNumberFocus
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an administered shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is > $administeredShotNumberFocus
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name "SUPPORTED_SEASON.COVID19Dec2020Season"
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^postEvaluationCheck^COVID19Dec2020Season"
+end
+
+rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in the COVID19Sep2023/Aug2024 Season"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+	salience 999
+	when
+		There is an administered shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- that has already been evaluated
+			- make note of the administered shot number as $administeredShotNumberFocus
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an administered shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is > $administeredShotNumberFocus
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name a member of ("SUPPORTED_SEASON.COVID19Sep2023Season", "SUPPORTED_SEASON.COVID19Aug2024Season")
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^postEvaluationCheck^COVID19Sep2023Season"
+end
+
+rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in the COVIDAug2025+ Season"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+	salience 999
+	when
+		There is an administered shot $currentShot
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- that has already been evaluated
+			- make note of the administered shot number as $administeredShotNumberFocus
+			- make note of the associated series as $associatedTargetSeries
+		There does not exist an administered shot
+			- the shot belongs to the series $associatedTargetSeries
+			- that has already been evaluated
+			- the administered shot number is > $administeredShotNumberFocus
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the season with name a member of ("SUPPORTED_SEASON.COVID19Sep2023Season", "SUPPORTED_SEASON.COVID19Aug2024Season", "SUPPORTED_SEASON.COVID19Aug2025Season")
+	then
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
+		Set the Agenda Group Focus to "HistoryEvaluation^postEvaluationCheck^COVID19Aug2025Season"
+end

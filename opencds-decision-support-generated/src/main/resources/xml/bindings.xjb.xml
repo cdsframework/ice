@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    /**
+     * Copyright (C) 2019 New York City Department of Health and Mental Hygiene, Bureau of Immunization
+     * Contributions by HLN Consulting, LLC
+     *
+     * This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+     * Lesser General Public License as published by the Free Software Foundation, either version 3 of the
+     * License, or (at your option) any later version. You should have received a copy of the GNU Lesser
+     * General Public License along with this program. If not, see <http://www.gnu.org/licenses/> for more
+     * details.
+     *
+     * The above-named contributors (HLN Consulting, LLC) are also licensed by the New York City
+     * Department of Health and Mental Hygiene, Bureau of Immunization to have (without restriction,
+     * limitation, and warranty) complete irrevocable access and rights to this project.
+     *
+     * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; THE
+     *
+     * SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING,
+     * BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+     * NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS, IF ANY, OR DEVELOPERS BE LIABLE FOR
+     * ANY CLAIM, DAMAGES, OR OTHER LIABILITY OF ANY KIND, ARISING FROM, OUT OF, OR IN CONNECTION WITH
+     * THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     *
+     * For more information about this software, see http://www.hln.com/ice or send
+     * correspondence to ice@hln.com.
+     */
+
+-->
+<bindings xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns="https://jakarta.ee/xml/ns/jaxb"
+          extensionBindingPrefixes="xjc" version="3.0">
+    <globalBindings>
+        <xjc:simple/>
+        <javaType name="java.util.Date" xmlType="xs:date" parseMethod="org.opencds.support.util.DateUtils.parseDate"
+                  printMethod="org.opencds.support.util.DateUtils.printDate"/>
+        <javaType name="java.util.Date" xmlType="xs:dateTime" parseMethod="org.opencds.support.util.DateUtils.parseDateTime"
+                  printMethod="org.opencds.support.util.DateUtils.printDateTime"/>
+    </globalBindings>
+    <bindings xmlns:tns="http://www.omg.org/spec/CDSS/201105/dss" scd="x-schema::tns">
+        <schemaBindings map="false"/>
+        <bindings scd="~tns:KMEvaluationRequestBase">
+            <class ref="org.omg.dss.KMEvaluationRequestBase"/>
+        </bindings>
+        <bindings scd="~tns:InvalidDriDataFormatException">
+            <class ref="org.omg.dss.InvalidDriDataFormatException"/>
+        </bindings>
+        <bindings scd="~tns:ServiceRequestBase">
+            <class ref="org.omg.dss.ServiceRequestBase"/>
+        </bindings>
+        <bindings scd="~tns:KMCriterion">
+            <class ref="org.omg.dss.KMCriterion"/>
+        </bindings>
+        <bindings scd="~tns:evaluateIterativelyAtSpecifiedTimeResponse">
+            <class ref="org.omg.dss.EvaluateIterativelyAtSpecifiedTimeResponse"/>
+        </bindings>
+        <bindings scd="~tns:KMTraitCriterionValue">
+            <class ref="org.omg.dss.KMTraitCriterionValue"/>
+        </bindings>
+        <bindings scd="~tns:CPQPInUse">
+            <class ref="org.omg.dss.CPQPInUse"/>
+        </bindings>
+        <bindings scd="~tns:describeSemanticSignifier">
+            <class ref="org.omg.dss.DescribeSemanticSignifier"/>
+        </bindings>
+        <bindings scd="~tns:describeSemanticRequirement">
+            <class ref="org.omg.dss.DescribeSemanticRequirement"/>
+        </bindings>
+        <bindings scd="~tns:getKMDescription">
+            <class ref="org.omg.dss.GetKMDescription"/>
+        </bindings>
+        <bindings scd="~tns:KMTraitCriterion">
+            <class ref="org.omg.dss.KMTraitCriterion"/>
+        </bindings>
+        <bindings scd="~tns:ServiceProfile">
+            <class ref="org.omg.dss.ServiceProfile"/>
+        </bindings>
+        <bindings scd="~tns:ScopedDO">
+            <class ref="org.omg.dss.ScopedDO"/>
+        </bindings>
+        <bindings scd="~tns:ComputableDefinition">
+            <class ref="org.omg.dss.ComputableDefinition"/>
+        </bindings>
+        <bindings scd="~tns:DataRequirementCriterion">
+            <class ref="org.omg.dss.DataRequirementCriterion"/>
+        </bindings>
+        <bindings scd="~tns:getKMDescriptionResponse">
+            <class ref="org.omg.dss.GetKMDescriptionResponse"/>
+        </bindings>
+        <bindings scd="~tns:getKMEvaluationResultSemanticsResponse">
+            <class ref="org.omg.dss.GetKMEvaluationResultSemanticsResponse"/>
+        </bindings>
+        <bindings scd="~tns:RankedKMList">
+            <class ref="org.omg.dss.RankedKMList"/>
+        </bindings>
+        <bindings scd="~tns:InteractionIdentifier">
+            <class ref="org.omg.dss.InteractionIdentifier"/>
+        </bindings>
+        <bindings scd="~tns:RelatedKMSearchCriterion">
+            <class ref="org.omg.dss.RelatedKMSearchCriterion"/>
+        </bindings>
+        <bindings scd="~tns:SemanticProfile">
+            <class ref="org.omg.dss.SemanticProfile"/>
+        </bindings>
+        <bindings scd="~tns:listProfiles">
+            <class ref="org.omg.dss.ListProfiles"/>
+        </bindings>
+        <bindings scd="~tns:DataRequirementBase">
+            <class ref="org.omg.dss.DataRequirementBase"/>
+        </bindings>
+        <bindings scd="~tns:describeProfileResponse">
+            <class ref="org.omg.dss.DescribeProfileResponse"/>
+        </bindings>
+        <bindings scd="~tns:DSSRuntimeException">
+            <class ref="org.omg.dss.DSSRuntimeException"/>
+        </bindings>
+        <bindings scd="~tns:KMDataRequirementGroup">
+            <class ref="org.omg.dss.KMDataRequirementGroup"/>
+        </bindings>
+        <bindings scd="~tns:UnrecognizedScopingEntityException">
+            <class ref="org.omg.dss.UnrecognizedScopingEntityException"/>
+        </bindings>
+        <bindings scd="~tns:getKMEvaluationResultSemantics">
+            <class ref="org.omg.dss.GetKMEvaluationResultSemantics"/>
+        </bindings>
+        <bindings scd="~tns:AllowedDataRequirement">
+            <class ref="org.omg.dss.AllowedDataRequirement"/>
+        </bindings>
+        <bindings scd="~tns:UnrecognizedLanguageException">
+            <class ref="org.omg.dss.UnrecognizedLanguageException"/>
+        </bindings>
+        <bindings scd="~tns:RelatedKM">
+            <class ref="org.omg.dss.RelatedKM"/>
+        </bindings>
+        <bindings scd="~tns:KMDataRequirementItem">
+            <class ref="org.omg.dss.KMDataRequirementItem"/>
+        </bindings>
+        <bindings scd="~tns:getKMDataRequirementsResponse">
+            <class ref="org.omg.dss.GetKMDataRequirementsResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateIteratively">
+            <class ref="org.omg.dss.EvaluateIteratively"/>
+        </bindings>
+        <bindings scd="~tns:DescribedDO">
+            <class ref="org.omg.dss.DescribedDO"/>
+        </bindings>
+        <bindings scd="~tns:LanguageSupportRequirement">
+            <class ref="org.omg.dss.LanguageSupportRequirement"/>
+        </bindings>
+        <bindings scd="~tns:describeTrait">
+            <class ref="org.omg.dss.DescribeTrait"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationResponseBase">
+            <class ref="org.omg.dss.EvaluationResponseBase"/>
+        </bindings>
+        <bindings scd="~tns:UnrecognizedTraitCriterionException">
+            <class ref="org.omg.dss.UnrecognizedTraitCriterionException"/>
+        </bindings>
+        <bindings scd="~tns:KMSearchCriteria">
+            <class ref="org.omg.dss.KMSearchCriteria"/>
+        </bindings>
+        <bindings scd="~tns:SemanticRequirement">
+            <class ref="org.omg.dss.SemanticRequirement"/>
+        </bindings>
+        <bindings scd="~tns:IterativeKMEvaluationRequest">
+            <class ref="org.omg.dss.IterativeKMEvaluationRequest"/>
+        </bindings>
+        <bindings scd="~tns:listKMsResponse">
+            <class ref="org.omg.dss.ListKMsResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateResponse">
+            <class ref="org.omg.dss.EvaluateResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateAtSpecifiedTimeResponse">
+            <class ref="org.omg.dss.EvaluateAtSpecifiedTimeResponse"/>
+        </bindings>
+        <bindings scd="~tns:findKMsResponse">
+            <class ref="org.omg.dss.FindKMsResponse"/>
+        </bindings>
+        <bindings scd="~tns:Warning">
+            <class ref="org.omg.dss.Warning"/>
+        </bindings>
+        <bindings scd="~tns:KMLocalizedTraitValue">
+            <class ref="org.omg.dss.KMLocalizedTraitValue"/>
+        </bindings>
+        <bindings scd="~tns:evaluate">
+            <class ref="org.omg.dss.Evaluate"/>
+        </bindings>
+        <bindings scd="~tns:RequiredDataRequirement">
+            <class ref="org.omg.dss.RequiredDataRequirement"/>
+        </bindings>
+        <bindings scd="~tns:listProfilesResponse">
+            <class ref="org.omg.dss.ListProfilesResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateIterativelyAtSpecifiedTime">
+            <class ref="org.omg.dss.EvaluateIterativelyAtSpecifiedTime"/>
+        </bindings>
+        <bindings scd="~tns:IterativeEvaluationResponse">
+            <class ref="org.omg.dss.IterativeEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:evaluateAtSpecifiedTime">
+            <class ref="org.omg.dss.EvaluateAtSpecifiedTime"/>
+        </bindings>
+        <bindings scd="~tns:getKMDataRequirements">
+            <class ref="org.omg.dss.GetKMDataRequirements"/>
+        </bindings>
+        <bindings scd="~tns:ProfilesOfType">
+            <class ref="org.omg.dss.ProfilesOfType"/>
+        </bindings>
+        <bindings scd="~tns:describeScopingEntityResponse">
+            <class ref="org.omg.dss.DescribeScopingEntityResponse"/>
+        </bindings>
+        <bindings scd="~tns:KMList">
+            <class ref="org.omg.dss.KMList"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationRequest">
+            <class ref="org.omg.dss.EvaluationRequest"/>
+        </bindings>
+        <bindings scd="~tns:KMTraitValue">
+            <class ref="org.omg.dss.KMTraitValue"/>
+        </bindings>
+        <bindings scd="~tns:findKMs">
+            <class ref="org.omg.dss.FindKMs"/>
+        </bindings>
+        <bindings scd="~tns:getKMDataRequirementsForEvaluationAtSpecifiedTimeResponse">
+            <class ref="org.omg.dss.GetKMDataRequirementsForEvaluationAtSpecifiedTimeResponse"/>
+        </bindings>
+        <bindings scd="~tns:TraitSetRequirement">
+            <class ref="org.omg.dss.TraitSetRequirement"/>
+        </bindings>
+        <bindings scd="~tns:FunctionalProfile">
+            <class ref="org.omg.dss.FunctionalProfile"/>
+        </bindings>
+        <bindings scd="~tns:SemanticPayload">
+            <class ref="org.omg.dss.SemanticPayload"/>
+        </bindings>
+        <bindings scd="~tns:describeTraitResponse">
+            <class ref="org.omg.dss.DescribeTraitResponse"/>
+        </bindings>
+        <bindings scd="~tns:RankedKM">
+            <class ref="org.omg.dss.RankedKM"/>
+        </bindings>
+        <bindings scd="~tns:describeScopingEntityHierarchy">
+            <class ref="org.omg.dss.DescribeScopingEntityHierarchy"/>
+        </bindings>
+        <bindings scd="~tns:ItemIdentifier">
+            <class ref="org.omg.dss.ItemIdentifier"/>
+        </bindings>
+        <bindings scd="~tns:UnsupportedLanguageException">
+            <class ref="org.omg.dss.UnsupportedLanguageException"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationException">
+            <class ref="org.omg.dss.EvaluationException"/>
+        </bindings>
+        <bindings scd="~tns:describeScopingEntity">
+            <class ref="org.omg.dss.DescribeScopingEntity"/>
+        </bindings>
+        <bindings scd="~tns:listKMs">
+            <class ref="org.omg.dss.ListKMs"/>
+        </bindings>
+        <bindings scd="~tns:KMDescriptionBase">
+            <class ref="org.omg.dss.KMDescriptionBase"/>
+        </bindings>
+        <bindings scd="~tns:XSDComputableDefinition">
+            <class ref="org.omg.dss.XSDComputableDefinition"/>
+        </bindings>
+        <bindings scd="~tns:KMItem">
+            <class ref="org.omg.dss.KMItem"/>
+        </bindings>
+        <bindings scd="~tns:InformationModelAlternative">
+            <class ref="org.omg.dss.InformationModelAlternative"/>
+        </bindings>
+        <bindings scd="~tns:IterativeEvaluationRequest">
+            <class ref="org.omg.dss.IterativeEvaluationRequest"/>
+        </bindings>
+        <bindings scd="~tns:ProfilesByType">
+            <class ref="org.omg.dss.ProfilesByType"/>
+        </bindings>
+        <bindings scd="~tns:DataRequirementItemData">
+            <class ref="org.omg.dss.DataRequirementItemData"/>
+        </bindings>
+        <bindings scd="~tns:InvalidTraitCriterionDataFormatException">
+            <class ref="org.omg.dss.InvalidTraitCriterionDataFormatException"/>
+        </bindings>
+        <bindings scd="~tns:InvalidDataFormatException">
+            <class ref="org.omg.dss.InvalidDataFormatException"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationResultSemanticsList">
+            <class ref="org.omg.dss.KMEvaluationResultSemanticsList"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationResultSemantics">
+            <class ref="org.omg.dss.KMEvaluationResultSemantics"/>
+        </bindings>
+        <bindings scd="~tns:KMTraitInclusionSpecification">
+            <class ref="org.omg.dss.KMTraitInclusionSpecification"/>
+        </bindings>
+        <bindings scd="~tns:describeSemanticSignifierResponse">
+            <class ref="org.omg.dss.DescribeSemanticSignifierResponse"/>
+        </bindings>
+        <bindings scd="~tns:IterativeKMEvaluationResponse">
+            <class ref="org.omg.dss.IterativeKMEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:RequiredDataNotProvidedException">
+            <class ref="org.omg.dss.RequiredDataNotProvidedException"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationResponse">
+            <class ref="org.omg.dss.KMEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:ScopingEntity">
+            <class ref="org.omg.dss.ScopingEntity"/>
+        </bindings>
+        <bindings scd="~tns:InvalidTimeZoneOffsetException">
+            <class ref="org.omg.dss.InvalidTimeZoneOffsetException"/>
+        </bindings>
+        <bindings scd="~tns:KMDescription">
+            <class ref="org.omg.dss.KMDescription"/>
+        </bindings>
+        <bindings scd="~tns:evaluateIterativelyResponse">
+            <class ref="org.omg.dss.EvaluateIterativelyResponse"/>
+        </bindings>
+        <bindings scd="~tns:ExtendedKMDescription">
+            <class ref="org.omg.dss.ExtendedKMDescription"/>
+        </bindings>
+        <bindings scd="~tns:KMDataRequirements">
+            <class ref="org.omg.dss.KMDataRequirements"/>
+        </bindings>
+        <bindings scd="~tns:TraitRequirement">
+            <class ref="org.omg.dss.TraitRequirement"/>
+        </bindings>
+        <bindings scd="~tns:ConformanceProfile">
+            <class ref="org.omg.dss.ConformanceProfile"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationResultData">
+            <class ref="org.omg.dss.KMEvaluationResultData"/>
+        </bindings>
+        <bindings scd="~tns:KMEvaluationRequest">
+            <class ref="org.omg.dss.KMEvaluationRequest"/>
+        </bindings>
+        <bindings scd="~tns:Trait">
+            <class ref="org.omg.dss.Trait"/>
+        </bindings>
+        <bindings scd="~tns:getKMDataRequirementsForEvaluationAtSpecifiedTime">
+            <class ref="org.omg.dss.GetKMDataRequirementsForEvaluationAtSpecifiedTime"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationResponse">
+            <class ref="org.omg.dss.EvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationRequestBase">
+            <class ref="org.omg.dss.EvaluationRequestBase"/>
+        </bindings>
+        <bindings scd="~tns:TraitCriterion">
+            <class ref="org.omg.dss.TraitCriterion"/>
+        </bindings>
+        <bindings scd="~tns:KMConsumerProvidedQueryParameter">
+            <class ref="org.omg.dss.KMConsumerProvidedQueryParameter"/>
+        </bindings>
+        <bindings scd="~tns:describeProfile">
+            <class ref="org.omg.dss.DescribeProfile"/>
+        </bindings>
+        <bindings scd="~tns:SemanticSignifier">
+            <class ref="org.omg.dss.SemanticSignifier"/>
+        </bindings>
+        <bindings scd="~tns:EvaluationResultCriterion">
+            <class ref="org.omg.dss.EvaluationResultCriterion"/>
+        </bindings>
+        <bindings scd="~tns:UnrecognizedScopedEntityException">
+            <class ref="org.omg.dss.UnrecognizedScopedEntityException"/>
+        </bindings>
+        <bindings scd="~tns:OtherSemanticRequirement">
+            <class ref="org.omg.dss.OtherSemanticRequirement"/>
+        </bindings>
+        <bindings scd="~tns:EntityIdentifier">
+            <class ref="org.omg.dss.common.EntityIdentifier"/>
+        </bindings>
+        <bindings scd="~tns:describeScopingEntityHierarchyResponse">
+            <class ref="org.omg.dss.DescribeScopingEntityHierarchyResponse"/>
+        </bindings>
+        <bindings scd="~tns:DSSException">
+            <class ref="org.omg.dss.DSSException"/>
+        </bindings>
+        <bindings scd="~tns:IntermediateKMEvaluationResponse">
+            <class ref="org.omg.dss.IntermediateKMEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:describeSemanticRequirementResponse">
+            <class ref="org.omg.dss.DescribeSemanticRequirementResponse"/>
+        </bindings>
+        <bindings scd="~tns:IntermediateState">
+            <class ref="org.omg.dss.IntermediateState"/>
+        </bindings>
+        <bindings scd="~tns:InformationModelRequirement">
+            <class ref="org.omg.dss.InformationModelRequirement"/>
+        </bindings>
+        <bindings scd="~tns:FinalKMEvaluationResponse">
+            <class ref="org.omg.dss.FinalKMEvaluationResponse"/>
+        </bindings>
+        <bindings scd="~tns:KMStatusCriterion">
+            <class ref="org.omg.dss.KMStatusCriterion"/>
+        </bindings>
+    </bindings>
+</bindings>

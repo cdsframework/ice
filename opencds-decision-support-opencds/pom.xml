@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>opencds-decision-support-opencds</artifactId>
+
+    <parent>
+        <groupId>org.cdsframework</groupId>
+        <artifactId>ice</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <properties>
+        <cxf.version>4.1.4</cxf.version>
+        <guava.version>33.5.0-jre</guava.version>
+        <jaxb-maven-plugin.version>4.0.12</jaxb-maven-plugin.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-spring-boot-starter-jaxws</artifactId>
+            <version>${cxf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <version>${cxf.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-sources</id>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
+                        <configuration>
+                            <wsdlOptions>
+                                <wsdlOption>
+                                    <wsdl>src/main/resources/wsdl/dss.wsdl</wsdl>
+                                    <serviceName>DecisionSupportService</serviceName>
+                                    <extraargs>
+                                        <extrarg>-p</extrarg>
+                                        <extrarg>http://www.omg.org/spec/CDSS/201105/dss=org.omg.dss</extrarg>
+                                        <extrarg>-p</extrarg>
+                                        <extrarg>http://www.omg.org/spec/CDSS/201105/dssWsdl=org.omg.dss</extrarg>
+                                    </extraargs>
+                                    <markGenerated>true</markGenerated>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
+                <version>${jaxb-maven-plugin.version}</version>
+                <executions>
+                    <!--                    <execution>-->
+                    <!--                        <id>jaxb-generate-cdsframework</id>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>generate</goal>-->
+                    <!--                        </goals>-->
+                    <!--                        <configuration>-->
+                    <!--                            <args>-->
+                    <!--                                <arg>-extension</arg>-->
+                    <!--                            </args>-->
+                    <!--                            <schemaDirectory>src/main/resources/xml</schemaDirectory>-->
+                    <!--                            <schemaIncludes>-->
+                    <!--                                <include>*.xsd</include>-->
+                    <!--                            </schemaIncludes>-->
+                    <!--                            <bindingIncludes>-->
+                    <!--                                <include>*.xjb.xml</include>-->
+                    <!--                            </bindingIncludes>-->
+                    <!--                            <generateDirectory>${project.build.directory}/generated-sources/xml</generateDirectory>-->
+                    <!--                        </configuration>-->
+                    <!--                    </execution>-->
+                    <execution>
+                        <id>vmr</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatePackage>org.opencds.vmr.v1_0.schema</generatePackage>
+                            <schemaDirectory>src/main/resources/vmr</schemaDirectory>
+                            <schemaIncludes>
+                                <include>*.xsd</include>
+                            </schemaIncludes>
+                            <generateDirectory>${project.build.directory}/generated-sources/vmr</generateDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>schema</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatePackage>org.opencds.config.schema</generatePackage>
+                            <schemaDirectory>src/main/resources/schema</schemaDirectory>
+                            <schemaIncludes>
+                                <include>*.xsd</include>
+                            </schemaIncludes>
+                            <generateDirectory>${project.build.directory}/generated-sources/schema</generateDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <extension>true</extension>
+                    <verbose>true</verbose>
+                    <markGenerated>true</markGenerated>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

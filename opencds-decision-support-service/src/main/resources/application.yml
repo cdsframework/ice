@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: ice
+  config:
+    import:
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/iceSupportingData.yml
+      - classpath:data/knowledgeCommon/org.cdsframework.ice/ice-supporting-data/iceSupportingData.yml
+  threads:
+    virtual:
+      enabled: true
+  jackson:
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    access:
+      max-permitted: none
+
+server:
+  servlet:
+    context-path: /opencds-decision-support-service
+
+cxf:
+  path: /evaluate
+
+logging:
+  level:
+    org.drools: ERROR
+
+ice:
+  knowledge-modules:
+    '[org.nyc.cir^ICE^1.0.0]':
+      output-earliest-and-overdue-dates: true
+      enable-dose-override-feature: false
+      output-supplemental-text: true
+      enable-unsupported-vaccines-group: false
+      vaccine-group-exclusions:
+        - ANTHRAX
+        - MOSQUITO_BORNE
+        - CHOLERA
+        - JAPANESE_ENCEPHALITIS
+        - TYPHOID
+        - YELLOW_FEVER
+      disable-covid19-sep2023-dose-number-reset: false
+      supplemental-text-mode: LEGACY
+      drools-path: classpath:drools
+  config-path: classpath:config
+  ice-base-rules-scoping-entity-id: org.cdsframework
+  ice-base-rules-version: 1.0.0
+  enable-drools-event-logging: false
+  fire-limit: 25000
+  ice-version: ICE_2.55.1

@@ -1,0 +1,90 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+global java.util.Date evalTime;
+
+/**
+ * If one of the duplicate shots is a non-combination CVX 49 (Hib OMP) and the other shot is not an unspecified formulation, then:
+ * evaluate the CVX 49 as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other Hib CVX as Valid. NOTE that this
+ * rule, unlike the default duplicate shot/same day rules, works _across_ series of the vaccine group. CVX 49 should never be marked
+ * valid if there is another non-CVX 49 shot in _any_ series that _is_ valid. This will prevent the OMP series from being selected
+ * in circumstances where the CVX 49 is a duplicate to a non-CVX 49 dose.
+ * (In this case, the other shot may either be a combination or monovalent vaccine, but must not be an NOS.)
+ */
+rule "Duplicate Shots/Same Day Hib: If one of the shots is a non-combination vaccine with component CVX 49 and the other shot is _not_ an NOS vaccine, then evaluate the CVX 49 as Invalid / DUPLICATE_SAME_DAY and evaluate the other specified Hib CVX as Valid"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
+			vaccineComponent.cdsConceptName == "VACCINE_CVX_49",	administeredVaccine.isCombinationVaccine() == false)
+		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID,
+			isDoseStatusOverridden() == false, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "VACCINE_CVX_49",
+			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+        $ts : TargetSeries(this == $tdother.associatedTargetSeries)
+	then
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeries with Duplicate CVX 49 Shot: " + $td.associatedTargetSeries + "; TargetSeries with VALID shot: " + $tdother.associatedTargetSeries);
+end
+
+/**
+ * If one of the duplicate shots is a *combination* CVX 49 (Hib OMP) and the other shot is *also* a (non-CVX 49) *combination*
+ * vaccine: evaluate the CVX 49 as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other Hib CVX as Valid. NOTE
+ * that this rule, unlike the default duplicate shot/same day rules, works _across_ series of the vaccine group. CVX 49 should never
+ * be marked valid if there is another non-CVX 49 shot in _any_ series that _is_ valid. This will prevent the OMP series from being
+ * selected in circumstances where the CVX 49 is a duplicate to a non-CVX 49 dose.
+ * (In this case, both shots are combination vaccines and the other vaccine must not be an NOS.)
+ */
+rule "Duplicate Shots/Same Day Hib: If one of the shots is a combination vaccine with component CVX 49 and the other is also a combination vaccine, non-NOS vaccine, evaluate the CVX 49 as Invalid / DUPLICATE_SAME_DAY and other Hib as Valid"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", hasBeenEvaluated == true, status == DoseStatus.VALID, vaccineComponent.cdsConceptName == "VACCINE_CVX_49",
+			isDoseStatusOverridden() == false, administeredVaccine.isCombinationVaccine() == true)
+		$tdother : TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HIB", this != $td, hasBeenEvaluated == true, administrationDate == $td.administrationDate, status == DoseStatus.VALID,
+			isDoseStatusOverridden() == false, administeredVaccine.isCombinationVaccine() == true, vaccineComponent.isUnspecifiedFormulation() == false, vaccineComponent.cdsConceptName != "VACCINE_CVX_49",
+			isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+        $ts : TargetSeries(this == $tdother.associatedTargetSeries)
+	then
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($tdother) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeries with Duplicate CVX 49 Shot: " + $td.associatedTargetSeries + "; TargetSeries with VALID shot: " + $tdother.associatedTargetSeries);
+end

@@ -1,0 +1,197 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+
+/**
+* If a patient is >= 18 years old and has completed the series and has received one booster dose after series completion:
+*   the recommendation is Not Recommended/ COMPLETE
+*/
+rule "Polio: If a patient is >=18 years old and has completed the series and has received one booster dose after series completion"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+    when
+		There is a series $targetSeries that needs forecasting
+			- The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.POLIO"
+			- The series is complete
+        The patient information $patientInformation must be known to complete writing this rule
+            - Make note of the date as $dateAtAge18y when the patient is "18y" of age
+        // check there is a booster dose after age 18
+		There is an administered shot $dose
+		    - The shot does not belong to the primary series
+		    - The shot belongs to the series $targetSeries
+		    - That has already been evaluated and whose shot validity is VALID or ACCEPTED
+		    - The administration date of the shot is >= $dateAtAge18y
+		    - Make note of all evaluation reasons for this shot as $reasons
+		    - The collection $reasons contains "EVALUATION_REASON_CONCEPT.BOOSTER_DOSE"
+		Confirm the date evalTime is on the same date or after $dateAtAge18y
+    then
+		Create a recommendation as $recommendation with status RecommendationStatus.NOT_RECOMMENDED for the series $targetSeries
+        Set the recommendation reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE"
+        Include the recommendation $recommendation for consideration in the final forecast of the series
+
+		Mark forecasting of the series $targetSeries complete
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this dose rule fired for the dose $dose
+end
+
+/**
+* If a patient is >= 18 years old and has completed the series:
+*   the recommendation is Conditional, with recommendation reasons COMPLETE_HIGH_RISK and SUPPLEMENTAL_TEXT; Descriptive Text:
+*   "Adults who completed their polio vaccination but who are at increased risk of exposure to poliovirus may receive one lifetime
+*   IPV booster. Refer to ACIP for additional information."
+*/
+rule "Polio: If a patient is >=18 years old and has completed the series"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+    when
+		There is a series $targetSeries that needs forecasting
+			- The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.POLIO"
+			- The series is complete
+		The patient information $patientInformation must be known to complete writing this rule
+            - Make note of the date as $dateAtAge18y when the patient is "18y" of age
+        Confirm the date evalTime is on the same date or after $dateAtAge18y
+    then
+		Create a recommendation as $recommendation with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+		Set the recommendation reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+        Include the recommendation $recommendation for consideration in the final forecast of the series
+
+        Create a recommendation as $supplementalText with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+        Set the recommendation supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.POLIO_COMPLETE_HIGH_RISK"
+        Include the recommendation $supplementalText for consideration in the final forecast of the series
+
+		Mark forecasting of the series $targetSeries complete
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
+end
+
+rule "Polio: If a patient is >=18 years old and has no shots on record"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+    when
+		There is a series $targetSeries that needs forecasting
+			- The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.POLIO"
+			- The series is not complete
+		There does not exist an administered shot
+		    - The shot belongs to the series $targetSeries
+		The patient information $patientInformation must be known to complete writing this rule
+            - Make note of the date as $dateAtAge18y when the patient is "18y" of age
+        Confirm the date evalTime is on the same date or after $dateAtAge18y
+    then
+		Create a recommendation as $recommendation with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+		Set the recommendation reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+        Include the recommendation $recommendation for consideration in the final forecast of the series
+
+        Create a recommendation as $supplementalText with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+        Set the recommendation supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.POLIO_ASSUME_VACCINATED"
+        Include the recommendation $supplementalText for consideration in the final forecast of the series
+
+		Mark forecasting of the series $targetSeries complete
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
+end
+
+rule "Polio: If the execution date is before 8/7/2009, modify the Minimum Age of DoseRule 4 to 126 days & the Minimum Interval of DoseRule3 to 28 days"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	no-loop true
+	when
+		There is a series $targetSeries that needs forecasting
+			- The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.POLIO"
+			- The name of the series is "SUPPORTED_SERIES.Polio4DoseSeries"
+			- Post processing on the series forecast has not already been run
+			- The series is not complete
+			- The number of doses administered is == 3
+		Confirm the date evalTime is before "07-Aug-2009"
+	then
+		Obtain the existing DoseRule for dose number 4 in the series $targetSeries as $assign_oDoseRule4
+		Set the minimum age for DoseRule $assign_oDoseRule4 to TimePeriod "126d"
+		Replace the existing DoseRule in the series $targetSeries with $assign_oDoseRule4
+		Obtain the existing DoseRule for dose number 3 in the series $targetSeries as $assign_oDoseRule3
+		Set the minimum interval for DoseRule $assign_oDoseRule3 to TimePeriod "28d"
+		Replace the existing DoseRule in the series $targetSeries with $assign_oDoseRule3
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
+end
+
+rule "Polio: If the execution date is before 8/7/2009 and the calculated Earliest Date for Dose 4 is after 8/7/2009, reset the Minimum Age & Minimum Interval back to their original values (4y & 6m, respectively) and recalculate"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a series $targetSeries
+			- Post processing on the series forecast has not already been run
+			- A forecast for the series has been made and a recommendation date has been determined
+			- The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.POLIO"
+			- The name of the series is "SUPPORTED_SERIES.Polio4DoseSeries"
+			- The effective dose number in the series is == 4
+			- Make note of the earliest date as $earliestDate
+		Confirm the date evalTime is before "07-Aug-2009"
+		Confirm the date $earliestDate is after "07-Aug-2009"
+	then
+		Clear forecasted recommendations from consideration in series $targetSeries
+		Obtain the existing DoseRule for dose number 4 in the series $targetSeries as $assign_oDoseRule4
+		Set the minimum age for DoseRule $assign_oDoseRule4 to TimePeriod "4y"
+		Replace the existing DoseRule in the series $targetSeries with $assign_oDoseRule4
+		Obtain the existing DoseRule for dose number 3 in the series $targetSeries as $assign_oDoseRule3
+		Set the minimum interval for DoseRule $assign_oDoseRule3 to TimePeriod "6m"
+		Replace the existing DoseRule in the series $targetSeries with $assign_oDoseRule3
+		Refresh all facts in the series $targetSeries for forecasting
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
+end
+
+/**
+ * Series complete with 3 doses: If patient is >= 4 years old (or will be >= 4 years old at the dose 3 recommended due date),
+ * recommend target dose 3 (and final dose) at 4 years old; minimum interval = 6 months (for earliest date); recommended interval =
+ * 6 months.
+ */
+rule "Polio: If patient >= 4 yrs (or will be >= 4 yrs for target dose 3 recommendation date), include recommendation at 4yrs of age; minimum & recommended interval of 6m from prior administered shot for target dose 3"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	no-loop true
+	when
+        The patient information $patientInfo must be known to complete writing this rule
+            - Make note of the date as $dateWhenPatientIs4YearsOld when the patient is "4y" of age
+		There is a series $targetSeries
+			- The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.POLIO"
+			- The name of the series is "SUPPORTED_SERIES.Polio4DoseSeries"
+			- Post processing on the series forecast has not already been run
+			- The series is not complete
+			- The dose number to recommend is == 3
+			- A forecast for the series has been made and a recommendation date has been determined
+			- Make note of the recommendation date as $recommendationDate
+			- Make note of the date that the most recent shot was administered as $mostRecentAdministrationDate
+		Confirm the date evalTime is on the same date or after $dateWhenPatientIs4YearsOld || the date $recommendationDate is on the same date or after $dateWhenPatientIs4YearsOld
+	then
+		Create a recommendation as $rInterval for the series $targetSeries
+		Add "6m" to $mostRecentAdministrationDate and make note of the newly calculated date as $mostRecentAdministrationDatePlus6Months
+		Set the recommendation earliest forecast date for $rInterval to $mostRecentAdministrationDatePlus6Months
+		Set the recommendation recommended forecast date for $rInterval to $mostRecentAdministrationDatePlus6Months
+		Include the recommendation $rInterval for consideration in the final forecast of the series
+
+		Create a recommendation as $rAge for the series $targetSeries
+        Set the recommendation recommended forecast date for $rAge to $dateWhenPatientIs4YearsOld
+		Include the recommendation $rAge for consideration in the final forecast of the series
+
+		Refresh all facts in the series $targetSeries for forecasting
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
+end

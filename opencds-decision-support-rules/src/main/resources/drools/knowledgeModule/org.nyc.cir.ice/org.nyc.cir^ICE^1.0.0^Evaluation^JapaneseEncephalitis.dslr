@@ -1,0 +1,73 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+
+rule "JE-VC Risk 2-dose Series: If target dose 2 is administered when the patient is >= 18 years old and < 66 years old, apply accelerated intervals"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
+	when
+		There is an Administered Shot $currentShot that needs to be Evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS" and the Series with name "SUPPORTED_SERIES.JEVCRisk2DoseSeries"
+			- the dose number in the Series is == 2
+			- the Series that the shot belongs to is not complete
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the Associated Series as $associatedTargetSeries
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthdate
+		Confirm Elapsed time between $birthdate and $currentShotDate >= "18y"
+		Confirm Elapsed time between $birthdate and $currentShotDate < "66y"
+	then
+		Obtain the existing DoseRule for Dose Number 1 in the Series $associatedTargetSeries as $assign_oDoseRule
+		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule to TimePeriod "7d"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule to TimePeriod "7d"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule to TimePeriod "7d"
+		Set the Latest Recommended Interval for DoseRule $assign_oDoseRule to TimePeriod "28d"
+		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+rule "JE-VC Risk 2-dose Accelerated Series: If target dose 2 is administered when the patient is >= 66 years old, apply standard intervals"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	salience 999
+	when
+		There is an Administered Shot $currentShot that needs to be Evaluated
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS" and the Series with name "SUPPORTED_SERIES.JEVCRisk2DoseAcceleratedSeries"
+			- the dose number in the Series is == 2
+			- the Series that the shot belongs to is not complete
+			- make note of the date this shot was administered as $currentShotDate
+			- make note of the Associated Series as $associatedTargetSeries
+		The Patient information $patientInfo must be known to complete writing this rule
+			- make note of the Patient's birthdate as $birthdate
+		Confirm Elapsed time between $birthdate and $currentShotDate >= "66y"
+	then
+		Obtain the existing DoseRule for Dose Number 1 in the Series $associatedTargetSeries as $assign_oDoseRule
+		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule to TimePeriod "24d"
+		Set the Minimum Interval for DoseRule $assign_oDoseRule to TimePeriod "28d"
+		Set the Recommended Interval for DoseRule $assign_oDoseRule to TimePeriod "28d"
+		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule
+		Record that this dose rule was Processed for the TargetDose $currentShot
+		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end

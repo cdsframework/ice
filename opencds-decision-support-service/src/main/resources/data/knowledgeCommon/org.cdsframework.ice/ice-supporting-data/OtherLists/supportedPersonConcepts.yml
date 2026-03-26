@@ -1,0 +1,32 @@
+ice-supporting-data:
+  knowledge-modules:
+    '[org.cdsframework^ICE^1.0.0]':
+      code-systems:
+        SUPPORTED_PERSON_CONCEPT:
+          name: SUPPORTED_PERSON_CONCEPT
+          identifiers:
+            - value: 1333f305bc0568822eE2608f22be9d1bac9c
+          description: supported_person_concept
+          url: 2.16.840.1.113883.5.1
+          title: HL7 Gender
+          version: org.cdsframework^ICE^1.0.0
+          status: active
+          content: complete
+          properties:
+            - code: conceptMapping
+              type: Coding
+          concepts:
+            - code: M
+              display: Male
+              properties:
+                - code: conceptMapping
+                  valueCoding:
+                    code: C30
+                    display: Male
+            - code: F
+              display: Female
+              properties:
+                - code: conceptMapping
+                  valueCoding:
+                    code: C31
+                    display: Female

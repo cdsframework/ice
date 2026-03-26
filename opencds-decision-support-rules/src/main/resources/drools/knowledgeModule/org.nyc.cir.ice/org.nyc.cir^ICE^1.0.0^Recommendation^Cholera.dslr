@@ -1,0 +1,129 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
+/**
+ * Cholera Recommendation Rule
+ * When recommending in the Cholera vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text, "Cholera
+ * vaccination is not routinely recommended in the U.S. and only indicated for select patients at increased risk.
+ * Refer to ACIP and the CDC Yellow Book: Health Information for International Travel for additional information.", except when the
+ * Recommendation is Not Recommended and the reason code is COMPLETE.
+ */
+rule "Cholera: Always include supplemental text with the recommendation indicating Cholera is not routinely recommended in the U.S., except when the recommendation is Not Recommended / COMPLETE"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.CHOLERA"
+			- post processing on the Series forecast has not already been run
+			- a forecast for the Series has been made
+			- the Series is not complete
+			- make note of the recommendation status as $recommendationStatus
+			- make note of the final recommendations as $allFinalRecommendations
+		Confirm that the following is true: !($recommendationStatus == RecommendationStatus.NOT_RECOMMENDED && $targetSeries.getRecommendationReasonsForStatus($recommendationStatus).contains("RECOMMENDATION_REASON_CONCEPT.COMPLETE"))
+	then
+		Create a Recommendation as $supplementalText for the Series $targetSeries
+	    	Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.CHOLERA_NOT_ROUTINE_SEE_ACIP"
+	    	Set the Recommendation Status for $supplementalText to $recommendationStatus
+	    	Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+       	Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Rules Based on Patient's Age
+ *
+ * If no doses are on record and:
+ *   + the patient is < the routine age (i.e., 2 years old) for the Cholera Risk 1-dose Series, then the Recommendation is Not
+ *     Recommended and the reason code is SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
+ *   + the patient is >= the routine age (i.e., 2 years old) for the Cholera Risk 1-dose Series and < 65 years old, then the
+ *     Recommendation is Conditional and the reason code is HIGH_RISK and SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
+ *   + the patient is >= 65 years old, then the Recommendation is Not Recommended and the reason code is TOO_OLD and
+ *     SUPPLEMENTAL_TEXT (see Cholera Recommendation Rule).
+ */
+rule "Cholera: Patient < 2 years old, Not Recommended with supplemental text"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.CHOLERA"
+			- the Series is not complete
+			- the number of Doses Administered is == 0
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime < "2y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Cholera: Patient >= 2 years old and < 65 years old, Conditional/High Risk with supplemental text"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.CHOLERA"
+			- the Series is not complete
+			- the number of Doses Administered is == 0
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "2y" && elapsed time between $dtBirthDate and evalTime < "65y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Cholera: Patient >= 65 years old, Not Recommended / TOO_OLD with supplemental text"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.CHOLERA"
+			- the Series is not complete
+			- the number of Doses Administered is == 0
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= "65y"
+	then
+		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.TOO_OLD"
+		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Mark Forecasting of the Series $targetSeries Complete
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end

@@ -1,0 +1,26 @@
+package org.opencds.vmr.v1_0.internal;
+
+import java.util.List;
+
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
+import org.opencds.vmr.v1_0.internal.datatypes.INT;
+import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = false)
+@ToString
+public class SubstanceAdministrationOrder extends SubstanceAdministrationBase
+{
+    protected CD criticality;
+    protected DoseRestriction doseRestriction;
+    protected IVLDate administrationTimeInterval;
+    protected List<CD> dosingSig;
+    protected INT numberFillsAllowed;
+    protected IVLDate orderEventTime;
+}

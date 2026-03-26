@@ -1,0 +1,123 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.ObservationResult;
+import org.opencds.vmr.v1_0.internal.concepts.ObservationCodedValueConcept;
+import org.opencds.vmr.v1_0.internal.concepts.ObservationFocusConcept;
+import org.opencds.vmr.v1_0.internal.concepts.ObservationInterpretationConcept;
+import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.ICELogicHelper;
+
+global java.util.Date evalTime;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+rule "Make Note of Disease Immunity for Hep B Due to Disease Documented"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_HEP_B" due to reason "DISEASE_DOCUMENTED"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.HEP_B" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.DISEASE_DOCUMENTED" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.DISEASE_DOCUMENTED"
+		Log that Immunity was noted for HepB and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Hep B Due to Proof of Immunity"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_HEP_B" due to reason "PROOF_OF_IMMUNITY"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.HEP_B" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.PROOF_OF_IMMUNITY"
+		Log that Immunity was noted for HepB and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Hep A Due to Disease Documented"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_HEP_A" due to reason "DISEASE_DOCUMENTED"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.HEP_A" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.DISEASE_DOCUMENTED" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.DISEASE_DOCUMENTED"
+		Log that Immunity was noted for HepA and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Hep A Due to Proof of Immunity"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_HEP_A" due to reason "PROOF_OF_IMMUNITY"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.HEP_A" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.PROOF_OF_IMMUNITY"
+		Log that Immunity was noted for HepA and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Measles Due to Disease Documented"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_MEASLES" due to reason "DISEASE_DOCUMENTED"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.MEASLES" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.DISEASE_DOCUMENTED" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.DISEASE_DOCUMENTED"
+		Log that Immunity was noted for Measles and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Measles Due to Proof of Immunity"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_MEASLES" due to reason "PROOF_OF_IMMUNITY"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.MEASLES" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.PROOF_OF_IMMUNITY"
+		Log that Immunity was noted for Measles and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Mumps Due to Disease Documented"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_MUMPS" due to reason "DISEASE_DOCUMENTED"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.MUMPS" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.DISEASE_DOCUMENTED" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.DISEASE_DOCUMENTED"
+		Log that Immunity was noted for Mumps and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Mumps Due to Proof of Immunity"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_MUMPS" due to reason "PROOF_OF_IMMUNITY"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.MUMPS" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.PROOF_OF_IMMUNITY"
+		Log that Immunity was noted for Mumps and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Rubella Due to Disease Documented"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_RUBELLA" due to reason "DISEASE_DOCUMENTED"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.RUBELLA" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.DISEASE_DOCUMENTED" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.DISEASE_DOCUMENTED"
+		Log that Immunity was noted for Rubella and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Rubella Due to Proof of Immunity"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_RUBELLA" due to reason "PROOF_OF_IMMUNITY"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.RUBELLA" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.PROOF_OF_IMMUNITY"
+		Log that Immunity was noted for Rubella and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Varicella Due to Disease Documented"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_VARICELLA" due to reason "DISEASE_DOCUMENTED"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.VARICELLA" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.DISEASE_DOCUMENTED" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.DISEASE_DOCUMENTED"
+		Log that Immunity was noted for Varicella and Immunity Date $immunityDate
+end
+
+rule "Make Note of Disease Immunity for Varicella Due to Proof of Immunity"
+	ruleflow-group "DiseaseImmunityRecord"
+	when
+		The Immunization History indicates that the Patient has obtained Immunity to "DISEASE_CONCEPT_VARICELLA" due to reason "PROOF_OF_IMMUNITY"
+	then
+		Make note of the Patient's Immunity to "SUPPORTED_DISEASE_CONCEPT.VARICELLA" with Immunity Date as $immunityDate and evaluation reason "EVALUATION_REASON_CONCEPT.PROOF_OF_IMMUNITY" and recommendation reason "RECOMMENDATION_REASON_CONCEPT.PROOF_OF_IMMUNITY"
+		Log that Immunity was noted for Varicella and Immunity Date $immunityDate
+end

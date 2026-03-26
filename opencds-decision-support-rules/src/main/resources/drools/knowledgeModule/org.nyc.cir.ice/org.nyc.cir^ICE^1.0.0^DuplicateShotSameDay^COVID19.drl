@@ -1,0 +1,186 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+global java.util.Date evalTime;
+
+rule "Duplicate Shots/Same Day (Sep2023/Aug2024 >= 5yrs): If a CVX 213 and CVX 313 are administered on the same day and both would be considered valid, evaluate the CVX 213 as valid"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19",
+		associatedTargetSeries!.targetSeason.seasonName in ("SUPPORTED_SEASON.COVID19Sep2023Season", "SUPPORTED_SEASON.COVID19Aug2024Season"), vaccineComponent.cdsConceptName == "VACCINE_CVX_313")
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true,
+		status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "VACCINE_CVX_213")
+        $ts : TargetSeries(this == $tdother.associatedTargetSeries)
+	then
+		modify($td) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($tdother) {
+			setStatus(DoseStatus.VALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets()
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+rule "Duplicate Shots/Same Day (COVID-19): If a Janssen is administered on the same day as a Pfizer, Moderna or Novavax vaccine, evaluate the Pfizer/Moderna/Novavax shot first"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", vaccineComponent.cdsConceptName == "VACCINE_CVX_212")
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate,
+			vaccineComponent.cdsConceptName in ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302"))
+	then
+		modify($td) {
+			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true)
+		};
+		modify($tdother) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + "will be evaluated before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+rule "Duplicate Shots/Same Day (COVID-19): For shots prior to 10/25/2021, bypass Duplicate Shot/Same Day Processing by not setting the target dose number of the shot to be evaluated shot to the prior dose number"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customMakeNoteOfDuplicateShotSameDayIfAny"
+	when
+		$td: TargetDose(hasBeenEvaluated == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", isPreEvaluationCheckCompleted() == false, status == DoseStatus.EVALUATION_IN_PROCESS)
+		EvaluatedPerson($dtDateAtAge : TimePeriod.addTimePeriod(demographics.birthTime, "18y"), $td.administrationDate >= $dtDateAtAge)
+		eval($td.administrationDate.compareTo(TimePeriod.generateDateFromStringInDroolsDateFormat("25-Oct-2021")) < 0)
+	then
+		modify ($td) {
+			setPreEvaluationCheckCompleted(true),
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $td.associatedTargetSeries);
+		drools.setFocus("HistoryEvaluation^customEvaluationRule");
+end
+
+rule "Duplicate Shots/Same Day (COVID-19): If shot is marked valid but another shot on the same day is marked Accepted, evaluate the non-preferred shot as Invalid with reason DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	no-loop true
+	salience 5
+	when
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", isDoseStatusOverridden() == false)
+		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, doseNumberInSeries == $td.doseNumberInSeries,
+			status == DoseStatus.ACCEPTED, isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+        $ts : TargetSeries(this == $tdother.associatedTargetSeries)
+	then
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+rule "Duplicate Shots/Same Day (COVID-19): If one of those shots is Valid and another shot on the same day is Invalid with reason code VACCINE_NOT_ALLOWED_FOR_THIS_DOSE (and no other reason codes), replace this reason code with DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19")
+		$tdother : TargetDose(this != $td, administrationDate == $td.administrationDate, hasBeenEvaluated == true, status == DoseStatus.INVALID, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries,
+			doseNumberInSeries == $td.doseNumberInSeries, containsInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.cdsListItemName), invalidReasons.size() == 1, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+        $ts : TargetSeries(this == $tdother.associatedTargetSeries)
+	then
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeInvalidReason(BaseDataEvaluationReason._VACCINE_NOT_ALLOWED_FOR_THIS_DOSE.cdsListItemName),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+rule "Duplicate Shots/Same Day (COVID-19): If a Moderna shot and Pfizer shot are both Valid on the same day (after 10/25/2021 as per above), mark the Moderna shot Valid and the other shot Invalid / DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$tdpfizer: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302"))
+		$tdmoderna : TargetDose(this != $tdpfizer, associatedTargetSeries == $tdpfizer.associatedTargetSeries, doseNumberInSeries == $tdpfizer.doseNumberInSeries, administrationDate == $tdpfizer.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
+			administeredVaccine.cdsConceptName in ("VACCINE_CVX_207", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230"), isDuplicateShotSameDayCheckCompleted() == false || $tdpfizer.isDuplicateShotSameDayCheckCompleted() == false)
+        $ts : TargetSeries(this == $tdmoderna.associatedTargetSeries)
+	then
+		modify($tdpfizer) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($tdmoderna) {
+			setStatus(DoseStatus.VALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets()
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdmoderna + " in TargetSeries " + $tdmoderna.associatedTargetSeries);
+end
+
+rule "Duplicate Shots/Same Day (COVID-19): If an FDA-approved vaccine and a WHO-only approved vaccine are both Valid on the same day (after 10/25/2021 as per above), mark the FDA-approved shot as Valid and the other shot Invalid / DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$tdfda: TargetDose(associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, administeredVaccine.cdsConceptName in ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302"))
+		$tdwho : TargetDose(this != $tdfda, associatedTargetSeries == $tdfda.associatedTargetSeries, doseNumberInSeries == $tdfda.doseNumberInSeries, administrationDate == $tdfda.administrationDate, status == DoseStatus.VALID, isDoseStatusOverridden() == false,
+			administeredVaccine.cdsConceptName not in ("VACCINE_CVX_207", "VACCINE_CVX_208", "VACCINE_CVX_211", "VACCINE_CVX_213", "VACCINE_CVX_217", "VACCINE_CVX_218", "VACCINE_CVX_219", "VACCINE_CVX_221", "VACCINE_CVX_227", "VACCINE_CVX_228", "VACCINE_CVX_229", "VACCINE_CVX_230", "VACCINE_CVX_300", "VACCINE_CVX_301", "VACCINE_CVX_302"), isDuplicateShotSameDayCheckCompleted() == false || $tdfda.isDuplicateShotSameDayCheckCompleted() == false)
+        $ts : TargetSeries(this == $tdwho.associatedTargetSeries)
+	then
+		modify($tdwho) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($tdfda) {
+			setStatus(DoseStatus.VALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets()
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdfda + " in TargetSeries " + $tdfda.associatedTargetSeries);
+end

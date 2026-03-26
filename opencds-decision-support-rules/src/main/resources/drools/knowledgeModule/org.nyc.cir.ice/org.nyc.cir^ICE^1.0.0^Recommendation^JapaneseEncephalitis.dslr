@@ -1,0 +1,172 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.List;
+import java.util.Set;
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseRule;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICEIntervalFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.Season;
+import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+global java.util.Date evalTime;
+global org.cdsframework.ice.service.Schedule schedule;
+
+/**
+ * Japanese Encephalitis Recommendation Rule
+ * When recommending in the Japanese Encephalitis vaccine group, always return reason code SUPPLEMENTAL_TEXT with descriptive text,
+ * "Japanese Encephalitis vaccination is not routinely recommended in the U.S. and is only indicated for select patients at
+ * increased risk. Refer to ACIP guidelines for additional information."
+ */
+rule "Japanese Encephalitis: Always include supplemental text with the recommendation"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+    when
+        There is a Series $targetSeries
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
+            - post processing on the Series forecast has not already been run
+            - a forecast for the Series has been made
+            - make note of the recommendation status as $recommendationStatus
+    then
+        Create a Recommendation as $supplementalText for the Series $targetSeries
+        Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"
+        Set the Recommendation Status for $supplementalText to $recommendationStatus
+        Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
+        Record that this Series Rule was Processed for the TargetSeries $targetSeries
+        Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Rules Based on Series Completion and Patient Age:
+ *
+ * If the patient is not complete for Japanese Encephalitis and
+ *   - the patient is < the routine age for the JE-VC Risk 2-dose Series (i.e., < 2 months), then the recommendation is Not
+ *     Recommended with reason code SUPPLEMENTAL_TEXT.
+ *   - If the patient is >= the routine age for the JE-VC Risk 2-dose Series (i.e., >= 2 months), then the recommendation is
+ *     Conditional with reason codes HIGH_RISK and SUPPLEMENTAL_TEXT.
+ *
+ * If the patient is complete for Japanese Encephalitis, then the recommendation is Conditional with reason codes COMPLETE_HIGH_RISK
+ * and SUPPLEMENTAL_TEXT.
+ */
+rule "Japanese Encephalitis: Patient < 2 months old, Not Recommended with SUPPLEMENTAL_TEXT"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^customRecommendationRule"
+    when
+        There is a Series $targetSeries that needs forecasting
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
+            - the Series is not complete
+            - The number of doses administered is == 0
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+            - make note of the patient's birthdate as $dtBirthDate
+        Confirm elapsed time between $dtBirthDate and evalTime < "2m"
+    then
+        Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
+        Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"
+        Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+        Mark Forecasting of the Series $targetSeries Complete
+        Record that this Series Rule was Processed for the TargetSeries $targetSeries
+        Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Japanese Encephalitis: Patient >= 2 months old and not complete, Conditional/High Risk"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^customRecommendationRule"
+    when
+        There is a Series $targetSeries that needs forecasting
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
+            - the Series is not complete
+            - The number of doses administered is == 0
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+            - make note of the patient's birthdate as $dtBirthDate
+        Confirm elapsed time between $dtBirthDate and evalTime >= "2m"
+    then
+        Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+        Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+        Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+        Mark Forecasting of the Series $targetSeries Complete
+        Record that this Series Rule was Processed for the TargetSeries $targetSeries
+        Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Japanese Encephalitis: Patient is complete for Japanese Encephalitis, Conditional/Complete_High_Risk"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^customRecommendationRule"
+    when
+        There is a Series $targetSeries that needs forecasting
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
+            - the Series is complete
+    then
+        Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
+        Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+        Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+        Mark Forecasting of the Series $targetSeries Complete
+        Record that this Series Rule was Processed for the TargetSeries $targetSeries
+        Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Suppress the regular latest recommended interval check if on accelerated schedule and second dose would be on or after 66th
+ * birthday
+ */
+rule "Japanese Encephalitis: Suppress Latest Recommended Interval Check for accelerated schedule when 66 or older"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "latestRecommendedIntervalCheck"
+	when
+        There is a Series $targetSeries that needs forecasting
+            - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
+            - The name of the series is "SUPPORTED_SERIES.JEVCRisk2DoseAcceleratedSeries"
+            - the Series is not complete
+            - The number of doses administered is == 1
+            - Make note of the date that the most recent shot was administered as $previousShotDate
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+            - Make note of the patient's birthdate as $dtBirthDate
+        Confirm elapsed time between $dtBirthDate and $previousShotDate >= "66y-7d"
+	then
+	    Record that this Series Rule was Processed for the TargetSeries $targetSeries
+	    Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * If the recommended due date for target dose 2 of the accelerated series is >= 66 years old then use the non-accelerated minimum
+ * and recommended intervals.
+ */
+rule "Japanese Encephalitis: Patient on accelerated schedule is 66 or older for recommended second dose"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck"
+	when
+        There is a Series $targetSeries
+            - The Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
+            - The name of the series is "SUPPORTED_SERIES.JEVCRisk2DoseAcceleratedSeries"
+            - A Forecast for the Series has been made and a Recommendation Date has been determined
+			- Make note of the date that the most recent shot was administered as $previousShotDate
+			- Make note of the recommendation date as $recommendationDate
+        The patient information $oEvaluatedPerson must be known to complete writing this rule
+            - Make note of the patient's birthdate as $dtBirthDate
+        Confirm elapsed time between $dtBirthDate and $recommendationDate >= "66y"
+	then
+	    Add 28 DurationType.DAYS to $previousShotDate and make note of the newly calculated date as $newDate
+	    Create a Recommendation as $newRecommendation for the Series $targetSeries
+        Set the Recommendation Earliest Forecast Date for $newRecommendation to $newDate
+        Set the Recommendation Recommended Forecast Date for $newRecommendation to $newDate
+        Include the Recommendation $newRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+        Log that this Series Rule fired for the Series $targetSeries
+end

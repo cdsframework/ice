@@ -1,0 +1,164 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.Date;
+import org.opencds.vmr.v1_0.internal.datatypes.CD;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+
+global java.util.Date evalTime;
+
+expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
+
+/**
+ * If a person => 19 years old and did NOT get a shot, recommendation should be Conditional / Recommended for High Risk Groups.
+ * Overrides routine recommendationAgeCheck
+ */
+rule "HepA: Recommend Conditional/High Risk when >= 19 years old and no shots"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationAgeCheck"
+    when
+		There is a Series $targetSeries that needs forecasting
+        	- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
+        	- the number of Administered Shots is == 0
+		The patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthDate
+		Confirm elapsed time between $dtBirthDate and evalTime >= 19 DurationType.YEARS
+	then
+		Add "2y" to $dtBirthDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED and Recommended Forecast Date $dtCalculated for Consideration in the final Forecast of the Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * The interval between dose 1 & 3 of HepA 3-dose series needs to be at least 6 months for Recommendation.
+ * Routine interval rule still runs
+ */
+rule "HepA: Recommend both an earliest and recommended interval of 6 months between doses 1 & 3 for HepA 3-dose Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
+			- the name of the series is "SUPPORTED_SERIES.HepAAdult3DoseSeries"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * The interval between dose 1 & 4 of HepA 4-dose Accelerated Twinrix series needs to be at least 12 months for Recommendation.
+ * Routine interval rule still runs
+ */
+rule "HepA: Recommend both an earliest and recommended interval of 12 months between doses 1 & 4 for HepA 4-dose Accelerated Twinrix Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
+			- the name of the series is "SUPPORTED_SERIES.HepA4DoseAcceleratedTwinrixSeries"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 4
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "12m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Recommend at the vaccine level, CVX 104 (Hep A-Hep B (Twinrix)) vaccine, when recommending for the Hep A 3-dose Series
+ * if the next recommended dose of Hep B is in the Hep B 3-Dose Twinrix Series at the same target dose number, and the
+ * recommendation dates of the next Hep A dose and next Hep B dose are the same
+ */
+rule "Hep A: Recommend CVX 104 (Hep A-Hep B (Twinrix)) for the Hep A 3-dose Series if in sync with Hep B 3-dose Twinrix Series"
+	ruleflow-group "RecommendationForecast^postRecommendationCheck"
+	when
+		There is a Series $targetSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
+			- the Name of the Series is "SUPPORTED_SERIES.HepAAdult3DoseSeries"
+			- the Series is Not Complete
+			- a forecast for the series has been made and a recommendation date has been determined
+			- make note of the Dose Number to Recommend as $doseNumber
+			- make Note of the Recommendation Date as $recommendationDate
+		There is a Series $hepBSeries
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the Name of the Series is "SUPPORTED_SERIES.HepB3DoseTwinrixSeries"
+			- the Series is Not Complete
+			- a forecast for the series has been made and a recommendation date has been determined
+			- the Dose Number to Recommend is == $doseNumber
+			- make Note of the Recommendation Date as $hepBRecommendationDate
+			- the Date $hepBRecommendationDate == $recommendationDate
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_104"
+		Set the Recommendation Supplemental Text for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.HEP_A_3DOSE_TWINRIX_ALT_VACCINE"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Recommend at the vaccine level, CVX 104 (Hep A-Hep B (Twinrix)) vaccine, when recommending for the Hep A 4-dose Accelerated
+ * Twinrix Series
+ */
+rule "Hep A: Recommend CVX 104 (Hep A-Hep B (Twinrix)) for the Hep A 4-dose Accelerated Twinrix Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
+			- the Name of the Series is "SUPPORTED_SERIES.HepA4DoseAcceleratedTwinrixSeries"
+			- the Series is Not Complete
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_104"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Include supplemental when recommending for target dose 4 in the Hep A 4-dose Accelerated
+ * Twinrix Series
+ */
+rule "Hep A: Include supplemental text for target dose 4 in the Hep A 4-dose Accelerated Twinrix Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
+			- the Name of the Series is "SUPPORTED_SERIES.HepA4DoseAcceleratedTwinrixSeries"
+			- the Series is Not Complete
+			- the effective dose number in the Series is == 4
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.HEP_A_3DOSE_TWINRIX_ALT_VACCINE"
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>opencds-decision-support-generated</artifactId>
+
+    <parent>
+        <groupId>org.cdsframework</groupId>
+        <artifactId>ice</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <properties>
+        <jaxb-maven-plugin.version>4.0.12</jaxb-maven-plugin.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jvnet.jaxb</groupId>
+                <artifactId>jaxb-maven-plugin</artifactId>
+                <version>${jaxb-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>jaxb-generate-cdsframework</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>-extension</arg>
+                            </args>
+                            <schemaDirectory>src/main/resources/xml</schemaDirectory>
+                            <schemaIncludes>
+                                <include>*.xsd</include>
+                            </schemaIncludes>
+                            <bindingIncludes>
+                                <include>*.xjb.xml</include>
+                            </bindingIncludes>
+                            <generateDirectory>${project.build.directory}/generated-sources/xml</generateDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>fhir</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>-XautoNameResolution</arg>
+                            </args>
+                            <schemaDirectory>src/main/resources/fhir</schemaDirectory>
+                            <schemaIncludes>
+                                <include>fhir-all.xsd</include>
+                            </schemaIncludes>
+                            <bindingIncludes>
+                                <include>bindings.xjb.xml</include>
+                            </bindingIncludes>
+                            <generateDirectory>${project.build.directory}/generated-sources/fhir</generateDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <extension>true</extension>
+                    <verbose>true</verbose>
+                    <markGenerated>true</markGenerated>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

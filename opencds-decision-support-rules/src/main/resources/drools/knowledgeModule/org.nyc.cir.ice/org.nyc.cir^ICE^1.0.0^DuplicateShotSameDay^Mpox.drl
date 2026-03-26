@@ -1,0 +1,134 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+global java.util.Date evalTime;
+
+/**
+ * Evaluate CVX 325 last to ensure that all same day checks between other Mpox vaccines are evaluated first. This avoids the potential
+ * for two non-325 doses have their same day evaluations completed due to the same 325 dose and not being evaluated against
+ * each other.
+ */
+rule "Duplicate Shots/Same Day (Mpox): Evaluate CVX 325 last"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	activation-group "duplicateShotEvaluationOrder"
+	auto-focus true
+	when
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MPOX", vaccineComponent.cdsConceptName == "VACCINE_CVX_325")
+		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.cdsConceptName != "VACCINE_CVX_325")
+	then
+		modify($td) {
+			setStatus(DoseStatus.EVALUATION_NOT_STARTED),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true)
+		};
+		modify($tdother) {
+			setStatus(DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS),
+			setDuplicateShotSameDayEvaluationOrderCompleted(true)
+		};
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + "will be evaluated before " + $td + " in TargetSeries " + $td.associatedTargetSeries);
+end
+
+/**
+ * CVX 206 takes precedence over CVX 325 (NOS) when both are given on the same day
+ */
+rule "Duplicate Shots/Same Day (Mpox): If CVX 206 and CVX 325 are given on the same day, mark 206 as valid and 325 as invalid"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 20
+	when
+		$td206: TargetDose(hasBeenEvaluated == true, (status == DoseStatus.VALID || status == DoseStatus.ACCEPTED), isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MPOX",
+			administeredVaccine.cdsConceptName == "VACCINE_CVX_206", $tdAdministrationDate : administrationDate)
+		$td325: TargetDose(this != $td206, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, (status == DoseStatus.VALID || status == DoseStatus.ACCEPTED), isDoseStatusOverridden() == false,
+			associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MPOX", administeredVaccine.cdsConceptName == "VACCINE_CVX_325",  associatedTargetSeries == $td206.associatedTargetSeries,
+			isDuplicateShotSameDayCheckCompleted() == false || $td206.isDuplicateShotSameDayCheckCompleted() == false)
+        $ts : TargetSeries(this == $td325.associatedTargetSeries)
+	then
+		modify($td206) {
+			setStatus(DoseStatus.VALID),
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		modify($td325) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "VACCINE_CVX_206 marked valid, VACCINE_CVX_325 marked invalid as duplicate same day dose in TargetSeries " + $td206.associatedTargetSeries);
+end
+
+/**
+ * CVX 75 and CVX 105 take precedence ove the NOS CVX 325 when administered on the same day.
+ */
+rule "Duplicate Shots/Same Day (Mpox): If CVX 75 or CVX 105 and CVX 325 are given on the same day, mark 75/105 as valid and 325 as invalid"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 20
+	when
+		$td75_105: TargetDose(hasBeenEvaluated == true, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MPOX",
+			(administeredVaccine.cdsConceptName == "VACCINE_CVX_75" || administeredVaccine.cdsConceptName == "VACCINE_CVX_105"), (status == DoseStatus.VALID || associatedTargetSeries.seriesRules.seriesName ==  "SUPPORTED_SERIES.Mpox2DoseSeries"),
+			$tdAdministrationDate : administrationDate)
+		$td325: TargetDose(this != $td75_105, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false,
+			associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MPOX", administeredVaccine.cdsConceptName == "VACCINE_CVX_325",
+			associatedTargetSeries == $td75_105.associatedTargetSeries,
+			isDuplicateShotSameDayCheckCompleted() == false || $td75_105.isDuplicateShotSameDayCheckCompleted() == false)
+        $ts : TargetSeries(this == $td325.associatedTargetSeries)
+	then
+		modify($td75_105) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		modify($td325) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "VACCINE_CVX_325 marked invalid as duplicate same day dose in TargetSeries " + $td75_105.associatedTargetSeries);
+end
+
+rule "Duplicate Shots/Same Day (Mpox): If one of those shots is Valid and another shot on the same day is Accepted, mark the other Accepted shot Invalid/DUPLICATE_SAME_DAY"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	salience 10
+	when
+		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MPOX", $tdAdministrationDate : administrationDate)
+		$tdother : TargetDose(this != $td, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, status == DoseStatus.ACCEPTED, isDoseStatusOverridden() == false, associatedTargetSeries == $td.associatedTargetSeries,
+			doseNumberInSeries == $td.doseNumberInSeries, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
+        $ts : TargetSeries(this == $tdother.associatedTargetSeries)
+	then
+		modify($tdother) {
+			setStatus(DoseStatus.INVALID),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets(),
+			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName())
+		};
+		modify($td) {
+			setDuplicateShotSameDayCheckCompleted(true)
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $tdother + " in TargetSeries " + $td.associatedTargetSeries);
+end
