@@ -1,8 +1,8 @@
-FROM eclipse-temurin:21-jre-noble
+FROM eclipse-temurin:25-jre-noble
 
 EXPOSE 8080
 
-COPY target/opencds-decision-support-service.war app.war
+COPY opencds-decision-support-service/target/opencds-decision-support-service.war app.war
 
 ENTRYPOINT ["java", "-jar", "app.war"]
 
