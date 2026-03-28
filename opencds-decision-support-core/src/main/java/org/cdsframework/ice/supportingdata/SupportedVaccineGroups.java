@@ -36,10 +36,10 @@ import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.ice.dto.CodeSystemConceptProperty;
+import org.cdsframework.ice.dto.Coding;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
-import org.hl7.fhir.CodeSystemConceptProperty;
-import org.hl7.fhir.Coding;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.springframework.util.ObjectUtils;
 
@@ -133,26 +133,26 @@ public class SupportedVaccineGroups implements SupportingData
 
             for (final CodeSystemConceptProperty cp : lcccli.getProperties())
             {
-                final String propertyCode = cp.getCode().getValue();
+                final String propertyCode = cp.getCode();
                 switch (propertyCode)
                 {
                     case "priority" ->
                     {
-                        if (cp.getValueInteger() instanceof final org.hl7.fhir.Integer priorityInt)
-                            lPriority = priorityInt.getValue();
+                        if (cp.getValueInteger() != null)
+                            lPriority = cp.getValueInteger();
                     }
                     case "routine" ->
                     {
-                        if (cp.getValueBoolean() instanceof final org.hl7.fhir.Boolean routineBool)
-                            lRoutine = routineBool.isValue();
+                        if (cp.isValueBoolean() != null)
+                            lRoutine = cp.isValueBoolean();
                     }
                     case "diseaseImmunity" ->
                     {
                         if (cp.getValueCoding() instanceof final Coding diseaseImmunityCoding)
                         {
                             final CD diseaseCD = new CD();
-                            diseaseCD.setCode(diseaseImmunityCoding.getCode().getValue());
-                            diseaseCD.setCodeSystem(diseaseImmunityCoding.getSystem().getValue());
+                            diseaseCD.setCode(diseaseImmunityCoding.getCode());
+                            diseaseCD.setCodeSystem(diseaseImmunityCoding.getSystem());
                             final LocallyCodedCdsListItem lRelatedDiseaseCdsListItem =
                                     this.supportedCdsLists.getCdsListItem(diseaseCD);
                             if (lRelatedDiseaseCdsListItem == null)
@@ -179,9 +179,8 @@ public class SupportedVaccineGroups implements SupportingData
                     case "conceptMapping", "supported", "outboundCode" ->
                     {
                     }
-                    default ->
-                        log.warn(_METHODNAME + "Unsupported property found for vaccine group: {} - {}",
-                                lVaccineGroupCdsListItemName, propertyCode);
+                    default -> log.warn(_METHODNAME + "Unsupported property found for vaccine group: {} - {}",
+                            lVaccineGroupCdsListItemName, propertyCode);
                 }
             }
 

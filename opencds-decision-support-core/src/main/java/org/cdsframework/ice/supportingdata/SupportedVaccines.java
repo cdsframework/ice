@@ -44,13 +44,13 @@ import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.ice.dto.CodeSystemConceptProperty;
+import org.cdsframework.ice.dto.Coding;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Vaccine;
 import org.cdsframework.ice.service.VaccineComponent;
 import org.cdsframework.ice.util.TimePeriod;
-import org.hl7.fhir.CodeSystemConceptProperty;
-import org.hl7.fhir.Coding;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.springframework.util.ObjectUtils;
 
@@ -195,7 +195,7 @@ public class SupportedVaccines implements SupportingData
 
         for (final CodeSystemConceptProperty cp : lcccli.getProperties())
         {
-            final String code = cp.getCode().getValue();
+            final String code = cp.getCode();
             switch (code)
             {
                 case "diseaseImmunity" ->
@@ -203,8 +203,8 @@ public class SupportedVaccines implements SupportingData
                     if (cp.getValueCoding() instanceof final Coding c)
                     {
                         final CD diseaseCD = new CD();
-                        diseaseCD.setCode(c.getCode().getValue());
-                        diseaseCD.setCodeSystem(c.getSystem().getValue());
+                        diseaseCD.setCode(c.getCode());
+                        diseaseCD.setCodeSystem(c.getSystem());
                         final LocallyCodedCdsListItem lRelatedDiseaseCdsListItem = this.supportedCdsLists.getCdsListItem(diseaseCD);
                         if (lRelatedDiseaseCdsListItem != null
                                 && ICEConceptType.DISEASE == ICEConceptType.getSupportedIceConceptType(
@@ -217,8 +217,8 @@ public class SupportedVaccines implements SupportingData
                     if (cp.getValueCoding() instanceof final Coding c)
                     {
                         final CD compCD = new CD();
-                        compCD.setCode(c.getCode().getValue());
-                        compCD.setCodeSystem(c.getSystem().getValue());
+                        compCD.setCode(c.getCode());
+                        compCD.setCodeSystem(c.getSystem());
                         lVaccineComponentCDs.add(compCD);
                     }
                 }
@@ -227,47 +227,47 @@ public class SupportedVaccines implements SupportingData
                     if (cp.getValueCoding() instanceof final Coding c)
                     {
                         final CD conflictCD = new CD();
-                        conflictCD.setCode(c.getCode().getValue());
-                        conflictCD.setCodeSystem(c.getSystem().getValue());
+                        conflictCD.setCode(c.getCode());
+                        conflictCD.setCodeSystem(c.getSystem());
                         lConflictingVaccineCDs.add(conflictCD);
                     }
                 }
                 case "liveVirusVaccine" ->
                 {
-                    if (cp.getValueBoolean() instanceof final org.hl7.fhir.Boolean b)
-                        lLiveVirusVaccine = b.isValue();
+                    if (cp.isValueBoolean() != null)
+                        lLiveVirusVaccine = cp.isValueBoolean();
                 }
                 case "unspecifiedFormulation" ->
                 {
-                    if (cp.getValueBoolean() instanceof final org.hl7.fhir.Boolean b)
-                        lUnspecifiedFormulation = b.isValue();
+                    if (cp.isValueBoolean() != null)
+                        lUnspecifiedFormulation = cp.isValueBoolean();
                 }
                 case "selectAdjuvantProduct" ->
                 {
-                    if (cp.getValueBoolean() instanceof final org.hl7.fhir.Boolean b)
-                        lSelectAdjuvantProduct = b.isValue();
+                    if (cp.isValueBoolean() != null)
+                        lSelectAdjuvantProduct = cp.isValueBoolean();
                 }
                 case "minimumDateForUse" -> lMinimumDateForUse = parseDate(cp.getValueString());
                 case "maximumDateForUse" -> lMaximumDateForUse = parseDate(cp.getValueString());
                 case "validMinimumAgeForUse" ->
                 {
-                    if (cp.getValueString() instanceof final org.hl7.fhir.String s)
-                        lValidMinimumAgeForUse = new TimePeriod(s.getValue());
+                    if (cp.getValueString() != null)
+                        lValidMinimumAgeForUse = new TimePeriod(cp.getValueString());
                 }
                 case "validMaximumAgeForUse" ->
                 {
-                    if (cp.getValueString() instanceof final org.hl7.fhir.String s)
-                        lValidMaximumAgeForUse = new TimePeriod(s.getValue());
+                    if (cp.getValueString() != null)
+                        lValidMaximumAgeForUse = new TimePeriod(cp.getValueString());
                 }
                 case "recommendedMinimumAgeForUse" ->
                 {
-                    if (cp.getValueString() instanceof final org.hl7.fhir.String s)
-                        lRecommendedMinimumAgeForUse = new TimePeriod(s.getValue());
+                    if (cp.getValueString() != null)
+                        lRecommendedMinimumAgeForUse = new TimePeriod(cp.getValueString());
                 }
                 case "recommendedMaximumAgeForUse" ->
                 {
-                    if (cp.getValueString() instanceof final org.hl7.fhir.String s)
-                        lRecommendedMaximumAgeForUse = new TimePeriod(s.getValue());
+                    if (cp.getValueString() != null)
+                        lRecommendedMaximumAgeForUse = new TimePeriod(cp.getValueString());
                 }
                 // already processed
                 case "conceptMapping", "supported", "outboundCode" ->
@@ -372,25 +372,26 @@ public class SupportedVaccines implements SupportingData
         }
     }
 
-    private Date parseDate(final org.hl7.fhir.String value)
+    private Date parseDate(final String value)
     {
+        if (value == null)
+            return null;
         try
         {
-            return Date.from(LocalDateTime.parse(value.getValue(), DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant());
+            return Date.from(
+                    LocalDateTime.parse(value, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(ZoneId.systemDefault()).toInstant());
         }
         catch (final DateTimeParseException e)
         {
             try
             {
-                return Date.from(java.time.LocalDate.parse(value.getValue(), DateTimeFormatter.ISO_LOCAL_DATE)
+                return Date.from(java.time.LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE)
                         .atStartOfDay(ZoneId.systemDefault())
                         .toInstant());
             }
             catch (final DateTimeParseException e2)
             {
-                log.warn("Failed to parse date: {}", value.getValue());
+                log.warn("Failed to parse date: {}", value);
             }
         }
         return null;

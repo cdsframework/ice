@@ -10,11 +10,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.cdsframework.ice.dto.CodeSystem;
+import org.cdsframework.ice.dto.CodeSystemConcept;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.util.CollectionUtils;
-import org.hl7.fhir.CodeSystem;
-import org.hl7.fhir.CodeSystemConcept;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.springframework.util.ObjectUtils;
 
@@ -89,8 +89,9 @@ public class SupportedCdsLists implements SupportingData
             return;
 
         // If adding a code that is not one of the supported cdsVersions, then return
-        if (ObjectUtils.isEmpty(CollectionUtils.intersectionOfStringCollections(
-                java.util.Collections.singletonList(pCodeSystem.getVersion().getValue()), this.cdsVersions)))
+        if (ObjectUtils.isEmpty(
+                CollectionUtils.intersectionOfStringCollections(java.util.Collections.singletonList(pCodeSystem.getVersion()),
+                        this.cdsVersions)))
             return;
 
         final LocallyCodedCdsListItem locallyCodedCdsListItem = new LocallyCodedCdsListItem(pCodeSystem, pConcept);

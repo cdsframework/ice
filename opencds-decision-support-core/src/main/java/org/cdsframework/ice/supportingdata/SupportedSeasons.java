@@ -41,6 +41,8 @@ import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
+import org.cdsframework.ice.dto.CodeSystemConceptProperty;
+import org.cdsframework.ice.dto.Coding;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Season;
@@ -144,29 +146,28 @@ public class SupportedSeasons implements SupportingData
             String lVgSystem = null;
             String lVgDisplayName = null;
 
-            for (final org.hl7.fhir.CodeSystemConceptProperty cp : locallyCodedCdsSeasonListItem.getProperties())
+            for (final CodeSystemConceptProperty cp : locallyCodedCdsSeasonListItem.getProperties())
             {
-                final String lPropCode = cp.getCode().getValue();
+                final String lPropCode = cp.getCode();
                 switch (lPropCode)
                 {
-                    case "defaultSeason" -> lDefaultSeason = cp.getValueBoolean().isValue();
-                    case "startDate" -> lStartDateStr = cp.getValueString().getValue();
-                    case "endDate" -> lEndDateStr = cp.getValueString().getValue();
-                    case "defaultStartMonthAndDay" -> lDefaultStartMonthAndDayStr = cp.getValueString().getValue();
-                    case "defaultStopMonthAndDay" -> lDefaultStopMonthAndDayStr = cp.getValueString().getValue();
+                    case "defaultSeason" -> lDefaultSeason = java.util.Objects.requireNonNullElse(cp.isValueBoolean(), false);
+                    case "startDate" -> lStartDateStr = cp.getValueString();
+                    case "endDate" -> lEndDateStr = cp.getValueString();
+                    case "defaultStartMonthAndDay" -> lDefaultStartMonthAndDayStr = cp.getValueString();
+                    case "defaultStopMonthAndDay" -> lDefaultStopMonthAndDayStr = cp.getValueString();
                     case "vaccineGroup" ->
                     {
-                        final org.hl7.fhir.Coding vgCoding = cp.getValueCoding();
-                        lVgCode = vgCoding.getCode().getValue();
-                        lVgSystem = vgCoding.getSystem().getValue();
-                        lVgDisplayName = vgCoding.getDisplay().getValue();
+                        final Coding vgCoding = cp.getValueCoding();
+                        lVgCode = vgCoding.getCode();
+                        lVgSystem = vgCoding.getSystem();
+                        lVgDisplayName = vgCoding.getDisplay();
                     }
                     // already processed
                     case "conceptMapping", "supported", "outboundCode" ->
                     {
                     }
-                    default ->
-                        log.warn(_METHODNAME + "Unsupported property found for season: {} - {}", lSeasonCode, lPropCode);
+                    default -> log.warn(_METHODNAME + "Unsupported property found for season: {} - {}", lSeasonCode, lPropCode);
                 }
             }
 

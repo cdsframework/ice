@@ -16,7 +16,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { IceSupportingDataProperties.class, org.cdsframework.ice.config.FhirConverterConfig.class }, initializers = ConfigDataApplicationContextInitializer.class)
+@ContextConfiguration(classes = { IceSupportingDataProperties.class }, initializers = ConfigDataApplicationContextInitializer.class)
 @TestPropertySource(properties = {
         "spring.config.import=classpath:data/knowledgeCommon/org.cdsframework.ice/ice-supporting-data/iceSupportingData.yml,classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/iceSupportingData.yml" })
 @EnableConfigurationProperties(IceSupportingDataProperties.class)
@@ -45,7 +45,8 @@ public class FullSupportingDataLoadTest
                 int depth = 0;
                 StringBuilder sb = new StringBuilder();
                 sb.append("CAUSE_CHAIN:\n");
-                while (root != null && depth < 20) {
+                while (root != null && depth < 20)
+                {
                     String line = "Cause[" + depth + "]: " + root.getClass().getName() + ": " + String.valueOf(root.getMessage());
                     System.out.println("[DEBUG_LOG] " + line);
                     sb.append(line).append('\n');

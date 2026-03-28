@@ -12,11 +12,11 @@ import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.ice.config.iceSupportingProperties.CdsListData;
 import org.cdsframework.ice.config.iceSupportingProperties.CdsListItemConceptMappingData;
 import org.cdsframework.ice.config.iceSupportingProperties.CdsListItemData;
-import org.hl7.fhir.CodeSystem;
-import org.hl7.fhir.CodeSystemConcept;
-import org.hl7.fhir.CodeSystemConceptProperty;
-import org.hl7.fhir.Coding;
-import org.hl7.fhir.Identifier;
+import org.cdsframework.ice.dto.CodeSystem;
+import org.cdsframework.ice.dto.CodeSystemConcept;
+import org.cdsframework.ice.dto.CodeSystemConceptProperty;
+import org.cdsframework.ice.dto.Coding;
+import org.cdsframework.ice.dto.Identifier;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 import lombok.EqualsAndHashCode;
@@ -204,10 +204,9 @@ public class LocallyCodedCdsListItem
                 .flatMap(Collection::stream)
                 .findFirst()
                 .map(Identifier::getValue)
-                .map(org.hl7.fhir.String::getValue)
                 .orElse(null);
 
-        this.cdsListCode = pCodeSystem.getName().getValue();
+        this.cdsListCode = pCodeSystem.getName();
         if (cdsListCode == null)
         {
             final String lErrStr = "required element cdsListCode (CodeSystem.name) not specified";
@@ -224,7 +223,7 @@ public class LocallyCodedCdsListItem
             throw new IllegalArgumentException(lErrStr);
         }
 
-        final String lCdsListItemKey = pConcept.getCode().getValue();
+        final String lCdsListItemKey = pConcept.getCode();
         if (lCdsListItemKey == null)
         {
             final String lErrStr = "required element cdsListItemKey (ConceptDefinitionComponent.code) not specified";
@@ -241,8 +240,8 @@ public class LocallyCodedCdsListItem
             throw new IllegalArgumentException(lErrStr);
         }
 
-        this.cdsListDescription = pCodeSystem.getDescription().getValue();
-        this.cdsListCodeSystem = pCodeSystem.getUrl().getValue();
+        this.cdsListDescription = pCodeSystem.getDescription();
+        this.cdsListCodeSystem = pCodeSystem.getUrl();
         this.cdsListValueSet = null;
 
         if (this.cdsListCodeSystem == null)
@@ -252,24 +251,23 @@ public class LocallyCodedCdsListItem
             throw new IllegalArgumentException(lErrStr);
         }
 
-        this.cdsListCodeSystemName = pCodeSystem.getTitle().getValue();
+        this.cdsListCodeSystemName = pCodeSystem.getTitle();
         this.cdsListOpenCdsConceptType = null;
         this.cdsListItemKey = lCdsListItemKey.replaceAll("[ \t\n\f\r]", "_");
-        this.cdsListItemValue = pConcept.getDisplay().getValue();
+        this.cdsListItemValue = pConcept.getDisplay();
         this.opencdsConceptMappings = new ArrayList<>();
 
-        this.cdsListVersions = java.util.Collections.singletonList(
-                Optional.ofNullable(pCodeSystem.getVersion()).map(org.hl7.fhir.String::getValue).orElse(""));
-        this.properties.addAll(pConcept.getProperties());
+        this.cdsListVersions = java.util.Collections.singletonList(Optional.ofNullable(pCodeSystem.getVersion()).orElse(""));
+        Optional.ofNullable(pConcept.getProperties()).ifPresent(this.properties::addAll);
         this.cdsListItemName = "%s.%s".formatted(this.cdsListCode, this.cdsListItemKey);
 
         // Handle outbound coding or concept mapping if defined as a property
         final String OUTBOUND_CODE_PROPERTY = "outboundCode";
         final String CONCEPT_MAPPING_PROPERTY = "conceptMapping";
         final String SUPPORTED_PROPERTY = "supported";
-        for (final CodeSystemConceptProperty cp : pConcept.getProperties())
+        for (final CodeSystemConceptProperty cp : Optional.ofNullable(pConcept.getProperties()).orElseGet(List::of))
         {
-            final String propertyCode = Optional.ofNullable(cp.getCode()).map(org.hl7.fhir.Code::getValue).orElse(null);
+            final String propertyCode = cp.getCode();
             if (propertyCode == null)
                 continue;
 
@@ -280,12 +278,9 @@ public class LocallyCodedCdsListItem
                     if (cp.getValueCoding() instanceof final Coding outboundCoding)
                     {
                         this.cdsListItemOutboundCD = new CD();
-                        this.cdsListItemOutboundCD.setCode(
-                                Optional.ofNullable(outboundCoding.getCode()).map(org.hl7.fhir.Code::getValue).orElse(null));
-                        this.cdsListItemOutboundCD.setDisplayName(
-                                Optional.ofNullable(outboundCoding.getDisplay()).map(org.hl7.fhir.String::getValue).orElse(null));
-                        this.cdsListItemOutboundCD.setCodeSystem(
-                                Optional.ofNullable(outboundCoding.getSystem()).map(org.hl7.fhir.Uri::getValue).orElse(null));
+                        this.cdsListItemOutboundCD.setCode(outboundCoding.getCode());
+                        this.cdsListItemOutboundCD.setDisplayName(outboundCoding.getDisplay());
+                        this.cdsListItemOutboundCD.setCodeSystem(outboundCoding.getSystem());
                         // TODO: Add codeSystemName lookup by oid
                         this.cdsListItemOutboundCD.setCodeSystemName(null);
                         this.cdsListItemOutboundCD.setOriginalText(
@@ -299,21 +294,17 @@ public class LocallyCodedCdsListItem
                 {
                     if (cp.getValueCoding() instanceof final Coding conceptMappingCoding && conceptMappingCoding.getCode() != null)
                     {
-                        final CdsConcept lC = new CdsConcept(
-                                Optional.ofNullable(conceptMappingCoding.getCode()).map(org.hl7.fhir.Code::getValue).orElse(null));
-                        lC.setDisplayName(Optional.ofNullable(conceptMappingCoding.getDisplay())
-                                .map(org.hl7.fhir.String::getValue)
-                                .orElse(null));
-                        lC.setConceptTargetId(
-                                Optional.ofNullable(conceptMappingCoding.getSystem()).map(org.hl7.fhir.Uri::getValue).orElse(null));
+                        final CdsConcept lC = new CdsConcept(conceptMappingCoding.getCode());
+                        lC.setDisplayName(conceptMappingCoding.getDisplay());
+                        lC.setConceptTargetId(conceptMappingCoding.getSystem());
                         lC.setIsOpenCdsSupportedConcept(true);
                         this.opencdsConceptMappings.add(lC);
                     }
                 }
                 case SUPPORTED_PROPERTY ->
                 {
-                    if (cp.getValueBoolean() instanceof final org.hl7.fhir.Boolean supportedBoolean)
-                        this.supported = supportedBoolean.isValue();
+                    if (cp.isValueBoolean() != null)
+                        this.supported = cp.isValueBoolean();
                 }
             }
         }

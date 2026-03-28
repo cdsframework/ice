@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.cdsframework.ice.dto.CodeSystem;
 import org.cdsframework.ice.config.IceSupportingDataProperties;
-import org.hl7.fhir.CodeSystem;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

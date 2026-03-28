@@ -68,25 +68,6 @@
                             <generateDirectory>${project.build.directory}/generated-sources/xml</generateDirectory>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>fhir</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <args>
-                                <arg>-XautoNameResolution</arg>
-                            </args>
-                            <schemaDirectory>src/main/resources/fhir</schemaDirectory>
-                            <schemaIncludes>
-                                <include>fhir-all.xsd</include>
-                            </schemaIncludes>
-                            <bindingIncludes>
-                                <include>bindings.xjb.xml</include>
-                            </bindingIncludes>
-                            <generateDirectory>${project.build.directory}/generated-sources/fhir</generateDirectory>
-                        </configuration>
-                    </execution>
                 </executions>
                 <configuration>
                     <extension>true</extension>

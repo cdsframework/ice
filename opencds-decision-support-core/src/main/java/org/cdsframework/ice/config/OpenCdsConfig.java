@@ -89,10 +89,8 @@ import org.opencds.dss.evaluate.impl.RequestProcessorService;
 import org.opencds.dss.evaluation.service.util.DSSCallableUtil;
 import org.opencds.evaluation.service.EvaluationService;
 import org.opencds.evaluation.service.util.CallableUtil;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
 
@@ -857,18 +855,11 @@ public class OpenCdsConfig
         ICESupportingDataLoaderPlugin.setIceProperties(iceProperties);
         ICESupportingDataLoaderPlugin.setIceSupportingDataProperties(iceSupportingDataProperties);
 
+        log.info("Context refreshed, preloading immunization schedules");
+        ICESupportingDataLoaderPlugin.preloadSchedules();
+
         IceExecutionEngineContext.setIceVersion(versionData.iceVersion());
 
         return new ConfigurationService(Set.of(configStrategy), CacheServiceImpl.class, configData);
-    }
-
-    @Bean
-    public ApplicationListener<ContextRefreshedEvent> contextRefreshedListener()
-    {
-        return _ ->
-        {
-            log.info("Context refreshed, preloading immunization schedules");
-            ICESupportingDataLoaderPlugin.preloadSchedules();
-        };
     }
 }
