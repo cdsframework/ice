@@ -1,14 +1,11 @@
 package org.cdsframework.ice.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
 
-@Getter
-@Setter
-public class Identifier
+@Builder
+public record Identifier(String use,
+                         CodeableConcept type,
+                         String system,
+                         String value)
 {
-    private String use;
-    private CodeableConcept type;
-    private String system;
-    private String value;
 }

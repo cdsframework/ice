@@ -1,42 +1,53 @@
 package org.cdsframework.ice.api;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import org.cdsframework.ice.dto.CodeSystem;
 import org.cdsframework.ice.config.IceSupportingDataProperties;
+import org.cdsframework.ice.config.iceSupportingProperties.SeriesData;
+import org.cdsframework.ice.dto.CodeSystem;
+import org.cdsframework.ice.supportingdata.ICEConceptType;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-import lombok.Builder;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+@Validated
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/supporting-data")
 public class SupportingDataController
 {
-    @Builder
     public record KnowledgeModule(String scopingEntityId,
                                   String businessId,
                                   String version)
     {
+        private static final Pattern KM_ID_SEPARATOR = Pattern.compile("\\^");
+
         public static KnowledgeModule parse(final String kmId)
         {
-            return Pattern.compile("\\^")
-                    .splitAsStream(kmId)
-                    .collect(Collectors.collectingAndThen(Collectors.toList(), parts -> KnowledgeModule.builder()
-                            .scopingEntityId(parts.getFirst())
-                            .businessId(parts.get(1))
-                            .version(parts.get(2))
-                            .build()));
+            final String[] parts = KM_ID_SEPARATOR.split(kmId, -1);
+            if (parts.length != 3)
+            {
+                throw new IllegalArgumentException(
+                        "Invalid knowledge module id '%s'. Expected 'scopingEntityId^businessId^version'.".formatted(kmId));
+            }
+            return new KnowledgeModule(parts[0], parts[1], parts[2]);
         }
     }
+
+    private static final Set<String> CORE_CODE_SYSTEMS =
+            Set.of(ICEConceptType.DISEASE.getIceConceptTypeValue(), ICEConceptType.VACCINE_GROUP.getIceConceptTypeValue(),
+                    ICEConceptType.VACCINE.getIceConceptTypeValue(), ICEConceptType.SEASON.getIceConceptTypeValue(),
+                    ICEConceptType.SERIES.getIceConceptTypeValue());
 
     private static String kmId(final String scopingEntityId, final String businessId, final String version)
     {
@@ -44,6 +55,69 @@ public class SupportingDataController
     }
 
     private final IceSupportingDataProperties iceSupportingDataProperties;
+
+    private IceSupportingDataProperties.KnowledgeModule requireKnowledgeModule(final String scopingEntityId,
+            final String businessId, final String version)
+    {
+        final String kmId = kmId(scopingEntityId, businessId, version);
+        final Map<String, IceSupportingDataProperties.KnowledgeModule> knowledgeModules =
+                iceSupportingDataProperties.getKnowledgeModules();
+        if (knowledgeModules == null)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Supporting data is not initialized.");
+        }
+        final IceSupportingDataProperties.KnowledgeModule knowledgeModule = knowledgeModules.get(kmId);
+        if (knowledgeModule == null)
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Knowledge module '%s' not found. Use /supporting-data/knowledge-modules to list available modules.".formatted(
+                            kmId));
+        }
+        return knowledgeModule;
+    }
+
+    private CodeSystem requireCodeSystem(final IceSupportingDataProperties.KnowledgeModule knowledgeModule,
+            final String codeSystemName)
+    {
+        final Map<String, CodeSystem> codeSystems = knowledgeModule.codeSystems();
+        if (codeSystems == null)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Knowledge module has no code systems configured.");
+        }
+        final CodeSystem codeSystem = codeSystems.get(codeSystemName);
+        if (codeSystem == null)
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Code system '%s' not found for the requested knowledge module.".formatted(codeSystemName));
+        }
+        return codeSystem;
+    }
+
+    private CodeSystem lookupCodeSystem(final String scopingEntityId, final String businessId, final String version,
+            final String codeSystemName)
+    {
+        return requireCodeSystem(requireKnowledgeModule(scopingEntityId, businessId, version), codeSystemName);
+    }
+
+    private Map<String, CodeSystem> requireCodeSystems(final IceSupportingDataProperties.KnowledgeModule knowledgeModule)
+    {
+        final Map<String, CodeSystem> codeSystems = knowledgeModule.codeSystems();
+        if (codeSystems == null)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Knowledge module has no code systems configured.");
+        }
+        return codeSystems;
+    }
+
+    private Map<String, SeriesData> requireSeries(final IceSupportingDataProperties.KnowledgeModule knowledgeModule)
+    {
+        final Map<String, SeriesData> series = knowledgeModule.series();
+        if (series == null)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Knowledge module has no series configured.");
+        }
+        return series;
+    }
 
     @GetMapping
     public IceSupportingDataProperties supportingData()
@@ -54,53 +128,80 @@ public class SupportingDataController
     @GetMapping("/knowledge-modules")
     public List<KnowledgeModule> knowledgeModules()
     {
-        return iceSupportingDataProperties.getKnowledgeModules().keySet().stream().map(KnowledgeModule::parse).toList();
+        final Map<String, IceSupportingDataProperties.KnowledgeModule> knowledgeModules =
+                iceSupportingDataProperties.getKnowledgeModules();
+        if (knowledgeModules == null)
+        {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Supporting data is not initialized.");
+        }
+        return knowledgeModules.keySet().stream().sorted().map(KnowledgeModule::parse).toList();
     }
 
     @GetMapping("/knowledge-module")
-    public IceSupportingDataProperties.KnowledgeModule supportingData(@RequestParam final String scopingEntityId,
-            @RequestParam final String businessId, @RequestParam final String version)
+    public IceSupportingDataProperties.KnowledgeModule supportingData(@RequestParam @NotBlank final String scopingEntityId,
+            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
     {
-        return iceSupportingDataProperties.getKnowledgeModules().get(kmId(scopingEntityId, businessId, version));
+        return requireKnowledgeModule(scopingEntityId, businessId, version);
     }
 
     @GetMapping("/diseases")
-    public CodeSystem diseases(@RequestParam final String scopingEntityId, @RequestParam final String businessId,
-            @RequestParam final String version)
+    public CodeSystem diseases(@RequestParam @NotBlank final String scopingEntityId,
+            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
     {
-        return iceSupportingDataProperties.getKnowledgeModules()
-                .get(kmId(scopingEntityId, businessId, version))
-                .codeSystems()
-                .get("SUPPORTED_DISEASE_CONCEPT");
+        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.DISEASE.getIceConceptTypeValue());
     }
 
     @GetMapping("/vaccine-groups")
-    public CodeSystem vaccineGroups(@RequestParam final String scopingEntityId, @RequestParam final String businessId,
-            @RequestParam final String version)
+    public CodeSystem vaccineGroups(@RequestParam @NotBlank final String scopingEntityId,
+            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
     {
-        return iceSupportingDataProperties.getKnowledgeModules()
-                .get(kmId(scopingEntityId, businessId, version))
-                .codeSystems()
-                .get("VACCINE_GROUP_CONCEPT");
+        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.VACCINE_GROUP.getIceConceptTypeValue());
     }
 
     @GetMapping("/vaccines")
-    public CodeSystem vaccines(@RequestParam final String scopingEntityId, @RequestParam final String businessId,
-            @RequestParam final String version)
+    public CodeSystem vaccines(@RequestParam @NotBlank final String scopingEntityId,
+            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
     {
-        return iceSupportingDataProperties.getKnowledgeModules()
-                .get(kmId(scopingEntityId, businessId, version))
-                .codeSystems()
-                .get("SUPPORTED_VACCINES");
+        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.VACCINE.getIceConceptTypeValue());
     }
 
     @GetMapping("/seasons")
-    public CodeSystem seasons(@RequestParam final String scopingEntityId, @RequestParam final String businessId,
-            @RequestParam final String version)
+    public CodeSystem seasons(@RequestParam @NotBlank final String scopingEntityId, @RequestParam @NotBlank final String businessId,
+            @RequestParam @NotBlank final String version)
     {
-        return iceSupportingDataProperties.getKnowledgeModules()
-                .get(kmId(scopingEntityId, businessId, version))
-                .codeSystems()
-                .get("SUPPORTED_SEASON");
+        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.SEASON.getIceConceptTypeValue());
+    }
+
+    @GetMapping("/series")
+    public CodeSystem series(@RequestParam @NotBlank final String scopingEntityId, @RequestParam @NotBlank final String businessId,
+            @RequestParam @NotBlank final String version)
+    {
+        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.SERIES.getIceConceptTypeValue());
+    }
+
+    @GetMapping("/series-data")
+    public Map<String, SeriesData> seriesData(@RequestParam @NotBlank final String scopingEntityId,
+            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
+    {
+        return requireSeries(requireKnowledgeModule(scopingEntityId, businessId, version));
+    }
+
+    @GetMapping("/code-system")
+    public CodeSystem codeSystem(@RequestParam @NotBlank final String scopingEntityId,
+            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version,
+            @RequestParam @NotBlank final String name)
+    {
+        return lookupCodeSystem(scopingEntityId, businessId, version, name);
+    }
+
+    @GetMapping("/other-code-systems")
+    public Map<String, CodeSystem> otherCodeSystems(@RequestParam @NotBlank final String scopingEntityId,
+            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
+    {
+        return requireCodeSystems(requireKnowledgeModule(scopingEntityId, businessId, version)).entrySet()
+                .stream()
+                .filter(entry -> !CORE_CODE_SYSTEMS.contains(entry.getKey()))
+                .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (left, _) -> left,
+                        java.util.LinkedHashMap::new));
     }
 }

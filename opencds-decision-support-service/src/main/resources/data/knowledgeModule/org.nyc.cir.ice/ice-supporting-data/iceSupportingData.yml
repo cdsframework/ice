@@ -3,3 +3,15 @@ spring:
     import:
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/OtherLists/iceSupportingOtherLists.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/Series/iceSupportingSeriesData.yml
+
+ice-supporting-data:
+  knowledge-modules:
+    '[org.nyc.cir^ICE^1.0.0]':
+      outbound-code-system-map:
+        "2.16.840.1.113883.6.96": "http://snomed.info/sct"
+        "2.16.840.1.113883.6.1": "http://loinc.org"
+        "2.16.840.1.113883.6.103": "http://hl7.org/fhir/sid/icd-9-cm"
+        "2.16.840.1.113883.6.90": "http://hl7.org/fhir/sid/icd-10-cm"
+        "2.16.840.1.113883.6.3": "http://hl7.org/fhir/sid/icd-10"
+        "2.16.840.1.113883.3.795.12.100.4": "http://terminology.cdsframework.org/ice/unknown"
+        "2.16.840.1.113883.3.795.12.100.500": "http://terminology.cdsframework.org/ice/series-display-options"

@@ -1,5 +1,7 @@
 package org.opencds.config.api.xml;
 
+import org.jspecify.annotations.NonNull;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -19,21 +21,19 @@ public class JAXBContextService
 
     private final LoadingCache<String, JAXBContext> contextCache = CacheBuilder.newBuilder().build(new CacheLoader<>()
     {
+        @NonNull
         @Override
-        public JAXBContext load(final String contextPath)
+        public JAXBContext load(final @NonNull String contextPath)
         {
-            JAXBContext jaxbContext = null;
             try
             {
-                log.info("Creating JAXBContext: {}", contextPath);
-                jaxbContext = JAXBContext.newInstance(contextPath);
-                log.info("JAXBContext created: {}", contextPath);
+                return JAXBContext.newInstance(contextPath);
             }
             catch (final JAXBException e)
             {
                 log.error("Error creating a JAXBContext for: {}", contextPath, e);
+                throw new RuntimeException(e);
             }
-            return jaxbContext;
         }
     });
 

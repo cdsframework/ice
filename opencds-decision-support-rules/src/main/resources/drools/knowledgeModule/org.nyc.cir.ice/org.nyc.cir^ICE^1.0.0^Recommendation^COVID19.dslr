@@ -34,11 +34,11 @@ rule "COVID-19: Invoke separate agenda group for recommendations in the COVID19D
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the series belongs to the season with name "SUPPORTED_SEASON.COVID19Dec2020Season"
+			- the series belongs to the season with name "SUPPORTED_SEASON.COVID_19_DEC_2020_SEASON"
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
-		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 end
 
 rule "COVID-19: Invoke separate agenda group for recommendations in the COVID19Sep2023/Aug2024 Season"
@@ -48,7 +48,7 @@ rule "COVID-19: Invoke separate agenda group for recommendations in the COVID19S
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the Series belongs to the Season with name a member of ("SUPPORTED_SEASON.COVID19Sep2023Season", "SUPPORTED_SEASON.COVID19Aug2024Season")
+			- the Series belongs to the Season with name a member of ("SUPPORTED_SEASON.COVID_19_SEP_2023_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2024_SEASON")
 			- make note of the Season name as $seasonNameForSeriesToBeForecasted
 		There is a Season $sept2023season
 			- the name of the Season is $seasonNameForSeriesToBeForecasted
@@ -60,7 +60,7 @@ rule "COVID-19: Invoke separate agenda group for recommendations in the COVID19S
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
-		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationRule^COVID19Sep2023Season"
+		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationRule^COVID_19_SEP_2023_SEASON"
 end
 
 /**
@@ -79,7 +79,7 @@ rule "COVID-19: If a seasonal COVID-19 Series that needs forecasting is complete
 			- make note of the Season Name as $seriesSeasonName
 			- make note of the Season Start Date as $targetSeasonStartDate
 		There is a Season $COVID19Sept2023Season
-		    - the name of the season is "SUPPORTED_SEASON.COVID19Sep2023Season"
+		    - the name of the season is "SUPPORTED_SEASON.COVID_19_SEP_2023_SEASON"
 		    - make note of the fully specified season start date as $sept2023StartDate
 		There is a Season $otherSeason
 			- the Season belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -106,7 +106,7 @@ rule "COVID-19: Invoke separate agenda group for recommendations in the Aug2025+
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the Series belongs to the Season with name "SUPPORTED_SEASON.COVID19Aug2025Season"
+			- the Series belongs to the Season with name "SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON"
 			- make note of the Season name as $seasonNameForSeriesToBeForecasted
 		There is a Season $aug2025season
 			- the name of the Season is $seasonNameForSeriesToBeForecasted
@@ -118,7 +118,7 @@ rule "COVID-19: Invoke separate agenda group for recommendations in the Aug2025+
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
-		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+		Set the Agenda Group Focus to "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
 end
 
 rule "COVID-19: Invoke separate agenda group for post recommendation checks in the COVID19Dec2020 Season"
@@ -127,13 +127,13 @@ rule "COVID-19: Invoke separate agenda group for post recommendation checks in t
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the series belongs to the season with name "SUPPORTED_SEASON.COVID19Dec2020Season"
+			- the series belongs to the season with name "SUPPORTED_SEASON.COVID_19_DEC_2020_SEASON"
 			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
-		Set the Agenda Group Focus to "RecommendationForecast^postCustomRecommendationCheck^COVID19Dec2020Season"
+		Set the Agenda Group Focus to "RecommendationForecast^postCustomRecommendationCheck^COVID_19_DEC_2020_SEASON"
 end
 
 rule "COVID-19: Invoke separate agenda group for post recommendation checks in the COVID19Sep2023 Season"
@@ -142,13 +142,13 @@ rule "COVID-19: Invoke separate agenda group for post recommendation checks in t
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the Series belongs to the Season with name a member of ("SUPPORTED_SEASON.COVID19Sep2023Season", "SUPPORTED_SEASON.COVID19Aug2024Season")
+			- the Series belongs to the Season with name a member of ("SUPPORTED_SEASON.COVID_19_SEP_2023_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2024_SEASON")
 			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
-		Set the Agenda Group Focus to "RecommendationForecast^postCustomRecommendationCheck^COVID19Sep2023Season"
+		Set the Agenda Group Focus to "RecommendationForecast^postCustomRecommendationCheck^COVID_19_SEP_2023_SEASON"
 end
 
 rule "COVID-19: Invoke separate agenda group for post recommendation checks in the COVID19Aug2025 Season"
@@ -157,13 +157,13 @@ rule "COVID-19: Invoke separate agenda group for post recommendation checks in t
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the Series belongs to the Season with name "SUPPORTED_SEASON.COVID19Aug2025Season"
+			- the Series belongs to the Season with name "SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON"
 			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
 	then
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
-		Set the Agenda Group Focus to "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+		Set the Agenda Group Focus to "RecommendationForecast^postCustomRecommendationCheck^COVID_19_AUG_2025_SEASON"
 end
 
 /**

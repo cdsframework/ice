@@ -1,20 +1,12 @@
 package org.cdsframework.ice.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
 
-@Getter
-@Setter
-public class CodeSystemConceptProperty
+@Builder
+public record CodeSystemConceptProperty(String code,
+                                        Coding valueCoding,
+                                        Boolean valueBoolean,
+                                        Integer valueInteger,
+                                        String valueString)
 {
-    private String code;
-    private Coding valueCoding;
-    private Boolean valueBoolean;
-    private Integer valueInteger;
-    private String valueString;
-
-    public Boolean isValueBoolean()
-    {
-        return valueBoolean;
-    }
 }

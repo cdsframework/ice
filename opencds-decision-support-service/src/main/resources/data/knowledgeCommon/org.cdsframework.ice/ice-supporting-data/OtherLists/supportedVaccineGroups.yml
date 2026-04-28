@@ -4,15 +4,16 @@ ice-supporting-data:
       code-systems:
         VACCINE_GROUP_CONCEPT:
           name: VACCINE_GROUP_CONCEPT
-          identifiers:
-            - value: V1f305b8822e2608f22be9d1bac9c
-          description: Supported Vaccine Groups
-          url: 2.16.840.1.113883.3.795.12.100.1
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.3.795.12.100.1
+          description: Supported vaccine groups for display
+          url: http://terminology.cdsframework.org/ice/vaccine-group
           title: Vaccine Groups
           version: org.cdsframework^ICE^1.0.0
           status: active
           content: complete
-          properties:
+          property:
             - code: conceptMapping
               type: Coding
             - code: outboundCode
@@ -21,10 +22,10 @@ ice-supporting-data:
               type: integer
             - code: diseaseImmunity
               type: Coding
-          concepts:
+          concept:
             - code: OTHER
               display: Other Vaccine Group
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_GROUP_CONCEPT_OTHER

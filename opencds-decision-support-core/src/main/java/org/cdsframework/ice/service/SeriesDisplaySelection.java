@@ -31,51 +31,40 @@ import org.kie.api.definition.type.ClassReactive;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Getter
 @Setter
+@ToString
 @ClassReactive
 public class SeriesDisplaySelection
 {
-    public enum SeriesDisplaySelectionType
-    {
-        SERIES_DISPLAY_NOT_SELECTED,
-        SERIES_DISPLAY_UNAMBIGUOUS,
-        SERIES_DISPLAY_BEST_GUESS,
-        SERIES_DISPLAY_ALTERNATIVE,
-        SERIES_DISPLAY_NONE
-    }
-
     @EqualsAndHashCode.Include
     private final String uniqueId;
     private final TargetSeries targetSeries;
-    private SeriesDisplaySelectionType seriesSelectionDisplayType;
+    private SeriesDisplaySelectionType seriesDisplaySelectionType;
     private String numberOfDosesRemaining;
-    private boolean seriesSelectionDisplayDeterminationComplete;
+    private boolean seriesDisplaySelectionDeterminationComplete;
 
     public SeriesDisplaySelection(final TargetSeries pTargetSeries)
     {
         uniqueId = ICELogicHelper.generateUniqueString();
         this.targetSeries = pTargetSeries;
-        this.seriesSelectionDisplayType = SeriesDisplaySelectionType.SERIES_DISPLAY_NOT_SELECTED;
-        this.numberOfDosesRemaining = null;
-        this.seriesSelectionDisplayDeterminationComplete = false;
+        this.seriesDisplaySelectionType = SeriesDisplaySelectionType.SERIES_DISPLAY_NOT_SELECTED;
     }
 
-    public SeriesDisplaySelection(final TargetSeries pTargetSeries, final SeriesDisplaySelectionType pSST)
+    public SeriesDisplaySelection(final TargetSeries pTargetSeries, final SeriesDisplaySelectionType pSeriesDisplaySelectionType)
     {
         uniqueId = ICELogicHelper.generateUniqueString();
         this.targetSeries = pTargetSeries;
-        this.seriesSelectionDisplayType = pSST;
-        this.numberOfDosesRemaining = null;
-        this.seriesSelectionDisplayDeterminationComplete = false;
+        this.seriesDisplaySelectionType = pSeriesDisplaySelectionType;
     }
 
-    public SeriesDisplaySelection(final TargetSeries pTargetSeries, final SeriesDisplaySelectionType pSST,
+    public SeriesDisplaySelection(final TargetSeries pTargetSeries, final SeriesDisplaySelectionType pSeriesDisplaySelectionType,
             final String pDosesRemaining)
     {
-        this(pTargetSeries, pSST);
+        this(pTargetSeries, pSeriesDisplaySelectionType);
         this.numberOfDosesRemaining = pDosesRemaining;
     }
 
@@ -87,32 +76,5 @@ public class SeriesDisplaySelection
     public String getVaccineGroup()
     {
         return this.targetSeries.getVaccineGroup();
-    }
-
-    public SeriesDisplaySelectionType getSeriesDisplaySelectionType()
-    {
-        return seriesSelectionDisplayType;
-    }
-
-    public void setSeriesDisplaySelectionType(final SeriesDisplaySelectionType pSST)
-    {
-        this.seriesSelectionDisplayType = pSST;
-    }
-
-    public boolean isSeriesDisplaySelectionDeterminationComplete()
-    {
-        return this.seriesSelectionDisplayDeterminationComplete;
-    }
-
-    public void setSeriesDisplaySelectionDeterminationComplete(final boolean pIsDeterminationComplete)
-    {
-        this.seriesSelectionDisplayDeterminationComplete = pIsDeterminationComplete;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "SeriesDisplaySelection [ targetSeries=\"%s\", seriesSelectionOutputType=%s, numberOfDosesRemaining=%s, uniqueId=%s ]".formatted(
-                targetSeries.getSeriesName(), seriesSelectionDisplayType, numberOfDosesRemaining, uniqueId);
     }
 }

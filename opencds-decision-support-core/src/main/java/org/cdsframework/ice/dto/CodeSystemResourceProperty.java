@@ -1,12 +1,9 @@
 package org.cdsframework.ice.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
 
-@Getter
-@Setter
-public class CodeSystemResourceProperty
+@Builder
+public record CodeSystemResourceProperty(String code,
+                                         String type)
 {
-    private String code;
-    private String type;
 }

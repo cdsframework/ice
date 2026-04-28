@@ -31,7 +31,7 @@ rule "RSV: If an Adult or otherwise unspecified RSV vaccine (CVX 303, CVX 304, C
 	when
 		There is an administered shot $currentShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSVAdultSeries"
+			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSV_ADULT_SERIES"
 			- that has already been evaluated
 			- the vaccine administered a member of ("VACCINE_CVX_303", "VACCINE_CVX_304", "VACCINE_CVX_305", "VACCINE_CVX_314", "VACCINE_CVX_326")
 			- the administration date of the shot is < "21-Jun-2023"
@@ -55,7 +55,7 @@ rule "RSV: If an Infant RSV vaccine (CVX 332) is administered prior to 6/9/2025,
 	when
 		There is an administered shot $currentShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSVInfantSeries"
+			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- that has already been evaluated
 			- the vaccine administered is "VACCINE_CVX_332"
 			- the administration date of the shot is < "09-Jun-2025"
@@ -79,7 +79,7 @@ rule "RSV: If an Infant RSV vaccine or otherwise unspecified RSV vaccine (CVX 30
 	when
 		There is an administered shot $currentShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSVInfantSeries"
+			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- that has already been evaluated
 			- the vaccine administered a member of ("VACCINE_CVX_304", "VACCINE_CVX_306", "VACCINE_CVX_307", "VACCINE_CVX_315")
 			- the administration date of the shot is < "03-Aug-2023"
@@ -107,7 +107,7 @@ rule "RSV: If an RSV shot is administered in the Infant Series to a patient < 8 
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSVInfantSeries"
+			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
 		There is a Series $targetSeries identified by $associatedTargetSeries
@@ -130,13 +130,13 @@ rule "RSV: If a shot was administered in the current season of the RSV Infant Se
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSVInfantSeries"
+			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- the Series that the shot belongs to is not complete
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
 		There is an administered shot $otherShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSVInfantSeries"
+			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- that has already been evaluated and whose shot validity is VALID
 			- make note of the associated series as $associatedPriorTargetSeries
 			- the object $associatedPriorTargetSeries is != $associatedTargetSeries
@@ -156,11 +156,11 @@ rule "RSV: If the RSV Infant Series was completed in a prior season, mark the cu
 	when
 		There is an administered shot $priorSeasonShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSVInfantSeries"
+			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- that has already been evaluated and whose shot validity is VALID
 		There is a Series $currentSeasonSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the name of the Series is "SUPPORTED_SERIES.RSVInfantSeries"
+			- the name of the Series is "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- the Series is not complete
 			- the current date falls between the season start and offseason stop dates of the Series
 	then
@@ -240,7 +240,7 @@ rule "RSV: If shot administered was evaluated in the Adult Series as Invalid wit
 	when
 		There is an administered shot $administeredShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSVAdultSeries"
+			- the shot belongs to the Series with name "SUPPORTED_SERIES.RSV_ADULT_SERIES"
 			- that has already been evaluated and whose shot validity is INVALID
 			- make note of Invalid evaluation reasons for this shot as $oEvaluationReasons
 			- the size of the collection $oEvaluationReasons is > 1

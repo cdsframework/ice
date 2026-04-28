@@ -446,8 +446,7 @@ public class SupportedSeries implements SupportingData
 
         // Create the SeriesRules object
         final SeriesRules series1Rules = createSeriesRules(lSeriesCode, lVGI, lSeasons);
-        if (pSeriesData.numberOfDosesInSeries() != null)
-            series1Rules.setNumberOfDosesInSeries(pSeriesData.numberOfDosesInSeries());
+        series1Rules.setNumberOfDosesInSeries(pSeriesData.numberOfDosesInSeries());
         if (pSeriesData.seriesGroup() != null)
             series1Rules.setSeriesGroup(pSeriesData.seriesGroup());
         if (pSeriesData.patientStartAge() != null)

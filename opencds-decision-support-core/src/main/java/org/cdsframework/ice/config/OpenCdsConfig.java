@@ -841,7 +841,8 @@ public class OpenCdsConfig
 
     @Bean
     public ConfigurationService configurationService(final IceProperties iceProperties,
-            final IceSupportingDataProperties iceSupportingDataProperties, final VersionData versionData,
+            final IceSupportingDataProperties iceSupportingDataProperties,
+            final org.cdsframework.ice.service.SupportingDataService iceSupportingDataService, final VersionData versionData,
             final ConfigData configData, final ConfigStrategy configStrategy)
     {
         log.info("Setting fire limit to {}", iceProperties.getFireLimit());
@@ -854,6 +855,7 @@ public class OpenCdsConfig
 
         ICESupportingDataLoaderPlugin.setIceProperties(iceProperties);
         ICESupportingDataLoaderPlugin.setIceSupportingDataProperties(iceSupportingDataProperties);
+        ICESupportingDataLoaderPlugin.setSupportingDataService(iceSupportingDataService);
 
         log.info("Context refreshed, preloading immunization schedules");
         ICESupportingDataLoaderPlugin.preloadSchedules();

@@ -4,103 +4,128 @@ ice-supporting-data:
       code-systems:
         SUPPORTED_DISEASE_CONCEPT:
           name: SUPPORTED_DISEASE_CONCEPT
-          identifiers:
-            - value: 1f30111T5bc0568822e2608f22be9d1bac9c
-          description: Supported Disease Concept
-          url: 2.16.840.1.113883.3.795.12.1.1
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.3.795.12.1.1
+          description: Supported disease concepts for display
+          url: http://terminology.cdsframework.org/ice/disease
           title: Supported Disease Concept
           version: org.nyc.cir^ICE^1.0.0
           status: active
           content: complete
-          properties:
+          property:
             - code: conceptMapping
               type: Coding
             - code: outboundCode
               type: Coding
-          concepts:
+            - code: reportable
+              type: boolean
+            - code: reportableType
+              type: Coding
+          concept:
             - code: MENINGOCOCCAL_ACWY
               display: Meningococcal ACWY
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
-                    code: '111853008'
-                    display: Meningococcal meningitis
+                    code: '23511006'
+                    display: Meningococcal infectious disease
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: MENINGOCOCCAL_B
               display: Meningococcal B
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
-                    code: '18653004'
-                    display: Meningococcal group B infection
+                    code: '1354584007'
+                    display: Meningococcal infectious disease caused by Neisseria meningitidis serogroup B
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: INFLUENZA_H1N1
               display: H1N1 Influenza
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '442438000'
-                    display: Influenza A virus subtype H1N1 infection
+                    display: Influenza caused by Influenza A virus
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: HPV
               display: Human Papillomavirus
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '240532009'
-                    display: Human papillomavirus infection
+                    display: Human papilloma virus infection
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: PNEUMOCOCCAL_PNEUMONIA
               display: Pneumococcal Pneumonia
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '233604007'
-                    display: Pneumococcal pneumonia
+                    display: Pneumonia
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: INFLUENZA
               display: Influenza
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '6142004'
                     display: Influenza
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: TETANUS
               display: Tetanus
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '76902006'
                     display: Tetanus
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: DIPHTHERIA
               display: Diphtheria
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '397428000'
                     display: Diphtheria
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: PERTUSSIS
               display: Pertussis
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '27836007'
-                    display: Whooping cough (pertussis)
+                    display: Pertussis
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: POLIO
               display: Polio
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '398102009'
-                    display: Poliomyelitis
+                    display: Acute poliomyelitis
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: HEP_B
               display: Hepatitis B
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
                     code: DISEASE_CONCEPT_HEP_B
@@ -108,11 +133,23 @@ ice-supporting-data:
                 - code: outboundCode
                   valueCoding:
                     code: '66071002'
-                    display: Hepatitis B
+                    display: Type B viral hepatitis
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: true
+                - code: reportableType
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Immunity Documented
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                - code: reportableType
+                  valueCoding:
+                    code: PROOF_OF_IMMUNITY
+                    display: Proof of Immunity
+                    system: 2.16.840.1.113883.3.795.12.1.1
             - code: HEP_A
               display: Hepatitis A
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
                     code: DISEASE_CONCEPT_HEP_A
@@ -120,11 +157,23 @@ ice-supporting-data:
                 - code: outboundCode
                   valueCoding:
                     code: '40468003'
-                    display: Hepatitis A
+                    display: Viral hepatitis, type A
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: true
+                - code: reportableType
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Immunity Documented
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                - code: reportableType
+                  valueCoding:
+                    code: PROOF_OF_IMMUNITY
+                    display: Proof of Immunity
+                    system: 2.16.840.1.113883.3.795.12.1.1
             - code: MEASLES
               display: Measles
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
                     code: DISEASE_CONCEPT_MEASLES
@@ -134,9 +183,21 @@ ice-supporting-data:
                     code: '14189004'
                     display: Measles
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: true
+                - code: reportableType
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Immunity Documented
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                - code: reportableType
+                  valueCoding:
+                    code: PROOF_OF_IMMUNITY
+                    display: Proof of Immunity
+                    system: 2.16.840.1.113883.3.795.12.1.1
             - code: MUMPS
               display: Mumps
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
                     code: DISEASE_CONCEPT_MUMPS
@@ -146,9 +207,21 @@ ice-supporting-data:
                     code: '36989005'
                     display: Mumps
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: true
+                - code: reportableType
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Immunity Documented
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                - code: reportableType
+                  valueCoding:
+                    code: PROOF_OF_IMMUNITY
+                    display: Proof of Immunity
+                    system: 2.16.840.1.113883.3.795.12.1.1
             - code: RUBELLA
               display: Rubella
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
                     code: DISEASE_CONCEPT_RUBELLA
@@ -158,9 +231,21 @@ ice-supporting-data:
                     code: '36653000'
                     display: Rubella
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: true
+                - code: reportableType
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Immunity Documented
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                - code: reportableType
+                  valueCoding:
+                    code: PROOF_OF_IMMUNITY
+                    display: Proof of Immunity
+                    system: 2.16.840.1.113883.3.795.12.1.1
             - code: VARICELLA
               display: Varicella
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
                     code: DISEASE_CONCEPT_VARICELLA
@@ -170,99 +255,135 @@ ice-supporting-data:
                     code: '38907003'
                     display: Varicella
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: true
+                - code: reportableType
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Immunity Documented
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                - code: reportableType
+                  valueCoding:
+                    code: PROOF_OF_IMMUNITY
+                    display: Proof of Immunity
+                    system: 2.16.840.1.113883.3.795.12.1.1
             - code: ROTAVIRUS
               display: Rotavirus
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '18624000'
                     display: Rotavirus infection
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: HIB
               display: Hib
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
-                    code: '27836002'
+                    code: '709410003'
                     display: Haemophilus influenzae type b infection
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: ZOSTER
               display: Zoster
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '4740000'
                     display: Herpes zoster
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: COVID_19
               display: Coronavirus (unspecified)
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '840539006'
-                    display: Disease caused by Severe acute respiratory syndrome coronavirus 2
+                    display: Disease caused by 2019 novel coronavirus
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: MPOX
               display: Mpox
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
-                    code: '111865007'
-                    display: Mpox (disorder)
+                    code: '359814004'
+                    display: Monkeypox
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: RSV
               display: RSV
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '55735004'
                     display: Respiratory syncytial virus infection
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: ANTHRAX
               display: Anthrax
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '409498004'
                     display: Anthrax
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: CHOLERA
               display: Cholera
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '63650001'
                     display: Cholera
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: MOSQUITO_BORNE
               display: Mosquito-borne, other
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
-                    code: '3885004'
+                    code: '4730003'
                     display: Mosquito-borne infectious disease
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: TYPHOID
               display: Typhoid fever
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '4834000'
                     display: Typhoid fever
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: YELLOW_FEVER
               display: Yellow fever
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
                     code: '16541001'
                     display: Yellow fever
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false
             - code: JAPANESE_ENCEPHALITIS
               display: Japanese Encephalitis
-              properties:
+              property:
                 - code: outboundCode
                   valueCoding:
-                    code: '18649001'
-                    display: Japanese encephalitis
+                    code: '52947006'
+                    display: Japanese encephalitis virus disease
                     system: 2.16.840.1.113883.6.96
+                - code: reportable
+                  valueBoolean: false

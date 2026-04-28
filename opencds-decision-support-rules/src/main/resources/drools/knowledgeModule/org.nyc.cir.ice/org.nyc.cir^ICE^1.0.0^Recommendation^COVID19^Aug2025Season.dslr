@@ -35,7 +35,7 @@ global org.cdsframework.ice.service.Schedule schedule;
 
 rule "COVID-19(Aug2025): If the patient is complete for the season, the recommendation is Not_Recommended/Complete_High_Risk"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -68,16 +68,16 @@ end
  */
 rule "COVID-19(Aug2025 2–64y/GTE65yr)->TargetDose 1: If ≥1 prior COVID-19 shot, set earliest & recommended interval to 56d"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     activation-group "recommendationIntervalCheck"
 when
     There is a Series $targetSeries that needs forecasting
         - the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-        - the name of the Series a member of ("SUPPORTED_SERIES.COVID19Aug20252yTo64ySeries", "SUPPORTED_SERIES.COVID19Aug2025gte65Series")
+        - the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES", "SUPPORTED_SERIES.COVID_19_AUG_2025_GTE_65_SERIES")
         - the effective dose number in the series is == 1
         - the Series is not complete
         - make note of the season name as $seasonName
-        - the string $seasonName == "SUPPORTED_SEASON.COVID19Aug2025Season"
+        - the string $seasonName == "SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON"
     There is an administered shot $mostRecentShot
         - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
         - make note of the date this shot was administered as $mostRecentShotDate
@@ -101,11 +101,11 @@ end
  */
 rule "COVID-19(Aug2025 2–64y): If the patient is >= 12 years - 8 weeks and the most recent shot was <= 12 weeks from the assessment date, include SUPPLEMENTAL_TEXT describing interval options"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_AUG_2025_SEASON"
 when
     There is a Series $targetSeries
         - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-        - the name of the Series is "SUPPORTED_SERIES.COVID19Aug20252yTo64ySeries"
+        - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES"
         - the effective dose number in the series is == 1
         - post processing on the Series forecast has not already been run
         - a forecast for the Series has been made
@@ -124,7 +124,7 @@ when
     Confirm elapsed time between $mostRecentShotDate and evalTime <= "12w"
 then
     Create a Recommendation as $supplementalText for the Series $targetSeries
-    Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.TARGET_DOSE1_NOVAVAX_3W_OTHERS_8_12W"
+    Set the Recommendation Supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.TARGET_DOSE1_NOVAVAX_3W_OTHERS_8_12W"
     Set the Recommendation Status for $supplementalText to $recommendationStatus
     Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
     Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -133,11 +133,11 @@ end
 
 rule "COVID-19(GTE65 Series): If the most recent shot was <= 12 weeks from the assessment date, include SUPPLEMENTAL_TEXT describing interval options"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_AUG_2025_SEASON"
 when
     There is a Series $targetSeries
         - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-        - the name of the Series is "SUPPORTED_SERIES.COVID19Aug2025gte65Series"
+        - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_GTE_65_SERIES"
         - the effective dose number in the series is == 1
         - post processing on the Series forecast has not already been run
         - a forecast for the Series has been made
@@ -153,7 +153,7 @@ when
     Confirm elapsed time between $mostRecentShotDate and evalTime <= "12w"
 then
     Create a Recommendation as $supplementalText for the Series $targetSeries
-    Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.TARGET_DOSE1_NOVAVAX_3W_OTHERS_8_12W_V2"
+    Set the Recommendation Supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.TARGET_DOSE1_NOVAVAX_3W_OTHERS_8_12W_V2"
     Set the Recommendation Status for $supplementalText to $recommendationStatus
     Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
     Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -175,11 +175,11 @@ end
  */
 rule "COVID-19(Aug2025 2–64y Series): If <19y, ≥1 pre-season valid dose and no in-season dose, recommend CONDITIONAL / HIGH_RISK and CLINICAL_PATIENT_DISCRETION"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     when
         There is a Series $targetSeries that needs forecasting
             - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-            - the name of the Series is "SUPPORTED_SERIES.COVID19Aug20252yTo64ySeries"
+            - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_2_Y_TO_64_Y_SERIES"
             - the Series is not Complete
             - make note of the season start date as $seasonStartDate
         There is an administered shot $previousShot
@@ -227,18 +227,18 @@ end
  */
 rule "COVID-19(Aug2025 GTE65 Series): If age >= 12y-8w, include SUPPLEMENTAL_TEXT describing interval options"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_AUG_2025_SEASON"
 when
     There is a Series $targetSeries
         - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-        - the name of the Series is "SUPPORTED_SERIES.COVID19Aug2025gte65Series"
+        - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_GTE_65_SERIES"
         - the effective dose number in the series is == 2
         - post processing on the Series forecast has not already been run
         - a forecast for the Series has been made
         - make note of the recommendation status as $recommendationStatus
 then
     Create a Recommendation as $supplementalText for the Series $targetSeries
-    Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.TARGET_DOSE2_6MO_MIN_8_12W_BY_PRODUCT"
+    Set the Recommendation Supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.TARGET_DOSE2_6MO_MIN_8_12W_BY_PRODUCT"
     Set the Recommendation Status for $supplementalText to $recommendationStatus
     Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
     Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -258,11 +258,11 @@ end
  */
 rule "COVID-19(Aug2025 < 2yrs Series): When a shot is recommended for this series, specifically recommend CVX 311"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_AUG_2025_SEASON"
 when
     There is a Series $targetSeries
         - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-        - the name of the Series is "SUPPORTED_SERIES.COVID19Aug2025lt2Series"
+        - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_LT_2_SERIES"
         - post processing on the Series forecast has not already been run
         - a forecast for the Series has been made and a shot is recommended
 then
@@ -276,12 +276,12 @@ end
  */
 rule "COVID-19(Aug2025 < 2yrs Series): If a shot was previously administered and evaluated as Invalid / BELOW_MINIMUM_AGE_SERIES, the minimum/recommended interval from that shot to the next shot is 28 days (*recommendationIntervalCheck*)"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
 	activation-group "recommendationIntervalCheck"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series is "SUPPORTED_SERIES.COVID19Aug2025lt2Series"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_LT_2_SERIES"
 			- the Series is not complete
 			- the effective dose number in the Series is == 1
 		There is an administered shot $mostRecentShot
@@ -312,11 +312,11 @@ end
  */
  rule "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has no doses on record but >= 1 invalid shot(s) administered prior to the season start date (*recommendations*)"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     when
         There is a Series $targetSeries that needs forecasting
             - the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-            - the name of the Series is "SUPPORTED_SERIES.COVID19Aug2025lt2Series"
+            - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_LT_2_SERIES"
             - the Series is not complete
             - the effective dose number in the Series is == 1
             - make note of the season start date as $seasonStartDate
@@ -346,9 +346,9 @@ end
  *   Recommended interval = 21 days
 */
 rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 1: If patient has any of CVX 208, 217, 218, 219, 300, 301, 302, 308, 309, 310, 211, 313, 213 administered prior to the season start date, then minimum and recommended intervals are 21 days"
-    extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has no doses on record but >= 1 invalid shot(s) administered prior to the season start date (*recommendations*)"
+	extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has no doses on record but >= 1 invalid shot(s) administered prior to the season start date (*recommendations*)"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     when
         There is an administered shot $sameMostRecentShot
             - that is the same shot as $mostRecentShot
@@ -370,9 +370,9 @@ end
  *   Recommended interval = 28 days
  */
  rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 1: If patient has any other invalid COVID-19 shot administered prior to the season start date, then minimum and recommended intervals are 28 days"
-    extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has no doses on record but >= 1 invalid shot(s) administered prior to the season start date (*recommendations*)"
+	extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has no doses on record but >= 1 invalid shot(s) administered prior to the season start date (*recommendations*)"
      dialect "mvel"
-     ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+     ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
      when
          There is an administered shot $sameMostRecentShot
              - that is the same shot as $mostRecentShot
@@ -393,11 +393,11 @@ end
  */
 rule "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has any of CVX 213, 308, 309, 310, 313 administered prior to the season start date (*recommendations*)"
 		dialect "mvel"
-		ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+		ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
 		when
             There is a Series $targetSeries that needs forecasting
                 - the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-                - the name of the Series is "SUPPORTED_SERIES.COVID19Aug2025lt2Series"
+                - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_LT_2_SERIES"
                 - the Series is not complete
                 - the effective dose number in the Series is == 1
                 - make note of the season start date as $seasonStartDate
@@ -433,9 +433,9 @@ end
  *   Latest recommended interval (less than) = 8 weeks
  */
 rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 1: If patient has any of CVX 213, 308, 309, 310, 313 administered prior to the season start date, then minimum interval from prior Pfizer, Novavax or Unspecified shot to the next attempt is 21 days"
-   extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has any of CVX 213, 308, 309, 310, 313 administered prior to the season start date (*recommendations*)"
+	extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has any of CVX 213, 308, 309, 310, 313 administered prior to the season start date (*recommendations*)"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     when
         There is an administered shot $mostRecentShot
             - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -473,9 +473,9 @@ end
  *   Latest recommended interval (less than) = 8 weeks
  */
 rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 1: If patient has any of CVX 213, 308, 309, 310, 313 administered prior to the season start date, then minimum interval from prior other than Pfizer, Novavax or Unspecified shot to the first dose is 28 days"
-   extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has any of CVX 213, 308, 309, 310, 313 administered prior to the season start date (*recommendations*)"
+	extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 1: If patient has any of CVX 213, 308, 309, 310, 313 administered prior to the season start date (*recommendations*)"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     when
         There is an administered shot $mostRecentShot
             - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -535,11 +535,11 @@ end
  */
 rule "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 2: If exactly one prior valid CVX 311/312 before season start (*recommendations*)"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     when
         There is a Series $targetSeries that needs forecasting
             - the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-            - the name of the Series is "SUPPORTED_SERIES.COVID19Aug2025lt2Series"
+            - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_LT_2_SERIES"
             - the effective dose number in the series is == 2
             - the Series is not complete
             - make note of the season start date as $seasonStartDate
@@ -567,9 +567,9 @@ rule "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 2: If exactly one prio
 end
 
 rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 2: If prior CVX 311/312 and prior invalid Pfizer, Novavax or Unspecified before season start, minimal and recommended intervals are 21 days"
-    extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 2: If exactly one prior valid CVX 311/312 before season start (*recommendations*)"
+	extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 2: If exactly one prior valid CVX 311/312 before season start (*recommendations*)"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     when
         There is an administered shot $previousShot
             - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -596,9 +596,9 @@ rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 2: If prior CVX 311/312 and pri
 end
 
 rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 2: If prior CVX 311/312 and prior is not Pfizer, Novavax or Unspecified before season start, minimal and recommended intervals are 28 days"
-    extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 2: If exactly one prior valid CVX 311/312 before season start (*recommendations*)"
+	extends "COVID-19(Aug2025 LT2y Series abstract)-->TargetDose 2: If exactly one prior valid CVX 311/312 before season start (*recommendations*)"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     when
         There is an administered shot $previousShot
             - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -634,12 +634,12 @@ end
  */
 rule "COVID-19(Aug2025 LT2y Series)-->TargetDose 2: If ≥2 valid pre-season doses, set earliest & recommended interval to 8w"
     dialect "mvel"
-    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Aug2025Season"
+    ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_AUG_2025_SEASON"
     salience 20
 when
     There is a Series $targetSeries that needs forecasting
         - the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-        - the name of the Series is "SUPPORTED_SERIES.COVID19Aug2025lt2Series"
+        - the name of the Series is "SUPPORTED_SERIES.COVID_19_AUG_2025_LT_2_SERIES"
         - the effective dose number in the series is == 2
         - the Series is not complete
         - make note of the season start date as $seasonStartDate

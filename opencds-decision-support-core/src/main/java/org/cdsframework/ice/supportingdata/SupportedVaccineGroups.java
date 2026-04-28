@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
@@ -116,16 +117,27 @@ public class SupportedVaccineGroups implements SupportingData
             final String lVaccineGroupCdsListItemName = lcccli.getCdsListItemName();
 
             // CdsListItem is a CdsConcept of type vaccine group? - check to make sure that the specified vaccine group CdsConcept has been specified with this vaccine group's cdsListItem definition
-            final CdsConcept lPrimaryOpenCdsConcept = new CdsConcept(lVaccineGroupCdsListItemName, lcccli.getCdsListItemValue());
-            if (!lcccli.equals(this.supportedCdsLists.getSupportedCdsConcepts()
-                    .getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE_GROUP, lPrimaryOpenCdsConcept)))
+            final CdsConcept lPrimaryOpenCdsConcept = Optional.ofNullable(CdsConcept.builder()
+                    .openCdsConceptCode(lVaccineGroupCdsListItemName)
+                    .displayName(lcccli.getCdsListItemValue())
+                    .build()).map(concept ->
             {
-                final String lErrStr =
-                        "Vaccine group with a Primary CdsConcept that is not associated with the vaccine group; vaccine group"
-                                + lVaccineGroupCdsListItemName + "; Primary CdsConcept: " + lPrimaryOpenCdsConcept;
+                if (!lcccli.equals(this.supportedCdsLists.getSupportedCdsConcepts()
+                        .getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.VACCINE_GROUP, concept)))
+                {
+                    final String lErrStr =
+                            "Vaccine group with a Primary CdsConcept that is not associated with the vaccine group; vaccine group"
+                                    + lVaccineGroupCdsListItemName + "; Primary CdsConcept: " + concept;
+                    log.warn(_METHODNAME + "{}", lErrStr);
+                    throw new InconsistentConfigurationException(lErrStr);
+                }
+                return concept;
+            }).orElseThrow(() ->
+            {
+                final String lErrStr = "Vaccine group CdsConcept not found for vaccine group: " + lVaccineGroupCdsListItemName;
                 log.warn(_METHODNAME + "{}", lErrStr);
-                throw new InconsistentConfigurationException(lErrStr);
-            }
+                return new InconsistentConfigurationException(lErrStr);
+            });
 
             final List<String> lRelatedDiseasesCdsListItems = new ArrayList<>();
             int lPriority = 0;
@@ -133,33 +145,33 @@ public class SupportedVaccineGroups implements SupportingData
 
             for (final CodeSystemConceptProperty cp : lcccli.getProperties())
             {
-                final String propertyCode = cp.getCode();
+                final String propertyCode = cp.code();
                 switch (propertyCode)
                 {
                     case "priority" ->
                     {
-                        if (cp.getValueInteger() != null)
-                            lPriority = cp.getValueInteger();
+                        if (cp.valueInteger() != null)
+                            lPriority = cp.valueInteger();
                     }
                     case "routine" ->
                     {
-                        if (cp.isValueBoolean() != null)
-                            lRoutine = cp.isValueBoolean();
+                        if (cp.valueBoolean() != null)
+                            lRoutine = cp.valueBoolean();
                     }
                     case "diseaseImmunity" ->
                     {
-                        if (cp.getValueCoding() instanceof final Coding diseaseImmunityCoding)
+                        if (cp.valueCoding() instanceof final Coding diseaseImmunityCoding)
                         {
                             final CD diseaseCD = new CD();
-                            diseaseCD.setCode(diseaseImmunityCoding.getCode());
-                            diseaseCD.setCodeSystem(diseaseImmunityCoding.getSystem());
+                            diseaseCD.setCode(diseaseImmunityCoding.code());
+                            diseaseCD.setCodeSystem(diseaseImmunityCoding.system());
                             final LocallyCodedCdsListItem lRelatedDiseaseCdsListItem =
                                     this.supportedCdsLists.getCdsListItem(diseaseCD);
                             if (lRelatedDiseaseCdsListItem == null)
                             {
                                 final String lErrStr =
                                         "Related disease specified for vaccine group %s not found in SupportedCdsLists: %s".formatted(
-                                                lVaccineGroupCdsListItemName, diseaseCD);
+                                                lVaccineGroupCdsListItemName, diseaseImmunityCoding);
                                 log.warn(_METHODNAME + "{}", lErrStr);
                                 throw new InconsistentConfigurationException(lErrStr);
                             }

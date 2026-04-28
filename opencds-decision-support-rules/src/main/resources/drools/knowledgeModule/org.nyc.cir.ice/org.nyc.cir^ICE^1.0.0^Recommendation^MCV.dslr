@@ -27,7 +27,7 @@ rule "Meningococcal: Mark the Series Complete if Dose 1 is Administered >= 16yrs
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_ACWY"
-			- the name of the Series is "SUPPORTED_SERIES.MCV42DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.MCV_42_DOSE_SERIES"
 			- the Series is Not Complete
 			- the number of Doses Administered is == 1
 		There is an Administered Shot $shot
@@ -53,7 +53,7 @@ rule "Meningococcal: Recommend Dose 1 at 16yrs of age if Patient >= 16yrs and < 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_ACWY"
-			- the name of the Series is "SUPPORTED_SERIES.MCV42DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.MCV_42_DOSE_SERIES"
 			- the Series is Not Complete
 			- the number of Doses Administered is == 0
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule

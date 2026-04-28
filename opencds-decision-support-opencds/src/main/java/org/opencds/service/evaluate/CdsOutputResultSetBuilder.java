@@ -55,6 +55,11 @@ public class CdsOutputResultSetBuilder implements ResultSetBuilder<org.opencds.v
                     "ClinicalStatementRelationship", "EntityRelationship" };
     private static final List<String> outputNameList = Arrays.asList(outputNames);
 
+    private static <T> List<T> getResults(final Map<String, List<?>> results, final String key)
+    {
+        return (List<T>) results.get(key);
+    }
+
     @Override
     public org.opencds.vmr.v1_0.schema.CDSOutput buildResultSet(final Map<String, List<?>> results,
             final EvaluationRequestKMItem dssRequestKMItem)
@@ -69,8 +74,10 @@ public class CdsOutputResultSetBuilder implements ResultSetBuilder<org.opencds.v
 
         final List<ClinicalStatementRelationship> allClinicalStmtRels = getResults(results, "ClinicalStatementRelationship");
         final Map<String, List<ClinicalStatementRelationship>> clinicalStmtRelsByTargetId =
-                allClinicalStmtRels != null ? allClinicalStmtRels.stream()
-                        .collect(Collectors.groupingBy(ClinicalStatementRelationship::getTargetId)) : new HashMap<>();
+                allClinicalStmtRels != null
+                ? allClinicalStmtRels.stream()
+                  .collect(Collectors.groupingBy(ClinicalStatementRelationship::getTargetId))
+                : new HashMap<>();
 
         if (getResults(results, "CDSInput") != null)
         {
@@ -260,10 +267,5 @@ public class CdsOutputResultSetBuilder implements ResultSetBuilder<org.opencds.v
             }
         }
         return cdsOutput;
-    }
-
-    private static <T> List<T> getResults(final Map<String, List<?>> results, final String key)
-    {
-        return (List<T>) results.get(key);
     }
 }

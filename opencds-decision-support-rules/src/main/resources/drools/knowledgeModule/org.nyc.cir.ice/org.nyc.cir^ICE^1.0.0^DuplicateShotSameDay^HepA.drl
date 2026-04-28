@@ -36,7 +36,7 @@ rule "Duplicate Shots/Same Day (Hep A): If a pediatric vaccine is administered t
 	activation-group "duplicateShotEvaluationOrder"
 	auto-focus true
 	when
-		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEP_A", associatedSeriesName == "SUPPORTED_SERIES.HepA2DoseChildAdultSeries", vaccineComponent.cdsConceptName in ("VACCINE_CVX_83", "VACCINE_CVX_84", "VACCINE_CVX_31"))
+		$td: TargetDose(hasBeenEvaluated == false, status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEP_A", associatedSeriesName == "SUPPORTED_SERIES.HEP_A_2_DOSE_CHILD_ADULT_SERIES", vaccineComponent.cdsConceptName in ("VACCINE_CVX_83", "VACCINE_CVX_84", "VACCINE_CVX_31"))
 		$tdother : TargetDose(this != $td, hasBeenEvaluated == false, status == DoseStatus.EVALUATION_NOT_STARTED, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, vaccineComponent.cdsConceptName not in ("VACCINE_CVX_83", "VACCINE_CVX_84", "VACCINE_CVX_31"))
 		$oEvaluatedPerson : EvaluatedPerson($dtBirthDate : demographics.birthTime)
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($dtBirthDate, $td.administrationDate, "19y") >= 0)

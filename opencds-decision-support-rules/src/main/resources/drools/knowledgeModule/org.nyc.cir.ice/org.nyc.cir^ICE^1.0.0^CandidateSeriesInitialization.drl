@@ -104,8 +104,8 @@ rule "CandidateSeriesIdentification(RSV): If there are exactly 2 RSV series wher
 	ruleflow-group "CandidateSeriesIdentification^customCandidateSeriesIdentificationRule"
 	when
 		accumulate($srrsv : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV"); $count : count($srrsv); $count == 2)
-		$rsvinfant : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSVInfantSeries")
-		$rsvadult : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSVAdultSeries")
+		$rsvinfant : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSV_INFANT_SERIES")
+		$rsvadult : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSV_ADULT_SERIES")
 		eval($rsvinfant.seriesEndAge != null && $rsvadult.seriesStartAge != null && TimePeriod.differenceInDays(TimePeriod.addTimePeriod(evalTime, $rsvinfant.seriesEndAge), TimePeriod.addTimePeriod(evalTime, $rsvadult.seriesStartAge)) == 1)
 	then
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Criteria of exactly 2 RSV series defined as required; RSV series processing to continue");
@@ -117,7 +117,7 @@ rule "CandidateSeriesIdentification(RSV): Prevent the default CandidateSeriesIde
 	dialect "mvel"
 	ruleflow-group "CandidateSeriesIdentification^customCandidateSeriesIdentificationRule"
 	when
-		$s : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSVAdultSeries")
+		$s : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSV_ADULT_SERIES")
 		not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._CANDIDATE_SERIES_IDENTIFICATION_DEFAULT_RULE_OVERRIDE.conceptCodeValue, associatedSeriesRules == $s)
 	then
 		ICEFactTypeFinding iftf = new ICEFactTypeFinding(SupportedFactConcept._CANDIDATE_SERIES_IDENTIFICATION_DEFAULT_RULE_OVERRIDE.conceptCodeValue, $s);
@@ -130,7 +130,7 @@ rule "CandidateSeriesIdentification(RSV): Initialize an Adult RSV TargetSeries i
 	ruleflow-group "CandidateSeriesIdentification^customCandidateSeriesIdentificationRule^RSV"
 	salience 10
 	when
-		$s : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSVAdultSeries", seasons.isEmpty(), seriesStartAge != null)
+		$s : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSV_ADULT_SERIES", seasons.isEmpty(), seriesStartAge != null)
 		not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == $s.seriesName)
 		EvaluatedPerson($birthDate : demographics.birthTime)
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($birthDate, evalTime, $s.seriesStartAge) >= 0)
@@ -145,7 +145,7 @@ rule "CandidateSeriesIdentification(RSV): Initialize an Adult RSV TargetSeries i
 	dialect "mvel"
 	ruleflow-group "CandidateSeriesIdentification^customCandidateSeriesIdentificationRule^RSV"
 	when
-		$s : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSVAdultSeries", seasons.isEmpty(), seriesStartAge != null)
+		$s : SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSV_ADULT_SERIES", seasons.isEmpty(), seriesStartAge != null)
 		not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == $s.seriesName)
 		ImmunizationConcept($ctid : conceptTargetId, $occ : openCdsConceptCode)
 		SubstanceAdministrationEvent(id == $ctid, $shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(administrationTimeInterval))
@@ -164,7 +164,7 @@ rule "CandidateSeriesIdentification(RSV): If the patient age is <= the RSV Infan
 	ruleflow-group "CandidateSeriesIdentification^customCandidateSeriesIdentificationRule^RSV"
 	salience 190
 	when
-		$s: SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSVInfantSeries", seasons.size() > 0, seriesEndAge != null)
+		$s: SeriesRules(vaccineGroup == "VACCINE_GROUP_CONCEPT.RSV", seriesName == "SUPPORTED_SERIES.RSV_INFANT_SERIES", seasons.size() > 0, seriesEndAge != null)
 		not Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, dateIsApplicableToSeason(evalTime))
 
 		$priorSeason : Season(isDefaultSeason() == false, isDefinedBySeriesTableRules() == true, vaccineGroup == $s.vaccineGroup, $priorSeasonStart : fullySpecifiedSeasonStartDate, ICELogicHelper.toDate($priorSeasonStart) < evalTime)

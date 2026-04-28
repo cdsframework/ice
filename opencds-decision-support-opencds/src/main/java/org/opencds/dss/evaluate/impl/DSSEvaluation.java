@@ -127,6 +127,7 @@ public class DSSEvaluation implements Evaluation
             final XMLGregorianCalendar specifiedTime, final EvaluationRequest evaluationRequest)
             throws UnrecognizedScopedEntityExceptionFault, EvaluationExceptionFault, DSSRuntimeExceptionFault
     {
+        final long startedAtNanos = System.nanoTime();
         log.debug("II: {} EvaluationSoapService.evaluateAtSpecifiedTime started", interactionId.getInteractionId());
 
         final List<FinalKMEvaluationResponse> responses =
@@ -138,7 +139,9 @@ public class DSSEvaluation implements Evaluation
         for (final FinalKMEvaluationResponse response : responses)
             evalAtSpecTimeResponse.getFinalKMEvaluationResponse().add(response);
 
-        log.info("II: {}  EvaluationSoapService.evaluateAtSpecifiedTime completed", interactionId.getInteractionId());
+        final long durationMillis = (System.nanoTime() - startedAtNanos) / 1_000_000L;
+        log.info("II: {}  EvaluationSoapService.evaluateAtSpecifiedTime completed in {} ms", interactionId.getInteractionId(),
+                durationMillis);
 
         return evalAtSpecTimeResponse;
     }

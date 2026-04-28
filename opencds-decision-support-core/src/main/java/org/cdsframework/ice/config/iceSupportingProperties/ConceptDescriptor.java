@@ -1,5 +1,7 @@
 package org.cdsframework.ice.config.iceSupportingProperties;
 
+import org.jspecify.annotations.NonNull;
+
 import jakarta.validation.constraints.NotEmpty;
 
 public record ConceptDescriptor(@NotEmpty
@@ -9,6 +11,7 @@ public record ConceptDescriptor(@NotEmpty
                                 String displayName,
                                 String originalText) implements BaseConceptDescriptor
 {
+    @NonNull
     @Override
     public String toString()
     {

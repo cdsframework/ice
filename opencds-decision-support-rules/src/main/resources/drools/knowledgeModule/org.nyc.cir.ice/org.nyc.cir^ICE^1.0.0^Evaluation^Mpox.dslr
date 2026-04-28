@@ -57,7 +57,7 @@ end
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MPOX"
 			- the series is complete
-			- the name of the Series is "SUPPORTED_SERIES.Mpox2DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.MPOX_2_DOSE_SERIES"
 			- the effective number of doses administered in the Series is == 2
 		There is an administered shot $administeredShot
 			- the shot belongs to the series $targetSeries
@@ -78,7 +78,7 @@ end
 			- the administration date of the shot is < $currentShotDate
 		Confirm elapsed time between $priorShotDate and $currentShotDate < "28d"
 	then
-		Include Supplemental Text "EVALUATION_REASON_CONCEPT.MPOX_MIN_INTERVAL_28D" for Valid Shot $administeredShot
+		Include Supplemental Text "SUPPLEMENTAL_EVALUATION_REASON_CONCEPT.MPOX_MIN_INTERVAL_28D" for Valid Shot $administeredShot
 		Record that this dose rule was Processed for the TargetDose $administeredShot
 		Log that this dose rule fired for the dose $administeredShot in the Series $targetSeries
 end

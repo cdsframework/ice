@@ -1,15 +1,11 @@
 package org.cdsframework.ice.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
 
-@Getter
-@Setter
-public class Coding
+@Builder
+public record Coding(String system,
+                     String version,
+                     String code,
+                     String display)
 {
-    private String system;
-    private String version;
-    private String code;
-    private String display;
-    private Boolean userSelected;
 }

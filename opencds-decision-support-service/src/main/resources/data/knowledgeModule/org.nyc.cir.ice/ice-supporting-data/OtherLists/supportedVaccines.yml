@@ -4,15 +4,16 @@ ice-supporting-data:
       code-systems:
         SUPPORTED_VACCINES:
           name: SUPPORTED_VACCINES
-          identifiers:
-            - value: 1f30111EET5bc0568822e2608f22be9d1bac9c
-          description: Supported Vaccines
-          url: 2.16.840.1.113883.12.292
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.12.292
+          description: Supported vaccines for display
+          url: http://hl7.org/fhir/sid/cvx
           title: Vaccines (CVX)
           version: org.nyc.cir^ICE^1.0.0
           status: active
           content: complete
-          properties:
+          property:
             - code: conceptMapping
               type: Coding
             - code: supported
@@ -41,10 +42,10 @@ ice-supporting-data:
               type: string
             - code: conflictingVaccine
               type: Coding
-          concepts:
+          concept:
             - code: '01'
               display: DTP
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -75,7 +76,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '02'
               display: OPV, trivalent
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -96,7 +97,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '03'
               display: MMR
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -127,7 +128,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '04'
               display: Measles/Rubella
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -153,7 +154,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '05'
               display: Measles
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -174,7 +175,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '06'
               display: Rubella
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -195,7 +196,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '07'
               display: Mumps
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -216,7 +217,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '08'
               display: Hep B peds, less than 20yrs
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -239,7 +240,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '09'
               display: Td, adult, absorbed
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -267,7 +268,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '10'
               display: IPV
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -288,7 +289,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '100'
               display: Pneumococcal Conjugate 7 valent (PCV 7)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -311,7 +312,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '101'
               display: Typhoid, Vi capsular polysaccharide (ViCPS)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -334,7 +335,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '102'
               display: DTP-Hib-HepB
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -385,7 +386,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '104'
               display: Twinrix
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -416,7 +417,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '105'
               display: Vaccinia (smallpox) vaccine, diluted
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -439,7 +440,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '106'
               display: DT, PediatricDTaP, 5 pertussis antigens
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -470,7 +471,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '107'
               display: DTaP NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -503,7 +504,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '108'
               display: Meningococcal ACWY, unspecified formulation
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -528,7 +529,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '109'
               display: Pneumococcal NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -553,7 +554,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '11'
               display: Pertussis
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -574,7 +575,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '110'
               display: DTaP-HepB-IPV (Pediarix)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -625,7 +626,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '111'
               display: Influenza, live, intranasal
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -650,7 +651,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '113'
               display: Td
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -678,7 +679,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '114'
               display: Meningococcal MCV4P (Menactra)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -701,7 +702,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '115'
               display: Tdap
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -734,7 +735,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '116'
               display: Rotavirus RV5 (RotaTeq, 3 dose)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -755,7 +756,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '118'
               display: HPV Bivalent (Cervarix)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -776,7 +777,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '119'
               display: Rotavirus RV1 (Rotarix, 2 dose)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -797,7 +798,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '120'
               display: DTaP-Hib (PRP-T)-IPV
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -848,7 +849,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '121'
               display: Zoster vaccine, live
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -869,7 +870,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '122'
               display: Rotavirus NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -892,7 +893,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '125'
               display: Novel Influenza-H1N1-09, nasal
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -913,7 +914,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '126'
               display: Novel Influenza-H1N1-09, preservative-free
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -934,7 +935,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '127'
               display: Novel Influenza-H1N1-09
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -955,7 +956,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '128'
               display: Novel Influenza-H1N1-09, all formulations
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -978,7 +979,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '130'
               display: DTaP-IPV
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1019,7 +1020,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '132'
               display: DTaP-IPV-Hib-HepB, historical
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1080,7 +1081,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '133'
               display: Pneumococcal Conjugate 13 valent (PCV 13)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1103,7 +1104,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '134'
               display: Japanese Encephalitis IM (Ixiaro)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1126,7 +1127,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '135'
               display: Influenza, high dose, seasonal
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1149,7 +1150,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '136'
               display: Meningococcal MCV4O (Menveo)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1172,7 +1173,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '137'
               display: HPV NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1195,7 +1196,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '138'
               display: Td (adult, not absorbed)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1223,7 +1224,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '139'
               display: Td (adult) NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1253,7 +1254,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '140'
               display: Influenza, seasonal, injectable, preservative free
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1276,7 +1277,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '141'
               display: Influenza, seasonal, injectable
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1299,7 +1300,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '144'
               display: Influenza, seasonal, intradermal, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1324,7 +1325,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '146'
               display: DTaP-IPV-Hib-HepB
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1385,7 +1386,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '147'
               display: Meningococcal MCV4, unspecified formulation
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1408,7 +1409,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '148'
               display: Mening CY-Hib PRP-T (Menhibrix)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1429,7 +1430,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '149'
               display: Influenza, live, intranasal, quadrivalent
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -1454,7 +1455,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '15'
               display: Influenza, split (incl. purified surface antigen)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1477,7 +1478,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '150'
               display: Influenza, injectable, quadrivalent, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1500,7 +1501,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '151'
               display: Influenza nasal, unspecified formulation
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -1527,7 +1528,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '152'
               display: Pneumococcal Conjugate NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1552,7 +1553,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '153'
               display: Influenza, injectable, MDCK, preservative free
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1575,7 +1576,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '155'
               display: Influenza, recombinant, injectable, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1598,7 +1599,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '158'
               display: Influenza, injectable, quadrivalent
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1621,7 +1622,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '16'
               display: Influenza, whole
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1644,7 +1645,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '161'
               display: Influenza, injectable, quadrivalent, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1669,7 +1670,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '162'
               display: Meningococcal B FHbp, recombinant (Trumenba)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1692,7 +1693,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '163'
               display: Meningococcal B 4C, OMV (Bexsero)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1715,7 +1716,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '165'
               display: HPV9
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1736,7 +1737,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '166'
               display: Influenza, intradermal, quadrivalent, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1761,7 +1762,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '168'
               display: Influenza, trivalent, adjuvanted, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1786,7 +1787,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '17'
               display: Hib NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1809,7 +1810,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '170'
               display: DTaP-IPV-Hib
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1860,7 +1861,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '171'
               display: Influenza, injectable, MDCK, preservative free,
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1883,7 +1884,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '174'
               display: Cholera, live attenuated (Vaxchora)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1906,7 +1907,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '177'
               display: Pneumococcal Conjugate 10 valent (PCV 10)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1929,7 +1930,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '178'
               display: OPV bivalent
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1950,7 +1951,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '179'
               display: OPV, monovalent, unspecified
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1973,7 +1974,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '182'
               display: OPV, Unspecified
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -1996,7 +1997,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '183'
               display: Yellow fever vaccine live - alt
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -2019,7 +2020,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '184'
               display: Yellow fever, unspecified formulation (NOS)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -2042,7 +2043,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '185'
               display: Influenza, recombinant, quadrivalent,injectable,
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2065,7 +2066,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '186'
               display: Influenza, injectable, MDCK, quadrivalent, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2088,7 +2089,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '187'
               display: Zoster recombinant
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2111,7 +2112,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '188'
               display: Zoster, unspecified formulation
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2134,7 +2135,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '189'
               display: Hep B, adjuvanted
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2161,7 +2162,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '194'
               display: Influenza, Southern Hemisphere, unspecified formulation
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2182,7 +2183,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '195'
               display: DT-IPV adsorbed Non-US
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2218,7 +2219,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '196'
               display: Td (adult) adsorbed, preservative free, Lf unspecified
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2246,7 +2247,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '197'
               display: Influenza, high dose, quadrivalent
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2269,7 +2270,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '198'
               display: DTP-Hep B-Hib, Pentavalent
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2320,7 +2321,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '20'
               display: DTaP
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2351,7 +2352,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '200'
               display: Influenza, Southern Hemisphere, pediatric, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2372,7 +2373,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '201'
               display: Influenza, Southern Hemisphere, quadrivalent, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2393,7 +2394,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '202'
               display: Influenza, Southern Hemisphere, quadrivalent, with
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2414,7 +2415,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '203'
               display: Meningococcal MenACWY-TT ((MenQuadfi))
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2437,7 +2438,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '205'
               display: Influenza, quadrivalent, adjuvanted
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2462,7 +2463,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '206'
               display: Vaccinia, smallpox Mpox vaccine live, PF, SQ or
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2485,7 +2486,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '207'
               display: COVID-19, mRNA LNP-S, PF, Moderna
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2508,7 +2509,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '208'
               display: COVID-19, mRNA LNP-S, PF, Pfizer
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2531,7 +2532,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '21'
               display: Varicella
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -2552,7 +2553,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '210'
               display: COVID-19, vector-nr,rS-ChadOx1, PF, AstraZeneca
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2575,7 +2576,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '211'
               display: COVID-19, rS-nanoparticle, Novavax
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2602,7 +2603,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '212'
               display: COVID-19, vector-nr, rS-Ad26, PF, Janssen
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2625,7 +2626,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '213'
               display: COVID-19 (NOS)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2652,7 +2653,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '215'
               display: Pneumococcal Conjugate 15 valent (PCV 15)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2675,7 +2676,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '216'
               display: Pneumococcal Conjugate 20 valent (PCV 20)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2698,7 +2699,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '217'
               display: COVID-19, mRNA, >= 12yrs, Pfizer
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2721,7 +2722,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '218'
               display: COVID-19, mRNA, 5yrs-11yrs, Pfizer
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2746,7 +2747,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '219'
               display: COVID-19, mRNA, 6mos-4yrs, Pfizer
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2771,7 +2772,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '22'
               display: DTP-Hib (Tetramune; OmniHib-DTP)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2812,7 +2813,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '220'
               display: HepB recombinant, 3-antigen, Al(OH)3
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2835,7 +2836,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '221'
               display: COVID-19, mRNA, Moderna
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2856,7 +2857,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '227'
               display: COVID-19, Moderna (Inactive)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2881,7 +2882,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '228'
               display: COVID-19, mRNA, 6mos-5yrs, Moderna
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2906,7 +2907,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '229'
               display: COVID-19, mRNA, 6yrs-11yrs / >= 12yrs, bivalent
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2929,7 +2930,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '230'
               display: COVID-19, mRNA, 6mos-5yrs, bivalent booster, Moderna
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2952,7 +2953,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '231'
               display: Influenza, Southern Hemisphere, high-dose, quadrivalent
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2973,7 +2974,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '24'
               display: Anthrax, pre-exposure prophylaxis, post-exposure
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -2994,7 +2995,7 @@ ice-supporting-data:
                   valueBoolean: false
             - code: '25'
               display: Typhoid, oral
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3017,7 +3018,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '28'
               display: DT, Pediatric
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3043,7 +3044,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '300'
               display: COVID-19, mRNA, >= 12yrs, bivalent booster, Pfizer
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3066,7 +3067,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '301'
               display: COVID-19, mRNA, 5yrs-11yrs, bivalent booster, Pfizer
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3091,7 +3092,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '302'
               display: COVID-19, mRNA, booster, 6 mos-4 yrs, Pfizer
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3114,7 +3115,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '303'
               display: RSV, recombinant, protein subunit RSVpreF, adjuvant
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3135,7 +3136,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '304'
               display: Respiratory syncytial virus (RSV), unspecified
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3156,7 +3157,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '305'
               display: RSV, bivalent, PF (Adult)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3177,7 +3178,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '306'
               display: RSV, mAb, 0.5 mL, age 0 - < 8 mos. (nirsevimab)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3200,7 +3201,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '307'
               display: RSV, mAb, 1 mL, age 0 - 19 mos. (nirsevimab)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3223,7 +3224,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '308'
               display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 3 mcg/0.3
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3256,7 +3257,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '309'
               display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 30 mcg/0.3
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3283,7 +3284,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '31'
               display: Hep A pediatric NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3308,7 +3309,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '310'
               display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, 10 mcg/0.3
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3339,7 +3340,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '311'
               display: COVID-19, mRNA, LNP-S, PF, 25mcg/0.25 mL, Moderna
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3370,7 +3371,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '312'
               display: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3397,7 +3398,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '313'
               display: COVID-19, subunit, rS-nanoparticle, adjuvanted,
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3422,7 +3423,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '314'
               display: Respiratory syncytial virus (RSV) vaccine, unspecified
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3443,7 +3444,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '315'
               display: Respiratory syncytial virus (RSV) MAB, unspecified
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3466,7 +3467,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '316'
               display: Meningococcal polysaccharide (MenACWY-TT conjugate),
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3497,7 +3498,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '317'
               display: Chikungunya live attenuated vaccine, 0.5 mL, PF
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3518,7 +3519,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '318'
               display: Anthrax, post-exposure prophylaxis
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3539,7 +3540,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '32'
               display: Meningococcal MPSv4 (Menomume)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3562,7 +3563,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '320'
               display: Influenza, MDCK, trivalent, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3585,9 +3586,30 @@ ice-supporting-data:
                     display: Influenza, MDCK, trivalent, preservative
                 - code: supported
                   valueBoolean: true
+            - code: '324'
+              display: Poliovirus, inactivated, fractional-dose (fIPV)
+              property:
+                - code: liveVirusVaccine
+                  valueBoolean: false
+                - code: vaccineComponent
+                  valueCoding:
+                    code: '324'
+                    system: 2.16.840.1.113883.12.292
+                    display: Poliovirus, inactivated, fractional-dose (fIPV)
+                - code: diseaseImmunity
+                  valueCoding:
+                    code: POLIO
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                    display: Acute Poliomyelitis
+                - code: conceptMapping
+                  valueCoding:
+                    code: VACCINE_CVX_324
+                    display: fIPV
+                - code: supported
+                  valueBoolean: true
             - code: '325'
               display: Vaccinia (smallpox, mpox), unspecified (NOS)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -3610,7 +3632,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '326'
               display: RSV, mRNA, injectable, PF
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3631,7 +3653,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '327'
               display: Pneumococcal Conjugate PCV21, polysaccharide CRM197
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3654,7 +3676,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '328'
               display: Meningococcal MenABCWY (Penmenvy)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3685,7 +3707,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '33'
               display: Pneumococcal Polysaccharide 23 valent
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3708,7 +3730,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '331'
               display: Influenza, Southern Hemisphere, trivalent, preservative
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3731,7 +3753,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '332'
               display: RSV, mAb, 0.7 mL, age 0 - < 8 mos. (clesrovimab)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3754,7 +3776,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '333'
               display: Influenza, live, intranasal, self-caregiver admin
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -3781,7 +3803,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '334'
               display: COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3808,7 +3830,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '37'
               display: Yellow fever live
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -3831,7 +3853,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '38'
               display: Mumps/Rubella
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -3857,7 +3879,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '42'
               display: Hep B Dialysis
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3880,7 +3902,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '43'
               display: Hep B adult >=20 yrs
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3901,7 +3923,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '44'
               display: Hep B NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3922,7 +3944,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '45'
               display: Hep B NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3945,7 +3967,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '46'
               display: Hib-PRP-D (ProHIBIT)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3966,7 +3988,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '47'
               display: Hib-HbOC (HibTITER)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -3987,7 +4009,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '48'
               display: Hib-PRP-T (ActHIB, Hiberix)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4008,7 +4030,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '49'
               display: Hib-PRP-OMP (PedvaxHIB)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4029,7 +4051,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '50'
               display: DTaP-Hib (TriHiBIt)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4070,7 +4092,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '500'
               display: COVID-19 Non-US, Product Unknown
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4093,7 +4115,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '501'
               display: COVID-19 IV Non-US (QAZCOVID-IN)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4116,7 +4138,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '502'
               display: COVID-19 IV Non-US (COVAXIN)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4139,7 +4161,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '503'
               display: COVID-19 LAV Non-US (COVIVAC)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4162,7 +4184,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '504'
               display: COVID-19 VVnr Non-US (Sputnik Light)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4185,7 +4207,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '505'
               display: COVID-19 VVnr Non-US (Sputnik V)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4208,7 +4230,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '506'
               display: COVID-19 VVnr Non-US Vaccine (CanSino Biological
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4231,7 +4253,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '507'
               display: COVID-19 vaccine, PS, non-US, Anhui Zhifei Longcom
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4254,7 +4276,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '508'
               display: COVID-19 PS Non-US (Jiangsu Province Centers for
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4277,7 +4299,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '509'
               display: COVID-19 PS Non-US (EpiVacCorona)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4300,7 +4322,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '51'
               display: Hep B-Hib PRP-OMP (ComVAX)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4331,7 +4353,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '510'
               display: COVID-19 IV Non-US (BIBP, Sinopharm)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4354,7 +4376,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '511'
               display: COVID-19 IV Non-US (CoronaVac, Sinovac)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4377,7 +4399,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '512'
               display: COVID-19 VLP Non-US Vaccine (Medicago, Covifenz)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4400,7 +4422,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '513'
               display: COVID-19 PS Non-US Vaccine (Anhui Zhifei Longcom,
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4421,7 +4443,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '514'
               display: COVID-19 DNA Non-US Vaccine (Zydus Cadila, ZyCoV-D)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4442,7 +4464,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '515'
               display: COVID-19 PS Non-US Vaccine (Medigen, MVC-COV1901)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4463,7 +4485,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '516'
               display: COVID-19 Inactivated Non-US Vaccine (Minhai Biotechnology
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4484,7 +4506,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '517'
               display: COVID-19 PS Non-US Vaccine (Biological E Limited,
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4505,7 +4527,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '518'
               display: COVID-19 Inactivated, Non-US Vaccine (VLA2001,
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4526,7 +4548,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '519'
               display: COVID-19 mRNA, bivalent, original/Omicron BA.1,
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4547,7 +4569,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '52'
               display: Hep A, adult
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4570,7 +4592,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '520'
               display: COVID-19 mRNA, bivalent, original/Omicron BA.1,
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4591,7 +4613,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '521'
               display: COVID-19 SP, protein-based, adjuvanted (VidPrevtyn
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4614,7 +4636,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '62'
               display: HPV Quadrivalent (Gardasil)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4635,7 +4657,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '74'
               display: Rotavirus
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4656,7 +4678,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '75'
               display: Vaccinia (smallpox, mpox), live
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -4679,7 +4701,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '83'
               display: Hep A ped/adol 2 dose
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4704,7 +4726,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '84'
               display: Hep A ped/adol 3 dose
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4729,7 +4751,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '85'
               display: Hep A NOS
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4754,7 +4776,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '88'
               display: Influenza, unspecified formulation
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4779,7 +4801,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '89'
               display: Polio, unspecified formulation (NOS)
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: false
                 - code: vaccineComponent
@@ -4802,7 +4824,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: '94'
               display: MMR-Varicella
-              properties:
+              property:
                 - code: liveVirusVaccine
                   valueBoolean: true
                 - code: vaccineComponent
@@ -4845,7 +4867,7 @@ ice-supporting-data:
                   valueBoolean: true
             - code: FAKE_MENING_CVX
               display: Meningococcal C/Y
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
                     code: N-ICE-VACCINE_MENING_CY

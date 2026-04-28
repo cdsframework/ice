@@ -4,15 +4,16 @@ ice-supporting-data:
       code-systems:
         SUPPORTED_SEASON:
           name: SUPPORTED_SEASON
-          identifiers:
-            - value: 7kX4nV2mP9zB1sT8fD3jW6gH9qR2vL5xN1
-          description: Supported Vaccine Seasons
-          url: 2.16.840.1.113883.3.795.12.100.11
-          title: ICE Seasons
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.3.795.12.100.11
+          description: Supported seasons for display
+          url: http://terminology.cdsframework.org/ice/seasons
+          title: ICE Vaccine Season
           version: org.nyc.cir^ICE^1.0.0
           status: active
           content: complete
-          properties:
+          property:
             - code: conceptMapping
               type: Coding
             - code: defaultSeason
@@ -27,14 +28,14 @@ ice-supporting-data:
               type: string
             - code: defaultStopMonthAndDay
               type: string
-          concepts:
-            - code: 2009H1N1Season
-              display: 2009 H1N1 Season
-              properties:
+          concept:
+            - code: 2009_H1N1_SEASON
+              display: 2009-2010 H1N1 Season
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_2009H1N1Season
-                    display: 2009 H1N1 Season
+                    code: VACCINE_SEASON_2009_H1N1_SEASON
+                    display: 2009-2010 H1N1 Season
                 - code: defaultSeason
                   valueBoolean: false
                 - code: vaccineGroup
@@ -50,12 +51,12 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: 20122013InfluenzaSeason
+            - code: 20122013_INFLUENZA_SEASON
               display: 2012-2013 Influenza Season
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_20122013InfluenzaSeason
+                    code: VACCINE_SEASON_20122013_INFLUENZA_SEASON
                     display: 2012-2013 Influenza Season
                 - code: defaultSeason
                   valueBoolean: false
@@ -72,12 +73,12 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: 20132014InfluenzaSeason
+            - code: 20132014_INFLUENZA_SEASON
               display: 2013-2014 Influenza Season
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_20132014InfluenzaSeason
+                    code: VACCINE_SEASON_20132014_INFLUENZA_SEASON
                     display: 2013-2014 Influenza Season
                 - code: defaultSeason
                   valueBoolean: false
@@ -94,12 +95,12 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: 20142015InfluenzaSeason
+            - code: 20142015_INFLUENZA_SEASON
               display: 2014-2015 Influenza Season
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_20142015InfluenzaSeason
+                    code: VACCINE_SEASON_20142015_INFLUENZA_SEASON
                     display: 2014-2015 Influenza Season
                 - code: defaultSeason
                   valueBoolean: false
@@ -116,12 +117,12 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: 20152016InfluenzaSeason
+            - code: 20152016_INFLUENZA_SEASON
               display: 2015-2016 Influenza Season
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_20152016InfluenzaSeason
+                    code: VACCINE_SEASON_20152016_INFLUENZA_SEASON
                     display: 2015-2016 Influenza Season
                 - code: defaultSeason
                   valueBoolean: false
@@ -138,13 +139,13 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: COVID19Aug2024Season
-              display: COVID-19 August 2024 Season
-              properties:
+            - code: COVID_19_AUG_2024_SEASON
+              display: 2024-2025 COVID-19 Season
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_COVID19Aug2024Season
-                    display: COVID-19 August 2024 Season
+                    code: VACCINE_SEASON_COVID_19_AUG_2024_SEASON
+                    display: 2024-2025 COVID-19 Season
                 - code: defaultSeason
                   valueBoolean: false
                 - code: vaccineGroup
@@ -160,13 +161,13 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: COVID19Aug2025Season
-              display: COVID-19 August 2025 Season
-              properties:
+            - code: COVID_19_AUG_2025_SEASON
+              display: 2025-2026 COVID-19 Season
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_COVID19Aug2025Season
-                    display: COVID-19 August 2025 Season
+                    code: VACCINE_SEASON_COVID_19_AUG_2025_SEASON
+                    display: 2025-2026 COVID-19 Season
                 - code: defaultSeason
                   valueBoolean: false
                 - code: vaccineGroup
@@ -182,13 +183,13 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: COVID19Dec2020Season
-              display: December 2020 to September 2023 COVID Season
-              properties:
+            - code: COVID_19_DEC_2020_SEASON
+              display: Pandemic COVID-19 Season
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_COVID19Dec2020Season
-                    display: December 2020 to September 2023 COVID Season
+                    code: VACCINE_SEASON_COVID_19_DEC_2020_SEASON
+                    display: Pandemic COVID-19 Season
                 - code: defaultSeason
                   valueBoolean: false
                 - code: vaccineGroup
@@ -204,13 +205,13 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: COVID19Sep2023Season
-              display: COVID-19 September 2023 Season
-              properties:
+            - code: COVID_19_SEP_2023_SEASON
+              display: 2023-2024 COVID-19 Season
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_COVID19Sep2023Season
-                    display: COVID-19 September 2023 Season
+                    code: VACCINE_SEASON_COVID_19_SEP_2023_SEASON
+                    display: 2023-2024 COVID-19 Season
                 - code: defaultSeason
                   valueBoolean: false
                 - code: vaccineGroup
@@ -226,12 +227,12 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: DefaultInfluenzaSeason
+            - code: DEFAULT_INFLUENZA_SEASON
               display: Default Influenza Season
-              properties:
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_DefaultInfluenzaSeason
+                    code: VACCINE_SEASON_DEFAULT_INFLUENZA_SEASON
                     display: Default Influenza Season
                 - code: defaultSeason
                   valueBoolean: true
@@ -248,13 +249,13 @@ ice-supporting-data:
                   valueString: 07-01
                 - code: defaultStopMonthAndDay
                   valueString: 06-30
-            - code: RSV20242025Season
-              display: RSV 2024-2025 Season
-              properties:
+            - code: RSV_20242025_SEASON
+              display: 2024-2025 Infant RSV Season
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_RSV20242025Season
-                    display: RSV 2024-2025 Season
+                    code: VACCINE_SEASON_RSV_20242025_SEASON
+                    display: 2024-2025 Infant RSV Season
                 - code: defaultSeason
                   valueBoolean: false
                 - code: vaccineGroup
@@ -270,13 +271,13 @@ ice-supporting-data:
                   valueString: null
                 - code: defaultStopMonthAndDay
                   valueString: null
-            - code: RSVDefaultSeason
-              display: Default RSV Season
-              properties:
+            - code: RSV_DEFAULT_SEASON
+              display: Default Infant RSV Season
+              property:
                 - code: conceptMapping
                   valueCoding:
-                    code: VACCINE_SEASON_RSVDefaultSeason
-                    display: Default RSV Season
+                    code: VACCINE_SEASON_RSV_DEFAULT_SEASON
+                    display: Default Infant RSV Season
                 - code: defaultSeason
                   valueBoolean: true
                 - code: vaccineGroup

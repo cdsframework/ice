@@ -30,8 +30,16 @@ public class IceProperties
     public enum SupplementalTextMode
     {
         LEGACY,
-        NEW,
+        CODED,
         BOTH
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    public static class ExperimentalFeatures
+    {
+        private boolean enableFhirR6;
     }
 
     public record KnowledgeModuleProperties(@NotNull
@@ -40,6 +48,10 @@ public class IceProperties
                                             Boolean enableDoseOverrideFeature,
                                             @NotNull
                                             Boolean outputSupplementalText,
+                                            @NotNull
+                                            Boolean outputNumberOfDosesRemaining,
+                                            @NotNull
+                                            Boolean outputSeriesInformation,
                                             @NotNull
                                             Boolean enableUnsupportedVaccinesGroup,
                                             @NotNull
@@ -96,4 +108,6 @@ public class IceProperties
 
     @NotNull
     private Resource configPath;
+
+    private Map<@NotBlank String, @NotNull Boolean> experimentalFeatures = Map.of();
 }

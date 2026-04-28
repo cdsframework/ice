@@ -40,11 +40,11 @@ global org.cdsframework.ice.service.Schedule schedule;
  */
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y and < 18y of age and has completed the Moderna Series along with no extra doses, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series is "SUPPORTED_SERIES.COVID19ModernaSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES"
 			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
@@ -68,12 +68,12 @@ end
  */
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y has completed the Moderna Series along with no extra doses, then recommend a booster dose at earliest/recommended age of 18y w/ earliest/recommended interval of 5 months"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series is "SUPPORTED_SERIES.COVID19ModernaSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -110,12 +110,12 @@ end
  */
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y has completed the Series along with no extra doses in the Pfizer or Mixed Product series, then recommend a booster dose at earliest/recommended age of 5y w/ earliest/recommended interval of 5 months"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES")
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -156,11 +156,11 @@ end
 
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 12y has completed the Janssen Series and no extra doses have been administered, then recommend the _1st_ booster dose at recommended age 12y w/ recommended interval of 8 weeks, whichever is later"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series is "SUPPORTED_SERIES.COVID19Janssen1DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES"
 			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
@@ -201,11 +201,11 @@ end
 
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 12y of age and has completed the Novavax Series along with no extra doses, then recommend a booster dose at earliest/recommended age of 12y w/ earliest/recommended interval of 5 months"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series is "SUPPORTED_SERIES.COVID19Novavax2DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_NOVAVAX_2_DOSE_SERIES"
 			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
@@ -245,12 +245,12 @@ end
 
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y has completed a WHO-approved series along with no extra doses, then recommend a booster dose at earliest/recommended age of 5y w/ recommended interval of 5 months"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete
 		There is an administered shot $lastShotAdministered
@@ -300,11 +300,11 @@ end
  */
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y and < 50y has completed the Moderna Series along with one extra dose, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series is "SUPPORTED_SERIES.COVID19ModernaSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES"
 			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
@@ -342,12 +342,12 @@ end
  */
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 5y and < 50 years has completed the Series along with one extra dose in the Pfizer, Mixed Product or WHO-approved series, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		There does not exist an administered shot
@@ -374,12 +374,12 @@ end
  */
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 50y has completed the Series along with one extra dose in the Pfizer, Moderna, Mixed Product or WHO-approved series, then recommend a 2nd booster dose at earliest/recommended age of 50y w/ earliest/recommended interval of 4 months"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+1
 		There is an administered shot $lastShotAdministered
@@ -425,12 +425,12 @@ end
  */
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y has completed the Janssen Series and 1 extra dose of a non-mRNA vaccine, then recommend the _2nd_ booster dose at earliest age 18y/recommended age 18y or recommended interval of 4 months, whichever is later"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series is "SUPPORTED_SERIES.COVID19Janssen1DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES"
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
@@ -477,12 +477,12 @@ end
  */
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 18y and < 50y has completed the Janssen Series and 1 extra dose of an mRNA vaccine, then recommend CONDITIONAL / COMPLETE_HIGH_RISK"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series is "SUPPORTED_SERIES.COVID19Janssen1DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES"
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
@@ -524,12 +524,12 @@ end
  */
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient >= 50y has completed the Janssen Series and 1 extra dose of an mRNA vaccine, then recommend the _2nd_ booster dose at earliest age 50y/recommended age 50y or recommended interval of 4 months, whichever is later"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series is "SUPPORTED_SERIES.COVID19Janssen1DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES"
 			- make note of the dose number after which the Series was marked complete as $numberOfDosesRequired
 			- the effective number of doses administered in the Series is == $numberOfDosesRequired+1
 		There exists an administered shot
@@ -582,12 +582,12 @@ end
 
 rule "COVID-19: If the execution date is < 9/2/2022 and the patient has completed the the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series and 2 extra doses has been administered, then recommend NOT_RECOMMENDED / COMPLETE"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19Janssen1DoseSeries", "SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is == $doseNumberAfterWhichComplete+2
 		Confirm the date evalTime is before "02-Sep-2022"
@@ -609,11 +609,11 @@ end
 
 rule "COVID-19: If the execution date is anytime (before, on, or after 9/2/2022), the patient >= 5y and < 12y has completed the Janssen Series, and 0 or 1 one extra dose has been administered, then recommend Not Recommended / COMPLETE_HIGH_RISK"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series is "SUPPORTED_SERIES.COVID19Janssen1DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES"
 			- the Series is complete
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is <= $doseNumberAfterWhichComplete+1
@@ -637,7 +637,7 @@ end
 
 rule "COVID-19(Abstract): If the execution date is >= 9/2/2022, determine recommendation for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -667,10 +667,10 @@ end
 rule "COVID-19: If the execution date is >= 12/8/2022 and < 4/19/2023, the patient >= __6 months__, and has completed the __Moderna__ Series along with an additional dose and/or up to 3 extra doses, then recommend a booster dose at earliest/recommended age of 6 month & 12/8/2022 w/ earliest/recommended interval of 8 weeks"
 	extends "COVID-19(Abstract): If the execution date is >= 9/2/2022, determine recommendation for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $inheritedSeries identified by $targetSeries
-			- the name of the Series is "SUPPORTED_SERIES.COVID19ModernaSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES"
 		Confirm the date evalTime is on the same date or after "08-Dec-2022"
 		Confirm the date evalTime is before "19-Apr-2023"
 		There does not exist an administered shot
@@ -699,10 +699,10 @@ end
 rule "COVID-19: If the execution date is >= 10/12/2022 and < 12/8/2022, the patient >= __5y__, and has completed the __Moderna__ Series along with an additional dose and/or up to 3 extra doses, then recommend a booster dose at earliest/recommended age of 5y & 10/12/2022 w/ earliest/recommended interval of 8 weeks"
 	extends "COVID-19(Abstract): If the execution date is >= 9/2/2022, determine recommendation for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $inheritedSeries identified by $targetSeries
-			- the name of the Series is "SUPPORTED_SERIES.COVID19ModernaSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES"
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
@@ -733,10 +733,10 @@ end
 rule "COVID-19: If the execution date is >= 10/12/2022 and < 4/19/2023, the patient >= __5y__, and has completed the __Pfizer__, __Mixed Product__ or __WHO-approved__ series along with an additional dose and/or up to 3 extra doses, then recommend a booster dose at earliest/recommended age of 5y & 10/12/2022 w/ earliest/recommended interval of 8 weeks"
 	extends "COVID-19(Abstract): If the execution date is >= 9/2/2022, determine recommendation for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $inheritedSeries identified by $targetSeries
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
@@ -767,10 +767,10 @@ end
 rule "COVID-19: If the execution date is >= 9/2/2022 and < 4/19/2023, the patient >= __12y__ and has completed the __Pfizer__, __Mixed Product__, __Moderna__, __Novavax__, __Janssen__ or __WHO-approved__ Series  with an additional dose and/or up to 3 extra doses, then recommend a booster dose at earliest/recommended age of 5y & 9/2/2022 w/ earliest/recommended interval of 8 weeks"
 	extends "COVID-19(Abstract): If the execution date is >= 9/2/2022, determine recommendation for completed the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series along with up to an additional dose and/or 3 extra doses"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $inheritedSeries identified by $targetSeries
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19Novavax2DoseSeries", "SUPPORTED_SERIES.COVID19Janssen1DoseSeries", "SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_NOVAVAX_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
@@ -812,12 +812,12 @@ end
  */
 rule "COVID-19(Abstract): Prior booster dose was administered in the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series on or after 9/2/2022"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- the Series is complete
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19Novavax2DoseSeries", "SUPPORTED_SERIES.COVID19Janssen1DoseSeries", "SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_NOVAVAX_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- the effective number of doses administered in the Series is >= $doseNumberAfterWhichComplete+1
 		There is an administered shot $lastShotAdministered
@@ -840,12 +840,12 @@ end
 rule "COVID-19: If a prior booster dose was administered >= 12/8/2022 when the patient is >= __6 months__ of age in the __Moderna__ Series, the execution date is < 4/19/2023, recommend Not Recommended / COMPLETE"
 	extends "COVID-19(Abstract): Prior booster dose was administered in the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series on or after 9/2/2022"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	salience 30
 	when
 		There exists an administered shot
 			- that is the same shot as $lastShotAdministered
-			- the shot belongs to the series with name "SUPPORTED_SERIES.COVID19ModernaSeries"
+			- the shot belongs to the series with name "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES"
 			- the administration date of the shot is >= "08-Dec-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -867,12 +867,12 @@ end
 rule "COVID-19: If a prior booster dose was administered >= 10/12/2022 when the patient is >= __5 yrs__ in the __Pfizer__ Series, and the execution date is < 3/17/2023, recommend Not Recommended / COMPLETE"
 	extends "COVID-19(Abstract): Prior booster dose was administered in the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series on or after 9/2/2022"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	salience 20
 	when
 		There exists an administered shot
 			- that is the same shot as $lastShotAdministered
-			- the shot belongs to the series with name "SUPPORTED_SERIES.COVID19PfizerSeries"
+			- the shot belongs to the series with name "SUPPORTED_SERIES.COVID_19_PFIZER_SERIES"
 			- the administration date of the shot is >= "12-Oct-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -896,12 +896,12 @@ end
 rule "COVID-19: If a prior booster dose was administered >= 10/12/2022 when the patient is >= __5 yrs__ in the __Mixed Product__, __Moderna__ or __WHO-approved__ series and the execution date is < 4/19/2023, recommend Not Recommended / COMPLETE"
 	extends "COVID-19(Abstract): Prior booster dose was administered in the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series on or after 9/2/2022"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	salience 20
 	when
 		There exists an administered shot
 			- that is the same shot as $lastShotAdministered
-			- the shot belongs to the series with name a member of ("SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the shot belongs to the series with name a member of ("SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 			- the administration date of the shot is >= "12-Oct-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -923,12 +923,12 @@ end
 rule "COVID-19: If a prior booster dose was administered >= 9/2/2022 when the patient is >= 12 yrs of age in the __Pfizer__ Series, and the execution date is < 3/17/2023, recommend Not Recommended / COMPLETE"
 	extends "COVID-19(Abstract): Prior booster dose was administered in the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series on or after 9/2/2022"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	salience 10
 	when
 		There exists an administered shot
 			- that is the same shot as $lastShotAdministered
-			- the shot belongs to the series with name "SUPPORTED_SERIES.COVID19PfizerSeries"
+			- the shot belongs to the series with name "SUPPORTED_SERIES.COVID_19_PFIZER_SERIES"
 			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -950,12 +950,12 @@ end
 rule "COVID-19: If a prior booster dose was administered >= 9/2/2022 in the __Mixed Product__, __Moderna__, Novavax, Janssen or WHO-approved Series when the patient is >= __12 yrs__ of age and the execution date is < 4/19/2023, recommend Not Recommended / COMPLETE"
 	extends "COVID-19(Abstract): Prior booster dose was administered in the Pfizer, Moderna, Mixed Product, Janssen or WHO-approved Series on or after 9/2/2022"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	salience 10
 	when
 		There exists an administered shot
 			- that is the same shot as $lastShotAdministered
-			- the shot belongs to the series with name a member of ("SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19Novavax2DoseSeries", "SUPPORTED_SERIES.COVID19Janssen1DoseSeries", "SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the shot belongs to the series with name a member of ("SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_NOVAVAX_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 			- the administration date of the shot is >= "02-Sep-2022"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -980,11 +980,11 @@ end
 
 rule "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19Janssen1DoseSeries", "SUPPORTED_SERIES.COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_NOVAVAX_2_DOSE_SERIES")
 			- the Series is complete
 		There is an administered shot $lastShotAdministered
 			- the shot belongs to the series $targetSeries
@@ -1006,7 +1006,7 @@ end
 rule "COVID-19: If the execution date is >= 4/19/2023, patient is >= 65 yrs of age and has had 2 or more prior doses with a bivalent vaccine or 2 or more doses at >= 4/19/2023, recommend Not Recommended / COMPLETE"
 	extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		Confirm that the following is true: $nNumberOfBivalentDoses + $nDosesAdministeredAfter041923 >= 2
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
@@ -1027,7 +1027,7 @@ end
 rule "COVID-19: If the execution date is >= 4/19/2023, patient is >= 65 yrs of age, and has had 1 prior dose with a bivalent vaccine or 1 prior dose at >= 4/19/2023 in the Moderna series, recommend Not Recommended / COMPLETE_HIGH_RISK"
 	extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		Confirm the variable $nNumberOfBivalentDoses is == 1 || the variable $nDosesAdministeredAfter041923 is == 1
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
@@ -1047,7 +1047,7 @@ end
 rule "COVID-19: If the execution date is >= 4/19/2023, patient is < 65 years of age and has had at least 1 prior dose with a bivalent vaccine or at least 1 dose administered at >= 4/19/2023, recommend Not Recommended / COMPLETE"
 	extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		Confirm the variable $nNumberOfBivalentDoses is >= 1 || the variable $nDosesAdministeredAfter041923 is >= 1
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
@@ -1067,10 +1067,10 @@ end
 rule "COVID-19: If the execution date is >= 4/19/2023 for the Mixed Product, Moderna, Janssen or Novavax COVID-19 series, the patient has not had any bivalent doses or any doses administered at >= 4/19/2023, recommend a bivalent vaccine at age 6 months and recommended interval of 8 weeks along with recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
 	extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $pfizerSeries identified by $targetSeries
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19Janssen1DoseSeries", "SUPPORTED_SERIES.COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_NOVAVAX_2_DOSE_SERIES")
 		Confirm the variable $nNumberOfBivalentDoses is == 0 && the variable $nDosesAdministeredAfter041923 is == 0
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -1094,10 +1094,10 @@ end
 rule "COVID-19: If the execution date is >= 4/19/2023 for the Pfizer COVID-19 series, the patient is >= 5 yrs of age, and has not had any bivalent doses or any doses administered at >= 4/19/2023, recommend a bivalent vaccine at age 6 months and recommended interval of 8 weeks along with recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
 	extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $pfizerSeries identified by $targetSeries
-			- the name of the Series is "SUPPORTED_SERIES.COVID19PfizerSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_PFIZER_SERIES"
 		Confirm the variable $nNumberOfBivalentDoses is == 0 && the variable $nDosesAdministeredAfter041923 is == 0
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -1128,10 +1128,10 @@ end
 rule "COVID-19: If the child < 5 years of age completes the Pfizer series, the execution date is >= 3/17/2023, and neither a bivalent vaccine dose has been administered nor a dose administered >= 4/19/2023, recommend at the vaccine group level with recommended interval of 8 weeks or on 3/17/2023, whichever is latest, along with recommended reason ADMINISTER_COVID19_BIVALENT_VACCINE"
 	extends "COVID-19(Abstract): If the execution date is >= 3/17/2023, determine recommendation for __completed__ __Pfizer__, __Mixed Product__, __Moderna__, __Janssen__ or __Novavax__ COVID-19 Series"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $pfizerSeries identified by $targetSeries
-			- the name of the Series is "SUPPORTED_SERIES.COVID19PfizerSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_PFIZER_SERIES"
 			- make note of the dose number after which the Series was marked complete as $doseNumberAfterWhichComplete
 			- make note of the effective dose number in the series as $effectiveDoseNumber
 			- the numeric $effectiveDoseNumber is <= $doseNumberAfterWhichComplete+2
@@ -1152,7 +1152,7 @@ rule "COVID-19: If the child < 5 years of age completes the Pfizer series, the e
 		Set the Recommendation Reason for $rReason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_COVID19_BIVALENT_VACCINE"
 		Include the Recommendation $rReason for Consideration in the final Forecast of the Series
 		Create a recommendation as $rSupplementalText for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $rSupplementalText to "RECOMMENDATION_REASON_CONCEPT.POST_3DOSE_MONO_BIVALENT_BOOSTER_8W"
+		Set the Recommendation Supplemental Text for $rSupplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.POST_3DOSE_MONO_BIVALENT_BOOSTER_8W"
 		Include the Recommendation $rSupplementalText for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -1166,11 +1166,11 @@ end
  * postCustomRecommendation checks for FDA-approved or WHO-approved series
  */
 rule "COVID-19: If a dose is recommended in the Pfizer series for patient < 5 years and the execution date is >= 3/17/2023, add the recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
-	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series is "SUPPORTED_SERIES.COVID19PfizerSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_PFIZER_SERIES"
 			- a forecast for the Series has been made and a shot is Recommended
 			- post processing on the Series forecast has not already been run
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -1186,11 +1186,11 @@ rule "COVID-19: If a dose is recommended in the Pfizer series for patient < 5 ye
 end
 
 rule "COVID-19: If a dose is recommended in the Pfizer series for patient >= 5 years and the execution date is >= 3/17/2023 and < 4/19/2023, add the recommendation reason BOOSTER_DOSE"
-	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series is "SUPPORTED_SERIES.COVID19PfizerSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_PFIZER_SERIES"
 			- a forecast for the Series has been made and a shot is Recommended
 			- post processing on the Series forecast has not already been run
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
@@ -1207,11 +1207,11 @@ rule "COVID-19: If a dose is recommended in the Pfizer series for patient >= 5 y
 end
 
 rule "COVID-19: If a dose is recommended in the Pfizer, Mixed Product, Moderna, Janssen or Novavax series and the execution date is >= 4/19/2023, add the recommendation reason ADMINISTER_COVID19_BIVALENT_VACCINE"
-	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19Janssen1DoseSeries", "SUPPORTED_SERIES.COVID19Novavax2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_NOVAVAX_2_DOSE_SERIES")
 			- a forecast for the Series has been made and a shot is Recommended
 			- post processing on the Series forecast has not already been run
 		Confirm the date evalTime is on the same date or after "19-Apr-2023"
@@ -1228,11 +1228,11 @@ end
  * either of those series is already complete, add the recommendation reason "BOOSTER_DOSE"
  */
 rule "COVID-19: If a dose is recommended in the Pfizer series, the series is complete and the execution date is < 3/17/2023, add the recommendation reason BOOSTER_DOSE"
-	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series is "SUPPORTED_SERIES.COVID19PfizerSeries"
+			- the name of the Series is "SUPPORTED_SERIES.COVID_19_PFIZER_SERIES"
 			- the Series is complete
 			- a forecast for the Series has been made and a shot is Recommended
 			- post processing on the Series forecast has not already been run
@@ -1250,11 +1250,11 @@ end
  * either of those series is already complete, add the recommendation reason "BOOSTER_DOSE"
  */
 rule "COVID-19: If a dose is recommended in the Moderna, Mixed Product, Janssen, Novavax or FDA-authorized/WHO series, the series is complete and the execution date is < 4/19/2023, add the recommendation reason BOOSTER_DOSE"
-	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the Series a member of ("SUPPORTED_SERIES.COVID19ModernaSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries", "SUPPORTED_SERIES.COVID19Janssen1DoseSeries", "SUPPORTED_SERIES.COVID19Novavax2DoseSeries", "SUPPORTED_SERIES.COVID19AstraZeneca2DoseSeries", "SUPPORTED_SERIES.COVID19BIBPSinopharm2DoseSeries", "SUPPORTED_SERIES.COVID19CoronaVacSinovac2DoseSeries", "SUPPORTED_SERIES.COVID19COVAXIN2DoseSeries", "SUPPORTED_SERIES.COVID19Medicago2DoseSeries")
+			- the name of the Series a member of ("SUPPORTED_SERIES.COVID_19_MODERNA_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES", "SUPPORTED_SERIES.COVID_19_JANSSEN_1_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_NOVAVAX_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_ASTRA_ZENECA_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_BIBP_SINOPHARM_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_COVAXIN_2_DOSE_SERIES", "SUPPORTED_SERIES.COVID_19_MEDICAGO_2_DOSE_SERIES")
 			- the Series is complete
 			- a forecast for the Series has been made and a shot is Recommended
 			- post processing on the Series forecast has not already been run
@@ -1272,7 +1272,7 @@ end
  * series is NOT_RECOMMENDED, the reason has to manually be set to COMPLETE
  */
 rule "COVID-19: If Pfizer, Moderna, Mixed Product, Janssen or FDA-authorized/WHO Series is complete and a dose is NOT_RECOMMENDED (i.e. - 2 or more doses for Janseen; 3 or more doses for Pfizer/Moderna), add the recommendation reason to COMPLETE"
-	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^postCustomRecommendationCheck^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -1298,7 +1298,7 @@ end
 
 rule "COVID-19: If the patient has no doses on record and is >= 6 months, recommend on today's date"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -1317,7 +1317,7 @@ end
 
 rule "COVID-19: If the patient has no doses on record and is < 6 months old, recommend at 6 months of age"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -1347,7 +1347,7 @@ end
  * routine interval of 28 days to the next dose
  */
 rule "COVID-19: If the Series is not complete and the last shot administered was CVX 213 or shot not authorized by the FDA, recommend earliest and recommended interval of 28 days"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
@@ -1369,7 +1369,7 @@ end
 
 rule "COVID-19: If the Series is not complete and the last shot administered was a WHO-approved vaccine not authorized by the FDA, override default earliest interval rule to not fire"
 	extends "COVID-19: If the Series is not complete and the last shot administered was CVX 213 or shot not authorized by the FDA, recommend earliest and recommended interval of 28 days"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	activation-group "earliestIntervalCheck"
 	when
 		There exists an Administered Shot
@@ -1382,7 +1382,7 @@ end
 
 rule "COVID-19: If the Series is not complete and the last shot administered was a WHO-approved vaccine not authorized by the FDA, override default recommendation interval rule to not fire"
 	extends "COVID-19: If the Series is not complete and the last shot administered was CVX 213 or shot not authorized by the FDA, recommend earliest and recommended interval of 28 days"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	activation-group "recommendationIntervalCheck"
 	when
 		There exists an Administered Shot
@@ -1403,11 +1403,11 @@ end
 
 rule "COVID-19(Abstract): If dose 1 was administered at >= 6 yrs of age in the Moderna Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Seasone"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the series is "SUPPORTED_SERIES.COVID19ModernaSeries"
+			- the name of the series is "SUPPORTED_SERIES.COVID_19_MODERNA_SERIES"
 			- the series is not complete
 			- the number of administered shots is >= 1
 			- the effective dose number in the Series is <= 2
@@ -1424,7 +1424,7 @@ end
 rule "COVID-19: If dose 1 was administered at >= 6 yrs of age and and the execution date >= 4/19/2023, override default earliest interval and recommend earliest interval of 8 weeks"
 	extends "COVID-19(Abstract): If dose 1 was administered at >= 6 yrs of age in the Moderna Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	activation-group "earliestIntervalCheck"
 	when
 		// Condition met for earliest interval change
@@ -1438,7 +1438,7 @@ end
 rule "COVID-19: If dose 1 was administered at >= 6 yrs of age and and the execution date >= 4/19/2023, override default recommended interval and recommend recommended interval of 8 weeks"
 	extends "COVID-19(Abstract): If dose 1 was administered at >= 6 yrs of age in the Moderna Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	activation-group "recommendationIntervalCheck"
 	when
 		// Condition met for recommended interval change
@@ -1451,11 +1451,11 @@ end
 
 rule "COVID-19(Abstract): If dose 1 was administered at >= 5 yrs of age in the Pfizer or Mixed Product Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the name of the series a member of ("SUPPORTED_SERIES.COVID19PfizerSeries", "SUPPORTED_SERIES.COVID19MixedProductSeries")
+			- the name of the series a member of ("SUPPORTED_SERIES.COVID_19_PFIZER_SERIES", "SUPPORTED_SERIES.COVID_19_MIXED_PRODUCT_SERIES")
 			- the series is not complete
 			- the number of administered shots is >= 1
 			- the effective dose number in the Series is <= 2
@@ -1472,7 +1472,7 @@ end
 rule "COVID-19: If dose 1 was administered at >= 5 yrs of age and and the execution date >= 4/19/2023, override default earliest interval and recommend earliest interval of 8 weeks"
 	extends "COVID-19(Abstract): If dose 1 was administered at >= 5 yrs of age in the Pfizer or Mixed Product Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	activation-group "earliestIntervalCheck"
 	when
 		// Condition met for earliest interval change
@@ -1486,7 +1486,7 @@ end
 rule "COVID-19: If dose 1 was administered at >= 5 yrs of age and and the execution date >= 4/19/2023, override default recommended interval and recommend recommended interval of 8 weeks"
 	extends "COVID-19(Abstract): If dose 1 was administered at >= 5 yrs of age in the Pfizer or Mixed Product Series and the execution date >= 4/19/2023, recommend earliest and recommended interval of 8 weeks"
 	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID19Dec2020Season"
+	ruleflow-group "RecommendationForecast^customRecommendationRule^COVID_19_DEC_2020_SEASON"
 	activation-group "recommendationIntervalCheck"
 	when
 		// Condition met for recommended interval change

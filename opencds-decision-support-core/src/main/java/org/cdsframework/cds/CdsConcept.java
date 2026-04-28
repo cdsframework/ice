@@ -34,6 +34,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -43,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Setter
+@SuperBuilder(toBuilder = true)
 public class CdsConcept extends VmrOpenCdsConcept
 {
     public static CdsConcept constructDeepCopyOfCdsConceptObject(final CdsConcept pIC)

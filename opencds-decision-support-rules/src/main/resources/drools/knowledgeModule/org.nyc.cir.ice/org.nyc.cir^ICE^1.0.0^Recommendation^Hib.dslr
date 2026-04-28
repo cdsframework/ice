@@ -52,7 +52,7 @@ rule "Hib: Include Recommendation with Date 7months in 4-Dose Hib Series and Tar
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the effective dose number in the Series is <= 2
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -76,7 +76,7 @@ rule "Hib: Include Recommendation with Date 12months and TargetDose 3 in 4-Dose 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the effective dose number in the Series is <= 3
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -101,7 +101,7 @@ rule "Hib: Set Recommendation Date to 12months and TargetDose 4 in 4-Dose Hib Se
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the effective dose number in the Series is <= 4
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate
@@ -125,7 +125,7 @@ rule "Hib: Set Recommendation Date to 15months and TargetDose 4 in 4-Dose Hib Se
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the effective dose number in the Series is <= 4
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
 			- make note of the patient's birthdate as $dtBirthDate

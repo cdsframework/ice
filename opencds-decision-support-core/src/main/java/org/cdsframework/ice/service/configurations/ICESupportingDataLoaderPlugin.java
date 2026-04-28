@@ -38,6 +38,7 @@ import org.cdsframework.ice.config.IceSupportingDataProperties;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
+import org.cdsframework.ice.service.SupportingDataService;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.opencds.config.api.model.KMId;
 import org.opencds.plugin.api.PluginDataCache;
@@ -64,6 +65,8 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
     private static IceProperties iceProperties;
     @Setter
     private static IceSupportingDataProperties iceSupportingDataProperties;
+    @Setter
+    private static SupportingDataService supportingDataService;
 
     private static synchronized List<String> normalizeVaccineGroupExclusionsForSchedule(final List<String> vaccineGroupExclusions,
             final List<String> vaccineGroupInclusions, final Schedule schedule, final String kmId)
@@ -307,6 +310,10 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
                 .put("outputEarliestOverdueDates", iceProperties.getOutputEarliestAndOverdueDates()
                         .orElseGet(knowledgeModuleProperties::outputEarliestAndOverdueDates));
 
+        context.globals().put("outputNumberOfDosesRemaining", knowledgeModuleProperties.outputNumberOfDosesRemaining());
+
+        context.globals().put("outputSeriesInformation", knowledgeModuleProperties.outputSeriesInformation());
+
         context.globals()
                 .put("doseOverrideFeatureEnabled", iceProperties.getEnableDoseOverrideFeature()
                         .orElseGet(knowledgeModuleProperties::enableDoseOverrideFeature));
@@ -356,7 +363,7 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
         {
             s = new Schedule("requestedKmId", KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(
                     iceProperties.getIceBaseRulesScopingEntityId(), lRequestedKMIdObject.getBusinessId(),
-                    iceProperties.getIceBaseRulesVersion()), List.of(kmId), iceSupportingDataProperties,
+                    iceProperties.getIceBaseRulesVersion()), List.of(kmId), iceSupportingDataProperties, supportingDataService,
                     iceProperties.getSupplementalTextMode().orElse(knowledgeModuleProperties.supplementalTextMode()));
         }
         catch (final IllegalArgumentException | InconsistentConfigurationException ii)

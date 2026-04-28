@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
@@ -77,6 +78,9 @@ public class TargetDose
     private Set<String> supplementalTextsForValidShots;
     private Set<String> supplementalTextsForAcceptedShots;
     private Set<String> supplementalTextsForInvalidShots;
+    private String evaluatedSeriesName;
+    private SeriesDisplaySelectionType seriesDisplaySelectionType;
+    private Season evaluatedSeriesSeason;
 
     /**
      * Initialize a TargetDose.
@@ -139,6 +143,14 @@ public class TargetDose
     public boolean containsInvalidReason(final String openCdsConceptCode)
     {
         return invalidReasons.contains(openCdsConceptCode);
+    }
+
+    public boolean onlyInvalidReasonsInSet(final Set<String> reasons)
+    {
+        return Optional.ofNullable(invalidReasons)
+                .filter(ir -> !ir.isEmpty())
+                .flatMap(ir -> Optional.ofNullable(reasons).filter(r -> r.containsAll(ir)))
+                .isPresent();
     }
 
     public boolean containsAcceptedReason(final String openCdsConceptCode)
@@ -428,6 +440,15 @@ public class TargetDose
         addInvalidReason(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
         if (supplementalTextForInvalidShots != null)
             supplementalTextsForInvalidShots.add(supplementalTextForInvalidShots);
+    }
+
+    public void captureEvaluationContext(final TargetSeries evaluatedSeries, final int vgSeriesCount)
+    {
+        this.evaluatedSeriesName = evaluatedSeries.getSeriesName();
+        this.seriesDisplaySelectionType = vgSeriesCount > 1
+                                          ? SeriesDisplaySelectionType.SERIES_DISPLAY_BEST_GUESS
+                                          : SeriesDisplaySelectionType.SERIES_DISPLAY_UNAMBIGUOUS;
+        this.evaluatedSeriesSeason = evaluatedSeries.getTargetSeason();
     }
 
     public Collection<String> getSupplementalTextsForInvalidShot()

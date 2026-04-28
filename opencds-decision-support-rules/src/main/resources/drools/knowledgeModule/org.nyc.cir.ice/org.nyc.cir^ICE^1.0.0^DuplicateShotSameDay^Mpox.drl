@@ -88,7 +88,7 @@ rule "Duplicate Shots/Same Day (Mpox): If CVX 75 or CVX 105 and CVX 325 are give
 	salience 20
 	when
 		$td75_105: TargetDose(hasBeenEvaluated == true, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MPOX",
-			(administeredVaccine.cdsConceptName == "VACCINE_CVX_75" || administeredVaccine.cdsConceptName == "VACCINE_CVX_105"), (status == DoseStatus.VALID || associatedTargetSeries.seriesRules.seriesName ==  "SUPPORTED_SERIES.Mpox2DoseSeries"),
+			(administeredVaccine.cdsConceptName == "VACCINE_CVX_75" || administeredVaccine.cdsConceptName == "VACCINE_CVX_105"), (status == DoseStatus.VALID || associatedTargetSeries.seriesRules.seriesName ==  "SUPPORTED_SERIES.MPOX_2_DOSE_SERIES"),
 			$tdAdministrationDate : administrationDate)
 		$td325: TargetDose(this != $td75_105, administrationDate == $tdAdministrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false,
 			associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MPOX", administeredVaccine.cdsConceptName == "VACCINE_CVX_325",

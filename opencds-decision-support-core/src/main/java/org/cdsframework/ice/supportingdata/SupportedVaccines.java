@@ -136,22 +136,15 @@ public class SupportedVaccines implements SupportingData
 
         // We need to process monovalent vaccines (those with 1 component) before combination vaccines
         // to ensure vaccine components are defined.
-        final List<LocallyCodedCdsListItem> sortedItems = vaccineCdsListItems.stream().sorted((a, b) ->
-        {
-            final int countA = countProperties(a, "vaccineComponent");
-            final int countB = countProperties(b, "vaccineComponent");
-            return Integer.compare(countA, countB);
-        }).toList();
+        final List<LocallyCodedCdsListItem> sortedItems = vaccineCdsListItems.stream()
+                .sorted((a, b) -> Long.compare(a.getProperties().stream().filter(p -> "vaccineComponent".equals(p.code())).count(),
+                        b.getProperties().stream().filter(p -> "vaccineComponent".equals(p.code())).count()))
+                .toList();
 
         for (final LocallyCodedCdsListItem lcccli : sortedItems)
         {
             addVaccineItemFromCdsListItem(lcccli);
         }
-    }
-
-    private int countProperties(final LocallyCodedCdsListItem item, final String propertyCode)
-    {
-        return (int) item.getProperties().stream().filter(p -> propertyCode.equals(p.getCode())).count();
     }
 
     private void addVaccineItemFromCdsListItem(final LocallyCodedCdsListItem lcccli) throws InconsistentConfigurationException
@@ -181,7 +174,6 @@ public class SupportedVaccines implements SupportingData
         // Extract properties from LocallyCodedCdsListItem
         final List<String> lRelatedDiseasesCdsListItems = new ArrayList<>();
         final List<CD> lVaccineComponentCDs = new ArrayList<>();
-        final List<CD> lConflictingVaccineCDs = new ArrayList<>();
 
         boolean lLiveVirusVaccine = false;
         boolean lUnspecifiedFormulation = false;
@@ -195,16 +187,16 @@ public class SupportedVaccines implements SupportingData
 
         for (final CodeSystemConceptProperty cp : lcccli.getProperties())
         {
-            final String code = cp.getCode();
+            final String code = cp.code();
             switch (code)
             {
                 case "diseaseImmunity" ->
                 {
-                    if (cp.getValueCoding() instanceof final Coding c)
+                    if (cp.valueCoding() instanceof final Coding c)
                     {
                         final CD diseaseCD = new CD();
-                        diseaseCD.setCode(c.getCode());
-                        diseaseCD.setCodeSystem(c.getSystem());
+                        diseaseCD.setCode(c.code());
+                        diseaseCD.setCodeSystem(c.system());
                         final LocallyCodedCdsListItem lRelatedDiseaseCdsListItem = this.supportedCdsLists.getCdsListItem(diseaseCD);
                         if (lRelatedDiseaseCdsListItem != null
                                 && ICEConceptType.DISEASE == ICEConceptType.getSupportedIceConceptType(
@@ -214,60 +206,59 @@ public class SupportedVaccines implements SupportingData
                 }
                 case "vaccineComponent" ->
                 {
-                    if (cp.getValueCoding() instanceof final Coding c)
+                    if (cp.valueCoding() instanceof final Coding c)
                     {
                         final CD compCD = new CD();
-                        compCD.setCode(c.getCode());
-                        compCD.setCodeSystem(c.getSystem());
+                        compCD.setCode(c.code());
+                        compCD.setCodeSystem(c.system());
                         lVaccineComponentCDs.add(compCD);
                     }
                 }
                 case "conflictingVaccine" ->
                 {
-                    if (cp.getValueCoding() instanceof final Coding c)
+                    if (cp.valueCoding() instanceof final Coding c)
                     {
                         final CD conflictCD = new CD();
-                        conflictCD.setCode(c.getCode());
-                        conflictCD.setCodeSystem(c.getSystem());
-                        lConflictingVaccineCDs.add(conflictCD);
+                        conflictCD.setCode(c.code());
+                        conflictCD.setCodeSystem(c.system());
                     }
                 }
                 case "liveVirusVaccine" ->
                 {
-                    if (cp.isValueBoolean() != null)
-                        lLiveVirusVaccine = cp.isValueBoolean();
+                    if (cp.valueBoolean() != null)
+                        lLiveVirusVaccine = cp.valueBoolean();
                 }
                 case "unspecifiedFormulation" ->
                 {
-                    if (cp.isValueBoolean() != null)
-                        lUnspecifiedFormulation = cp.isValueBoolean();
+                    if (cp.valueBoolean() != null)
+                        lUnspecifiedFormulation = cp.valueBoolean();
                 }
                 case "selectAdjuvantProduct" ->
                 {
-                    if (cp.isValueBoolean() != null)
-                        lSelectAdjuvantProduct = cp.isValueBoolean();
+                    if (cp.valueBoolean() != null)
+                        lSelectAdjuvantProduct = cp.valueBoolean();
                 }
-                case "minimumDateForUse" -> lMinimumDateForUse = parseDate(cp.getValueString());
-                case "maximumDateForUse" -> lMaximumDateForUse = parseDate(cp.getValueString());
+                case "minimumDateForUse" -> lMinimumDateForUse = parseDate(cp.valueString());
+                case "maximumDateForUse" -> lMaximumDateForUse = parseDate(cp.valueString());
                 case "validMinimumAgeForUse" ->
                 {
-                    if (cp.getValueString() != null)
-                        lValidMinimumAgeForUse = new TimePeriod(cp.getValueString());
+                    if (cp.valueString() != null)
+                        lValidMinimumAgeForUse = new TimePeriod(cp.valueString());
                 }
                 case "validMaximumAgeForUse" ->
                 {
-                    if (cp.getValueString() != null)
-                        lValidMaximumAgeForUse = new TimePeriod(cp.getValueString());
+                    if (cp.valueString() != null)
+                        lValidMaximumAgeForUse = new TimePeriod(cp.valueString());
                 }
                 case "recommendedMinimumAgeForUse" ->
                 {
-                    if (cp.getValueString() != null)
-                        lRecommendedMinimumAgeForUse = new TimePeriod(cp.getValueString());
+                    if (cp.valueString() != null)
+                        lRecommendedMinimumAgeForUse = new TimePeriod(cp.valueString());
                 }
                 case "recommendedMaximumAgeForUse" ->
                 {
-                    if (cp.getValueString() != null)
-                        lRecommendedMaximumAgeForUse = new TimePeriod(cp.getValueString());
+                    if (cp.valueString() != null)
+                        lRecommendedMaximumAgeForUse = new TimePeriod(cp.valueString());
                 }
                 // already processed
                 case "conceptMapping", "supported", "outboundCode" ->
@@ -290,7 +281,7 @@ public class SupportedVaccines implements SupportingData
 
         if (lVaccineComponentCDs.size() == 1)
         {
-            final CD lVaccineComponentCD = lVaccineComponentCDs.get(0);
+            final CD lVaccineComponentCD = lVaccineComponentCDs.getFirst();
             if (!lVaccineComponentCD.getCodeSystem().equals(lVaccineCD.getCodeSystem()))
             {
                 throw new InconsistentConfigurationException(

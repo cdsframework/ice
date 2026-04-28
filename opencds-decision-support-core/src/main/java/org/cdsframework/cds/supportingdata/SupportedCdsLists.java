@@ -9,11 +9,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.cdsframework.ice.dto.CodeSystem;
 import org.cdsframework.ice.dto.CodeSystemConcept;
+import org.cdsframework.ice.dto.CodeSystemConceptProperty;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
+import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
+import org.cdsframework.ice.supportingdata.SupplementalReasonSupport;
 import org.cdsframework.ice.util.CollectionUtils;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.springframework.util.ObjectUtils;
@@ -28,6 +33,27 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class SupportedCdsLists implements SupportingData
 {
+    private static void validateNoOutboundCodePropertyOnSupplementalReasonConcept(final CodeSystem pCodeSystem,
+            final CodeSystemConcept pConcept)
+    {
+        if (pCodeSystem == null || pConcept == null)
+            return;
+
+        if (!SupplementalReasonSupport.isSupplementalReasonConceptCodeSystem(pCodeSystem.name()))
+            return;
+
+        final boolean hasOutboundCodeProperty = Stream.ofNullable(pConcept.property())
+                .flatMap(Collection::stream)
+                .map(CodeSystemConceptProperty::code)
+                .anyMatch("outboundCode"::equals);
+        if (!hasOutboundCodeProperty)
+            return;
+
+        throw new InconsistentConfigurationException(
+                "Supplemental reason code systems must not define outboundCode property. Found on %s.%s".formatted(
+                        pCodeSystem.name(), pConcept.code()));
+    }
+
     /**
      * Representative of a concept and one associated local code, that can be represented by an enumeration as follows (for example):
      * _RECOMMENDED_RECOMMENDATION_STATUS("ICE219", "Recommended", "2.16.840.1.113883.3.795.12.100.5", "ICE3 Immunization Recommendation", "RECOMMENDED", "Due Now"),
@@ -63,7 +89,7 @@ public class SupportedCdsLists implements SupportingData
         return this.cdsListItemNameToCdsListItem.isEmpty();
     }
 
-    public void addSupportedCodeSystem(final CodeSystem pCodeSystem)
+    public void addSupportedCodeSystem(final CodeSystem pCodeSystem, final String codeSystemOid)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         if (pCodeSystem == null)
@@ -71,8 +97,8 @@ public class SupportedCdsLists implements SupportingData
 
         try
         {
-            Optional.ofNullable(pCodeSystem.getConcepts())
-                    .ifPresent(concepts -> concepts.forEach(c -> addSupportedCodeSystemConcept(pCodeSystem, c)));
+            Optional.ofNullable(pCodeSystem.concept())
+                    .ifPresent(concepts -> concepts.forEach(c -> addSupportedCodeSystemConcept(pCodeSystem, codeSystemOid, c)));
         }
         catch (final IllegalArgumentException iue)
         {
@@ -80,8 +106,8 @@ public class SupportedCdsLists implements SupportingData
         }
     }
 
-    private void addSupportedCodeSystemConcept(final CodeSystem pCodeSystem, final CodeSystemConcept pConcept)
-            throws IllegalArgumentException, InconsistentConfigurationException
+    private void addSupportedCodeSystemConcept(final CodeSystem pCodeSystem, final String codeSystemOid,
+            final CodeSystemConcept pConcept) throws IllegalArgumentException, InconsistentConfigurationException
     {
         final String _METHODNAME = "addSupportedCodeSystemConcept(): ";
 
@@ -90,11 +116,13 @@ public class SupportedCdsLists implements SupportingData
 
         // If adding a code that is not one of the supported cdsVersions, then return
         if (ObjectUtils.isEmpty(
-                CollectionUtils.intersectionOfStringCollections(java.util.Collections.singletonList(pCodeSystem.getVersion()),
+                CollectionUtils.intersectionOfStringCollections(java.util.Collections.singletonList(pCodeSystem.version()),
                         this.cdsVersions)))
             return;
 
-        final LocallyCodedCdsListItem locallyCodedCdsListItem = new LocallyCodedCdsListItem(pCodeSystem, pConcept);
+        validateNoOutboundCodePropertyOnSupplementalReasonConcept(pCodeSystem, pConcept);
+
+        final LocallyCodedCdsListItem locallyCodedCdsListItem = new LocallyCodedCdsListItem(pCodeSystem, pConcept, codeSystemOid);
         final String lSupportedListItemName = locallyCodedCdsListItem.getCdsListItemName();
         if (this.cdsListItemNameToCdsListItem.containsKey(lSupportedListItemName))
         {
@@ -183,6 +211,29 @@ public class SupportedCdsLists implements SupportingData
         }
     }
 
+    public void validateSupplementalReasonSupportingData()
+    {
+        final boolean hasSupplementalEvaluationCodeSystem =
+                hasCdsListItemsAssociatedWithCdsListCode(SupplementalReasonSupport.SUPPLEMENTAL_EVALUATION_REASON_CONCEPT);
+        final boolean hasSupplementalRecommendationCodeSystem =
+                hasCdsListItemsAssociatedWithCdsListCode(SupplementalReasonSupport.SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT);
+        final boolean hasLegacySupplementalEvaluationReason =
+                cdsListItemExists(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
+        final boolean hasLegacySupplementalRecommendationReason =
+                cdsListItemExists(BaseDataRecommendationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
+
+        if (hasSupplementalEvaluationCodeSystem && hasSupplementalRecommendationCodeSystem && hasLegacySupplementalEvaluationReason
+                && hasLegacySupplementalRecommendationReason)
+            return;
+
+        throw new InconsistentConfigurationException(
+                "Supplemental reason supporting data is incomplete. Required: code systems %s and %s plus base legacy items %s and %s.".formatted(
+                        SupplementalReasonSupport.SUPPLEMENTAL_EVALUATION_REASON_CONCEPT,
+                        SupplementalReasonSupport.SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT,
+                        BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName(),
+                        BaseDataRecommendationReason._SUPPLEMENTAL_TEXT.getCdsListItemName()));
+    }
+
     /**
      * Obtain the Cds List Code associated with a specified code system.
      *
@@ -208,6 +259,11 @@ public class SupportedCdsLists implements SupportingData
             return null;
 
         return this.cdsListNameToCdsListItems.get(pCdsListCode);
+    }
+
+    public boolean hasCdsListItemsAssociatedWithCdsListCode(final String pCdsListCode)
+    {
+        return !ObjectUtils.isEmpty(getCdsListItemsAssociatedWithCdsListCode(pCdsListCode));
     }
 
     /**

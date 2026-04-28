@@ -34,7 +34,7 @@ rule "RSV: If the evaluation date is >= 6/21/2023 and < 10/1/2023, and the patie
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.RSV"
-			- the name of the Series is "SUPPORTED_SERIES.RSVInfantSeries"
+			- the name of the Series is "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- make note of the Patient's birthdate as $birthDate
@@ -81,7 +81,7 @@ rule "RSV: If a patient is >= 8 months and < 20 months of age and not complete f
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the name of the Series is "SUPPORTED_SERIES.RSVInfantSeries"
+			- the name of the Series is "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- the Series is not complete
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
@@ -101,7 +101,7 @@ rule "RSV: If a patient is >= 8 months and < 20 months of age and is complete fo
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the name of the Series is "SUPPORTED_SERIES.RSVInfantSeries"
+			- the name of the Series is "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- the Series is complete
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
@@ -129,7 +129,7 @@ rule "RSV: If a patient is < 8 months of age and is complete for the RSV Infant 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the name of the Series is "SUPPORTED_SERIES.RSVInfantSeries"
+			- the name of the Series is "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- the Series is complete
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
@@ -186,7 +186,7 @@ rule "RSV: If the patient is both < 8 months of age and a dose is recommended in
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the name of the Series is "SUPPORTED_SERIES.RSVInfantSeries"
+			- the name of the Series is "SUPPORTED_SERIES.RSV_INFANT_SERIES"
 			- post processing on the Series forecast has not already been run
 			- the Series is not complete
 			- a forecast for the Series has been made and a shot is recommended
@@ -197,7 +197,7 @@ rule "RSV: If the patient is both < 8 months of age and a dose is recommended in
 		Confirm elapsed time between $birthDate and $recommendationDate < "8m"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Supplemental text for $recommendation to "RECOMMENDATION_REASON_CONCEPT.MATERNAL_UNK_OR_WITHIN_14D_RSV_MAB"
+		Set the Recommendation Supplemental text for $recommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.MATERNAL_UNK_OR_WITHIN_14D_RSV_MAB"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -213,7 +213,7 @@ rule "RSV: If a patient is >= 20 months and < 50 years of age and a shot is reco
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the name of the Series is "SUPPORTED_SERIES.RSVAdultSeries"
+			- the name of the Series is "SUPPORTED_SERIES.RSV_ADULT_SERIES"
 			- post processing on the Series forecast has not already been run
 			- the Series is not complete
 			- a forecast for the Series has been made and a shot is recommended
@@ -222,7 +222,7 @@ rule "RSV: If a patient is >= 20 months and < 50 years of age and a shot is reco
 		Confirm elapsed time between $birthDate and evalTime >= "20m" && elapsed time between $birthDate and evalTime < "50y"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Supplemental text for $recommendation to "RECOMMENDATION_REASON_CONCEPT.RSV_75PLUS_50_74_AT_RISK_SINGLE_DOSE"
+		Set the Recommendation Supplemental text for $recommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.RSV_75PLUS_50_74_AT_RISK_SINGLE_DOSE"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
        	Log that this Series Rule fired for the Series $targetSeries
@@ -238,7 +238,7 @@ rule "RSV: If a patient is >= 50 years and < 75 years of age and the Adult Serie
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.RSV"
-			- the name of the Series is "SUPPORTED_SERIES.RSVAdultSeries"
+			- the name of the Series is "SUPPORTED_SERIES.RSV_ADULT_SERIES"
 			- the Series is not complete
 		The Patient information $patientInfo must be known to complete writing this rule
 			- make note of the Patient's birthdate as $birthDate
@@ -248,7 +248,7 @@ rule "RSV: If a patient is >= 50 years and < 75 years of age and the Adult Serie
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Create a Recommendation as $supplementalText for the Series $targetSeries
-		Set the Recommendation supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.RSV_75PLUS_50_74_AT_RISK"
+		Set the Recommendation supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.RSV_75PLUS_50_74_AT_RISK"
 		Include the Recommendation $supplementalText for Consideration in the final Forecast of the Series
 		Mark Forecasting of the Series $targetSeries Complete
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -261,7 +261,7 @@ rule "RSV: If the RSV Adult Series is not complete, set the earliest/recommended
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.RSV"
-			- the name of the Series is "SUPPORTED_SERIES.RSVAdultSeries"
+			- the name of the Series is "SUPPORTED_SERIES.RSV_ADULT_SERIES"
 			- the Series is not complete
 		The patient information $oEvaluatedPerson must be known to complete writing this rule
         	- make note of the date as $dtDateAtAge75y when the patient is "75y" of age

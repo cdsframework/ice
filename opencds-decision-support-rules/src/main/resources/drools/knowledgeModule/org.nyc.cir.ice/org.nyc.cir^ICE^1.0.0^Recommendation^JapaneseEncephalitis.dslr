@@ -46,7 +46,7 @@ rule "Japanese Encephalitis: Always include supplemental text with the recommend
             - make note of the recommendation status as $recommendationStatus
     then
         Create a Recommendation as $supplementalText for the Series $targetSeries
-        Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"
+        Set the Recommendation Supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"
         Set the Recommendation Status for $supplementalText to $recommendationStatus
         Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
         Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -78,7 +78,7 @@ rule "Japanese Encephalitis: Patient < 2 months old, Not Recommended with SUPPLE
         Confirm elapsed time between $dtBirthDate and evalTime < "2m"
     then
         Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-        Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT"
+        Set the Recommendation Reason for $recommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.JE_NOT_ROUTINE_ACCEL_18_65_SEE_ACIP"
         Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
         Mark Forecasting of the Series $targetSeries Complete
         Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -132,7 +132,7 @@ rule "Japanese Encephalitis: Suppress Latest Recommended Interval Check for acce
 	when
         There is a Series $targetSeries that needs forecasting
             - the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
-            - The name of the series is "SUPPORTED_SERIES.JEVCRisk2DoseAcceleratedSeries"
+            - The name of the series is "SUPPORTED_SERIES.JEVC_RISK_2_DOSE_ACCELERATED_SERIES"
             - the Series is not complete
             - The number of doses administered is == 1
             - Make note of the date that the most recent shot was administered as $previousShotDate
@@ -154,7 +154,7 @@ rule "Japanese Encephalitis: Patient on accelerated schedule is 66 or older for 
 	when
         There is a Series $targetSeries
             - The Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS"
-            - The name of the series is "SUPPORTED_SERIES.JEVCRisk2DoseAcceleratedSeries"
+            - The name of the series is "SUPPORTED_SERIES.JEVC_RISK_2_DOSE_ACCELERATED_SERIES"
             - A Forecast for the Series has been made and a Recommendation Date has been determined
 			- Make note of the date that the most recent shot was administered as $previousShotDate
 			- Make note of the recommendation date as $recommendationDate

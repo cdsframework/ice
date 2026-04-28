@@ -4,15 +4,16 @@ ice-supporting-data:
       code-systems:
         EVALUATION_REASON_CONCEPT:
           name: EVALUATION_REASON_CONCEPT
-          identifiers:
-            - value: 1f305bc0X568822e2608f22be9d1bac9c
-          description: evaluation_interpretation
-          url: 2.16.840.1.113883.3.795.12.100.3
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.3.795.12.100.3
+          description: Supported evaluation reasons for display
+          url: http://terminology.cdsframework.org/ice/evaluation-reason
           title: ICE Evaluation Reason
           version: org.cdsframework^ICE^1.0.0
           status: active
           content: complete
-          concepts:
+          concept:
             - code: BOOSTER_DOSE
               display: This shot is a booster dose.
             - code: INVALID_AGE

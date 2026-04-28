@@ -107,14 +107,14 @@ rule "Duplicate Shots/Same Day (MenB- Series is Not Complete): If CVX 162 or CVX
 			setDuplicateShotSameDayCheckCompleted(true),
 			removeAllEvaluationReasonsFromAllReasonSets(),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName()),
-			addInvalidReason("EVALUATION_REASON_CONCEPT.MENB_SAME_DAY_DIFFERENT_PRODUCTS_UNDETERMINED")
+			addInvalidReason("SUPPLEMENTAL_EVALUATION_REASON_CONCEPT.MENB_SAME_DAY_DIFFERENT_PRODUCTS_UNDETERMINED")
 		};
 		modify($td) {
 			setStatus(DoseStatus.INVALID),
 			setDuplicateShotSameDayCheckCompleted(true),
 			removeAllEvaluationReasonsFromAllReasonSets(),
 			addInvalidReason(BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName()),
-			addInvalidReason("EVALUATION_REASON_CONCEPT.MENB_SAME_DAY_DIFFERENT_PRODUCTS_UNDETERMINED")
+			addInvalidReason("SUPPLEMENTAL_EVALUATION_REASON_CONCEPT.MENB_SAME_DAY_DIFFERENT_PRODUCTS_UNDETERMINED")
 		};
 		update($ts)
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td + " in TargetSeries " + $td.associatedTargetSeries);
@@ -137,7 +137,7 @@ rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162 (or CVX 316) / CVX 163 (
 	auto-focus true
 	no-loop true
 	when
-		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", associatedTargetSeries.seriesName == "SUPPORTED_SERIES.MenB4C2DoseSeries", vaccineComponent.cdsConceptName == "VACCINE_CVX_163",
+		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", associatedTargetSeries.seriesName == "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES", vaccineComponent.cdsConceptName == "VACCINE_CVX_163",
 			administrationDate < "25-Oct-2024", isDoseStatusOverridden() == false)
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, doseNumberInSeries == $td.doseNumberInSeries,
 			vaccineComponent.cdsConceptName == "VACCINE_CVX_162", isDoseStatusOverridden() == false, isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
@@ -163,7 +163,7 @@ rule "Duplicate Shots/Same Day MeningB Rule: If CVX 162 (or CVX 316) / CVX 163 (
 	no-loop true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B", vaccineComponent.cdsConceptName == "VACCINE_CVX_162", administrationDate < "25-Oct-2024", isDoseStatusOverridden() == false,
-			associatedTargetSeries.seriesName == "SUPPORTED_SERIES.MenBFHbp2DoseSeries" || associatedTargetSeries.seriesName == "SUPPORTED_SERIES.MenBFHbp3DoseSeries")
+			associatedTargetSeries.seriesName == "SUPPORTED_SERIES.MEN_BF_HBP_2_DOSE_SERIES" || associatedTargetSeries.seriesName == "SUPPORTED_SERIES.MEN_BF_HBP_3_DOSE_SERIES")
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true, isDoseStatusOverridden() == false,
 			doseNumberInSeries == $td.doseNumberInSeries, vaccineComponent.cdsConceptName == "VACCINE_CVX_163", isDuplicateShotSameDayCheckCompleted() == false || $td.isDuplicateShotSameDayCheckCompleted() == false)
 	    $ts : TargetSeries(this == $tdother.associatedTargetSeries)

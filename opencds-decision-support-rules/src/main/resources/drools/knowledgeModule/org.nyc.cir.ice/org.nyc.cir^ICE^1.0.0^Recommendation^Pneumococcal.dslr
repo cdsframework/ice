@@ -37,7 +37,7 @@ rule "Pneumococcal Adult: If the output of Pneumococcal earliest and overdue dat
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- the series is not complete
 			- the effective dose number in the Series is >= 6
 		There exists an IceFact
@@ -89,7 +89,7 @@ rule "Pnuemo Adult Special Recommendation Rule #1: If a patient >= 50 years of a
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a Recommendation Date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- post processing on the Series forecast has not already been run
 			- the Series is not complete
 			- the effective dose number in the Series is >= 6
@@ -128,7 +128,7 @@ rule "Pneumo Adult Special Recommendation Rule #2: If a patient >= 50y years of 
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a Recommendation Date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- post processing on the Series forecast has not already been run
 			- the Series is not complete
 			- the effective dose number in the Series is >= 6
@@ -178,7 +178,7 @@ rule "Pneumococcal Adult: If a patient >= 65 years of age, has completed the ser
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- the Series is complete
 			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
@@ -211,7 +211,7 @@ rule "Pneumococcal Adult: If a patient >= 65 years of age, has completed the ser
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
 		Include the Recommendation $recommendation for Consideration in the final forecast of the Series
 		Create a Recommendation as $supplementalText for the Series $targetSeries
-		Set the Recommendation Supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.PCV20_OR_PCV21_SCDM_AFTER_5Y"
+		Set the Recommendation Supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.PCV20_OR_PCV21_SCDM_AFTER_5Y"
 		Include the Recommendation $supplementalText for Consideration in the final forecast of the Series
 		Mark forecasting of the Series $targetSeries complete
 		Insert an IceFact "PNEUMOCOCCAL_ADULT_CONDITIONALLY_RECOMMENDED_W_COMPLETE_CLINICAL_PATIENT_DISCRETION" with TargetSeries $targetSeries into working memory
@@ -229,7 +229,7 @@ rule "Pneumococcal Adult(PCV-PPSV Series): If no adult doses have been administe
 		There is a Series $targetSeries
 			- a forecast for the Series has been made and a Recommendation Date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- post processing on the Series forecast has not already been run
 			- the effective dose number in the Series is >= 6
 		There does not exist an administered shot
@@ -260,7 +260,7 @@ rule "Pneumococcal Adult(PCV-PPSV Series): If dose 1 of the adult series was a P
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made and a shot is recommended
 			- a forecast for the Series has been made and a specific vaccine is not recommended
@@ -278,7 +278,7 @@ rule "Pneumococcal Adult(PCV-PPSV Series): If dose 1 of the adult series was a P
 			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Supplemental text for $recommendation to "RECOMMENDATION_REASON_CONCEPT.IF_NO_PPSV23_USE_PCV20_OR_PCV21_STOP"
+		Set the Recommendation Supplemental text for $recommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.IF_NO_PPSV23_USE_PCV20_OR_PCV21_STOP"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "VACCINE_CVX_33"
 		Refresh all facts in the Series $targetSeries
@@ -296,7 +296,7 @@ rule "Pneumococcal Adult(PPSV-PCV Series): If dose 1 of the adult series was a P
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made and a shot is recommended
 			- a forecast for the Series has been made and a specific vaccine is not recommended
@@ -333,7 +333,7 @@ rule "Pneumococcal Adult(PPSV-PCV Series): If dose 1 of the adult series was a P
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- post processing on the Series forecast has not already been run
 			- a forecast for the Series has been made and a shot is recommended
 			- a forecast for the Series has been made and a specific vaccine is not recommended
@@ -351,7 +351,7 @@ rule "Pneumococcal Adult(PPSV-PCV Series): If dose 1 of the adult series was a P
 			- that has finding "PNEUMOCOCCAL_ADULT_SPECIAL_RECOMMENDATION_RULE_2"
 	then
 		Create a Recommendation as $recommendation for the Series $targetSeries
-		Set the Recommendation Supplemental text for $recommendation to "RECOMMENDATION_REASON_CONCEPT.IF_NO_PPSV23_USE_PCV20_OR_PCV21_STOP"
+		Set the Recommendation Supplemental text for $recommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.IF_NO_PPSV23_USE_PCV20_OR_PCV21_STOP"
 		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
 		Set the Recommended Vaccine for the Forecast in the Series $targetSeries to "VACCINE_CVX_33"
 		Refresh all facts in the Series $targetSeries
@@ -369,7 +369,7 @@ rule "Pneumococcal Adult: Recommended Interval of 5yrs from prior PPSV shot (or 
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- post processing on the Series forecast has not already been run
 			- the effective dose number in the Series is >= 6
 			- a forecast for the Series has been made and a recommendation date has been determined
@@ -422,7 +422,7 @@ rule "Pneumococcal Adult: Recommend Recommended Interval of 1 yr from prior PCV 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- the series is not complete
 			- the effective dose number in the Series is >= 6
 		There is an administered shot $priorPCVshot
@@ -476,7 +476,7 @@ rule "Pneumococcal Adult: If the patient >= 19 years and < 50 years of age and t
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- the Series is not complete
 			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
@@ -488,7 +488,7 @@ rule "Pneumococcal Adult: If the patient >= 19 years and < 50 years of age and t
 			- the date evalTime < $dtDateAtAge50
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.ADULT_RISK_PCV20_21_OR_PCV15_THEN_PPSV23"
+		Set the Recommendation Supplemental Text for $oRecommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.ADULT_RISK_PCV20_21_OR_PCV15_THEN_PPSV23"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -502,7 +502,7 @@ rule "Pneumococcal Adult: If the patient is < 50 years of age, received one or m
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- the Series is not complete
 			- a forecast for the Series has been made and a shot is recommended
 			- make note of the recommendation date as $recommendationDate
@@ -521,7 +521,7 @@ rule "Pneumococcal Adult: If the patient is < 50 years of age, received one or m
 		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
 		Include the Recommendation $recommendation for Consideration in the final forecast of the Series
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.ADULT_RISK_PCV20_21_OR_PCV15_THEN_PPSV23"
+		Set the Recommendation Supplemental Text for $oRecommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.ADULT_RISK_PCV20_21_OR_PCV15_THEN_PPSV23"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Refresh all facts in the Series $targetSeries for forecasting
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
@@ -539,7 +539,7 @@ rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childh
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
 			- the dose number in the Series is >= 6
@@ -565,7 +565,7 @@ rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childh
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
 			- the dose number in the Series is >= 6
@@ -592,7 +592,7 @@ rule "Pneumococcal Adult: if patient *is* >= 5yrs and < 19yrs of age, the childh
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 		There does not exist an administered shot
 			- the shot belongs to the series $targetSeries
 			- the dose number in the Series is >= 6
@@ -623,7 +623,7 @@ rule "Pneumococcal Child: When recommending in the child series, always recommen
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the recommendation date as $recommendationDate
 			- post processing on the Series forecast has not already been run
 			- the effective dose number in the Series is <= 5
@@ -635,7 +635,7 @@ rule "Pneumococcal Child: When recommending in the child series, always recommen
 		Unset the recommended vaccine for the forecast in the Series $targetSeries
 		Create a Recommendation as $sRecommendation for the Series $targetSeries
 		Set the Recommendation Status for $sRecommendation to $recommendationStatus
-		Set the Recommendation Supplemental Text for $sRecommendation to "RECOMMENDATION_REASON_CONCEPT.PCV15_OR_PCV20_PCV13_IF_UNAVAILABLE"
+		Set the Recommendation Supplemental Text for $sRecommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.PCV15_OR_PCV20_PCV13_IF_UNAVAILABLE"
 		Include the Recommendation $sRecommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -652,7 +652,7 @@ rule "Pneumococcal Child: if the patient < 2yrs, if a PPSV23 (CVX 33) shot has b
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- the effective dose number in the series is <= 5
 			- make note of the Last Shot Administered in the Series as $lastAdministeredShot
 			- make note of the Date that the most recent Shot was Administered as $dateLastAdministeredShot
@@ -679,7 +679,7 @@ rule "Pneumococcal Child: if the patient >= 2yrs and < 5 years, if a PPSV23 (CVX
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the Last Shot Administered in the Series as $lastAdministeredShot
 			- make note of the Date that the most recent Shot was Administered as $dateLastAdministeredShot
 		There is an administered shot $shot
@@ -708,7 +708,7 @@ rule "Pneumococcal Child Series: Recommend PCV13/PCV15/PCV20 dose if series comp
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- the effective dose number in the Series is == 5
 			- the Number of Administered Shots is > 0
 			- make note of the date that the most recent shot was administered as $shotDate
@@ -721,7 +721,7 @@ rule "Pneumococcal Child Series: Recommend PCV13/PCV15/PCV20 dose if series comp
 		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
 		Include a recommendation as $recommendation with recommended forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
 		Create a recommendation as $supplementalText for the Series $targetSeries
-		Set the recommendation supplemental text for $supplementalText to "RECOMMENDATION_REASON_CONCEPT.PCV15_OR_PCV20_PCV13_IF_UNAVAILABLE"
+		Set the recommendation supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.PCV15_OR_PCV20_PCV13_IF_UNAVAILABLE"
 		Include the recommendation $supplementalText for consideration in the final forecast of the Series
 		Mark forecasting of the Series $targetSeries Complete
 		Insert an IceFact SupportedFactConcept._PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE.getConceptCodeValue() with TargetSeries $targetSeries into working memory
@@ -740,7 +740,7 @@ rule "Pneumococcal Child Series: if patient is < 5yrs completed the Child series
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- the effective dose number in the Series is <= 6
 			- the effective dose number in the Series is > 4
 		There is an administered shot $shot
@@ -773,7 +773,7 @@ rule "Pneumococcal Child Series: if patient *will be* >= 5 years at the recommen
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
 			- the effective dose number in the Series is < 7
@@ -808,7 +808,7 @@ rule "Pneumococcal Child Series: if patient **will be** >= 5 years at the recomm
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
 			- the effective dose number in the Series is < 7
@@ -837,7 +837,7 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-D
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 2
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -865,7 +865,7 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 7months in 4-D
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 3
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -893,7 +893,7 @@ rule "Pneumococcal Child Series: Include Recommendation with Date 12months and T
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 3
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -922,7 +922,7 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 12months and TargetD
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 4
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -950,7 +950,7 @@ rule "Pneumococcal Child Series: Set Recommendation Date to 24months and TargetD
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 4
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -978,7 +978,7 @@ rule "Pneumococcal Adult Series: Set Recommendation Date to 50y and Skip Dose to
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 6
 		There does not exist an administered shot
@@ -1009,7 +1009,7 @@ rule "Pneumococcal Adult: If the patient is >= 19 years of age, Skip to Target D
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
-			- the name of the Series is "SUPPORTED_SERIES.PneumococcalSeries"
+			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is <= 5
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule

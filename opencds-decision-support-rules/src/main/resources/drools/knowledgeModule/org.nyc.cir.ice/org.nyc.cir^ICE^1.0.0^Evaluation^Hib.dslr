@@ -99,7 +99,7 @@ rule "Hib:Evaluate Hib Shot as Below Absolute Minimum Age for Final Dose of 4-Do
 	salience 150
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Dose Number in the Series is == 4
 			- make note of the Associated Series as $associatedTargetSeries
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
@@ -109,7 +109,7 @@ rule "Hib:Evaluate Hib Shot as Below Absolute Minimum Age for Final Dose of 4-Do
 			- make note of the date as $dateOfInterest when the Patient is "7m" of age
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Number of Doses Administered before $dateOfInterest is == 0
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < $absMinAgeDose4
 	then
@@ -198,7 +198,7 @@ rule "Hib: Set Dose Number to 2 in 4-Dose Hib Series if No Shots Administered an
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Number of Administered Shots is == 0
 			- make note of the Effective Dose Number in the Series as $effectiveDoseNumber
 			- the numeric $effectiveDoseNumber is < 2
@@ -218,7 +218,7 @@ rule "Hib: Set Dose Number to 3 in 4-Dose Hib Series if No Shots Administered an
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Number of Administered Shots is == 0
 			- make note of the Effective Dose Number in the Series as $effectiveDoseNumber
 			- the numeric $effectiveDoseNumber is < 3
@@ -238,7 +238,7 @@ rule "Hib: Set Dose Number to 4 in 4-Dose Hib Series if No Shots Administered an
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Number of Administered Shots is == 0
 			- make note of the Effective Dose Number in the Series as $effectiveDoseNumber
 			- the numeric $effectiveDoseNumber is < 4
@@ -256,7 +256,7 @@ rule "Hib: Skip Dose Number to 2 in 4-Dose Hib Series for Patient Between Betwee
 	salience 200
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Dose Number in the Series is < 2
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
@@ -276,7 +276,7 @@ rule "Hib: Skip Dose Number to 4 in 4-Dose Hib Series if Patient Between 7and12 
 	salience 200
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Dose Number in the Series is < 3
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
@@ -298,7 +298,7 @@ rule "Hib: Skip Dose Number to 3 in 4-Dose Hib Series if Patient Between 12and15
 	salience 200
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Dose Number in the Series is < 3
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
@@ -308,7 +308,7 @@ rule "Hib: Skip Dose Number to 3 in 4-Dose Hib Series if Patient Between 12and15
 			- make note of the date as $dateOfInterest when the Patient is "12m" of age
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Number of Doses Administered before $dateOfInterest is < 2
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "12m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "15m"
 	then
@@ -323,7 +323,7 @@ rule "Hib: Skip Dose Number to 4 in 4-Dose Hib Series if Patient Between 12and15
 	salience 200
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Dose Number in the Series is < 4
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate
@@ -333,7 +333,7 @@ rule "Hib: Skip Dose Number to 4 in 4-Dose Hib Series if Patient Between 12and15
 			- make note of the date as $dateOfInterest when the Patient is "12m" of age
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HIB"
-			- the name of the Series is "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Number of Doses Administered before $dateOfInterest is == 2
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate >= "12m" && elapsed time between $dtBirthDate and $assign_dtAdministrationDate < "15m"
 	then
@@ -348,7 +348,7 @@ rule "Hib: Skip Dose Number to 4 in 4-Dose Hib Series for Patient over 15 Months
 	salience 200
 	when
 		There is an Administered Shot $currentDose that needs to be Evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.Hib4DoseSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HIB" and the Series with Name "SUPPORTED_SERIES.HIB_4_DOSE_SERIES"
 			- the Dose Number in the Series is < 4
 			- make note of the Dose Number for this Shot as $assign_nDoseNumber
 			- make note of the Date this Shot was Administered as $assign_dtAdministrationDate

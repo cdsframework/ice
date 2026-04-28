@@ -105,7 +105,7 @@ rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if s
 		Set the Recommendation Reason for $rReason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_TDAP_OR_TD"
 		Include the Recommendation $rReason for Consideration in the final Forecast of the Series
 		Create a recommendation as $rSupplementalText for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $rSupplementalText to "RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT_ADMINISTER_TDAP_OR_TD"
+		Set the Recommendation Supplemental Text for $rSupplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT_ADMINISTER_TDAP_OR_TD"
 		Include the Recommendation $rSupplementalText for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -152,7 +152,7 @@ rule "DTP: If the 5-Dose Series is Complete and the patient has NOT received a p
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
-			- the name of the series is "SUPPORTED_SERIES.DTP5DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
@@ -223,7 +223,7 @@ rule "DTP: If the 5-dose series is complete and a Tdap 5-dose series recommendat
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
-			- the name of the series is "SUPPORTED_SERIES.DTP5DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
 		There does not exist an IceFact
@@ -251,7 +251,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception Occurred)- If the 5-Dose
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
-			- the name of the series is "SUPPORTED_SERIES.DTP5DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
 			- the Series is complete
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
@@ -282,7 +282,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception A)- If patient does not 
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
-			- the name of the series is "SUPPORTED_SERIES.DTP5DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
 			- make note of the date that the most recent shot was administered as $dtAdministrationDate
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
@@ -309,7 +309,7 @@ rule "DTP: (Tdap 5-Dose Series Recommendation Exception B)- If the patient DOES 
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
 			- the Series is complete
-			- the name of the series is "SUPPORTED_SERIES.DTP5DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
 			- make note of the date that the most recent shot was administered as $dtAdministrationDate
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_ADOLESCENT_TDAP_NEEDED.conceptCodeValue
@@ -415,7 +415,7 @@ rule "DTP: Recommend booster at earliest interval of 5y, recommended interval of
 		Set the Recommendation Reason for $rReason to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_TDAP_OR_TD"
 		Include the Recommendation $rReason for Consideration in the final Forecast of the Series
 		Create a recommendation as $rSupplementalText for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $rSupplementalText to "RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT_ADMINISTER_TDAP_OR_TD"
+		Set the Recommendation Supplemental Text for $rSupplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT_ADMINISTER_TDAP_OR_TD"
 		Include the Recommendation $rSupplementalText for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -433,7 +433,7 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for
 		There is a Series $targetSeries
 			- a Forecast for the Series has been made and a Recommendation Date has been determined
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
-			- the name of the series is "SUPPORTED_SERIES.DTP5DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
 			- the number of doses administered is == 3
 			- make note of the Recommendation Date as $recommendationDate
 			- post processing on the Series forecast has not already been run
@@ -466,7 +466,7 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Skip to Dose 4 if patient >= 7yrs a
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
-			- the name of the Series is "SUPPORTED_SERIES.DTP5DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
 			- the number of doses administered is == 2
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
 			- the numeric $nEffectiveDoseNumber is == 3
@@ -503,7 +503,7 @@ rule "DTP: (Six by Seven Rule)- Recommend next dose at age 7yrs for 5-dose serie
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
-			- the name of the Series is "SUPPORTED_SERIES.DTP5DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
 			- the Series is not complete
 			- the number of administered shots excluding duplicate shots on the same day is >= 6
 		The Patient information $patientInfo must be known to complete writing this rule
@@ -525,7 +525,7 @@ rule "DTP: (3-Dose Series Exception Rule[Recommendation])- If none of the 3 or m
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
-			- the name of the Series is "SUPPORTED_SERIES.DTP3DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.DTP_3_DOSE_SERIES"
 			- the Series is not complete
 			- the number of Doses administered is >= 3
 		There does not exist an IceFact

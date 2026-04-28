@@ -47,7 +47,7 @@ rule "HepA: Recommend both an earliest and recommended interval of 6 months betw
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the name of the series is "SUPPORTED_SERIES.HepAAdult3DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.HEP_A_ADULT_3_DOSE_SERIES"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
 		There is an Administered Shot $dose1
@@ -74,7 +74,7 @@ rule "HepA: Recommend both an earliest and recommended interval of 12 months bet
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the name of the series is "SUPPORTED_SERIES.HepA4DoseAcceleratedTwinrixSeries"
+			- the name of the series is "SUPPORTED_SERIES.HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 4
 		There is an Administered Shot $dose1
@@ -102,14 +102,14 @@ rule "Hep A: Recommend CVX 104 (Hep A-Hep B (Twinrix)) for the Hep A 3-dose Seri
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the Name of the Series is "SUPPORTED_SERIES.HepAAdult3DoseSeries"
+			- the Name of the Series is "SUPPORTED_SERIES.HEP_A_ADULT_3_DOSE_SERIES"
 			- the Series is Not Complete
 			- a forecast for the series has been made and a recommendation date has been determined
 			- make note of the Dose Number to Recommend as $doseNumber
 			- make Note of the Recommendation Date as $recommendationDate
 		There is a Series $hepBSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
-			- the Name of the Series is "SUPPORTED_SERIES.HepB3DoseTwinrixSeries"
+			- the Name of the Series is "SUPPORTED_SERIES.HEP_B_3_DOSE_TWINRIX_SERIES"
 			- the Series is Not Complete
 			- a forecast for the series has been made and a recommendation date has been determined
 			- the Dose Number to Recommend is == $doseNumber
@@ -118,7 +118,7 @@ rule "Hep A: Recommend CVX 104 (Hep A-Hep B (Twinrix)) for the Hep A 3-dose Seri
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_104"
-		Set the Recommendation Supplemental Text for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.HEP_A_3DOSE_TWINRIX_ALT_VACCINE"
+		Set the Recommendation Supplemental Text for $oRecommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.HEP_A_3DOSE_TWINRIX_ALT_VACCINE"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -133,7 +133,7 @@ rule "Hep A: Recommend CVX 104 (Hep A-Hep B (Twinrix)) for the Hep A 4-dose Acce
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the Name of the Series is "SUPPORTED_SERIES.HepA4DoseAcceleratedTwinrixSeries"
+			- the Name of the Series is "SUPPORTED_SERIES.HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES"
 			- the Series is Not Complete
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
@@ -152,12 +152,12 @@ rule "Hep A: Include supplemental text for target dose 4 in the Hep A 4-dose Acc
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the Name of the Series is "SUPPORTED_SERIES.HepA4DoseAcceleratedTwinrixSeries"
+			- the Name of the Series is "SUPPORTED_SERIES.HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES"
 			- the Series is Not Complete
 			- the effective dose number in the Series is == 4
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Supplemental Text for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.HEP_A_3DOSE_TWINRIX_ALT_VACCINE"
+		Set the Recommendation Supplemental Text for $oRecommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.HEP_A_3DOSE_TWINRIX_ALT_VACCINE"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries

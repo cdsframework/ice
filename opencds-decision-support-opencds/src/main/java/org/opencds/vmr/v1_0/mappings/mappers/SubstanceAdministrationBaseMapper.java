@@ -57,8 +57,7 @@ public abstract class SubstanceAdministrationBaseMapper extends ClinicalStatemen
     }
 
     public static void pushOut(final SubstanceAdministrationBase source,
-            final org.opencds.vmr.v1_0.schema.SubstanceAdministrationBase target)
-            throws ImproperUsageException, DataFormatException, InvalidDataException
+            final org.opencds.vmr.v1_0.schema.SubstanceAdministrationBase target) throws ImproperUsageException
     {
         final String _METHODNAME = "pushOut(): ";
 

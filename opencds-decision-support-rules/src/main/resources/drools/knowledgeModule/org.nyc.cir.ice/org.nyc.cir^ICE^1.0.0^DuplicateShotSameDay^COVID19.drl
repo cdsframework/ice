@@ -30,7 +30,7 @@ rule "Duplicate Shots/Same Day (Sep2023/Aug2024 >= 5yrs): If a CVX 213 and CVX 3
 	auto-focus true
 	when
 		$td: TargetDose(hasBeenEvaluated == true, status == DoseStatus.VALID, isDoseStatusOverridden() == false, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19",
-		associatedTargetSeries!.targetSeason.seasonName in ("SUPPORTED_SEASON.COVID19Sep2023Season", "SUPPORTED_SEASON.COVID19Aug2024Season"), vaccineComponent.cdsConceptName == "VACCINE_CVX_313")
+		associatedTargetSeries!.targetSeason.seasonName in ("SUPPORTED_SEASON.COVID_19_SEP_2023_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2024_SEASON"), vaccineComponent.cdsConceptName == "VACCINE_CVX_313")
 		$tdother : TargetDose(this != $td, associatedTargetSeries == $td.associatedTargetSeries, administrationDate == $td.administrationDate, hasBeenEvaluated == true,
 		status == DoseStatus.VALID, isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "VACCINE_CVX_213")
         $ts : TargetSeries(this == $tdother.associatedTargetSeries)

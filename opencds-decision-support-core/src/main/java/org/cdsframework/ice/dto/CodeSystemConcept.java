@@ -2,14 +2,13 @@ package org.cdsframework.ice.dto;
 
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Singular;
 
-@Getter
-@Setter
-public class CodeSystemConcept
+@Builder
+public record CodeSystemConcept(String code,
+                                String display,
+                                @Singular("property")
+                                List<CodeSystemConceptProperty> property)
 {
-    private String code;
-    private String display;
-    private List<CodeSystemConceptProperty> properties;
 }

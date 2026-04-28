@@ -4,15 +4,16 @@ ice-supporting-data:
       code-systems:
         RECOMMENDATION_STATUS_CONCEPT:
           name: RECOMMENDATION_STATUS_CONCEPT
-          identifiers:
-            - value: F1f305bc0568822e2608f22be9d1bac9c
-          description: Supported Recommendation Status
-          url: 2.16.840.1.113883.3.795.12.100.5
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.3.795.12.100.5
+          description: Supported recommendation statuses for display
+          url: http://terminology.cdsframework.org/ice/recommendation-status
           title: ICE Evaluation Status
           version: org.cdsframework^ICE^1.0.0
           status: active
           content: complete
-          concepts:
+          concept:
             - code: RECOMMENDED
               display: Recommended
             - code: CONDITIONAL

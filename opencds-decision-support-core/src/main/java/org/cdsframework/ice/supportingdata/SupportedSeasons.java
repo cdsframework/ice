@@ -113,11 +113,6 @@ public class SupportedSeasons implements SupportingData
         return this.cdsListItemNameToSeasonItem.get(pSeasonItemName);
     }
 
-    protected SupportedVaccineGroups getAssociatedSupportedCdsVaccineGroups()
-    {
-        return this.supportedVaccineGroups;
-    }
-
     public void initializeFromCdsLists() throws InconsistentConfigurationException
     {
         final String _METHODNAME = "initializeFromCdsLists(): ";
@@ -148,20 +143,20 @@ public class SupportedSeasons implements SupportingData
 
             for (final CodeSystemConceptProperty cp : locallyCodedCdsSeasonListItem.getProperties())
             {
-                final String lPropCode = cp.getCode();
+                final String lPropCode = cp.code();
                 switch (lPropCode)
                 {
-                    case "defaultSeason" -> lDefaultSeason = java.util.Objects.requireNonNullElse(cp.isValueBoolean(), false);
-                    case "startDate" -> lStartDateStr = cp.getValueString();
-                    case "endDate" -> lEndDateStr = cp.getValueString();
-                    case "defaultStartMonthAndDay" -> lDefaultStartMonthAndDayStr = cp.getValueString();
-                    case "defaultStopMonthAndDay" -> lDefaultStopMonthAndDayStr = cp.getValueString();
+                    case "defaultSeason" -> lDefaultSeason = java.util.Objects.requireNonNullElse(cp.valueBoolean(), false);
+                    case "startDate" -> lStartDateStr = cp.valueString();
+                    case "endDate" -> lEndDateStr = cp.valueString();
+                    case "defaultStartMonthAndDay" -> lDefaultStartMonthAndDayStr = cp.valueString();
+                    case "defaultStopMonthAndDay" -> lDefaultStopMonthAndDayStr = cp.valueString();
                     case "vaccineGroup" ->
                     {
-                        final Coding vgCoding = cp.getValueCoding();
-                        lVgCode = vgCoding.getCode();
-                        lVgSystem = vgCoding.getSystem();
-                        lVgDisplayName = vgCoding.getDisplay();
+                        final Coding vgCoding = cp.valueCoding();
+                        lVgCode = vgCoding.code();
+                        lVgSystem = vgCoding.system();
+                        lVgDisplayName = vgCoding.display();
                     }
                     // already processed
                     case "conceptMapping", "supported", "outboundCode" ->
@@ -174,7 +169,7 @@ public class SupportedSeasons implements SupportingData
             if (lVgCode == null)
             {
                 final String lErrStr = "Required property vaccineGroup not found for season: " + lSeasonCode;
-                log.warn(_METHODNAME + lErrStr);
+                log.warn("{}{}", _METHODNAME, lErrStr);
                 this.isSupportingDataConsistent = false;
                 throw new InconsistentConfigurationException(lErrStr);
             }
@@ -230,7 +225,7 @@ public class SupportedSeasons implements SupportingData
                     else
                     {
                         final String lErrStr = "Default season dates not specified for season: " + lSeasonCode;
-                        log.warn(_METHODNAME + lErrStr);
+                        log.warn("{}{}", _METHODNAME, lErrStr);
                         this.isSupportingDataConsistent = false;
                         throw new InconsistentConfigurationException(lErrStr);
                     }
@@ -240,7 +235,7 @@ public class SupportedSeasons implements SupportingData
                 if (lStartDateStr == null || lEndDateStr == null)
                 {
                     final String lErrStr = "Fully-specified season dates not specified for season: " + lSeasonCode;
-                    log.warn(_METHODNAME + lErrStr);
+                    log.warn("{}{}", _METHODNAME, lErrStr);
                     this.isSupportingDataConsistent = false;
                     throw new InconsistentConfigurationException(lErrStr);
                 }
@@ -258,54 +253,14 @@ public class SupportedSeasons implements SupportingData
     }
 
     /**
-     * Return a *copy* of the list of Season associated with the specified vaccine group. If the vaccine group is not supported, null is returned.
-     * If the vaccine group is supported but not Season have been specified for the vaccine group, an empty list is returned.
-     */
-    public List<Season> getCopyOfSeasonForVaccineGroup(final LocallyCodedVaccineGroupItem plcvg)
-    {
-        return getSeasonsForVaccineGroup(plcvg, true);
-    }
-
-    /**
-     * Return a reference to the list of Season associated with the specified vaccine group. If the vaccine group is not supported, null is returned.
-     * If the vaccine group is supported but not Season have been specified for the vaccine group, an empty list is returned.
-     */
-    protected List<Season> getSeasonsForVaccineGroup(final LocallyCodedVaccineGroupItem plcvg)
-    {
-        return getSeasonsForVaccineGroup(plcvg, false);
-    }
-
-    private List<Season> getSeasonsForVaccineGroup(final LocallyCodedVaccineGroupItem plcvg, final boolean copyOf)
-    {
-        final List<Season> lSs = this.vaccineGroupItemToSeasons.get(plcvg);
-        if (lSs == null)
-            return null;
-
-        return lSs.stream().map(lS -> copyOf ? Season.constructDeepCopyOfSeasonObject(lS) : lS).toList();
-    }
-
-    /**
      * Return a copy of all Season supported by this installation. If none, an empty list is returned.
      */
     public List<Season> getCopyOfAllSeasons()
     {
-        return getAllSeasons(true);
-    }
-
-    /**
-     * Return a copy of all Season supported by this installation. If none, an empty list is returned.
-     */
-    protected List<Season> getAllSeasons()
-    {
-        return getAllSeasons(false);
-    }
-
-    private List<Season> getAllSeasons(final boolean copyOf)
-    {
         return vaccineGroupItemToSeasons.values()
                 .stream()
                 .flatMap(Collection::stream)
-                .map(lSR -> copyOf ? Season.constructDeepCopyOfSeasonObject(lSR) : lSR)
+                .map(Season::constructDeepCopyOfSeasonObject)
                 .toList();
     }
 

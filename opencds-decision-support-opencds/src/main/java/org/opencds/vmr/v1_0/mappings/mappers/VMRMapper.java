@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.opencds.common.exceptions.DataFormatException;
-import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
@@ -29,7 +28,7 @@ public class VMRMapper
 
     public static void pushOut(final Map<String, List<?>> results, final VMR source,
             final org.opencds.vmr.v1_0.schema.CDSOutput output, final String focalPersonId)
-            throws DataFormatException, InvalidDataException, ImproperUsageException
+            throws DataFormatException, InvalidDataException
     {
         if (source == null)
             return;

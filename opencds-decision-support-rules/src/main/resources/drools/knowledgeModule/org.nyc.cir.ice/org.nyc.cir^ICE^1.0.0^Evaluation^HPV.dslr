@@ -73,7 +73,7 @@ rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV" and the Series with name "SUPPORTED_SERIES.HPV3DoseSeries"
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV" and the Series with name "SUPPORTED_SERIES.HPV_3_DOSE_SERIES"
 			- the dose number in the series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries

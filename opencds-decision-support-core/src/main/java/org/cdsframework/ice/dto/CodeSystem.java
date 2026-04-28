@@ -1,22 +1,30 @@
 package org.cdsframework.ice.dto;
 
 import java.util.List;
+import java.util.Objects;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Singular;
 
-@Getter
-@Setter
-public class CodeSystem
+@Builder
+public record CodeSystem(String name,
+                         @Singular("identifier")
+                         List<Identifier> identifier,
+                         String description,
+                         String url,
+                         String title,
+                         String version,
+                         PublicationStatusEnum status,
+                         CodeSystemContentModeEnum content,
+                         @Singular("property")
+                         List<CodeSystemResourceProperty> property,
+                         @Singular("concept")
+                         List<CodeSystemConcept> concept)
 {
-    private String name;
-    private List<Identifier> identifiers;
-    private String description;
-    private String url;
-    private String title;
-    private String version;
-    private PublicationStatusEnum status;
-    private CodeSystemContentModeEnum content;
-    private List<CodeSystemResourceProperty> properties;
-    private List<CodeSystemConcept> concepts;
+    public CodeSystem
+    {
+        identifier = Objects.requireNonNullElseGet(identifier, List::of);
+        property = Objects.requireNonNullElseGet(property, List::of);
+        concept = Objects.requireNonNullElseGet(concept, List::of);
+    }
 }

@@ -3,20 +3,15 @@ package org.cdsframework.cds.supportingdata;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.ConceptUtils;
-import org.cdsframework.ice.config.iceSupportingProperties.CdsListData;
-import org.cdsframework.ice.config.iceSupportingProperties.CdsListItemConceptMappingData;
-import org.cdsframework.ice.config.iceSupportingProperties.CdsListItemData;
 import org.cdsframework.ice.dto.CodeSystem;
 import org.cdsframework.ice.dto.CodeSystemConcept;
 import org.cdsframework.ice.dto.CodeSystemConceptProperty;
 import org.cdsframework.ice.dto.Coding;
-import org.cdsframework.ice.dto.Identifier;
+import org.cdsframework.ice.supportingdata.SupplementalReasonSupport;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 import lombok.EqualsAndHashCode;
@@ -31,7 +26,6 @@ public class LocallyCodedCdsListItem
     private final List<CodeSystemConceptProperty> properties = new ArrayList<>();
     @EqualsAndHashCode.Include
     private String cdsListItemName;
-    private String cdsListId;
     @EqualsAndHashCode.Include
     private String cdsListCode;
     private String cdsListType;
@@ -50,146 +44,18 @@ public class LocallyCodedCdsListItem
     private CD cdsListItemOutboundCD;
     private CD cdsListItemCD;
     private boolean supplementalText;
+    private SupplementalReasonSupport.SupplementalReasonType supplementalReasonType =
+            SupplementalReasonSupport.SupplementalReasonType.NONE;
     private boolean supported = true;
-
-    /**
-     * Create a SupportedListConceptItem object based on the CdsListData and a CdsListItemData.
-     *
-     * @param pCdsLsf CdsListData
-     * @param pCdsLi  CdsListItemData
-     */
-    protected LocallyCodedCdsListItem(final CdsListData pCdsLsf, final CdsListItemData pCdsLi) throws IllegalArgumentException
-    {
-        final String _METHODNAME = "LocallyCodedCdsListItem(): ";
-
-        if (pCdsLsf == null || pCdsLi == null)
-            return;
-
-        this.cdsListType =
-                Stream.of("VALUE_SET", "CODE_SYSTEM").filter(s -> s.equals(pCdsLsf.listType())).findAny().orElseThrow(() ->
-                {
-                    final String lErrStr = "cdsListType \"" + pCdsLsf.listType() + "\" not supported by this class";
-                    log.error(_METHODNAME + "{}", lErrStr);
-                    return new IllegalArgumentException(lErrStr);
-                });
-
-        this.cdsListId = pCdsLsf.listId();
-        this.cdsListCode = pCdsLsf.code();
-        if (cdsListCode == null)
-        {
-            final String lErrStr = "required element cdsListCode not specified";
-            log.error(_METHODNAME + lErrStr);
-            throw new IllegalArgumentException(lErrStr);
-        }
-
-        if (!ConceptUtils.attributeNameConformsToRequiredNamingConvention(cdsListCode))
-        {
-            final String lErrStr = "required element cdsListCode \"" + this.cdsListCode + "\"  contains invalid characters "
-                    + ConceptUtils._attributeNamingConvention;
-            log.error(_METHODNAME + "{}", lErrStr);
-            throw new IllegalArgumentException(lErrStr);
-        }
-
-        final String lCdsListItemKey = pCdsLi.cdsListItemKey();
-        if (lCdsListItemKey == null)
-        {
-            final String lErrStr = "required element cdsListItemKey not specified";
-            log.error(_METHODNAME + lErrStr);
-            throw new IllegalArgumentException(lErrStr);
-        }
-
-        if (!ConceptUtils.attributeNameConformsToRequiredNamingConvention(lCdsListItemKey))
-        {
-            final String lErrStr =
-                    "required element cdsListItemKey \"%s\" contains invalid characters; must conform to %s".formatted(
-                            lCdsListItemKey, ConceptUtils._attributeNamingConvention);
-            log.error(_METHODNAME + "{}", lErrStr);
-            throw new IllegalArgumentException(lErrStr);
-        }
-
-        final Map<String, CdsListItemData> lPCdsListItems = pCdsLsf.cdsListItem();
-        if (lPCdsListItems == null)
-        {
-            final String lErrStr = "specified cdsListItem not found in specified cdsListSpecificationFile";
-            log.error(_METHODNAME + lErrStr);
-            throw new IllegalArgumentException(lErrStr);
-        }
-
-        if (lPCdsListItems.values().stream().noneMatch(lCdsListItem -> lCdsListItemKey.equals(lCdsListItem.cdsListItemKey())))
-        {
-            final String lErrStr = "specified cdsListItem not found in specified cdsListSpecificationFile";
-            log.error(_METHODNAME + lErrStr);
-            throw new IllegalArgumentException(lErrStr);
-        }
-
-        this.cdsListDescription = pCdsLsf.description();
-        this.cdsListCodeSystem = pCdsLsf.codeSystem();
-        this.cdsListValueSet = pCdsLsf.valueSet();
-
-        if (this.cdsListCodeSystem == null && this.cdsListValueSet == null)
-        {
-            final String lErrStr = "specified cdsList does not have a specified code system or value set OID";
-            log.error(_METHODNAME + lErrStr);
-            throw new IllegalArgumentException(lErrStr);
-        }
-
-        if (this.cdsListCodeSystem != null && this.cdsListValueSet != null)
-        {
-            final String lErrStr = "specified cdsList has both a code system OID and value set OID set";
-            log.error(_METHODNAME + lErrStr);
-            throw new IllegalArgumentException(lErrStr);
-        }
-
-        this.cdsListCodeSystemName = pCdsLsf.codeSystemName();
-        this.cdsListOpenCdsConceptType = pCdsLsf.openCdsConceptType();
-        this.cdsListItemKey = lCdsListItemKey.replaceAll("[ \t\n\f\r]", "_");
-        this.cdsListItemValue = pCdsLi.cdsListItemValue();
-        this.opencdsConceptMappings = new ArrayList<>();
-
-        if (pCdsLi.cdsListItemConceptMapping() != null)
-        {
-            for (final CdsListItemConceptMappingData clic : pCdsLi.cdsListItemConceptMapping().values())
-            {
-                final CdsConcept ic = new CdsConcept(clic.code(), clic.displayName());
-                ic.setIsOpenCdsSupportedConcept(true);
-                ic.setDeterminationMethodCode(clic.conceptDeterminationMethod());
-                this.opencdsConceptMappings.add(ic);
-            }
-        }
-
-        this.cdsListVersions = pCdsLsf.cdsVersion().values();
-        this.cdsListItemName = "%s.%s".formatted(this.cdsListCode, this.cdsListItemKey);
-
-        if (pCdsLi.outboundCoding() != null)
-        {
-            this.cdsListItemOutboundCD = new CD();
-            this.cdsListItemOutboundCD.setCode(pCdsLi.outboundCoding().code());
-            this.cdsListItemOutboundCD.setDisplayName(pCdsLi.outboundCoding().displayName());
-            this.cdsListItemOutboundCD.setCodeSystem(pCdsLi.outboundCoding().codeSystem());
-            this.cdsListItemOutboundCD.setCodeSystemName(pCdsLi.outboundCoding().codeSystemName());
-            this.cdsListItemOutboundCD.setOriginalText(Optional.ofNullable(pCdsLi.outboundCoding().originalText())
-                    .map(text -> text.replaceAll("\\s+", " "))
-                    .orElse(null));
-            this.supplementalText =
-                    Optional.ofNullable(this.cdsListItemOutboundCD.getCode()).map("SUPPLEMENTAL_TEXT"::equals).orElse(false);
-        }
-        this.cdsListItemCD = new CD();
-        this.cdsListItemCD.setCode(this.cdsListItemKey);
-        this.cdsListItemCD.setDisplayName(this.cdsListItemValue);
-        if (this.cdsListValueSet != null)
-            this.cdsListItemCD.setCodeSystem(this.cdsListValueSet);
-        else
-            this.cdsListItemCD.setCodeSystem(this.cdsListCodeSystem);
-        this.cdsListItemCD.setCodeSystemName(this.cdsListCodeSystemName);
-    }
 
     /**
      * Create a SupportedListConceptItem object based on FHIR CodeSystem and a concept.
      *
-     * @param pCodeSystem FHIR CodeSystem
-     * @param pConcept    FHIR CodeSystem Concept
+     * @param pCodeSystem    FHIR CodeSystem
+     * @param pConcept       FHIR CodeSystem Concept
+     * @param pCodeSystemOid validated code system OID
      */
-    protected LocallyCodedCdsListItem(final CodeSystem pCodeSystem, final CodeSystemConcept pConcept)
+    protected LocallyCodedCdsListItem(final CodeSystem pCodeSystem, final CodeSystemConcept pConcept, final String pCodeSystemOid)
             throws IllegalArgumentException
     {
         final String _METHODNAME = "LocallyCodedCdsListItem(CodeSystem, ConceptDefinitionComponent): ";
@@ -199,14 +65,7 @@ public class LocallyCodedCdsListItem
 
         this.cdsListType = "CODE_SYSTEM";
 
-        this.cdsListId = Optional.ofNullable(pCodeSystem.getIdentifiers())
-                .stream()
-                .flatMap(Collection::stream)
-                .findFirst()
-                .map(Identifier::getValue)
-                .orElse(null);
-
-        this.cdsListCode = pCodeSystem.getName();
+        this.cdsListCode = pCodeSystem.name();
         if (cdsListCode == null)
         {
             final String lErrStr = "required element cdsListCode (CodeSystem.name) not specified";
@@ -223,7 +82,7 @@ public class LocallyCodedCdsListItem
             throw new IllegalArgumentException(lErrStr);
         }
 
-        final String lCdsListItemKey = pConcept.getCode();
+        final String lCdsListItemKey = pConcept.code();
         if (lCdsListItemKey == null)
         {
             final String lErrStr = "required element cdsListItemKey (ConceptDefinitionComponent.code) not specified";
@@ -240,34 +99,34 @@ public class LocallyCodedCdsListItem
             throw new IllegalArgumentException(lErrStr);
         }
 
-        this.cdsListDescription = pCodeSystem.getDescription();
-        this.cdsListCodeSystem = pCodeSystem.getUrl();
-        this.cdsListValueSet = null;
-
-        if (this.cdsListCodeSystem == null)
+        this.cdsListDescription = pCodeSystem.description();
+        this.cdsListCodeSystem = pCodeSystemOid;
+        if (this.cdsListCodeSystem == null || this.cdsListCodeSystem.isBlank())
         {
-            final String lErrStr = "specified cdsList does not have a specified code system URL (CodeSystem.url)";
+            final String lErrStr = "required element cdsListCodeSystem OID not specified";
             log.error(_METHODNAME + lErrStr);
             throw new IllegalArgumentException(lErrStr);
         }
+        this.cdsListValueSet = null;
 
-        this.cdsListCodeSystemName = pCodeSystem.getTitle();
+        this.cdsListCodeSystemName = pCodeSystem.title();
         this.cdsListOpenCdsConceptType = null;
         this.cdsListItemKey = lCdsListItemKey.replaceAll("[ \t\n\f\r]", "_");
-        this.cdsListItemValue = pConcept.getDisplay();
+        this.cdsListItemValue = pConcept.display();
+        this.supplementalReasonType = SupplementalReasonSupport.getSupplementalReasonTypeForCodeSystem(this.cdsListCode);
         this.opencdsConceptMappings = new ArrayList<>();
 
-        this.cdsListVersions = java.util.Collections.singletonList(Optional.ofNullable(pCodeSystem.getVersion()).orElse(""));
-        Optional.ofNullable(pConcept.getProperties()).ifPresent(this.properties::addAll);
+        this.cdsListVersions = java.util.Collections.singletonList(Optional.ofNullable(pCodeSystem.version()).orElse(""));
+        Optional.ofNullable(pConcept.property()).ifPresent(this.properties::addAll);
         this.cdsListItemName = "%s.%s".formatted(this.cdsListCode, this.cdsListItemKey);
 
         // Handle outbound coding or concept mapping if defined as a property
         final String OUTBOUND_CODE_PROPERTY = "outboundCode";
         final String CONCEPT_MAPPING_PROPERTY = "conceptMapping";
         final String SUPPORTED_PROPERTY = "supported";
-        for (final CodeSystemConceptProperty cp : Optional.ofNullable(pConcept.getProperties()).orElseGet(List::of))
+        for (final CodeSystemConceptProperty cp : Optional.ofNullable(pConcept.property()).orElseGet(List::of))
         {
-            final String propertyCode = cp.getCode();
+            final String propertyCode = cp.code();
             if (propertyCode == null)
                 continue;
 
@@ -275,45 +134,65 @@ public class LocallyCodedCdsListItem
             {
                 case OUTBOUND_CODE_PROPERTY ->
                 {
-                    if (cp.getValueCoding() instanceof final Coding outboundCoding)
+                    if (cp.valueCoding() instanceof final Coding outboundCoding)
                     {
                         this.cdsListItemOutboundCD = new CD();
-                        this.cdsListItemOutboundCD.setCode(outboundCoding.getCode());
-                        this.cdsListItemOutboundCD.setDisplayName(outboundCoding.getDisplay());
-                        this.cdsListItemOutboundCD.setCodeSystem(outboundCoding.getSystem());
+                        this.cdsListItemOutboundCD.setCode(outboundCoding.code());
+                        this.cdsListItemOutboundCD.setDisplayName(outboundCoding.display());
+                        this.cdsListItemOutboundCD.setCodeSystem(outboundCoding.system());
                         // TODO: Add codeSystemName lookup by oid
                         this.cdsListItemOutboundCD.setCodeSystemName(null);
                         this.cdsListItemOutboundCD.setOriginalText(
-                                "SUPPLEMENTAL_TEXT".equals(this.cdsListItemOutboundCD.getCode()) ? this.cdsListItemValue : null);
+                                SupplementalReasonSupport.SUPPLEMENTAL_TEXT_CODE.equals(this.cdsListItemOutboundCD.getCode())
+                                ? this.cdsListItemValue
+                                : null);
                         this.supplementalText = Optional.ofNullable(this.cdsListItemOutboundCD.getCode())
-                                .map("SUPPLEMENTAL_TEXT"::equals)
+                                .map(SupplementalReasonSupport.SUPPLEMENTAL_TEXT_CODE::equals)
                                 .orElse(false);
                     }
                 }
                 case CONCEPT_MAPPING_PROPERTY ->
                 {
-                    if (cp.getValueCoding() instanceof final Coding conceptMappingCoding && conceptMappingCoding.getCode() != null)
+                    if (cp.valueCoding() instanceof final Coding conceptMappingCoding && conceptMappingCoding.code() != null)
                     {
-                        final CdsConcept lC = new CdsConcept(conceptMappingCoding.getCode());
-                        lC.setDisplayName(conceptMappingCoding.getDisplay());
-                        lC.setConceptTargetId(conceptMappingCoding.getSystem());
+                        final CdsConcept lC = new CdsConcept(conceptMappingCoding.code());
+                        lC.setDisplayName(conceptMappingCoding.display());
+                        lC.setConceptTargetId(conceptMappingCoding.system());
                         lC.setIsOpenCdsSupportedConcept(true);
                         this.opencdsConceptMappings.add(lC);
                     }
                 }
                 case SUPPORTED_PROPERTY ->
                 {
-                    if (cp.isValueBoolean() != null)
-                        this.supported = cp.isValueBoolean();
+                    if (cp.valueBoolean() != null)
+                        this.supported = cp.valueBoolean();
                 }
             }
         }
+        initializeSupplementalOutboundCDForReasonConceptIfApplicable();
 
-        this.cdsListItemCD = new CD();
-        this.cdsListItemCD.setCode(this.cdsListItemKey);
-        this.cdsListItemCD.setDisplayName(this.cdsListItemValue);
-        this.cdsListItemCD.setCodeSystem(this.cdsListCodeSystem);
-        this.cdsListItemCD.setCodeSystemName(this.cdsListCodeSystemName);
+        this.cdsListItemCD = CD.builder()
+                .code(this.cdsListItemKey)
+                .displayName(this.cdsListItemValue)
+                .codeSystem(this.cdsListCodeSystem)
+                .codeSystemName(this.cdsListCodeSystemName)
+                .build();
+    }
+
+    private void initializeSupplementalOutboundCDForReasonConceptIfApplicable()
+    {
+        if (!this.supplementalReasonType.isSupplemental())
+            return;
+
+        if (this.cdsListItemOutboundCD == null)
+            this.cdsListItemOutboundCD = new CD();
+
+        this.cdsListItemOutboundCD.setCode(SupplementalReasonSupport.SUPPLEMENTAL_TEXT_CODE);
+        this.cdsListItemOutboundCD.setOriginalText(this.cdsListItemValue);
+        this.cdsListItemOutboundCD.setCodeSystemName(
+                Optional.ofNullable(this.cdsListItemOutboundCD.getCodeSystemName()).orElse(this.cdsListCodeSystemName));
+
+        this.supplementalText = true;
     }
 
     /**
@@ -350,8 +229,6 @@ public class LocallyCodedCdsListItem
     {
         final StringBuilder lStr = new StringBuilder().append("[SupportedCdsListItem=")
                 .append(cdsListItemName)
-                .append("\ncdsListId=")
-                .append(cdsListId)
                 .append("\ncdsListCode=")
                 .append(cdsListCode)
                 .append("\ncdsListType=")

@@ -383,7 +383,7 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
         {
             log.error(e.getMessage(), e);
             throw new InvalidDriDataFormatException("Unknown error initializing CdsInputFactListsBuilder: " + e.getMessage()
-                    + ", therefore unable to complete unmarshalling input Semantic Payload: " + payload.toString());
+                    + ", therefore unable to complete unmarshalling input Semantic Payload: " + payload);
         }
         finally
         {

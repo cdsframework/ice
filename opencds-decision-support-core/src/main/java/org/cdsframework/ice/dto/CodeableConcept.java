@@ -1,14 +1,18 @@
 package org.cdsframework.ice.dto;
 
 import java.util.List;
+import java.util.Objects;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Singular;
 
-@Getter
-@Setter
-public class CodeableConcept
+@Builder
+public record CodeableConcept(@Singular("coding")
+                              List<Coding> coding,
+                              String text)
 {
-    private List<Coding> coding;
-    private String text;
+    public CodeableConcept
+    {
+        coding = Objects.requireNonNullElseGet(coding, List::of);
+    }
 }

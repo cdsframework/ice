@@ -141,7 +141,8 @@ public class SemanticSignifierServiceImpl implements SemanticSignifierService
 
     private <T, RSB extends ResultSetBuilder<T>> Map<SSId, RSB> buildResultSetBuilderPairs(final List<SemanticSignifier> all)
     {
-        return all.stream().map(ss -> Map.entry(ss.getSSId(), ClassUtil.<RSB>newInstance(ss.getResultSetBuilder())))
+        return all.stream()
+                .map(ss -> Map.entry(ss.getSSId(), ClassUtil.<RSB>newInstance(ss.getResultSetBuilder())))
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

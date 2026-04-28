@@ -20,7 +20,8 @@ import lombok.Setter;
 public class IceSupportingDataProperties
 {
     public record KnowledgeModule(Map<String, @Valid SeriesData> series,
-                                  Map<String, CodeSystem> codeSystems)
+                                  Map<String, @Valid CodeSystem> codeSystems,
+                                  Map<String, @Valid String> outboundCodeSystemMap)
     {
     }
 

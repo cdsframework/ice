@@ -40,15 +40,15 @@ rule "HepB: Recommend a Dose of HepB Conditionally if Patient >= 60 Years and No
 end
 
 /**
- * The interval between dose 1 & 3 of HepB Child/Adolescent series needs to be at least 112 days for Recommendation.
+ * The interval between dose 1 & 3 of HepB 3-dose Child/Adolescent series needs to be at least 112 days for Recommendation.
  * Routine interval rule still runs
  */
-rule "HepB: Recommend both an earliest interval and recommended interval of 112 days between doses 1 & 3 for Child/Adolescent Series"
+rule "HepB: Recommend both an earliest interval and recommended interval of 112 days between doses 1 & 3 for 3-dose Child/Adolescent Series"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
-			- the name of the series is "SUPPORTED_SERIES.HepBChildAdolescentSeries"
+			- the name of the series is "SUPPORTED_SERIES.HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
 		There is an Administered Shot $dose1
@@ -75,7 +75,7 @@ rule "HepB: Recommend both an earliest interval of 112 days and recommended inte
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
-			- the name of the series is "SUPPORTED_SERIES.HepBAdult3DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.HEP_B_ADULT_3_DOSE_SERIES"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
 		There is an Administered Shot $dose1
@@ -103,7 +103,7 @@ rule "HepB: Recommend both an earliest and recommended interval of 6 months betw
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
-			- the name of the series is "SUPPORTED_SERIES.HepB3DoseTwinrixSeries"
+			- the name of the series is "SUPPORTED_SERIES.HEP_B_3_DOSE_TWINRIX_SERIES"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
 		There is an Administered Shot $dose1
@@ -130,7 +130,7 @@ rule "HepB: Recommend both an earliest and recommended interval of 12 months bet
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
-			- the name of the series is "SUPPORTED_SERIES.HepB4DoseAcceleratedTwinrixSeries"
+			- the name of the series is "SUPPORTED_SERIES.HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 4
 		There is an Administered Shot $dose1
@@ -149,6 +149,89 @@ rule "HepB: Recommend both an earliest and recommended interval of 12 months bet
 end
 
 /**
+ * The interval between dose 1 & 3 of HepB 3-dose Child/Adolescent series needs to be at least 16 weeks for Recommendation.
+ * Routine interval rule still runs
+ */
+rule "HepB: Recommend both an earliest and recommended interval of 16 weeks between doses 1 & 3 for the Hep-B 3-dose Child/Adolescent Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the name of the series is "SUPPORTED_SERIES.HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "16w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * The interval between dose 1 & 4 of HepB 4-dose Child/Adolescent series needs to be at least 16 weeks for Recommendation.
+ * Routine interval rule still runs
+ */
+rule "HepB: Recommend both an earliest and recommended interval of 16 weeks between doses 1 & 4 for the Hep-B 4-dose Child/Adolescent Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the name of the series is "SUPPORTED_SERIES.HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 4
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "16w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * The interval between dose 2 & 4 of HepB 4-dose Child/Adolescent series needs to be at least 56 days for Recommendation.
+ * Routine interval rule still runs
+ */
+rule "HepB: Recommend both an earliest and recommended interval of 56 days between doses 2 & 4 for the Hep-B 4-dose Child/Adolescent Series"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+			- the name of the series is "SUPPORTED_SERIES.HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 4
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 2
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Create a Recommendation as $r for the Series $targetSeries
+		Add "56d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Add "18m+4w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculatedOverdue
+		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
+		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
+		Set the recommendation Overdue Forecast Date for $r to $dtCalculatedOverdue
+		Include the Recommendation $r for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
  * Recommend at the vaccine level, CVX 189 (Hep B adjuvanted) vaccine, when recommending for the Hep B 2-dose Adult Series
  */
 rule "Hep B: Recommend CVX 189 (Hep B adjuvanted) for the Hep B 2-dose Adult Series"
@@ -156,7 +239,7 @@ rule "Hep B: Recommend CVX 189 (Hep B adjuvanted) for the Hep B 2-dose Adult Ser
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
-			- the Name of the Series is "SUPPORTED_SERIES.HepBAdult2DoseSeries"
+			- the Name of the Series is "SUPPORTED_SERIES.HEP_B_ADULT_2_DOSE_SERIES"
 			- the Series is Not Complete
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
@@ -174,12 +257,12 @@ rule "Hep B: Recommend CVX 104 (Hep A-Hep B (Twinrix)) for the Hep B 3-dose Twin
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
-			- the Name of the Series is "SUPPORTED_SERIES.HepB3DoseTwinrixSeries"
+			- the Name of the Series is "SUPPORTED_SERIES.HEP_B_3_DOSE_TWINRIX_SERIES"
 			- the Series is Not Complete
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_104"
-		Set the Recommendation Supplemental Text for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.HEP_B_3DOSE_TWINRIX_ALT_VACCINE"
+		Set the Recommendation Supplemental Text for $oRecommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.HEP_B_3DOSE_TWINRIX_ALT_VACCINE"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -194,7 +277,7 @@ rule "Hep B: Recommend CVX 104 (Hep A-Hep B (Twinrix)) for the Hep B 4-dose Acce
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
-			- the Name of the Series is "SUPPORTED_SERIES.HepB4DoseAcceleratedTwinrixSeries"
+			- the Name of the Series is "SUPPORTED_SERIES.HEP_B_4_DOSE_ACCELERATED_TWINRIX_SERIES"
 			- the Series is Not Complete
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries

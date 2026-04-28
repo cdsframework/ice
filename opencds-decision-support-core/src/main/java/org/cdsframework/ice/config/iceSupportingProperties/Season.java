@@ -1,5 +1,7 @@
 package org.cdsframework.ice.config.iceSupportingProperties;
 
+import org.jspecify.annotations.NonNull;
+
 import jakarta.validation.constraints.NotEmpty;
 
 public record Season(@NotEmpty
@@ -11,6 +13,7 @@ public record Season(@NotEmpty
                      @NotEmpty
                      String displayName) implements BaseConceptDescriptor
 {
+    @NonNull
     @Override
     public String toString()
     {

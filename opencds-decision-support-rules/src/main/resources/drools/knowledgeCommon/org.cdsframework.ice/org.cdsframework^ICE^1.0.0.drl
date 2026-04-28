@@ -41,7 +41,7 @@ import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.service.Season;
 import org.cdsframework.ice.service.SeriesRules;
 import org.cdsframework.ice.service.SeriesDisplaySelection;
-import org.cdsframework.ice.service.SeriesDisplaySelection.SeriesDisplaySelectionType;
+import org.cdsframework.ice.service.SeriesDisplaySelectionType;
 import org.cdsframework.ice.service.TargetDose;
 import org.cdsframework.ice.service.TargetDoseInitializationTracker;
 import org.cdsframework.ice.service.TargetSeasons;
@@ -75,6 +75,7 @@ global java.lang.Boolean outputSupplementalText;
 global java.util.List vaccineGroupExclusions;
 global java.lang.Boolean enableUnsupportedVaccinesGroup;
 global java.lang.Boolean outputNumberOfDosesRemaining;
+global java.lang.Boolean outputSeriesInformation;
 global java.lang.Boolean disableCovid19DoseNumberReset;
 global java.lang.Boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries;
 global java.lang.String iceVersion;
@@ -195,6 +196,20 @@ rule "InitializeReferenceData: Output Number of Doses Remaining Fact Object"
         eval(outputNumberOfDosesRemaining != null && outputNumberOfDosesRemaining.booleanValue() == true)
     then
         insert(new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue));
+        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output number of doses remaining? Initialized");
+end
+
+/**
+ * General Design rule... Do not Edit
+ */
+rule "InitializeReferenceData: Output Series Information Fact Object"
+	ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+    when
+        not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue)
+        eval(outputSeriesInformation != null && outputSeriesInformation.booleanValue() == true)
+    then
+        insert(new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue));
         ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output number of doses remaining? Initialized");
 end
 
@@ -1083,6 +1098,22 @@ rule "HistoryEvaluation.denoteDoseReadyForFinalEvaluationStatus"
 end
 
 /**
+ * General Design rule... Do not Edit
+ */
+ rule "HistoryEvaluation.captureEvaluationContext"
+	ruleflow-group "HistoryEvaluation"
+	dialect "mvel"
+	salience 100
+	when
+	    exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue))
+		$td : TargetDose(status in (DoseStatus.VALID, DoseStatus.INVALID, DoseStatus.ACCEPTED, DoseStatus.NOT_EVALUATED), $ts : associatedTargetSeries)
+		accumulate($srthis : SeriesRules(vaccineGroup == $ts.vaccineGroup); $numberOfSeriesInVG : count($srthis); $numberOfSeriesInVG > 0)
+	then
+		$td.captureEvaluationContext($td.associatedTargetSeries, $numberOfSeriesInVG.intValue());
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td.toString() + " in TargetSeries " + $td.associatedTargetSeries.seriesName);
+ end
+
+/**
  * Supplemental Series Table rule... modifying this rule not suggested
  */
 rule "HistoryEvaluation.markExtraneousDosesAcceptedIfCompleteForAllDiseaseTargetedByThisDose"
@@ -1669,7 +1700,8 @@ rule "RecommendationForecast: Make a Record of all Non-Seasonal TargetSeries of 
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue)) or
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue))
 		$ts : TargetSeries(isSelectedSeries() == true, targetSeason == null)
 		not SeriesDisplaySelection(targetSeries == $ts)
 	then
@@ -1685,8 +1717,9 @@ rule "RecommendationForecast: Maka a Record of Seasonal TargetSeries in the Curr
 	ruleflow-group "RecommendationForecast"
 	dialect "mvel"
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
-		$ts : TargetSeries(isSelectedSeries() == true, targetSeason != null, isSeriesComplete() == false)
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue)) or
+		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue))
+		$ts : TargetSeries(isSelectedSeries() == true, targetSeason != null)
 		not SeriesDisplaySelection(targetSeries == $ts)
 		not TargetSeries(vaccineGroup == $ts.vaccineGroup, targetSeason != null, targetSeason.fullySpecifiedSeasonStartDate.isAfter($ts.targetSeason.fullySpecifiedSeasonStartDate))
 	then
@@ -2722,8 +2755,8 @@ rule "ProcessResults: Return Evaluations"
 		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
 		$evalTime: EvalTime()
 	then
-		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true);
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects);
+		p.outputNestedImmEvaluationResult($evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
 		insert(saeEvaluation);
@@ -2739,7 +2772,7 @@ rule "ProcessResults(COVID-19 Abstract): Return COVID-19 Season Evaluations - (C
 	salience 12
 	when
 		not ICEFactTypeFinding(iceResultFinding == "COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED")
-		$covidSeason : Season(seasonName in ("SUPPORTED_SEASON.COVID19Sep2023Season", "SUPPORTED_SEASON.COVID19Aug2024Season", "SUPPORTED_SEASON.COVID19Aug2025Season"), fullySpecifiedSeasonStartDate != null, fullySpecifiedSeasonEndDate != null, $seasonStartDate : ICELogicHelper.toDate(fullySpecifiedSeasonStartDate), $seasonEndDate : ICELogicHelper.toDate(fullySpecifiedSeasonEndDate))
+		$covidSeason : Season(seasonName in ("SUPPORTED_SEASON.COVID_19_SEP_2023_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2024_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON"), fullySpecifiedSeasonStartDate != null, fullySpecifiedSeasonEndDate != null, $seasonStartDate : ICELogicHelper.toDate(fullySpecifiedSeasonStartDate), $seasonEndDate : ICELogicHelper.toDate(fullySpecifiedSeasonEndDate))
 		$sae : SubstanceAdministrationEvent()
 		$td : TargetDose(doseId == $sae.id, associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", associatedTargetSeries.targetSeasonExists() == true, associatedTargetSeries.targetSeason.seasonName == $covidSeason.seasonName, administrationDate >= $seasonStartDate, administrationDate <= $seasonEndDate)
 		$ts : TargetSeries(this == $td.associatedTargetSeries, $vaccineGroup : seriesRules.vaccineGroup, selectedSeries == true, targetSeasonExists() == true, targetSeason.seasonName == $covidSeason.seasonName)
@@ -2756,16 +2789,16 @@ end
  * COVID-19 Supplementary rule... To be migrated to custom rule and genericize
  */
 rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - (CB1 - _always_ reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set and series was not started and not completed in the previous season)"
-		extends "ProcessResults(COVID-19 Abstract): Return COVID-19 Season Evaluations - (CB1 - determine if dose number should be reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set"
+	extends "ProcessResults(COVID-19 Abstract): Return COVID-19 Season Evaluations - (CB1 - determine if dose number should be reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 11
 	when
 		exists TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1)
 	then
-		PayloadHelper p = new PayloadHelper(schedule);
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects);
 		int doseNumberToDisplay = $numberOfPreviousDoses.intValue() == 0 ? 1 : $numberOfPreviousDoses.intValue()+1;
-		p.outputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, doseNumberToDisplay);
+		p.outputNestedImmEvaluationResult($evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, doseNumberToDisplay);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
 		insert(saeEvaluation);
@@ -2777,7 +2810,7 @@ end
  * COVID-19 Supplementary rule... To be migrated to custom rule and genericize
  */
 rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - (CB1 - do _not_ reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set and series was started and not completed in the previous season)"
-		extends "ProcessResults(COVID-19 Abstract): Return COVID-19 Season Evaluations - (CB1 - determine if dose number should be reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set"
+	extends "ProcessResults(COVID-19 Abstract): Return COVID-19 Season Evaluations - (CB1 - determine if dose number should be reset to dose 1 at the beginning of the Sept 2023, Aug 2024 and Aug 2025 season start dates if COVID19_SEP2023_DOSE_NUMBER_RESET_DISABLED is _not_ set"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 11
@@ -2786,8 +2819,8 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - (CB1 - do _
 		TargetDose(associatedTargetSeries == $ts, $tddosenumber : doseNumberInSeries)
 		not TargetDose(associatedTargetSeries == $ts, doseNumberInSeries < $tddosenumber)
 	then
-		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $tddosenumber);
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects);
+		p.outputNestedImmEvaluationResult($evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $tddosenumber);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
 		insert(saeEvaluation);
@@ -2811,8 +2844,8 @@ rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations (CB2 - do _n
 		$numberOfPreviousDoses: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", administrationDate < $td.administrationDate, isValid == true), count($acctd))
 		$evalTime: EvalTime()
 	then
-		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputNestedImmEvaluationResult(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $numberOfPreviousDoses.intValue()+1);
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects);
+		p.outputNestedImmEvaluationResult($evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, outputSupplementalText, true, $numberOfPreviousDoses.intValue()+1);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
 		insert(saeEvaluation);
@@ -2833,8 +2866,8 @@ rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
 		not TargetDose(doseId == $sae.id)
 		$evalTime: EvalTime()
 	then
-		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputNestedImmEvaluationNotSupported(drools, namedObjects, $evalTime, focalPersonId, iceVersion, $sae, "VACCINE_GROUP_CONCEPT.OTHER");
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects);
+		p.outputNestedImmEvaluationNotSupported($evalTime, focalPersonId, iceVersion, $sae, "VACCINE_GROUP_CONCEPT.OTHER");
 		$sae.setToBeReturned(true);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $sae);
 end
@@ -2843,7 +2876,7 @@ end
  * General Design rule... Do not Edit
  */
 rule "ProcessResults: Return Recommendations for Vaccines Not Supported"
-    extends "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
+	extends "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 10
@@ -2851,8 +2884,8 @@ rule "ProcessResults: Return Recommendations for Vaccines Not Supported"
 		not ObservationResult(observationValue != null && observationValue.concept != null &&
 			observationValue.concept == PayloadHelper.getLocalCodeForRecommendationStatus(RecommendationStatus.RECOMMENDATION_NOT_AVAILABLE, schedule))
 	then
-		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputOtherImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion);
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects);
+		p.outputOtherImmRecommendationSubstanceAdministrationProposal(focalPersonId, iceVersion);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
 
@@ -2933,8 +2966,8 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series"
 		not TargetSeries(vaccineGroup == $ts.vaccineGroup, seriesRules.seriesGroup > $ts.seriesRules.seriesGroup)
 		$evalTime: EvalTime()
 	then
-		PayloadHelper p = new PayloadHelper(schedule);
-		SubstanceAdministrationProposal sap = p.outputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects);
+		SubstanceAdministrationProposal sap = p.outputRootImmRecommendationSubstanceAdministrationProposal(focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
 		insert(sap);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
@@ -2952,28 +2985,42 @@ rule "ProcessResults: Return Recommendations For Seasonal Series"
 		not TargetSeries(vaccineGroup == $vg, seriesRules.seriesGroup > $ts.seriesRules.seriesGroup)
 		not TargetSeries(vaccineGroup == $vg, targetSeason != null,	targetSeason.fullySpecifiedSeasonStartDate.isAfter($tseasonStartDate))
 	then
-		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputRootImmRecommendationSubstanceAdministrationProposal(drools, namedObjects, focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects);
+		p.outputRootImmRecommendationSubstanceAdministrationProposal(focalPersonId, iceVersion, $ts, outputEarliestOverdueDates, outputSupplementalText);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
 
 /**
- * START Supplemental Output Rules - Output Series Display Selection and Number of Doses Remaining for each Series Display Option
+ * START Supplemental Output Rules - Output Series Display Selection and / or Number of Doses Remaining for each Series Display Option
  */
 
 /**
  * General Design Rule... Do not Edit
  * Output Series Selection display information if option enabled
  */
-rule "Series Display(Abstract): Return Series Selection Display Options"
+rule "Series Display(Abstract): Determine Series Display Options Enabled"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 8
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
+		exists ICEFactTypeFinding(iceResultFinding in (SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue,
+		        SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue))
+    then
+        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Display Options Enabled");
+end
+
+/**
+ * General Design Rule... Do not Edit
+ * Output Series Selection display information if option enabled
+ */
+rule "Series Display(Abstract): Determine Series Display Selection"
+    extends "Series Display(Abstract): Determine Series Display Options Enabled"
+	ruleflow-group "ProcessResults"
+	dialect "mvel"
+	salience 8
+	when
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType == SeriesDisplaySelectionType.SERIES_DISPLAY_NOT_SELECTED)
-		$ts : TargetSeries(this == $ss.targetSeries, isSeriesComplete() == false && (recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE) ||
-			isSeriesComplete() == true && determineEffectiveNumberOfDosesInSeries() <= seriesRules.numberOfDosesInSeries)
+		$ts : TargetSeries(this == $ss.targetSeries)
 	then
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Selection \": " + $ts.seriesName);
 end
@@ -2983,7 +3030,7 @@ end
  * Output Series Selection display information if option enabled
  */
 rule "Series Display: Mark Selected Series as Unambiguous for Display if there is only one configured series for the Vaccine Group"
-	extends "Series Display(Abstract): Return Series Selection Display Options"
+	extends "Series Display(Abstract): Determine Series Display Selection"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 8
@@ -2994,7 +3041,7 @@ rule "Series Display: Mark Selected Series as Unambiguous for Display if there i
 		modify ($ss) {
 			setSeriesDisplaySelectionType(SeriesDisplaySelectionType.SERIES_DISPLAY_UNAMBIGUOUS)
 		};
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Selection \": " + $ts.seriesName + "; " + SeriesDisplaySelectionType.SERIES_DISPLAY_UNAMBIGUOUS);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Selection \": " + $ts.seriesName + "; " + "SERIES_DISPLAY_UNAMBIGUOUS");
 end
 
 /**
@@ -3002,7 +3049,7 @@ end
  * Output Series Selection display information if option enabled
  */
 rule "Series Display: Mark Selected Series as Best Guess for Display when there are more than one configured series for the Vaccine Group" 
-	extends "Series Display(Abstract): Return Series Selection Display Options"
+	extends "Series Display(Abstract): Determine Series Display Selection"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 8
@@ -3013,7 +3060,7 @@ rule "Series Display: Mark Selected Series as Best Guess for Display when there 
 		modify ($ss) {
 			setSeriesDisplaySelectionType(SeriesDisplaySelectionType.SERIES_DISPLAY_BEST_GUESS)
 		};
-		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Selection \": " + $ts.seriesName + "; " + SeriesDisplaySelectionType.SERIES_DISPLAY_BEST_GUESS);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Selection \": " + $ts.seriesName + "; " + "SERIES_DISPLAY_BEST_GUESS");
 end
 
 /**
@@ -3021,11 +3068,11 @@ end
  * Output Series Selection display information if option enabled
  */
 rule "Series Display: Invoke Series Display Custom Rules"
+  extends "Series Display(Abstract): Determine Series Display Options Enabled"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 7
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ts : TargetSeries()
 		exists SeriesDisplaySelection(targetSeries.vaccineGroup == $ts.vaccineGroup, targetSeries != $ts, seriesDisplaySelectionType == SeriesDisplaySelectionType.SERIES_DISPLAY_NOT_SELECTED)
 		not SeriesDisplaySelection(targetSeries.vaccineGroup == $ts.vaccineGroup, seriesDisplaySelectionType == SeriesDisplaySelectionType.SERIES_DISPLAY_UNAMBIGUOUS)
@@ -3039,11 +3086,11 @@ end
  * Output Series Selection display information if option enabled
  */
 rule "Series Display: For any remaining series display selections set to SERIES_DISPLAY_NOT_SELECTED, change the series display selection to SERIES_DISPLAY_NONE"
+  extends "Series Display(Abstract): Determine Series Display Options Enabled"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 6
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType == SeriesDisplaySelectionType.SERIES_DISPLAY_NOT_SELECTED)
 	then
 		modify($ss) {
@@ -3057,11 +3104,11 @@ end
  * Output Series Selection display information if option enabled
  */
 rule "Series Display: Set Number of Doses Remaining to Recommendation for a Series that is Not Complete"
+  extends "Series Display(Abstract): Determine Series Display Options Enabled"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	salience 5
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == false, $numberOfDosesInSeries : targetSeries.seriesRules.numberOfDosesInSeries, $numberOfDosesAdministered : targetSeries.determineEffectiveNumberOfDosesInSeries())
 		not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.getConceptCodeValue(), associatedTargetSeries == $ss.targetSeries)
 		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == false, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
@@ -3080,12 +3127,12 @@ end
  * however, one or more additional doses may be recommended
  */
 rule "Series Display: Set Number of Doses Remaining to Zero Doses for a Series that is Not Recurring and Complete; 'however, one or more additional doses may still be recommended'"
+  extends "Series Display(Abstract): Determine Series Display Options Enabled"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	no-loop true
 	salience 5
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == false)
 		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == true, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
 	then
@@ -3101,12 +3148,12 @@ end
  * Supplemental Output rule... Output Zero Doses Remaining to Recommendation for a Series that is Not Recurring and Complete
  */
 rule "Series Display: Set Number of Doses Remaining to Zero Doses for a Series that is Not Recurring and Complete"
+  extends "Series Display(Abstract): Determine Series Display Options Enabled"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	no-loop true
 	salience 5
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == false)
 		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == true, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false, recommendationStatus != RecommendationStatus.RECOMMENDED && recommendationStatus != RecommendationStatus.RECOMMENDED_IN_FUTURE)
 	then
@@ -3122,12 +3169,12 @@ end
  * Supplemental Output rule... Output doses N/A for Doses Remaining to Recommendation for a Series that is Recurring
  */
 rule "Series Display: Set Number of Doses Remaining to 'Recurring' for a Series that is Complete and Recurring"
+  extends "Series Display(Abstract): Determine Series Display Options Enabled"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	no-loop true
 	salience 5
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == false)
 		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == true, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == true, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
 	then
@@ -3142,12 +3189,12 @@ end
  * Supplemental Output rule... Output doses N/A for Doses Remaining to Recommendation for a Series that is Not Recommended
  */
 rule "Series Display: Append N/A for Doses Remaining to Recommendation for a Series that is Not Recommended"
+  extends "Series Display(Abstract): Determine Series Display Options Enabled"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	no-loop true
 	salience 5
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == false)
 		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, recommendationStatus == RecommendationStatus.NOT_RECOMMENDED)
 	then
@@ -3160,20 +3207,19 @@ rule "Series Display: Append N/A for Doses Remaining to Recommendation for a Ser
 end
 
 rule "Series Display: Output Series Display Selections and Number of Doses Remaining for Each Vaccine Group"
+  extends "Series Display(Abstract): Determine Series Display Options Enabled"
 	ruleflow-group "ProcessResults"
 	dialect "mvel"
 	no-loop true
 	salience 3
 	when
-		exists (ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue))
 		$ts : TargetSeries()
 		$sap : SubstanceAdministrationProposal(id == $ts.targetSeriesIdentifier)
 		$sdlist : List() from
 			accumulate($sdthis : SeriesDisplaySelection(targetSeries.vaccineGroup == $ts.vaccineGroup, seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == true), collectList($sdthis));
-
 	then
-		PayloadHelper p = new PayloadHelper(schedule);
-		p.outputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(drools, namedObjects, focalPersonId, $sdlist, $sap);
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects);
+		p.outputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(focalPersonId, $sdlist, $sap, outputNumberOfDosesRemaining);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Display Selection \": " + $ts.seriesName);
 end
 

@@ -48,7 +48,7 @@ rule "Hep A: Evaluate shot 2 as Valid if administered >= 6 months-4 days from Do
 	activation-group "doseIntervalCheck"
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with Name "SUPPORTED_SERIES.HepA2DoseChildAdultSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with Name "SUPPORTED_SERIES.HEP_A_2_DOSE_CHILD_ADULT_SERIES"
 			- the dose number in the series is == 2
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries
@@ -73,7 +73,7 @@ rule "Hep A: If CVX 104 (Twinrix) is administered at >= 18 years-4 days in the 3
 	when
 		There is an administered shot $currentShot that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the shot belongs to the Series with name a member of ("SUPPORTED_SERIES.HepAAdult3DoseSeries", "SUPPORTED_SERIES.HepA4DoseAcceleratedTwinrixSeries")
+			- the shot belongs to the Series with name a member of ("SUPPORTED_SERIES.HEP_A_ADULT_3_DOSE_SERIES", "SUPPORTED_SERIES.HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES")
 			- make note of the date this shot was administered as $administrationDate
 			- make note of the associated series as $associatedTargetSeries
 			- the vaccine administered is "VACCINE_CVX_104"
@@ -94,7 +94,7 @@ rule "Hep A: If dose 1 and dose 2 are administered in the 3-dose Series at < 19y
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
 	when
 		There is an administered shot $hepAAdultDose2
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HepAAdult3DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HEP_A_ADULT_3_DOSE_SERIES"
 			- the dose number in the Series is == 2
 			- that has already been evaluated and whose shot validity is VALID
 			- make note of the date this shot was administered as $administrationDateDose2
@@ -118,7 +118,7 @@ rule "Hep A: Switch from 2-Dose Hep A series to 3-Dose Hep A series if CVX 104 d
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an administered shot $cvx104Shot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HepA2DoseChildAdultSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HEP_A_2_DOSE_CHILD_ADULT_SERIES"
 			- the dose number in the series is == 1
 			- the vaccine administered is "VACCINE_CVX_104"
 			- make note of the Administered Shot Number as $assign_nAdministeredShotNumber
@@ -132,7 +132,7 @@ rule "Hep A: Switch from 2-Dose Hep A series to 3-Dose Hep A series if CVX 104 d
 			- the administration date of the shot is >= $dtDateAtAge19y
 		There is a Series $seriesToSwitchTo
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the name of the Series is "SUPPORTED_SERIES.HepAAdult3DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HEP_A_ADULT_3_DOSE_SERIES"
 	then
 		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $doseNumberInSeries and evaluate using Interval for prior dose to this dose from SwitchedTo Series
 		Refresh all facts in the Series $targetSeries for Evaluation
@@ -145,7 +145,7 @@ rule "Hep A: Switch from 2-Dose Hep A series to 3-Dose Hep A series if CVX 104 a
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an administered shot $cvx104Shot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HepA2DoseChildAdultSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HEP_A_2_DOSE_CHILD_ADULT_SERIES"
 			- the dose number in the series is == 2
 			- the vaccine administered is "VACCINE_CVX_104"
 			- make note of the associated series as $targetSeries
@@ -181,7 +181,7 @@ rule "Hep A: Switch from 2-Dose Hep A series to 3-Dose Hep A series if CVX 104 a
             - the shot is not ignored
 		There is a Series $seriesToSwitchTo
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the name of the Series is "SUPPORTED_SERIES.HepAAdult3DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HEP_A_ADULT_3_DOSE_SERIES"
         Confirm Elapsed time between $lastAdministeredShotDate and $dtAdministrationDate >= "24d"
 	then
 		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $doseNumberInSeries and evaluate using Interval for prior dose to this dose from SwitchedTo Series
@@ -195,7 +195,7 @@ rule "Hep A: Switch from 2-Dose Hep A series to 3-Dose Hep A series if CVX 104 d
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an administered shot $cvx104Shot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HepA2DoseChildAdultSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HEP_A_2_DOSE_CHILD_ADULT_SERIES"
 			- the dose number in the series is == 2
 			- the vaccine administered is "VACCINE_CVX_104"
 			- make note of the associated series as $targetSeries
@@ -231,7 +231,7 @@ rule "Hep A: Switch from 2-Dose Hep A series to 3-Dose Hep A series if CVX 104 d
             - the shot is not ignored
 		There is a Series $seriesToSwitchTo
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the name of the Series is "SUPPORTED_SERIES.HepAAdult3DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.HEP_A_ADULT_3_DOSE_SERIES"
         Confirm Elapsed time between $lastAdministeredShotDate and $dtAdministrationDate >= "24d" && Elapsed time between $lastAdministeredShotDate and $dtAdministrationDate < "6m-4d"
 	then
 		Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number $doseNumberInSeries and evaluate using Interval for prior dose to this dose from SwitchedTo Series
@@ -248,7 +248,7 @@ rule "Hep A: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the H
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HepAAdult3DoseSeries"
+			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A" and the Series with name "SUPPORTED_SERIES.HEP_A_ADULT_3_DOSE_SERIES"
 			- the Dose Number in the Series is == 3
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries
@@ -275,7 +275,7 @@ rule "Hep A: Ensure the Absolute Minimum Interval Between Doses 1 and 4 in the H
 	when
 		There is an Administered Shot $currentDose that needs to be evaluated
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_A"
-			- the shot belongs to the series with name "SUPPORTED_SERIES.HepA4DoseAcceleratedTwinrixSeries"
+			- the shot belongs to the series with name "SUPPORTED_SERIES.HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES"
 			- the Dose Number in the Series is == 4
 			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
 			- make note of the Associated Series as $associatedTargetSeries

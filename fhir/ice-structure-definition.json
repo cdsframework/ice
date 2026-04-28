@@ -1,0 +1,579 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "immunization-selection-context",
+  "url": "http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context",
+  "version": "1.0.0",
+  "name": "ImmunizationSelectionContext",
+  "title": "Immunization Selection Context",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-04-13",
+  "publisher": "CDS Framework",
+  "contact": [
+    {
+      "name": "CDS Framework"
+    }
+  ],
+  "description": "Captures the coded series selection, series selection type, and optional season selection associated with immunization evaluations and recommendations.",
+  "purpose": "Provides machine-readable selection context for immunization forecasting when base FHIR elements do not carry coded series-selection and season-selection metadata.",
+  "fhirVersion": "6.0.0-ballot4",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "ImmunizationEvaluation"
+    },
+    {
+      "type": "element",
+      "expression": "ImmunizationRecommendation.recommendation"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Immunization selection context",
+        "definition": "Coded series selection, series selection type, and optional season selection associated with immunization evaluations and recommendations.",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.id",
+        "path": "Extension.id",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "min": 2,
+        "max": "3"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:selectedSeries",
+        "path": "Extension.extension",
+        "sliceName": "selectedSeries",
+        "short": "Selected series",
+        "definition": "The coded series selected by the forecasting engine for this recommendation or evaluation context.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeries.id",
+        "path": "Extension.extension.id",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:selectedSeries.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:selectedSeries.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "selectedSeries"
+      },
+      {
+        "id": "Extension.extension:selectedSeries.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:selectedSeries.valueCodeableConcept",
+        "path": "Extension.extension.valueCodeableConcept",
+        "short": "Selected series",
+        "definition": "The coded series selected by the forecasting engine for this recommendation or evaluation context.",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://terminology.cdsframework.org/fhir/ValueSet/ice-series"
+        }
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType",
+        "path": "Extension.extension",
+        "sliceName": "seriesSelectionType",
+        "short": "Series selection type",
+        "definition": "The coded type of series selection, such as unambiguous, best guess, alternative, or none.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.id",
+        "path": "Extension.extension.id",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "seriesSelectionType"
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.valueCodeableConcept",
+        "path": "Extension.extension.valueCodeableConcept",
+        "short": "Series selection type",
+        "definition": "The coded type of series selection, such as unambiguous, best guess, alternative, or none.",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://terminology.cdsframework.org/fhir/ValueSet/ice-series-display-selection-type"
+        }
+      },
+      {
+        "id": "Extension.extension:selectedSeason",
+        "path": "Extension.extension",
+        "sliceName": "selectedSeason",
+        "short": "Selected season",
+        "definition": "The coded season associated with this recommendation or evaluation context, when season-based forecasting applies.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeason.id",
+        "path": "Extension.extension.id",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:selectedSeason.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:selectedSeason.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "selectedSeason"
+      },
+      {
+        "id": "Extension.extension:selectedSeason.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:selectedSeason.valueCodeableConcept",
+        "path": "Extension.extension.valueCodeableConcept",
+        "short": "Selected season",
+        "definition": "The coded season associated with this recommendation or evaluation context, when season-based forecasting applies.",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://terminology.cdsframework.org/fhir/ValueSet/ice-seasons"
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Immunization selection context",
+        "definition": "Coded series selection, series selection type, and optional season selection associated with immunization evaluations and recommendations.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Extension",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "Extension.id",
+        "path": "Extension.id",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "ordered": false,
+          "rules": "open"
+        },
+        "min": 2,
+        "max": "3",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeries",
+        "path": "Extension.extension",
+        "sliceName": "selectedSeries",
+        "short": "Selected series",
+        "definition": "The coded series selected by the forecasting engine for this recommendation or evaluation context.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeries.id",
+        "path": "Extension.extension.id",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeries.extension",
+        "path": "Extension.extension.extension",
+        "max": "0",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeries.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "selectedSeries",
+        "base": {
+          "path": "Extension.url",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeries.value[x]",
+        "path": "Extension.extension.value[x]",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Extension.value[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeries.valueCodeableConcept",
+        "path": "Extension.extension.valueCodeableConcept",
+        "short": "Selected series",
+        "definition": "The coded series selected by the forecasting engine for this recommendation or evaluation context.",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://terminology.cdsframework.org/fhir/ValueSet/ice-series"
+        }
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType",
+        "path": "Extension.extension",
+        "sliceName": "seriesSelectionType",
+        "short": "Series selection type",
+        "definition": "The coded type of series selection, such as unambiguous, best guess, alternative, or none.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.id",
+        "path": "Extension.extension.id",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.extension",
+        "path": "Extension.extension.extension",
+        "max": "0",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "seriesSelectionType",
+        "base": {
+          "path": "Extension.url",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.value[x]",
+        "path": "Extension.extension.value[x]",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Extension.value[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:seriesSelectionType.valueCodeableConcept",
+        "path": "Extension.extension.valueCodeableConcept",
+        "short": "Series selection type",
+        "definition": "The coded type of series selection, such as unambiguous, best guess, alternative, or none.",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://terminology.cdsframework.org/fhir/ValueSet/ice-series-display-selection-type"
+        }
+      },
+      {
+        "id": "Extension.extension:selectedSeason",
+        "path": "Extension.extension",
+        "sliceName": "selectedSeason",
+        "short": "Selected season",
+        "definition": "The coded season associated with this recommendation or evaluation context, when season-based forecasting applies.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeason.id",
+        "path": "Extension.extension.id",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeason.extension",
+        "path": "Extension.extension.extension",
+        "max": "0",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeason.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "selectedSeason",
+        "base": {
+          "path": "Extension.url",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeason.value[x]",
+        "path": "Extension.extension.value[x]",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Extension.value[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:selectedSeason.valueCodeableConcept",
+        "path": "Extension.extension.valueCodeableConcept",
+        "short": "Selected season",
+        "definition": "The coded season associated with this recommendation or evaluation context, when season-based forecasting applies.",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://terminology.cdsframework.org/fhir/ValueSet/ice-seasons"
+        }
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context",
+        "base": {
+          "path": "Extension.url",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ]
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "max": "0",
+        "base": {
+          "path": "Extension.value[x]",
+          "min": 0,
+          "max": "1"
+        }
+      }
+    ]
+  }
+}

@@ -57,7 +57,7 @@ rule "Mening B: Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the name of the series is "SUPPORTED_SERIES.MenB4C2DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
 			- the Series is not complete
 			- the dose number to recommend is > 1
 	then
@@ -77,7 +77,7 @@ rule "Mening B: Recommend CVX 163 for the 2nd target dose and later in the MenB 
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the name of the series is "SUPPORTED_SERIES.MenB4C3DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES"
 			- the series is not complete
 			- the dose number to recommend is > 1
 	then
@@ -97,7 +97,7 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-do
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the name of the series is "SUPPORTED_SERIES.MenBFHbp3DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.MEN_BF_HBP_3_DOSE_SERIES"
 			- the Series is not complete
 			- the dose number to recommend is > 1
 	then
@@ -117,7 +117,7 @@ rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-do
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the name of the series is "SUPPORTED_SERIES.MenBFHbp2DoseSeries"
+			- the name of the series is "SUPPORTED_SERIES.MEN_BF_HBP_2_DOSE_SERIES"
 			- the Series is not complete
 			- the dose number to recommend is > 1
 	then
@@ -240,7 +240,7 @@ rule "MeningB: Recommend minimum interval & recommended interval of at 6 months 
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
-			- the name of the Series is "SUPPORTED_SERIES.MenBFHbp3DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.MEN_BF_HBP_3_DOSE_SERIES"
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
@@ -264,7 +264,7 @@ rule "MenB(4C 3-Dose Series): Recommend minimum & recommended interval of at 6 m
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the name of the Series is "SUPPORTED_SERIES.MenB4C3DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES"
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 3
@@ -285,7 +285,7 @@ rule "MenB(4C 2-Dose Series): If (valid) dose 1 was >= 10/25/2024, the minimum i
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the name of the Series is "SUPPORTED_SERIES.MenB4C2DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the effective dose number in the Series is == 2
@@ -321,7 +321,7 @@ rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If no shots were administered 
 	salience 999
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the name of the Series is "SUPPORTED_SERIES.MenB4C2DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the number of administered shots is == 0
@@ -344,7 +344,7 @@ rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If an (invalid) shot was 1 was
 	salience 999
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the name of the Series is "SUPPORTED_SERIES.MenB4C2DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the number of doses administered is == 0
@@ -372,7 +372,7 @@ rule "MenB(4C 2-Dose Series; Target Dose 2; CRR): If a (valid) dose 1 administer
 	salience 999
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the name of the Series is "SUPPORTED_SERIES.MenB4C2DoseSeries"
+			- the name of the Series is "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the Series is not Complete
 			- the number of doses administered is == 1

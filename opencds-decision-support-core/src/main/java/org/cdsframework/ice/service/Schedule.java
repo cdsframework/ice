@@ -66,7 +66,7 @@ public class Schedule
      * @param pKnowledgeModules The CDS versions supported by this schedule
      */
     public Schedule(final String pScheduleId, final String pCommonLogicModule, final List<String> pKnowledgeModules,
-            final IceSupportingDataProperties iceSupportingDataProperties,
+            final IceSupportingDataProperties iceSupportingDataProperties, final SupportingDataService supportingDataService,
             final IceProperties.SupplementalTextMode supplementalTextMode)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
@@ -84,7 +84,8 @@ public class Schedule
 
         // Initialize the supporting data for the common logic and knowledge modules specified and available
         this.iceSupportingDataConfiguration =
-                new ICESupportingDataConfiguration(pCommonLogicModule, pKnowledgeModules, iceSupportingDataProperties);
+                new ICESupportingDataConfiguration(pCommonLogicModule, pKnowledgeModules, iceSupportingDataProperties,
+                        supportingDataService);
 
         this.supplementalTextMode = supplementalTextMode;
 

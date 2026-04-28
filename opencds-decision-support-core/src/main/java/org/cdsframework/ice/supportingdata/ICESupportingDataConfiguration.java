@@ -46,6 +46,7 @@ import org.cdsframework.ice.service.DoseStatus;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SupportingDataService;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.opencds.config.api.model.KMId;
 import org.springframework.util.ObjectUtils;
@@ -68,7 +69,7 @@ public class ICESupportingDataConfiguration
      * vaccines; seasons; finally, series
      */
     public ICESupportingDataConfiguration(final String pCommonLogicModule, final List<String> pSupportedKnowledgeModules,
-            final IceSupportingDataProperties iceSupportingDataProperties)
+            final IceSupportingDataProperties iceSupportingDataProperties, final SupportingDataService supportingDataService)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         final String _METHODNAME = "ICESupportingDataConfiguration(): ";
@@ -133,7 +134,8 @@ public class ICESupportingDataConfiguration
                     .filter(iceSupportingDataProperties.getKnowledgeModules()::containsKey)
                     .forEach(kmId -> Optional.ofNullable(iceSupportingDataProperties.getKnowledgeModules().get(kmId).codeSystems())
                             .ifPresent(codeSystemMap -> codeSystemMap.values()
-                                    .forEach(this.supportedCdsLists::addSupportedCodeSystem)));
+                                    .forEach(codeSystem -> this.supportedCdsLists.addSupportedCodeSystem(codeSystem,
+                                            supportingDataService.extractCodeSystemOid(codeSystem)))));
         }
         catch (final Exception e)
         {
@@ -156,6 +158,7 @@ public class ICESupportingDataConfiguration
             log.error(_METHODNAME + lErrStr);
             throw new InconsistentConfigurationException(lErrStr);
         }
+        this.supportedCdsLists.validateSupplementalReasonSupportingData();
 
         // Initialize the Vaccine Group supporting data
         this.supportedVaccineGroups = new SupportedVaccineGroups(this);

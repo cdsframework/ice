@@ -2,13 +2,13 @@ ice-supporting-data:
   knowledge-modules:
     '[org.nyc.cir^ICE^1.0.0]':
       series:
-        HepBChildAdolescentSeries:
-          series-id: 928c115e9665b553885e27371966096e
+        HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES:
+          series-id: oB4de8KEYSTrxbcaUvJP2PFrSndPm4c1
           series:
-            code: HepBChildAdolescentSeries
+            code: HEP_B_4_DOSE_CHILD_ADOLESCENT_SERIES
             code-system: 2.16.840.1.113883.3.795.12.100.10
             code-system-name: ICE Vaccine Series
-            display-name: HepB Child/Adolescent Series
+            display-name: HepB 4-Dose Child/Adolescent Series
           cds-version:
             '1': org.nyc.cir^ICE^1.0.0
           dose-intervals:
@@ -18,24 +18,142 @@ ice-supporting-data:
               absolute-minimum-interval: 24d
               minimum-interval: 28d
               earliest-recommended-interval: 28d
+              latest-recommended-interval: 5m+4w
             '2':
               from-dose-number: 2
-              to-dose-number: 3
+              to-dose-number: 4
               absolute-minimum-interval: 52d
               minimum-interval: 56d
               earliest-recommended-interval: 56d
-          number-of-doses-in-series: 3
+              latest-recommended-interval: 18m+4w
+            '3':
+              from-dose-number: 3
+              to-dose-number: 4
+              absolute-minimum-interval: 0d
+              minimum-interval: 0d
+              earliest-recommended-interval: 0d
+            '4':
+              from-dose-number: 1
+              to-dose-number: 4
+              absolute-minimum-interval: 112d
+              minimum-interval: 16w
+              earliest-recommended-interval: 112d
+          number-of-doses-in-series: 4
           vaccine-group:
             '1':
               code: HEP_B
               code-system: 2.16.840.1.113883.3.795.12.100.1
               code-system-name: ICE Vaccine Group
-              display-name: HepB
+              display-name: Hep B
           doses:
             '1':
-              absolute-minimum-age: 28d
+              absolute-minimum-age: 0d
+              minimum-age: 0d
+              earliest-recommended-age: 0d
+              latest-recommended-age: 4w
+              dose-vaccines:
+                '1':
+                  preferred: false
+                  vaccine:
+                    code: '102'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: DTP-Hib-Hep B
+                '2':
+                  preferred: true
+                  vaccine:
+                    code: '44'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: Hep B, dialysis
+                '3':
+                  preferred: true
+                  vaccine:
+                    code: '43'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: Hep B, adult
+                '4':
+                  preferred: true
+                  vaccine:
+                    code: '45'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: Hep B NOS
+                '5':
+                  preferred: true
+                  vaccine:
+                    code: '51'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: Hib-Hep B
+                '6':
+                  preferred: true
+                  vaccine:
+                    code: '110'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: DTaP-Hep B-IPV
+                '7':
+                  preferred: true
+                  vaccine:
+                    code: '08'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: Hep B, adolescent or pediatric
+                '8':
+                  preferred: true
+                  vaccine:
+                    code: '104'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: Hep A-Hep B
+                '9':
+                  preferred: true
+                  vaccine:
+                    code: '42'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: Hep B, adolescent/high risk infant
+                '10':
+                  preferred: true
+                  vaccine:
+                    code: '146'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: DTaP-IPV-Hib-HepB
+                '11':
+                  preferred: true
+                  vaccine:
+                    code: '132'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: DTaP-IPV-Hib-HepB, historical
+                '12':
+                  preferred: true
+                  vaccine:
+                    code: '189'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: Hep B, adjuvanted
+                '13':
+                  preferred: true
+                  vaccine:
+                    code: '198'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: DTP-Hep B-Hib, Pentavalent
+                '14':
+                  preferred: true
+                  vaccine:
+                    code: '220'
+                    code-system: 2.16.840.1.113883.12.292
+                    code-system-name: CVX
+                    display-name: HepB recombinant, 3-antigen, Al(OH)3
+            '2':
+              absolute-minimum-age: 24d
               minimum-age: 28d
-              earliest-recommended-age: 2m
+              earliest-recommended-age: 1m
               latest-recommended-age: 3m+4w
               dose-vaccines:
                 '1':
@@ -83,7 +201,7 @@ ice-supporting-data:
                 '7':
                   preferred: true
                   vaccine:
-                    code: 08
+                    code: '08'
                     code-system: 2.16.840.1.113883.12.292
                     code-system-name: CVX
                     display-name: Hep B, adolescent or pediatric
@@ -123,7 +241,7 @@ ice-supporting-data:
                     code-system-name: CVX
                     display-name: Hep B, adjuvanted
                 '13':
-                  preferred: false
+                  preferred: true
                   vaccine:
                     code: '198'
                     code-system: 2.16.840.1.113883.12.292
@@ -136,11 +254,7 @@ ice-supporting-data:
                     code-system: 2.16.840.1.113883.12.292
                     code-system-name: CVX
                     display-name: HepB recombinant, 3-antigen, Al(OH)3
-            '2':
-              absolute-minimum-age: 52d
-              minimum-age: 56d
-              earliest-recommended-age: 4m
-              latest-recommended-age: 5m+4w
+            '3':
               dose-vaccines:
                 '1':
                   preferred: false
@@ -187,7 +301,7 @@ ice-supporting-data:
                 '7':
                   preferred: true
                   vaccine:
-                    code: 08
+                    code: '08'
                     code-system: 2.16.840.1.113883.12.292
                     code-system-name: CVX
                     display-name: Hep B, adolescent or pediatric
@@ -227,7 +341,7 @@ ice-supporting-data:
                     code-system-name: CVX
                     display-name: Hep B, adjuvanted
                 '13':
-                  preferred: false
+                  preferred: true
                   vaccine:
                     code: '198'
                     code-system: 2.16.840.1.113883.12.292
@@ -239,8 +353,8 @@ ice-supporting-data:
                     code: '220'
                     code-system: 2.16.840.1.113883.12.292
                     code-system-name: CVX
-                    display-name: HepB recombinant, 3-antigen, Al(OH)3
-            '3':
+                    display-name: Hep B recombinant, 3-antigen, Al(OH)3
+            '4':
               absolute-minimum-age: 164d
               minimum-age: 168d
               earliest-recommended-age: 6m
@@ -291,7 +405,7 @@ ice-supporting-data:
                 '7':
                   preferred: true
                   vaccine:
-                    code: 08
+                    code: '08'
                     code-system: 2.16.840.1.113883.12.292
                     code-system-name: CVX
                     display-name: Hep B, adolescent or pediatric
@@ -331,7 +445,7 @@ ice-supporting-data:
                     code-system-name: CVX
                     display-name: Hep B, adjuvanted
                 '13':
-                  preferred: false
+                  preferred: true
                   vaccine:
                     code: '198'
                     code-system: 2.16.840.1.113883.12.292

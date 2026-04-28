@@ -1,5 +1,7 @@
 package org.cdsframework.ice.config.iceSupportingProperties;
 
+import org.jspecify.annotations.NonNull;
+
 import jakarta.validation.constraints.NotEmpty;
 
 public record VaccineGroup(@NotEmpty
@@ -8,6 +10,7 @@ public record VaccineGroup(@NotEmpty
                            String codeSystemName,
                            String displayName) implements BaseConceptDescriptor
 {
+    @NonNull
     @Override
     public String toString()
     {
