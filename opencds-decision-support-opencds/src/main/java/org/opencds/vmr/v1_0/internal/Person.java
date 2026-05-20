@@ -17,7 +17,7 @@ import lombok.ToString;
 @ToString
 public class Person extends EntityBase
 {
-    protected List<EN> name;
-    protected List<AD> address;
-    protected List<TEL> telecom;
+    private List<EN> name;
+    private List<AD> address;
+    private List<TEL> telecom;
 }

@@ -1,0 +1,227 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "ice-dose-age-constraint",
+  "url": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint",
+  "version": "1.0.0",
+  "name": "IceDoseAgeConstraint",
+  "title": "ICE Dose Age Constraint",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-04-24",
+  "publisher": "CDS Framework",
+  "description": "Age constraints for a vaccine dose represented by PlanDefinition.action.",
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "PlanDefinition.action"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Dose age constraints",
+        "definition": "Age constraints for a dose, expressed as ICE interval strings.",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 1,
+        "max": "*"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:absoluteMinimumAge",
+        "path": "Extension.extension",
+        "sliceName": "absoluteMinimumAge",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:absoluteMinimumAge.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:absoluteMinimumAge.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "absoluteMinimumAge"
+      },
+      {
+        "id": "Extension.extension:absoluteMinimumAge.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:minimumAge",
+        "path": "Extension.extension",
+        "sliceName": "minimumAge",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:minimumAge.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:minimumAge.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "minimumAge"
+      },
+      {
+        "id": "Extension.extension:minimumAge.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:earliestRecommendedAge",
+        "path": "Extension.extension",
+        "sliceName": "earliestRecommendedAge",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:earliestRecommendedAge.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:earliestRecommendedAge.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "earliestRecommendedAge"
+      },
+      {
+        "id": "Extension.extension:earliestRecommendedAge.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:latestRecommendedAge",
+        "path": "Extension.extension",
+        "sliceName": "latestRecommendedAge",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:latestRecommendedAge.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:latestRecommendedAge.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "latestRecommendedAge"
+      },
+      {
+        "id": "Extension.extension:latestRecommendedAge.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:absoluteMaximumAge",
+        "path": "Extension.extension",
+        "sliceName": "absoluteMaximumAge",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:absoluteMaximumAge.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:absoluteMaximumAge.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "absoluteMaximumAge"
+      },
+      {
+        "id": "Extension.extension:absoluteMaximumAge.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      }
+    ]
+  }
+}

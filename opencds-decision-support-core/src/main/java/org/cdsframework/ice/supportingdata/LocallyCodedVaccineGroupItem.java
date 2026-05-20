@@ -42,12 +42,13 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
     private final Collection<String> relatedDiseasesCdsListItemNames;
     private final int priority;
     private final boolean routine;
+    private final String vaccineGroupRulesUrl;
 
     protected LocallyCodedVaccineGroupItem(final String pVaccineGroupCdsListItemName, final CdsConcept pVaccineGroupCdsConcept,
             final Collection<String> pCdsVersions, final Collection<String> pRelatedDiseasesCdsListItemNames, final int pPriority,
-            final boolean routine) throws IllegalArgumentException
+            final boolean routine, final String pVaccineGroupRulesUrl) throws IllegalArgumentException
     {
-        super(pVaccineGroupCdsListItemName, pVaccineGroupCdsConcept, pCdsVersions);
+        super(pVaccineGroupCdsListItemName, pVaccineGroupCdsConcept);
 
         final String _METHODNAME = "VaccineGroupItem(): ";
 
@@ -62,6 +63,7 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
         this.relatedDiseasesCdsListItemNames = pRelatedDiseasesCdsListItemNames;
         this.priority = pPriority;
         this.routine = routine;
+        this.vaccineGroupRulesUrl = pVaccineGroupRulesUrl;
     }
 
     protected Collection<String> getRelatedDiseasesCdsListItemNames()
@@ -89,13 +91,6 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
             lStr.append("\tRelatedDiseaseCdsListItemName=").append(lDisease).append("\n");
         lStr.append("\t]\n");
         lStr.append("]");
-
-        lStr.append("\ncdsVersions= [");
-        for (final String lVersionStr : getCdsVersions())
-            lStr.append("\tCdsVersion=").append(lVersionStr).append("\n");
-        lStr.append("\t]\n");
-        lStr.append("]");
-
         return lStr.toString();
     }
 }

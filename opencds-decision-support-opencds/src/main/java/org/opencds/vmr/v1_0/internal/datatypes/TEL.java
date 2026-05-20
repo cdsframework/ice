@@ -13,8 +13,8 @@ import lombok.ToString;
 @ToString
 public class TEL extends ANY
 {
-    protected String useablePeriodOriginalText;
-    protected String value;
-    protected List<TelecommunicationAddressUse> use;
-    protected List<TelecommunicationCapability> capabilities;
+    private String useablePeriodOriginalText;
+    private String value;
+    private List<TelecommunicationAddressUse> use;
+    private List<TelecommunicationCapability> capabilities;
 }

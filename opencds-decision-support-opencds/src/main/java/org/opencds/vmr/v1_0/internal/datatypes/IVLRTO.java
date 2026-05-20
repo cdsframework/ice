@@ -11,10 +11,10 @@ import lombok.ToString;
 @ToString
 public class IVLRTO extends ANY
 {
-    protected double lowNumerator;
-    protected double lowDenominator;
-    protected double highNumerator;
-    protected double highDenominator;
-    protected Boolean lowIsInclusive;
-    protected Boolean highIsInclusive;
+    private double lowNumerator;
+    private double lowDenominator;
+    private double highNumerator;
+    private double highDenominator;
+    private Boolean lowIsInclusive;
+    private Boolean highIsInclusive;
 }

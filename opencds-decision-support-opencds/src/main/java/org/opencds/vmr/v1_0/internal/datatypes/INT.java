@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class INT extends QTY
 {
-    protected int value;
+    private int value;
 }

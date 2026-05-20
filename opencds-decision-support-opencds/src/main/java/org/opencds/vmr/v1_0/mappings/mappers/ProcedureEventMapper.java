@@ -34,7 +34,8 @@ public class ProcedureEventMapper extends ProcedureBaseMapper
         }
 
         if (source.getProcedureTime() != null)
-            target.setProcedureTime(MappingUtility.iVLTS2IVLDateInternal(source.getProcedureTime()));
+            target.setProcedureTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getProcedureTime(), factLists.getParsedDatesCache()));
 
         factLists.put(ProcedureEvent.class, target);
 
@@ -68,9 +69,9 @@ public class ProcedureEventMapper extends ProcedureBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getProcedureEvents() == null)
+        if (organizedResults.output().getProcedureEvents() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setProcedureEvents(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.ProcedureEvents());
         }
 

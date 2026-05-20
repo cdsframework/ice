@@ -1,5 +1,7 @@
 package org.opencds.config.api.model;
 
+import java.util.Arrays;
+
 public enum LoadContext
 {
     CLASSPATH,
@@ -7,11 +9,6 @@ public enum LoadContext
 
     public static LoadContext resolve(final String loadContext)
     {
-        for (final LoadContext lc : values())
-        {
-            if (lc.toString().equalsIgnoreCase(loadContext))
-                return lc;
-        }
-        return null;
+        return Arrays.stream(values()).filter(lc -> lc.toString().equalsIgnoreCase(loadContext)).findFirst().orElse(null);
     }
 }

@@ -1,9 +1,10 @@
 package org.opencds.vmr.v1_0.mappings.in;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.common.terminology.CodeSystems;
@@ -134,16 +135,18 @@ import org.opencds.vmr.v1_0.internal.concepts.UndeliveredSubstanceAdministration
 import org.opencds.vmr.v1_0.internal.concepts.VmrOpenCdsConcept;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+@UtilityClass
 @Slf4j
 public class BuildOpenCDSConceptLists
 {
-    public <C extends VmrOpenCdsConcept> void buildConceptLists(final ConceptService conceptService, final FactLists factLists,
+    public static void buildConceptLists(final ConceptService conceptService, final FactLists factLists,
             final Map<Class<?>, List<?>> allFactLists)
     {
         final long t0 = System.nanoTime();
-        final ConceptLists conceptLists = new ConceptLists();
+        final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists = new ConcurrentHashMap<>();
 
         processEvaluatedPersons(conceptService, factLists.get(EvaluatedPerson.class), conceptLists);
         processEntities(conceptService, factLists.get(Entity.class), conceptLists);
@@ -196,22 +199,23 @@ public class BuildOpenCDSConceptLists
         processSupplyProposal(conceptService, factLists.get(SupplyProposal.class), conceptLists);
         processUndeliveredSupply(conceptService, factLists.get(UndeliveredSupply.class), conceptLists);
 
-        for (final Entry<Class<?>, List<?>> list : conceptLists.iterable())
-            allFactLists.put(list.getKey(), list.getValue());
+        allFactLists.putAll(conceptLists);
+
         log.debug("BuildOpenCDSConceptLists time : {} ms", (System.nanoTime() - t0) / 1e6);
     }
 
-    private <EB extends EntityBase> void processEntities(final ConceptService conceptService, final List<EB> entities,
-            final ConceptLists conceptLists)
+    private static <EB extends EntityBase> void processEntities(final ConceptService conceptService, final List<EB> entities,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (entities != null)
-        {
-            for (final EB entity : entities)
-                processEntity(conceptService, entity, conceptLists);
-        }
+        if (entities == null)
+            return;
+
+        for (final EB entity : entities)
+            processEntity(conceptService, entity, conceptLists);
     }
 
-    private void processEntity(final ConceptService conceptService, final EntityBase entity, final ConceptLists conceptLists)
+    private static void processEntity(final ConceptService conceptService, final EntityBase entity,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         populateVmrOpenCdsConcept(conceptService, entity.getId(), entity.getTemplateId(),
                 CodeSystems.CODE_SYSTEM_OID_OPENCDS_TEMPLATES, EntityTemplateConcept.class, conceptLists);
@@ -219,98 +223,100 @@ public class BuildOpenCDSConceptLists
         populateVmrOpenCdsConcept(conceptService, entity.getId(), entity.getEntityType(), EntityTypeConcept.class, conceptLists);
     }
 
-    private void processEvaluatedPersons(final ConceptService conceptService, final List<EvaluatedPerson> evaluatedPersons,
-            final ConceptLists conceptLists)
+    private static void processEvaluatedPersons(final ConceptService conceptService, final List<EvaluatedPerson> evaluatedPersons,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (evaluatedPersons != null)
+        if (evaluatedPersons == null)
+            return;
+
+        for (final EvaluatedPerson evaluatedPerson : evaluatedPersons)
         {
-            for (final EvaluatedPerson evaluatedPerson : evaluatedPersons)
+            processEntity(conceptService, evaluatedPerson, conceptLists);
+
+            if (evaluatedPerson.getDemographics() != null)
             {
-                processEntity(conceptService, evaluatedPerson, conceptLists);
+                final Demographics demographics = evaluatedPerson.getDemographics();
 
-                if (evaluatedPerson.getDemographics() != null)
+                if (demographics.getGender() != null)
                 {
-                    final Demographics demographics = evaluatedPerson.getDemographics();
+                    populateVmrOpenCdsConcept(conceptService, evaluatedPerson.getId(), demographics.getGender(),
+                            GenderConcept.class, conceptLists);
+                }
 
-                    if (demographics.getGender() != null)
-                    {
-                        populateVmrOpenCdsConcept(conceptService, evaluatedPerson.getId(), demographics.getGender(),
-                                GenderConcept.class, conceptLists);
-                    }
+                if (demographics.getRace() != null)
+                {
+                    populateVmrOpenCdsConcept(conceptService, evaluatedPerson.getId(), demographics.getRace(), RaceConcept.class,
+                            conceptLists);
+                }
 
-                    if (demographics.getRace() != null)
-                    {
-                        populateVmrOpenCdsConcept(conceptService, evaluatedPerson.getId(), demographics.getRace(),
-                                RaceConcept.class, conceptLists);
-                    }
+                if (demographics.getEthnicity() != null)
+                {
+                    populateVmrOpenCdsConcept(conceptService, evaluatedPerson.getId(), demographics.getEthnicity(),
+                            EthnicityConcept.class, conceptLists);
+                }
 
-                    if (demographics.getEthnicity() != null)
-                    {
-                        populateVmrOpenCdsConcept(conceptService, evaluatedPerson.getId(), demographics.getEthnicity(),
-                                EthnicityConcept.class, conceptLists);
-                    }
-
-                    if (demographics.getPreferredLanguage() != null)
-                    {
-                        populateVmrOpenCdsConcept(conceptService, evaluatedPerson.getId(), demographics.getPreferredLanguage(),
-                                PreferredLanguageConcept.class, conceptLists);
-                    }
+                if (demographics.getPreferredLanguage() != null)
+                {
+                    populateVmrOpenCdsConcept(conceptService, evaluatedPerson.getId(), demographics.getPreferredLanguage(),
+                            PreferredLanguageConcept.class, conceptLists);
                 }
             }
         }
     }
 
-    private void processEvaluatedPersonRelationShips(final ConceptService conceptService,
-            final List<EvaluatedPersonRelationship> eprs, final ConceptLists conceptLists)
+    private static void processEvaluatedPersonRelationShips(final ConceptService conceptService,
+            final List<EvaluatedPersonRelationship> eprs,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (eprs != null)
+        if (eprs == null)
+            return;
+
+        for (final EvaluatedPersonRelationship epr : eprs)
         {
-            for (final EvaluatedPersonRelationship epr : eprs)
-            {
-                populateVmrOpenCdsConcept(conceptService, epr.getId(), epr.getTargetRole(),
-                        EvaluatedPersonRelationshipConcept.class, conceptLists);
-            }
+            populateVmrOpenCdsConcept(conceptService, epr.getId(), epr.getTargetRole(), EvaluatedPersonRelationshipConcept.class,
+                    conceptLists);
         }
     }
 
-    private void processEntityRelationships(final ConceptService conceptService, final List<EntityRelationship> ers,
-            final ConceptLists conceptLists)
+    private static void processEntityRelationships(final ConceptService conceptService, final List<EntityRelationship> ers,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (ers != null)
+        if (ers == null)
+            return;
+
+        for (final EntityRelationship er : ers)
         {
-            for (final EntityRelationship er : ers)
-            {
-                populateVmrOpenCdsConcept(conceptService, er.getId(), er.getTargetRole(), EntityRelationshipConcept.class,
-                        conceptLists);
-            }
+            populateVmrOpenCdsConcept(conceptService, er.getId(), er.getTargetRole(), EntityRelationshipConcept.class,
+                    conceptLists);
         }
     }
 
-    private void processClinicalStatementRelationships(final ConceptService conceptService,
-            final List<ClinicalStatementRelationship> csrs, final ConceptLists conceptLists)
+    private static void processClinicalStatementRelationships(final ConceptService conceptService,
+            final List<ClinicalStatementRelationship> csrs,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (csrs != null)
+        if (csrs == null)
+            return;
+
+        for (final ClinicalStatementRelationship csr : csrs)
         {
-            for (final ClinicalStatementRelationship csr : csrs)
-            {
-                populateVmrOpenCdsConcept(conceptService, csr.getId(), csr.getTargetRelationshipToSource(),
-                        ClinicalStatementRelationshipConcept.class, conceptLists);
-            }
+            populateVmrOpenCdsConcept(conceptService, csr.getId(), csr.getTargetRelationshipToSource(),
+                    ClinicalStatementRelationshipConcept.class, conceptLists);
         }
     }
 
-    private <AEB extends AdverseEventBase> void processAdverseEventBase(final ConceptService conceptService, final List<AEB> aebs,
-            final ConceptLists conceptLists)
+    private static <AEB extends AdverseEventBase> void processAdverseEventBase(final ConceptService conceptService,
+            final List<AEB> aebs, final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (aebs != null)
-        {
-            for (final AEB aeb : aebs)
-                processAdverseEventBase(conceptService, aeb, conceptLists);
-        }
+        if (aebs == null)
+            return;
+
+        for (final AEB aeb : aebs)
+            processAdverseEventBase(conceptService, aeb, conceptLists);
     }
 
-    private <AEB extends AdverseEventBase> void processAdverseEventBase(final ConceptService conceptService, final AEB aeb,
-            final ConceptLists conceptLists)
+    private static <AEB extends AdverseEventBase> void processAdverseEventBase(final ConceptService conceptService, final AEB aeb,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         populateVmrOpenCdsConcept(conceptService, aeb.getId(), aeb.getTemplateId(), CodeSystems.CODE_SYSTEM_OID_OPENCDS_TEMPLATES,
                 ClinicalStatementTemplateConcept.class, conceptLists);
@@ -344,75 +350,75 @@ public class BuildOpenCDSConceptLists
         }
     }
 
-    private void processDeniedAdverseEvents(final ConceptService conceptService, final List<DeniedAdverseEvent> daes,
-            final ConceptLists conceptLists)
+    private static void processDeniedAdverseEvents(final ConceptService conceptService, final List<DeniedAdverseEvent> daes,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         processAdverseEventBase(conceptService, daes, conceptLists);
     }
 
-    private void processAdverseEvents(final ConceptService conceptService, final List<AdverseEvent> aes,
-            final ConceptLists conceptLists)
+    private static void processAdverseEvents(final ConceptService conceptService, final List<AdverseEvent> aes,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (aes != null)
+        if (aes == null)
+            return;
+
+        for (final AdverseEvent ae : aes)
         {
-            for (final AdverseEvent ae : aes)
-            {
-                processAdverseEventBase(conceptService, ae, conceptLists);
+            processAdverseEventBase(conceptService, ae, conceptLists);
 
-                populateVmrOpenCdsConcept(conceptService, ae.getId(), ae.getCriticality(), AdverseEventCriticalityConcept.class,
-                        conceptLists);
+            populateVmrOpenCdsConcept(conceptService, ae.getId(), ae.getCriticality(), AdverseEventCriticalityConcept.class,
+                    conceptLists);
 
-                populateVmrOpenCdsConcept(conceptService, ae.getId(), ae.getSeverity(), AdverseEventSeverityConcept.class,
-                        conceptLists);
+            populateVmrOpenCdsConcept(conceptService, ae.getId(), ae.getSeverity(), AdverseEventSeverityConcept.class,
+                    conceptLists);
 
-                populateVmrOpenCdsConcept(conceptService, ae.getId(), ae.getAdverseEventStatus(), AdverseEventStatusConcept.class,
-                        conceptLists);
-            }
+            populateVmrOpenCdsConcept(conceptService, ae.getId(), ae.getAdverseEventStatus(), AdverseEventStatusConcept.class,
+                    conceptLists);
         }
     }
 
-    private void processAppointmentRequests(final ConceptService conceptService, final List<AppointmentRequest> ars,
-            final ConceptLists conceptLists)
+    private static void processAppointmentRequests(final ConceptService conceptService, final List<AppointmentRequest> ars,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (ars != null)
-        {
-            for (final AppointmentRequest ar : ars)
-            {
-                processEncounterBase(conceptService, ar, conceptLists);
+        if (ars == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, ar.getId(), ar.getCriticality(), EncounterCriticalityConcept.class,
-                        conceptLists);
-            }
+        for (final AppointmentRequest ar : ars)
+        {
+            processEncounterBase(conceptService, ar, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, ar.getId(), ar.getCriticality(), EncounterCriticalityConcept.class,
+                    conceptLists);
         }
     }
 
-    private void processAppointmentProposals(final ConceptService conceptService, final List<AppointmentProposal> aps,
-            final ConceptLists conceptLists)
+    private static void processAppointmentProposals(final ConceptService conceptService, final List<AppointmentProposal> aps,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (aps != null)
-        {
-            for (final AppointmentProposal ap : aps)
-            {
-                processEncounterBase(conceptService, ap, conceptLists);
+        if (aps == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, ap.getId(), ap.getCriticality(), EncounterCriticalityConcept.class,
-                        conceptLists);
-            }
+        for (final AppointmentProposal ap : aps)
+        {
+            processEncounterBase(conceptService, ap, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, ap.getId(), ap.getCriticality(), EncounterCriticalityConcept.class,
+                    conceptLists);
         }
     }
 
-    private <EB extends EncounterBase> void processEncounterBase(final ConceptService conceptService, final List<EB> list,
-            final ConceptLists conceptLists)
+    private static <EB extends EncounterBase> void processEncounterBase(final ConceptService conceptService, final List<EB> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final EB eb : list)
-                processEncounterBase(conceptService, eb, conceptLists);
-        }
+        if (list == null)
+            return;
+
+        for (final EB eb : list)
+            processEncounterBase(conceptService, eb, conceptLists);
     }
 
-    private <EB extends EncounterBase> void processEncounterBase(final ConceptService conceptService, final EB eb,
-            final ConceptLists conceptLists)
+    private static <EB extends EncounterBase> void processEncounterBase(final ConceptService conceptService, final EB eb,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         populateVmrOpenCdsConcept(conceptService, eb.getId(), eb.getTemplateId(), CodeSystems.CODE_SYSTEM_OID_OPENCDS_TEMPLATES,
                 ClinicalStatementTemplateConcept.class, conceptLists);
@@ -422,26 +428,26 @@ public class BuildOpenCDSConceptLists
         populateVmrOpenCdsConcept(conceptService, eb.getId(), eb.getEncounterType(), EncounterTypeConcept.class, conceptLists);
     }
 
-    private void processScheduledAppointments(final ConceptService conceptService, final List<ScheduledAppointment> list,
-            final ConceptLists conceptLists)
+    private static void processScheduledAppointments(final ConceptService conceptService, final List<ScheduledAppointment> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         processEncounterBase(conceptService, list, conceptLists);
     }
 
-    private void processMissedAppointments(final ConceptService conceptService, final List<MissedAppointment> list,
-            final ConceptLists conceptLists)
+    private static void processMissedAppointments(final ConceptService conceptService, final List<MissedAppointment> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         processEncounterBase(conceptService, list, conceptLists);
     }
 
-    private void processEncounterEvents(final ConceptService conceptService, final List<EncounterEvent> ees,
-            final ConceptLists conceptLists)
+    private static void processEncounterEvents(final ConceptService conceptService, final List<EncounterEvent> ees,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         processEncounterBase(conceptService, ees, conceptLists);
     }
 
-    private <GB extends GoalBase> void processGoalBase(final ConceptService conceptService, final GB gb,
-            final ConceptLists conceptLists)
+    private static <GB extends GoalBase> void processGoalBase(final ConceptService conceptService, final GB gb,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         populateVmrOpenCdsConcept(conceptService, gb.getId(), gb.getTemplateId(), CodeSystems.CODE_SYSTEM_OID_OPENCDS_TEMPLATES,
                 ClinicalStatementTemplateConcept.class, conceptLists);
@@ -468,32 +474,32 @@ public class BuildOpenCDSConceptLists
         populateVmrOpenCdsConcept(conceptService, gb.getId(), gb.getCriticality(), GoalCriticalityConcept.class, conceptLists);
     }
 
-    private void processGoalProposals(final ConceptService conceptService, final List<GoalProposal> list,
-            final ConceptLists conceptLists)
+    private static void processGoalProposals(final ConceptService conceptService, final List<GoalProposal> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
+        if (list == null)
+            return;
+
+        for (final GoalProposal goalProposal : list)
+            processGoalBase(conceptService, goalProposal, conceptLists);
+    }
+
+    private static void processGoals(final ConceptService conceptService, final List<Goal> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
+    {
+        if (list == null)
+            return;
+
+        for (final Goal goal : list)
         {
-            for (final GoalProposal goalProposal : list)
-                processGoalBase(conceptService, goalProposal, conceptLists);
+            processGoalBase(conceptService, goal, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, goal.getId(), goal.getGoalStatus(), GoalStatusConcept.class, conceptLists);
         }
     }
 
-    private void processGoals(final ConceptService conceptService, final List<Goal> list, final ConceptLists conceptLists)
-    {
-        if (list != null)
-        {
-            for (final Goal goal : list)
-            {
-                processGoalBase(conceptService, goal, conceptLists);
-
-                populateVmrOpenCdsConcept(conceptService, goal.getId(), goal.getGoalStatus(), GoalStatusConcept.class,
-                        conceptLists);
-            }
-        }
-    }
-
-    private <OB extends ObservationBase> void processObservationBase(final ConceptService conceptService, final OB ob,
-            final ConceptLists conceptLists)
+    private static <OB extends ObservationBase> void processObservationBase(final ConceptService conceptService, final OB ob,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         populateVmrOpenCdsConcept(conceptService, ob.getId(), ob.getTemplateId(), CodeSystems.CODE_SYSTEM_OID_OPENCDS_TEMPLATES,
                 ClinicalStatementTemplateConcept.class, conceptLists);
@@ -516,84 +522,84 @@ public class BuildOpenCDSConceptLists
         }
     }
 
-    private void processUnconductedObservations(final ConceptService conceptService, final List<UnconductedObservation> list,
-            final ConceptLists conceptLists)
+    private static void processUnconductedObservations(final ConceptService conceptService, final List<UnconductedObservation> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
+        if (list == null)
+            return;
+
+        for (final UnconductedObservation unconductedObservation : list)
         {
-            for (final UnconductedObservation unconductedObservation : list)
+            processObservationBase(conceptService, unconductedObservation, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, unconductedObservation.getId(), unconductedObservation.getReason(),
+                    ObservationUnconductedReasonConcept.class, conceptLists);
+        }
+    }
+
+    private static void processObservationResults(final ConceptService conceptService, final List<ObservationResult> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
+    {
+        if (list == null)
+            return;
+
+        for (final ObservationResult observationResult : list)
+        {
+            processObservationBase(conceptService, observationResult, conceptLists);
+
+            if (observationResult.getObservationValue() != null)
             {
-                processObservationBase(conceptService, unconductedObservation, conceptLists);
-
-                populateVmrOpenCdsConcept(conceptService, unconductedObservation.getId(), unconductedObservation.getReason(),
-                        ObservationUnconductedReasonConcept.class, conceptLists);
+                populateVmrOpenCdsConcept(conceptService, observationResult.getId(),
+                        observationResult.getObservationValue().getConcept(), ObservationCodedValueConcept.class, conceptLists);
             }
+
+            populateVmrOpenCdsConcept(conceptService, observationResult.getId(), observationResult.getInterpretation(),
+                    ObservationInterpretationConcept.class, conceptLists);
         }
     }
 
-    private void processObservationResults(final ConceptService conceptService, final List<ObservationResult> list,
-            final ConceptLists conceptLists)
+    private static void processObservationProposals(final ConceptService conceptService, final List<ObservationProposal> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
+        if (list == null)
+            return;
+
+        for (final ObservationProposal observationProposal : list)
         {
-            for (final ObservationResult observationResult : list)
-            {
-                processObservationBase(conceptService, observationResult, conceptLists);
+            processObservationBase(conceptService, observationProposal, conceptLists);
 
-                if (observationResult.getObservationValue() != null)
-                {
-                    populateVmrOpenCdsConcept(conceptService, observationResult.getId(),
-                            observationResult.getObservationValue().getConcept(), ObservationCodedValueConcept.class, conceptLists);
-                }
-
-                populateVmrOpenCdsConcept(conceptService, observationResult.getId(), observationResult.getInterpretation(),
-                        ObservationInterpretationConcept.class, conceptLists);
-            }
+            populateVmrOpenCdsConcept(conceptService, observationProposal.getId(), observationProposal.getCriticality(),
+                    ObservationCriticalityConcept.class, conceptLists);
         }
     }
 
-    private void processObservationProposals(final ConceptService conceptService, final List<ObservationProposal> list,
-            final ConceptLists conceptLists)
+    private static void processObservationOrders(final ConceptService conceptService, final List<ObservationOrder> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final ObservationProposal observationProposal : list)
-            {
-                processObservationBase(conceptService, observationProposal, conceptLists);
+        if (list == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, observationProposal.getId(), observationProposal.getCriticality(),
-                        ObservationCriticalityConcept.class, conceptLists);
-            }
+        for (final ObservationOrder observationOrder : list)
+        {
+            processObservationBase(conceptService, observationOrder, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, observationOrder.getId(), observationOrder.getCriticality(),
+                    ObservationCriticalityConcept.class, conceptLists);
         }
     }
 
-    private void processObservationOrders(final ConceptService conceptService, final List<ObservationOrder> list,
-            final ConceptLists conceptLists)
+    private static <PB extends ProblemBase> void processProblemBase(final ConceptService conceptService, final List<PB> pbs,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final ObservationOrder observationOrder : list)
-            {
-                processObservationBase(conceptService, observationOrder, conceptLists);
+        if (pbs == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, observationOrder.getId(), observationOrder.getCriticality(),
-                        ObservationCriticalityConcept.class, conceptLists);
-            }
-        }
+        for (final PB pb : pbs)
+            processProblemBase(conceptService, pb, conceptLists);
     }
 
-    private <PB extends ProblemBase> void processProblemBase(final ConceptService conceptService, final List<PB> pbs,
-            final ConceptLists conceptLists)
-    {
-        if (pbs != null)
-        {
-            for (final PB pb : pbs)
-                processProblemBase(conceptService, pb, conceptLists);
-        }
-    }
-
-    private <PB extends ProblemBase> void processProblemBase(final ConceptService conceptService, final PB pb,
-            final ConceptLists conceptLists)
+    private static <PB extends ProblemBase> void processProblemBase(final ConceptService conceptService, final PB pb,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         populateVmrOpenCdsConcept(conceptService, pb.getId(), pb.getTemplateId(), CodeSystems.CODE_SYSTEM_OID_OPENCDS_TEMPLATES,
                 ClinicalStatementTemplateConcept.class, conceptLists);
@@ -623,59 +629,60 @@ public class BuildOpenCDSConceptLists
         }
     }
 
-    private void processProblems(final ConceptService conceptService, final List<Problem> list, final ConceptLists conceptLists)
+    private static void processProblems(final ConceptService conceptService, final List<Problem> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
+        if (list == null)
+            return;
+
+        for (final Problem problem : list)
         {
-            for (final Problem problem : list)
-            {
-                processProblemBase(conceptService, problem, conceptLists);
+            processProblemBase(conceptService, problem, conceptLists);
 
-                populateVmrOpenCdsConcept(conceptService, problem.getId(), problem.getProblemStatus(), ProblemStatusConcept.class,
-                        conceptLists);
+            populateVmrOpenCdsConcept(conceptService, problem.getId(), problem.getProblemStatus(), ProblemStatusConcept.class,
+                    conceptLists);
 
-                populateVmrOpenCdsConcept(conceptService, problem.getId(), problem.getImportance(), ProblemImportanceConcept.class,
-                        conceptLists);
+            populateVmrOpenCdsConcept(conceptService, problem.getId(), problem.getImportance(), ProblemImportanceConcept.class,
+                    conceptLists);
 
-                populateVmrOpenCdsConcept(conceptService, problem.getId(), problem.getSeverity(), ProblemSeverityConcept.class,
-                        conceptLists);
-            }
+            populateVmrOpenCdsConcept(conceptService, problem.getId(), problem.getSeverity(), ProblemSeverityConcept.class,
+                    conceptLists);
         }
     }
 
-    private void processDeniedProblems(final ConceptService conceptService, final List<DeniedProblem> list,
-            final ConceptLists conceptLists)
+    private static void processDeniedProblems(final ConceptService conceptService, final List<DeniedProblem> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         processProblemBase(conceptService, list, conceptLists);
     }
 
-    private void processUndeliveredProcedures(final ConceptService conceptService, final List<UndeliveredProcedure> list,
-            final ConceptLists conceptLists)
+    private static void processUndeliveredProcedures(final ConceptService conceptService, final List<UndeliveredProcedure> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final UndeliveredProcedure undeliveredProcedure : list)
-            {
-                processProcedureBase(conceptService, undeliveredProcedure, conceptLists);
+        if (list == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, undeliveredProcedure.getId(), undeliveredProcedure.getReason(),
-                        UndeliveredProcedureReasonConcept.class, conceptLists);
-            }
+        for (final UndeliveredProcedure undeliveredProcedure : list)
+        {
+            processProcedureBase(conceptService, undeliveredProcedure, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, undeliveredProcedure.getId(), undeliveredProcedure.getReason(),
+                    UndeliveredProcedureReasonConcept.class, conceptLists);
         }
     }
 
-    private <PB extends ProcedureBase> void processProcedureBase(final ConceptService conceptService, final List<PB> list,
-            final ConceptLists conceptLists)
+    private static <PB extends ProcedureBase> void processProcedureBase(final ConceptService conceptService, final List<PB> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final PB pb : list)
-                processProcedureBase(conceptService, pb, conceptLists);
-        }
+        if (list == null)
+            return;
+
+        for (final PB pb : list)
+            processProcedureBase(conceptService, pb, conceptLists);
     }
 
-    private <PB extends ProcedureBase> void processProcedureBase(final ConceptService conceptService, final PB pb,
-            final ConceptLists conceptLists)
+    private static <PB extends ProcedureBase> void processProcedureBase(final ConceptService conceptService, final PB pb,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         populateVmrOpenCdsConcept(conceptService, pb.getId(), pb.getTemplateId(), CodeSystems.CODE_SYSTEM_OID_OPENCDS_TEMPLATES,
                 ClinicalStatementTemplateConcept.class, conceptLists);
@@ -705,50 +712,51 @@ public class BuildOpenCDSConceptLists
         }
     }
 
-    private void processScheduledProcedures(final ConceptService conceptService, final List<ScheduledProcedure> list,
-            final ConceptLists conceptLists)
+    private static void processScheduledProcedures(final ConceptService conceptService, final List<ScheduledProcedure> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         processProcedureBase(conceptService, list, conceptLists);
     }
 
-    private void processProcedureProposals(final ConceptService conceptService, final List<ProcedureProposal> list,
-            final ConceptLists conceptLists)
+    private static void processProcedureProposals(final ConceptService conceptService, final List<ProcedureProposal> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final ProcedureProposal procedureProposal : list)
-            {
-                processProcedureBase(conceptService, procedureProposal, conceptLists);
+        if (list == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, procedureProposal.getId(), procedureProposal.getCriticality(),
-                        ProcedureCriticalityConcept.class, conceptLists);
-            }
+        for (final ProcedureProposal procedureProposal : list)
+        {
+            processProcedureBase(conceptService, procedureProposal, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, procedureProposal.getId(), procedureProposal.getCriticality(),
+                    ProcedureCriticalityConcept.class, conceptLists);
         }
     }
 
-    private void processProcedureOrders(final ConceptService conceptService, final List<ProcedureOrder> list,
-            final ConceptLists conceptLists)
+    private static void processProcedureOrders(final ConceptService conceptService, final List<ProcedureOrder> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final ProcedureOrder procedureOrder : list)
-            {
-                processProcedureBase(conceptService, procedureOrder, conceptLists);
+        if (list == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, procedureOrder.getId(), procedureOrder.getCriticality(),
-                        ProcedureCriticalityConcept.class, conceptLists);
-            }
+        for (final ProcedureOrder procedureOrder : list)
+        {
+            processProcedureBase(conceptService, procedureOrder, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, procedureOrder.getId(), procedureOrder.getCriticality(),
+                    ProcedureCriticalityConcept.class, conceptLists);
         }
     }
 
-    private void processProcedureEvents(final ConceptService conceptService, final List<ProcedureEvent> list,
-            final ConceptLists conceptLists)
+    private static void processProcedureEvents(final ConceptService conceptService, final List<ProcedureEvent> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         processProcedureBase(conceptService, list, conceptLists);
     }
 
-    private <SAB extends SubstanceAdministrationBase> void processSubstanceAdministrationBase(final ConceptService conceptService,
-            final SAB sab, final ConceptLists conceptLists)
+    private static <SAB extends SubstanceAdministrationBase> void processSubstanceAdministrationBase(
+            final ConceptService conceptService, final SAB sab,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         populateVmrOpenCdsConcept(conceptService, sab.getId(), sab.getTemplateId(), CodeSystems.CODE_SYSTEM_OID_OPENCDS_TEMPLATES,
                 ClinicalStatementTemplateConcept.class, conceptLists);
@@ -807,91 +815,96 @@ public class BuildOpenCDSConceptLists
         }
     }
 
-    private <SAB extends SubstanceAdministrationBase> void processSubstanceAdministrationBase(final ConceptService conceptService,
-            final List<SAB> list, final ConceptLists conceptLists)
+    private static <SAB extends SubstanceAdministrationBase> void processSubstanceAdministrationBase(
+            final ConceptService conceptService, final List<SAB> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
+        if (list == null)
+            return;
+
+        for (final SAB sab : list)
+            processSubstanceAdministrationBase(conceptService, sab, conceptLists);
+    }
+
+    private static void processUndeliveredSubstanceAdministration(final ConceptService conceptService,
+            final List<UndeliveredSubstanceAdministration> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
+    {
+        if (list == null)
+            return;
+
+        for (final UndeliveredSubstanceAdministration undeliveredSubstanceAdministration : list)
         {
-            for (final SAB sab : list)
-                processSubstanceAdministrationBase(conceptService, sab, conceptLists);
+            processSubstanceAdministrationBase(conceptService, undeliveredSubstanceAdministration, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, undeliveredSubstanceAdministration.getId(),
+                    undeliveredSubstanceAdministration.getReason(), UndeliveredSubstanceAdministrationReasonConcept.class,
+                    conceptLists);
         }
     }
 
-    private void processUndeliveredSubstanceAdministration(final ConceptService conceptService,
-            final List<UndeliveredSubstanceAdministration> list, final ConceptLists conceptLists)
-    {
-        if (list != null)
-        {
-            for (final UndeliveredSubstanceAdministration undeliveredSubstanceAdministration : list)
-            {
-                processSubstanceAdministrationBase(conceptService, undeliveredSubstanceAdministration, conceptLists);
-
-                populateVmrOpenCdsConcept(conceptService, undeliveredSubstanceAdministration.getId(),
-                        undeliveredSubstanceAdministration.getReason(), UndeliveredSubstanceAdministrationReasonConcept.class,
-                        conceptLists);
-            }
-        }
-    }
-
-    private void processSubstanceDispensationEvent(final ConceptService conceptService, final List<SubstanceDispensationEvent> list,
-            final ConceptLists conceptLists)
+    private static void processSubstanceDispensationEvent(final ConceptService conceptService,
+            final List<SubstanceDispensationEvent> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         processSubstanceAdministrationBase(conceptService, list, conceptLists);
     }
 
-    private void processSubstanceAdministrationProposal(final ConceptService conceptService,
-            final List<SubstanceAdministrationProposal> list, final ConceptLists conceptLists)
+    private static void processSubstanceAdministrationProposal(final ConceptService conceptService,
+            final List<SubstanceAdministrationProposal> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final SubstanceAdministrationProposal substanceAdministrationProposal : list)
-            {
-                processSubstanceAdministrationBase(conceptService, substanceAdministrationProposal, conceptLists);
+        if (list == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, substanceAdministrationProposal.getId(),
-                        substanceAdministrationProposal.getCriticality(), SubstanceAdministrationCriticalityConcept.class,
-                        conceptLists);
-            }
+        for (final SubstanceAdministrationProposal substanceAdministrationProposal : list)
+        {
+            processSubstanceAdministrationBase(conceptService, substanceAdministrationProposal, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, substanceAdministrationProposal.getId(),
+                    substanceAdministrationProposal.getCriticality(), SubstanceAdministrationCriticalityConcept.class,
+                    conceptLists);
         }
     }
 
-    private void processSubstanceAdministrationOrder(final ConceptService conceptService,
-            final List<SubstanceAdministrationOrder> list, final ConceptLists conceptLists)
+    private static void processSubstanceAdministrationOrder(final ConceptService conceptService,
+            final List<SubstanceAdministrationOrder> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
+        if (list == null)
+            return;
+
+        for (final SubstanceAdministrationOrder substanceAdministrationOrder : list)
         {
-            for (final SubstanceAdministrationOrder substanceAdministrationOrder : list)
-            {
-                processSubstanceAdministrationBase(conceptService, substanceAdministrationOrder, conceptLists);
+            processSubstanceAdministrationBase(conceptService, substanceAdministrationOrder, conceptLists);
 
-                populateVmrOpenCdsConcept(conceptService, substanceAdministrationOrder.getId(),
-                        substanceAdministrationOrder.getCriticality(), SubstanceAdministrationCriticalityConcept.class,
-                        conceptLists);
+            populateVmrOpenCdsConcept(conceptService, substanceAdministrationOrder.getId(),
+                    substanceAdministrationOrder.getCriticality(), SubstanceAdministrationCriticalityConcept.class, conceptLists);
 
-                populateVmrOpenCdsConcept(conceptService, substanceAdministrationOrder.getId(),
-                        substanceAdministrationOrder.getDosingSig(), DosingSigConcept.class, conceptLists);
-            }
+            populateVmrOpenCdsConcept(conceptService, substanceAdministrationOrder.getId(),
+                    substanceAdministrationOrder.getDosingSig(), DosingSigConcept.class, conceptLists);
         }
     }
 
-    private void processSubstanceAdministrationEvents(final ConceptService conceptService,
-            final List<SubstanceAdministrationEvent> list, final ConceptLists conceptLists)
+    private static void processSubstanceAdministrationEvents(final ConceptService conceptService,
+            final List<SubstanceAdministrationEvent> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final SubstanceAdministrationEvent substanceAdministrationEvent : list)
-            {
-                processSubstanceAdministrationBase(conceptService, substanceAdministrationEvent, conceptLists);
+        if (list == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, substanceAdministrationEvent.getId(),
-                        substanceAdministrationEvent.getInformationAttestationType(), InformationAttestationTypeConcept.class,
-                        conceptLists);
-            }
+        for (final SubstanceAdministrationEvent substanceAdministrationEvent : list)
+        {
+            processSubstanceAdministrationBase(conceptService, substanceAdministrationEvent, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, substanceAdministrationEvent.getId(),
+                    substanceAdministrationEvent.getInformationAttestationType(), InformationAttestationTypeConcept.class,
+                    conceptLists);
         }
     }
 
-    private <SB extends SupplyBase> void processSupplyBase(final ConceptService conceptService, final SB sb,
-            final ConceptLists conceptLists)
+    private static <SB extends SupplyBase> void processSupplyBase(final ConceptService conceptService, final SB sb,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         populateVmrOpenCdsConcept(conceptService, sb.getId(), sb.getTemplateId(), CodeSystems.CODE_SYSTEM_OID_OPENCDS_TEMPLATES,
                 ClinicalStatementTemplateConcept.class, conceptLists);
@@ -910,129 +923,139 @@ public class BuildOpenCDSConceptLists
         }
     }
 
-    private <SB extends SupplyBase> void processSupplyBase(final ConceptService conceptService, final List<SB> list,
-            final ConceptLists conceptLists)
+    private static <SB extends SupplyBase> void processSupplyBase(final ConceptService conceptService, final List<SB> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
+        if (list == null)
+            return;
+
+        for (final SB sb : list)
+            processSupplyBase(conceptService, sb, conceptLists);
+    }
+
+    private static void processUndeliveredSupply(final ConceptService conceptService, final List<UndeliveredSupply> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
+    {
+        if (list == null)
+            return;
+
+        for (final UndeliveredSupply undeliveredSupply : list)
         {
-            for (final SB sb : list)
-                processSupplyBase(conceptService, sb, conceptLists);
+            processSupplyBase(conceptService, undeliveredSupply, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, undeliveredSupply.getId(), undeliveredSupply.getReason(),
+                    SupplyUndeliveredReasonConcept.class, conceptLists);
         }
     }
 
-    private void processUndeliveredSupply(final ConceptService conceptService, final List<UndeliveredSupply> list,
-            final ConceptLists conceptLists)
+    private static void processSupplyProposal(final ConceptService conceptService, final List<SupplyProposal> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final UndeliveredSupply undeliveredSupply : list)
-            {
-                processSupplyBase(conceptService, undeliveredSupply, conceptLists);
+        if (list == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, undeliveredSupply.getId(), undeliveredSupply.getReason(),
-                        SupplyUndeliveredReasonConcept.class, conceptLists);
-            }
+        for (final SupplyProposal supplyProposal : list)
+        {
+            processSupplyBase(conceptService, supplyProposal, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, supplyProposal.getId(), supplyProposal.getCriticality(),
+                    SupplyCriticalityConcept.class, conceptLists);
         }
     }
 
-    private void processSupplyProposal(final ConceptService conceptService, final List<SupplyProposal> list,
-            final ConceptLists conceptLists)
+    private static void processSupplyOrder(final ConceptService conceptService, final List<SupplyOrder> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (list != null)
-        {
-            for (final SupplyProposal supplyProposal : list)
-            {
-                processSupplyBase(conceptService, supplyProposal, conceptLists);
+        if (list == null)
+            return;
 
-                populateVmrOpenCdsConcept(conceptService, supplyProposal.getId(), supplyProposal.getCriticality(),
-                        SupplyCriticalityConcept.class, conceptLists);
-            }
+        for (final SupplyOrder supplyOrder : list)
+        {
+            processSupplyBase(conceptService, supplyOrder, conceptLists);
+
+            populateVmrOpenCdsConcept(conceptService, supplyOrder.getId(), supplyOrder.getCriticality(),
+                    SupplyCriticalityConcept.class, conceptLists);
         }
     }
 
-    private void processSupplyOrder(final ConceptService conceptService, final List<SupplyOrder> list,
-            final ConceptLists conceptLists)
-    {
-        if (list != null)
-        {
-            for (final SupplyOrder supplyOrder : list)
-            {
-                processSupplyBase(conceptService, supplyOrder, conceptLists);
-
-                populateVmrOpenCdsConcept(conceptService, supplyOrder.getId(), supplyOrder.getCriticality(),
-                        SupplyCriticalityConcept.class, conceptLists);
-            }
-        }
-    }
-
-    private void processSupplyEvent(final ConceptService conceptService, final List<SupplyEvent> list,
-            final ConceptLists conceptLists)
+    private static void processSupplyEvent(final ConceptService conceptService, final List<SupplyEvent> list,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
         processSupplyBase(conceptService, list, conceptLists);
     }
 
-    private <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final ConceptService conceptService, final String id,
-            final String[] codes, final String codeSystem, final Class<C> conceptClass, final ConceptLists conceptList)
+    private static <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final ConceptService conceptService,
+            final String id, final String[] codes, final String codeSystem, final Class<C> conceptClass,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (codes != null)
-        {
-            for (final String code : codes)
-                populateVmrOpenCdsConcept(conceptService, id, code, codeSystem, conceptClass, conceptList);
-        }
+        if (codes == null)
+            return;
+
+        for (final String code : codes)
+            populateVmrOpenCdsConcept(conceptService, id, code, codeSystem, conceptClass, conceptLists);
     }
 
-    private <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final ConceptService conceptService, final String id,
-            final List<CD> cds, final Class<C> conceptClass, final ConceptLists conceptLists)
+    private static <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final ConceptService conceptService,
+            final String id, final List<CD> cds, final Class<C> conceptClass,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (cds != null)
-        {
-            for (final CD cd : cds)
-                populateVmrOpenCdsConcept(conceptService, id, cd, conceptClass, conceptLists);
-        }
+        if (cds == null)
+            return;
+
+        for (final CD cd : cds)
+            populateVmrOpenCdsConcept(conceptService, id, cd, conceptClass, conceptLists);
     }
 
-    private <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final ConceptService conceptService, final String id,
-            final CD cd, final Class<C> conceptClass, final ConceptLists conceptLists)
+    private static <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final ConceptService conceptService,
+            final String id, final CD cd, final Class<C> conceptClass,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (cd != null)
-            populateVmrOpenCdsConcept(conceptService, id, cd.getCode(), cd.getCodeSystem(), conceptClass, conceptLists);
+        if (cd == null)
+            return;
+
+        populateVmrOpenCdsConcept(conceptService, id, cd.getCode(), cd.getCodeSystem(), conceptClass, conceptLists);
     }
 
-    private <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final ConceptService conceptService, final String id,
-            final String code, final String codeSystem, final Class<C> conceptClass, final ConceptLists conceptLists)
+    private static <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final ConceptService conceptService,
+            final String id, final String code, final String codeSystem, final Class<C> conceptClass,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists)
     {
-        if (code != null)
-        {
-            final List<ConceptView> conceptViews = conceptService.getConceptViews(codeSystem, code);
-            populateVmrOpenCdsConcept(id, conceptClass, conceptLists, conceptViews);
-        }
+        if (code == null)
+            return;
+
+        populateVmrOpenCdsConcept(id, conceptClass, conceptLists, conceptService.getConceptViews(codeSystem, code));
     }
 
-    private <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final String conceptTargetId, final Class<C> conceptClass,
-            final ConceptLists conceptLists, final List<ConceptView> conceptViews)
+    private static <C extends VmrOpenCdsConcept> void populateVmrOpenCdsConcept(final String conceptTargetId,
+            final Class<C> conceptClass,
+            final Map<Class<? extends VmrOpenCdsConcept>, List<? extends VmrOpenCdsConcept>> conceptLists,
+            final List<ConceptView> conceptViews)
     {
-        if (conceptViews != null)
+        if (conceptViews == null)
+            return;
+
+        for (final ConceptView conceptView : conceptViews)
         {
-            for (final ConceptView conceptView : conceptViews)
+            final C vocc;
+            try
             {
-                final C vocc;
-                try
-                {
-                    vocc = conceptClass.getDeclaredConstructor().newInstance();
-                }
-                catch (final InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e)
-                {
-                    log.error(e.getMessage(), e);
-                    throw new OpenCDSRuntimeException(e.getMessage(), e);
-                }
-                final Concept toConcept = conceptView.getToConcept();
-                vocc.setId(MiscUtility.getIDAsString());
-                vocc.setConceptTargetId(conceptTargetId);
-                vocc.setOpenCdsConceptCode(toConcept.getCode());
-                vocc.setDeterminationMethodCode(conceptView.getCdmCode());
-                vocc.setDisplayName(toConcept.getDisplayName());
-                conceptLists.put(conceptClass, vocc);
+                vocc = conceptClass.getDeclaredConstructor().newInstance();
             }
+            catch (final InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e)
+            {
+                log.error(e.getMessage(), e);
+                throw new OpenCDSRuntimeException(e.getMessage(), e);
+            }
+
+            final Concept toConcept = conceptView.toConcept();
+            vocc.setId(MiscUtility.getIDAsString());
+            vocc.setConceptTargetId(conceptTargetId);
+            vocc.setOpenCdsConceptCode(toConcept.code());
+            vocc.setDeterminationMethodCode(conceptView.cdmCode());
+            vocc.setDisplayName(toConcept.displayName());
+
+            //noinspection unchecked
+            ((List<C>) conceptLists.computeIfAbsent(conceptClass, _ -> new ArrayList<>())).add(vocc);
         }
     }
 }

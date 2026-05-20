@@ -13,5 +13,5 @@ import lombok.ToString;
 @ToString
 public class ProcedureEvent extends ProcedureBase
 {
-    protected IVLDate procedureTime;
+    private IVLDate procedureTime;
 }

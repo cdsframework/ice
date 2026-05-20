@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class ANY
 {
-    protected Object any;
+    private Object any;
 }

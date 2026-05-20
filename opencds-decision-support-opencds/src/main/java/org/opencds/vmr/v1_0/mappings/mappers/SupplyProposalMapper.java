@@ -34,7 +34,8 @@ public class SupplyProposalMapper extends SupplyBaseMapper
         }
 
         if (source.getProposedSupplyTime() != null)
-            target.setProposedSupplyTime(MappingUtility.iVLTS2IVLDateInternal(source.getProposedSupplyTime()));
+            target.setProposedSupplyTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getProposedSupplyTime(), factLists.getParsedDatesCache()));
         if (source.getRepeatNumber() != null)
             target.setRepeatNumber(MappingUtility.iNT2INTInternal(source.getRepeatNumber()));
 
@@ -72,9 +73,9 @@ public class SupplyProposalMapper extends SupplyBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getSupplyProposals() == null)
+        if (organizedResults.output().getSupplyProposals() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setSupplyProposals(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.SupplyProposals());
         }
 

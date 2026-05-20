@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class BL extends ANY
 {
-    protected boolean value;
+    private boolean value;
 }

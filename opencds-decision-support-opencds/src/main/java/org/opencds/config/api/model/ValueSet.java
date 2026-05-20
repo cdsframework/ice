@@ -1,8 +1,12 @@
 package org.opencds.config.api.model;
 
-public interface ValueSet
-{
-    String getOid();
+import org.springframework.util.StringUtils;
 
-    String getName();
+public record ValueSet(String oid,
+                       String name)
+{
+    public ValueSet
+    {
+        assert StringUtils.hasText(oid);
+    }
 }

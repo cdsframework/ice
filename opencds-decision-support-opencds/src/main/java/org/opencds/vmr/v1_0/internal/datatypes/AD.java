@@ -14,8 +14,8 @@ import lombok.ToString;
 @ToString
 public class AD extends ANY
 {
-    protected List<ADXP> part = new ArrayList<>();
-    protected List<PostalAddressUse> use = new ArrayList<>();
+    private List<ADXP> part = new ArrayList<>();
+    private List<PostalAddressUse> use = new ArrayList<>();
 
     public List<ADXP> getPart()
     {

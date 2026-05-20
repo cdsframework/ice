@@ -8,31 +8,26 @@ import javax.xml.transform.stream.StreamSource;
 import org.opencds.common.exceptions.InvalidDriDataFormatException;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.config.api.pool.UnmarshallerFactory;
-import org.opencds.config.api.ss.EntryPoint;
 import org.opencds.vmr.v1_0.schema.CDSInput;
 
-import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+@UtilityClass
 @Slf4j
-public class CDSInputEntryPoint implements EntryPoint<CDSInput>
+public class CDSInputEntryPoint
 {
-    private final UnmarshallerFactory unmarshallerFactory = new UnmarshallerFactory();
-
-    @Override
-    public CDSInput buildInput(final byte[] inputPayload)
+    public static CDSInput buildInput(final byte[] inputPayload)
     {
         log.debug("starting CDSInputEntryPoint");
         final CDSInput cdsInput;
 
         try
         {
-            final StreamSource payloadStream = new StreamSource(new ByteArrayInputStream(inputPayload));
-            final Unmarshaller unmarshaller = unmarshallerFactory.create(CDSInput.class);
-            final JAXBElement<CDSInput> jaxbElement = unmarshaller.unmarshal(payloadStream, CDSInput.class);
-            cdsInput = jaxbElement.getValue();
+            cdsInput = UnmarshallerFactory.create(CDSInput.class)
+                    .unmarshal(new StreamSource(new ByteArrayInputStream(inputPayload)), CDSInput.class)
+                    .getValue();
         }
         catch (final JAXBException e)
         {

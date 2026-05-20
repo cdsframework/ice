@@ -36,9 +36,11 @@ public class UnconductedObservationMapper extends ObservationBaseMapper
         if (source.getReason() != null)
             target.setReason(MappingUtility.cD2CDInternal(source.getReason()));
         if (source.getSubjectEffectiveTime() != null)
-            target.setSubjectEffectiveTime(MappingUtility.iVLTS2IVLDateInternal(source.getSubjectEffectiveTime()));
+            target.setSubjectEffectiveTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getSubjectEffectiveTime(), factLists.getParsedDatesCache()));
         if (source.getDocumentationTime() != null)
-            target.setDocumentationTime(MappingUtility.iVLTS2IVLDateInternal(source.getDocumentationTime()));
+            target.setDocumentationTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getDocumentationTime(), factLists.getParsedDatesCache()));
 
         factLists.put(UnconductedObservation.class, target);
 
@@ -76,9 +78,9 @@ public class UnconductedObservationMapper extends ObservationBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getUnconductedObservations() == null)
+        if (organizedResults.output().getUnconductedObservations() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setUnconductedObservations(
                             new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.UnconductedObservations());
         }

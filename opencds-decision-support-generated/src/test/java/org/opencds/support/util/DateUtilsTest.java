@@ -26,8 +26,9 @@
 
 package org.opencds.support.util;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -47,19 +48,19 @@ public class DateUtilsTest
     public void testGetISODateFormat()
     {
         log.info("getISODateFormat");
-        final Date date = new Date();
-        Assertions.assertEquals(new SimpleDateFormat("yyyyMMdd").format(date), DateUtils.getISODateFormat(date));
+        final LocalDate date = LocalDate.now();
+        Assertions.assertEquals(date.format(DateTimeFormatter.ofPattern("yyyyMMdd")), DateUtils.getISODateFormat(date));
     }
 
     /**
      * Test of parseISODateFormat method, of class DateUtils.
      */
     @Test
-    public void testParseISODateFormat() throws Exception
+    public void testParseISODateFormat()
     {
         log.info("parseISODateFormat");
-        final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-        final String expResult = formatter.format(new Date());
-        Assertions.assertEquals(expResult, formatter.format(DateUtils.parseISODateFormat(expResult)));
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        final String expResult = LocalDate.now().format(formatter);
+        Assertions.assertEquals(expResult, Objects.requireNonNull(DateUtils.parseISODateFormat(expResult)).format(formatter));
     }
 }

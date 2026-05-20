@@ -2,7 +2,19 @@ package org.opencds.plugin.api;
 
 import java.util.Map;
 
-public interface PreProcessPluginContext extends PluginContext
+public record PreProcessPluginContext(Map<String, SupportingData> supportingData,
+                                      PluginDataCache cache,
+                                      Map<String, Object> globals) implements PluginContext
 {
-    Map<String, Object> globals();
+    public static PreProcessPluginContext create(final Map<String, SupportingData> supportingData, final PluginDataCache cache,
+            final Map<String, Object> globals)
+    {
+        return new PreProcessPluginContext(supportingData, cache, globals);
+    }
+
+    public static PreProcessPluginContext createPreProcessPluginContext(final Map<String, SupportingData> supportingData,
+            final PluginDataCache cache, final Map<String, Object> globals)
+    {
+        return create(supportingData, cache, globals);
+    }
 }

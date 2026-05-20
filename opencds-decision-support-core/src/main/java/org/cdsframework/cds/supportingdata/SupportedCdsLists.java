@@ -11,15 +11,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.cdsframework.ice.dto.CodeSystem;
-import org.cdsframework.ice.dto.CodeSystemConcept;
-import org.cdsframework.ice.dto.CodeSystemConceptProperty;
+import org.cdsframework.fhir.CodeSystem;
+import org.cdsframework.fhir.CodeSystemConcept;
+import org.cdsframework.fhir.CodeSystemConceptProperty;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.supportingdata.SupplementalReasonSupport;
-import org.cdsframework.ice.util.CollectionUtils;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.springframework.util.ObjectUtils;
 
@@ -112,12 +111,6 @@ public class SupportedCdsLists implements SupportingData
         final String _METHODNAME = "addSupportedCodeSystemConcept(): ";
 
         if (pCodeSystem == null || pConcept == null)
-            return;
-
-        // If adding a code that is not one of the supported cdsVersions, then return
-        if (ObjectUtils.isEmpty(
-                CollectionUtils.intersectionOfStringCollections(java.util.Collections.singletonList(pCodeSystem.version()),
-                        this.cdsVersions)))
             return;
 
         validateNoOutboundCodePropertyOnSupplementalReasonConcept(pCodeSystem, pConcept);

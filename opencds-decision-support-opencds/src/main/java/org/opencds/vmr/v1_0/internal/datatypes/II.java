@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class II extends ANY
 {
-    protected String value;
+    private String value;
 }

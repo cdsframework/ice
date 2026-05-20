@@ -1,20 +1,21 @@
 package org.opencds.config.api.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
-public interface SupportingData
+import org.springframework.util.StringUtils;
+
+public record SupportingData(String identifier,
+                             KMId kmId,
+                             String packageType,
+                             String packageId,
+                             PluginId loadedBy,
+                             LocalDate timestamp,
+                             String userId)
 {
-    String getIdentifier();
-
-    KMId getKMId();
-
-    String getPackageType();
-
-    String getPackageId();
-
-    PluginId getLoadedBy();
-
-    Date getTimestamp();
-
-    String getUserId();
+    public SupportingData
+    {
+        assert StringUtils.hasText(identifier);
+        assert StringUtils.hasText(packageType);
+        assert StringUtils.hasText(packageId);
+    }
 }

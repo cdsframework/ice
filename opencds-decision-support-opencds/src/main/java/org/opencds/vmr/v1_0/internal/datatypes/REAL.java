@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class REAL extends QTY
 {
-    protected double value;
+    private double value;
 }

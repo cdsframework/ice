@@ -61,9 +61,9 @@ public class GoalProposalMapper extends GoalBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getGoalProposals() == null)
+        if (organizedResults.output().getGoalProposals() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setGoalProposals(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.GoalProposals());
         }
 

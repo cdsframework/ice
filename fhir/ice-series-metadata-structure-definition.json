@@ -1,0 +1,210 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "ice-series-metadata",
+  "url": "http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata",
+  "version": "1.0.0",
+  "name": "IceSeriesMetadata",
+  "title": "ICE Series Metadata",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-04-24",
+  "publisher": "CDS Framework",
+  "description": "Carries series-level coded terminology metadata for an ICE series PlanDefinition.",
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "PlanDefinition"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "ICE series metadata",
+        "definition": "Series-level coded terminology metadata used by ICE series PlanDefinition instances.",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 3,
+        "max": "*"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:numberOfDosesInSeries",
+        "path": "Extension.extension",
+        "sliceName": "numberOfDosesInSeries",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:numberOfDosesInSeries.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:numberOfDosesInSeries.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "numberOfDosesInSeries"
+      },
+      {
+        "id": "Extension.extension:numberOfDosesInSeries.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:series",
+        "path": "Extension.extension",
+        "sliceName": "series",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:series.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:series.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "series"
+      },
+      {
+        "id": "Extension.extension:series.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:series.valueCodeableConcept",
+        "path": "Extension.extension.valueCodeableConcept",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://terminology.cdsframework.org/fhir/ValueSet/ice-series"
+        }
+      },
+      {
+        "id": "Extension.extension:vaccineGroup",
+        "path": "Extension.extension",
+        "sliceName": "vaccineGroup",
+        "min": 1,
+        "max": "*",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:vaccineGroup.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:vaccineGroup.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "vaccineGroup"
+      },
+      {
+        "id": "Extension.extension:vaccineGroup.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:vaccineGroup.valueCodeableConcept",
+        "path": "Extension.extension.valueCodeableConcept",
+        "binding": {
+          "strength": "required",
+          "valueSet": "http://terminology.cdsframework.org/fhir/ValueSet/ice-vaccine-groups"
+        }
+      },
+      {
+        "id": "Extension.extension:season",
+        "path": "Extension.extension",
+        "sliceName": "season",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:season.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:season.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "season"
+      },
+      {
+        "id": "Extension.extension:season.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      }
+    ]
+  }
+}

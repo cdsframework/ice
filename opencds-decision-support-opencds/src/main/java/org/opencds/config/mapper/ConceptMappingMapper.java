@@ -1,17 +1,12 @@
 package org.opencds.config.mapper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.opencds.config.api.model.Concept;
 import org.opencds.config.api.model.ConceptMapping;
-import org.opencds.config.api.model.impl.ConceptImpl;
-import org.opencds.config.api.model.impl.ConceptMappingImpl;
 import org.opencds.config.schema.ConceptMapping.FromConcepts;
 import org.opencds.config.schema.NamespacedConcept;
+import org.springframework.util.ObjectUtils;
 
 public abstract class ConceptMappingMapper
 {
@@ -19,65 +14,53 @@ public abstract class ConceptMappingMapper
     {
         if (external == null)
             return null;
-        final List<Concept> fromConceptsList = new ArrayList<>();
-        for (final FromConcepts fromConcepts : external.getFromConcepts())
-        {
-            for (final org.opencds.config.schema.Concept fromConcept : fromConcepts.getConcept())
-            {
-                final Concept concept =
-                        ConceptImpl.create(fromConcept.getCode(), fromConcepts.getCodeSystem(), fromConcepts.getCodeSystemName(),
-                                fromConcept.getDisplayName(), fromConcept.getComment(), null);
 
-                fromConceptsList.add(concept);
-            }
-        }
-        return ConceptMappingImpl.create(ConceptMapper.internal(external.getToConcept()), fromConceptsList);
+        return new ConceptMapping(ConceptMapper.internal(external.getToConcept()), external.getFromConcepts()
+                .stream()
+                .flatMap(fromConcepts -> fromConcepts.getConcept()
+                        .stream()
+                        .map(fromConcept -> new Concept(fromConcept.getCode(), fromConcepts.getCodeSystem(),
+                                fromConcepts.getCodeSystemName(), fromConcept.getDisplayName(), fromConcept.getComment(), null)))
+                .toList());
     }
 
     public static org.opencds.config.schema.ConceptMapping external(final ConceptMapping internal)
     {
         if (internal == null)
             return null;
+
         final org.opencds.config.schema.ConceptMapping external = new org.opencds.config.schema.ConceptMapping();
-        if (internal.getToConcept() != null)
+        if (internal.toConcept() != null)
         {
             final NamespacedConcept nc = new NamespacedConcept();
-            nc.setCode(internal.getToConcept().getCode());
-            nc.setCodeSystem(internal.getToConcept().getCodeSystem());
-            nc.setCodeSystemName(internal.getToConcept().getCodeSystemName());
-            nc.setDisplayName(internal.getToConcept().getDisplayName());
-            nc.setComment(internal.getToConcept().getComment());
-            nc.setValueSet(ValueSetMapper.external(internal.getToConcept().getValueSet()));
+            nc.setCode(internal.toConcept().code());
+            nc.setCodeSystem(internal.toConcept().codeSystem());
+            nc.setCodeSystemName(internal.toConcept().codeSystemName());
+            nc.setDisplayName(internal.toConcept().displayName());
+            nc.setComment(internal.toConcept().comment());
+            nc.setValueSet(ValueSetMapper.external(internal.toConcept().valueSet()));
             external.setToConcept(nc);
         }
 
-        if (internal.getFromConcepts() != null && !internal.getFromConcepts().isEmpty())
+        if (!ObjectUtils.isEmpty(internal.fromConcepts()))
         {
-            final Map<String, List<Concept>> conceptGroups = new HashMap<>();
-            for (final Concept intFromConcept : internal.getFromConcepts())
-            {
-                if (!conceptGroups.containsKey(intFromConcept.getCodeSystem()))
-                    conceptGroups.put(intFromConcept.getCodeSystem(), new ArrayList<>());
-                conceptGroups.get(intFromConcept.getCodeSystem()).add(intFromConcept);
-            }
-
-            for (final Entry<String, List<Concept>> group : conceptGroups.entrySet())
+            internal.fromConcepts().stream().collect(Collectors.groupingBy(Concept::codeSystem)).values().forEach(values ->
             {
                 FromConcepts fromConcepts = null;
-                for (final Concept internalConcept : group.getValue())
+                for (final Concept internalConcept : values)
                 {
                     if (fromConcepts == null)
                     {
                         fromConcepts = new FromConcepts();
-                        fromConcepts.setCodeSystem(internalConcept.getCodeSystem());
-                        fromConcepts.setCodeSystemName(internalConcept.getCodeSystemName());
+                        fromConcepts.setCodeSystem(internalConcept.codeSystem());
+                        fromConcepts.setCodeSystemName(internalConcept.codeSystemName());
                     }
                     final org.opencds.config.schema.Concept externalConcept;
                     externalConcept = ConceptMapper.external(internalConcept);
                     fromConcepts.getConcept().add(externalConcept);
                 }
                 external.getFromConcepts().add(fromConcepts);
-            }
+            });
         }
 
         return external;

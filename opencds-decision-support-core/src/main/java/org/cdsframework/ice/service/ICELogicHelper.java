@@ -27,12 +27,7 @@
 package org.cdsframework.ice.service;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
@@ -80,13 +75,13 @@ public class ICELogicHelper
      * Given a vMR IVLDate datatype where the high and low values are expected to be the same => convert to a Date datatype. Therefore, if the
      * high and low values of the IVLDate are different, an exception is thrown
      */
-    public static Date extractSingularDateValueFromIVLDate(final IVLDate dateInterval) throws IllegalArgumentException
+    public static LocalDate extractSingularDateValueFromIVLDate(final IVLDate dateInterval) throws IllegalArgumentException
     {
         if (dateInterval == null)
             throw new IllegalArgumentException("No immunization date provided");
 
-        final Date lowIntervalDate = dateInterval.getLow();
-        final Date highIntervalDate = dateInterval.getHigh();
+        final LocalDate lowIntervalDate = dateInterval.getLow();
+        final LocalDate highIntervalDate = dateInterval.getHigh();
 
         if (lowIntervalDate == null && highIntervalDate == null)
             throw new IllegalArgumentException("No immunization date provided");
@@ -97,81 +92,9 @@ public class ICELogicHelper
         if (highIntervalDate == null)
             return lowIntervalDate;
 
-        final int dateComparison = compareDates(lowIntervalDate, highIntervalDate);
-        if (dateComparison != 0)
+        if (!Objects.equals(lowIntervalDate, highIntervalDate))
             throw new IllegalArgumentException("Invalid immunization date data; interval date contained unequal dates");
 
         return lowIntervalDate;
-    }
-
-    /**
-     * Compares two dates - month, date and year only
-     *
-     * @return the value 0 if the dates are equal, a value less than 0 if date1 is before date2, a value greater than 0 if date2 > date1.
-     * If both dates are null, they're considered equal; if one date is null and the other is not, then the non-null date is returned as the greater
-     * of the two.
-     */
-    private static int compareDates(final Date date1, final Date date2)
-    {
-        if (date1 == null && date2 == null)
-            return 0;
-
-        if (date1 != null && date2 == null)
-            return -1;
-
-        if (date1 == null)
-            return 1;
-
-        final Calendar calendar1 = new GregorianCalendar();
-        calendar1.setLenient(false);
-        calendar1.setTime(date1);
-        final Calendar calendar2 = new GregorianCalendar();
-        calendar2.setLenient(false);
-        calendar2.setTime(date2);
-
-        final int year1 = calendar1.get(Calendar.YEAR);
-        final int month1 = calendar1.get(Calendar.MONTH);
-        final int dateday1 = calendar1.get(Calendar.DATE);
-        final int year2 = calendar2.get(Calendar.YEAR);
-        final int month2 = calendar2.get(Calendar.MONTH);
-        final int dateday2 = calendar2.get(Calendar.DATE);
-
-        // Compare years
-        if (year1 < year2)
-            return 1;
-
-        if (year1 > year2)
-            return -1;
-
-        // Compare months
-        if (month1 < month2)
-            return 1;
-
-        if (month1 > month2)
-            return -1;
-
-        // Compare dates
-        return Integer.compare(dateday2, dateday1);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static LocalDate toLocalDate(final Date date)
-    {
-        return Optional.ofNullable(date)
-                .map(Date::toInstant)
-                .map(i -> i.atZone(ZoneId.systemDefault()))
-                .map(ZonedDateTime::toLocalDate)
-                .orElse(null);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static Date toDate(final LocalDate localDate)
-    {
-        return Optional.ofNullable(localDate)
-                .map(LocalDate::atStartOfDay)
-                .map(ldt -> ldt.atZone(ZoneId.systemDefault()))
-                .map(ZonedDateTime::toInstant)
-                .map(Date::from)
-                .orElse(null);
     }
 }

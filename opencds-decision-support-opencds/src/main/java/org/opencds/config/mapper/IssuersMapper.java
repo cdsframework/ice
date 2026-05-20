@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.opencds.config.api.model.AccessType;
 import org.opencds.config.api.model.Issuer;
-import org.opencds.config.api.model.impl.IssuerImpl;
 import org.opencds.config.schema.Issuers;
 
 public class IssuersMapper
@@ -13,6 +12,7 @@ public class IssuersMapper
     {
         if (issuers == null)
             return null;
+
         return issuers.getIssuer().stream().map(IssuersMapper::internal).toList();
     }
 
@@ -20,14 +20,15 @@ public class IssuersMapper
     {
         if (issuer == null)
             throw new IllegalArgumentException("issuer must not be null");
-        return IssuerImpl.create(issuer.getIss(), issuer.getJku(), issuer.getJwk(),
-                AccessType.valueOf(issuer.getAccessType().value()));
+
+        return new Issuer(issuer.getIss(), issuer.getJku(), issuer.getJwk(), AccessType.valueOf(issuer.getAccessType().value()));
     }
 
     public static Issuers external(final List<Issuer> issuers)
     {
         if (issuers == null)
             return null;
+
         final var issuer = new Issuers();
         issuers.stream().map(IssuersMapper::external).forEach(issuer.getIssuer()::add);
         return issuer;
@@ -37,6 +38,7 @@ public class IssuersMapper
     {
         if (issuer == null)
             throw new IllegalArgumentException("issuer must not be null");
+
         final var iss = new org.opencds.config.schema.Issuer();
         iss.setIss(issuer.iss());
         iss.setJku(issuer.jku());

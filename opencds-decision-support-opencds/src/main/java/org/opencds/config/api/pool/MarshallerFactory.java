@@ -5,24 +5,26 @@ import org.opencds.config.api.xml.JAXBContextService;
 
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+@UtilityClass
 @Slf4j
 public class MarshallerFactory
 {
-    public Marshaller create(final Class<?> clazz)
+    public static Marshaller create(final Class<?> clazz)
     {
         final Marshaller marshaller;
         log.debug("Creating instance of marshaller: {}", clazz.getCanonicalName());
         try
         {
-            marshaller = JAXBContextService.getInstance().getJAXBContext(clazz).createMarshaller();
+            marshaller = JAXBContextService.getJAXBContext(clazz).createMarshaller();
         }
         catch (final JAXBException e)
         {
             throw new OpenCDSRuntimeException(
-                    "Request for Marshaller for class: " + clazz.getCanonicalName() + " created JAXBException: " + e.getMessage(),
-                    e);
+                    "Request for Marshaller for class: %s created JAXBException: %s".formatted(clazz.getCanonicalName(),
+                            e.getMessage()), e);
         }
 
         if (marshaller == null)

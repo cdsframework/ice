@@ -28,7 +28,6 @@ package org.cdsframework.ice.service;
 
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -91,7 +90,7 @@ public class TargetSeasons
         }
     }
 
-    private final Date evalTime;
+    private final LocalDate evalTime;
     //private Map<SupportedVaccineGroupConcept, Season> currentSeasonManuallySet;
     // The current season for this invocation
     private final Map<String, Season> currentSeason = new HashMap<>();
@@ -111,7 +110,7 @@ public class TargetSeasons
      * @param pSVGC the vaccine group that scopes the set of TargetSeasons to scan for this criteria
      * @return true if a Season tracked by this class has been found for which this criteria is true, false if no such season is found.
      */
-    public boolean dateIsApplicableToOneOrMoreFullySpecifiedTargetSeasonsInVaccineGroup(final Date pDate, final String pSVGC)
+    public boolean dateIsApplicableToOneOrMoreFullySpecifiedTargetSeasonsInVaccineGroup(final LocalDate pDate, final String pSVGC)
     {
         return getFullySpecifiedTargetSeasonInVaccineGroupApplicableToDate(pDate, pSVGC) != null;
     }
@@ -122,7 +121,7 @@ public class TargetSeasons
      *
      * @return vaccine group Season that the date is applicable to, or null if there is no season for the specified criteria
      */
-    public Season getFullySpecifiedTargetSeasonInVaccineGroupApplicableToDate(final Date pDate, final String pSVGC)
+    public Season getFullySpecifiedTargetSeasonInVaccineGroupApplicableToDate(final LocalDate pDate, final String pSVGC)
     {
         if (pDate == null || pSVGC == null)
             return null;

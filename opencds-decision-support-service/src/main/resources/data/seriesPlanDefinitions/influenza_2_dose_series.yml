@@ -1,0 +1,857 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+      plan-definitions:
+        INFLUENZA_2_DOSE_SERIES:
+          resource-type: PlanDefinition
+          url: http://cdsframework.org/PlanDefinition/series/influenza_2_dose_series
+          version: 1.0.0
+          name: INFLUENZA_2_DOSE_SERIES
+          title: Influenza 2-Dose Series
+          status: active
+          meta:
+            profile:
+              - http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition
+          type:
+            coding:
+              - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
+                code: eca-rule
+                display: ECA Rule
+          extension:
+            - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
+              extension:
+                - url: numberOfDosesInSeries
+                  value-integer: 2
+                - url: series
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.10
+                        code: INFLUENZA_2_DOSE_SERIES
+                        version: ICE Vaccine Series
+                        display: Influenza 2-Dose Series
+                    text: Influenza 2-Dose Series
+                - url: vaccineGroup
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.1
+                        code: INFLUENZA
+                        version: ICE Vaccine Group
+                        display: Influenza
+                    text: Influenza
+                - url: season
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.11
+                        code: 20122013_INFLUENZA_SEASON
+                        version: ICE Vaccine Season
+                        display: 2012-2013 Influenza Season
+                    text: 2012-2013 Influenza Season
+                - url: season
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.11
+                        code: 20132014_INFLUENZA_SEASON
+                        version: ICE Vaccine Season
+                        display: 2013-2014 Influenza Season
+                    text: 2013-2014 Influenza Season
+                - url: season
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.11
+                        code: 20142015_INFLUENZA_SEASON
+                        version: ICE Vaccine Season
+                        display: 2014-2015 Influenza Season
+                    text: 2014-2015 Influenza Season
+                - url: season
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.11
+                        code: 20152016_INFLUENZA_SEASON
+                        version: ICE Vaccine Season
+                        display: 2015-2016 Influenza Season
+                    text: 2015-2016 Influenza Season
+          action:
+            - id: dose-1
+              title: Dose 1
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 1
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 6m - 4d
+                    - url: minimumAge
+                      value-string: 6m
+                    - url: earliestRecommendedAge
+                      value-string: 6m
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '151'
+                            version: CVX
+                            display: influenza nasal, unspecified formulation
+                        text: influenza nasal, unspecified formulation
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '144'
+                            version: CVX
+                            display: influenza, intradermal, preservative-free
+                        text: influenza, intradermal, preservative-free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '149'
+                            version: CVX
+                            display: influenza, live, intranasal, quadrivalent
+                        text: influenza, live, intranasal, quadrivalent
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '88'
+                            version: CVX
+                            display: influenza NOS
+                        text: influenza NOS
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '111'
+                            version: CVX
+                            display: influenza, live, intranasal
+                        text: influenza, live, intranasal
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '155'
+                            version: CVX
+                            display: influenza, recombinant, inj., preservative-free
+                        text: influenza, recombinant, inj., preservative-free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '15'
+                            version: CVX
+                            display: 'influenza, split '
+                        text: 'influenza, split '
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '141'
+                            version: CVX
+                            display: influenza, injectable
+                        text: influenza, injectable
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '153'
+                            version: CVX
+                            display: Influenza, injectable, MDCK, (ccIIV3), trivalent, preservative
+                              free
+                        text: Influenza, injectable, MDCK, (ccIIV3), trivalent, preservative
+                          free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '16'
+                            version: CVX
+                            display: influenza, whole
+                        text: influenza, whole
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '135'
+                            version: CVX
+                            display: 'influenza, high dose '
+                        text: 'influenza, high dose '
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '150'
+                            version: CVX
+                            display: Influenza, injectable, quadrivalent (IIV4), preservative
+                              free
+                        text: Influenza, injectable, quadrivalent (IIV4), preservative free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '140'
+                            version: CVX
+                            display: influenza, injectable, preservative-free
+                        text: influenza, injectable, preservative-free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '158'
+                            version: CVX
+                            display: Influenza-IIV4, IM (>3yrs)
+                        text: Influenza-IIV4, IM (>3yrs)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '161'
+                            version: CVX
+                            display: Influenza, injectable, quadrivalent, preservative free,
+                              pediatric
+                        text: Influenza, injectable, quadrivalent, preservative free, pediatric
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '166'
+                            version: CVX
+                            display: Influenza, intradermal, quadrivalent, preservative free,
+                              injectable
+                        text: Influenza, intradermal, quadrivalent, preservative free, injectable
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '168'
+                            version: CVX
+                            display: Seasonal trivalent influenza vaccine, adjuvanted, preservative
+                              free
+                        text: Seasonal trivalent influenza vaccine, adjuvanted, preservative
+                          free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '171'
+                            version: CVX
+                            display: Influenza, injectable, Madin Darby Canine Kidney, preservative
+                              free, quadrivalent
+                        text: Influenza, injectable, Madin Darby Canine Kidney, preservative
+                          free, quadrivalent
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '185'
+                            version: CVX
+                            display: influenza, recombinant, quadrivalent,injectable, preservative
+                              free
+                        text: influenza, recombinant, quadrivalent,injectable, preservative
+                          free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '186'
+                            version: CVX
+                            display: Influenza, injectable, MDCK, quadrivalent
+                        text: Influenza, injectable, MDCK, quadrivalent
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '194'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, unspecified formulation
+                        text: Influenza, Southern Hemisphere, unspecified formulation
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '197'
+                            version: CVX
+                            display: Influenza, high dose, quadrivalent
+                        text: Influenza, high dose, quadrivalent
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '200'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, pediatric, preservative
+                              free
+                        text: Influenza, Southern Hemisphere, pediatric, preservative free
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '201'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, preservative free
+                        text: Influenza, Southern Hemisphere, preservative free
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '202'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, quadrivalent, with preservative
+                        text: Influenza, Southern Hemisphere, quadrivalent, with preservative
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '205'
+                            version: CVX
+                            display: Influenza, seasonal vaccine, quadrivalent, adjuvanted
+                        text: Influenza, seasonal vaccine, quadrivalent, adjuvanted
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '231'
+                            version: CVX
+                            display: influenza, Southern Hemisphere, high-dose, quadrivalent
+                        text: influenza, Southern Hemisphere, high-dose, quadrivalent
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '320'
+                            version: CVX
+                            display: Influenza, MDCK, trivalent, preservative
+                        text: Influenza, MDCK, trivalent, preservative
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '331'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, trivalent, preservative
+                              free
+                        text: Influenza, Southern Hemisphere, trivalent, preservative free
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '333'
+                            version: CVX
+                            display: Influenza, live, intranasal, self-caregiver admin
+                        text: Influenza, live, intranasal, self-caregiver admin
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '337'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, high-dose, trivalent, PF
+                        text: Influenza, Southern Hemisphere, high-dose, trivalent, PF
+                    - url: preferred
+                      value-boolean: false
+            - id: dose-2
+              title: Dose 2
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 2
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '151'
+                            version: CVX
+                            display: influenza nasal, unspecified formulation
+                        text: influenza nasal, unspecified formulation
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '144'
+                            version: CVX
+                            display: influenza, intradermal, preservative-free
+                        text: influenza, intradermal, preservative-free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '149'
+                            version: CVX
+                            display: influenza, live, intranasal, quadrivalent
+                        text: influenza, live, intranasal, quadrivalent
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '88'
+                            version: CVX
+                            display: influenza NOS
+                        text: influenza NOS
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '111'
+                            version: CVX
+                            display: influenza, live, intranasal
+                        text: influenza, live, intranasal
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '155'
+                            version: CVX
+                            display: influenza, recombinant, inj., preservative-free
+                        text: influenza, recombinant, inj., preservative-free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '15'
+                            version: CVX
+                            display: 'influenza, split '
+                        text: 'influenza, split '
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '141'
+                            version: CVX
+                            display: influenza, injectable
+                        text: influenza, injectable
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '153'
+                            version: CVX
+                            display: Influenza, injectable, MDCK, (ccIIV3), trivalent, preservative
+                              free
+                        text: Influenza, injectable, MDCK, (ccIIV3), trivalent, preservative
+                          free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '16'
+                            version: CVX
+                            display: influenza, whole
+                        text: influenza, whole
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '135'
+                            version: CVX
+                            display: 'influenza, high dose '
+                        text: 'influenza, high dose '
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '150'
+                            version: CVX
+                            display: Influenza, injectable, quadrivalent (IIV4), preservative
+                              free
+                        text: Influenza, injectable, quadrivalent (IIV4), preservative free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '140'
+                            version: CVX
+                            display: influenza, injectable, preservative-free
+                        text: influenza, injectable, preservative-free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '158'
+                            version: CVX
+                            display: Influenza-IIV4, IM (>3yrs)
+                        text: Influenza-IIV4, IM (>3yrs)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '161'
+                            version: CVX
+                            display: Influenza, injectable, quadrivalent, preservative free,
+                              pediatric
+                        text: Influenza, injectable, quadrivalent, preservative free, pediatric
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '166'
+                            version: CVX
+                            display: Influenza, intradermal, quadrivalent, preservative free,
+                              injectable
+                        text: Influenza, intradermal, quadrivalent, preservative free, injectable
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '168'
+                            version: CVX
+                            display: Seasonal trivalent influenza vaccine, adjuvanted, preservative
+                              free
+                        text: Seasonal trivalent influenza vaccine, adjuvanted, preservative
+                          free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '171'
+                            version: CVX
+                            display: Influenza, injectable, Madin Darby Canine Kidney, preservative
+                              free, quadrivalent
+                        text: Influenza, injectable, Madin Darby Canine Kidney, preservative
+                          free, quadrivalent
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '185'
+                            version: CVX
+                            display: influenza, recombinant, quadrivalent,injectable, preservative
+                              free
+                        text: influenza, recombinant, quadrivalent,injectable, preservative
+                          free
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '186'
+                            version: CVX
+                            display: Influenza, injectable, MDCK, quadrivalent
+                        text: Influenza, injectable, MDCK, quadrivalent
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '194'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, unspecified formulation
+                        text: Influenza, Southern Hemisphere, unspecified formulation
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '197'
+                            version: CVX
+                            display: Influenza, high dose, quadrivalent
+                        text: Influenza, high dose, quadrivalent
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '200'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, pediatric, preservative
+                              free
+                        text: Influenza, Southern Hemisphere, pediatric, preservative free
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '201'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, preservative free
+                        text: Influenza, Southern Hemisphere, preservative free
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '202'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, quadrivalent, with preservative
+                        text: Influenza, Southern Hemisphere, quadrivalent, with preservative
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '205'
+                            version: CVX
+                            display: Influenza, seasonal vaccine, quadrivalent, adjuvanted
+                        text: Influenza, seasonal vaccine, quadrivalent, adjuvanted
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '231'
+                            version: CVX
+                            display: influenza, Southern Hemisphere, high-dose, quadrivalent
+                        text: influenza, Southern Hemisphere, high-dose, quadrivalent
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '320'
+                            version: CVX
+                            display: Influenza, MDCK, trivalent, preservative
+                        text: Influenza, MDCK, trivalent, preservative
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '331'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, trivalent, preservative
+                              free
+                        text: Influenza, Southern Hemisphere, trivalent, preservative free
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '333'
+                            version: CVX
+                            display: Influenza, live, intranasal, self-caregiver admin
+                        text: Influenza, live, intranasal, self-caregiver admin
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '337'
+                            version: CVX
+                            display: Influenza, Southern Hemisphere, high-dose, trivalent, PF
+                        text: Influenza, Southern Hemisphere, high-dose, trivalent, PF
+                    - url: preferred
+                      value-boolean: false
+              related-action:
+                - action-id: dose-1
+                  relationship: after-end
+                  extension:
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 24d
+                        - url: minimumInterval
+                          value-string: 28d
+                        - url: earliestRecommendedInterval
+                          value-string: 28d

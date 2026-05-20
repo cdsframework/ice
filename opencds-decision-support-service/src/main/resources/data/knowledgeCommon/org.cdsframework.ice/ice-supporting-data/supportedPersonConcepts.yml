@@ -1,0 +1,32 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/common-ice-forecast|1.0.0]':
+      code-systems:
+        SUPPORTED_PERSON_CONCEPT:
+          name: SUPPORTED_PERSON_CONCEPT
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.5.1
+          description: Supported person concepts for display
+          url: http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender
+          title: HL7 Gender
+          status: active
+          content: complete
+          property:
+            - code: conceptMapping
+              type: Coding
+          concept:
+            - code: M
+              display: Male
+              property:
+                - code: conceptMapping
+                  valueCoding:
+                    code: C30
+                    display: Male
+            - code: F
+              display: Female
+              property:
+                - code: conceptMapping
+                  valueCoding:
+                    code: C31
+                    display: Female

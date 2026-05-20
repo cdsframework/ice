@@ -36,9 +36,11 @@ public class ObservationOrderMapper extends ObservationBaseMapper
         if (source.getCriticality() != null)
             target.setCriticality(MappingUtility.cD2CDInternal(source.getCriticality()));
         if (source.getOrderEventTime() != null)
-            target.setOrderEventTime(MappingUtility.iVLTS2IVLDateInternal(source.getOrderEventTime()));
+            target.setOrderEventTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getOrderEventTime(), factLists.getParsedDatesCache()));
         if (source.getObservationTime() != null)
-            target.setObservationTime(MappingUtility.iVLTS2IVLDateInternal(source.getObservationTime()));
+            target.setObservationTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getObservationTime(), factLists.getParsedDatesCache()));
         if (source.getRepeatNumber() != null)
             target.setRepeatNumber(MappingUtility.iNT2INTInternal(source.getRepeatNumber()));
 
@@ -79,9 +81,9 @@ public class ObservationOrderMapper extends ObservationBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getObservationOrders() == null)
+        if (organizedResults.output().getObservationOrders() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setObservationOrders(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.ObservationOrders());
         }
 

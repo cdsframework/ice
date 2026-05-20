@@ -1,7 +1,5 @@
 package org.cdsframework.cds.supportingdata;
 
-import java.util.Collection;
-
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.ConceptUtils;
 import org.springframework.util.ObjectUtils;
@@ -17,7 +15,6 @@ public abstract class LocallyCodedCdsItem
 {
     @EqualsAndHashCode.Include
     private final String cdsItemName;
-    private final Collection<String> cdsVersions;
     private CdsConcept cdsConcept;
 
     /**
@@ -26,7 +23,7 @@ public abstract class LocallyCodedCdsItem
      * LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention would modify the supplied parameter (as it should not), an IllegalArgumentException
      * is thrown.
      */
-    public LocallyCodedCdsItem(final String pCdsItemName, final Collection<String> pCdsVersions) throws IllegalArgumentException
+    public LocallyCodedCdsItem(final String pCdsItemName) throws IllegalArgumentException
     {
         final String _METHODNAME = "LocallyCodedCdsItem(): ";
 
@@ -38,15 +35,7 @@ public abstract class LocallyCodedCdsItem
         }
 
         ConceptUtils.modifyAttributeNameToConformToRequiredNamingConvention(pCdsItemName);
-        if (ObjectUtils.isEmpty(pCdsVersions))
-        {
-            final String lErrStr = "CdsVersion(s) not specified";
-            log.warn(_METHODNAME + lErrStr);
-            throw new IllegalArgumentException(lErrStr);
-        }
-
         this.cdsItemName = pCdsItemName;
-        this.cdsVersions = pCdsVersions;
     }
 
     /**
@@ -55,10 +44,9 @@ public abstract class LocallyCodedCdsItem
      * LocallyCodedCdsListItem.modifyAttributeNameToConformToRequiredNamingConvention would modify the supplied parameter (as it should not), an IllegalArgumentException
      * is thrown. The CdsConceptName specifies the CdsConcept that is associated with this LocallyCodedCdsItem.
      */
-    public LocallyCodedCdsItem(final String pCdsItemName, final CdsConcept pCdsConcept, final Collection<String> pCdsVersions)
-            throws IllegalArgumentException
+    public LocallyCodedCdsItem(final String pCdsItemName, final CdsConcept pCdsConcept) throws IllegalArgumentException
     {
-        this(pCdsItemName, pCdsVersions);
+        this(pCdsItemName);
 
         final String _METHODNAME = "LocallyCodedCdsItem(): ";
 

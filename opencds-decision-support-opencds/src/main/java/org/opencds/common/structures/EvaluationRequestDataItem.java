@@ -1,24 +1,19 @@
 package org.opencds.common.structures;
 
 import java.net.URI;
-import java.util.Date;
+import java.time.LocalDate;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Builder;
 
-@Setter
-@Getter
-@ToString
-public class EvaluationRequestDataItem
+@Builder
+public record EvaluationRequestDataItem(String focalPersonId,
+                                        LocalDate evalTime,
+                                        String clientLanguage,
+                                        String clientTimeZoneOffset,
+                                        String externalFactModelSSId,
+                                        String inputItemName,
+                                        String inputContainingEntityId,
+                                        String interactionId,
+                                        URI serverUri)
 {
-    protected String focalPersonId;
-    protected Date evalTime;
-    protected String clientLanguage;
-    protected String clientTimeZoneOffset;
-    protected String externalFactModelSSId;
-    protected String inputItemName;
-    protected String inputContainingEntityId;
-    protected String interactionId;
-    protected URI serverUri;
 }

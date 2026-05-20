@@ -14,10 +14,10 @@ import lombok.ToString;
 @ToString
 public abstract class GoalBase extends ClinicalStatement
 {
-    protected CD goalFocus;
-    protected CD criticality;
-    protected IVLDate goalPursuitEffectiveTime;
-    protected IVLDate goalAchievementTargetTime;
-    protected BodySite targetBodySite;
-    protected GoalValue targetGoalValue;
+    private CD goalFocus;
+    private CD criticality;
+    private IVLDate goalPursuitEffectiveTime;
+    private IVLDate goalAchievementTargetTime;
+    private BodySite targetBodySite;
+    private GoalValue targetGoalValue;
 }

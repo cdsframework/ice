@@ -1,8 +1,13 @@
 package org.opencds.config.api.model;
 
-public interface Plugin
-{
-    PluginId getIdentifier();
+import org.springframework.util.StringUtils;
 
-    String getClassName();
+public record Plugin(PluginId identifier,
+                     String className)
+{
+    public Plugin
+    {
+        assert identifier != null;
+        assert StringUtils.hasText(className);
+    }
 }

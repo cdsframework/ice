@@ -13,7 +13,7 @@ import lombok.ToString;
 @ToString
 public class VMR
 {
-    protected List<String> templateId;
+    private List<String> templateId;
 
-    protected String focalPersonId;
+    private String focalPersonId;
 }

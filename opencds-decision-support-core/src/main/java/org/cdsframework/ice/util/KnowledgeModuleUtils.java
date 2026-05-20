@@ -1,7 +1,6 @@
 package org.cdsframework.ice.util;
 
 import org.opencds.config.api.model.KMId;
-import org.opencds.config.api.model.impl.KMIdImpl;
 import org.springframework.util.ObjectUtils;
 
 import lombok.experimental.UtilityClass;
@@ -53,6 +52,6 @@ public class KnowledgeModuleUtils
         if (lKmIdParts.length != 3)
             return null;
 
-        return KMIdImpl.create(lKmIdParts[0], lKmIdParts[1], lKmIdParts[2]);
+        return new KMId(lKmIdParts[0], lKmIdParts[1], lKmIdParts[2]);
     }
 }

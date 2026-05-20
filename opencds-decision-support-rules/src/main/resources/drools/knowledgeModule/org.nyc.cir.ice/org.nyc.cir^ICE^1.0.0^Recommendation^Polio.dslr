@@ -2,7 +2,6 @@ package knowledgeModule.org.nyc.cir.ice;
 
 import java.util.List;
 import java.util.Set;
-import java.util.Date;
 import org.opencds.vmr.v1_0.internal.EvalTime;
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
 import org.cdsframework.ice.service.DiseaseImmunity;
@@ -20,7 +19,7 @@ import org.cdsframework.ice.service.Vaccine;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 /**
 * If a patient is >= 18 years old and has completed the series and has received one booster dose after series completion:
@@ -229,8 +228,7 @@ rule "Polio: Polio4DoseSeries - If patient >= 4 yrs (or will be >= 4 yrs for tar
             - The name of the series is "SUPPORTED_SERIES.POLIO_4_DOSE_SERIES"
             - Post processing on the series forecast has not already been run
             - The series is not complete
-            - Make note of the number of doses required to complete this series as $numberOfDosesRequired
-            - The dose number to recommend is == $numberOfDosesRequired - 1
+            - The dose number to recommend is == 3
             - A forecast for the series has been made and a recommendation date has been determined
             - Make note of the recommendation date as $recommendationDate
         There is an administered shot $mostRecentDose
@@ -270,8 +268,7 @@ rule "Polio: PoliofIPVSeries - If patient >= 4 yrs (or will be >= 4 yrs for targ
             - The name of the series is "SUPPORTED_SERIES.POLIO_FRACTIONAL_IPV_SERIES"
             - Post processing on the series forecast has not already been run
             - The series is not complete
-            - Make note of the number of doses required to complete this series as $numberOfDosesRequired
-            - The dose number to recommend is == $numberOfDosesRequired - 1
+            - The dose number to recommend is == 4
             - A forecast for the series has been made and a recommendation date has been determined
             - Make note of the recommendation date as $recommendationDate
         There is an administered shot $mostRecentDose

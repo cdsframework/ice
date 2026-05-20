@@ -36,9 +36,11 @@ public class UndeliveredSubstanceAdministrationMapper extends SubstanceAdministr
         if (source.getReason() != null)
             target.setReason(MappingUtility.cD2CDInternal(source.getReason()));
         if (source.getSubjectEffectiveTime() != null)
-            target.setSubjectEffectiveTime(MappingUtility.iVLTS2IVLDateInternal(source.getSubjectEffectiveTime()));
+            target.setSubjectEffectiveTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getSubjectEffectiveTime(), factLists.getParsedDatesCache()));
         if (source.getDocumentationTime() != null)
-            target.setDocumentationTime(MappingUtility.iVLTS2IVLDateInternal(source.getDocumentationTime()));
+            target.setDocumentationTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getDocumentationTime(), factLists.getParsedDatesCache()));
 
         factLists.put(UndeliveredSubstanceAdministration.class, target);
 
@@ -78,9 +80,9 @@ public class UndeliveredSubstanceAdministrationMapper extends SubstanceAdministr
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getUndeliveredSubstanceAdministrations() == null)
+        if (organizedResults.output().getUndeliveredSubstanceAdministrations() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setUndeliveredSubstanceAdministrations(
                             new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.UndeliveredSubstanceAdministrations());
         }

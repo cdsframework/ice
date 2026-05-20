@@ -87,7 +87,7 @@ class PayloadHelperSupplementalTextModeTest
                                    : "2.16.840.1.113883.3.795.12.100.6");
         legacyBaseCD.setDisplayName(scenario.type == SupplementalReasonSupport.SupplementalReasonType.EVALUATION
                                     ? "Supplemental text is available for this immunization event."
-                                    : "Supplemental text is available for this recommendation.");
+                                    : "Supplemental text is available for this recommendations.");
 
         final List<CD> result = invokeOutboundSupplementalTextReason(scenario, supplementalMessage, legacyBaseCD,
                 IceProperties.SupplementalTextMode.LEGACY);

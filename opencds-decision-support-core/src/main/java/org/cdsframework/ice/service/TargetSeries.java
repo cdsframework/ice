@@ -26,12 +26,11 @@
 
 package org.cdsframework.ice.service;
 
-import java.time.ZoneId;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -96,8 +95,8 @@ public class TargetSeries
             if (uniqueIdA != null && uniqueIdA.equals(uniqueIdB))
                 return 0;
 
-            final Date aDate = a.getAdministrationDate();
-            final Date bDate = b.getAdministrationDate();
+            final LocalDate aDate = a.getAdministrationDate();
+            final LocalDate bDate = b.getAdministrationDate();
 
             if (aDate == null && bDate == null)
                 return 0;
@@ -116,17 +115,17 @@ public class TargetSeries
     @EqualsAndHashCode.Include
     private final String targetSeriesIdentifier;
     private final Schedule scheduleBackingSeries;
-    private final Date seriesStartAgeDate;
-    private final Date seriesEndAgeDate;
+    private final LocalDate seriesStartAgeDate;
+    private final LocalDate seriesEndAgeDate;
     private final Map<String, Integer> interimEvaluationValidityCountByDisease;
     // Disease -> evaluation validity count for disease
     private final Map<String, Map<Integer, Integer>> interimDosesToSkipByDisease;
     // Disease -> skip dose instructions for disease
-    private final Map<String, Date> diseaseImmunityDate;
-    private final List<Date> liveVirusDatesAccountedForInRecommendedFinalEarliestDate;
-    private final List<Date> liveVirusDatesAccountedForInRecommendedFinalDate;
-    private final List<Date> adjuvantDatesAccountedForInRecommendedFinalEarliestDate;
-    private final List<Date> adjuvantDatesAccountedForInRecommendedFinalDate;
+    private final Map<String, LocalDate> diseaseImmunityDate;
+    private final List<LocalDate> liveVirusDatesAccountedForInRecommendedFinalEarliestDate;
+    private final List<LocalDate> liveVirusDatesAccountedForInRecommendedFinalDate;
+    private final List<LocalDate> adjuvantDatesAccountedForInRecommendedFinalEarliestDate;
+    private final List<LocalDate> adjuvantDatesAccountedForInRecommendedFinalDate;
     private final List<String> seriesRulesProcessed;
     private SeriesRules seriesRules;
     private NavigableSet<TargetDose> targetDoses;
@@ -153,9 +152,9 @@ public class TargetSeries
     private Vaccine recommendationVaccine;
     private RecommendationStatus recommendationStatus;
     private RecommendationStatus recommendationStatusPrior;
-    private Date finalEarliestDate;
-    private Date finalRecommendationDate;
-    private Date finalOverdueDate;
+    private LocalDate finalEarliestDate;
+    private LocalDate finalRecommendationDate;
+    private LocalDate finalOverdueDate;
     private List<Recommendation> finalRecommendations;
     private boolean displayForecastDateForConditionalRecommendations;
 
@@ -577,7 +576,7 @@ public class TargetSeries
         return null;
     }
 
-    public Date getAdministrationDateOfTargetDoseByShotNumberNumber(final int shotNumber)
+    public LocalDate getAdministrationDateOfTargetDoseByShotNumberNumber(final int shotNumber)
     {
         final TargetDose td = getTargetDoseByAdministeredShotNumber(shotNumber);
         if (td == null)
@@ -815,12 +814,12 @@ public class TargetSeries
             tallyOfDoseNumberByDisease.put(disease, 0);
 
         // Record tally for disease immunity
-        final Date targetDoseDate = pTD.getAdministrationDate();
+        final LocalDate targetDoseDate = pTD.getAdministrationDate();
         final Integer numberOfDosesInSeriesInt = getSeriesRules().getNumberOfDosesInSeries();
         for (final String sdc : this.diseaseImmunityDate.keySet())
         {
-            final Date lDiseaseImmunityDate = this.diseaseImmunityDate.get(sdc);
-            if (targetDoseDate != null && lDiseaseImmunityDate != null && targetDoseDate.compareTo(lDiseaseImmunityDate) >= 0)
+            final LocalDate lDiseaseImmunityDate = this.diseaseImmunityDate.get(sdc);
+            if (targetDoseDate != null && lDiseaseImmunityDate != null && !targetDoseDate.isBefore(lDiseaseImmunityDate))
             {
                 this.interimEvaluationValidityCountByDisease.put(sdc, numberOfDosesInSeriesInt);
                 tallyOfRelevantDiseaseImmunity.put(sdc, numberOfDosesInSeriesInt);
@@ -837,7 +836,7 @@ public class TargetSeries
 
         final String pTDUniqueIdentifier = pTD.getUniqueId();
         TargetDose lPreviouslyProcessedTD = null;
-        Date lDuplicateShotSameDayValidDoseFoundDate = null;
+        LocalDate lDuplicateShotSameDayValidDoseFoundDate = null;
         Set<String> lDuplicateShotDiseases = new HashSet<>();
         for (final TargetDose td : targetDoses)
         {
@@ -1219,7 +1218,7 @@ public class TargetSeries
      * is true, the count also includes shots administered on the specified date.
      * Does not take into account immunity or skipped doses. If the supplied date is null, this methods returns 0.
      */
-    public int determineNumberOfDosesAdministeredInSeriesByDate(final Date pDate, final boolean includeDate)
+    public int determineNumberOfDosesAdministeredInSeriesByDate(final LocalDate pDate, final boolean includeDate)
     {
         if (targetDoses == null || pDate == null)
             return 0;
@@ -1230,7 +1229,7 @@ public class TargetSeries
             if (!td.getIsValid())
                 continue;
 
-            final Date shotDate = td.getAdministrationDate();
+            final LocalDate shotDate = td.getAdministrationDate();
             if (shotDate == null)
                 continue;
 
@@ -1249,7 +1248,7 @@ public class TargetSeries
      * is true, the count also includes shots administered on the specified date. If the supplied date is null, this methods returns 0.
      * If no shots were administered, returns 0, which may not be the same as the number of effective doses for the series.
      */
-    public int determineEffectiveNumberOfDosesInSeriesByDate(final Date pDate, final boolean includeDate)
+    public int determineEffectiveNumberOfDosesInSeriesByDate(final LocalDate pDate, final boolean includeDate)
     {
         final String _METHODNAME = "determineEffectiveNumberOfDosesInSeriesByDate(): ";
 
@@ -1263,7 +1262,7 @@ public class TargetSeries
         TargetDose lTargetDoseOfInterest = null;
         for (final TargetDose td : targetDoses)
         {
-            final Date shotDate = td.getAdministrationDate();
+            final LocalDate shotDate = td.getAdministrationDate();
             if (shotDate == null)
                 continue;
 
@@ -1378,48 +1377,48 @@ public class TargetSeries
                 evaluationValidiityCountsBySpecifiedDiseases.keySet());
     }
 
-    public void recommendNextShotBasedOnEarliestAgeRule(final Date pEvalPersonBirthTime, final Date pEvalDate)
+    public void recommendNextShotBasedOnEarliestAgeRule(final LocalDate pEvalPersonBirthTime, final LocalDate pEvalDate)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         recommendNextShotBasedOnSeriesAgeRule(pEvalPersonBirthTime, pEvalDate, RecommendationDateType.EARLIEST);
     }
 
-    public void recommendNextShotBasedOnEarliestIntervalRule(final Date pEvalDate)
+    public void recommendNextShotBasedOnEarliestIntervalRule(final LocalDate pEvalDate)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         recommendNextShotBasedOnSeriesIntervalRule(pEvalDate, RecommendationDateType.EARLIEST);
     }
 
-    public void recommendNextShotBasedOnEarliestRecommendedAgeRule(final Date pEvalPersonBirthTime, final Date pEvalDate)
+    public void recommendNextShotBasedOnEarliestRecommendedAgeRule(final LocalDate pEvalPersonBirthTime, final LocalDate pEvalDate)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         recommendNextShotBasedOnSeriesAgeRule(pEvalPersonBirthTime, pEvalDate, RecommendationDateType.EARLIEST_RECOMMENDED);
     }
 
-    public void recommendNextShotBasedOnEarliestRecommendedIntervalRule(final Date pEvalDate)
+    public void recommendNextShotBasedOnEarliestRecommendedIntervalRule(final LocalDate pEvalDate)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         recommendNextShotBasedOnSeriesIntervalRule(pEvalDate, RecommendationDateType.EARLIEST_RECOMMENDED);
     }
 
-    public void recommendNextShotBasedOnLatestRecommendedAgeRule(final Date pEvalPersonBirthTime, final Date pEvalDate)
+    public void recommendNextShotBasedOnLatestRecommendedAgeRule(final LocalDate pEvalPersonBirthTime, final LocalDate pEvalDate)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         recommendNextShotBasedOnSeriesAgeRule(pEvalPersonBirthTime, pEvalDate, RecommendationDateType.LATEST_RECOMMENDED);
     }
 
-    public void recommendNextShotBasedOnLatestRecommendedIntervalRule(final Date pEvalDate)
+    public void recommendNextShotBasedOnLatestRecommendedIntervalRule(final LocalDate pEvalDate)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         recommendNextShotBasedOnSeriesIntervalRule(pEvalDate, RecommendationDateType.LATEST_RECOMMENDED);
     }
 
     /**
-     * Check age against series rule for this dose and record a recommendation based on the age recommended in the series
+     * Check age against series rule for this dose and record a recommendations based on the age recommended in the series
      *
-     * @param pEvalDate Evaluation Date that this recommendation should be made against. If null, the current date is used.
+     * @param pEvalDate Evaluation Date that this recommendations should be made against. If null, the current date is used.
      */
-    private void recommendNextShotBasedOnSeriesAgeRule(final Date pEvalPersonBirthTime, Date pEvalDate,
+    private void recommendNextShotBasedOnSeriesAgeRule(final LocalDate pEvalPersonBirthTime, LocalDate pEvalDate,
             final RecommendationDateType pRecommendationDateType)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
@@ -1472,7 +1471,7 @@ public class TargetSeries
         else
             doseNumberInSeriesToRecommend = determineEffectiveNumberOfDosesInSeries() + 1;
         if (log.isDebugEnabled())
-            log.debug(_METHODNAME + "Dose number in series for recommendation: {}", doseNumberInSeriesToRecommend);
+            log.debug(_METHODNAME + "Dose number in series for recommendations: {}", doseNumberInSeriesToRecommend);
 
         // Obtain the right age and corresponding date
         final DoseRule vaccineGroupDoseRule = obtainDoseRuleForSeriesByDoseNumber(doseNumberInSeriesToRecommend);
@@ -1504,20 +1503,19 @@ public class TargetSeries
 
         // Now calculate the date that the next shot should be administered according to age rule, but if age for the series is before the start
         // date of the season (if a seasonal series), use the seasonal series start date as the minimum age date
-        Date ageDate = TimePeriod.addTimePeriod(pEvalPersonBirthTime, rAge);
+        LocalDate ageDate = TimePeriod.addTimePeriod(pEvalPersonBirthTime, rAge);
         if (targetSeasonExists())
         {
-            final Date seasonStartDate = Date.from(
-                    targetSeason.getFullySpecifiedSeasonStartDate().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
-            if (ageDate.before(seasonStartDate))
+            final LocalDate seasonStartDate = targetSeason.getFullySpecifiedSeasonStartDate();
+            if (ageDate.isBefore(seasonStartDate))
                 ageDate = seasonStartDate;
             // Date lSeasonEndDate = targetSeason.getFullySpecifiedSeasonEndDate().toDate();
             // If the recommended age is after the end date of the season and there is no off-season start date (which is indicative that there are no other seasons for this
-            // vaccine group, then return; no recommendation based on minimum age will be made.
+            // vaccine group, then return; no recommendations based on minimum age will be made.
         }
 
         if (pEvalDate == null)
-            pEvalDate = new Date();
+            pEvalDate = LocalDate.now();
 
         switch (pRecommendationDateType)
         {
@@ -1525,14 +1523,15 @@ public class TargetSeries
             {
                 final Recommendation lEarliest = new Recommendation(this);
                 lEarliest.setEarliestDate(ageDate);
-                populateInterimEarliestAgeRecommendation(lEarliest,
-                        pEvalDate.before(ageDate) ? RecommendationStatus.RECOMMENDED_IN_FUTURE : RecommendationStatus.RECOMMENDED);
+                populateInterimEarliestAgeRecommendation(lEarliest, pEvalDate.isBefore(ageDate)
+                                                                    ? RecommendationStatus.RECOMMENDED_IN_FUTURE
+                                                                    : RecommendationStatus.RECOMMENDED);
             }
             case EARLIEST_RECOMMENDED ->
             {
                 final Recommendation lEarliestRec = new Recommendation(this);
                 lEarliestRec.setRecommendationDate(ageDate);
-                if (pEvalDate.before(ageDate))
+                if (pEvalDate.isBefore(ageDate))
                     populateInterimEarliestRecommendedAgeRecommendation(lEarliestRec, RecommendationStatus.RECOMMENDED_IN_FUTURE);
                 else
                     populateInterimEarliestRecommendedAgeRecommendation(lEarliestRec, RecommendationStatus.RECOMMENDED);
@@ -1540,10 +1539,10 @@ public class TargetSeries
             default ->
             {
                 // Past due date is the latest recommended date (calculated via age or interval) + 1 day
-                final Date lLatestDate = TimePeriod.addTimePeriod(ageDate, new TimePeriod(-1, DurationType.DAYS));
+                final LocalDate lLatestDate = TimePeriod.addTimePeriod(ageDate, new TimePeriod(-1, DurationType.DAYS));
                 final Recommendation lLatestRecommended = new Recommendation(this);
                 lLatestRecommended.setLatestRecommendationDate(lLatestDate);
-                populateInterimLatestRecommendedAgeRecommendation(lLatestRecommended, pEvalDate.before(lLatestDate)
+                populateInterimLatestRecommendedAgeRecommendation(lLatestRecommended, pEvalDate.isBefore(lLatestDate)
                                                                                       ? RecommendationStatus.RECOMMENDED_IN_FUTURE
                                                                                       : RecommendationStatus.RECOMMENDED);
             }
@@ -1551,11 +1550,12 @@ public class TargetSeries
     }
 
     /**
-     * Check interval against series rule for this dose and record a recommendation based on the routine interval
+     * Check interval against series rule for this dose and record a recommendations based on the routine interval
      *
-     * @param pEvalDate Evaluation Date that this recommendation should be made against. If null, the current date is used.
+     * @param pEvalDate Evaluation Date that this recommendations should be made against. If null, the current date is used.
      */
-    private void recommendNextShotBasedOnSeriesIntervalRule(Date pEvalDate, final RecommendationDateType pRecommendationDateType)
+    private void recommendNextShotBasedOnSeriesIntervalRule(LocalDate pEvalDate,
+            final RecommendationDateType pRecommendationDateType)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         final String _METHODNAME = "recommendNextShotBasedOnSeriesIntervalRule(): ";
@@ -1663,19 +1663,19 @@ public class TargetSeries
         }
 
         // Now calculate the date that the next shot should be administered according to internal rule
-        Date rIntervalDate = TimePeriod.addTimePeriod(lastDoseAdministered.getAdministrationDate(), rInterval);
+        LocalDate rIntervalDate = TimePeriod.addTimePeriod(lastDoseAdministered.getAdministrationDate(), rInterval);
 
         // AI: Look up the start date of the next season, if defined. Otherwise, set to the date of the default season.
-        // If this is a Seasonal TargetSeries and the rIntervalDate is after the off-season end date, then set the recommendation to the beginning of the next season
+        // If this is a Seasonal TargetSeries and the rIntervalDate is after the off-season end date, then set the recommendations to the beginning of the next season
         if (this.targetSeason != null && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate() != null
-                && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().isBefore(ICELogicHelper.toLocalDate(rIntervalDate)))
+                && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().isBefore(rIntervalDate))
         {
-            rIntervalDate = ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1));
+            rIntervalDate = targetSeason.getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1);
         }
 
-        // Otherwise, store the interval recommendation
+        // Otherwise, store the interval recommendations
         if (pEvalDate == null)
-            pEvalDate = new Date();
+            pEvalDate = LocalDate.now();
 
         switch (pRecommendationDateType)
         {
@@ -1683,18 +1683,18 @@ public class TargetSeries
             {
                 final Recommendation lEarliest = new Recommendation(this);
                 lEarliest.setEarliestDate(rIntervalDate);
-                populateInterimEarliestIntervalRecommendation(lEarliest, pEvalDate.before(rIntervalDate)
+                populateInterimEarliestIntervalRecommendation(lEarliest, pEvalDate.isBefore(rIntervalDate)
                                                                          ? RecommendationStatus.RECOMMENDED_IN_FUTURE
                                                                          : RecommendationStatus.RECOMMENDED);
             }
             case LATEST_RECOMMENDED ->
             {
                 // Past due date is the latest recommended date (calculated via age or interval) + 1
-                final Date lLatestDate = TimePeriod.addTimePeriod(rIntervalDate, new TimePeriod(-1, DurationType.DAYS));
+                final LocalDate lLatestDate = TimePeriod.addTimePeriod(rIntervalDate, new TimePeriod(-1, DurationType.DAYS));
                 final Recommendation lLatestRecommended = new Recommendation(this);
                 lLatestRecommended.setLatestRecommendationDate(lLatestDate);
                 // populate this in interim structure.... if there are age rule recommendations, they will need to be removed later
-                populateInterimLatestRecommendedIntervalRecommendation(lLatestRecommended, pEvalDate.before(lLatestDate)
+                populateInterimLatestRecommendedIntervalRecommendation(lLatestRecommended, pEvalDate.isBefore(lLatestDate)
                                                                                            ? RecommendationStatus.RECOMMENDED_IN_FUTURE
                                                                                            : RecommendationStatus.RECOMMENDED);
             }
@@ -1703,7 +1703,7 @@ public class TargetSeries
                 final Recommendation rec = new Recommendation(this);
                 rec.setRecommendationDate(rIntervalDate);
                 // populate this in interim structure.... if there are age rule recommendations, they will need to be removed later
-                if (pEvalDate.before(rIntervalDate))
+                if (pEvalDate.isBefore(rIntervalDate))
                     populateInterimEarliestRecommendedIntervalRecommendation(rec, RecommendationStatus.RECOMMENDED_IN_FUTURE);
                 else
                     populateInterimEarliestRecommendedIntervalRecommendation(rec, RecommendationStatus.RECOMMENDED);
@@ -1712,10 +1712,10 @@ public class TargetSeries
     }
 
     /**
-     * Record recommendation status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleEarliest object.
+     * Record recommendations status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleEarliest object.
      * - The supplied Recommendation object is updated with the chosen RecommendationStatus.
      *
-     * @param rec                  Recommendation Object in which to record recommendation status codes and reasons. Simply returns if supplied parameter is null.
+     * @param rec                  Recommendation Object in which to record recommendations status codes and reasons. Simply returns if supplied parameters is null.
      * @param recommendationStatus may not be null
      */
     private void populateInterimEarliestAgeRecommendation(final Recommendation rec, final RecommendationStatus recommendationStatus)
@@ -1732,10 +1732,10 @@ public class TargetSeries
     }
 
     /**
-     * Record recommendation status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleEarliest object.
+     * Record recommendations status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleEarliest object.
      * - The supplied Recommendation object is updated with the chosen RecommendationStatus.
      *
-     * @param rec Recommendation Object in which to record recommendation status codes and reasons. Simply returns if supplied parameter is null.
+     * @param rec Recommendation Object in which to record recommendations status codes and reasons. Simply returns if supplied parameters is null.
      */
     private void populateInterimEarliestIntervalRecommendation(final Recommendation rec,
             final RecommendationStatus recommendationStatus)
@@ -1752,10 +1752,10 @@ public class TargetSeries
     }
 
     /**
-     * Record recommendation status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleEarliestRecommendedAge object.
+     * Record recommendations status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleEarliestRecommendedAge object.
      * - The supplied Recommendation object is updated with the chosen RecommendationStatus.
      *
-     * @param rec                  Recommendation Object in which to record recommendation status codes and reasons. Simply returns if supplied parameter is null.
+     * @param rec                  Recommendation Object in which to record recommendations status codes and reasons. Simply returns if supplied parameters is null.
      * @param recommendationStatus may not be null
      */
     private void populateInterimEarliestRecommendedAgeRecommendation(final Recommendation rec,
@@ -1773,10 +1773,10 @@ public class TargetSeries
     }
 
     /**
-     * Record recommendation status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleEarliestRecommendedInterval object.
+     * Record recommendations status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleEarliestRecommendedInterval object.
      * - The supplied Recommendation object is updated with the chosen RecommendationStatus.
      *
-     * @param rec                  Recommendation Object in which to record recommendation status codes and reasons. Simply returns if supplied parameter is null.
+     * @param rec                  Recommendation Object in which to record recommendations status codes and reasons. Simply returns if supplied parameters is null.
      * @param recommendationStatus may be null
      */
     private void populateInterimEarliestRecommendedIntervalRecommendation(final Recommendation rec,
@@ -1794,11 +1794,11 @@ public class TargetSeries
     }
 
     /**
-     * Record recommendation status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleLatestRecommendedAge object.
+     * Record recommendations status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleLatestRecommendedAge object.
      * - The supplied Recommendation object is updated with the chosen RecommendationStatus.
      *
-     * @param rec                  Recommendation Object in which to record recommendation status codes and reasons. Simply returns if any supplied
-     *                             parameter is null.
+     * @param rec                  Recommendation Object in which to record recommendations status codes and reasons. Simply returns if any supplied
+     *                             parameters is null.
      * @param recommendationStatus may be null
      */
     private void populateInterimLatestRecommendedAgeRecommendation(final Recommendation rec,
@@ -1816,11 +1816,11 @@ public class TargetSeries
     }
 
     /**
-     * Record recommendation status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleLatestRecommendedInterval object.
+     * Record recommendations status codes and date following the below business rules in the TargetSeries interimRecommendationsScheduleLatestRecommendedInterval object.
      * - The supplied Recommendation object is updated with the chosen RecommendationStatus.
      *
-     * @param rec Recommendation Object in which to record recommendation status codes and reasons. Simply returns if any supplied
-     *            parameter is null.
+     * @param rec Recommendation Object in which to record recommendations status codes and reasons. Simply returns if any supplied
+     *            parameters is null.
      */
     private void populateInterimLatestRecommendedIntervalRecommendation(final Recommendation rec,
             final RecommendationStatus recommendationStatus)
@@ -1837,7 +1837,7 @@ public class TargetSeries
     }
 
     /**
-     * Helper method to modify supplied Recommendation object with record recommendation status codes and reasons, and record generic reason in the
+     * Helper method to modify supplied Recommendation object with record recommendations status codes and reasons, and record generic reason in the
      * specified interim Recommendations List. Also, the supplied Recommendation object is updated with the specified RecommendationStatus.
      * Generic reasons for the recorded RecommendationStatus are automatically populated in the Recommended object as follows:
      * + if RecommendationStatus.CONDITIONALLY_RECOMMENDED, then ICELogicHelper._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON_CODE
@@ -1847,8 +1847,8 @@ public class TargetSeries
      * If you wish to supply different reasons, then you must manually populate a CD and record it yourself in the Recommendation object before passing it
      * into this one to be added to the Recommendations List
      *
-     * @param interimRecommendationsListInstanceToUpdate reference to the interim recommendations List to add the supplied recommendation object to, as well as the reason. Returns if supplied parameter is null
-     * @param rec                                        Recommendation Object in which to record recommendation status codes and reasons. Simply returns if supplied parameter is null.
+     * @param interimRecommendationsListInstanceToUpdate reference to the interim recommendations List to add the supplied recommendations object to, as well as the reason. Returns if supplied parameters is null
+     * @param rec                                        Recommendation Object in which to record recommendations status codes and reasons. Simply returns if supplied parameters is null.
      * @param pRecommendationStatus                      may be null
      */
     private void populateInterimRecommendationsAndRecordGenericReasonHelper(
@@ -1922,24 +1922,25 @@ public class TargetSeries
     }
 
     /**
-     * Add an earliest recommended recommendation with the specified earliest recommended date for consideration in this TargetSeries. Note that this method will record *generic* reasons for the
-     * recommendation as follows:
+     * Add an earliest recommended recommendations with the specified earliest recommended date for consideration in this TargetSeries. Note that this method will record *generic* reasons for the
+     * recommendations as follows:
      * + if RecommendationStatus.CONDITIONALLY_RECOMMENDED, then ICELogicHelper._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON_CODE
      * + if RecommendationStatus.NOT_RECOMMENDED, then ICELogicHelper._NOT_RECOMMENDED_NOT_SPECIFIED_REASON_CODE
      * + if RecommendationStatus.RECOMMENDED_IN_FUTURE, then ICELogicHelper._RECOMMENDED_IN_FUTURE_REASON_CODE
      * + if RecommendationStatus.RECOMMENDED, then ICELogicHelper._RECOMMENDED_DUE_NOW_REASON_CODE
      * If you wish to supply different reasons, then you must manually populate a CD and record it yourself
      *
-     * @param recommendationDate   Date of this recommendation
+     * @param recommendationDate   Date of this recommendations
      * @param v                    Recommended vaccine
-     * @param recommendationStatus Specify a RecommendationStatus if you wish to be explicit; otherwise, the recommendation will either
-     *                             be in the future or now based on date calculations with the supplied evaluation date of the next parameter
-     * @param pEvalDate            Evaluation Date that this recommendation should be made against. If null, the current date is used.
+     * @param recommendationStatus Specify a RecommendationStatus if you wish to be explicit; otherwise, the recommendations will either
+     *                             be in the future or now based on date calculations with the supplied evaluation date of the next parameters
+     * @param pEvalDate            Evaluation Date that this recommendations should be made against. If null, the current date is used.
      */
-    private void addInterimRecommendationForConsideration(final Date recommendationDate, final Vaccine v,
-            final RecommendationStatus recommendationStatus, final String recommendationReason, Date pEvalDate)
+    private void addInterimRecommendationForConsideration(final LocalDate recommendationDate, final Vaccine v,
+            final RecommendationStatus recommendationStatus, final String recommendationReason, LocalDate pEvalDate)
     {
-        final String _METHODNAME = "addInterimRecommendationForConsideration(Date, Vaccine, RecommendationStatus, String, Date): ";
+        final String _METHODNAME =
+                "addInterimRecommendationForConsideration(LocalDate, Vaccine, RecommendationStatus, String, Date): ";
 
         final Recommendation rec;
         try
@@ -1948,13 +1949,13 @@ public class TargetSeries
         }
         catch (final IllegalArgumentException ie)
         {
-            final String str = "Caught unexpected IllegalArgumentException instantiating a recommendation: this should not happen";
+            final String str = "Caught unexpected IllegalArgumentException instantiating a recommendations: this should not happen";
             log.error(_METHODNAME + str);
             throw new IllegalStateException(str);
         }
 
         if (pEvalDate == null)
-            pEvalDate = new Date();
+            pEvalDate = LocalDate.now();
 
         rec.setRecommendationDate(recommendationDate);
         rec.setRecommendedVaccine(v);
@@ -1972,7 +1973,7 @@ public class TargetSeries
                     rec.getRecommendationStatus());
         }
         else
-            if (pEvalDate.before(recommendationDate))
+            if (pEvalDate.isBefore(recommendationDate))
             {
                 populateInterimRecommendationsAndRecordGenericReasonHelper(interimRecommendationsCustom, rec,
                         RecommendationStatus.RECOMMENDED_IN_FUTURE);
@@ -1985,58 +1986,58 @@ public class TargetSeries
     }
 
     /**
-     * Add an earliest recommended recommendation with the specified earliest recommended date for consideration in this TargetSeries. Note that this method will record *generic* reasons for the
-     * recommendation as follows:
+     * Add an earliest recommended recommendations with the specified earliest recommended date for consideration in this TargetSeries. Note that this method will record *generic* reasons for the
+     * recommendations as follows:
      * + if RecommendationStatus.CONDITIONALLY_RECOMMENDED, then ICELogicHelper._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON_CODE
      * + if RecommendationStatus.NOT_RECOMMENDED, then ICELogicHelper._NOT_RECOMMENDED_NOT_SPECIFIED_REASON_CODE
      * + if RecommendationStatus.RECOMMENDED_IN_FUTURE, then ICELogicHelper._RECOMMENDED_IN_FUTURE_REASON_CODE
      * + if RecommendationStatus.RECOMMENDED, then ICELogicHelper._RECOMMENDED_DUE_NOW_REASON_CODE
      * If you wish to supply different reasons, then you must manually populate a CD and record it yourself
      *
-     * @param recommendationDate   Date of this recommendation
-     * @param recommendationStatus Specify a RecommendationStatus if you wish to be explicit; otherwise, the recommendation will either
-     *                             be in the future or now based on date calculations with the supplied evaluation date of the next parameter
-     * @param pEvalDate            Evaluation Date that this recommendation should be made against. If null, the current date is used.
+     * @param recommendationDate   Date of this recommendations
+     * @param recommendationStatus Specify a RecommendationStatus if you wish to be explicit; otherwise, the recommendations will either
+     *                             be in the future or now based on date calculations with the supplied evaluation date of the next parameters
+     * @param pEvalDate            Evaluation Date that this recommendations should be made against. If null, the current date is used.
      */
-    public void addInterimRecommendationForConsideration(final Date recommendationDate,
-            final RecommendationStatus recommendationStatus, final Date pEvalDate)
+    public void addInterimRecommendationForConsideration(final LocalDate recommendationDate,
+            final RecommendationStatus recommendationStatus, final LocalDate pEvalDate)
     {
         addInterimRecommendationForConsideration(recommendationDate, null, recommendationStatus, null, pEvalDate);
     }
 
     /**
-     * Add a recommendation with the specified earliest recommended date for consideration in this TargetSeries. Note that this method will record *generic* reasons for the
-     * recommendation as follows:
+     * Add a recommendations with the specified earliest recommended date for consideration in this TargetSeries. Note that this method will record *generic* reasons for the
+     * recommendations as follows:
      * + if RecommendationStatus.CONDITIONALLY_RECOMMENDED, then ICELogicHelper._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON_CODE
      * + if RecommendationStatus.NOT_RECOMMENDED, then ICELogicHelper._NOT_RECOMMENDED_NOT_SPECIFIED_REASON_CODE
      * + if RecommendationStatus.RECOMMENDED_IN_FUTURE, then ICELogicHelper._RECOMMENDED_IN_FUTURE_REASON_CODE
      * + if RecommendationStatus.RECOMMENDED, then ICELogicHelper._RECOMMENDED_DUE_NOW_REASON_CODE
-     * If you wish to supply different reasons, then you must manually populate a CD and record the recommendation yourself by some
-     * other means. Note that the recommendation will either be in the future or now based on date calculations with the supplied evaluation date
+     * If you wish to supply different reasons, then you must manually populate a CD and record the recommendations yourself by some
+     * other means. Note that the recommendations will either be in the future or now based on date calculations with the supplied evaluation date
      *
-     * @param recommendationDate Date of this recommendation
-     * @param pEvalDate          Evaluation Date that this recommendation should be made against. If null, the current date is used.
+     * @param recommendationDate Date of this recommendations
+     * @param pEvalDate          Evaluation Date that this recommendations should be made against. If null, the current date is used.
      */
-    public void addInterimRecommendationForConsideration(final Date recommendationDate, final Date pEvalDate)
+    public void addInterimRecommendationForConsideration(final LocalDate recommendationDate, final LocalDate pEvalDate)
     {
         addInterimRecommendationForConsideration(recommendationDate, null, pEvalDate);
     }
 
     /**
-     * Add a recommendation for consideration in this TargetSeries. Note that this method will record *generic* reasons for the
-     * recommendation as follows:
+     * Add a recommendations for consideration in this TargetSeries. Note that this method will record *generic* reasons for the
+     * recommendations as follows:
      * + if RecommendationStatus.CONDITIONALLY_RECOMMENDED, then ICELogicHelper._RECOMMENDED_CONDITIONALLY_HIGH_RISK_REASON_CODE
      * + if RecommendationStatus.NOT_RECOMMENDED, then ICELogicHelper._NOT_RECOMMENDED_NOT_SPECIFIED_REASON_CODE
      * + if RecommendationStatus.RECOMMENDED_IN_FUTURE, then ICELogicHelper._RECOMMENDED_IN_FUTURE_REASON_CODE
      * + if RecommendationStatus.RECOMMENDED, then ICELogicHelper._RECOMMENDED_DUE_NOW_REASON_CODE
      * If you wish to supply different reasons, then you must manually populate a CD and record it yourself
      *
-     * @param recommendation Prepopulated recommendation to add. In this object, specify a RecommendationStatus if you wish to be explicit;
-     *                       otherwise, the recommendation will either be in the future or now based on date calculations with the supplied evaluation date of the
-     *                       next parameter and recommendation date
-     * @param pEvalDate      Evaluation Date that this recommendation should be made against. If null, the current date is used.
+     * @param recommendation Prepopulated recommendations to add. In this object, specify a RecommendationStatus if you wish to be explicit;
+     *                       otherwise, the recommendations will either be in the future or now based on date calculations with the supplied evaluation date of the
+     *                       next parameters and recommendations date
+     * @param pEvalDate      Evaluation Date that this recommendations should be made against. If null, the current date is used.
      */
-    public void addInterimRecommendationForConsideration(final Recommendation recommendation, Date pEvalDate)
+    public void addInterimRecommendationForConsideration(final Recommendation recommendation, LocalDate pEvalDate)
     {
         final String _METHODNAME = "addInterimRecommendationForConsideration(Recommendation, Date): ";
         if (recommendation == null)
@@ -2046,7 +2047,7 @@ public class TargetSeries
             log.debug(_METHODNAME + "Recommendation: {}", recommendation);
 
         if (pEvalDate == null)
-            pEvalDate = new Date();
+            pEvalDate = LocalDate.now();
 
         // First, add "regular" interim recommendations, which may or may not include a forecast date
         final RecommendationStatus lRS = recommendation.getRecommendationStatus();
@@ -2085,8 +2086,8 @@ public class TargetSeries
     {
         final String _METHODNAME = "finalizeRecommendationsForForecasting(): ";
 
-        // Obtain determine overall recommendation status-- priority is: NOT_RECOMMENDED, CONDITIONALLY_RECOMMENDED, FUTURE_RECOMMENDED then RECOMMENDED
-        // Then choose recommendation with latest date collected across all interim recommendations (including earliest) if the status is not NOT_RECOMMENDED
+        // Obtain determine overall recommendations status-- priority is: NOT_RECOMMENDED, CONDITIONALLY_RECOMMENDED, FUTURE_RECOMMENDED then RECOMMENDED
+        // Then choose recommendations with latest date collected across all interim recommendations (including earliest) if the status is not NOT_RECOMMENDED
         final List<Recommendation> lInterimRecommended = new ArrayList<>();
         if (!interimRecommendationsScheduleEarliestRecommendedAge.isEmpty())
         {
@@ -2145,32 +2146,32 @@ public class TargetSeries
                 // then RECOMMENDED
                 RecommendationStatus lFinalRecommendationStatus = null;
                 // Date lFinalRecommendationDate = null;
-                Date lFinalRecommendationDate = (getFinalRecommendationDate() != null) ? getFinalRecommendationDate() : null;
+                LocalDate lFinalRecommendationDate = (getFinalRecommendationDate() != null) ? getFinalRecommendationDate() : null;
                 final List<RecommendationStatus> lRecommendationStatusesIterTmpvar = new ArrayList<>();
                 for (final Recommendation lR : lInterimRecommended)
                 {
                     final RecommendationStatus lRS = lR.getRecommendationStatus();
                     if (lRS == RecommendationStatus.NOT_RECOMMENDED)
                     {
-                        // No reason to continue; NOT_RECOMMENDED is highest weighted status was found and the final recommendation date will be null
+                        // No reason to continue; NOT_RECOMMENDED is highest weighted status was found and the final recommendations date will be null
                         lFinalRecommendationStatus = RecommendationStatus.NOT_RECOMMENDED;
                         lFinalRecommendationDate = null;
                         break;
                     }
-                    final Date lRDate = lR.getRecommendationDate();
+                    final LocalDate lRDate = lR.getRecommendationDate();
                     if (lRDate != null)
                     {
                         if (lFinalRecommendationDate == null)
                             lFinalRecommendationDate = lRDate;
                         else
-                            if (lRDate.after(lFinalRecommendationDate))
+                            if (lRDate.isAfter(lFinalRecommendationDate))
                                 lFinalRecommendationDate = lRDate;
                     }
                     lRecommendationStatusesIterTmpvar.add(lR.getRecommendationStatus());
                 }
                 if (lFinalRecommendationStatus == null)
                 {
-                    // A final recommendation status has not been determined yet; determine final recommendation status now
+                    // A final recommendations status has not been determined yet; determine final recommendations status now
                     if (lRecommendationStatusesIterTmpvar.contains(RecommendationStatus.CONDITIONALLY_RECOMMENDED))
                         lFinalRecommendationStatus = RecommendationStatus.CONDITIONALLY_RECOMMENDED;
                     else
@@ -2181,27 +2182,27 @@ public class TargetSeries
                 }
 
 			/*
-			/////// Adjust final recommendation date to be the same as the last shot administered in series if the final recommended date is before the last shot date. Adjust the
+			/////// Adjust final recommendations date to be the same as the last shot administered in series if the final recommended date is before the last shot date. Adjust the
 			/////// recommended status too, if necessary
 			/////// if (lFinalRecommendationDate != null && getLastShotAdministeredInSeries() != null && getLastShotAdministeredInSeries().getAdministrationDate() != null &&
-				/////// lFinalRecommendationDate.before(getLastShotAdministeredInSeries().getAdministrationDate())) {
+				/////// lFinalRecommendationDate.isBefore(getLastShotAdministeredInSeries().getAdministrationDate())) {
 				/////// lFinalRecommendationDate = getLastShotAdministeredInSeries().getAdministrationDate();
 				/////// if (lFinalRecommendationStatus == RecommendationStatus.RECOMMENDED) {
-					/////// if (lFinalRecommendationDate.after(this.evalTime)) {
+					/////// if (lFinalRecommendationDate.isAfter(this.evalTime)) {
 						/////// lFinalRecommendationStatus = RecommendationStatus.RECOMMENDED_IN_FUTURE;
 					/////// }
 				/////// }
 			/////// }
 			*/
 
-                // Now set the final recommendation (final recommendation date, recommendation status and Recommendation object list) for this TargetSeries instance
+                // Now set the final recommendations (final recommendations date, recommendations status and Recommendation object list) for this TargetSeries instance
                 setFinalRecommendationDate(lFinalRecommendationDate);
                 setRecommendationStatus(lFinalRecommendationStatus);
                 final List<RecommendationStatus> lRecStatusListOfInterestOtherNoDate = new ArrayList<>();
                 lRecStatusListOfInterestOtherNoDate.add(RecommendationStatus.FORECASTING_COMPLETE);
                 lRecStatusListOfInterestOtherNoDate.add(RecommendationStatus.FORECASTING_IN_PROGRESS);
                 lRecStatusListOfInterestOtherNoDate.add(RecommendationStatus.NOT_FORECASTED);
-                // Get List from these non-standard status of recommendations that do not have a recommendation date - e.g. - perhaps a vaccine is associated with them
+                // Get List from these non-standard status of recommendations that do not have a recommendations date - e.g. - perhaps a vaccine is associated with them
                 final List<Recommendation> others =
                         Recommendation.getRecommendationListSubsetWithSpecifiedStatuses(lInterimRecommended,
                                 lRecStatusListOfInterestOtherNoDate);
@@ -2345,40 +2346,41 @@ public class TargetSeries
                 }
                 else
                 {
-                    // Determine earliest age - If the recommendation date is before the earliest date, set the recommendation date to the earliest date
-                    Date lObtainLatestEarliest =
+                    // Determine earliest age - If the recommendations date is before the earliest date, set the recommendations date to the earliest date
+                    LocalDate lObtainLatestEarliest =
                             Recommendation.obtainMostRecentEarliestDateFromRecommendationsList(lInterimRecommendedEarliest);
-                    final Date lPrevFinalEarliestDate = getFinalEarliestDate();
+                    final LocalDate lPrevFinalEarliestDate = getFinalEarliestDate();
                     if (lPrevFinalEarliestDate != null)
                     {
                         if (lObtainLatestEarliest == null)
                             lObtainLatestEarliest = lPrevFinalEarliestDate;
                         else
-                            if (lPrevFinalEarliestDate.after(lObtainLatestEarliest))
+                            if (lPrevFinalEarliestDate.isAfter(lObtainLatestEarliest))
                                 lObtainLatestEarliest = lPrevFinalEarliestDate;
                     }
                     if (lObtainLatestEarliest != null)
                     {
                         setFinalEarliestDate(lObtainLatestEarliest);
-                        if (lFinalRecommendationDate != null && lObtainLatestEarliest.after(lFinalRecommendationDate))
+                        if (lFinalRecommendationDate != null && lObtainLatestEarliest.isAfter(lFinalRecommendationDate))
                             setFinalRecommendationDate(lObtainLatestEarliest);
                     }
 
-                    // Now determine the latest recommended date. If the latest recommendation date is before the recommended date, set it to the recommended date
-                    Date lObtainUnadjustedLatest = Recommendation.obtainMostRecentLatestRecommendationDateFromRecommendationsList(
-                            lInterimRecommendedLatest);
-                    final Date lPrevFinalLatestDate = getFinalOverdueDate();
+                    // Now determine the latest recommended date. If the latest recommendations date is before the recommended date, set it to the recommended date
+                    LocalDate lObtainUnadjustedLatest =
+                            Recommendation.obtainMostRecentLatestRecommendationDateFromRecommendationsList(
+                                    lInterimRecommendedLatest);
+                    final LocalDate lPrevFinalLatestDate = getFinalOverdueDate();
                     if (lPrevFinalLatestDate != null)
                     {
                         if (lObtainUnadjustedLatest == null)
                             lObtainUnadjustedLatest = lPrevFinalLatestDate;
                         else
-                            if (lPrevFinalLatestDate.after(lObtainUnadjustedLatest))
+                            if (lPrevFinalLatestDate.isAfter(lObtainUnadjustedLatest))
                                 lObtainUnadjustedLatest = lPrevFinalLatestDate;
                     }
                     if (lObtainUnadjustedLatest != null)
                     {
-                        if (lFinalRecommendationDate != null && lObtainUnadjustedLatest.before(lFinalRecommendationDate))
+                        if (lFinalRecommendationDate != null && lObtainUnadjustedLatest.isBefore(lFinalRecommendationDate))
                             setFinalOverdueDate(lFinalRecommendationDate);
                         else
                             setFinalOverdueDate(lObtainUnadjustedLatest);
@@ -2386,7 +2388,7 @@ public class TargetSeries
                 }
             }
 
-        // Reset interim recommendation tracking
+        // Reset interim recommendations tracking
         this.recommendationStatusPrior = getRecommendationStatus();
         interimRecommendationsScheduleEarliestAge = new ArrayList<>();
         interimRecommendationsScheduleEarliestInterval = new ArrayList<>();
@@ -2399,13 +2401,13 @@ public class TargetSeries
         interimRecommendationsCustomLatest = new ArrayList<>();
     }
 
-    public void evaluateVaccineGroupMinimumAgeandRecordReason(final Date pEvalPersonBirthTime, final TargetDose pTD)
+    public void evaluateVaccineGroupMinimumAgeandRecordReason(final LocalDate pEvalPersonBirthTime, final TargetDose pTD)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         evaluateVaccineGroupMinimumAgeOrMaximumAgeandRecordReason(pEvalPersonBirthTime, pTD, EvaluationType.MINIMUM_AGE);
     }
 
-    public void evaluateVaccineGroupMaximumAgeandRecordReason(final Date pEvalPersonBirthTime, final TargetDose pTD)
+    public void evaluateVaccineGroupMaximumAgeandRecordReason(final LocalDate pEvalPersonBirthTime, final TargetDose pTD)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         evaluateVaccineGroupMinimumAgeOrMaximumAgeandRecordReason(pEvalPersonBirthTime, pTD, EvaluationType.MAXIMUM_AGE);
@@ -2414,8 +2416,9 @@ public class TargetSeries
     /**
      * Check age for the supplied dose and record evaluation reason in supplied TargetDose's validReasons, acceptedReasons and/or invalidReasons list.
      */
-    private void evaluateVaccineGroupMinimumAgeOrMaximumAgeandRecordReason(final Date pEvalPersonBirthTime, final TargetDose pTD,
-            final EvaluationType minimumOrMaximumAgeChoice) throws IllegalArgumentException, InconsistentConfigurationException
+    private void evaluateVaccineGroupMinimumAgeOrMaximumAgeandRecordReason(final LocalDate pEvalPersonBirthTime,
+            final TargetDose pTD, final EvaluationType minimumOrMaximumAgeChoice)
+            throws IllegalArgumentException, InconsistentConfigurationException
     {
         final String _METHODNAME = "evaluateVaccineGroupMinimumAgeandRecordReason(): ";
 
@@ -2440,16 +2443,17 @@ public class TargetSeries
             return;
         }
 
-        final Date administrationDate = pTD.getAdministrationDate();
+        final LocalDate administrationDate = pTD.getAdministrationDate();
         if (administrationDate == null)
         {
             final String str = "Vaccination date not supplied";
             log.warn(_METHODNAME + str);
             throw new IllegalArgumentException(str);
         }
-        if (administrationDate.before(pEvalPersonBirthTime))
+        if (administrationDate.isBefore(pEvalPersonBirthTime))
         {
-            log.warn(_METHODNAME + "Vaccination date supplied before birth date");
+            if (log.isDebugEnabled())
+                log.debug(_METHODNAME + "Vaccination date supplied before birth date");
             pTD.addInvalidReason(BaseDataEvaluationReason._PRIOR_TO_DOB.getCdsListItemName());
         }
 
@@ -2512,8 +2516,8 @@ public class TargetSeries
         if (isSeriesComplete())
             return;
 
-        final Date previousDoseDate = pTDprev.getAdministrationDate();
-        final Date currentDoseDate = pTD.getAdministrationDate();
+        final LocalDate previousDoseDate = pTDprev.getAdministrationDate();
+        final LocalDate currentDoseDate = pTD.getAdministrationDate();
         int doseNumberForWhichToObtainRule = pTD.getDoseNumberInSeries();
         if (doseNumberForWhichToObtainRule > 1)
             doseNumberForWhichToObtainRule--;
@@ -3095,6 +3099,32 @@ public class TargetSeries
         return seriesDoseRulePrev.getEarliestRecommendedInterval();
     }
 
+    /**
+     * Return the latest recommended interval for the specified dose; null if there is none
+     *
+     * @return TimePeriod
+     */
+    public TimePeriod getLatestRecommendedIntervalForTargetDose(final int targetDoseNumber) throws IllegalArgumentException
+    {
+        final String _METHODNAME = "getLatestRecommendedIntervalForTargetDose(): ";
+        if (targetDoseNumber <= 0)
+        {
+            final String errStr = "Invalid parameters supplied";
+            log.debug(_METHODNAME + errStr);
+            return null;
+        }
+
+        final DoseRule seriesDoseRulePrev = obtainDoseRuleForSeriesByDoseNumber(targetDoseNumber);
+        if (seriesDoseRulePrev == null)
+        {
+            final String str = "Corresponding previous series dose not found";
+            log.error(_METHODNAME + str);
+            throw new IllegalArgumentException(str);
+        }
+
+        return seriesDoseRulePrev.getLatestRecommendedInterval();
+    }
+
     public String getRecommendedIntervalForTargetDoseInStringFormat(final int targetDoseNumber) throws IllegalArgumentException
     {
         final TimePeriod t = getRecommendedIntervalForTargetDose(targetDoseNumber);
@@ -3140,7 +3170,7 @@ public class TargetSeries
         if (pTD == null)
             return false;
 
-        final Date targetDoseDate = pTD.getAdministrationDate();
+        final LocalDate targetDoseDate = pTD.getAdministrationDate();
         final int administeredShotNumber = pTD.getAdministeredShotNumberInSeries();
         if (targetDoseDate == null)
         {
@@ -3153,7 +3183,7 @@ public class TargetSeries
         int minAdminiteredShotNumberWithSameDate = 0;
         for (final TargetDose td : targetDoses)
         {
-            final Date tdShotDate = td.getAdministrationDate();
+            final LocalDate tdShotDate = td.getAdministrationDate();
             final DoseStatus tdStatus = td.getStatus();
             final int tdAdministeredShotNumber = td.getAdministeredShotNumberInSeries();
             if (tdShotDate == null)
@@ -3237,9 +3267,9 @@ public class TargetSeries
                 break;
 
             // Business logic of TargetDate ensures that the administration date is not null
-            final Date lTDOfInterestShotDate = lTDOfInterest.getAdministrationDate();
-            final Date lTDPriorShotDate = lTDPrior.getAdministrationDate();
-            if (lTDPriorShotDate.before(lTDOfInterestShotDate))
+            final LocalDate lTDOfInterestShotDate = lTDOfInterest.getAdministrationDate();
+            final LocalDate lTDPriorShotDate = lTDPrior.getAdministrationDate();
+            if (lTDPriorShotDate.isBefore(lTDOfInterestShotDate))
             {
                 priorTargetDoseIdentified = true;
                 break;
@@ -3333,13 +3363,13 @@ public class TargetSeries
     }
 
     /**
-     * Make note that the patient has immunity to the specified series. This
+     * Make notes that the patient has immunity to the specified series. This
      * will affect evaluation of all remaining doses not yet evaluated in the
      * series
      *
      * @param pSDC SupportedDiseaseConcept
      */
-    public void markImmunityToSpecifiedDisease(final String pSDC, final Date pDateOfImmunity)
+    public void markImmunityToSpecifiedDisease(final String pSDC, final LocalDate pDateOfImmunity)
     {
         if (pSDC == null || pDateOfImmunity == null)
             return;
@@ -3384,7 +3414,7 @@ public class TargetSeries
         if (targetDose == null)
             return false;
 
-        final Date targetDoseDate = targetDose.getAdministrationDate();
+        final LocalDate targetDoseDate = targetDose.getAdministrationDate();
         if (targetDoseDate == null)
         {
             final String str = "Supplied TargetDose does not have an administration date";
@@ -3455,12 +3485,12 @@ public class TargetSeries
      *
      * @return Date of the start date of the season, or null if none
      */
-    public Date getSeasonStartDate()
+    public LocalDate getSeasonStartDate()
     {
         if (targetSeason == null)
             return null;
 
-        return ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonStartDate());
+        return targetSeason.getFullySpecifiedSeasonStartDate();
     }
 
     /**
@@ -3468,12 +3498,12 @@ public class TargetSeries
      *
      * @return Date of the end date of the target season, or null if none
      */
-    public Date getSeasonEndDate()
+    public LocalDate getSeasonEndDate()
     {
         if (targetSeason == null)
             return null;
 
-        return ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonEndDate());
+        return targetSeason.getFullySpecifiedSeasonEndDate();
     }
 
     /**
@@ -3481,12 +3511,12 @@ public class TargetSeries
      *
      * @return Date of the end date of the target season, or null if none
      */
-    public Date getOffSeasonStartDate()
+    public LocalDate getOffSeasonStartDate()
     {
         if (targetSeason == null)
             return null;
 
-        return ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonOffSeasonStartDate());
+        return targetSeason.getFullySpecifiedSeasonOffSeasonStartDate();
     }
 
     /**
@@ -3494,12 +3524,12 @@ public class TargetSeries
      *
      * @return Date of the end date of the target season, or null if none
      */
-    public Date getOffSeasonEndDate()
+    public LocalDate getOffSeasonEndDate()
     {
         if (targetSeason == null)
             return null;
 
-        return ICELogicHelper.toDate(targetSeason.getFullySpecifiedSeasonOffSeasonEndDate());
+        return targetSeason.getFullySpecifiedSeasonOffSeasonEndDate();
     }
 
     public String getSeriesName()
@@ -3525,7 +3555,7 @@ public class TargetSeries
         final String _METHODNAME = "setSeriesRules(): ";
         if (seriesRules == null)
         {
-            final String errStr = "SeriesRules parameter was not supplied";
+            final String errStr = "SeriesRules parameters was not supplied";
             log.error(_METHODNAME + errStr);
             throw new IllegalArgumentException(errStr);
         }
@@ -3590,7 +3620,7 @@ public class TargetSeries
         }
     }
 
-    public void addLiveVirusDateAccountedForInRecommendedFinalEarliestDate(final Date pLiveVirusDate)
+    public void addLiveVirusDateAccountedForInRecommendedFinalEarliestDate(final LocalDate pLiveVirusDate)
     {
         if (pLiveVirusDate == null)
             return;
@@ -3599,7 +3629,7 @@ public class TargetSeries
             this.liveVirusDatesAccountedForInRecommendedFinalEarliestDate.add(pLiveVirusDate);
     }
 
-    public void addLiveVirusDateAccountedForInRecommendedFinalDate(final Date pLiveVirusDate)
+    public void addLiveVirusDateAccountedForInRecommendedFinalDate(final LocalDate pLiveVirusDate)
     {
         if (pLiveVirusDate == null)
             return;
@@ -3608,7 +3638,7 @@ public class TargetSeries
             this.liveVirusDatesAccountedForInRecommendedFinalDate.add(pLiveVirusDate);
     }
 
-    public void addAdjuvantDateAccountedForInRecommendedFinalEarliestDate(final Date pAdjuvantDate)
+    public void addAdjuvantDateAccountedForInRecommendedFinalEarliestDate(final LocalDate pAdjuvantDate)
     {
         if (pAdjuvantDate == null)
             return;
@@ -3617,7 +3647,7 @@ public class TargetSeries
             this.adjuvantDatesAccountedForInRecommendedFinalEarliestDate.add(pAdjuvantDate);
     }
 
-    public void addAdjuvantDateAccountedForInRecommendedFinalDate(final Date pAdjuvantDate)
+    public void addAdjuvantDateAccountedForInRecommendedFinalDate(final LocalDate pAdjuvantDate)
     {
         if (pAdjuvantDate == null)
             return;
@@ -3685,16 +3715,16 @@ public class TargetSeries
 
     /**
      * If recommendationStatus is RECOMMENDED or RECOMMENDED_IN_FUTURE, check to see if the recommendationStatus should be changed according to the
-     * final recommendation date and evaluation time parameter; change it to the other if necessary
-     * e.g. - current recommendation status is RECOMMENDED, pEvalTime is 4/2/2010, and final recommendation date is 4/29/2010. Therefore, change the
+     * final recommendations date and evaluation time parameters; change it to the other if necessary
+     * e.g. - current recommendations status is RECOMMENDED, pEvalTime is 4/2/2010, and final recommendations date is 4/29/2010. Therefore, change the
      * recommendationStatus from RECOMMENDED to RECOMMENDED_IN_FUTURE.
      * <p>
      * If the supplied pEvalTime is null, finalRecommendationDate is null, or the current RecommendationStatus is not RECOMMENDED or RECOMMENDED_IN_FUTURE,
      * then this method has no effect.
      *
-     * @return true if recommendation status (and reason if applicable) was updated, false if not
+     * @return true if recommendations status (and reason if applicable) was updated, false if not
      */
-    public boolean adjustRecommendationStatusAndReasonByEvalTime(final Date pEvalTime)
+    public boolean adjustRecommendationStatusAndReasonByEvalTime(final LocalDate pEvalTime)
     {
         if (pEvalTime == null || this.finalRecommendationDate == null || (recommendationStatus != RecommendationStatus.RECOMMENDED
                 && recommendationStatus != RecommendationStatus.RECOMMENDED_IN_FUTURE))
@@ -3755,12 +3785,12 @@ public class TargetSeries
     }
 
     /**
-     * Set the final recommendation date. The final earliest and final latest recommendation dates are affected as follows:
-     * 1) If the earliest date is present and after the supplied recommendation date, the earliest date is also changed to the supplied recommendation date.
-     * 2) If the latest (overdue) date is present and before the supplied recommendation date, then the latest date is changed to the supplied recommendation date.
-     * 3) If the supplied recommendation date is null, then the earliest and latest recommendation dates are changed to null.
+     * Set the final recommendations date. The final earliest and final latest recommendations dates are affected as follows:
+     * 1) If the earliest date is present and after the supplied recommendations date, the earliest date is also changed to the supplied recommendations date.
+     * 2) If the latest (overdue) date is present and before the supplied recommendations date, then the latest date is changed to the supplied recommendations date.
+     * 3) If the supplied recommendations date is null, then the earliest and latest recommendations dates are changed to null.
      */
-    public void setFinalRecommendationDate(final Date pFinalRecommendationDate)
+    public void setFinalRecommendationDate(final LocalDate pFinalRecommendationDate)
     {
         this.finalRecommendationDate = pFinalRecommendationDate;
         this.liveVirusDatesAccountedForInRecommendedFinalDate.clear();
@@ -3769,12 +3799,12 @@ public class TargetSeries
         if (pFinalRecommendationDate != null)
         {
             // Check to ensure consistency with the earliest date
-            Date lDate = getFinalEarliestDate();
-            if (lDate != null && pFinalRecommendationDate.before(lDate))
+            LocalDate lDate = getFinalEarliestDate();
+            if (lDate != null && pFinalRecommendationDate.isBefore(lDate))
                 setFinalEarliestDate(pFinalRecommendationDate);
             // Check to ensure consistency with the latest date
             lDate = getFinalOverdueDate();
-            if (lDate != null && pFinalRecommendationDate.after(lDate))
+            if (lDate != null && pFinalRecommendationDate.isAfter(lDate))
                 setFinalOverdueDate(pFinalRecommendationDate);
         }
         else
@@ -3807,11 +3837,11 @@ public class TargetSeries
 
     /**
      * Set the final earliest date. The final recommended and final latest recommended dates are affected as follows:
-     * 1) If the recommended date is present and before the supplied earliest date, then the recommendation date is changed to the supplied earliest date.
+     * 1) If the recommended date is present and before the supplied earliest date, then the recommendations date is changed to the supplied earliest date.
      * 2) If the latest recommended date is present and before the supplied earliest date, then the latest date is changed to the supplied earliest date.
-     * 3) If the supplied earliest date is null, no changes are made to the recommended and latest recommendation dates.
+     * 3) If the supplied earliest date is null, no changes are made to the recommended and latest recommendations dates.
      */
-    public void setFinalEarliestDate(final Date finalEarliestDate)
+    public void setFinalEarliestDate(final LocalDate finalEarliestDate)
     {
         this.finalEarliestDate = finalEarliestDate;
         this.liveVirusDatesAccountedForInRecommendedFinalEarliestDate.clear();
@@ -3819,13 +3849,13 @@ public class TargetSeries
 
         if (finalEarliestDate != null)
         {
-            // Check to ensure consistency with recommendation date
-            Date lDate = getFinalRecommendationDate();
-            if (lDate != null && finalEarliestDate.after(lDate))
+            // Check to ensure consistency with recommendations date
+            LocalDate lDate = getFinalRecommendationDate();
+            if (lDate != null && finalEarliestDate.isAfter(lDate))
                 setFinalRecommendationDate(finalEarliestDate);
-            // Check to ensure consistency with latest recommendation date
+            // Check to ensure consistency with latest recommendations date
             lDate = getFinalOverdueDate();
-            if (lDate != null && finalEarliestDate.after(lDate))
+            if (lDate != null && finalEarliestDate.isAfter(lDate))
                 setFinalOverdueDate(finalEarliestDate);
         }
     }

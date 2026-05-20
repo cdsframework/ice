@@ -4,7 +4,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.drools.core.base.accumulators.AbstractAccumulateFunction;
 
@@ -17,12 +17,12 @@ public class DateMaxAccumulateFunction extends AbstractAccumulateFunction<DateMa
     @Setter
     public static class MaxData implements Externalizable
     {
-        private Date max;
+        private LocalDate max;
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException
         {
-            max = (Date) in.readObject();
+            max = (LocalDate) in.readObject();
         }
 
         @Override
@@ -63,17 +63,17 @@ public class DateMaxAccumulateFunction extends AbstractAccumulateFunction<DateMa
     @Override
     public void accumulate(final MaxData data, final Object value)
     {
-        if (value instanceof final Date dateValue)
-            data.setMax(data.getMax() == null || data.getMax().compareTo(dateValue) < 0 ? dateValue : data.getMax());
+        if (value instanceof final LocalDate dateValue)
+            data.setMax(data.getMax() == null || data.getMax().isBefore(dateValue) ? dateValue : data.getMax());
     }
 
     @Override
     public boolean tryReverse(final MaxData data, final Object value)
     {
-        if (!(value instanceof final Date dateValue))
+        if (!(value instanceof final LocalDate dateValue))
             return true;
 
-        return data.getMax().compareTo(dateValue) > 0;
+        return data.getMax().isAfter(dateValue);
     }
 
     @Override
@@ -96,6 +96,6 @@ public class DateMaxAccumulateFunction extends AbstractAccumulateFunction<DateMa
     @Override
     public Class<?> getResultType()
     {
-        return Date.class;
+        return LocalDate.class;
     }
 }

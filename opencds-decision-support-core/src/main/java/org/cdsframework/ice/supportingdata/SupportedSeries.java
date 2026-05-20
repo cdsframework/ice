@@ -41,12 +41,6 @@ import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
-import org.cdsframework.ice.config.iceSupportingProperties.Dose;
-import org.cdsframework.ice.config.iceSupportingProperties.DoseInterval;
-import org.cdsframework.ice.config.iceSupportingProperties.DoseVaccine;
-import org.cdsframework.ice.config.iceSupportingProperties.Series;
-import org.cdsframework.ice.config.iceSupportingProperties.SeriesData;
-import org.cdsframework.ice.config.iceSupportingProperties.VaccineGroup;
 import org.cdsframework.ice.service.DoseRule;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
@@ -54,7 +48,6 @@ import org.cdsframework.ice.service.Season;
 import org.cdsframework.ice.service.SeriesRules;
 import org.cdsframework.ice.service.Vaccine;
 import org.cdsframework.ice.service.VaccineComponent;
-import org.cdsframework.ice.util.CollectionUtils;
 import org.cdsframework.ice.util.TimePeriod;
 import org.jspecify.annotations.NonNull;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
@@ -188,7 +181,7 @@ public class SupportedSeries implements SupportingData
     }
 
     private void addSeriesToVaccineGroup(final String pSeriesCode, final CdsConcept pSeriesCdsConcept,
-            final Collection<String> pCdsVersions, final SeriesRules pSeriesRules, final LocallyCodedVaccineGroupItem pVGI)
+            final SeriesRules pSeriesRules, final LocallyCodedVaccineGroupItem pVGI)
     {
         final String _METHODNAME = "addSeriesToVaccineGroup(): ";
 
@@ -196,7 +189,7 @@ public class SupportedSeries implements SupportingData
         final LocallyCodedSeriesItem lcsi;
         try
         {
-            lcsi = new LocallyCodedSeriesItem(pSeriesCode, pSeriesCdsConcept, pCdsVersions, pSeriesRules);
+            lcsi = new LocallyCodedSeriesItem(pSeriesCode, pSeriesCdsConcept, pSeriesRules);
         }
         catch (final IllegalArgumentException iue)
         {
@@ -222,13 +215,13 @@ public class SupportedSeries implements SupportingData
     }
 
     private List<Season> validateAndGetSeasons(final String pSeriesCode,
-            final Collection<org.cdsframework.ice.config.iceSupportingProperties.Season> pSeasons, final String pMethodName)
+            final Collection<org.cdsframework.ice.supportingdata.Season> pSeasons, final String pMethodName)
             throws InconsistentConfigurationException
     {
         final List<Season> lSeasons = new ArrayList<>();
         if (pSeasons != null)
         {
-            for (final org.cdsframework.ice.config.iceSupportingProperties.Season s : pSeasons)
+            for (final org.cdsframework.ice.supportingdata.Season s : pSeasons)
             {
                 final CD lInternalSeasonCD = ConceptUtils.toInternalCD(s);
                 final LocallyCodedCdsListItem locallyCodedCdsSeasonListItem =
@@ -327,23 +320,9 @@ public class SupportedSeries implements SupportingData
 
         if (pSeriesData == null)
         {
-            log.warn(_METHODNAME + "Series parameter is null; cannot process and returning");
+            log.warn(_METHODNAME + "Series parameters is null; cannot process and returning");
             return;
         }
-
-        // CDS Version validation checks
-        if (ObjectUtils.isEmpty(pSeriesData.cdsVersion()))
-        {
-            final String lErrStr = "No cdsVersion specified in series properties.";
-            log.error(_METHODNAME + lErrStr);
-            throw new InconsistentConfigurationException(lErrStr);
-        }
-
-        // If adding a code that is not one of the supported cdsVersions, then return
-        final Collection<String> lCdsVersions = CollectionUtils.intersectionOfCollections(pSeriesData.cdsVersion().values(),
-                this.supportedCdsLists.getCdsVersions());
-        if (ObjectUtils.isEmpty(lCdsVersions))
-            return;
 
         // Determine the series name. No duplicates allowed; no series that weren't previously defined LocallyCodedCdsListItem allowed.
         final Series lPropSeries = pSeriesData.series();
@@ -412,7 +391,7 @@ public class SupportedSeries implements SupportingData
         final LocallyCodedVaccineGroupItem lVGI = getLocallyCodedVaccineGroupItem(lPropVaccineGroup);
 
         // At least one dose must be specified and the number of doses must match the Dose elements
-        final Map<String, org.cdsframework.ice.config.iceSupportingProperties.Dose> lDosesMap = pSeriesData.doses();
+        final Map<String, Dose> lDosesMap = pSeriesData.doses();
         if (ObjectUtils.isEmpty(lDosesMap))
         {
             final String lErrStr = "No series doses have been specified for the series. Series: " + lSeriesCode;
@@ -460,7 +439,7 @@ public class SupportedSeries implements SupportingData
         series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(
                 Optional.ofNullable(pSeriesData.doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered()).orElse(true));
 
-        addSeriesToVaccineGroup(lSeriesCode, lPrimaryOpenCdsConcept, lCdsVersions, series1Rules, lVGI);
+        addSeriesToVaccineGroup(lSeriesCode, lPrimaryOpenCdsConcept, series1Rules, lVGI);
     }
 
     private @NonNull List<DoseRule> getDoseRules(final SeriesData pSeriesData, final Map<String, Dose> lDosesMap,
@@ -514,7 +493,7 @@ public class SupportedSeries implements SupportingData
 
             for (final DoseVaccine lDV : lDoseVaccinesMap.values())
             {
-                final org.cdsframework.ice.config.iceSupportingProperties.Vaccine lPropVaccine = lDV.vaccine();
+                final org.cdsframework.ice.supportingdata.Vaccine lPropVaccine = lDV.vaccine();
 
                 final LocallyCodedVaccineItem lcvi = this.supportedVaccines.getVaccineItem(ConceptUtils.toInternalCD(lPropVaccine));
                 if (lcvi == null)

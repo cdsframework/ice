@@ -1,6 +1,5 @@
 package knowledgeModule.org.nyc.cir.ice;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.opencds.vmr.v1_0.internal.EvalTime;
@@ -21,7 +20,7 @@ import org.cdsframework.ice.service.Vaccine;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 rule "DTP: Bypass absolute minimum age for vaccine check if the primary series is complete"
 	dialect "mvel"

@@ -26,8 +26,6 @@
 
 package org.cdsframework.ice.supportingdata;
 
-import java.util.Collection;
-
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsItem;
 import org.cdsframework.ice.service.Vaccine;
@@ -45,9 +43,9 @@ public class LocallyCodedVaccineItem extends LocallyCodedCdsItem
      * Create a LocallyCodedVaccineItem. All parameters to this method must be specified, or an IllegalArgumentException is thrown.
      */
     protected LocallyCodedVaccineItem(final String pVaccineCdsListItemName, final CdsConcept pVaccineConceptItem,
-            final Collection<String> pCdsVersions, final Vaccine pVaccine) throws IllegalArgumentException
+            final Vaccine pVaccine) throws IllegalArgumentException
     {
-        super(pVaccineCdsListItemName, pVaccineConceptItem, pCdsVersions);
+        super(pVaccineCdsListItemName, pVaccineConceptItem);
 
         final String _METHODNAME = "LocallyCodedVaccineItem(): ";
         if (pVaccine == null)

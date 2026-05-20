@@ -1,21 +1,20 @@
 package org.opencds.config.api.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
-public interface PluginPackage
+public record PluginPackage(PPId identifier,
+                            LoadContext loadContext,
+                            String resourceName,
+                            List<Plugin> plugins,
+                            LocalDate timestamp,
+                            String userId)
 {
-    PPId getIdentifier();
+    public Plugin getPlugin(final PluginId pluginId)
+    {
+        if (plugins == null)
+            return null;
 
-    LoadContext getLoadContext();
-
-    String getResourceName();
-
-    List<Plugin> getPlugins();
-
-    Plugin getPlugin(PluginId pluginId);
-
-    Date getTimestamp();
-
-    String getUserId();
+        return plugins.stream().filter(p -> p.identifier().equals(pluginId)).findFirst().orElse(null);
+    }
 }

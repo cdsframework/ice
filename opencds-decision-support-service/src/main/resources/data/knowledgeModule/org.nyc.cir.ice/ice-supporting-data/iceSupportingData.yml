@@ -1,12 +1,6 @@
-spring:
-  config:
-    import:
-      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/OtherLists/iceSupportingOtherLists.yml
-      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/Series/iceSupportingSeriesData.yml
-
-ice-supporting-data:
-  knowledge-modules:
-    '[org.nyc.cir^ICE^1.0.0]':
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
       outbound-code-system-map:
         "2.16.840.1.113883.6.96": "http://snomed.info/sct"
         "2.16.840.1.113883.6.1": "http://loinc.org"
@@ -15,3 +9,79 @@ ice-supporting-data:
         "2.16.840.1.113883.6.3": "http://hl7.org/fhir/sid/icd-10"
         "2.16.840.1.113883.3.795.12.100.4": "http://terminology.cdsframework.org/ice/unknown"
         "2.16.840.1.113883.3.795.12.100.500": "http://terminology.cdsframework.org/ice/series-display-options"
+
+spring:
+  config:
+    import:
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedDiseaseImmunitySources.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedDiseaseImmunityReasons.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedDiseaseConcept.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedEvaluationReasons.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedSupplementalEvaluationReasons.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedRecommendationReasons.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedSupplementalRecommendationReasons.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedSeasons.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedSeries.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedVaccineGroups.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedVaccines.yml
+      # series definitions
+      - classpath:data/seriesPlanDefinitions/cholera_1_dose_risk_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_astra_zeneca_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_aug_2025_2_y_to_64_y_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_aug_2025_gte_65_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_aug_2025_lt_2_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_bibp_sinopharm_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_corona_vac_sinovac_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_covaxin_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_janssen_1_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_medicago_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_mixed_product_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_moderna_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_novavax_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_pfizer_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_sep_2023_gte_5_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_sep_2023_mixed_product_lt_5_y_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_sep_2023_moderna_lt_5_y_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_sep_2023_novavax_series.yml
+      - classpath:data/seriesPlanDefinitions/covid_19_sep_2023_pfizer_lt_5_y_series.yml
+      - classpath:data/seriesPlanDefinitions/dtp_3_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/dtp_5_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/h1n1_1_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/h1n1_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/hep_a_2_dose_child_adult_series.yml
+      - classpath:data/seriesPlanDefinitions/hep_a_4_dose_accelerated_twinrix_series.yml
+      - classpath:data/seriesPlanDefinitions/hep_a_adult_3_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/hep_b_3_dose_twinrix_series.yml
+      - classpath:data/seriesPlanDefinitions/hep_b_4_dose_accelerated_twinrix_series.yml
+      - classpath:data/seriesPlanDefinitions/hep_b_adult_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/hep_b_adult_3_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/hep_b_3_dose_child_adolescent_series.yml
+      - classpath:data/seriesPlanDefinitions/hep_b_4_dose_child_adolescent_series.yml
+      - classpath:data/seriesPlanDefinitions/hib_4_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/hib_omp_series.yml
+      - classpath:data/seriesPlanDefinitions/hpv_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/hpv_3_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/influenza_1_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/influenza_2_dose_default_series.yml
+      - classpath:data/seriesPlanDefinitions/influenza_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/jevc_risk_2_dose_accelerated_series.yml
+      - classpath:data/seriesPlanDefinitions/jevc_risk_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/mcv_42_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/men_bf_hbp_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/men_bf_hbp_3_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/men_b_4_c_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/men_b_4_c_3_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/mmr_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/mpox_1_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/mpox_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/pneumococcal_series.yml
+      - classpath:data/seriesPlanDefinitions/polio_4_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/polio_fractional_ipv_series.yml
+      - classpath:data/seriesPlanDefinitions/rotavirus_2_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/rotavirus_3_dose_series.yml
+      - classpath:data/seriesPlanDefinitions/rsv_adult_series.yml
+      - classpath:data/seriesPlanDefinitions/rsv_infant_series.yml
+      - classpath:data/seriesPlanDefinitions/typhoid_risk_series.yml
+      - classpath:data/seriesPlanDefinitions/yellow_fever_risk_series.yml
+      - classpath:data/seriesPlanDefinitions/zoster_series.yml
+      - classpath:data/seriesPlanDefinitions/varicella_2_dose_series.yml

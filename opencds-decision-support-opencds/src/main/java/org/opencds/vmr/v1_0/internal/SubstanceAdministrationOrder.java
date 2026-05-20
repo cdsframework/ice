@@ -17,10 +17,10 @@ import lombok.ToString;
 @ToString
 public class SubstanceAdministrationOrder extends SubstanceAdministrationBase
 {
-    protected CD criticality;
-    protected DoseRestriction doseRestriction;
-    protected IVLDate administrationTimeInterval;
-    protected List<CD> dosingSig;
-    protected INT numberFillsAllowed;
-    protected IVLDate orderEventTime;
+    private CD criticality;
+    private DoseRestriction doseRestriction;
+    private IVLDate administrationTimeInterval;
+    private List<CD> dosingSig;
+    private INT numberFillsAllowed;
+    private IVLDate orderEventTime;
 }

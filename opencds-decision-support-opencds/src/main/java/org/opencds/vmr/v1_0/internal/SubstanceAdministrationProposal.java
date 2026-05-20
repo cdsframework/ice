@@ -15,9 +15,9 @@ import lombok.ToString;
 @ToString
 public class SubstanceAdministrationProposal extends SubstanceAdministrationBase
 {
-    protected CD criticality;
-    protected DoseRestriction doseRestriction;
-    protected IVLDate proposedAdministrationTimeInterval;
-    protected IVLDate validAdministrationTimeInterval;
-    protected INT numberFillsAllowed;
+    private CD criticality;
+    private DoseRestriction doseRestriction;
+    private IVLDate proposedAdministrationTimeInterval;
+    private IVLDate validAdministrationTimeInterval;
+    private INT numberFillsAllowed;
 }

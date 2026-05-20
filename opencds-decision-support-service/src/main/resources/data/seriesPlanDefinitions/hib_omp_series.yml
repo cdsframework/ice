@@ -1,0 +1,346 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+      plan-definitions:
+        HIB_OMP_SERIES:
+          resource-type: PlanDefinition
+          url: http://cdsframework.org/PlanDefinition/series/hib_omp_series
+          version: 1.0.0
+          name: HIB_OMP_SERIES
+          title: Hib OMP Series
+          status: active
+          meta:
+            profile:
+              - http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition
+          type:
+            coding:
+              - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
+                code: eca-rule
+                display: ECA Rule
+          extension:
+            - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
+              extension:
+                - url: numberOfDosesInSeries
+                  value-integer: 3
+                - url: recurringDosesAfterSeriesComplete
+                  value-boolean: false
+                - url: doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered
+                  value-boolean: true
+                - url: series
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.10
+                        code: HIB_OMP_SERIES
+                        version: ICE Vaccine Series
+                        display: Hib OMP Series
+                    text: Hib OMP Series
+                - url: vaccineGroup
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.1
+                        code: HIB
+                        version: ICE Vaccine Group
+                        display: Hib
+                    text: Hib
+          action:
+            - id: dose-1
+              title: Dose 1
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 1
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 38d
+                    - url: minimumAge
+                      value-string: 42d
+                    - url: earliestRecommendedAge
+                      value-string: 2m
+                    - url: latestRecommendedAge
+                      value-string: 3m+4w
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '49'
+                            version: CVX
+                            display: Hib (PRP-OMP)
+                        text: Hib (PRP-OMP)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '51'
+                            version: CVX
+                            display: Hib-Hep B
+                        text: Hib-Hep B
+                    - url: preferred
+                      value-boolean: true
+            - id: dose-2
+              title: Dose 2
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 2
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 66d
+                    - url: minimumAge
+                      value-string: 70d
+                    - url: earliestRecommendedAge
+                      value-string: 4m
+                    - url: latestRecommendedAge
+                      value-string: 5m+4w
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '49'
+                            version: CVX
+                            display: Hib (PRP-OMP)
+                        text: Hib (PRP-OMP)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '51'
+                            version: CVX
+                            display: Hib-Hep B
+                        text: Hib-Hep B
+                    - url: preferred
+                      value-boolean: true
+              related-action:
+                - action-id: dose-1
+                  relationship: after-end
+                  extension:
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 24d
+                        - url: minimumInterval
+                          value-string: 28d
+                        - url: earliestRecommendedInterval
+                          value-string: 28d
+                        - url: latestRecommendedInterval
+                          value-string: 16w
+            - id: dose-3
+              title: Dose 3
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 3
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 1y-4d
+                    - url: minimumAge
+                      value-string: 1y
+                    - url: earliestRecommendedAge
+                      value-string: 1y
+                    - url: latestRecommendedAge
+                      value-string: 16m+4w
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '102'
+                            version: CVX
+                            display: DTP-Hib-Hep B
+                        text: DTP-Hib-Hep B
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '22'
+                            version: CVX
+                            display: DTP-Hib
+                        text: DTP-Hib
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '49'
+                            version: CVX
+                            display: Hib (PRP-OMP)
+                        text: Hib (PRP-OMP)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '48'
+                            version: CVX
+                            display: Hib (PRP-T)
+                        text: Hib (PRP-T)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '17'
+                            version: CVX
+                            display: Hib NOS
+                        text: Hib NOS
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '50'
+                            version: CVX
+                            display: DTaP-Hib
+                        text: DTaP-Hib
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '51'
+                            version: CVX
+                            display: Hib-Hep B
+                        text: Hib-Hep B
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '46'
+                            version: CVX
+                            display: Hib (PRP-D)
+                        text: Hib (PRP-D)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '47'
+                            version: CVX
+                            display: Hib (HbOC)
+                        text: Hib (HbOC)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '148'
+                            version: CVX
+                            display: meningococcal C/Y-HIB PRP
+                        text: meningococcal C/Y-HIB PRP
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '120'
+                            version: CVX
+                            display: DTaP-Hib-IPV
+                        text: DTaP-Hib-IPV
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '146'
+                            version: CVX
+                            display: DTAP-IPV-Hib-HepB
+                        text: DTAP-IPV-Hib-HepB
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '132'
+                            version: CVX
+                            display: DTAP-IPV-Hib-HepB, historical
+                        text: DTAP-IPV-Hib-HepB, historical
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '170'
+                            version: CVX
+                            display: DTaP-IPV-Hib
+                        text: DTaP-IPV-Hib
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '198'
+                            version: CVX
+                            display: DTaP-Hep B-Hib Pentavalent, non-US
+                        text: DTaP-Hep B-Hib Pentavalent, non-US
+                    - url: preferred
+                      value-boolean: false
+              related-action:
+                - action-id: dose-2
+                  relationship: after-end
+                  extension:
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 52d
+                        - url: minimumInterval
+                          value-string: 56d
+                        - url: earliestRecommendedInterval
+                          value-string: 56d
+                        - url: latestRecommendedInterval
+                          value-string: 10m+4w

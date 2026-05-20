@@ -11,10 +11,10 @@ import lombok.ToString;
 @ToString
 public class IVLREAL extends ANY
 {
-    protected double low;
-    protected double high;
-    protected Boolean lowIsInclusive;
-    protected Boolean highIsInclusive;
+    private double low;
+    private double high;
+    private Boolean lowIsInclusive;
+    private Boolean highIsInclusive;
 
     public Boolean isLowIsInclusive()
     {

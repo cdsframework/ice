@@ -53,10 +53,10 @@ public class CdsConcept extends VmrOpenCdsConcept
             return null;
 
         final CdsConcept lIC = new CdsConcept();
-        lIC.setConceptTargetId(pIC.conceptTargetId);
-        lIC.setDeterminationMethodCode(pIC.determinationMethodCode);
-        lIC.setOpenCdsConceptCode(pIC.openCdsConceptCode);
-        lIC.setDisplayName(pIC.displayName);
+        lIC.setConceptTargetId(pIC.getConceptTargetId());
+        lIC.setDeterminationMethodCode(pIC.getDeterminationMethodCode());
+        lIC.setOpenCdsConceptCode(pIC.getOpenCdsConceptCode());
+        lIC.setDisplayName(pIC.getDisplayName());
         lIC.setIsOpenCdsSupportedConcept(pIC.isOpenCdsSupportedConcept);
         return lIC;
     }
@@ -103,7 +103,7 @@ public class CdsConcept extends VmrOpenCdsConcept
     @Override
     public int hashCode()
     {
-        return Objects.hashCode(openCdsConceptCode);
+        return Objects.hashCode(getOpenCdsConceptCode());
     }
 
     @Override
@@ -115,7 +115,7 @@ public class CdsConcept extends VmrOpenCdsConcept
         if (!(obj instanceof final CdsConcept other))
             return false;
 
-        return Objects.equals(this.openCdsConceptCode, other.openCdsConceptCode);
+        return Objects.equals(this.getOpenCdsConceptCode(), other.getOpenCdsConceptCode());
     }
 
     @Override

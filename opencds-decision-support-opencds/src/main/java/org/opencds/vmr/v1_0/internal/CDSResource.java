@@ -13,6 +13,6 @@ import lombok.ToString;
 @ToString
 public class CDSResource
 {
-    protected CD cdsResourceType;
-    protected Object resourceContents;
+    private CD cdsResourceType;
+    private Object resourceContents;
 }

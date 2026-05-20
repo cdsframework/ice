@@ -16,9 +16,9 @@ import lombok.ToString;
 @ToString
 public class SubstanceAdministrationEvent extends SubstanceAdministrationBase
 {
-    protected INT doseNumber;
-    protected IVLDate administrationTimeInterval;
-    protected IVLDate documentationTime;
-    protected CD informationAttestationType;
-    protected BL isValid;
+    private INT doseNumber;
+    private IVLDate administrationTimeInterval;
+    private IVLDate documentationTime;
+    private CD informationAttestationType;
+    private BL isValid;
 }

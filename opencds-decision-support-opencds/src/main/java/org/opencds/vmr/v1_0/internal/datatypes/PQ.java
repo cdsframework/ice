@@ -11,6 +11,6 @@ import lombok.ToString;
 @ToString
 public class PQ extends QTY
 {
-    protected double value;
-    protected String unit;
+    private double value;
+    private String unit;
 }

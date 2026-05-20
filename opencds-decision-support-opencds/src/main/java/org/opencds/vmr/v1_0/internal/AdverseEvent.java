@@ -13,8 +13,8 @@ import lombok.ToString;
 @ToString
 public class AdverseEvent extends AdverseEventBase
 {
-    protected CD criticality;
-    protected CD severity;
+    private CD criticality;
+    private CD severity;
 
-    protected CD adverseEventStatus;
+    private CD adverseEventStatus;
 }

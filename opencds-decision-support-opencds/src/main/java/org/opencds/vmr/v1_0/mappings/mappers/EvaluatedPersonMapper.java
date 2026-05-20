@@ -44,7 +44,9 @@ public class EvaluatedPersonMapper extends EntityBaseMapper
                 internal.setDemographics(new Demographics());
 
             if (external.getDemographics().getBirthTime() != null)
-                internal.getDemographics().setBirthTime(MappingUtility.tS2DateInternal(external.getDemographics().getBirthTime()));
+                internal.getDemographics()
+                        .setBirthTime(MappingUtility.tS2DateInternal(external.getDemographics().getBirthTime(),
+                                factLists.getParsedDatesCache()));
             if (external.getDemographics().getGender() != null)
                 internal.getDemographics().setGender(MappingUtility.cD2CDInternal(external.getDemographics().getGender()));
             else

@@ -14,7 +14,7 @@ import lombok.ToString;
 @ToString
 public class UndeliveredSupply extends SupplyBase
 {
-    protected CD reason;
-    protected IVLDate subjectEffectiveTime;
-    protected IVLDate documentationTime;
+    private CD reason;
+    private IVLDate subjectEffectiveTime;
+    private IVLDate documentationTime;
 }

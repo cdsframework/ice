@@ -1,8 +1,6 @@
 package org.opencds.config.api.model;
 
-public interface ConceptView
+public record ConceptView(Concept toConcept,
+                          String cdmCode)
 {
-    Concept getToConcept();
-
-    String getCdmCode();
 }

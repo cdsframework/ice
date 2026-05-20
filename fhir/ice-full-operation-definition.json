@@ -62,60 +62,61 @@
       "type": "Parameters"
     },
     {
-      "name": "guidanceResponse",
+      "name": "output",
       "use": "out",
       "min": 1,
       "max": "1",
-      "documentation": "Summary metadata describing the execution and outcome of the forecast.",
-      "type": "GuidanceResponse"
-    },
-    {
-      "name": "assessmentDate",
-      "use": "out",
-      "min": 1,
-      "max": "1",
-      "documentation": "The effective assessment date actually used by the forecasting service.",
-      "type": "date"
-    },
-    {
-      "name": "durationMs",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "documentation": "Execution duration in milliseconds.",
-      "type": "integer"
-    },
-    {
-      "name": "engineVersion",
-      "use": "out",
-      "min": 1,
-      "max": "1",
-      "documentation": "The CDS engine version that processed the request.",
-      "type": "string"
-    },
-    {
-      "name": "evaluation",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "documentation": "ImmunizationEvaluation resources produced by the forecast. extension may include url http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context with nested extensions selectedSeries, seriesSelectionType, and selectedSeason. targetDisease is represented as a single CodeableConcept and may contain multiple codings for component/multi-disease vaccines.",
-      "type": "ImmunizationEvaluation"
-    },
-    {
-      "name": "recommendation",
-      "use": "out",
-      "min": 0,
-      "max": "*",
-      "documentation": "ImmunizationRecommendation resources produced by the forecast. recommendation.extension may include url http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context with nested extensions selectedSeries, seriesSelectionType, and selectedSeason.",
-      "type": "ImmunizationRecommendation"
-    },
-    {
-      "name": "operationOutcome",
-      "use": "out",
-      "min": 0,
-      "max": "1",
-      "documentation": "Warnings, informational notes, or errors related to processing.",
-      "type": "OperationOutcome"
+      "documentation": "Container for forecast output values and resources.",
+      "part": [
+        {
+          "name": "durationMs",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "documentation": "Execution duration in milliseconds.",
+          "type": "integer"
+        },
+        {
+          "name": "engineVersion",
+          "use": "out",
+          "min": 1,
+          "max": "1",
+          "documentation": "The CDS engine version that processed the request.",
+          "type": "string"
+        },
+        {
+          "name": "guidanceResponse",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "documentation": "Summary metadata describing the execution and outcome of the forecast.",
+          "type": "GuidanceResponse"
+        },
+        {
+          "name": "evaluation",
+          "use": "out",
+          "min": 0,
+          "max": "*",
+          "documentation": "ImmunizationEvaluation resources produced by the forecast. extension may include url http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context with nested extensions selectedSeries, seriesSelectionType, and selectedSeason, or url http://terminology.cdsframework.org/fhir/StructureDefinition/vaccine-group-rules-artifact containing a RelatedArtifact. targetDisease is represented as a single CodeableConcept and may contain multiple codings for component/multi-disease vaccines.",
+          "type": "ImmunizationEvaluation"
+        },
+        {
+          "name": "recommendation",
+          "use": "out",
+          "min": 0,
+          "max": "*",
+          "documentation": "ImmunizationRecommendation resources produced by the forecast. recommendation.extension may include url http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context with nested extensions selectedSeries, seriesSelectionType, and selectedSeason, or url http://terminology.cdsframework.org/fhir/StructureDefinition/vaccine-group-rules-artifact containing a RelatedArtifact.",
+          "type": "ImmunizationRecommendation"
+        },
+        {
+          "name": "operationOutcome",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "documentation": "Warnings, informational notes, or errors related to processing.",
+          "type": "OperationOutcome"
+        }
+      ]
     }
   ]
 }

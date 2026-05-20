@@ -1,0 +1,33 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/common-ice-forecast|1.0.0]':
+      code-systems:
+        EVALUATION_STATUS_CONCEPT:
+          name: EVALUATION_STATUS_CONCEPT
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.3.795.12.100.2
+          description: Supported evaluation statuses for display
+          url: http://terminology.cdsframework.org/ice/evaluation-status
+          title: ICE Evaluation Status
+          status: active
+          content: complete
+          concept:
+            - code: ACCEPTED
+              display: Accepted Dose
+            - code: INVALID
+              display: Invalid Dose
+            - code: VALID
+              display: Valid Dose
+            - code: NOT_EVALUATED
+              display: Shot Not Evaluated
+            - code: PRIMARY_SHOT_DETERMINATION_IN_PROCESS
+              display: Primary Shot Determination in Process
+            - code: EVALUATION_IN_PROCESS
+              display: Evaluation in Process
+            - code: EVALUATION_COMPLETE
+              display: Evaluation Complete
+            - code: EVALUATION_NOT_STARTED
+              display: Evaluation Not Started
+            - code: DECISION_RENDERED
+              display: Decision Rendered

@@ -18,7 +18,7 @@ import org.cdsframework.ice.service.Vaccine;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 rule "Hep B: Verify Adherence to the Maximum Valid Age for the Vaccine if HepB High Risk Infant Vaccine is Administered"
 	dialect "mvel"
@@ -140,9 +140,9 @@ rule "Hep B: Suppress check of the absolute minimum interval between doses when 
 end
 
 /**
- * Absolute minimum interval between doses 1 and 3 in HepB 3-dose Child/Adolescent Series is 112 days
+ * Absolute minimum interval between doses 1 and 3 in HepB 3-dose Child/Adolescent Series is 108 days
  */
-rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the HepB 3-dose Child/Adolescent Series is >= 112d"
+rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the HepB 3-dose Child/Adolescent Series is >= 108d"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -163,7 +163,7 @@ rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the H
             - that has associated administered shot $currentDose
             - that has associated series $associatedTargetSeries
             - that has finding "HEPLISAV-B Applies"
-		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "112d"
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "108d"
 	then
 		Include the reason for shot $currentDose Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentDose
@@ -171,9 +171,9 @@ rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 3 in the H
 end
 
 /**
- * Absolute minimum interval between doses 1 and 4 in HepB 4-dose Child/Adolescent Series is 112 days
+ * Absolute minimum interval between doses 1 and 4 in HepB 4-dose Child/Adolescent Series is 108 days
  */
-rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 4 in the HepB 4-dose Child/Adolescent Series is >= 112d"
+rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 4 in the HepB 4-dose Child/Adolescent Series is >= 108d"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
@@ -194,7 +194,7 @@ rule "Hep B: Ensure the Absolute Minimum Interval Between Doses 1 and 4 in the H
             - that has associated administered shot $currentDose
             - that has associated series $associatedTargetSeries
             - that has finding "HEPLISAV-B Applies"
-		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "112d"
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "108d"
 	then
 		Include the reason for shot $currentDose Invalid due to "Below Minimum Interval"
 		Record that this dose rule was Processed for the TargetDose $currentDose
@@ -500,6 +500,7 @@ rule "Hep B: Switch from Hep B 3-dose Child/Adolescent Series to 4-dose Series i
       Convert from Series $targetSeries to $seriesToSwitchTo starting with Dose Number 4 and evaluate using Interval for prior dose to this dose from SwitchedTo Series
       Set the Shot Status of $dose3 to Valid
       Remove all evaluation reasons from shot $dose3
+      Include the reason for shot $dose3 Valid due to "Extra Dose"
       Refresh all facts in the Series $targetSeries for Evaluation
       Refresh all facts for the Shot $dose3
       Log that this Series Rule fired for the Series $targetSeries

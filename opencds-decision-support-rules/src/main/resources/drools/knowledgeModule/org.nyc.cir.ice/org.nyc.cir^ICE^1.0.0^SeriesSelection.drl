@@ -1,7 +1,6 @@
 package knowledgeModule.org.nyc.cir.ice;
 
 import java.util.Collection;
-import java.util.Date;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
@@ -30,9 +29,9 @@ import org.cdsframework.ice.service.Vaccine;
 import accumulate org.cdsframework.ice.service.DateMinAccumulateFunction minDate;
 import accumulate org.cdsframework.ice.service.DateMaxAccumulateFunction maxDate;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 global org.cdsframework.ice.service.Schedule schedule;
-global java.util.Date patientAgeTimeOfInterest;
+global java.time.LocalDate patientAgeTimeOfInterest;
 
 rule "SeriesSelection: DUMMY catch-all Influenza season rule, 2 dose-series applies"
 	dialect "mvel"
@@ -186,7 +185,7 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014, 2014-2015 season 
 		)
 		eval($countPriorDoses >= 2)
 		eval($latestInfluenzaDoseDateFromPriorSeasons != null &&
-			 $latestInfluenzaDoseDateFromPriorSeasons >= new Date("01-Jul-2010"))
+			 $latestInfluenzaDoseDateFromPriorSeasons >= "01-Jul-2010")
 		$person : EvaluatedPerson()
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, patientAgeTimeOfInterest, "9y") < 0)
 	then
@@ -281,9 +280,9 @@ rule "SeriesSelection: For the Influenza 2012-2013, 2013-2014 or 2014-2015 seaso
         accumulate($tdpriorCondition2 : TargetDose(isValid == true, administrationDate < "01-Jul-2010") from getAllDosesAcrossListOfTargetSeries($currentAndPriorSeasonsInfluenza);
             $countPriorInfluenzaDosesCondition2 : count($tdpriorCondition2); ! ($countPriorInfluenzaDosesCondition2 >= 2 && $countPriorH1N1Doses >= 1))
 		$person : EvaluatedPerson()
-		$earliestInfluenzaDoseDateThisSeason : Date() from accumulate(
-			$tdcurr : TargetDose(isValid == true, $doseDatesThisSeason : administrationDate) from $ts.targetDoses,
-			minDate($doseDatesThisSeason)
+		accumulate(
+		    $tdcurr : TargetDose(isValid == true, $doseDatesThisSeason : administrationDate) from $ts.targetDoses,
+		    $earliestInfluenzaDoseDateThisSeason: minDate($doseDatesThisSeason)
 		)
 		eval(
 			$earliestInfluenzaDoseDateThisSeason != null &&
@@ -325,9 +324,9 @@ rule "SeriesSelection: For the Influenza 2015-2016, 2016-2017 and 2017-2018 seas
 			$countPriorInfluenzaDosesCondition1 : count($tdpriorCondition1);
 			! ($countPriorInfluenzaDosesCondition1 >= 2)
 		)
-		$earliestInfluenzaDoseDateThisSeason : Date() from accumulate(
+		accumulate(
 			$tdcurr : TargetDose(isValid == true, $doseDatesThisSeason : administrationDate) from $ts.targetDoses,
-			minDate($doseDatesThisSeason)
+			$earliestInfluenzaDoseDateThisSeason: minDate($doseDatesThisSeason)
 		)
 		$person : EvaluatedPerson()
 		eval(
@@ -2748,8 +2747,8 @@ rule "SeriesSelection(Hep A): Select 2-dose series if 2-dose series is complete 
        $ts2DoseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEP_A", seriesName == "SUPPORTED_SERIES.HEP_A_2_DOSE_CHILD_ADULT_SERIES", selectedSeries == false, isSeriesComplete() == true)
        $ts3DoseAdultSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEP_A", seriesName == "SUPPORTED_SERIES.HEP_A_ADULT_3_DOSE_SERIES")
        $tsTwinrix4DoseSeries : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.HEP_A", seriesName == "SUPPORTED_SERIES.HEP_A_4_DOSE_ACCELERATED_TWINRIX_SERIES")
-       eval(($ts3DoseAdultSeries.isSelectedSeries() && (!$ts3DoseAdultSeries.isSeriesComplete() || $ts2DoseSeries.lastShotAdministeredInSeries.administrationDate.before($ts3DoseAdultSeries.lastShotAdministeredInSeries.administrationDate))) ||
-           ($tsTwinrix4DoseSeries.isSelectedSeries() && (!$tsTwinrix4DoseSeries.isSeriesComplete() || $ts2DoseSeries.lastShotAdministeredInSeries.administrationDate.before($tsTwinrix4DoseSeries.lastShotAdministeredInSeries.administrationDate))))
+       eval(($ts3DoseAdultSeries.isSelectedSeries() && (!$ts3DoseAdultSeries.isSeriesComplete() || $ts2DoseSeries.lastShotAdministeredInSeries.administrationDate.isBefore($ts3DoseAdultSeries.lastShotAdministeredInSeries.administrationDate))) ||
+           ($tsTwinrix4DoseSeries.isSelectedSeries() && (!$tsTwinrix4DoseSeries.isSeriesComplete() || $ts2DoseSeries.lastShotAdministeredInSeries.administrationDate.isBefore($tsTwinrix4DoseSeries.lastShotAdministeredInSeries.administrationDate))))
    then
        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "SeriesSelection: TargetSeries " + $ts2DoseSeries + " (2-dose series completed before 3 or 4 dose series)");
        insert(new ICEFactTypeFinding("SeriesSelection: Hep A 3-Dose Series Override Applied"));
@@ -3570,7 +3569,7 @@ rule "SeriesSelection.JapaneseEncephalitis.SelectJEVC_RISK_2_DOSE_SERIESIfPatien
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS", seriesRules.seriesName == "SUPPORTED_SERIES.JEVC_RISK_2_DOSE_SERIES")
 		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate)
 		$person : EvaluatedPerson()
-		$dtBirthDate : Date() from $person.demographics.birthTime
+		$dtBirthDate : LocalDate() from $person.demographics.birthTime
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "18y-4d") < 0 ||
 		     TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "66y") >= 0)
 	then
@@ -3592,7 +3591,7 @@ rule "SeriesSelection.JapaneseEncephalitis.SelectJEVC_RISK_2_DOSE_SERIESIfPatien
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS", selectedSeries == true))
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS", seriesRules.seriesName == "SUPPORTED_SERIES.JEVC_RISK_2_DOSE_SERIES")
 		$person : EvaluatedPerson()
-		$dtBirthDate : Date() from $person.demographics.birthTime
+		$dtBirthDate : LocalDate() from $person.demographics.birthTime
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "18y-4d") < 0 ||
 		     TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "66y") >= 0)
 	then
@@ -3614,7 +3613,7 @@ rule "SeriesSelection.JapaneseEncephalitis.SelectJEVC_RISK_2_DOSE_ACCELERATED_SE
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS", selectedSeries == true))
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS", seriesRules.seriesName == "SUPPORTED_SERIES.JEVC_RISK_2_DOSE_ACCELERATED_SERIES")
 		$person : EvaluatedPerson()
-		$dtBirthDate : Date() from $person.demographics.birthTime
+		$dtBirthDate : LocalDate() from $person.demographics.birthTime
 		$td : TargetDose(associatedTargetSeries == $ts, doseNumberInSeries == 1, isValid == true, $administrationDate : administrationDate)
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "18y-4d") >= 0 &&
 		     TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, $administrationDate, "66y") < 0)
@@ -3637,7 +3636,7 @@ rule "SeriesSelection.JapaneseEncephalitis.SelectJEVC_RISK_2_DOSE_ACCELERATED_SE
 		not (exists TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS", selectedSeries == true))
 		$ts : TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.JAPANESE_ENCEPHALITIS", seriesRules.seriesName == "SUPPORTED_SERIES.JEVC_RISK_2_DOSE_ACCELERATED_SERIES")
 		$person : EvaluatedPerson()
-		$dtBirthDate : Date() from $person.demographics.birthTime
+		$dtBirthDate : LocalDate() from $person.demographics.birthTime
 		eval(TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "18y-4d") >= 0 &&
 		     TimePeriod.compareElapsedTimePeriodToDateRange($person.demographics.birthTime, evalTime, "66y") < 0)
 	then

@@ -1,6 +1,5 @@
 package knowledgeModule.org.nyc.cir.ice;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +20,7 @@ import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.ice.util.TimePeriod.DurationType;
 import org.cdsframework.ice.service.Vaccine;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 rule "Duplicate Shots/Same Day Polio Rule: If one of those shots is OPV (CVX 02, 182) and the other is not, evaluate the OPV as Invalid with a reason code of DUPLICATE_SAME_DAY and evaluate the other as Valid"
 	dialect "mvel"

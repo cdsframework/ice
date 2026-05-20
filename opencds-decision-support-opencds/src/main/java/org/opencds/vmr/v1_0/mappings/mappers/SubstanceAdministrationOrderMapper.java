@@ -41,11 +41,13 @@ public class SubstanceAdministrationOrderMapper extends SubstanceAdministrationB
                     DoseRestrictionMapper.pullIn(source.getDoseRestriction(), new DoseRestriction(), null, subjectPersonId,
                             focalPersonId, factLists));
         if (source.getAdministrationTimeInterval() != null)
-            target.setAdministrationTimeInterval(MappingUtility.iVLTS2IVLDateInternal(source.getAdministrationTimeInterval()));
+            target.setAdministrationTimeInterval(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getAdministrationTimeInterval(), factLists.getParsedDatesCache()));
         if (source.getNumberFillsAllowed() != null)
             target.setNumberFillsAllowed(MappingUtility.iNT2INTInternal(source.getNumberFillsAllowed()));
         if (source.getOrderEventTime() != null)
-            target.setOrderEventTime(MappingUtility.iVLTS2IVLDateInternal(source.getOrderEventTime()));
+            target.setOrderEventTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getOrderEventTime(), factLists.getParsedDatesCache()));
 
         factLists.put(SubstanceAdministrationOrder.class, target);
 
@@ -88,9 +90,9 @@ public class SubstanceAdministrationOrderMapper extends SubstanceAdministrationB
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getSubstanceAdministrationOrders() == null)
+        if (organizedResults.output().getSubstanceAdministrationOrders() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setSubstanceAdministrationOrders(
                             new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.SubstanceAdministrationOrders());
         }

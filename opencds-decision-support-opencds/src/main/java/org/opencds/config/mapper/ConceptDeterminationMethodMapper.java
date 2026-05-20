@@ -1,14 +1,10 @@
 package org.opencds.config.mapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.opencds.common.utilities.XMLDateUtility;
 import org.opencds.config.api.model.CDMId;
 import org.opencds.config.api.model.ConceptDeterminationMethod;
-import org.opencds.config.api.model.ConceptMapping;
-import org.opencds.config.api.model.impl.CDMIdImpl;
-import org.opencds.config.api.model.impl.ConceptDeterminationMethodImpl;
 import org.opencds.config.schema.ConceptDeterminationMethods;
 
 public abstract class ConceptDeterminationMethodMapper
@@ -17,48 +13,38 @@ public abstract class ConceptDeterminationMethodMapper
     {
         if (external == null)
             return null;
-        final List<ConceptMapping> conceptMappings = new ArrayList<>();
 
-        for (final org.opencds.config.schema.ConceptMapping cm : external.getConceptMapping())
-        {
-            final ConceptMapping cmi = ConceptMappingMapper.internal(cm);
-            conceptMappings.add(cmi);
-        }
-
-        final CDMId cdmId = CDMIdImpl.create(external.getCodeSystem(), external.getCode(), external.getVersion());
-
-        return ConceptDeterminationMethodImpl.create(cdmId, external.getDisplayName(), external.getDescription(),
-                XMLDateUtility.xmlGregorian2Gregorian(external.getTimestamp()).getTime(), external.getUserId(), conceptMappings);
-
+        return new ConceptDeterminationMethod(new CDMId(external.getCodeSystem(), external.getCode(), external.getVersion()),
+                external.getDisplayName(), external.getDescription(),
+                external.getTimestamp().toGregorianCalendar().toZonedDateTime().toLocalDate(), external.getUserId(),
+                external.getConceptMapping().stream().map(ConceptMappingMapper::internal).toList());
     }
 
     public static List<ConceptDeterminationMethod> internal(final ConceptDeterminationMethods cdms)
     {
         if (cdms == null)
             return null;
-        final List<ConceptDeterminationMethod> internalCDMs = new ArrayList<>();
-        for (final org.opencds.config.schema.ConceptDeterminationMethod cdm : cdms.getConceptDeterminationMethod())
-            internalCDMs.add(internal(cdm));
-        return internalCDMs;
+
+        return cdms.getConceptDeterminationMethod().stream().map(ConceptDeterminationMethodMapper::internal).toList();
     }
 
     public static org.opencds.config.schema.ConceptDeterminationMethod external(final ConceptDeterminationMethod internal)
     {
         if (internal == null)
             return null;
+
         final org.opencds.config.schema.ConceptDeterminationMethod external =
                 new org.opencds.config.schema.ConceptDeterminationMethod();
 
-        external.setCode(internal.getCDMId().getCode());
-        external.setCodeSystem(internal.getCDMId().getCodeSystem());
-        external.setVersion(internal.getCDMId().getVersion());
+        external.setCode(internal.cdmId().code());
+        external.setCodeSystem(internal.cdmId().codeSystem());
+        external.setVersion(internal.cdmId().version());
 
-        external.setDisplayName(internal.getDisplayName());
-        external.setTimestamp(XMLDateUtility.date2XMLGregorian(internal.getTimestamp()));
-        external.setUserId(internal.getUserId());
+        external.setDisplayName(internal.displayName());
+        external.setTimestamp(XMLDateUtility.date2XMLGregorian(internal.timestamp()));
+        external.setUserId(internal.userId());
 
-        for (final ConceptMapping cm : internal.getConceptMappings())
-            external.getConceptMapping().add(ConceptMappingMapper.external(cm));
+        internal.conceptMappings().stream().map(ConceptMappingMapper::external).forEach(external.getConceptMapping()::add);
 
         return external;
     }
@@ -67,9 +53,11 @@ public abstract class ConceptDeterminationMethodMapper
     {
         if (cdmList == null)
             return null;
+
         final ConceptDeterminationMethods cdms = new ConceptDeterminationMethods();
-        for (final ConceptDeterminationMethod cdm : cdmList)
-            cdms.getConceptDeterminationMethod().add(external(cdm));
+
+        cdmList.stream().map(ConceptDeterminationMethodMapper::external).forEach(cdms.getConceptDeterminationMethod()::add);
+
         return cdms;
     }
 }

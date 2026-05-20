@@ -9,44 +9,61 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Map;
 
+import org.cdsframework.fhir.AdministrativeGender;
+import org.cdsframework.fhir.CodeSystem;
+import org.cdsframework.fhir.CodeSystemConcept;
+import org.cdsframework.fhir.CodeSystemContentModeEnum;
+import org.cdsframework.fhir.CodeableConcept;
+import org.cdsframework.fhir.Coding;
+import org.cdsframework.fhir.Identifier;
+import org.cdsframework.fhir.Immunization;
+import org.cdsframework.fhir.Observation;
+import org.cdsframework.fhir.Parameters;
+import org.cdsframework.fhir.ParametersParameter;
+import org.cdsframework.fhir.Patient;
+import org.cdsframework.fhir.PlanDefinition;
+import org.cdsframework.fhir.PublicationStatusEnum;
+import org.cdsframework.ice.config.CdsEngineProperties;
 import org.cdsframework.ice.config.IceProperties;
-import org.cdsframework.ice.config.IceSupportingDataProperties;
-import org.cdsframework.ice.dto.AdministrativeGender;
-import org.cdsframework.ice.dto.CodeSystem;
-import org.cdsframework.ice.dto.CodeSystemConcept;
-import org.cdsframework.ice.dto.CodeSystemContentModeEnum;
-import org.cdsframework.ice.dto.CodeableConcept;
-import org.cdsframework.ice.dto.Coding;
-import org.cdsframework.ice.dto.Identifier;
-import org.cdsframework.ice.dto.Immunization;
-import org.cdsframework.ice.dto.Observation;
-import org.cdsframework.ice.dto.Parameters;
-import org.cdsframework.ice.dto.Patient;
-import org.cdsframework.ice.dto.PublicationStatusEnum;
+import org.cdsframework.ice.service.conversion.FhirToVmrInputAdapter;
+import org.cdsframework.ice.service.conversion.SelectionContextExtensionBuilder;
+import org.cdsframework.ice.service.conversion.VaccineGroupRulesArtifactExtensionBuilder;
+import org.cdsframework.ice.service.conversion.VmrConversionComponent;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.web.server.ResponseStatusException;
 
 class VmrConversionComponentCodeSystemReverseMappingTest
 {
     private static final String KM_ID = "org.nyc.cir^ICE^1.0.0";
+    private static final String MODULE_CANONICAL = "http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
+
+    private static CdsEngineProperties createCdsEngineProperties()
+    {
+        final CdsEngineProperties properties = new CdsEngineProperties();
+        properties.setModuleCanonicalDefinitionMap(Map.of(MODULE_CANONICAL, createModuleCanonicalDefinition()));
+        return properties;
+    }
 
     private static IceProperties createIceProperties()
     {
         final IceProperties properties = new IceProperties();
-        properties.setKnowledgeModules(Map.of(KM_ID,
-                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, java.util.List.of(),
+        properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
+        properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
+                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, java.util.List.of(),
                         java.util.List.of(), false, IceProperties.SupplementalTextMode.LEGACY,
                         new ByteArrayResource(new byte[0]))));
         return properties;
     }
 
     private static IceProperties createIceProperties(final boolean outputNumberOfDosesRemaining,
-            final boolean outputSeriesInformation)
+            @SuppressWarnings("SameParameterValue") final boolean outputSeriesInformation)
     {
         final IceProperties properties = new IceProperties();
-        properties.setKnowledgeModules(Map.of(KM_ID,
+        properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
+        properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
                 new IceProperties.KnowledgeModuleProperties(true, false, true, outputNumberOfDosesRemaining,
-                        outputSeriesInformation, false, java.util.List.of(), java.util.List.of(), false,
+                        outputSeriesInformation, false, false, java.util.List.of(), java.util.List.of(), false,
                         IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         return properties;
     }
@@ -54,99 +71,81 @@ class VmrConversionComponentCodeSystemReverseMappingTest
     private static VmrConversionComponent createVmrConversionComponent(final SupportingDataService supportingDataService,
             final IceProperties iceProperties)
     {
-        return new VmrConversionComponent(supportingDataService, iceProperties, new KnowledgeModuleIdResolver(iceProperties));
+        return new VmrConversionComponent(supportingDataService, iceProperties, new FhirToVmrInputAdapter(supportingDataService),
+                new SelectionContextExtensionBuilder(supportingDataService), new VaccineGroupRulesArtifactExtensionBuilder());
     }
 
-    private static IceSupportingDataProperties createIceSupportingDataProperties()
+    private static CdsEngineProperties.ModuleCanonicalDefinition createModuleCanonicalDefinition()
     {
-        final IceSupportingDataProperties properties = new IceSupportingDataProperties();
-        properties.setKnowledgeModules(Map.of(KM_ID, new IceSupportingDataProperties.KnowledgeModule(Map.of(),
-                Map.of("DISEASE_IMMUNITY_SOURCE_CONCEPT", CodeSystem.builder()
-                        .name("DISEASE_IMMUNITY_SOURCE_CONCEPT")
-                        .identifier(Identifier.builder()
-                                .system("urn:ietf:rfc:3986")
-                                .value("urn:oid:2.16.840.1.113883.3.795.12.100.8")
-                                .build())
-                        .url("http://terminology.cdsframework.org/ice/disease-immunity-source")
-                        .status(PublicationStatusEnum.ACTIVE)
-                        .content(CodeSystemContentModeEnum.COMPLETE)
-                        .concept(CodeSystemConcept.builder().code("DISEASE_DOCUMENTED").display("Disease Documented").build())
-                        .concept(CodeSystemConcept.builder().code("PROOF_OF_IMMUNITY").display("Proof of Immunity").build())
-                        .build(), "DISEASE_IMMUNITY_REASON_CONCEPT", CodeSystem.builder()
-                        .name("DISEASE_IMMUNITY_REASON_CONCEPT")
-                        .identifier(Identifier.builder()
-                                .system("urn:ietf:rfc:3986")
-                                .value("urn:oid:2.16.840.1.113883.3.795.12.100.9")
-                                .build())
-                        .url("http://terminology.cdsframework.org/ice/disease-immunity-reason")
-                        .status(PublicationStatusEnum.ACTIVE)
-                        .content(CodeSystemContentModeEnum.COMPLETE)
-                        .concept(CodeSystemConcept.builder().code("IS_IMMUNE").display("Is Immune").build())
-                        .build(), "RECOMMENDATION_REASON_CONCEPT", CodeSystem.builder()
-                        .name("RECOMMENDATION_REASON_CONCEPT")
-                        .identifier(Identifier.builder()
-                                .system("urn:ietf:rfc:3986")
-                                .value("urn:oid:2.16.840.1.113883.3.795.12.100.6")
-                                .build())
-                        .url("http://terminology.cdsframework.org/ice/recommendation-reason")
-                        .status(PublicationStatusEnum.ACTIVE)
-                        .content(CodeSystemContentModeEnum.COMPLETE)
-                        .build(), "EVALUATION_REASON_CONCEPT", CodeSystem.builder()
-                        .name("EVALUATION_REASON_CONCEPT")
-                        .identifier(Identifier.builder()
-                                .system("urn:ietf:rfc:3986")
-                                .value("urn:oid:2.16.840.1.113883.3.795.12.100.3")
-                                .build())
-                        .url("http://terminology.cdsframework.org/ice/evaluation-reason")
-                        .status(PublicationStatusEnum.ACTIVE)
-                        .content(CodeSystemContentModeEnum.COMPLETE)
-                        .build(), "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT", CodeSystem.builder()
-                        .name("SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT")
-                        .identifier(Identifier.builder()
-                                .system("urn:ietf:rfc:3986")
-                                .value("urn:oid:2.16.840.1.113883.3.795.12.100.50")
-                                .build())
-                        .url("http://terminology.cdsframework.org/ice/supplemental-recommendation-reason")
-                        .status(PublicationStatusEnum.ACTIVE)
-                        .content(CodeSystemContentModeEnum.COMPLETE)
-                        .build(), "SUPPLEMENTAL_EVALUATION_REASON_CONCEPT", CodeSystem.builder()
-                        .name("SUPPLEMENTAL_EVALUATION_REASON_CONCEPT")
-                        .identifier(Identifier.builder()
-                                .system("urn:ietf:rfc:3986")
-                                .value("urn:oid:2.16.840.1.113883.3.795.12.100.51")
-                                .build())
-                        .url("http://terminology.cdsframework.org/ice/supplemental-evaluation-reason")
-                        .status(PublicationStatusEnum.ACTIVE)
-                        .content(CodeSystemContentModeEnum.COMPLETE)
-                        .build(), "SUPPORTED_VACCINES", CodeSystem.builder()
-                        .name("SUPPORTED_VACCINES")
-                        .identifier(
-                                Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.12.292").build())
-                        .url("http://hl7.org/fhir/sid/cvx")
-                        .status(PublicationStatusEnum.ACTIVE)
-                        .content(CodeSystemContentModeEnum.COMPLETE)
-                        .build()),
-                Map.of("2.16.840.1.113883.6.96", "http://snomed.info/sct", "2.16.840.1.113883.6.1", "http://loinc.org",
-                        "2.16.840.1.113883.6.103", "http://hl7.org/fhir/sid/icd-9-cm", "2.16.840.1.113883.6.90",
-                        "http://hl7.org/fhir/sid/icd-10-cm", "2.16.840.1.113883.6.3", "http://hl7.org/fhir/sid/icd-10",
-                        "2.16.840.1.113883.3.795.12.100.4", "http://terminology.cdsframework.org/ice/unknown",
-                        "2.16.840.1.113883.3.795.12.100.500", "http://terminology.cdsframework.org/ice/series-display-options"))));
-        return properties;
+        return new CdsEngineProperties.ModuleCanonicalDefinition(PlanDefinition.builder()
+                .identifier(
+                        Identifier.builder().system("http://cdsframework.org/identifiers/knowledge-modules").value(KM_ID).build())
+                .build(), Map.of(), Map.of(), Map.of("DISEASE_IMMUNITY_SOURCE_CONCEPT", CodeSystem.builder()
+                .name("DISEASE_IMMUNITY_SOURCE_CONCEPT")
+                .identifier(
+                        Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.8").build())
+                .url("http://terminology.cdsframework.org/ice/disease-immunity-source")
+                .status(PublicationStatusEnum.ACTIVE)
+                .content(CodeSystemContentModeEnum.COMPLETE)
+                .concept(CodeSystemConcept.builder().code("DISEASE_DOCUMENTED").display("Disease Documented").build())
+                .concept(CodeSystemConcept.builder().code("PROOF_OF_IMMUNITY").display("Proof of Immunity").build())
+                .build(), "DISEASE_IMMUNITY_REASON_CONCEPT", CodeSystem.builder()
+                .name("DISEASE_IMMUNITY_REASON_CONCEPT")
+                .identifier(
+                        Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.9").build())
+                .url("http://terminology.cdsframework.org/ice/disease-immunity-reason")
+                .status(PublicationStatusEnum.ACTIVE)
+                .content(CodeSystemContentModeEnum.COMPLETE)
+                .concept(CodeSystemConcept.builder().code("IS_IMMUNE").display("Is Immune").build())
+                .build(), "RECOMMENDATION_REASON_CONCEPT", CodeSystem.builder()
+                .name("RECOMMENDATION_REASON_CONCEPT")
+                .identifier(
+                        Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.6").build())
+                .url("http://terminology.cdsframework.org/ice/recommendation-reason")
+                .status(PublicationStatusEnum.ACTIVE)
+                .content(CodeSystemContentModeEnum.COMPLETE)
+                .build(), "EVALUATION_REASON_CONCEPT", CodeSystem.builder()
+                .name("EVALUATION_REASON_CONCEPT")
+                .identifier(
+                        Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.3").build())
+                .url("http://terminology.cdsframework.org/ice/evaluation-reason")
+                .status(PublicationStatusEnum.ACTIVE)
+                .content(CodeSystemContentModeEnum.COMPLETE)
+                .build(), "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT", CodeSystem.builder()
+                .name("SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT")
+                .identifier(
+                        Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.50").build())
+                .url("http://terminology.cdsframework.org/ice/supplemental-recommendation-reason")
+                .status(PublicationStatusEnum.ACTIVE)
+                .content(CodeSystemContentModeEnum.COMPLETE)
+                .build(), "SUPPLEMENTAL_EVALUATION_REASON_CONCEPT", CodeSystem.builder()
+                .name("SUPPLEMENTAL_EVALUATION_REASON_CONCEPT")
+                .identifier(
+                        Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.51").build())
+                .url("http://terminology.cdsframework.org/ice/supplemental-evaluation-reason")
+                .status(PublicationStatusEnum.ACTIVE)
+                .content(CodeSystemContentModeEnum.COMPLETE)
+                .build(), "SUPPORTED_VACCINES", CodeSystem.builder()
+                .name("SUPPORTED_VACCINES")
+                .identifier(Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.12.292").build())
+                .url("http://hl7.org/fhir/sid/cvx")
+                .status(PublicationStatusEnum.ACTIVE)
+                .content(CodeSystemContentModeEnum.COMPLETE)
+                .concept(CodeSystemConcept.builder().code("10").display("IPV").build())
+                .build()), Map.of("2.16.840.1.113883.6.96", "http://snomed.info/sct", "2.16.840.1.113883.6.1", "http://loinc.org",
+                "2.16.840.1.113883.6.103", "http://hl7.org/fhir/sid/icd-9-cm", "2.16.840.1.113883.6.90",
+                "http://hl7.org/fhir/sid/icd-10-cm", "2.16.840.1.113883.6.3", "http://hl7.org/fhir/sid/icd-10",
+                "2.16.840.1.113883.3.795.12.100.4", "http://terminology.cdsframework.org/ice/unknown",
+                "2.16.840.1.113883.3.795.12.100.500", "http://terminology.cdsframework.org/ice/series-display-options"));
     }
 
     private static Parameters createRequest(final String moduleCanonical)
     {
         return Parameters.builder()
                 .resourceType("Parameters")
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
-                        .name("assessmentDate")
-                        .valueDate("2026-04-04")
-                        .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
-                        .name("module")
-                        .valueCanonical(moduleCanonical)
-                        .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-04").build())
+                .parameter(ParametersParameter.builder().name("module").valueCanonical(moduleCanonical).build())
+                .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()
                                 .identifier(
@@ -155,7 +154,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                                 .gender(AdministrativeGender.FEMALE)
                                 .build())
                         .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder()
                         .name("immunization")
                         .resource(Immunization.builder()
                                 .identifier(Identifier.builder()
@@ -173,7 +172,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                                 .occurrenceDateTime("2020-03-15")
                                 .build())
                         .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder()
                         .name("observation")
                         .resource(Observation.builder()
                                 .status("final")
@@ -211,11 +210,10 @@ class VmrConversionComponentCodeSystemReverseMappingTest
     void convertsInboundCanonicalSystemsBackToOidsForVmrPayload()
     {
         final IceProperties iceProperties = createIceProperties();
-        final SupportingDataService supportingDataService =
-                new SupportingDataService(createIceSupportingDataProperties(), iceProperties);
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
-        final Parameters request = createRequest("http://nyc.gov/cir/PlanDefinition/ice-forecast|1.0.0");
+        final Parameters request = createRequest("http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0");
 
         final var evaluateAtSpecifiedTime = vmrConversionComponent.convertToEvaluateAtSpecifiedTime(request);
         final byte[] payload = evaluateAtSpecifiedTime.getEvaluationRequest()
@@ -234,37 +232,17 @@ class VmrConversionComponentCodeSystemReverseMappingTest
     }
 
     @Test
-    void throwsWhenDerivedKmIdIsNotConfigured()
+    void excludesUnsupportedCvxCodesFromVmrPayload()
     {
         final IceProperties iceProperties = createIceProperties();
-        final SupportingDataService supportingDataService =
-                new SupportingDataService(createIceSupportingDataProperties(), iceProperties);
-        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
-
-        final Parameters request = createRequest("http://example.org/fhir/PlanDefinition/forecast|1.0.0");
-
-        assertThrows(IllegalArgumentException.class, () -> vmrConversionComponent.convertToEvaluateAtSpecifiedTime(request));
-    }
-
-    @Test
-    void mapsDiseaseDocumentedObservationValueToDiseaseImmunityCodeSystem()
-    {
-        final IceProperties iceProperties = createIceProperties();
-        final SupportingDataService supportingDataService =
-                new SupportingDataService(createIceSupportingDataProperties(), iceProperties);
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
         final Parameters request = Parameters.builder()
                 .resourceType("Parameters")
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
-                        .name("assessmentDate")
-                        .valueDate("2026-04-04")
-                        .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
-                        .name("module")
-                        .valueCanonical("http://nyc.gov/cir/PlanDefinition/ice-forecast|1.0.0")
-                        .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-04").build())
+                .parameter(ParametersParameter.builder().name("module").valueCanonical(MODULE_CANONICAL).build())
+                .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()
                                 .identifier(
@@ -273,7 +251,166 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                                 .gender(AdministrativeGender.FEMALE)
                                 .build())
                         .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder()
+                        .name("immunization")
+                        .resource(Immunization.builder()
+                                .identifier(Identifier.builder()
+                                        .system("http://nyc.gov/cir/identifier/immunization-id")
+                                        .value("supported")
+                                        .build())
+                                .vaccineCode(CodeableConcept.builder()
+                                        .coding(Coding.builder()
+                                                .system("http://hl7.org/fhir/sid/cvx")
+                                                .code("10")
+                                                .display("IPV")
+                                                .build())
+                                        .text("IPV")
+                                        .build())
+                                .occurrenceDateTime("2020-03-15")
+                                .build())
+                        .build())
+                .parameter(ParametersParameter.builder()
+                        .name("immunization")
+                        .resource(Immunization.builder()
+                                .identifier(Identifier.builder()
+                                        .system("http://nyc.gov/cir/identifier/immunization-id")
+                                        .value("unsupported")
+                                        .build())
+                                .vaccineCode(CodeableConcept.builder()
+                                        .coding(Coding.builder()
+                                                .system("http://hl7.org/fhir/sid/cvx")
+                                                .code("999")
+                                                .display("Unsupported")
+                                                .build())
+                                        .text("Unsupported")
+                                        .build())
+                                .occurrenceDateTime("2020-03-16")
+                                .build())
+                        .build())
+                .build();
+
+        final var evaluateAtSpecifiedTime = vmrConversionComponent.convertToEvaluateAtSpecifiedTime(request);
+        final byte[] payload = evaluateAtSpecifiedTime.getEvaluationRequest()
+                .getDataRequirementItemData()
+                .getFirst()
+                .getData()
+                .getBase64EncodedPayload()
+                .getFirst();
+        final String xml = new String(payload, StandardCharsets.UTF_8);
+
+        assertTrue(xml.contains("extension=\"supported\""));
+        assertFalse(xml.contains("extension=\"unsupported\""));
+        assertFalse(xml.contains("code=\"999\""));
+    }
+
+    @Test
+    void excludesImmunizationsWithUnsupportedCodeSystemsFromVmrPayload()
+    {
+        final IceProperties iceProperties = createIceProperties();
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
+        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
+
+        final Parameters request = Parameters.builder()
+                .resourceType("Parameters")
+                .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-04").build())
+                .parameter(ParametersParameter.builder().name("module").valueCanonical(MODULE_CANONICAL).build())
+                .parameter(ParametersParameter.builder()
+                        .name("patient")
+                        .resource(Patient.builder()
+                                .identifier(
+                                        Identifier.builder().system("http://nyc.gov/cir/identifier/patient-id").value("p1").build())
+                                .birthDate(LocalDate.parse("2020-01-15"))
+                                .gender(AdministrativeGender.FEMALE)
+                                .build())
+                        .build())
+                .parameter(ParametersParameter.builder()
+                        .name("immunization")
+                        .resource(Immunization.builder()
+                                .identifier(Identifier.builder()
+                                        .system("http://nyc.gov/cir/identifier/immunization-id")
+                                        .value("supported")
+                                        .build())
+                                .vaccineCode(CodeableConcept.builder()
+                                        .coding(Coding.builder()
+                                                .system("http://hl7.org/fhir/sid/cvx")
+                                                .code("10")
+                                                .display("IPV")
+                                                .build())
+                                        .text("IPV")
+                                        .build())
+                                .occurrenceDateTime("2020-03-15")
+                                .build())
+                        .build())
+                .parameter(ParametersParameter.builder()
+                        .name("immunization")
+                        .resource(Immunization.builder()
+                                .identifier(Identifier.builder()
+                                        .system("http://nyc.gov/cir/identifier/immunization-id")
+                                        .value("unsupported-system")
+                                        .build())
+                                .vaccineCode(CodeableConcept.builder()
+                                        .coding(Coding.builder()
+                                                .system("http://hl7.org/fhir/sid/cvxs")
+                                                .code("10")
+                                                .display("IPV")
+                                                .build())
+                                        .text("IPV")
+                                        .build())
+                                .occurrenceDateTime("2020-03-16")
+                                .build())
+                        .build())
+                .build();
+
+        final var evaluateAtSpecifiedTime = vmrConversionComponent.convertToEvaluateAtSpecifiedTime(request);
+        final byte[] payload = evaluateAtSpecifiedTime.getEvaluationRequest()
+                .getDataRequirementItemData()
+                .getFirst()
+                .getData()
+                .getBase64EncodedPayload()
+                .getFirst();
+        final String xml = new String(payload, StandardCharsets.UTF_8);
+
+        assertTrue(xml.contains("extension=\"supported\""));
+        assertFalse(xml.contains("extension=\"unsupported-system\""));
+        assertFalse(xml.contains("cvxs"));
+    }
+
+    @Test
+    void throwsWhenDerivedKmIdIsNotConfigured()
+    {
+        final IceProperties iceProperties = createIceProperties();
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
+        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
+
+        final Parameters request = createRequest("http://example.org/fhir/PlanDefinition/forecast|1.0.0");
+
+        assertThrows(ResponseStatusException.class, () -> vmrConversionComponent.convertToEvaluateAtSpecifiedTime(request));
+    }
+
+    @Test
+    void mapsDiseaseDocumentedObservationValueToDiseaseImmunityCodeSystem()
+    {
+        final IceProperties iceProperties = createIceProperties();
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
+        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
+
+        final Parameters request = Parameters.builder()
+                .resourceType("Parameters")
+                .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-04").build())
+                .parameter(ParametersParameter.builder()
+                        .name("module")
+                        .valueCanonical("http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0")
+                        .build())
+                .parameter(ParametersParameter.builder()
+                        .name("patient")
+                        .resource(Patient.builder()
+                                .identifier(
+                                        Identifier.builder().system("http://nyc.gov/cir/identifier/patient-id").value("p1").build())
+                                .birthDate(LocalDate.parse("2020-01-15"))
+                                .gender(AdministrativeGender.FEMALE)
+                                .build())
+                        .build())
+                .parameter(ParametersParameter.builder()
                         .name("observation")
                         .resource(Observation.builder()
                                 .status("final")
@@ -323,21 +460,17 @@ class VmrConversionComponentCodeSystemReverseMappingTest
     void mapsIcd9Icd10AndLoincSystemsToOidsForObservationFocus()
     {
         final IceProperties iceProperties = createIceProperties();
-        final SupportingDataService supportingDataService =
-                new SupportingDataService(createIceSupportingDataProperties(), iceProperties);
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
         final Parameters request = Parameters.builder()
                 .resourceType("Parameters")
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
-                        .name("assessmentDate")
-                        .valueDate("2026-04-04")
-                        .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-04").build())
+                .parameter(ParametersParameter.builder()
                         .name("module")
-                        .valueCanonical("http://nyc.gov/cir/PlanDefinition/ice-forecast|1.0.0")
+                        .valueCanonical("http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0")
                         .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()
                                 .identifier(
@@ -346,7 +479,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                                 .gender(AdministrativeGender.FEMALE)
                                 .build())
                         .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder()
                         .name("observation")
                         .resource(Observation.builder()
                                 .status("final")
@@ -369,7 +502,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                                 .effectiveDateTime("2006-12-08")
                                 .build())
                         .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder()
                         .name("observation")
                         .resource(Observation.builder()
                                 .status("final")
@@ -392,7 +525,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                                 .effectiveDateTime("2006-12-08")
                                 .build())
                         .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder()
                         .name("observation")
                         .resource(Observation.builder()
                                 .status("final")
@@ -438,21 +571,17 @@ class VmrConversionComponentCodeSystemReverseMappingTest
     void mapsDiseaseImmunityInterpretationCodeToConfiguredReasonCodeSystem()
     {
         final IceProperties iceProperties = createIceProperties();
-        final SupportingDataService supportingDataService =
-                new SupportingDataService(createIceSupportingDataProperties(), iceProperties);
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
         final Parameters request = Parameters.builder()
                 .resourceType("Parameters")
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
-                        .name("assessmentDate")
-                        .valueDate("2026-04-04")
-                        .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-04").build())
+                .parameter(ParametersParameter.builder()
                         .name("module")
-                        .valueCanonical("http://nyc.gov/cir/PlanDefinition/ice-forecast|1.0.0")
+                        .valueCanonical("http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0")
                         .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()
                                 .identifier(
@@ -461,7 +590,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                                 .gender(AdministrativeGender.FEMALE)
                                 .build())
                         .build())
-                .parameter(org.cdsframework.ice.dto.ParametersParameter.builder()
+                .parameter(ParametersParameter.builder()
                         .name("observation")
                         .resource(Observation.builder()
                                 .status("final")
@@ -511,8 +640,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
     void outputSeriesContextGateUsesPrecomputedKnowledgeModuleFlags() throws Exception
     {
         final IceProperties iceProperties = createIceProperties(false, false);
-        final SupportingDataService supportingDataService =
-                new SupportingDataService(createIceSupportingDataProperties(), iceProperties);
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
         final Method shouldOutputSeriesContext =
@@ -526,8 +654,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
     void outputSeriesContextIsEnabledWhenNumberOfDosesRemainingIsEnabled() throws Exception
     {
         final IceProperties iceProperties = createIceProperties(true, false);
-        final SupportingDataService supportingDataService =
-                new SupportingDataService(createIceSupportingDataProperties(), iceProperties);
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
         final Method shouldOutputSeriesContext =

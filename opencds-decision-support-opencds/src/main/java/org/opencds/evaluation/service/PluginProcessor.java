@@ -1,7 +1,6 @@
 package org.opencds.evaluation.service;
 
 import java.util.AbstractMap;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,32 +12,31 @@ import org.opencds.config.api.KnowledgeRepository;
 import org.opencds.config.api.model.KnowledgeModule;
 import org.opencds.config.api.model.PluginId;
 import org.opencds.config.api.model.PrePostProcessPluginId;
-import org.opencds.config.api.util.EntityIdentifierUtil;
 import org.opencds.config.api.util.PluginIdComparator;
 import org.opencds.config.api.util.PluginIdTuple;
+import org.opencds.plugin.api.PostProcessPluginContext;
+import org.opencds.plugin.api.PreProcessPluginContext;
 import org.opencds.plugin.api.SupportingData;
-import org.opencds.plugin.support.PostProcessPluginContextImpl;
-import org.opencds.plugin.support.PreProcessPluginContextImpl;
 
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+@UtilityClass
 @Slf4j
 public class PluginProcessor
 {
     private static final String KM_CONFIGURED = "kmConfigured";
     private static final String LOADED_BY = "loadedBy";
 
-    public static <D> void preProcess(final KnowledgeRepository knowledgeRepository, final KnowledgeModule knowledgeModule,
+    public static void preProcess(final KnowledgeRepository knowledgeRepository, final KnowledgeModule knowledgeModule,
             final Map<String, SupportingData> supportingData, final EvaluationContext context)
     {
         log.debug("Plugin pre-processing...");
         final List<PluginId> plugins = knowledgeRepository.pluginPackageService().getAllPluginIds();
-        final List<PrePostProcessPluginId> allPreProcessPluginIds = knowledgeModule.getPreProcessPluginIds();
+        final List<PrePostProcessPluginId> allPreProcessPluginIds = knowledgeModule.preProcessPluginIds();
         if (allPreProcessPluginIds != null)
-        {
             PluginIdComparator.intersect(allPreProcessPluginIds, plugins)
                     .forEach(tuple -> applyPreProcessPlugin(knowledgeRepository, context, supportingData, tuple));
-        }
         log.debug("Plugin pre-processing done.");
     }
 
@@ -47,32 +45,29 @@ public class PluginProcessor
     {
         log.debug("Plugin post-processing...");
         final List<PluginId> plugins = knowledgeRepository.pluginPackageService().getAllPluginIds();
-        final List<PrePostProcessPluginId> allPostProcessPluginIds = knowledgeModule.getPostProcessPluginIds();
+        final List<PrePostProcessPluginId> allPostProcessPluginIds = knowledgeModule.postProcessPluginIds();
         if (allPostProcessPluginIds != null)
-        {
             PluginIdComparator.intersect(allPostProcessPluginIds, plugins)
                     .forEach(tuple -> applyPostProcessPlugin(knowledgeRepository, context, supportingData, tuple));
-        }
         log.debug("Plugin post-processing done.");
     }
 
     private static void applyPreProcessPlugin(final KnowledgeRepository knowledgeRepository, final EvaluationContext context,
             final Map<String, SupportingData> supportingData, final PluginIdTuple tuple)
     {
-        log.debug("applying plugin: {}", tuple.getLeft().toString());
-        final var opencdsPlugin = knowledgeRepository.pluginPackageService().load(tuple.getLeft());
-        opencdsPlugin.execute(PreProcessPluginContextImpl.createPreProcessPluginContext(filterSupportingData(tuple, supportingData),
-                knowledgeRepository.pluginDataCache(tuple.getLeft()), context.globals()));
+        log.debug("applying plugin: {}", tuple.pluginId().toString());
+        final var opencdsPlugin = knowledgeRepository.pluginPackageService().load(tuple.pluginId());
+        opencdsPlugin.execute(PreProcessPluginContext.createPreProcessPluginContext(filterSupportingData(tuple, supportingData),
+                knowledgeRepository.pluginDataCache(tuple.pluginId()), context.globals()));
     }
 
     private static void applyPostProcessPlugin(final KnowledgeRepository knowledgeRepository, final EvaluationContext context,
             final Map<String, SupportingData> supportingData, final PluginIdTuple tuple)
     {
-        log.debug("applying plugin: {}", tuple.getLeft().toString());
-        final var opencdsPlugin = knowledgeRepository.pluginPackageService().load(tuple.getLeft());
-        opencdsPlugin.execute(
-                PostProcessPluginContextImpl.createPostProcessPluginContext(filterSupportingData(tuple, supportingData),
-                        knowledgeRepository.pluginDataCache(tuple.getLeft())));
+        log.debug("applying plugin: {}", tuple.pluginId().toString());
+        final var opencdsPlugin = knowledgeRepository.pluginPackageService().load(tuple.pluginId());
+        opencdsPlugin.execute(PostProcessPluginContext.createPostProcessPluginContext(filterSupportingData(tuple, supportingData),
+                knowledgeRepository.pluginDataCache(tuple.pluginId())));
     }
 
     public static Map<String, SupportingData> filterSupportingData(final PluginIdTuple tuple,
@@ -81,19 +76,22 @@ public class PluginProcessor
         final Map<String, List<Entry<String, Entry<String, SupportingData>>>> allSupportingData =
                 supportingData.entrySet().stream().map((final Entry<String, SupportingData> sdEntry) ->
                 {
-                    if (kmConfigured(sdEntry, tuple.getRight()))
+                    if (kmConfigured(sdEntry, tuple.prePostProcessPluginId()))
                         return newEntry(KM_CONFIGURED, sdEntry);
-                    else
-                        if (loadedBy(sdEntry, tuple.getLeft()))
-                            return newEntry(LOADED_BY, sdEntry);
+
+                    if (loadedBy(sdEntry, tuple.pluginId()))
+                        return newEntry(LOADED_BY, sdEntry);
+
                     return null;
                 }).filter(Objects::nonNull).collect(Collectors.groupingBy(Entry::getKey));
+
         if (allSupportingData.containsKey(KM_CONFIGURED))
             return filter(KM_CONFIGURED, allSupportingData);
-        else
-            if (allSupportingData.containsKey(LOADED_BY))
-                return filter(LOADED_BY, allSupportingData);
-        return Collections.emptyMap();
+
+        if (allSupportingData.containsKey(LOADED_BY))
+            return filter(LOADED_BY, allSupportingData);
+
+        return Map.of();
     }
 
     private static Map<String, SupportingData> filter(final String key,
@@ -110,14 +108,15 @@ public class PluginProcessor
 
     private static boolean loadedBy(final Entry<String, SupportingData> sdEntry, final PluginId pluginId)
     {
-        final String pluginEID = EntityIdentifierUtil.makeEIString(pluginId);
-        if (sdEntry.getValue().getLoadedByPluginId() == null || pluginEID == null)
+        final String pluginEID = pluginId == null ? null : pluginId.toEIString();
+        if (sdEntry.getValue().loadedByPluginId() == null || pluginEID == null)
             return false;
-        return sdEntry.getValue().getLoadedByPluginId().equals(EntityIdentifierUtil.makeEIString(pluginId));
+
+        return sdEntry.getValue().loadedByPluginId().equals(pluginEID);
     }
 
     private static boolean kmConfigured(final Entry<String, SupportingData> sdEntry, final PrePostProcessPluginId right)
     {
-        return right.getSupportingDataIdentifiers().contains(sdEntry.getKey());
+        return right.supportingDataIdentifiers().contains(sdEntry.getKey());
     }
 }

@@ -1,10 +1,13 @@
 package org.opencds.config.api.model;
 
-public interface CDMId
+import org.springframework.util.StringUtils;
+
+public record CDMId(String codeSystem,
+                    String code,
+                    String version)
 {
-    String getCodeSystem();
-
-    String getCode();
-
-    String getVersion();
+    public CDMId
+    {
+        assert StringUtils.hasText(code);
+    }
 }

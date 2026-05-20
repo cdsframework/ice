@@ -2,9 +2,14 @@ package org.opencds.config.api.model;
 
 import java.util.List;
 
-public interface ConceptMapping
-{
-    Concept getToConcept();
+import org.springframework.util.ObjectUtils;
 
-    List<Concept> getFromConcepts();
+public record ConceptMapping(Concept toConcept,
+                             List<Concept> fromConcepts)
+{
+    public ConceptMapping
+    {
+        assert toConcept != null;
+        assert !ObjectUtils.isEmpty(fromConcepts);
+    }
 }

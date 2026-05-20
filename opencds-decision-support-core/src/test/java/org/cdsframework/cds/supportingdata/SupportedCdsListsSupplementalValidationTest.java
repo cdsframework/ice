@@ -5,18 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
-import org.cdsframework.ice.dto.CodeSystem;
-import org.cdsframework.ice.dto.CodeSystemConcept;
-import org.cdsframework.ice.dto.CodeSystemConceptProperty;
-import org.cdsframework.ice.dto.Coding;
-import org.cdsframework.ice.dto.Identifier;
+import org.cdsframework.fhir.CodeSystem;
+import org.cdsframework.fhir.CodeSystemConcept;
+import org.cdsframework.fhir.CodeSystemConceptProperty;
+import org.cdsframework.fhir.Coding;
+import org.cdsframework.fhir.Identifier;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.supportingdata.SupplementalReasonSupport;
 import org.junit.jupiter.api.Test;
 
 class SupportedCdsListsSupplementalValidationTest
 {
-    private static final String CDS_VERSION = "org.nyc.cir^ICE^1.0.0";
+    private static final String CDS_VERSION = "1.0.0";
 
     private static CodeSystem codeSystem(final String name, final String url, final CodeSystemConcept concept)
     {

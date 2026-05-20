@@ -15,8 +15,8 @@ import lombok.ToString;
 @ToString
 public class SupplyOrder extends SupplyBase
 {
-    protected IVLDate supplyTime;
-    protected IVLDate orderEventTime;
-    protected INT repeatNumber;
-    protected CD criticality;
+    private IVLDate supplyTime;
+    private IVLDate orderEventTime;
+    private INT repeatNumber;
+    private CD criticality;
 }

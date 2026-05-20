@@ -13,7 +13,7 @@ import org.omg.dss.EvaluationResponse;
 import org.omg.dss.KMEvaluationRequestBase;
 import org.omg.dss.ServiceRequestBase;
 import org.omg.dss.UnrecognizedScopedEntityExceptionFault;
-import org.opencds.dss.evaluate.impl.DSSEvaluation;
+import org.opencds.dss.evaluate.Evaluation;
 import org.opencds.dss.evaluate.util.DssUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.StopWatch;
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/resources")
+@RequestMapping("/opencds-decision-support-service/api/resources")
 public class EvaluateController
 {
     private static String getEvalInfo(final EvaluateAtSpecifiedTime eval)
@@ -57,7 +57,7 @@ public class EvaluateController
                 .collect(Collectors.joining(",")));
     }
 
-    private final DSSEvaluation evaluationService;
+    private final Evaluation evaluationService;
 
     @GetMapping(value = "/tz", produces = org.springframework.http.MediaType.TEXT_PLAIN_VALUE)
     public String tz()

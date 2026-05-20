@@ -7,10 +7,10 @@ import java.util.Optional;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.ConceptUtils;
-import org.cdsframework.ice.dto.CodeSystem;
-import org.cdsframework.ice.dto.CodeSystemConcept;
-import org.cdsframework.ice.dto.CodeSystemConceptProperty;
-import org.cdsframework.ice.dto.Coding;
+import org.cdsframework.fhir.CodeSystem;
+import org.cdsframework.fhir.CodeSystemConcept;
+import org.cdsframework.fhir.CodeSystemConceptProperty;
+import org.cdsframework.fhir.Coding;
 import org.cdsframework.ice.supportingdata.SupplementalReasonSupport;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
@@ -40,7 +40,6 @@ public class LocallyCodedCdsListItem
     @EqualsAndHashCode.Include
     private String cdsListItemValue;
     private Collection<CdsConcept> opencdsConceptMappings;
-    private Collection<String> cdsListVersions;
     private CD cdsListItemOutboundCD;
     private CD cdsListItemCD;
     private boolean supplementalText;
@@ -116,7 +115,6 @@ public class LocallyCodedCdsListItem
         this.supplementalReasonType = SupplementalReasonSupport.getSupplementalReasonTypeForCodeSystem(this.cdsListCode);
         this.opencdsConceptMappings = new ArrayList<>();
 
-        this.cdsListVersions = java.util.Collections.singletonList(Optional.ofNullable(pCodeSystem.version()).orElse(""));
         Optional.ofNullable(pConcept.property()).ifPresent(this.properties::addAll);
         this.cdsListItemName = "%s.%s".formatted(this.cdsListCode, this.cdsListItemKey);
 
@@ -252,8 +250,6 @@ public class LocallyCodedCdsListItem
         for (final CdsConcept icc : getCdsListItemOpencdsConceptMappings())
             lStr.append("\tICEConcept=").append(icc.toString()).append("\n");
         lStr.append("\t]\n");
-        for (final String lVersionStr : getCdsListVersions())
-            lStr.append("\tCdsVersion=").append(lVersionStr).append("\n");
         lStr.append("]");
         lStr.append("\n");
 

@@ -15,10 +15,10 @@ import lombok.ToString;
 @ToString
 public class SubstanceDispensationEvent extends SubstanceAdministrationBase
 {
-    protected INT daysSupply;
-    protected PQ dispensationQuantity;
-    protected DoseRestriction doseRestriction;
-    protected IVLDate dispensationTime;
-    protected INT fillNumber;
-    protected INT fillsRemaining;
+    private INT daysSupply;
+    private PQ dispensationQuantity;
+    private DoseRestriction doseRestriction;
+    private IVLDate dispensationTime;
+    private INT fillNumber;
+    private INT fillsRemaining;
 }

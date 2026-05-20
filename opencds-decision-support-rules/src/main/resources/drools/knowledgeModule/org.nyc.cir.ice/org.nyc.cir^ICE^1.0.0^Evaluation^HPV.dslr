@@ -21,7 +21,7 @@ import org.cdsframework.ice.supportingdata.BaseDataPerson;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 global org.cdsframework.ice.service.Schedule schedule;
 
 /**
@@ -68,20 +68,156 @@ rule "Evaluate HPV Shot as Accepted / ABOVE_REC_AGE_SERIES if Patient >= 46 yrs 
 		Log that this dose rule fired for the dose $currentDose in the Series $targetSeries
 end
 
-rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 - 5m-4 days required"
+rule "HPV (Abstract): Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 for shots before 12/16/2016"
+    dialect "mvel"
+    ruleflow-group "HistoryEvaluation^customEvaluationRule"
+    when
+        There is an Administered Shot $currentDose that needs to be evaluated
+            - the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV" and the Series with name "SUPPORTED_SERIES.HPV_3_DOSE_SERIES"
+            - the dose number in the series is == 3
+            - the administration date of the shot is < "16-Dec-2016"
+            - make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+            - make note of the Associated Series as $associatedTargetSeries
+        There is an Administered Shot $previousDose
+            - the shot belongs to the Series $associatedTargetSeries
+            - the dose number in the series is == 1
+            - that has already been evaluated and whose shot validity is VALID or ACCEPTED
+            - make note of the date this shot was administered as $dtAdministrationDatePreviousDose
+    then
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 for shots before 12/16/2016, mark as Valid if Interval >= 16w-4 days"
+  extends "HPV (Abstract): Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 for shots before 12/16/2016"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	when
-		There is an Administered Shot $currentDose that needs to be evaluated
-			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV" and the Series with name "SUPPORTED_SERIES.HPV_3_DOSE_SERIES"
-			- the dose number in the series is == 3
-			- make note of the date this shot was administered as $dtAdministrationDateCurrentDose
-			- make note of the Associated Series as $associatedTargetSeries
-		There is an Administered Shot $previousDose
-			- the shot belongs to the Series $associatedTargetSeries
-			- the dose number in the series is == 1
-			- that has already been evaluated and whose shot validity is VALID or ACCEPTED
-			- make note of the date this shot was administered as $dtAdministrationDatePreviousDose
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose >= "16w-4d"
+	then
+		Insert an Evaluation IceIntervalFact SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue with TargetDoses $previousDose and $currentDose into Working Memory
+		Record that this dose rule was Processed for the TargetDose $currentDose
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 - mark as Invalid if Interval < 16w-4 days for shots before 12/16/2016"
+    extends "HPV (Abstract): Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 for shots before 12/16/2016"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	when
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "16w-4d"
+	then
+		Include the reason for shot $currentDose Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentDose
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+rule "HPV (Abstract): Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 for shots on or after 12/16/2016"
+    dialect "mvel"
+    ruleflow-group "HistoryEvaluation^customEvaluationRule"
+    when
+        There is an Administered Shot $currentDose that needs to be evaluated
+            - the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV" and the Series with name "SUPPORTED_SERIES.HPV_3_DOSE_SERIES"
+            - the dose number in the series is == 3
+            - the administration date of the shot is >= "16-Dec-2016"
+            - make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+            - make note of the Associated Series as $associatedTargetSeries
+        There is an Administered Shot $previousDose
+            - the shot belongs to the Series $associatedTargetSeries
+            - the dose number in the series is == 1
+            - that has already been evaluated and whose shot validity is VALID or ACCEPTED
+            - make note of the date this shot was administered as $dtAdministrationDatePreviousDose
+    then
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 for shots on or after 12/16/2016, mark as Valid if Interval >= 5m-4 days"
+  extends "HPV (Abstract): Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 for shots on or after 12/16/2016"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	when
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose >= "5m-4d"
+	then
+		Insert an Evaluation IceIntervalFact SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue with TargetDoses $previousDose and $currentDose into Working Memory
+		Record that this dose rule was Processed for the TargetDose $currentDose
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+rule "HPV: Evaluate the Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 - mark as Invalid if Interval < 5m-4 days for shots on or after 12/16/2016"
+    extends "HPV (Abstract): Absolute Minimum Interval in 3-Dose Series between Doses 1 and 3 for shots on or after 12/16/2016"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	when
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "5m-4d"
+	then
+		Include the reason for shot $currentDose Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentDose
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+rule "HPV: Mark current Target Dose 2 as Invalid in 2-Dose Series if Interval from most recent Invalid Dose 2 < 12w-4 days"
+    dialect "mvel"
+    ruleflow-group "HistoryEvaluation^customEvaluationRule"
+    when
+        There is an Administered Shot $currentDose that needs to be evaluated
+            - the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV" and the Series with name "SUPPORTED_SERIES.HPV_2_DOSE_SERIES"
+            - the dose number in the series is == 2
+            - make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+            - make note of the Associated Series as $associatedTargetSeries
+        There is an Administered Shot $invalidDose2
+            - the shot belongs to the Series $associatedTargetSeries
+            - the dose number in the series is == 2
+            - that has already been evaluated and whose shot validity is INVALID
+            - make note of the administered shot number as $nInvalidDose2ShotNumber
+            - make note of the date this shot was administered as $dtAdministrationDateInvalidDose2
+        There does not exist an Administered Shot
+            - the shot belongs to the Series $associatedTargetSeries
+            - the dose number in the series is == 2
+            - that has already been evaluated and whose shot validity is INVALID
+            - the administered shot number is > $nInvalidDose2ShotNumber
+        Confirm Elapsed time between $dtAdministrationDateInvalidDose2 and $dtAdministrationDateCurrentDose < "12w-4d"
+    then
+		Include the reason for shot $currentDose Invalid due to "Below Minimum Interval"
+		Record that this dose rule was Processed for the TargetDose $currentDose
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+rule "HPV (Abstract): Intervals in 2-Dose Series for Dose 2 from Dose 1"
+    dialect "mvel"
+    ruleflow-group "HistoryEvaluation^customEvaluationRule"
+    when
+        There is an Administered Shot $currentDose that needs to be evaluated
+            - the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HPV" and the Series with name "SUPPORTED_SERIES.HPV_2_DOSE_SERIES"
+            - the dose number in the series is == 2
+            - make note of the date this shot was administered as $dtAdministrationDateCurrentDose
+            - make note of the Associated Series as $associatedTargetSeries
+        There is an Administered Shot $previousDose
+            - the shot belongs to the Series $associatedTargetSeries
+            - the dose number in the series is == 1
+            - that has already been evaluated and whose shot validity is VALID
+            - make note of the date this shot was administered as $dtAdministrationDatePreviousDose
+    then
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+rule "HPV: Evaluate the Absolute Minimum Interval in 2-Dose Series for Dose 2 - mark as Valid if Interval >= 5m-4 days from Dose 1"
+    extends "HPV (Abstract): Intervals in 2-Dose Series for Dose 2 from Dose 1"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose >= "5m-4d"
+	then
+		Insert an Evaluation IceIntervalFact SupportedFactConcept._DOSE_INTERVAL_OVERRIDE.conceptCodeValue with TargetDoses $previousDose and $currentDose into Working Memory
+		Record that this dose rule was Processed for the TargetDose $currentDose
+		Log that this dose rule fired for the dose $currentDose in the Series $associatedTargetSeries
+end
+
+rule "HPV: Evaluate the Absolute Minimum Interval in 2-Dose Series for Dose 2 - mark as Invalid if Interval < 5m-4 days from Dose 1"
+    extends "HPV (Abstract): Intervals in 2-Dose Series for Dose 2 from Dose 1"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
 		Confirm Elapsed time between $dtAdministrationDatePreviousDose and $dtAdministrationDateCurrentDose < "5m-4d"
 	then
 		Include the reason for shot $currentDose Invalid due to "Below Minimum Interval"

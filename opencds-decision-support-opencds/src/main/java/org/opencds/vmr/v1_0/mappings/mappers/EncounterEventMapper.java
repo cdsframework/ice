@@ -36,12 +36,11 @@ public class EncounterEventMapper extends EncounterBaseMapper
 
         if (external.getEncounterEventTime() == null)
             throw new InvalidDataException("EncounterEventTime was null");
-        final IVLDate eet = MappingUtility.iVLTS2IVLDateInternal(external.getEncounterEventTime());
+        final IVLDate eet = MappingUtility.iVLTS2IVLDateInternal(external.getEncounterEventTime(), factLists.getParsedDatesCache());
         if (eet == null)
             throw new InvalidDataException("EncounterEventTime was invalid.");
-        else
-            if (eet.getLow() == null && eet.getHigh() == null)
-                throw new InvalidDataException("EncounterEventTime must have non-null low or high value");
+        if (eet.getLow() == null && eet.getHigh() == null)
+            throw new InvalidDataException("EncounterEventTime must have non-null low or high value");
         internal.setEncounterEventTime(eet);
 
         factLists.put(EncounterEvent.class, internal);
@@ -77,9 +76,9 @@ public class EncounterEventMapper extends EncounterBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getEncounterEvents() == null)
+        if (organizedResults.output().getEncounterEvents() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setEncounterEvents(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.EncounterEvents());
         }
 

@@ -26,7 +26,7 @@
 
 package org.cdsframework.ice.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.kie.api.definition.type.ClassReactive;
 
@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DiseaseImmunity
 {
     private final String disease;
-    private Date dateOfImmunity;
+    private LocalDate dateOfImmunity;
     private String immunityReason;
     private String evaluationReasonResult;
     private String recommendationReasonResult;
@@ -57,20 +57,20 @@ public class DiseaseImmunity
         disease = pDiseaseImmunityObtained;
     }
 
-    public DiseaseImmunity(final String pDisease, final Date pDateOfImmunity)
+    public DiseaseImmunity(final String pDisease, final LocalDate pDateOfImmunity)
     {
         this(pDisease);
         dateOfImmunity = pDateOfImmunity;
     }
 
-    public DiseaseImmunity(final String pDisease, final Date pDateOfImmunity, final String pReason)
+    public DiseaseImmunity(final String pDisease, final LocalDate pDateOfImmunity, final String pReason)
     {
         this(pDisease);
         dateOfImmunity = pDateOfImmunity;
         immunityReason = pReason;
     }
 
-    public DiseaseImmunity(final String pDisease, final Date pDateOfImmunity, final String pEvaluationReasonResult,
+    public DiseaseImmunity(final String pDisease, final LocalDate pDateOfImmunity, final String pEvaluationReasonResult,
             final String pRecommendationReasonResult)
     {
         this(pDisease, pDateOfImmunity);
@@ -78,7 +78,7 @@ public class DiseaseImmunity
         recommendationReasonResult = pRecommendationReasonResult;
     }
 
-    public DiseaseImmunity(final String pDisease, final Date pDateOfImmunity, final String pImmunityReason,
+    public DiseaseImmunity(final String pDisease, final LocalDate pDateOfImmunity, final String pImmunityReason,
             final String pEvaluationReasonResult, final String pRecommendationReasonResult)
     {
         this(pDisease, pDateOfImmunity, pImmunityReason);

@@ -156,7 +156,7 @@ public class SeriesRules
         this.seriesName = seriesName;
     }
 
-    private CdsConcept getVaccineGroupConcept()
+    public CdsConcept getVaccineGroupConcept()
     {
         return vaccineGroupConcept;
     }

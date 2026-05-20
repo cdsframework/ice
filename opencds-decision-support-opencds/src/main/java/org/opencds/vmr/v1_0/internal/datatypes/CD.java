@@ -17,11 +17,11 @@ import lombok.ToString;
 @AllArgsConstructor
 public class CD extends ANY
 {
-    protected String displayName;
+    private String displayName;
     @EqualsAndHashCode.Include
-    protected String code;
+    private String code;
     @EqualsAndHashCode.Include
-    protected String codeSystem;
-    protected String codeSystemName;
-    protected String originalText;
+    private String codeSystem;
+    private String codeSystemName;
+    private String originalText;
 }

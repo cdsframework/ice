@@ -10,7 +10,6 @@ import org.omg.dss.InteractionIdentifier;
 import org.omg.dss.IterativeEvaluationRequest;
 import org.omg.dss.IterativeEvaluationResponse;
 import org.omg.dss.ObjectFactory;
-import org.omg.dss.RequiredDataNotProvidedExceptionFault;
 import org.omg.dss.UnrecognizedScopedEntityExceptionFault;
 
 import jakarta.jws.WebService;
@@ -30,9 +29,8 @@ public class EvaluationSoapService implements org.omg.dss.Evaluation
     @Override
     public IterativeEvaluationResponse evaluateIteratively(final InteractionIdentifier interactionId,
             final IterativeEvaluationRequest iterativeEvaluationRequest)
-            throws RequiredDataNotProvidedExceptionFault, DSSRuntimeExceptionFault
     {
-        return evaluation.evaluateIteratively(interactionId, iterativeEvaluationRequest);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -53,8 +51,7 @@ public class EvaluationSoapService implements org.omg.dss.Evaluation
     @Override
     public IterativeEvaluationResponse evaluateIterativelyAtSpecifiedTime(final InteractionIdentifier interactionId,
             final XMLGregorianCalendar specifiedTime, final IterativeEvaluationRequest iterativeEvaluationRequest)
-            throws RequiredDataNotProvidedExceptionFault, DSSRuntimeExceptionFault
     {
-        return evaluation.evaluateIterativelyAtSpecifiedTime(interactionId, specifiedTime, iterativeEvaluationRequest);
+        throw new UnsupportedOperationException();
     }
 }

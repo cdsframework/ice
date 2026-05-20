@@ -10,7 +10,6 @@ import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.KnowledgeModule;
 import org.opencds.config.api.model.SupportingData;
 import org.opencds.config.api.service.SupportingDataPackageService;
-import org.opencds.config.api.util.EntityIdentifierUtil;
 import org.opencds.plugin.api.SupportingDataPackage;
 
 import lombok.experimental.UtilityClass;
@@ -21,11 +20,11 @@ public class SupportingDataUtil
     public static Map<String, org.opencds.plugin.api.SupportingData> getSupportingData(
             final KnowledgeRepository knowledgeRepository, final KnowledgeModule knowledgeModule)
     {
-        return filterByKM(knowledgeModule.getKMId(), knowledgeRepository.supportingDataService().getAll()).stream()
-                .map(sd -> Map.entry(sd.getIdentifier(), org.opencds.plugin.api.SupportingData.create(sd.getIdentifier(),
-                        EntityIdentifierUtil.makeEIString(sd.getKMId()), EntityIdentifierUtil.makeEIString(sd.getLoadedBy()),
-                        sd.getPackageId(), sd.getPackageType(), sd.getTimestamp(),
-                        supportingDataPackageSupplier(knowledgeRepository.supportingDataPackageService(), sd))))
+        return filterByKM(knowledgeModule.kmId(), knowledgeRepository.supportingDataService().getAll()).stream()
+                .map(sd -> Map.entry(sd.identifier(),
+                        new org.opencds.plugin.api.SupportingData(sd.identifier(), sd.kmId().toEIString(),
+                                sd.loadedBy().toEIString(), sd.packageId(), sd.packageType(), sd.timestamp(),
+                                supportingDataPackageSupplier(knowledgeRepository.supportingDataPackageService(), sd))))
                 .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
@@ -38,6 +37,6 @@ public class SupportingDataUtil
 
     private static List<SupportingData> filterByKM(final KMId kmId, final List<SupportingData> sds)
     {
-        return sds.stream().filter(sd -> sd.getKMId() == null || (sd.getKMId() != null && sd.getKMId().equals(kmId))).toList();
+        return sds.stream().filter(sd -> sd.kmId() == null || sd.kmId().equals(kmId)).toList();
     }
 }

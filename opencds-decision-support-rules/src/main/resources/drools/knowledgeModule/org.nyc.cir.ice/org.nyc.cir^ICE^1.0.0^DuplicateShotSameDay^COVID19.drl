@@ -1,6 +1,5 @@
 package knowledgeModule.org.nyc.cir.ice;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +20,7 @@ import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.ice.util.TimePeriod.DurationType;
 import org.cdsframework.ice.service.Vaccine;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 rule "Duplicate Shots/Same Day (Sep2023/Aug2024 >= 5yrs): If a CVX 213 and CVX 313 are administered on the same day and both would be considered valid, evaluate the CVX 213 as valid"
 	dialect "mvel"

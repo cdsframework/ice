@@ -16,8 +16,8 @@ import lombok.ToString;
 @ToString
 public abstract class ProblemBase extends ClinicalStatement
 {
-    protected CD problemCode;
-    protected List<BodySite> affectedBodySite;
-    protected IVLDate problemEffectiveTime;
-    protected IVLDate diagnosticEventTime;
+    private CD problemCode;
+    private List<BodySite> affectedBodySite;
+    private IVLDate problemEffectiveTime;
+    private IVLDate diagnosticEventTime;
 }

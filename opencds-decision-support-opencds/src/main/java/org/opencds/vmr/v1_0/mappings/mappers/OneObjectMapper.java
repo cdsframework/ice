@@ -736,140 +736,140 @@ public abstract class OneObjectMapper
                 new org.opencds.vmr.v1_0.schema.AdverseEvent();
                 final org.opencds.vmr.v1_0.schema.AdverseEvent rootClinicalStatement;
                 rootClinicalStatement = AdverseEventMapper.pushOut((AdverseEvent) source, organizedResults);
-                organizedResults.getOutput().getAdverseEvents().getAdverseEvent().add(rootClinicalStatement);
+                organizedResults.output().getAdverseEvents().getAdverseEvent().add(rootClinicalStatement);
             }
             case "DeniedAdverseEvent" ->
             {
                 new org.opencds.vmr.v1_0.schema.DeniedAdverseEvent();
                 final org.opencds.vmr.v1_0.schema.DeniedAdverseEvent rootClinicalStatement;
                 rootClinicalStatement = DeniedAdverseEventMapper.pushOut((DeniedAdverseEvent) source, organizedResults);
-                organizedResults.getOutput().getDeniedAdverseEvents().getDeniedAdverseEvent().add(rootClinicalStatement);
+                organizedResults.output().getDeniedAdverseEvents().getDeniedAdverseEvent().add(rootClinicalStatement);
             }
             case "AppointmentProposal" ->
             {
                 new org.opencds.vmr.v1_0.schema.AppointmentProposal();
                 final org.opencds.vmr.v1_0.schema.AppointmentProposal rootClinicalStatement;
                 rootClinicalStatement = AppointmentProposalMapper.pushOut((AppointmentProposal) source, organizedResults);
-                organizedResults.getOutput().getAppointmentProposals().getAppointmentProposal().add(rootClinicalStatement);
+                organizedResults.output().getAppointmentProposals().getAppointmentProposal().add(rootClinicalStatement);
             }
             case "AppointmentRequest" ->
             {
                 new org.opencds.vmr.v1_0.schema.AppointmentRequest();
                 final org.opencds.vmr.v1_0.schema.AppointmentRequest rootClinicalStatement;
                 rootClinicalStatement = AppointmentRequestMapper.pushOut((AppointmentRequest) source, organizedResults);
-                organizedResults.getOutput().getAppointmentRequests().getAppointmentRequest().add(rootClinicalStatement);
+                organizedResults.output().getAppointmentRequests().getAppointmentRequest().add(rootClinicalStatement);
             }
             case "EncounterEvent" ->
             {
                 new org.opencds.vmr.v1_0.schema.EncounterEvent();
                 final org.opencds.vmr.v1_0.schema.EncounterEvent rootClinicalStatement;
                 rootClinicalStatement = EncounterEventMapper.pushOut((EncounterEvent) source, organizedResults);
-                organizedResults.getOutput().getEncounterEvents().getEncounterEvent().add(rootClinicalStatement);
+                organizedResults.output().getEncounterEvents().getEncounterEvent().add(rootClinicalStatement);
             }
             case "MissedAppointment" ->
             {
                 new org.opencds.vmr.v1_0.schema.MissedAppointment();
                 final org.opencds.vmr.v1_0.schema.MissedAppointment rootClinicalStatement;
                 rootClinicalStatement = MissedAppointmentMapper.pushOut((MissedAppointment) source, organizedResults);
-                organizedResults.getOutput().getMissedAppointments().getMissedAppointment().add(rootClinicalStatement);
+                organizedResults.output().getMissedAppointments().getMissedAppointment().add(rootClinicalStatement);
             }
             case "ScheduledAppointment" ->
             {
                 new org.opencds.vmr.v1_0.schema.ScheduledAppointment();
                 final org.opencds.vmr.v1_0.schema.ScheduledAppointment rootClinicalStatement;
                 rootClinicalStatement = ScheduledAppointmentMapper.pushOut((ScheduledAppointment) source, organizedResults);
-                organizedResults.getOutput().getScheduledAppointments().getScheduledAppointment().add(rootClinicalStatement);
+                organizedResults.output().getScheduledAppointments().getScheduledAppointment().add(rootClinicalStatement);
             }
             case "Goal" ->
             {
                 new org.opencds.vmr.v1_0.schema.Goal();
                 final org.opencds.vmr.v1_0.schema.Goal rootClinicalStatement;
                 rootClinicalStatement = GoalMapper.pushOut((Goal) source, organizedResults);
-                organizedResults.getOutput().getGoals().getGoal().add(rootClinicalStatement);
+                organizedResults.output().getGoals().getGoal().add(rootClinicalStatement);
             }
             case "GoalProposal" ->
             {
                 new org.opencds.vmr.v1_0.schema.GoalProposal();
                 final org.opencds.vmr.v1_0.schema.GoalProposal rootClinicalStatement;
                 rootClinicalStatement = GoalProposalMapper.pushOut((GoalProposal) source, organizedResults);
-                organizedResults.getOutput().getGoalProposals().getGoalProposal().add(rootClinicalStatement);
+                organizedResults.output().getGoalProposals().getGoalProposal().add(rootClinicalStatement);
             }
             case "ObservationOrder" ->
             {
                 new org.opencds.vmr.v1_0.schema.ObservationOrder();
                 final org.opencds.vmr.v1_0.schema.ObservationOrder rootClinicalStatement;
                 rootClinicalStatement = ObservationOrderMapper.pushOut((ObservationOrder) source, organizedResults);
-                organizedResults.getOutput().getObservationOrders().getObservationOrder().add(rootClinicalStatement);
+                organizedResults.output().getObservationOrders().getObservationOrder().add(rootClinicalStatement);
             }
             case "ObservationProposal" ->
             {
                 new org.opencds.vmr.v1_0.schema.ObservationProposal();
                 final org.opencds.vmr.v1_0.schema.ObservationProposal rootClinicalStatement;
                 rootClinicalStatement = ObservationProposalMapper.pushOut((ObservationProposal) source, organizedResults);
-                organizedResults.getOutput().getObservationProposals().getObservationProposal().add(rootClinicalStatement);
+                organizedResults.output().getObservationProposals().getObservationProposal().add(rootClinicalStatement);
             }
             case "ObservationResult" ->
             {
                 new org.opencds.vmr.v1_0.schema.ObservationResult();
                 final org.opencds.vmr.v1_0.schema.ObservationResult rootClinicalStatement;
                 rootClinicalStatement = ObservationResultMapper.pushOut((ObservationResult) source, organizedResults);
-                organizedResults.getOutput().getObservationResults().getObservationResult().add(rootClinicalStatement);
+                organizedResults.output().getObservationResults().getObservationResult().add(rootClinicalStatement);
             }
             case "UnconductedObservation" ->
             {
                 new org.opencds.vmr.v1_0.schema.UnconductedObservation();
                 final org.opencds.vmr.v1_0.schema.UnconductedObservation rootClinicalStatement;
                 rootClinicalStatement = UnconductedObservationMapper.pushOut((UnconductedObservation) source, organizedResults);
-                organizedResults.getOutput().getUnconductedObservations().getUnconductedObservation().add(rootClinicalStatement);
+                organizedResults.output().getUnconductedObservations().getUnconductedObservation().add(rootClinicalStatement);
             }
             case "DeniedProblem" ->
             {
                 new org.opencds.vmr.v1_0.schema.DeniedProblem();
                 final org.opencds.vmr.v1_0.schema.DeniedProblem rootClinicalStatement;
                 rootClinicalStatement = DeniedProblemMapper.pushOut((DeniedProblem) source, organizedResults);
-                organizedResults.getOutput().getDeniedProblems().getDeniedProblem().add(rootClinicalStatement);
+                organizedResults.output().getDeniedProblems().getDeniedProblem().add(rootClinicalStatement);
             }
             case "Problem" ->
             {
                 new org.opencds.vmr.v1_0.schema.Problem();
                 final org.opencds.vmr.v1_0.schema.Problem rootClinicalStatement;
                 rootClinicalStatement = ProblemMapper.pushOut((Problem) source, organizedResults);
-                organizedResults.getOutput().getProblems().getProblem().add(rootClinicalStatement);
+                organizedResults.output().getProblems().getProblem().add(rootClinicalStatement);
             }
             case "ProcedureEvent" ->
             {
                 new org.opencds.vmr.v1_0.schema.ProcedureEvent();
                 final org.opencds.vmr.v1_0.schema.ProcedureEvent rootClinicalStatement;
                 rootClinicalStatement = ProcedureEventMapper.pushOut((ProcedureEvent) source, organizedResults);
-                organizedResults.getOutput().getProcedureEvents().getProcedureEvent().add(rootClinicalStatement);
+                organizedResults.output().getProcedureEvents().getProcedureEvent().add(rootClinicalStatement);
             }
             case "ProcedureOrder" ->
             {
                 new org.opencds.vmr.v1_0.schema.ProcedureOrder();
                 final org.opencds.vmr.v1_0.schema.ProcedureOrder rootClinicalStatement;
                 rootClinicalStatement = ProcedureOrderMapper.pushOut((ProcedureOrder) source, organizedResults);
-                organizedResults.getOutput().getProcedureOrders().getProcedureOrder().add(rootClinicalStatement);
+                organizedResults.output().getProcedureOrders().getProcedureOrder().add(rootClinicalStatement);
             }
             case "ProcedureProposal" ->
             {
                 new org.opencds.vmr.v1_0.schema.ProcedureProposal();
                 final org.opencds.vmr.v1_0.schema.ProcedureProposal rootClinicalStatement;
                 rootClinicalStatement = ProcedureProposalMapper.pushOut((ProcedureProposal) source, organizedResults);
-                organizedResults.getOutput().getProcedureProposals().getProcedureProposal().add(rootClinicalStatement);
+                organizedResults.output().getProcedureProposals().getProcedureProposal().add(rootClinicalStatement);
             }
             case "ScheduledProcedure" ->
             {
                 new org.opencds.vmr.v1_0.schema.ScheduledProcedure();
                 final org.opencds.vmr.v1_0.schema.ScheduledProcedure rootClinicalStatement;
                 rootClinicalStatement = ScheduledProcedureMapper.pushOut((ScheduledProcedure) source, organizedResults);
-                organizedResults.getOutput().getScheduledProcedures().getScheduledProcedure().add(rootClinicalStatement);
+                organizedResults.output().getScheduledProcedures().getScheduledProcedure().add(rootClinicalStatement);
             }
             case "UndeliveredProcedure" ->
             {
                 new org.opencds.vmr.v1_0.schema.UndeliveredProcedure();
                 final org.opencds.vmr.v1_0.schema.UndeliveredProcedure rootClinicalStatement;
                 rootClinicalStatement = UndeliveredProcedureMapper.pushOut((UndeliveredProcedure) source, organizedResults);
-                organizedResults.getOutput().getUndeliveredProcedures().getUndeliveredProcedure().add(rootClinicalStatement);
+                organizedResults.output().getUndeliveredProcedures().getUndeliveredProcedure().add(rootClinicalStatement);
             }
             case "SubstanceAdministrationEvent" ->
             {
@@ -877,7 +877,7 @@ public abstract class OneObjectMapper
                 final org.opencds.vmr.v1_0.schema.SubstanceAdministrationEvent rootClinicalStatement;
                 rootClinicalStatement =
                         SubstanceAdministrationEventMapper.pushOut((SubstanceAdministrationEvent) source, organizedResults);
-                organizedResults.getOutput()
+                organizedResults.output()
                         .getSubstanceAdministrationEvents()
                         .getSubstanceAdministrationEvent()
                         .add(rootClinicalStatement);
@@ -888,7 +888,7 @@ public abstract class OneObjectMapper
                 final org.opencds.vmr.v1_0.schema.SubstanceAdministrationOrder rootClinicalStatement;
                 rootClinicalStatement =
                         SubstanceAdministrationOrderMapper.pushOut((SubstanceAdministrationOrder) source, organizedResults);
-                organizedResults.getOutput()
+                organizedResults.output()
                         .getSubstanceAdministrationOrders()
                         .getSubstanceAdministrationOrder()
                         .add(rootClinicalStatement);
@@ -899,7 +899,7 @@ public abstract class OneObjectMapper
                 final org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal rootClinicalStatement;
                 rootClinicalStatement =
                         SubstanceAdministrationProposalMapper.pushOut((SubstanceAdministrationProposal) source, organizedResults);
-                organizedResults.getOutput()
+                organizedResults.output()
                         .getSubstanceAdministrationProposals()
                         .getSubstanceAdministrationProposal()
                         .add(rootClinicalStatement);
@@ -910,7 +910,7 @@ public abstract class OneObjectMapper
                 final org.opencds.vmr.v1_0.schema.SubstanceDispensationEvent rootClinicalStatement;
                 rootClinicalStatement =
                         SubstanceDispensationEventMapper.pushOut((SubstanceDispensationEvent) source, organizedResults);
-                organizedResults.getOutput()
+                organizedResults.output()
                         .getSubstanceDispensationEvents()
                         .getSubstanceDispensationEvent()
                         .add(rootClinicalStatement);
@@ -922,7 +922,7 @@ public abstract class OneObjectMapper
                 rootClinicalStatement =
                         UndeliveredSubstanceAdministrationMapper.pushOut((UndeliveredSubstanceAdministration) source,
                                 organizedResults);
-                organizedResults.getOutput()
+                organizedResults.output()
                         .getUndeliveredSubstanceAdministrations()
                         .getUndeliveredSubstanceAdministration()
                         .add(rootClinicalStatement);
@@ -932,28 +932,28 @@ public abstract class OneObjectMapper
                 new org.opencds.vmr.v1_0.schema.SupplyEvent();
                 final org.opencds.vmr.v1_0.schema.SupplyEvent rootClinicalStatement;
                 rootClinicalStatement = SupplyEventMapper.pushOut((SupplyEvent) source, organizedResults);
-                organizedResults.getOutput().getSupplyEvents().getSupplyEvent().add(rootClinicalStatement);
+                organizedResults.output().getSupplyEvents().getSupplyEvent().add(rootClinicalStatement);
             }
             case "SupplyOrder" ->
             {
                 new org.opencds.vmr.v1_0.schema.SupplyOrder();
                 final org.opencds.vmr.v1_0.schema.SupplyOrder rootClinicalStatement;
                 rootClinicalStatement = SupplyOrderMapper.pushOut((SupplyOrder) source, organizedResults);
-                organizedResults.getOutput().getSupplyOrders().getSupplyOrder().add(rootClinicalStatement);
+                organizedResults.output().getSupplyOrders().getSupplyOrder().add(rootClinicalStatement);
             }
             case "SupplyProposal" ->
             {
                 new org.opencds.vmr.v1_0.schema.SupplyProposal();
                 final org.opencds.vmr.v1_0.schema.SupplyProposal rootClinicalStatement;
                 rootClinicalStatement = SupplyProposalMapper.pushOut((SupplyProposal) source, organizedResults);
-                organizedResults.getOutput().getSupplyProposals().getSupplyProposal().add(rootClinicalStatement);
+                organizedResults.output().getSupplyProposals().getSupplyProposal().add(rootClinicalStatement);
             }
             case "UndeliveredSupply" ->
             {
                 new org.opencds.vmr.v1_0.schema.UndeliveredSupply();
                 final org.opencds.vmr.v1_0.schema.UndeliveredSupply rootClinicalStatement;
                 rootClinicalStatement = UndeliveredSupplyMapper.pushOut((UndeliveredSupply) source, organizedResults);
-                organizedResults.getOutput().getUndeliveredSupplies().getUndeliveredSupply().add(rootClinicalStatement);
+                organizedResults.output().getUndeliveredSupplies().getUndeliveredSupply().add(rootClinicalStatement);
             }
         }
 
@@ -1197,7 +1197,7 @@ public abstract class OneObjectMapper
             throw new ImproperUsageException(errStr);
         }
 
-        final Object oneInternalEntityObject = organizedResults.getEntityList().get(internal.getTargetEntityId());
+        final Object oneInternalEntityObject = organizedResults.entityList().get(internal.getTargetEntityId());
         if (oneInternalEntityObject == null)
         {
             final String errStr = _METHODNAME + "improper usage: looking up entity Object for ID=" + internal.getTargetEntityId()
@@ -1227,7 +1227,7 @@ public abstract class OneObjectMapper
                 final org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance schemaNestedEntity =
                         new org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance();
                 AdministrableSubstanceMapper.pushOut(
-                        (AdministrableSubstance) organizedResults.getEntityList().get(internal.getTargetEntityId()),
+                        (AdministrableSubstance) organizedResults.entityList().get(internal.getTargetEntityId()),
                         schemaNestedEntity, organizedResults);
 
                 final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
@@ -1244,8 +1244,8 @@ public abstract class OneObjectMapper
             {
                 final org.opencds.vmr.v1_0.schema.RelatedEntity.Entity schemaNestedEntity =
                         new org.opencds.vmr.v1_0.schema.RelatedEntity.Entity();
-                EntityMapper.pushOut((Entity) organizedResults.getEntityList().get(internal.getTargetEntityId()),
-                        schemaNestedEntity, organizedResults);
+                EntityMapper.pushOut((Entity) organizedResults.entityList().get(internal.getTargetEntityId()), schemaNestedEntity,
+                        organizedResults);
 
                 final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
                         new org.opencds.vmr.v1_0.schema.RelatedEntity();
@@ -1261,7 +1261,7 @@ public abstract class OneObjectMapper
             {
                 final org.opencds.vmr.v1_0.schema.RelatedEntity.Facility schemaNestedEntity =
                         new org.opencds.vmr.v1_0.schema.RelatedEntity.Facility();
-                FacilityMapper.pushOut((Facility) organizedResults.getEntityList().get(internal.getTargetEntityId()),
+                FacilityMapper.pushOut((Facility) organizedResults.entityList().get(internal.getTargetEntityId()),
                         schemaNestedEntity, organizedResults);
 
                 final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
@@ -1278,7 +1278,7 @@ public abstract class OneObjectMapper
             {
                 final org.opencds.vmr.v1_0.schema.RelatedEntity.Organization schemaNestedEntity =
                         new org.opencds.vmr.v1_0.schema.RelatedEntity.Organization();
-                OrganizationMapper.pushOut((Organization) organizedResults.getEntityList().get(internal.getTargetEntityId()),
+                OrganizationMapper.pushOut((Organization) organizedResults.entityList().get(internal.getTargetEntityId()),
                         schemaNestedEntity, organizedResults);
 
                 final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
@@ -1295,8 +1295,8 @@ public abstract class OneObjectMapper
             {
                 final org.opencds.vmr.v1_0.schema.RelatedEntity.Person schemaNestedEntity =
                         new org.opencds.vmr.v1_0.schema.RelatedEntity.Person();
-                PersonMapper.pushOut((Person) organizedResults.getEntityList().get(internal.getTargetEntityId()),
-                        schemaNestedEntity, organizedResults);
+                PersonMapper.pushOut((Person) organizedResults.entityList().get(internal.getTargetEntityId()), schemaNestedEntity,
+                        organizedResults);
 
                 final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
                         new org.opencds.vmr.v1_0.schema.RelatedEntity();
@@ -1312,7 +1312,7 @@ public abstract class OneObjectMapper
             {
                 final org.opencds.vmr.v1_0.schema.RelatedEntity.Specimen schemaNestedEntity =
                         new org.opencds.vmr.v1_0.schema.RelatedEntity.Specimen();
-                SpecimenMapper.pushOut((Specimen) organizedResults.getEntityList().get(internal.getTargetEntityId()),
+                SpecimenMapper.pushOut((Specimen) organizedResults.entityList().get(internal.getTargetEntityId()),
                         schemaNestedEntity, organizedResults);
 
                 final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =

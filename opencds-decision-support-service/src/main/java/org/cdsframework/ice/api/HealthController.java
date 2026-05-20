@@ -1,8 +1,11 @@
 package org.cdsframework.ice.api;
 
+import org.cdsframework.ice.service.VersionData;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -10,10 +13,14 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @author sdn
  */
+@RequiredArgsConstructor
 @Slf4j
 @RestController
+@RequestMapping("/opencds-decision-support-service")
 public class HealthController
 {
+    private final VersionData versionData;
+
     /**
      * Returns health status.
      */
@@ -32,5 +39,15 @@ public class HealthController
     public void k8sHealthCheck()
     {
         log.debug("/_k8s-health-check called!");
+    }
+
+    /**
+     * Returns version details.
+     */
+    @GetMapping("/version")
+    public VersionData version()
+    {
+        log.debug("/version called!");
+        return versionData;
     }
 }

@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class XP
 {
-    protected String value;
+    private String value;
 }

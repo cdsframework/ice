@@ -26,7 +26,7 @@
 
 package org.cdsframework.ice.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.kie.api.definition.type.ClassReactive;
 
@@ -40,13 +40,13 @@ import lombok.Setter;
 @ClassReactive
 public class LiveVirusFact
 {
-    private Date liveVirusDate;
+    private LocalDate liveVirusDate;
     private boolean liveVirusDateSet;
 
     /**
      * Sets LiveVirusDate's date and isLiveVirusDateSet() to true
      */
-    public LiveVirusFact(final Date pLiveVirusDate)
+    public LiveVirusFact(final LocalDate pLiveVirusDate)
     {
         liveVirusDate = pLiveVirusDate;
         liveVirusDateSet = true;

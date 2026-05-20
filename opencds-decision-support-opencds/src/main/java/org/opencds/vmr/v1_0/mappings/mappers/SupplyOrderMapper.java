@@ -34,9 +34,10 @@ public class SupplyOrderMapper extends SupplyBaseMapper
         }
 
         if (source.getSupplyTime() != null)
-            target.setSupplyTime(MappingUtility.iVLTS2IVLDateInternal(source.getSupplyTime()));
+            target.setSupplyTime(MappingUtility.iVLTS2IVLDateInternal(source.getSupplyTime(), factLists.getParsedDatesCache()));
         if (source.getOrderEventTime() != null)
-            target.setOrderEventTime(MappingUtility.iVLTS2IVLDateInternal(source.getOrderEventTime()));
+            target.setOrderEventTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getOrderEventTime(), factLists.getParsedDatesCache()));
         if (source.getRepeatNumber() != null)
             target.setRepeatNumber(MappingUtility.iNT2INTInternal(source.getRepeatNumber()));
 
@@ -76,9 +77,9 @@ public class SupplyOrderMapper extends SupplyBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getSupplyOrders() == null)
+        if (organizedResults.output().getSupplyOrders() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setSupplyOrders(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.SupplyOrders());
         }
 

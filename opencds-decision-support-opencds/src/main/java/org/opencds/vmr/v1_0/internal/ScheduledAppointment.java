@@ -13,5 +13,5 @@ import lombok.ToString;
 @ToString
 public class ScheduledAppointment extends EncounterBase
 {
-    protected IVLDate appointmentTime;
+    private IVLDate appointmentTime;
 }

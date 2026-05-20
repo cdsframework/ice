@@ -1,0 +1,80 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/common-ice-forecast|1.0.0]':
+      code-systems:
+        EVALUATION_REASON_CONCEPT:
+          name: EVALUATION_REASON_CONCEPT
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.3.795.12.100.3
+          description: Supported evaluation reasons for display
+          url: http://terminology.cdsframework.org/ice/evaluation-reason
+          title: ICE Evaluation Reason
+          version: 1.0.0
+          status: active
+          content: complete
+          concept:
+            - code: BOOSTER_DOSE
+              display: This shot is a booster dose.
+            - code: INVALID_AGE
+              display: Invalid Age
+            - code: BELOW_MINIMUM_AGE_VACCINE
+              display: This immunization event occurred prior to the specified minimum age for this vaccine.
+            - code: ABOVE_MAXIMUM_AGE_VACCINE
+              display: This immunization event occurred after the specified maximum age for this vaccine.
+            - code: ABOVE_MAXIMUM_AGE_SERIES
+              display: This patient was above the maximum age for this dose.
+            - code: BELOW_MINIMUM_AGE_SERIES
+              display: This patient was below the minimum age for this dose.
+            - code: EXTRA_DOSE
+              display: The vaccine administered is an extra dose.
+            - code: BELOW_MINIMUM_INTERVAL
+              display: This immunization event occurred prior to the specified minimum interval for this dose.
+            - code: TOO_EARLY_LIVE_VIRUS
+              display: This immunization event occurred prior to the specified minimum interval for a live vaccine dose.
+            - code: VACCINE_NOT_ALLOWED
+              display: The vaccine administered is not allowed.
+            - code: VACCINE_NOT_ALLOWED_FOR_THIS_DOSE
+              display: The vaccine administered is not allowed for this dose.
+            - code: OUTSIDE_SEASON
+              display: This immunization was administered outside of the vaccine season.
+            - code: OUTSIDE_FLU_VAC_SEASON
+              display: This immunization was administered outside of influenza vaccine season.
+            - code: DUPLICATE_SAME_DAY
+              display: This immunization event is a duplicate.
+            - code: DOSE_OVERRIDE_INVALID
+              display: ICE has marked this shot Invalid as instructed by the user.
+            - code: DOSE_OVERRIDE_VALID
+              display: ICE has marked this shot Valid as instructed by the user.
+            - code: INSUFFICIENT_ANTIGEN
+              display: This vaccine contained insufficient antigen for the patient's age.
+            - code: PRIOR_TO_DOB
+              display: This immunization event was recorded prior to the date of birth.
+            - code: BELOW_MINIMUM_AGE_FINAL_DOSE
+              display: This patient was below the minimum age for the final dose.
+            - code: ABOVE_REC_AGE_SERIES
+              display: The vaccine is administered above the recommended age for this series.
+            - code: BELOW_REC_AGE_SERIES
+              display: The vaccine is administered below the recommended age for this series.
+            - code: VACCINE_NOT_PART_OF_THIS_SERIES
+              display: The vaccine is not a part of this series, therefore it will not be counted towards completion of this series.
+            - code: BOOSTER_ONLY
+              display: The vaccine administered is invalid as a primary shot; valid only as a booster dose.
+            - code: BELOW_MIN_INTERVAL_PCV_PPSV
+              display: This immunization event occurred prior to the specified minimum interval between PCV and PPSV doses.
+            - code: SELECT_ADJUVANT_PRODUCT_INTERVAL
+              display: This immunization event occurred prior to the specified minimum interval between adjuvant products.
+            - code: VACCINE_NOT_SUPPORTED
+              display: The vaccine administered is not supported by the ICE service.
+            - code: UNSPECIFIED_REASON
+              display: Evaluation reason is unspecified.
+            - code: VACCINE_NOT_ALLOWED_IN_US
+              display: Vaccine is not allowed in the U.S.
+            - code: VACCINE_NOT_APPROVED_IN_US
+              display: Vaccine Not Approved for Use in the U.S.
+            - code: VACCINE_NOT_APPROVED_IN_US_OR_BY_WHO
+              display: Vaccine Not Approved for Use in the U.S. or by the WHO
+            - code: VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED
+              display: Vaccine was Not Yet Available on the date that was specified for when it was administered.
+            - code: SUPPLEMENTAL_TEXT
+              display: Supplemental text is available for this immunization event.

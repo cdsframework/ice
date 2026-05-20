@@ -15,15 +15,15 @@ import lombok.ToString;
 @ToString
 public abstract class SubstanceAdministrationBase extends ClinicalStatement
 {
-    protected CD substanceAdministrationGeneralPurpose;
-    protected AdministrableSubstance substance;
-    protected CD deliveryMethod;
-    protected IVLPQ doseQuantity;
-    protected CD deliveryRoute;
-    protected BodySite approachBodySite;
-    protected BodySite targetBodySite;
-    protected IVLPQ dosingPeriod;
-    protected BL dosingPeriodIntervalIsImportant;
-    protected IVLPQ deliveryRate;
-    protected CD doseType;
+    private CD substanceAdministrationGeneralPurpose;
+    private AdministrableSubstance substance;
+    private CD deliveryMethod;
+    private IVLPQ doseQuantity;
+    private CD deliveryRoute;
+    private BodySite approachBodySite;
+    private BodySite targetBodySite;
+    private IVLPQ dosingPeriod;
+    private BL dosingPeriodIntervalIsImportant;
+    private IVLPQ deliveryRate;
+    private CD doseType;
 }

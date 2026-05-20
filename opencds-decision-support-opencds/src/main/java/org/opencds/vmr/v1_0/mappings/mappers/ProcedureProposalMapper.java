@@ -36,7 +36,8 @@ public class ProcedureProposalMapper extends ProcedureBaseMapper
         if (source.getCriticality() != null)
             target.setCriticality(MappingUtility.cD2CDInternal(source.getCriticality()));
         if (source.getProposedProcedureTime() != null)
-            target.setProposedProcedureTime(MappingUtility.iVLTS2IVLDateInternal(source.getProposedProcedureTime()));
+            target.setProposedProcedureTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getProposedProcedureTime(), factLists.getParsedDatesCache()));
         if (source.getRepeatNumber() != null)
             target.setRepeatNumber(MappingUtility.iNT2INTInternal(source.getRepeatNumber()));
 
@@ -75,9 +76,9 @@ public class ProcedureProposalMapper extends ProcedureBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getProcedureProposals() == null)
+        if (organizedResults.output().getProcedureProposals() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setProcedureProposals(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.ProcedureProposals());
         }
 

@@ -1,207 +1,189 @@
 package org.cdsframework.ice.api;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.Objects;
 
-import org.cdsframework.ice.config.IceSupportingDataProperties;
-import org.cdsframework.ice.config.iceSupportingProperties.SeriesData;
-import org.cdsframework.ice.dto.CodeSystem;
+import org.cdsframework.fhir.CodeSystem;
+import org.cdsframework.fhir.PlanDefinition;
+import org.cdsframework.ice.config.CdsEngineProperties;
+import org.cdsframework.ice.service.SupportingDataService;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/supporting-data")
+@RequestMapping("/cds/supporting-data")
+@Tag(name = "Supporting Data", description = "Read-only endpoints for ICE module plan definitions and supporting data.")
 public class SupportingDataController
 {
-    public record KnowledgeModule(String scopingEntityId,
-                                  String businessId,
-                                  String version)
+    private static final String MODULE_CANONICAL_EXAMPLE = "http://cdsframework.org/PlanDefinition/ice-forecast";
+    private static final String MODULE_VERSION_EXAMPLE = "1.0.0";
+    private static final String CODE_SYSTEM_NAME_EXAMPLE = "SUPPORTED_VACCINES";
+
+    private final CdsEngineProperties cdsEngineProperties;
+    private final SupportingDataService supportingDataService;
+
+    @Operation(operationId = "getModulePlanDefinitions", summary = "List supported module PlanDefinitions",
+               description = "Returns all configured PlanDefinition resources that identify supported ICE modules.")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "PlanDefinitions returned successfully.",
+                                         content = @Content(mediaType = "application/json", array = @ArraySchema(
+                                                 schema = @Schema(implementation = PlanDefinition.class)),
+                                                            examples = @ExampleObject(name = "PlanDefinitions",
+                                                                                      value = SupportingDataOpenApiExamples.MODULE_PLAN_DEFINITIONS_RESPONSE))) })
+    @GetMapping("/module-plan-definitions")
+    public Collection<PlanDefinition> getModulePlanDefinitions()
     {
-        private static final Pattern KM_ID_SEPARATOR = Pattern.compile("\\^");
-
-        public static KnowledgeModule parse(final String kmId)
-        {
-            final String[] parts = KM_ID_SEPARATOR.split(kmId, -1);
-            if (parts.length != 3)
-            {
-                throw new IllegalArgumentException(
-                        "Invalid knowledge module id '%s'. Expected 'scopingEntityId^businessId^version'.".formatted(kmId));
-            }
-            return new KnowledgeModule(parts[0], parts[1], parts[2]);
-        }
-    }
-
-    private static final Set<String> CORE_CODE_SYSTEMS =
-            Set.of(ICEConceptType.DISEASE.getIceConceptTypeValue(), ICEConceptType.VACCINE_GROUP.getIceConceptTypeValue(),
-                    ICEConceptType.VACCINE.getIceConceptTypeValue(), ICEConceptType.SEASON.getIceConceptTypeValue(),
-                    ICEConceptType.SERIES.getIceConceptTypeValue());
-
-    private static String kmId(final String scopingEntityId, final String businessId, final String version)
-    {
-        return "%s^%s^%s".formatted(scopingEntityId, businessId, version);
-    }
-
-    private final IceSupportingDataProperties iceSupportingDataProperties;
-
-    private IceSupportingDataProperties.KnowledgeModule requireKnowledgeModule(final String scopingEntityId,
-            final String businessId, final String version)
-    {
-        final String kmId = kmId(scopingEntityId, businessId, version);
-        final Map<String, IceSupportingDataProperties.KnowledgeModule> knowledgeModules =
-                iceSupportingDataProperties.getKnowledgeModules();
-        if (knowledgeModules == null)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Supporting data is not initialized.");
-        }
-        final IceSupportingDataProperties.KnowledgeModule knowledgeModule = knowledgeModules.get(kmId);
-        if (knowledgeModule == null)
-        {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Knowledge module '%s' not found. Use /supporting-data/knowledge-modules to list available modules.".formatted(
-                            kmId));
-        }
-        return knowledgeModule;
-    }
-
-    private CodeSystem requireCodeSystem(final IceSupportingDataProperties.KnowledgeModule knowledgeModule,
-            final String codeSystemName)
-    {
-        final Map<String, CodeSystem> codeSystems = knowledgeModule.codeSystems();
-        if (codeSystems == null)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Knowledge module has no code systems configured.");
-        }
-        final CodeSystem codeSystem = codeSystems.get(codeSystemName);
-        if (codeSystem == null)
-        {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Code system '%s' not found for the requested knowledge module.".formatted(codeSystemName));
-        }
-        return codeSystem;
-    }
-
-    private CodeSystem lookupCodeSystem(final String scopingEntityId, final String businessId, final String version,
-            final String codeSystemName)
-    {
-        return requireCodeSystem(requireKnowledgeModule(scopingEntityId, businessId, version), codeSystemName);
-    }
-
-    private Map<String, CodeSystem> requireCodeSystems(final IceSupportingDataProperties.KnowledgeModule knowledgeModule)
-    {
-        final Map<String, CodeSystem> codeSystems = knowledgeModule.codeSystems();
-        if (codeSystems == null)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Knowledge module has no code systems configured.");
-        }
-        return codeSystems;
-    }
-
-    private Map<String, SeriesData> requireSeries(final IceSupportingDataProperties.KnowledgeModule knowledgeModule)
-    {
-        final Map<String, SeriesData> series = knowledgeModule.series();
-        if (series == null)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Knowledge module has no series configured.");
-        }
-        return series;
-    }
-
-    @GetMapping
-    public IceSupportingDataProperties supportingData()
-    {
-        return iceSupportingDataProperties;
-    }
-
-    @GetMapping("/knowledge-modules")
-    public List<KnowledgeModule> knowledgeModules()
-    {
-        final Map<String, IceSupportingDataProperties.KnowledgeModule> knowledgeModules =
-                iceSupportingDataProperties.getKnowledgeModules();
-        if (knowledgeModules == null)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Supporting data is not initialized.");
-        }
-        return knowledgeModules.keySet().stream().sorted().map(KnowledgeModule::parse).toList();
-    }
-
-    @GetMapping("/knowledge-module")
-    public IceSupportingDataProperties.KnowledgeModule supportingData(@RequestParam @NotBlank final String scopingEntityId,
-            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
-    {
-        return requireKnowledgeModule(scopingEntityId, businessId, version);
-    }
-
-    @GetMapping("/diseases")
-    public CodeSystem diseases(@RequestParam @NotBlank final String scopingEntityId,
-            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
-    {
-        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.DISEASE.getIceConceptTypeValue());
-    }
-
-    @GetMapping("/vaccine-groups")
-    public CodeSystem vaccineGroups(@RequestParam @NotBlank final String scopingEntityId,
-            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
-    {
-        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.VACCINE_GROUP.getIceConceptTypeValue());
-    }
-
-    @GetMapping("/vaccines")
-    public CodeSystem vaccines(@RequestParam @NotBlank final String scopingEntityId,
-            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
-    {
-        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.VACCINE.getIceConceptTypeValue());
-    }
-
-    @GetMapping("/seasons")
-    public CodeSystem seasons(@RequestParam @NotBlank final String scopingEntityId, @RequestParam @NotBlank final String businessId,
-            @RequestParam @NotBlank final String version)
-    {
-        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.SEASON.getIceConceptTypeValue());
-    }
-
-    @GetMapping("/series")
-    public CodeSystem series(@RequestParam @NotBlank final String scopingEntityId, @RequestParam @NotBlank final String businessId,
-            @RequestParam @NotBlank final String version)
-    {
-        return lookupCodeSystem(scopingEntityId, businessId, version, ICEConceptType.SERIES.getIceConceptTypeValue());
-    }
-
-    @GetMapping("/series-data")
-    public Map<String, SeriesData> seriesData(@RequestParam @NotBlank final String scopingEntityId,
-            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
-    {
-        return requireSeries(requireKnowledgeModule(scopingEntityId, businessId, version));
-    }
-
-    @GetMapping("/code-system")
-    public CodeSystem codeSystem(@RequestParam @NotBlank final String scopingEntityId,
-            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version,
-            @RequestParam @NotBlank final String name)
-    {
-        return lookupCodeSystem(scopingEntityId, businessId, version, name);
-    }
-
-    @GetMapping("/other-code-systems")
-    public Map<String, CodeSystem> otherCodeSystems(@RequestParam @NotBlank final String scopingEntityId,
-            @RequestParam @NotBlank final String businessId, @RequestParam @NotBlank final String version)
-    {
-        return requireCodeSystems(requireKnowledgeModule(scopingEntityId, businessId, version)).entrySet()
+        return cdsEngineProperties.getModuleCanonicalDefinitionMap()
+                .values()
                 .stream()
-                .filter(entry -> !CORE_CODE_SYSTEMS.contains(entry.getKey()))
-                .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (left, _) -> left,
-                        java.util.LinkedHashMap::new));
+                .map(CdsEngineProperties.ModuleCanonicalDefinition::modulePlanDefinition)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    @Operation(operationId = "getDiseasesCodeSystem", summary = "Get diseases code system")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Diseases code system returned successfully.",
+                                         content = @Content(mediaType = "application/json",
+                                                            schema = @Schema(implementation = CodeSystem.class),
+                                                            examples = @ExampleObject(name = "CodeSystem",
+                                                                                      value = SupportingDataOpenApiExamples.CODE_SYSTEM_RESPONSE))),
+            @ApiResponse(responseCode = "404", description = "Module or code system was not found.") })
+    @GetMapping("/diseases")
+    public CodeSystem diseases(
+            @Parameter(description = "PlanDefinition canonical URL without version.", example = MODULE_CANONICAL_EXAMPLE)
+            @RequestParam @NotBlank final String moduleCanonical,
+            @Parameter(description = "PlanDefinition version.", example = MODULE_VERSION_EXAMPLE) @RequestParam @NotBlank
+            final String moduleVersion)
+    {
+        return supportingDataService.lookupCodeSystemFromCanonicalUrlVersion(moduleCanonical, moduleVersion,
+                ICEConceptType.DISEASE.getIceConceptTypeValue());
+    }
+
+    @Operation(operationId = "getVaccineGroupsCodeSystem", summary = "Get vaccine-groups code system")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Vaccine-groups code system returned successfully.",
+                                         content = @Content(mediaType = "application/json",
+                                                            schema = @Schema(implementation = CodeSystem.class),
+                                                            examples = @ExampleObject(name = "CodeSystem",
+                                                                                      value = SupportingDataOpenApiExamples.CODE_SYSTEM_RESPONSE))),
+            @ApiResponse(responseCode = "404", description = "Module or code system was not found.") })
+    @GetMapping("/vaccine-groups")
+    public CodeSystem vaccineGroups(
+            @Parameter(description = "PlanDefinition canonical URL without version.", example = MODULE_CANONICAL_EXAMPLE)
+            @RequestParam @NotBlank final String moduleCanonical,
+            @Parameter(description = "PlanDefinition version.", example = MODULE_VERSION_EXAMPLE) @RequestParam @NotBlank
+            final String moduleVersion)
+    {
+        return supportingDataService.lookupCodeSystemFromCanonicalUrlVersion(moduleCanonical, moduleVersion,
+                ICEConceptType.VACCINE_GROUP.getIceConceptTypeValue());
+    }
+
+    @Operation(operationId = "getVaccinesCodeSystem", summary = "Get vaccines code system")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Vaccines code system returned successfully.",
+                                         content = @Content(mediaType = "application/json",
+                                                            schema = @Schema(implementation = CodeSystem.class),
+                                                            examples = @ExampleObject(name = "CodeSystem",
+                                                                                      value = SupportingDataOpenApiExamples.CODE_SYSTEM_RESPONSE))),
+            @ApiResponse(responseCode = "404", description = "Module or code system was not found.") })
+    @GetMapping("/vaccines")
+    public CodeSystem vaccines(
+            @Parameter(description = "PlanDefinition canonical URL without version.", example = MODULE_CANONICAL_EXAMPLE)
+            @RequestParam @NotBlank final String moduleCanonical,
+            @Parameter(description = "PlanDefinition version.", example = MODULE_VERSION_EXAMPLE) @RequestParam @NotBlank
+            final String moduleVersion)
+    {
+        return supportingDataService.lookupCodeSystemFromCanonicalUrlVersion(moduleCanonical, moduleVersion,
+                ICEConceptType.VACCINE.getIceConceptTypeValue());
+    }
+
+    @Operation(operationId = "getSeasonsCodeSystem", summary = "Get seasons code system")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Seasons code system returned successfully.",
+                                         content = @Content(mediaType = "application/json",
+                                                            schema = @Schema(implementation = CodeSystem.class),
+                                                            examples = @ExampleObject(name = "CodeSystem",
+                                                                                      value = SupportingDataOpenApiExamples.CODE_SYSTEM_RESPONSE))),
+            @ApiResponse(responseCode = "404", description = "Module or code system was not found.") })
+    @GetMapping("/seasons")
+    public CodeSystem seasons(
+            @Parameter(description = "PlanDefinition canonical URL without version.", example = MODULE_CANONICAL_EXAMPLE)
+            @RequestParam @NotBlank final String moduleCanonical,
+            @Parameter(description = "PlanDefinition version.", example = MODULE_VERSION_EXAMPLE) @RequestParam @NotBlank
+            final String moduleVersion)
+    {
+        return supportingDataService.lookupCodeSystemFromCanonicalUrlVersion(moduleCanonical, moduleVersion,
+                ICEConceptType.SEASON.getIceConceptTypeValue());
+    }
+
+    @Operation(operationId = "getSeriesCodeSystem", summary = "Get series code system")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Series code system returned successfully.",
+                                         content = @Content(mediaType = "application/json",
+                                                            schema = @Schema(implementation = CodeSystem.class),
+                                                            examples = @ExampleObject(name = "CodeSystem",
+                                                                                      value = SupportingDataOpenApiExamples.CODE_SYSTEM_RESPONSE))),
+            @ApiResponse(responseCode = "404", description = "Module or code system was not found.") })
+    @GetMapping("/series")
+    public CodeSystem series(
+            @Parameter(description = "PlanDefinition canonical URL without version.", example = MODULE_CANONICAL_EXAMPLE)
+            @RequestParam @NotBlank final String moduleCanonical,
+            @Parameter(description = "PlanDefinition version.", example = MODULE_VERSION_EXAMPLE) @RequestParam @NotBlank
+            final String moduleVersion)
+    {
+        return supportingDataService.lookupCodeSystemFromCanonicalUrlVersion(moduleCanonical, moduleVersion,
+                ICEConceptType.SERIES.getIceConceptTypeValue());
+    }
+
+    @Operation(operationId = "getSeriesPlanDefinitions", summary = "Get series PlanDefinition resources")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Series PlanDefinitions returned successfully.",
+                                         content = @Content(mediaType = "application/json",
+                                                            schema = @Schema(implementation = Map.class),
+                                                            examples = @ExampleObject(name = "SeriesPlanDefinitions",
+                                                                                      value = SupportingDataOpenApiExamples.SERIES_PLAN_DEFINITIONS_RESPONSE))),
+            @ApiResponse(responseCode = "404", description = "Module was not found.") })
+    @GetMapping("/series-plan-definition")
+    public Collection<PlanDefinition> seriesPlanDefinitions(
+            @Parameter(description = "PlanDefinition canonical URL without version.", example = MODULE_CANONICAL_EXAMPLE)
+            @RequestParam @NotBlank final String moduleCanonical,
+            @Parameter(description = "PlanDefinition version.", example = MODULE_VERSION_EXAMPLE) @RequestParam @NotBlank
+            final String moduleVersion)
+    {
+        return supportingDataService.getKnowledgeModuleFromCanonicalUrlVersion(moduleCanonical, moduleVersion)
+                .planDefinitions()
+                .values();
+    }
+
+    @Operation(operationId = "getCodeSystemByName", summary = "Get a code system by name")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Code system returned successfully.",
+                                         content = @Content(mediaType = "application/json",
+                                                            schema = @Schema(implementation = CodeSystem.class),
+                                                            examples = @ExampleObject(name = "CodeSystem",
+                                                                                      value = SupportingDataOpenApiExamples.CODE_SYSTEM_RESPONSE))),
+            @ApiResponse(responseCode = "404", description = "Module or code system was not found.") })
+    @GetMapping("/code-system")
+    public CodeSystem codeSystem(
+            @Parameter(description = "PlanDefinition canonical URL without version.", example = MODULE_CANONICAL_EXAMPLE)
+            @RequestParam @NotBlank final String moduleCanonical,
+            @Parameter(description = "PlanDefinition version.", example = MODULE_VERSION_EXAMPLE) @RequestParam @NotBlank
+            final String moduleVersion,
+            @Parameter(description = "Code system name.", example = CODE_SYSTEM_NAME_EXAMPLE) @RequestParam @NotBlank
+            final String name)
+    {
+        return supportingDataService.lookupCodeSystemFromCanonicalUrlVersion(moduleCanonical, moduleVersion, name);
     }
 }

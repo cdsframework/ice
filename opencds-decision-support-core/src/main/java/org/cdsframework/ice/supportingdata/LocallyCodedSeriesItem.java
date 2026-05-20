@@ -26,8 +26,6 @@
 
 package org.cdsframework.ice.supportingdata;
 
-import java.util.Collection;
-
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsItem;
 import org.cdsframework.ice.service.SeriesRules;
@@ -42,9 +40,9 @@ public class LocallyCodedSeriesItem extends LocallyCodedCdsItem
     private final SeriesRules seriesRules;
 
     protected LocallyCodedSeriesItem(final String pCdsSeriesCode, final CdsConcept pSeriesCdsConcept,
-            final Collection<String> pCdsVersions, final SeriesRules pSeriesRules) throws IllegalArgumentException
+            final SeriesRules pSeriesRules) throws IllegalArgumentException
     {
-        super(pCdsSeriesCode, pSeriesCdsConcept, pCdsVersions);
+        super(pCdsSeriesCode, pSeriesCdsConcept);
 
         final String _METHODNAME = "LocallyCodedSeriesItem(): ";
 
@@ -61,7 +59,6 @@ public class LocallyCodedSeriesItem extends LocallyCodedCdsItem
     @Override
     public String toString()
     {
-        return "LocallyCodedSeriesItem [getCdsItemName()=%s; getCdsVersions()=%s; seriesRules=%s]".formatted(getCdsItemName(),
-                getCdsVersions(), this.seriesRules);
+        return "LocallyCodedSeriesItem [getCdsItemName()=%s; seriesRules=%s]".formatted(getCdsItemName(), this.seriesRules);
     }
 }

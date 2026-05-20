@@ -28,9 +28,11 @@ public abstract class ProblemBaseMapper extends ClinicalStatementMapper
 
         target.setProblemCode(MappingUtility.cD2CDInternal(source.getProblemCode()));
         if (source.getProblemEffectiveTime() != null)
-            target.setProblemEffectiveTime(MappingUtility.iVLTS2IVLDateInternal(source.getProblemEffectiveTime()));
+            target.setProblemEffectiveTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getProblemEffectiveTime(), factLists.getParsedDatesCache()));
         if (source.getDiagnosticEventTime() != null)
-            target.setDiagnosticEventTime(MappingUtility.iVLTS2IVLDateInternal(source.getDiagnosticEventTime()));
+            target.setDiagnosticEventTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getDiagnosticEventTime(), factLists.getParsedDatesCache()));
 
     }
 

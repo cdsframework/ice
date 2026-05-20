@@ -15,7 +15,7 @@ import lombok.ToString;
 @ToString
 public class ObservationProposal extends ObservationBase
 {
-    protected CD criticality;
-    protected IVLDate proposedObservationTime;
-    protected INT repeatNumber;
+    private CD criticality;
+    private IVLDate proposedObservationTime;
+    private INT repeatNumber;
 }

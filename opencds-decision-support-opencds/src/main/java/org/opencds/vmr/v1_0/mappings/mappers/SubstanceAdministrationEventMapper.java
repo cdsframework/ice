@@ -36,9 +36,11 @@ public class SubstanceAdministrationEventMapper extends SubstanceAdministrationB
         if (source.getDoseNumber() != null)
             target.setDoseNumber(MappingUtility.iNT2INTInternal(source.getDoseNumber()));
         if (source.getAdministrationTimeInterval() != null)
-            target.setAdministrationTimeInterval(MappingUtility.iVLTS2IVLDateInternal(source.getAdministrationTimeInterval()));
+            target.setAdministrationTimeInterval(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getAdministrationTimeInterval(), factLists.getParsedDatesCache()));
         if (source.getDocumentationTime() != null)
-            target.setDocumentationTime(MappingUtility.iVLTS2IVLDateInternal(source.getDocumentationTime()));
+            target.setDocumentationTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getDocumentationTime(), factLists.getParsedDatesCache()));
         if (source.getInformationAttestationType() != null)
             target.setInformationAttestationType(MappingUtility.cD2CDInternal(source.getInformationAttestationType()));
         if (source.getIsValid() != null)
@@ -85,9 +87,9 @@ public class SubstanceAdministrationEventMapper extends SubstanceAdministrationB
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getSubstanceAdministrationEvents() == null)
+        if (organizedResults.output().getSubstanceAdministrationEvents() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setSubstanceAdministrationEvents(
                             new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.SubstanceAdministrationEvents());
         }

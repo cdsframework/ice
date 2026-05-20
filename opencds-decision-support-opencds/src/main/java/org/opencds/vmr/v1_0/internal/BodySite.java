@@ -13,6 +13,6 @@ import lombok.ToString;
 @ToString
 public class BodySite
 {
-    protected CD bodySiteCode;
-    protected CD laterality;
+    private CD bodySiteCode;
+    private CD laterality;
 }

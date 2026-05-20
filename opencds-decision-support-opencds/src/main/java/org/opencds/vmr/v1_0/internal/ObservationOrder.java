@@ -15,8 +15,8 @@ import lombok.ToString;
 @ToString
 public class ObservationOrder extends ObservationBase
 {
-    protected CD criticality;
-    protected IVLDate orderEventTime;
-    protected IVLDate observationTime;
-    protected INT repeatNumber;
+    private CD criticality;
+    private IVLDate orderEventTime;
+    private IVLDate observationTime;
+    private INT repeatNumber;
 }

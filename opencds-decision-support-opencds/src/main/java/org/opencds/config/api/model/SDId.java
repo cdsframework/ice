@@ -2,7 +2,7 @@ package org.opencds.config.api.model;
 
 public interface SDId
 {
-    KMId getKMId();
+    KMId kmId();
 
-    String getIdentifier();
+    String identifier();
 }

@@ -34,7 +34,8 @@ public class ScheduledAppointmentMapper extends EncounterBaseMapper
         }
 
         if (source.getAppointmentTime() != null)
-            target.setAppointmentTime(MappingUtility.iVLTS2IVLDateInternal(source.getAppointmentTime()));
+            target.setAppointmentTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getAppointmentTime(), factLists.getParsedDatesCache()));
 
         factLists.put(ScheduledAppointment.class, target);
 
@@ -68,9 +69,9 @@ public class ScheduledAppointmentMapper extends EncounterBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getScheduledAppointments() == null)
+        if (organizedResults.output().getScheduledAppointments() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setScheduledAppointments(
                             new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.ScheduledAppointments());
         }

@@ -1,0 +1,281 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+      plan-definitions:
+        MCV_42_DOSE_SERIES:
+          resource-type: PlanDefinition
+          url: http://cdsframework.org/PlanDefinition/series/mcv_42_dose_series
+          version: 1.0.0
+          name: MCV_42_DOSE_SERIES
+          title: MCV4 2-Dose Series
+          status: active
+          meta:
+            profile:
+              - http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition
+          type:
+            coding:
+              - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
+                code: eca-rule
+                display: ECA Rule
+          extension:
+            - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
+              extension:
+                - url: numberOfDosesInSeries
+                  value-integer: 2
+                - url: series
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.10
+                        code: MCV_42_DOSE_SERIES
+                        version: ICE Vaccine Series
+                        display: MCV4 2-Dose Series
+                    text: MCV4 2-Dose Series
+                - url: vaccineGroup
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.1
+                        code: MENINGOCOCCAL_ACWY
+                        version: ICE Vaccine Group
+                        display: Meningococcal ACWY
+                    text: Meningococcal ACWY
+          action:
+            - id: dose-1
+              title: Dose 1
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 1
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 10y
+                    - url: minimumAge
+                      value-string: 11y
+                    - url: earliestRecommendedAge
+                      value-string: 11y
+                    - url: latestRecommendedAge
+                      value-string: 13y+4w
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '147'
+                            version: CVX
+                            display: meningococcal MCV4 NOS
+                        text: meningococcal MCV4 NOS
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '32'
+                            version: CVX
+                            display: meningococcal MPSV4
+                        text: meningococcal MPSV4
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '114'
+                            version: CVX
+                            display: meningococcal MCV4P
+                        text: meningococcal MCV4P
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '136'
+                            version: CVX
+                            display: meningococcal MCV4O
+                        text: meningococcal MCV4O
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '108'
+                            version: CVX
+                            display: meningococcal NOS
+                        text: meningococcal NOS
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '203'
+                            version: CVX
+                            display: meningococcal MenACWY-TT (MenQuadfi)
+                        text: meningococcal MenACWY-TT (MenQuadfi)
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '316'
+                            version: CVX
+                            display: Meningococcal polysaccharide (MenACWY-TT conjugate),
+                              (MenB), PF
+                        text: Meningococcal polysaccharide (MenACWY-TT conjugate), (MenB),
+                          PF
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '328'
+                            version: CVX
+                            display: Meningococcal MenABCWY (Penmenvy)
+                        text: Meningococcal MenABCWY (Penmenvy)
+                    - url: preferred
+                      value-boolean: true
+            - id: dose-2
+              title: Dose 2
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 2
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 16y-4d
+                    - url: minimumAge
+                      value-string: 16y
+                    - url: earliestRecommendedAge
+                      value-string: 16y
+                    - url: latestRecommendedAge
+                      value-string: 17y+4w
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '147'
+                            version: CVX
+                            display: meningococcal MCV4 NOS
+                        text: meningococcal MCV4 NOS
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '32'
+                            version: CVX
+                            display: meningococcal MPSV4
+                        text: meningococcal MPSV4
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '114'
+                            version: CVX
+                            display: meningococcal MCV4P
+                        text: meningococcal MCV4P
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '136'
+                            version: CVX
+                            display: meningococcal MCV4O
+                        text: meningococcal MCV4O
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '108'
+                            version: CVX
+                            display: meningococcal NOS
+                        text: meningococcal NOS
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '203'
+                            version: CVX
+                            display: meningococcal MenACWY-TT (MenQuadfi)
+                        text: meningococcal MenACWY-TT (MenQuadfi)
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '316'
+                            version: CVX
+                            display: Meningococcal polysaccharide (MenACWY-TT conjugate),
+                              (MenB), PF
+                        text: Meningococcal polysaccharide (MenACWY-TT conjugate), (MenB),
+                          PF
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '328'
+                            version: CVX
+                            display: Meningococcal MenABCWY (Penmenvy)
+                        text: Meningococcal MenABCWY (Penmenvy)
+                    - url: preferred
+                      value-boolean: true
+              related-action:
+                - action-id: dose-1
+                  relationship: after-end
+                  extension:
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 52d
+                        - url: minimumInterval
+                          value-string: 56d
+                        - url: earliestRecommendedInterval
+                          value-string: 56d
+                        - url: latestRecommendedInterval
+                          value-string: 6y+4w

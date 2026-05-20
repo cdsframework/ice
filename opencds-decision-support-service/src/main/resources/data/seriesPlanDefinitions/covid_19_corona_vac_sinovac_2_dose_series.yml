@@ -1,0 +1,384 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+      plan-definitions:
+        COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES:
+          resource-type: PlanDefinition
+          url: http://cdsframework.org/PlanDefinition/series/covid_19_corona_vac_sinovac_2_dose_series
+          version: 1.0.0
+          name: COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES
+          title: COVID-19 2-Dose CoronaVac Sinovac Series
+          status: active
+          meta:
+            profile:
+              - http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition
+          type:
+            coding:
+              - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
+                code: eca-rule
+                display: ECA Rule
+          extension:
+            - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
+              extension:
+                - url: numberOfDosesInSeries
+                  value-integer: 2
+                - url: recurringDosesAfterSeriesComplete
+                  value-boolean: true
+                - url: series
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.10
+                        code: COVID_19_CORONA_VAC_SINOVAC_2_DOSE_SERIES
+                        version: ICE Vaccine Series
+                        display: COVID-19 2-Dose CoronaVac Sinovac Series
+                    text: COVID-19 2-Dose CoronaVac Sinovac Series
+                - url: vaccineGroup
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.1
+                        code: COVID_19
+                        version: ICE Vaccine Group
+                        display: COVID-19
+                    text: COVID-19
+                - url: season
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.11
+                        code: COVID_19_DEC_2020_SEASON
+                        version: ICE Vaccine Season
+                        display: Pandemic COVID-19 Season
+                    text: Pandemic COVID-19 Season
+          action:
+            - id: dose-1
+              title: Dose 1
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 1
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 0d
+                    - url: earliestRecommendedAge
+                      value-string: 18y
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '511'
+                            version: CVX
+                            display: COVID-19 IV Non-US (CoronaVac, Sinovac)
+                        text: COVID-19 IV Non-US (CoronaVac, Sinovac)
+                    - url: preferred
+                      value-boolean: true
+            - id: dose-2
+              title: Dose 2
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 2
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 0d
+                    - url: minimumAge
+                      value-string: 18y
+                    - url: earliestRecommendedAge
+                      value-string: 18y
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '207'
+                            version: CVX
+                            display: COVID-19, mRNA LNP-S, PF, Moderna
+                        text: COVID-19, mRNA LNP-S, PF, Moderna
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '208'
+                            version: CVX
+                            display: COVID-19, mRNA LNP-S, PF, Pfizer
+                        text: COVID-19, mRNA LNP-S, PF, Pfizer
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '210'
+                            version: CVX
+                            display: COVID-19, vector-nr,rS-ChadOx1, PF, AstraZeneca
+                        text: COVID-19, vector-nr,rS-ChadOx1, PF, AstraZeneca
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '211'
+                            version: CVX
+                            display: COVID-19, Subunit, rS-nanoparticle+Matrix-M1 Adjuvant,
+                              PF
+                        text: COVID-19, Subunit, rS-nanoparticle+Matrix-M1 Adjuvant, PF
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '213'
+                            version: CVX
+                            display: COVID-19 (NOS)
+                        text: COVID-19 (NOS)
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '217'
+                            version: CVX
+                            display: COVID-19, mRNA LNP-S, PF, tris-sucrose, Pfizer
+                        text: COVID-19, mRNA LNP-S, PF, tris-sucrose, Pfizer
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '218'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, tris-sucrose, Pfizer (5 through
+                              11 yrs)
+                        text: COVID-19, mRNA, LNP-S, PF, tris-sucrose, Pfizer (5 through
+                          11 yrs)
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '219'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, 3 mcg/0.2 mL dose, tris-sucrose,
+                              Pfizer
+                        text: COVID-19, mRNA, LNP-S, PF, 3 mcg/0.2 mL dose, tris-sucrose,
+                          Pfizer
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '221'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL dose
+                        text: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL dose
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '227'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, pediatric 50 mcg/0.5 mL dose,
+                              Moderna
+                        text: COVID-19, mRNA, LNP-S, PF, pediatric 50 mcg/0.5 mL dose, Moderna
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '228'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, pediatric 25 mcg/0.25 mL dose,
+                              Moderna
+                        text: COVID-19, mRNA, LNP-S, PF, pediatric 25 mcg/0.25 mL dose,
+                          Moderna
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '229'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, bivalent booster, PF, 50 mcg/0.5
+                              mL or 25mcg/0.25 mL dose, Moderna
+                        text: COVID-19, mRNA, LNP-S, bivalent booster, PF, 50 mcg/0.5 mL
+                          or 25mcg/0.25 mL dose, Moderna
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '230'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, bivalent booster, PF, 10 mcg/0.2
+                              mL, Moderna
+                        text: COVID-19, mRNA, LNP-S, bivalent booster, PF, 10 mcg/0.2 mL,
+                          Moderna
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '300'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, bivalent booster, PF, 30 mcg/0.3
+                              mL dose, Pfizer
+                        text: COVID-19, mRNA, LNP-S, bivalent booster, PF, 30 mcg/0.3 mL
+                          dose, Pfizer
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '301'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, bivalent booster, PF, 10 mcg/0.2
+                              mL dose, Pfizer
+                        text: COVID-19, mRNA, LNP-S, bivalent booster, PF, 10 mcg/0.2 mL
+                          dose, Pfizer
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '302'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, bivalent, PF, 3 mcg/0.2 mL dose,
+                              Pfizer
+                        text: COVID-19, mRNA, LNP-S, bivalent, PF, 3 mcg/0.2 mL dose, Pfizer
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '502'
+                            version: CVX
+                            display: COVID-19 IV Non-US (COVAXIN)
+                        text: COVID-19 IV Non-US (COVAXIN)
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '510'
+                            version: CVX
+                            display: COVID-19 IV Non-US (BIBP, Sinopharm)
+                        text: COVID-19 IV Non-US (BIBP, Sinopharm)
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '511'
+                            version: CVX
+                            display: COVID-19 IV Non-US (CoronaVac, Sinovac)
+                        text: COVID-19 IV Non-US (CoronaVac, Sinovac)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '512'
+                            version: CVX
+                            display: COVID-19 VLP Non-US Vaccine (Medicago, Covifenz)
+                        text: COVID-19 VLP Non-US Vaccine (Medicago, Covifenz)
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '519'
+                            version: CVX
+                            display: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US
+                              Vaccine (Spikevax Bivalent), Moderna
+                        text: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US Vaccine
+                          (Spikevax Bivalent), Moderna
+                    - url: preferred
+                      value-boolean: false
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '520'
+                            version: CVX
+                            display: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US
+                              Vaccine Product, Pfizer-BioNTech
+                        text: COVID-19 mRNA, bivalent, original/Omicron BA.1, Non-US Vaccine
+                          Product, Pfizer-BioNTech
+                    - url: preferred
+                      value-boolean: false
+              related-action:
+                - action-id: dose-1
+                  relationship: after-end
+                  extension:
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 0d
+                        - url: minimumInterval
+                          value-string: 2w
+                        - url: earliestRecommendedInterval
+                          value-string: 2w

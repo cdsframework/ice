@@ -1,6 +1,6 @@
 package org.cdsframework.cds;
 
-import org.cdsframework.ice.config.iceSupportingProperties.BaseConceptDescriptor;
+import org.cdsframework.ice.supportingdata.BaseConceptDescriptor;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 
 import lombok.experimental.UtilityClass;

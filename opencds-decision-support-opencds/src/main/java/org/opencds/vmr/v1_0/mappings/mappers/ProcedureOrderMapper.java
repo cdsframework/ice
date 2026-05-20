@@ -36,9 +36,11 @@ public class ProcedureOrderMapper extends ProcedureBaseMapper
         if (source.getCriticality() != null)
             target.setCriticality(MappingUtility.cD2CDInternal(source.getCriticality()));
         if (source.getOrderEventTime() != null)
-            target.setOrderEventTime(MappingUtility.iVLTS2IVLDateInternal(source.getOrderEventTime()));
+            target.setOrderEventTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getOrderEventTime(), factLists.getParsedDatesCache()));
         if (source.getProcedureTime() != null)
-            target.setProcedureTime(MappingUtility.iVLTS2IVLDateInternal(source.getProcedureTime()));
+            target.setProcedureTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getProcedureTime(), factLists.getParsedDatesCache()));
         if (source.getRepeatNumber() != null)
             target.setRepeatNumber(MappingUtility.iNT2INTInternal(source.getRepeatNumber()));
 
@@ -79,9 +81,9 @@ public class ProcedureOrderMapper extends ProcedureBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getProcedureOrders() == null)
+        if (organizedResults.output().getProcedureOrders() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setProcedureOrders(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.ProcedureOrders());
         }
 

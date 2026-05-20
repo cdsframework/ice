@@ -1,5 +1,6 @@
 package org.opencds.vmr.v1_0.internal;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.opencds.vmr.v1_0.internal.datatypes.AD;
@@ -20,15 +21,15 @@ import lombok.ToString;
 @ToString
 public class Demographics
 {
-    protected java.util.Date birthTime;
-    protected PQ age;
-    protected CD gender;
-    protected List<CD> race;
-    protected List<CD> ethnicity;
-    protected List<EN> name;
-    protected List<AD> address;
-    protected List<TEL> telecom;
-    protected BL isDeceased;
-    protected PQ ageAtDeath;
-    protected CD preferredLanguage;
+    private LocalDate birthTime;
+    private PQ age;
+    private CD gender;
+    private List<CD> race;
+    private List<CD> ethnicity;
+    private List<EN> name;
+    private List<AD> address;
+    private List<TEL> telecom;
+    private BL isDeceased;
+    private PQ ageAtDeath;
+    private CD preferredLanguage;
 }

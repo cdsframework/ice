@@ -1,0 +1,194 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "ice-dose-interval-constraint",
+  "url": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint",
+  "version": "1.0.0",
+  "name": "IceDoseIntervalConstraint",
+  "title": "ICE Dose Interval Constraint",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-04-24",
+  "publisher": "CDS Framework",
+  "description": "Interval constraints from a prior dose to the current dose.",
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "PlanDefinition.action"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Dose interval constraints",
+        "definition": "Interval constraints for reaching the current dose from a related prior dose.",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 1,
+        "max": "*"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:absoluteMinimumInterval",
+        "path": "Extension.extension",
+        "sliceName": "absoluteMinimumInterval",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:absoluteMinimumInterval.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:absoluteMinimumInterval.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "absoluteMinimumInterval"
+      },
+      {
+        "id": "Extension.extension:absoluteMinimumInterval.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:minimumInterval",
+        "path": "Extension.extension",
+        "sliceName": "minimumInterval",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:minimumInterval.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:minimumInterval.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "minimumInterval"
+      },
+      {
+        "id": "Extension.extension:minimumInterval.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:earliestRecommendedInterval",
+        "path": "Extension.extension",
+        "sliceName": "earliestRecommendedInterval",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:earliestRecommendedInterval.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:earliestRecommendedInterval.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "earliestRecommendedInterval"
+      },
+      {
+        "id": "Extension.extension:earliestRecommendedInterval.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:latestRecommendedInterval",
+        "path": "Extension.extension",
+        "sliceName": "latestRecommendedInterval",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:latestRecommendedInterval.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:latestRecommendedInterval.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "latestRecommendedInterval"
+      },
+      {
+        "id": "Extension.extension:latestRecommendedInterval.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      }
+    ]
+  }
+}

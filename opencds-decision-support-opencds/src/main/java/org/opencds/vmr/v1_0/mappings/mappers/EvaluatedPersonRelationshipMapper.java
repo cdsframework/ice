@@ -1,12 +1,16 @@
 package org.opencds.vmr.v1_0.mappings.mappers;
 
+import java.time.LocalDate;
+import java.util.Map;
+
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
 import org.opencds.vmr.v1_0.internal.EvaluatedPersonRelationship;
 import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
 
 public class EvaluatedPersonRelationshipMapper
 {
-    public static EvaluatedPersonRelationship pullIn(final org.opencds.vmr.v1_0.schema.EntityRelationship external)
+    public static EvaluatedPersonRelationship pullIn(final org.opencds.vmr.v1_0.schema.EntityRelationship external,
+            final Map<String, LocalDate> parsedDatesCache)
     {
         if (external == null)
             return null;
@@ -28,7 +32,8 @@ public class EvaluatedPersonRelationshipMapper
         internal.setSourceEntityId(sourceId);
         internal.setTargetEntityId(targetId);
         internal.setTargetRole(MappingUtility.cD2CDInternal(external.getTargetRole()));
-        internal.setRelationshipTimeInterval(MappingUtility.iVLTS2IVLDateInternal(external.getRelationshipTimeInterval()));
+        internal.setRelationshipTimeInterval(
+                MappingUtility.iVLTS2IVLDateInternal(external.getRelationshipTimeInterval(), parsedDatesCache));
 
         return internal;
     }

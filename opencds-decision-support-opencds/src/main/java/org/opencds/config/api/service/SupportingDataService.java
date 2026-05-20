@@ -1,47 +1,50 @@
 package org.opencds.config.api.service;
 
-import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.opencds.config.api.dao.SupportingDataDao;
 import org.opencds.config.api.model.KMId;
 import org.opencds.config.api.model.SupportingData;
 
-public interface SupportingDataService
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class SupportingDataService
 {
-    SupportingData find(String supportingDataId);
+    private final Map<String, SupportingData> supportingDataMap;
 
-    SupportingData find(KMId kmId, String identifier);
+    public SupportingDataService(final SupportingDataDao dao)
+    {
+        supportingDataMap = dao.getAll()
+                .stream()
+                .map(sd -> Map.entry(sd.identifier(), sd))
+                .peek(entry -> log.debug("CACHEABLE SD: {} -> {}", entry.getKey(), entry.getValue()))
+                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
 
-    List<SupportingData> find(KMId kmid);
+    public SupportingData find(final String supportingDataId)
+    {
+        return supportingDataMap.get(supportingDataId);
+    }
 
-    List<SupportingData> getAll();
+    public SupportingData find(final KMId kmId, final String supportingDataId)
+    {
+        final var sd = supportingDataMap.get(supportingDataId);
+        if (kmId.equals(sd.kmId()))
+            return sd;
 
-    void persist(SupportingData sd);
+        return null;
+    }
 
-    @Deprecated
-    void delete(KMId kmId, String identifier);
+    public List<SupportingData> find(final KMId kmid)
+    {
+        return supportingDataMap.values().stream().filter(sd -> kmid.equals(sd.kmId())).toList();
+    }
 
-    void delete(String identifier);
-
-    void deleteAll(KMId kmId);
-
-    @Deprecated
-    InputStream getSupportingDataPackage(KMId kmId, String supportingDataId);
-
-    InputStream getSupportingDataPackage(String supportingDataId);
-
-    @Deprecated
-    boolean packageExists(KMId kmId, String supportingDataId);
-
-    boolean packageExists(String supportingDataId);
-
-    @Deprecated
-    void persistSupportingDataPackage(KMId kmId, String identifier, InputStream supportingDataPackage);
-
-    void persistSupportingDataPackage(String identifier, InputStream supportingDataPackage);
-
-    @Deprecated
-    void deleteSupportingDataPackage(KMId kmId, String identifier);
-
-    void deleteSupportingDataPackage(String identifier);
+    public List<SupportingData> getAll()
+    {
+        return List.copyOf(supportingDataMap.values());
+    }
 }

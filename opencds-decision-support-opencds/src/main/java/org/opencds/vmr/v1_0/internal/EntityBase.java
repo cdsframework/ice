@@ -15,12 +15,12 @@ import lombok.ToString;
 @ToString
 public class EntityBase
 {
-    protected String[] templateId;
-    protected String id;
-    protected CD entityType;
+    private String[] templateId;
+    private String id;
+    private CD entityType;
 
-    protected String evaluatedPersonId;
+    private String evaluatedPersonId;
 
-    protected boolean toBeReturned;
-    protected List<RelationshipToSource> relationshipToSources;
+    private boolean toBeReturned;
+    private List<RelationshipToSource> relationshipToSources;
 }

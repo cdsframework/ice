@@ -39,13 +39,16 @@ public abstract class GoalBaseMapper extends ClinicalStatementMapper
         if (source.getCriticality() != null)
             target.setCriticality(MappingUtility.cD2CDInternal(source.getCriticality()));
         if (source.getGoalPursuitEffectiveTime() != null)
-            target.setGoalPursuitEffectiveTime(MappingUtility.iVLTS2IVLDateInternal(source.getGoalPursuitEffectiveTime()));
+            target.setGoalPursuitEffectiveTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getGoalPursuitEffectiveTime(), factLists.getParsedDatesCache()));
         if (source.getGoalAchievementTargetTime() != null)
-            target.setGoalAchievementTargetTime(MappingUtility.iVLTS2IVLDateInternal(source.getGoalAchievementTargetTime()));
+            target.setGoalAchievementTargetTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getGoalAchievementTargetTime(), factLists.getParsedDatesCache()));
         if (source.getTargetBodySite() != null)
             target.setTargetBodySite(BodySiteMapper.pullIn(source.getTargetBodySite()));
         if (source.getTargetGoalValue() != null)
-            target.setTargetGoalValue(MappingUtility.targetGoalValue2TargetGoalValueInternal(source.getTargetGoalValue()));
+            target.setTargetGoalValue(MappingUtility.targetGoalValue2TargetGoalValueInternal(source.getTargetGoalValue(),
+                    factLists.getParsedDatesCache()));
 
     }
 

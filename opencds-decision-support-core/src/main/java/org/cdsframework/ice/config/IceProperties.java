@@ -34,12 +34,23 @@ public class IceProperties
         BOTH
     }
 
-    @Getter
-    @Setter
-    @ToString
-    public static class ExperimentalFeatures
+    public record OpenApiContactProperties(String name,
+                                           String email,
+                                           String url)
     {
-        private boolean enableFhirR6;
+    }
+
+    public record OpenApiLicenseProperties(String name,
+                                           String url)
+    {
+    }
+
+    public record OpenApiProperties(String title,
+                                    String description,
+                                    String version,
+                                    OpenApiContactProperties contact,
+                                    OpenApiLicenseProperties license)
+    {
     }
 
     public record KnowledgeModuleProperties(@NotNull
@@ -52,6 +63,8 @@ public class IceProperties
                                             Boolean outputNumberOfDosesRemaining,
                                             @NotNull
                                             Boolean outputSeriesInformation,
+                                            @NotNull
+                                            Boolean outputVaccineGroupRulesArtifact,
                                             @NotNull
                                             Boolean enableUnsupportedVaccinesGroup,
                                             @NotNull
@@ -73,10 +86,7 @@ public class IceProperties
     }
 
     @NotBlank
-    private String iceBaseRulesScopingEntityId;
-
-    @NotBlank
-    private String iceBaseRulesVersion;
+    private String iceBaseModuleCanonical;
 
     @NotEmpty
     private Map<@NotBlank String, @NotNull @Valid KnowledgeModuleProperties> knowledgeModules;
@@ -90,6 +100,12 @@ public class IceProperties
     private Optional<Boolean> enableDoseOverrideFeature = Optional.empty();
 
     private Optional<Boolean> outputSupplementalText = Optional.empty();
+
+    private Optional<Boolean> outputNumberOfDosesRemaining = Optional.empty();
+
+    private Optional<Boolean> outputSeriesInformation = Optional.empty();
+
+    private Optional<Boolean> outputVaccineGroupRulesArtifact = Optional.empty();
 
     private Optional<Boolean> enableUnsupportedVaccinesGroup = Optional.empty();
 
@@ -109,5 +125,6 @@ public class IceProperties
     @NotNull
     private Resource configPath;
 
-    private Map<@NotBlank String, @NotNull Boolean> experimentalFeatures = Map.of();
+    @Valid
+    private OpenApiProperties openApi;
 }

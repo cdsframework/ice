@@ -2,8 +2,9 @@ package org.opencds.service.evaluate;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +15,8 @@ import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
 import org.opencds.common.exceptions.InvalidDriDataFormatException;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
-import org.opencds.common.utilities.DateUtility;
-import org.opencds.config.api.FactListsBuilder;
 import org.opencds.config.api.KnowledgeRepository;
 import org.opencds.config.api.model.KnowledgeModule;
-import org.opencds.config.api.service.ConceptService;
 import org.opencds.vmr.v1_0.internal.AdministrableSubstance;
 import org.opencds.vmr.v1_0.internal.AdverseEvent;
 import org.opencds.vmr.v1_0.internal.AppointmentProposal;
@@ -79,10 +77,12 @@ import org.opencds.vmr.v1_0.mappings.mappers.VMRMapper;
 import org.opencds.vmr.v1_0.mappings.utilities.MappingUtility;
 
 import lombok.Getter;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+@UtilityClass
 @Slf4j
-public class CdsInputFactListsBuilder implements FactListsBuilder
+public class CdsInputFactListsBuilder
 {
     @Getter
     private static class AgePriorToEvalTime implements Serializable
@@ -90,19 +90,83 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
         @Serial
         private static final long serialVersionUID = 178221508897490900L;
 
-        protected long yearDifference;
-        protected long monthDifference;
-        protected long dayDifference;
-        protected long hourDifference;
-        protected long minuteDifference;
-        protected long secondDifference;
-        protected long millisecondDifference;
+        private static double getApproximateTimeDifference(final Calendar date1, final Calendar date2, final int timeUnit,
+                final boolean ignoreHoursMinutesSeconds)
+        {
+            final long date1AsLong;
+            {
+                final Calendar calendar = (Calendar) date1.clone();
+                if (ignoreHoursMinutesSeconds)
+                {
+                    calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
+                    calendar.set(Calendar.MILLISECOND, 0);
+                }
+                date1AsLong = calendar.getTimeInMillis();
+            }
 
-        private AgePriorToEvalTime(final Date birthTime, final Date evalTime, int highestReturnedCalendarTimeUnit,
+            final long date2AsLong;
+            {
+                final Calendar calendar = (Calendar) date2.clone();
+                if (ignoreHoursMinutesSeconds)
+                {
+                    calendar.set(Calendar.HOUR_OF_DAY, 0);
+                    calendar.set(Calendar.MINUTE, 0);
+                    calendar.set(Calendar.SECOND, 0);
+                    calendar.set(Calendar.MILLISECOND, 0);
+                }
+                date2AsLong = calendar.getTimeInMillis();
+            }
+
+            double x = 1000;
+
+            if (timeUnit == Calendar.YEAR)
+                x = x * 60 * 60 * 24 * 365.25;
+            else
+                if (timeUnit == Calendar.MONTH)
+                    x = x * 60 * 60 * 24 * 30.4375;
+                else
+                    if (timeUnit == Calendar.DATE || timeUnit == Calendar.DAY_OF_WEEK || timeUnit == Calendar.DAY_OF_WEEK_IN_MONTH
+                            || timeUnit == Calendar.DAY_OF_YEAR)
+
+                    {
+                        x = x * 60 * 60 * 24;
+                    }
+                    else
+                        if ((timeUnit == Calendar.HOUR_OF_DAY) || (timeUnit == Calendar.HOUR))
+                            x = x * 60 * 60;
+                        else
+                            if (timeUnit == Calendar.MINUTE)
+                                x = x * 60;
+                            else
+                            {
+                                if (timeUnit != Calendar.SECOND)
+                                {
+                                    if (timeUnit == Calendar.MILLISECOND)
+                                        x = x / 1000;
+                                    else
+                                    {
+                                        log.error("Error in DateUtility.getTimeDifference: time unit of <{}> not recognized.",
+                                                timeUnit);
+                                    }
+                                }
+                            }
+
+            return (date1AsLong - date2AsLong) / (x);
+        }
+
+        private long yearDifference;
+        private long monthDifference;
+        private long dayDifference;
+        private long hourDifference;
+        private long minuteDifference;
+        private long secondDifference;
+        private long millisecondDifference;
+
+        private AgePriorToEvalTime(final LocalDate birthTime, final LocalDate evalTime, int highestReturnedCalendarTimeUnit,
                 final boolean ignoreSmallTimeUnits, int highestCalendarTimeUnitToIgnore)
         {
-            initialize();
-
             if (highestCalendarTimeUnitToIgnore == Calendar.HOUR)
                 highestCalendarTimeUnitToIgnore = Calendar.HOUR_OF_DAY;
             if (highestReturnedCalendarTimeUnit == Calendar.HOUR)
@@ -110,10 +174,8 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
 
             if (!birthTime.equals(evalTime))
             {
-                final Calendar laterTime = new GregorianCalendar();
-                final Calendar earlierTime = new GregorianCalendar();
-                laterTime.setTime(evalTime);
-                earlierTime.setTime(birthTime);
+                final Calendar laterTime = GregorianCalendar.from(evalTime.atStartOfDay(ZoneId.systemDefault()));
+                final Calendar earlierTime = GregorianCalendar.from(birthTime.atStartOfDay(ZoneId.systemDefault()));
 
                 if (ignoreSmallTimeUnits)
                 {
@@ -125,131 +187,100 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
             }
         }
 
-        protected void initialize()
-        {
-            yearDifference = 0;
-            monthDifference = 0;
-            dayDifference = 0;
-            hourDifference = 0;
-            minuteDifference = 0;
-            secondDifference = 0;
-            millisecondDifference = 0;
-        }
-
         protected void clearThisTimeUnitAndBelow(final Calendar time, final int highestCalendarTimeUnitToIgnore)
         {
-            if (highestCalendarTimeUnitToIgnore == Calendar.YEAR)
+            switch (highestCalendarTimeUnitToIgnore)
             {
-                time.set(Calendar.YEAR, 1);
-                clearThisTimeUnitAndBelow(time, Calendar.MONTH);
-            }
-            else
-                if (highestCalendarTimeUnitToIgnore == Calendar.MONTH)
+                case Calendar.YEAR ->
+                {
+                    time.set(Calendar.YEAR, 1);
+                    clearThisTimeUnitAndBelow(time, Calendar.MONTH);
+                }
+                case Calendar.MONTH ->
                 {
                     time.set(Calendar.MONTH, 1);
                     clearThisTimeUnitAndBelow(time, Calendar.DATE);
                 }
-                else
-                    if (highestCalendarTimeUnitToIgnore == Calendar.DATE || highestCalendarTimeUnitToIgnore == Calendar.DAY_OF_WEEK
-                            || highestCalendarTimeUnitToIgnore == Calendar.DAY_OF_WEEK_IN_MONTH
-                            || highestCalendarTimeUnitToIgnore == Calendar.DAY_OF_YEAR)
-
-                    {
-                        time.set(Calendar.DATE, 1);
-                        clearThisTimeUnitAndBelow(time, Calendar.HOUR_OF_DAY);
-                    }
-                    else
-                        if ((highestCalendarTimeUnitToIgnore == Calendar.HOUR) || (highestCalendarTimeUnitToIgnore
-                                == Calendar.HOUR_OF_DAY))
-                        {
-                            time.set(Calendar.HOUR_OF_DAY, 0);
-                            clearThisTimeUnitAndBelow(time, Calendar.MINUTE);
-                        }
-                        else
-                            if (highestCalendarTimeUnitToIgnore == Calendar.MINUTE)
-                            {
-                                time.set(Calendar.MINUTE, 0);
-                                clearThisTimeUnitAndBelow(time, Calendar.SECOND);
-                            }
-                            else
-                                if (highestCalendarTimeUnitToIgnore == Calendar.SECOND)
-                                {
-                                    time.set(Calendar.SECOND, 0);
-                                    clearThisTimeUnitAndBelow(time, Calendar.MILLISECOND);
-                                }
-                                else
-                                    if (highestCalendarTimeUnitToIgnore == Calendar.MILLISECOND)
-                                        time.set(Calendar.MILLISECOND, 0);
-                                    else
-                                    {
-                                        log.error(
-                                                "Error in AbsoluteTimeDifference.clearThisTimeUnitAndBelow; time unit to ignore of <{}> not expected.",
-                                                highestCalendarTimeUnitToIgnore);
-                                    }
+                case Calendar.DATE, Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK_IN_MONTH, Calendar.DAY_OF_YEAR ->
+                {
+                    time.set(Calendar.DATE, 1);
+                    clearThisTimeUnitAndBelow(time, Calendar.HOUR_OF_DAY);
+                }
+                case Calendar.HOUR, Calendar.HOUR_OF_DAY ->
+                {
+                    time.set(Calendar.HOUR_OF_DAY, 0);
+                    clearThisTimeUnitAndBelow(time, Calendar.MINUTE);
+                }
+                case Calendar.MINUTE ->
+                {
+                    time.set(Calendar.MINUTE, 0);
+                    clearThisTimeUnitAndBelow(time, Calendar.SECOND);
+                }
+                case Calendar.SECOND ->
+                {
+                    time.set(Calendar.SECOND, 0);
+                    clearThisTimeUnitAndBelow(time, Calendar.MILLISECOND);
+                }
+                case Calendar.MILLISECOND -> time.set(Calendar.MILLISECOND, 0);
+                default -> log.error(
+                        "Error in AbsoluteTimeDifference.clearThisTimeUnitAndBelow; time unit to ignore of <{}> not expected.",
+                        highestCalendarTimeUnitToIgnore);
+            }
         }
 
         protected void setTimeDifferenceForUnitAndBelow(final Calendar evalTime, final Calendar birthTime,
                 final int calendarTimeUnit)
         {
-            if (calendarTimeUnit == Calendar.YEAR)
+            switch (calendarTimeUnit)
             {
-                yearDifference = getTimeDifferenceForUnit(evalTime, birthTime, calendarTimeUnit);
-                setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.MONTH);
-            }
-            else
-                if (calendarTimeUnit == Calendar.MONTH)
+                case Calendar.YEAR ->
+                {
+                    yearDifference = getTimeDifferenceForUnit(evalTime, birthTime, calendarTimeUnit);
+                    setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.MONTH);
+                }
+                case Calendar.MONTH ->
                 {
                     monthDifference = getTimeDifferenceForUnit(evalTime, birthTime, calendarTimeUnit);
                     setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.DATE);
                 }
-                else
-                    if (calendarTimeUnit == Calendar.DATE || calendarTimeUnit == Calendar.DAY_OF_WEEK
-                            || calendarTimeUnit == Calendar.DAY_OF_WEEK_IN_MONTH || calendarTimeUnit == Calendar.DAY_OF_YEAR)
-
-                    {
-                        dayDifference = getTimeDifferenceForUnit(evalTime, birthTime, Calendar.DATE);
-                        setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.HOUR_OF_DAY);
-                    }
-                    else
-                        if ((calendarTimeUnit == Calendar.HOUR) || (calendarTimeUnit == Calendar.HOUR_OF_DAY))
-                        {
-                            hourDifference = getTimeDifferenceForUnit(evalTime, birthTime, Calendar.HOUR_OF_DAY);
-                            setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.MINUTE);
-                        }
-                        else
-                            if (calendarTimeUnit == Calendar.MINUTE)
-                            {
-                                minuteDifference = getTimeDifferenceForUnit(evalTime, birthTime, calendarTimeUnit);
-                                setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.SECOND);
-                            }
-                            else
-                                if (calendarTimeUnit == Calendar.SECOND)
-                                {
-                                    secondDifference = getTimeDifferenceForUnit(evalTime, birthTime, calendarTimeUnit);
-                                    setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.MILLISECOND);
-                                }
-                                else
-                                    if (calendarTimeUnit == Calendar.MILLISECOND)
-                                        millisecondDifference = getTimeDifferenceForUnit(evalTime, birthTime, calendarTimeUnit);
-                                    else
-                                    {
-                                        System.err.println(
-                                                "Error in AbsoluteTimeDifference.setTimeDifferenceForUnitAndBelow; time unit of <"
-                                                        + calendarTimeUnit + "> not expected.");
-                                    }
+                case Calendar.DATE, Calendar.DAY_OF_WEEK, Calendar.DAY_OF_WEEK_IN_MONTH, Calendar.DAY_OF_YEAR ->
+                {
+                    dayDifference = getTimeDifferenceForUnit(evalTime, birthTime, Calendar.DATE);
+                    setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.HOUR_OF_DAY);
+                }
+                case Calendar.HOUR, Calendar.HOUR_OF_DAY ->
+                {
+                    hourDifference = getTimeDifferenceForUnit(evalTime, birthTime, Calendar.HOUR_OF_DAY);
+                    setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.MINUTE);
+                }
+                case Calendar.MINUTE ->
+                {
+                    minuteDifference = getTimeDifferenceForUnit(evalTime, birthTime, calendarTimeUnit);
+                    setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.SECOND);
+                }
+                case Calendar.SECOND ->
+                {
+                    secondDifference = getTimeDifferenceForUnit(evalTime, birthTime, calendarTimeUnit);
+                    setTimeDifferenceForUnitAndBelow(evalTime, birthTime, Calendar.MILLISECOND);
+                }
+                case Calendar.MILLISECOND ->
+                        millisecondDifference = getTimeDifferenceForUnit(evalTime, birthTime, calendarTimeUnit);
+                default -> log.error(
+                        "Error in AbsoluteTimeDifference.setTimeDifferenceForUnitAndBelow; time unit of <{}> not expected.",
+                        calendarTimeUnit);
+            }
         }
 
         protected long getTimeDifferenceForUnit(final Calendar evalTime, final Calendar birthTime, final int calendarTimeUnit)
         {
-            long privateTimeUnitDifference = 0;
+            long staticTimeUnitDifference = 0;
 
             boolean twoTimesAreClose = false;
             while (!twoTimesAreClose)
             {
-                final int approxDifForUnit = (int) DateUtility.getInstance()
-                        .getApproximateTimeDifference(evalTime.getTime(), birthTime.getTime(), calendarTimeUnit, false);
+                final int approxDifForUnit = (int) getApproximateTimeDifference(evalTime, birthTime, calendarTimeUnit, false);
                 birthTime.add(calendarTimeUnit, approxDifForUnit);
-                privateTimeUnitDifference += approxDifForUnit;
+                staticTimeUnitDifference += approxDifForUnit;
 
                 if ((approxDifForUnit == 0) || ((approxDifForUnit > 0) && (approxDifForUnit < 100)) || ((approxDifForUnit < 0) && (
                         approxDifForUnit > -100)))
@@ -263,26 +294,23 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
                 while (birthTime.before(evalTime))
                 {
                     birthTime.add(calendarTimeUnit, 1);
-                    privateTimeUnitDifference++;
+                    staticTimeUnitDifference++;
                 }
 
                 birthTime.add(calendarTimeUnit, -1);
-                privateTimeUnitDifference--;
+                staticTimeUnitDifference--;
             }
             else
                 if (birthTime.after(evalTime))
-                    privateTimeUnitDifference = 0;
+                    staticTimeUnitDifference = 0;
 
-            return privateTimeUnitDifference;
+            return staticTimeUnitDifference;
         }
 
     }
 
-    private final BuildOpenCDSConceptLists buildOpenCDSConceptLists = new BuildOpenCDSConceptLists();
-
-    @Override
-    public Map<Class<?>, List<?>> buildFactLists(final KnowledgeRepository knowledgeRepository,
-            final KnowledgeModule knowledgeModule, final Object payload, final Date evalTime)
+    public static Map<Class<?>, List<?>> buildFactLists(final KnowledgeRepository knowledgeRepository,
+            final KnowledgeModule knowledgeModule, final Object payload, final LocalDate evalTime)
     {
         log.debug("buildFactLists");
         final long t0 = System.nanoTime();
@@ -290,7 +318,6 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
 
         try
         {
-            MappingUtility.initParsedDatesCache();
             final FactLists factLists = new FactLists();
 
             final org.opencds.vmr.v1_0.schema.CDSInput cdsInput = (org.opencds.vmr.v1_0.schema.CDSInput) payload;
@@ -322,17 +349,13 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
             factLists.put(VMR.class, internalVMR);
 
             if (vmrInput.getPatient() != null)
-            {
-                final org.opencds.vmr.v1_0.schema.EvaluatedPerson inputPatient = vmrInput.getPatient();
-                oneEvaluatedPerson(inputPatient, evalTime, subjectPersonId, focalPersonId.id(), factLists);
-            }
+                oneEvaluatedPerson(vmrInput.getPatient(), evalTime, subjectPersonId, focalPersonId.id(), factLists);
 
             if ((vmrInput.getOtherEvaluatedPersons() != null) && (vmrInput.getOtherEvaluatedPersons().getEvaluatedPerson() != null)
                     && (!vmrInput.getOtherEvaluatedPersons().getEvaluatedPerson().isEmpty()))
             {
-                final List<org.opencds.vmr.v1_0.schema.EvaluatedPerson> input =
-                        vmrInput.getOtherEvaluatedPersons().getEvaluatedPerson();
-                for (final org.opencds.vmr.v1_0.schema.EvaluatedPerson eachOtherEvaluatedPerson : input)
+                for (final org.opencds.vmr.v1_0.schema.EvaluatedPerson eachOtherEvaluatedPerson : vmrInput.getOtherEvaluatedPersons()
+                        .getEvaluatedPerson())
                 {
                     subjectPersonId = MappingUtility.iI2FlatId(eachOtherEvaluatedPerson.getId());
                     oneEvaluatedPerson(eachOtherEvaluatedPerson, evalTime, subjectPersonId, focalPersonId.id(), factLists);
@@ -343,28 +366,24 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
                     vmrInput.getEvaluatedPersonRelationships().getEvaluatedPersonRelationship() != null)
                     && (!vmrInput.getEvaluatedPersonRelationships().getEvaluatedPersonRelationship().isEmpty()))
             {
-                final List<org.opencds.vmr.v1_0.schema.EntityRelationship> input =
-                        vmrInput.getEvaluatedPersonRelationships().getEvaluatedPersonRelationship();
-                for (final org.opencds.vmr.v1_0.schema.EntityRelationship each : input)
-                {
-                    final EvaluatedPersonRelationship internalEvaluatedPersonRelationship =
-                            EvaluatedPersonRelationshipMapper.pullIn(each);
-                    factLists.put(EvaluatedPersonRelationship.class, internalEvaluatedPersonRelationship);
-                }
+                for (final org.opencds.vmr.v1_0.schema.EntityRelationship each : vmrInput.getEvaluatedPersonRelationships()
+                        .getEvaluatedPersonRelationship())
+                    factLists.put(EvaluatedPersonRelationship.class,
+                            EvaluatedPersonRelationshipMapper.pullIn(each, factLists.getParsedDatesCache()));
             }
 
             try
             {
-                final ConceptService conceptService = knowledgeRepository.conceptService().byKM(knowledgeModule);
-                buildOpenCDSConceptLists.buildConceptLists(conceptService, factLists, allFactLists);
+                BuildOpenCDSConceptLists.buildConceptLists(knowledgeRepository.conceptService().byKM(knowledgeModule), factLists,
+                        allFactLists);
             }
             catch (final Exception e)
             {
                 log.error(e.getMessage(), e);
-                throw new InvalidDriDataFormatException("BuildOpenCDSConceptLists threw error: " + e.getMessage() + "; " + e);
+                throw new InvalidDriDataFormatException("BuildOpenCDSConceptLists threw error: " + e.getMessage(), e);
             }
 
-            factLists.populateAllFactLists(allFactLists);
+            factLists.populate(allFactLists);
 
             log.debug("buildFactLists completed for {}", focalPersonId);
         }
@@ -372,8 +391,8 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
         {
             log.error(e.getMessage(), e);
             throw new InvalidDriDataFormatException(
-                    e.getClass().getSimpleName() + " error in CdsInputFactListsBuilder: " + e.getMessage()
-                            + ", therefore unable to complete unmarshalling input Semantic Payload: " + payload);
+                    "%s error in CdsInputFactListsBuilder: %s, therefore unable to complete unmarshalling input Semantic Payload: %s".formatted(
+                            e.getClass().getSimpleName(), e.getMessage(), payload));
         }
         catch (final OpenCDSRuntimeException e)
         {
@@ -382,35 +401,27 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
         catch (final Exception e)
         {
             log.error(e.getMessage(), e);
-            throw new InvalidDriDataFormatException("Unknown error initializing CdsInputFactListsBuilder: " + e.getMessage()
-                    + ", therefore unable to complete unmarshalling input Semantic Payload: " + payload);
-        }
-        finally
-        {
-            MappingUtility.clearParsedDatesCache();
+            throw new InvalidDriDataFormatException(
+                    "Unknown error initializing CdsInputFactListsBuilder: %s, therefore unable to complete unmarshalling input Semantic Payload: %s".formatted(
+                            e.getMessage(), payload));
         }
 
         log.debug("CdsInputFactListsBuilder time : {} ms", (System.nanoTime() - t0) / 1e6);
         return allFactLists;
     }
 
-    private void oneEvaluatedPerson(final org.opencds.vmr.v1_0.schema.EvaluatedPerson inputPatient, final Date evalTime,
+    private static void oneEvaluatedPerson(final org.opencds.vmr.v1_0.schema.EvaluatedPerson inputPatient, final LocalDate evalTime,
             final String subjectPersonId, final String focalPersonId, final FactLists factLists)
             throws ImproperUsageException, DataFormatException, InvalidDataException
     {
         final EvaluatedPerson internalPatient = new EvaluatedPerson();
         EvaluatedPersonMapper.pullIn(inputPatient, internalPatient, null, null, subjectPersonId, focalPersonId, factLists);
 
-        if (inputPatient.getDemographics() != null)
-        {
-            final Date birthTime;
-            if (inputPatient.getDemographics().getBirthTime() != null)
-            {
-                birthTime = MappingUtility.tS2DateInternal(inputPatient.getDemographics().getBirthTime());
-                populateEvaluatedPersonAgeAtEvalTime(birthTime, evalTime, focalPersonId, factLists);
-            }
+        if (inputPatient.getDemographics() != null && inputPatient.getDemographics().getBirthTime() != null)
+            populateEvaluatedPersonAgeAtEvalTime(
+                    MappingUtility.tS2DateInternal(inputPatient.getDemographics().getBirthTime(), factLists.getParsedDatesCache()),
+                    evalTime, focalPersonId, factLists);
 
-        }
         factLists.put(EvaluatedPerson.class, internalPatient);
 
         if (inputPatient.getClinicalStatementRelationships() != null)
@@ -757,10 +768,10 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
 
     }
 
-    private void populateEvaluatedPersonAgeAtEvalTime(final Date birthTime, final Date evalTime,
+    private static void populateEvaluatedPersonAgeAtEvalTime(final LocalDate birthTime, final LocalDate evalTime,
             final String internalSubjectPersonId, final FactLists factLists)
     {
-        if ((birthTime != null) && (evalTime != null) && (internalSubjectPersonId != null) && (evalTime.after(birthTime)))
+        if ((birthTime != null) && (evalTime != null) && (internalSubjectPersonId != null) && (evalTime.isAfter(birthTime)))
         {
             final AgePriorToEvalTime tdYear = getAgePriorToEvalTime(evalTime, birthTime, Calendar.YEAR, true, Calendar.HOUR);
             final AgePriorToEvalTime tdMonth = getAgePriorToEvalTime(evalTime, birthTime, Calendar.MONTH, true, Calendar.HOUR);
@@ -811,7 +822,7 @@ public class CdsInputFactListsBuilder implements FactListsBuilder
         }
     }
 
-    private AgePriorToEvalTime getAgePriorToEvalTime(final Date birthTime, final Date evalTime,
+    private static AgePriorToEvalTime getAgePriorToEvalTime(final LocalDate birthTime, final LocalDate evalTime,
             final int highestReturnedCalendarTimeUnit, final boolean ignoreSmallTimeUnits,
             final int highestCalendarTimeUnitToIgnore)
     {

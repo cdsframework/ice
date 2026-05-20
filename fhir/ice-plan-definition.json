@@ -1,0 +1,39 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "ice-forecast",
+  "url": "http://cdsframework.org/PlanDefinition/ice-forecast",
+  "version": "1.0.0",
+  "name": "IceForecast",
+  "title": "ICE Immunization Forecast",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-04-22",
+  "publisher": "CDS Framework",
+  "contact": [
+    {
+      "name": "CDS Framework"
+    }
+  ],
+  "description": "PlanDefinition representing the ICE immunization forecasting module used by the CDS Framework FHIR immunization forecast operation.",
+  "purpose": "Provides the canonical module identity referenced by GuidanceResponse.moduleCanonical for ICE immunization forecasting results.",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+        "code": "eca-rule",
+        "display": "ECA Rule"
+      }
+    ],
+    "text": "Clinical decision support rule"
+  },
+  "identifier": [
+    {
+      "system": "http://cdsframework.org/identifiers/knowledge-modules",
+      "value": "org.nyc.cir^ICE^1.0.0"
+    }
+  ],
+  "versionAlgorithmString": "semver",
+  "library": [
+    "http://cdsframework.org/Library/ice-forecast-logic|1.0.0"
+  ]
+}

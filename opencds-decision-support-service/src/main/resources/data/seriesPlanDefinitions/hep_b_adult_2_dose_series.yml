@@ -1,0 +1,99 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+      plan-definitions:
+        HEP_B_ADULT_2_DOSE_SERIES:
+          resource-type: PlanDefinition
+          url: http://cdsframework.org/PlanDefinition/series/hep_b_adult_2_dose_series
+          version: 1.0.0
+          name: HEP_B_ADULT_2_DOSE_SERIES
+          title: HepB Adult 2-Dose Series
+          status: active
+          meta:
+            profile:
+              - http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition
+          type:
+            coding:
+              - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
+                code: eca-rule
+                display: ECA Rule
+          extension:
+            - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
+              extension:
+                - url: numberOfDosesInSeries
+                  value-integer: 2
+                - url: series
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.10
+                        code: HEP_B_ADULT_2_DOSE_SERIES
+                        version: ICE Vaccine Series
+                        display: HepB Adult 2-Dose Series
+                    text: HepB Adult 2-Dose Series
+                - url: vaccineGroup
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.1
+                        code: HEP_B
+                        version: ICE Vaccine Group
+                        display: HepB
+                    text: HepB
+          action:
+            - id: dose-1
+              title: Dose 1
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 1
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 18y-4d
+                    - url: minimumAge
+                      value-string: 18y
+                    - url: earliestRecommendedAge
+                      value-string: 18y
+                    - url: latestRecommendedAge
+                      value-string: 18y
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '189'
+                            version: CVX
+                            display: Hep B, adjuvanted
+                        text: Hep B, adjuvanted
+                    - url: preferred
+                      value-boolean: true
+            - id: dose-2
+              title: Dose 2
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 2
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '189'
+                            version: CVX
+                            display: Hep B, adjuvanted
+                        text: Hep B, adjuvanted
+                    - url: preferred
+                      value-boolean: true
+              related-action:
+                - action-id: dose-1
+                  relationship: after-end
+                  extension:
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 24d
+                        - url: minimumInterval
+                          value-string: 28d
+                        - url: earliestRecommendedInterval
+                          value-string: 28d
+                        - url: latestRecommendedInterval
+                          value-string: 56d

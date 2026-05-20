@@ -34,7 +34,7 @@ public class SupplyEventMapper extends SupplyBaseMapper
         }
 
         if (source.getSupplyTime() != null)
-            target.setSupplyTime(MappingUtility.iVLTS2IVLDateInternal(source.getSupplyTime()));
+            target.setSupplyTime(MappingUtility.iVLTS2IVLDateInternal(source.getSupplyTime(), factLists.getParsedDatesCache()));
 
         factLists.put(SupplyEvent.class, target);
 
@@ -68,9 +68,9 @@ public class SupplyEventMapper extends SupplyBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getSupplyEvents() == null)
+        if (organizedResults.output().getSupplyEvents() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setSupplyEvents(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.SupplyEvents());
         }
 

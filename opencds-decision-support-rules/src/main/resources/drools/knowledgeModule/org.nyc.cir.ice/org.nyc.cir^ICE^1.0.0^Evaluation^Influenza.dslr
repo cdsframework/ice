@@ -20,7 +20,7 @@ import org.cdsframework.ice.service.Vaccine;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 rule "Influenza: 24 day absolute minimum interval between target dose 1 in current seasonal series and most recent shot from a prior season"
 	dialect "mvel"
@@ -87,12 +87,12 @@ rule "Influenza: Change invalid >= maximum age reason to Insufficient Antigen fo
         Log that this dose rule fired for the dose $oTargetDose in the Series $associatedTargetSeries
 end
 
-rule "Influenza: If CVX 194, 200, 201 202, 231, or 331 is administered, evaluate the shot as Invalid / VACCINE_NOT_ALLOWED_IN_US"
+rule "Influenza: If CVX 194, 200, 201 202, 231, 331 or 337 is administered, evaluate the shot as Invalid / VACCINE_NOT_ALLOWED_IN_US"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
     when
     	There is an Administered Shot $oTargetDose that needs to be evaluated
     		- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.INFLUENZA"
-    		- the vaccine administered a member of ("VACCINE_CVX_194", "VACCINE_CVX_200", "VACCINE_CVX_201", "VACCINE_CVX_202", "VACCINE_CVX_231", "VACCINE_CVX_331")
+    		- the vaccine administered a member of ("VACCINE_CVX_194", "VACCINE_CVX_200", "VACCINE_CVX_201", "VACCINE_CVX_202", "VACCINE_CVX_231", "VACCINE_CVX_331", "VACCINE_CVX_337")
        		- make note of the Associated Series as $associatedTargetSeries
     then
     	Include the reason for shot $oTargetDose Invalid due to "Vaccine not Allowed in U.S."

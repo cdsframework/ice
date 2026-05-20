@@ -76,9 +76,9 @@ public class AdverseEventMapper extends AdverseEventBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getAdverseEvents() == null)
+        if (organizedResults.output().getAdverseEvents() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setAdverseEvents(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.AdverseEvents());
         }
 

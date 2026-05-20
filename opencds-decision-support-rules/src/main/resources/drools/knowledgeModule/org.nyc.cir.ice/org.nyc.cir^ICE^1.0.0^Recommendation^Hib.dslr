@@ -18,7 +18,7 @@ import org.cdsframework.ice.service.Vaccine;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 rule "Hib: Recommend Hib Conditional High Risk if Patient Age >=5yrs and Series Not Complete by 5yrs of Age and Cancel all other Recommendation Rules"
 	dialect "mvel"

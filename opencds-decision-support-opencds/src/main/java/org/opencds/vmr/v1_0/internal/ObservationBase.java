@@ -13,7 +13,7 @@ import lombok.ToString;
 @ToString
 public abstract class ObservationBase extends ClinicalStatement
 {
-    protected CD observationFocus;
-    protected CD observationMethod;
-    protected BodySite targetBodySite;
+    private CD observationFocus;
+    private CD observationMethod;
+    private BodySite targetBodySite;
 }

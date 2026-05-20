@@ -26,7 +26,7 @@
 
 package org.cdsframework.ice.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,29 +79,30 @@ public class Recommendation
                 .toList();
     }
 
-    public static Date obtainMostRecentEarliestDateFromRecommendationsList(final List<Recommendation> recommendationsList)
+    public static LocalDate obtainMostRecentEarliestDateFromRecommendationsList(final List<Recommendation> recommendationsList)
     {
         if (recommendationsList == null)
             return null;
 
-        return recommendationsList.stream().map(Recommendation::getEarliestDate).max(Date::compareTo).orElse(null);
+        return recommendationsList.stream().map(Recommendation::getEarliestDate).max(LocalDate::compareTo).orElse(null);
     }
 
-    public static Date obtainMostRecentRecommendationDateFromRecommendationsList(final List<Recommendation> recommendationsList)
-    {
-        if (recommendationsList == null)
-            return null;
-
-        return recommendationsList.stream().map(Recommendation::getRecommendationDate).max(Date::compareTo).orElse(null);
-    }
-
-    public static Date obtainMostRecentLatestRecommendationDateFromRecommendationsList(
+    public static LocalDate obtainMostRecentRecommendationDateFromRecommendationsList(
             final List<Recommendation> recommendationsList)
     {
         if (recommendationsList == null)
             return null;
 
-        return recommendationsList.stream().map(Recommendation::getLatestRecommendationDate).max(Date::compareTo).orElse(null);
+        return recommendationsList.stream().map(Recommendation::getRecommendationDate).max(LocalDate::compareTo).orElse(null);
+    }
+
+    public static LocalDate obtainMostRecentLatestRecommendationDateFromRecommendationsList(
+            final List<Recommendation> recommendationsList)
+    {
+        if (recommendationsList == null)
+            return null;
+
+        return recommendationsList.stream().map(Recommendation::getLatestRecommendationDate).max(LocalDate::compareTo).orElse(null);
     }
 
     @EqualsAndHashCode.Include
@@ -110,9 +111,9 @@ public class Recommendation
     private String targetDoseIdentifier;
     private RecommendationStatus recommendationStatus;
     private Vaccine recommendedVaccine;
-    private Date earliestDate;
-    private Date recommendationDate;
-    private Date latestRecommendationDate;
+    private LocalDate earliestDate;
+    private LocalDate recommendationDate;
+    private LocalDate latestRecommendationDate;
     private String recommendationReason;
 
     /**
@@ -170,7 +171,7 @@ public class Recommendation
     /**
      * Sets the latest recommendation date to the overdue date - 1 days
      */
-    public void setOverdueDate(final Date overdueDate)
+    public void setOverdueDate(final LocalDate overdueDate)
     {
         if (overdueDate == null)
             this.latestRecommendationDate = null;

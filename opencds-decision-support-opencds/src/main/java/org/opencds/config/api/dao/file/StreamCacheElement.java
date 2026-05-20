@@ -12,11 +12,6 @@ import org.opencds.common.exceptions.OpenCDSRuntimeException;
 public record StreamCacheElement(String id,
                                  InputStream inputStream) implements CacheElement
 {
-    public static CacheElement create(final String id, final InputStream inputStream)
-    {
-        return new StreamCacheElement(id, inputStream);
-    }
-
     @Override
     public long length()
     {
@@ -38,12 +33,14 @@ public record StreamCacheElement(String id,
             file = File.createTempFile(id, ".accdb");
             try (final DataOutputStream out = new DataOutputStream(new FileOutputStream(file)))
             {
-                final DataInputStream in = new DataInputStream(inputStream);
-                final byte[] b = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = in.read(b)) != -1)
-                    out.write(b, 0, bytesRead);
-                out.flush();
+                try (final DataInputStream in = new DataInputStream(inputStream))
+                {
+                    final byte[] b = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = in.read(b)) != -1)
+                        out.write(b, 0, bytesRead);
+                    out.flush();
+                }
             }
             return file;
         }

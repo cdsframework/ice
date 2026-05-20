@@ -59,15 +59,15 @@ public class DeniedProblemMapper extends ProblemBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getAdverseEvents() == null)
+        if (organizedResults.output().getAdverseEvents() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setAdverseEvents(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.AdverseEvents());
         }
 
-        if (organizedResults.getOutput().getDeniedProblems() == null)
+        if (organizedResults.output().getDeniedProblems() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setDeniedProblems(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.DeniedProblems());
         }
 

@@ -11,6 +11,6 @@ import lombok.ToString;
 @ToString
 public class EvaluatedPerson extends EntityBase
 {
-    protected Demographics demographics;
-    protected boolean focalPerson;
+    private Demographics demographics;
+    private boolean focalPerson;
 }

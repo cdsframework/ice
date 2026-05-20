@@ -33,9 +33,10 @@
           extensionBindingPrefixes="xjc" version="3.0">
     <globalBindings>
         <xjc:simple/>
-        <javaType name="java.util.Date" xmlType="xs:date" parseMethod="org.opencds.support.util.DateUtils.parseDate"
+        <javaType name="java.time.LocalDate" xmlType="xs:date" parseMethod="org.opencds.support.util.DateUtils.parseDate"
                   printMethod="org.opencds.support.util.DateUtils.printDate"/>
-        <javaType name="java.util.Date" xmlType="xs:dateTime" parseMethod="org.opencds.support.util.DateUtils.parseDateTime"
+        <javaType name="java.time.LocalDateTime" xmlType="xs:dateTime"
+                  parseMethod="org.opencds.support.util.DateUtils.parseDateTime"
                   printMethod="org.opencds.support.util.DateUtils.printDateTime"/>
     </globalBindings>
     <bindings xmlns:tns="http://www.omg.org/spec/CDSS/201105/dss" scd="x-schema::tns">

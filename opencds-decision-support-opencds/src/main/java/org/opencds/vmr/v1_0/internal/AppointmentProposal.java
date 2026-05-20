@@ -15,7 +15,7 @@ import lombok.ToString;
 @ToString
 public class AppointmentProposal extends EncounterBase
 {
-    protected CD criticality;
-    protected IVLDate proposedAppointmentTime;
-    protected INT repeatNumber;
+    private CD criticality;
+    private IVLDate proposedAppointmentTime;
+    private INT repeatNumber;
 }

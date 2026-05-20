@@ -26,7 +26,7 @@
 
 package org.cdsframework.ice.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.ice.util.TimePeriod;
@@ -51,8 +51,8 @@ public abstract class AbstractVaccine
     private TimePeriod validMaximumAgeOfUse;
     private TimePeriod recommendedForUseMinimumAge;
     private TimePeriod recommendedForUseMaximumAge;
-    private Date minimumDateForUse;
-    private Date maximumDateForUse;
+    private LocalDate minimumDateForUse;
+    private LocalDate maximumDateForUse;
 
     public AbstractVaccine(final AbstractVaccine pAbstractVaccine)
     {

@@ -1,19 +1,19 @@
 package org.opencds.config.api.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
-public interface ConceptDeterminationMethod
+public record ConceptDeterminationMethod(CDMId cdmId,
+                                         String displayName,
+                                         String description,
+                                         LocalDate timestamp,
+                                         String userId,
+                                         List<ConceptMapping> conceptMappings)
 {
-    CDMId getCDMId();
-
-    String getDisplayName();
-
-    Date getTimestamp();
-
-    String getDescription();
-
-    String getUserId();
-
-    List<ConceptMapping> getConceptMappings();
+    public ConceptDeterminationMethod
+    {
+        assert cdmId != null;
+        assert timestamp != null;
+        conceptMappings = conceptMappings == null ? List.of() : List.copyOf(conceptMappings);
+    }
 }

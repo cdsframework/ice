@@ -26,10 +26,10 @@
 
 package org.opencds.support.util;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.GregorianCalendar;
 
 import org.springframework.util.StringUtils;
@@ -43,58 +43,42 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class DateUtils
 {
-    public static String getISODateFormat(final Date date)
+    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    public static String getISODateFormat(final LocalDate date)
     {
         if (date == null)
             return "";
 
-        return new SimpleDateFormat("yyyyMMdd").format(date);
+        return date.format(dateFormat);
     }
 
-    public static String getISODatetimeFormat(final Date date)
-    {
-        if (date == null)
-            return "";
-
-        return new SimpleDateFormat("yyyyMMddHHmmss").format(date);
-    }
-
-    public static Date parseISODateFormat(final String dateString) throws ParseException
+    public static LocalDate parseISODateFormat(final String dateString)
     {
         if (!StringUtils.hasText(dateString))
             return null;
 
-        return new SimpleDateFormat("yyyyMMdd").parse(dateString);
+        return LocalDate.parse(dateString, dateFormat);
     }
 
-    public static Date parseISODatetimeFormat(final String dateString) throws ParseException
+    public static LocalDate parseDate(final String s)
     {
-        if (!StringUtils.hasText(dateString))
-            return null;
-
-        return new SimpleDateFormat("yyyyMMddHHmmss").parse(dateString);
+        return LocalDate.ofInstant(DatatypeConverter.parseDate(s).toInstant(), ZoneId.systemDefault());
     }
 
-    public static Date parseDate(final String s)
+    public static String printDate(final LocalDate dt)
     {
-        return DatatypeConverter.parseDate(s).getTime();
+        return DatatypeConverter.printDate(GregorianCalendar.from(dt.atStartOfDay().atZone(ZoneId.systemDefault())));
     }
 
-    public static String printDate(final Date dt)
+    public static LocalDateTime parseDateTime(final String s)
     {
-        final Calendar cal = new GregorianCalendar();
-        cal.setTime(dt);
-
-        return DatatypeConverter.printDate(cal);
+        return LocalDateTime.from(DatatypeConverter.parseDateTime(s).toInstant());
     }
 
-    public static Date parseDateTime(final String s)
+    public static String printDateTime(final LocalDateTime dt)
     {
-        return DatatypeConverter.parseDateTime(s).getTime();
-    }
-
-    public static String printDateTime(final Date dt)
-    {
-        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(dt);
+        return dt.format(dateTimeFormat);
     }
 }

@@ -2,9 +2,14 @@ package org.opencds.config.api.model;
 
 public interface EntityIdentifier
 {
-    String getScopingEntityId();
+    String scopingEntityId();
 
-    String getBusinessId();
+    String businessId();
 
-    String getVersion();
+    String version();
+
+    default String toEIString()
+    {
+        return "%s^%s^%s".formatted(scopingEntityId(), businessId(), version());
+    }
 }

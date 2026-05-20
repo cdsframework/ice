@@ -14,9 +14,9 @@ import lombok.ToString;
 @ToString
 public class EvaluatedPersonRelationship
 {
-    protected String id;
-    protected String sourceEntityId;
-    protected String targetEntityId;
-    protected CD targetRole;
-    protected IVLDate relationshipTimeInterval;
+    private String id;
+    private String sourceEntityId;
+    private String targetEntityId;
+    private CD targetRole;
+    private IVLDate relationshipTimeInterval;
 }

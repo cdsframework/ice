@@ -2,10 +2,8 @@ package org.opencds.config.mapper;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.opencds.config.api.model.Resource;
-import org.opencds.config.api.model.impl.ResourceImpl;
 
 public class ResourceMapper
 {
@@ -13,23 +11,24 @@ public class ResourceMapper
     {
         if (external == null)
             return null;
+
         return external.stream()
-                .map((org.opencds.config.schema.CDSHook.Prefetch.Resource res) -> ResourceImpl.create(res.getName(),
-                        res.getQuery()))
-                .collect(Collectors.toList());
+                .map((org.opencds.config.schema.CDSHook.Prefetch.Resource res) -> new Resource(res.getName(), res.getQuery()))
+                .toList();
     }
 
     public static Collection<? extends org.opencds.config.schema.CDSHook.Prefetch.Resource> external(final List<Resource> internal)
     {
         if (internal == null)
             return null;
-        return internal.stream().map((final Resource res) ->
+
+        return internal.stream().map(res ->
         {
             final org.opencds.config.schema.CDSHook.Prefetch.Resource resource =
                     new org.opencds.config.schema.CDSHook.Prefetch.Resource();
-            resource.setName(res.getName());
-            resource.setQuery(res.getQuery());
+            resource.setName(res.name());
+            resource.setQuery(res.query());
             return resource;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 }

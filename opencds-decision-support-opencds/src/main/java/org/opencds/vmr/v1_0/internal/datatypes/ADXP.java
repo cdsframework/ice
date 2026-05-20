@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class ADXP extends XP
 {
-    protected AddressPartType type;
+    private AddressPartType type;
 }

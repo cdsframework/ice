@@ -41,8 +41,8 @@ import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
-import org.cdsframework.ice.dto.CodeSystemConceptProperty;
-import org.cdsframework.ice.dto.Coding;
+import org.cdsframework.fhir.CodeSystemConceptProperty;
+import org.cdsframework.fhir.Coding;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Season;
@@ -246,8 +246,7 @@ public class SupportedSeasons implements SupportingData
             }
 
             lSeasonsListForVG.add(lS);
-            this.cdsListItemNameToSeasonItem.put(lSeasonCode, new LocallyCodedSeasonItem(lSeasonCode, lPrimaryOpenCdsConcept,
-                    locallyCodedCdsSeasonListItem.getCdsListVersions(), lS));
+            this.cdsListItemNameToSeasonItem.put(lSeasonCode, new LocallyCodedSeasonItem(lSeasonCode, lPrimaryOpenCdsConcept, lS));
             this.vaccineGroupItemToSeasons.put(lcvgi, lSeasonsListForVG);
         }
     }

@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class Specimen extends EntityBase
 {
-    protected String description;
+    private String description;
 }

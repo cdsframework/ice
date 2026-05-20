@@ -88,6 +88,7 @@ public class RestConfigUtil
         return unmarshal((PluginPackages pp) -> PluginPackageMapper.internal(pp), is, List::of);
     }
 
+    @SuppressWarnings("unchecked")
     public <X, T> T unmarshal(final Function<X, T> mapper, final InputStream is, final Supplier<T> defaultValueSupplier)
     {
         try

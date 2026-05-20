@@ -14,11 +14,11 @@ import lombok.ToString;
 @ToString
 public class AdministrableSubstance extends EntityBase
 {
-    protected CD substanceCode;
-    protected RTO strength;
-    protected CD form;
-    protected CD substanceBrandCode;
-    protected CD substanceGenericCode;
-    protected CD manufacturer;
-    protected String lotNo;
+    private CD substanceCode;
+    private RTO strength;
+    private CD form;
+    private CD substanceBrandCode;
+    private CD substanceGenericCode;
+    private CD manufacturer;
+    private String lotNo;
 }

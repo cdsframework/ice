@@ -27,24 +27,27 @@
 package org.cdsframework.ice.supportingdata;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
-import org.cdsframework.ice.config.IceSupportingDataProperties;
-import org.cdsframework.ice.config.iceSupportingProperties.Dose;
-import org.cdsframework.ice.config.iceSupportingProperties.DoseInterval;
-import org.cdsframework.ice.config.iceSupportingProperties.DoseVaccine;
-import org.cdsframework.ice.config.iceSupportingProperties.Season;
-import org.cdsframework.ice.config.iceSupportingProperties.SeriesData;
-import org.cdsframework.ice.config.iceSupportingProperties.VaccineGroup;
+import org.cdsframework.fhir.CodeSystem;
+import org.cdsframework.fhir.CodeSystemConcept;
+import org.cdsframework.fhir.PlanDefinition;
+
+import org.cdsframework.ice.config.CdsEngineProperties;
 import org.cdsframework.ice.service.DoseStatus;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.service.PlanDefinitionSeriesDataConsumer;
 import org.cdsframework.ice.service.RecommendationStatus;
 import org.cdsframework.ice.service.SupportingDataService;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
@@ -58,6 +61,10 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class ICESupportingDataConfiguration
 {
+    private static final String SUPPORTED_SERIES_CODE_SYSTEM_NAME = "SUPPORTED_SERIES";
+    private static final PlanDefinitionSeriesDataConsumer PLAN_DEFINITION_SERIES_DATA_CONSUMER =
+            new PlanDefinitionSeriesDataConsumer();
+
     private final SupportedCdsLists supportedCdsLists;
     private final SupportedVaccineGroups supportedVaccineGroups;
     private final SupportedVaccines supportedVaccines;
@@ -69,8 +76,7 @@ public class ICESupportingDataConfiguration
      * vaccines; seasons; finally, series
      */
     public ICESupportingDataConfiguration(final String pCommonLogicModule, final List<String> pSupportedKnowledgeModules,
-            final IceSupportingDataProperties iceSupportingDataProperties, final SupportingDataService supportingDataService)
-            throws IllegalArgumentException, InconsistentConfigurationException
+            final SupportingDataService supportingDataService) throws IllegalArgumentException, InconsistentConfigurationException
     {
         final String _METHODNAME = "ICESupportingDataConfiguration(): ";
 
@@ -131,8 +137,8 @@ public class ICESupportingDataConfiguration
         {
             Stream.concat(Stream.of(pCommonLogicModule), pSupportedKnowledgeModules.stream())
                     .distinct()
-                    .filter(iceSupportingDataProperties.getKnowledgeModules()::containsKey)
-                    .forEach(kmId -> Optional.ofNullable(iceSupportingDataProperties.getKnowledgeModules().get(kmId).codeSystems())
+                    .map(supportingDataService::getSupportingKnowledgeModuleByKmId)
+                    .forEach(knowledgeModule -> Optional.ofNullable(knowledgeModule.codeSystems())
                             .ifPresent(codeSystemMap -> codeSystemMap.values()
                                     .forEach(codeSystem -> this.supportedCdsLists.addSupportedCodeSystem(codeSystem,
                                             supportingDataService.extractCodeSystemOid(codeSystem)))));
@@ -228,15 +234,26 @@ public class ICESupportingDataConfiguration
 
         // Initialize Series supporting data
         this.supportedSeries = new SupportedSeries(this);
+        final List<SeriesData> loadedSeriesData = new ArrayList<>();
         try
         {
-            pSupportedKnowledgeModules.forEach(kmId -> iceSupportingDataProperties.getKnowledgeModules()
-                    .get(kmId)
-                    .series()
-                    .values()
-                    .stream()
-                    .sorted(Comparator.comparing(sd -> sd.series().displayName()))
-                    .forEach(this::addSupportedSeriesFromIceProperties));
+            pSupportedKnowledgeModules.forEach(
+                    kmId -> Optional.ofNullable(supportingDataService.getSupportingKnowledgeModuleByKmId(kmId).series())
+                            .map(Map::values)
+                            .stream()
+                            .flatMap(java.util.Collection::stream)
+                            .sorted(Comparator.comparing(sd -> sd.series().displayName()))
+                            .forEach(sd ->
+                            {
+                                loadedSeriesData.add(sd);
+                                this.addSupportedSeriesFromIceProperties(sd);
+                            }));
+            validateSupportedSeriesConsistency(pSupportedKnowledgeModules, supportingDataService, loadedSeriesData);
+            validateSupportedSeasonsReferencedBySeriesData(loadedSeriesData);
+        }
+        catch (final InconsistentConfigurationException e)
+        {
+            throw e;
         }
         catch (final Exception e)
         {
@@ -256,6 +273,210 @@ public class ICESupportingDataConfiguration
         lSbSDlocation.insert(0, lSbCdsVersion);
         lSbSDlocation.insert(0, _METHODNAME);
         log.debug(lSbSDlocation.toString());
+    }
+
+    private void validateSupportedSeriesConsistency(final List<String> supportedKnowledgeModules,
+            final SupportingDataService supportingDataService, final List<SeriesData> seriesDataItems)
+            throws InconsistentConfigurationException
+    {
+        final Set<String> supportedSeriesCodes = extractSupportedSeriesCodes(supportedKnowledgeModules, supportingDataService);
+        final Set<String> seriesPlanDefinitionNames =
+                validateSeriesPlanDefinitionMapKeysAndNames(supportedKnowledgeModules, supportingDataService);
+        validateSeriesPlanDefinitionsExistInSupportedSeries(seriesPlanDefinitionNames, supportedSeriesCodes);
+        validateSupportedSeriesReferencedBySeriesData(supportedSeriesCodes, seriesDataItems);
+    }
+
+    private Set<String> extractSupportedSeriesCodes(final List<String> supportedKnowledgeModules,
+            final SupportingDataService supportingDataService)
+    {
+        final Set<String> supportedSeriesCodes = new TreeSet<>();
+        Optional.ofNullable(supportedKnowledgeModules)
+                .orElse(List.of())
+                .stream()
+                .map(supportingDataService::getSupportingKnowledgeModuleByKmId)
+                .map(CdsEngineProperties.ModuleCanonicalDefinition::codeSystems)
+                .filter(Objects::nonNull)
+                .map(codeSystems -> codeSystems.get(SUPPORTED_SERIES_CODE_SYSTEM_NAME))
+                .filter(Objects::nonNull)
+                .map(CodeSystem::concept)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .map(CodeSystemConcept::code)
+                .map(this::normalizeSeriesCodeForComparison)
+                .filter(code -> !code.isEmpty())
+                .forEach(supportedSeriesCodes::add);
+        return supportedSeriesCodes;
+    }
+
+    private Set<String> validateSeriesPlanDefinitionMapKeysAndNames(final List<String> supportedKnowledgeModules,
+            final SupportingDataService supportingDataService) throws InconsistentConfigurationException
+    {
+        final String _METHODNAME = "validateSeriesPlanDefinitionMapKeysAndNames(): ";
+        final Set<String> seriesPlanDefinitionNames = new TreeSet<>();
+
+        Optional.ofNullable(supportedKnowledgeModules)
+                .orElse(List.of())
+                .stream()
+                .map(supportingDataService::getSupportingKnowledgeModuleByKmId)
+                .map(CdsEngineProperties.ModuleCanonicalDefinition::planDefinitions)
+                .filter(Objects::nonNull)
+                .forEach(planDefinitions -> planDefinitions.forEach((planDefinitionKey, planDefinition) ->
+                {
+                    if (!PLAN_DEFINITION_SERIES_DATA_CONSUMER.isSeriesPlanDefinition(planDefinition))
+                        return;
+
+                    final String normalizedMapKey = normalizeSeriesCodeForComparison(planDefinitionKey);
+                    final String normalizedName = Optional.ofNullable(planDefinition)
+                            .map(PlanDefinition::name)
+                            .map(this::normalizeSeriesCodeForComparison)
+                            .orElse("");
+
+                    if (normalizedMapKey.isEmpty() || normalizedName.isEmpty())
+                    {
+                        final String lErrStr =
+                                "Series PlanDefinition map key and name must both be populated. key='%s', name='%s'".formatted(
+                                        planDefinitionKey,
+                                        Optional.ofNullable(planDefinition).map(PlanDefinition::name).orElse(null));
+                        log.error("{}{}", _METHODNAME, lErrStr);
+                        throw new InconsistentConfigurationException(lErrStr);
+                    }
+                    if (!normalizedMapKey.equals(normalizedName))
+                    {
+                        final String lErrStr =
+                                "Series PlanDefinition map key must match PlanDefinition.name. key='%s', name='%s'".formatted(
+                                        planDefinitionKey, planDefinition.name());
+                        log.error("{}{}", _METHODNAME, lErrStr);
+                        throw new InconsistentConfigurationException(lErrStr);
+                    }
+
+                    seriesPlanDefinitionNames.add(normalizedName);
+                }));
+
+        return seriesPlanDefinitionNames;
+    }
+
+    private void validateSeriesPlanDefinitionsExistInSupportedSeries(final Set<String> seriesPlanDefinitionNames,
+            final Set<String> supportedSeriesCodes) throws InconsistentConfigurationException
+    {
+        final String _METHODNAME = "validateSeriesPlanDefinitionsExistInSupportedSeries(): ";
+        if (seriesPlanDefinitionNames.isEmpty())
+            return;
+
+        if (supportedSeriesCodes.isEmpty())
+        {
+            final String lErrStr = "No SUPPORTED_SERIES concepts configured, but series PlanDefinitions were found";
+            log.error("{}{}", _METHODNAME, lErrStr);
+            throw new InconsistentConfigurationException(lErrStr);
+        }
+
+        final Set<String> unknownSeriesPlanDefinitionNames = new TreeSet<>(seriesPlanDefinitionNames);
+        unknownSeriesPlanDefinitionNames.removeAll(supportedSeriesCodes);
+        if (!unknownSeriesPlanDefinitionNames.isEmpty())
+        {
+            final String lErrStr = "Series PlanDefinition name(s) are missing from SUPPORTED_SERIES concept list: %s".formatted(
+                    String.join(", ", unknownSeriesPlanDefinitionNames));
+            log.error("{}{}", _METHODNAME, lErrStr);
+            throw new InconsistentConfigurationException(lErrStr);
+        }
+    }
+
+    private void validateSupportedSeriesReferencedBySeriesData(final Set<String> supportedSeriesCodes,
+            final List<SeriesData> seriesDataItems) throws InconsistentConfigurationException
+    {
+        final String _METHODNAME = "validateSupportedSeriesReferencedBySeriesData(): ";
+        if (supportedSeriesCodes.isEmpty())
+            return;
+
+        final Set<String> seriesCodesReferencedBySeriesData = new TreeSet<>();
+        Optional.ofNullable(seriesDataItems)
+                .orElse(List.of())
+                .stream()
+                .filter(Objects::nonNull)
+                .map(SeriesData::series)
+                .filter(Objects::nonNull)
+                .map(Series::code)
+                .map(this::normalizeSeriesCodeForComparison)
+                .filter(code -> !code.isEmpty())
+                .forEach(seriesCodesReferencedBySeriesData::add);
+
+        final Set<String> missingSeriesCodes = new TreeSet<>(supportedSeriesCodes);
+        missingSeriesCodes.removeAll(seriesCodesReferencedBySeriesData);
+        if (!missingSeriesCodes.isEmpty())
+        {
+            final String lErrStr = "Supported series code(s) are not referenced by any series data: %s".formatted(
+                    String.join(", ", missingSeriesCodes));
+            log.error("{}{}", _METHODNAME, lErrStr);
+            throw new InconsistentConfigurationException(lErrStr);
+        }
+    }
+
+    private String normalizeSeriesCodeForComparison(final String seriesCode)
+    {
+        if (seriesCode == null)
+            return "";
+
+        final String trimmed = seriesCode.trim();
+        if (trimmed.isEmpty())
+            return trimmed;
+
+        final String seriesPrefix = ICEConceptType.SERIES.getIceConceptTypeValue() + ".";
+        return trimmed.startsWith(seriesPrefix) ? trimmed.substring(seriesPrefix.length()) : trimmed;
+    }
+
+    private void validateSupportedSeasonsReferencedBySeriesData(final List<SeriesData> seriesDataItems)
+            throws InconsistentConfigurationException
+    {
+        final String _METHODNAME = "validateSupportedSeasonsReferencedBySeriesData(): ";
+        final Set<String> supportedSeasonCodes = new TreeSet<>();
+        Optional.ofNullable(this.supportedSeasons)
+                .map(SupportedSeasons::getCopyOfAllSeasons)
+                .orElse(List.of())
+                .stream()
+                .map(org.cdsframework.ice.service.Season::getSeasonName)
+                .map(this::normalizeSeasonCodeForComparison)
+                .filter(code -> !code.isEmpty())
+                .forEach(supportedSeasonCodes::add);
+
+        if (supportedSeasonCodes.isEmpty())
+            return;
+
+        final Set<String> seasonCodesReferencedBySeriesData = new TreeSet<>();
+        Optional.ofNullable(seriesDataItems)
+                .orElse(List.of())
+                .stream()
+                .filter(Objects::nonNull)
+                .map(SeriesData::seasons)
+                .filter(Objects::nonNull)
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .map(Season::code)
+                .map(this::normalizeSeasonCodeForComparison)
+                .filter(code -> !code.isEmpty())
+                .forEach(seasonCodesReferencedBySeriesData::add);
+
+        supportedSeasonCodes.removeAll(seasonCodesReferencedBySeriesData);
+        if (!supportedSeasonCodes.isEmpty())
+        {
+            final String lErrStr = "Supported season code(s) are not referenced by any series data: %s".formatted(
+                    String.join(", ", supportedSeasonCodes));
+            log.error("{}{}", _METHODNAME, lErrStr);
+            throw new InconsistentConfigurationException(lErrStr);
+        }
+    }
+
+    private String normalizeSeasonCodeForComparison(final String seasonCode)
+    {
+        if (seasonCode == null)
+            return "";
+
+        final String trimmed = seasonCode.trim();
+        if (trimmed.isEmpty())
+            return trimmed;
+
+        final String seasonPrefix = ICEConceptType.SEASON.getIceConceptTypeValue() + ".";
+        return trimmed.startsWith(seasonPrefix) ? trimmed.substring(seasonPrefix.length()) : trimmed;
     }
 
     /**
@@ -341,8 +562,6 @@ public class ICESupportingDataConfiguration
             {
                 final StringBuilder lDebugStrb = new StringBuilder();
                 lDebugStrb.append(_METHODNAME).append(s.getClass().getName());
-                // ID
-                lDebugStrb.append("\ngetSeriesId(): ").append(s.seriesId());
                 // Code
                 lDebugStrb.append("\ngetCode(): ").append(s.series().code());
                 // Name
@@ -366,15 +585,6 @@ public class ICESupportingDataConfiguration
                     for (final Season lSeason : values)
                         lDebugStrb.append("\n\t(").append(i++).append("): ").append(lSeason.code());
                 }, () -> lDebugStrb.append("\n\tNo Seasons information supplied"));
-
-                // CdsVersions
-                lDebugStrb.append("\ngetCdsVersions(): ");
-                Optional.ofNullable(s.cdsVersion()).map(Map::values).ifPresentOrElse(values ->
-                {
-                    int i = 1;
-                    for (final String lCdsVersion : values)
-                        lDebugStrb.append("\n\t(").append(i++).append("): ").append(lCdsVersion);
-                }, () -> lDebugStrb.append("\n\tNo CdsVersion information supplied"));
 
                 // Series Dose Specifications
                 lDebugStrb.append("\ngetIceSeriesDoses(): ");

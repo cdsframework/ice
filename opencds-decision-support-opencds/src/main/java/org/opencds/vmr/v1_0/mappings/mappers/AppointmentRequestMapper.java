@@ -36,9 +36,11 @@ public class AppointmentRequestMapper extends EncounterBaseMapper
         if (source.getCriticality() != null)
             target.setCriticality(MappingUtility.cD2CDInternal(source.getCriticality()));
         if (source.getRequestedAppointmentTime() != null)
-            target.setRequestedAppointmentTime(MappingUtility.iVLTS2IVLDateInternal(source.getRequestedAppointmentTime()));
+            target.setRequestedAppointmentTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getRequestedAppointmentTime(), factLists.getParsedDatesCache()));
         if (source.getRequestIssuanceTime() != null)
-            target.setRequestIssuanceTime(MappingUtility.iVLTS2IVLDateInternal(source.getRequestIssuanceTime()));
+            target.setRequestIssuanceTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getRequestIssuanceTime(), factLists.getParsedDatesCache()));
         if (source.getRepeatNumber() != null)
             target.setRepeatNumber(MappingUtility.iNT2INTInternal(source.getRepeatNumber()));
 
@@ -80,9 +82,9 @@ public class AppointmentRequestMapper extends EncounterBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getAppointmentRequests() == null)
+        if (organizedResults.output().getAppointmentRequests() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setAppointmentRequests(
                             new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.AppointmentRequests());
         }

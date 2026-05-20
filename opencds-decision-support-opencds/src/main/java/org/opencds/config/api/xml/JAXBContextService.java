@@ -8,18 +8,14 @@ import com.google.common.cache.LoadingCache;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
+@UtilityClass
 @Slf4j
-@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class JAXBContextService
 {
-    @Getter
-    private static final JAXBContextService instance = new JAXBContextService();
-
-    private final LoadingCache<String, JAXBContext> contextCache = CacheBuilder.newBuilder().build(new CacheLoader<>()
+    private static final LoadingCache<String, JAXBContext> contextCache = CacheBuilder.newBuilder().build(new CacheLoader<>()
     {
         @NonNull
         @Override
@@ -37,12 +33,12 @@ public class JAXBContextService
         }
     });
 
-    public JAXBContext getJAXBContext(final Class<?> clazz)
+    public static JAXBContext getJAXBContext(final Class<?> clazz)
     {
         return getJAXBContext(clazz.getPackageName());
     }
 
-    public JAXBContext getJAXBContext(final String contextPath)
+    public static JAXBContext getJAXBContext(final String contextPath)
     {
         return contextCache.getUnchecked(contextPath);
     }

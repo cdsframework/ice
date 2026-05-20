@@ -26,15 +26,13 @@
 
 package org.cdsframework.ice.util;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Date;
+import java.util.Objects;
 
-import org.cdsframework.ice.service.ICELogicHelper;
 import org.springframework.util.ObjectUtils;
 
 import lombok.ToString;
@@ -110,39 +108,36 @@ public record TimePeriod(DurationType durationType,
         return YearMonth.of(year, month).lengthOfMonth();
     }
 
-    public static int differenceInDays(final Date startDate, final Date endDate)
+    public static int differenceInDays(final LocalDate startDate, final LocalDate endDate)
     {
         if (startDate == null || endDate == null)
             return 0;
 
-        return Math.toIntExact(ChronoUnit.DAYS.between(ICELogicHelper.toLocalDate(startDate), ICELogicHelper.toLocalDate(endDate)));
+        return Math.toIntExact(ChronoUnit.DAYS.between(startDate, endDate));
     }
 
-    public static int differenceInMonths(final Date startDate, final Date endDate)
+    public static int differenceInMonths(final LocalDate startDate, final LocalDate endDate)
     {
         if (startDate == null || endDate == null)
             return 0;
 
-        return Math.toIntExact(
-                ChronoUnit.MONTHS.between(ICELogicHelper.toLocalDate(startDate), ICELogicHelper.toLocalDate(endDate)));
+        return Math.toIntExact(ChronoUnit.MONTHS.between(startDate, endDate));
     }
 
-    public static int differenceInWeeks(final Date startDate, final Date endDate)
+    public static int differenceInWeeks(final LocalDate startDate, final LocalDate endDate)
     {
         if (startDate == null || endDate == null)
             return 0;
 
-        return Math.toIntExact(
-                ChronoUnit.WEEKS.between(ICELogicHelper.toLocalDate(startDate), ICELogicHelper.toLocalDate(endDate)));
+        return Math.toIntExact(ChronoUnit.WEEKS.between(startDate, endDate));
     }
 
-    public static int differenceInYears(final Date startDate, final Date endDate)
+    public static int differenceInYears(final LocalDate startDate, final LocalDate endDate)
     {
         if (startDate == null || endDate == null)
             return 0;
 
-        return Math.toIntExact(
-                ChronoUnit.YEARS.between(ICELogicHelper.toLocalDate(startDate), ICELogicHelper.toLocalDate(endDate)));
+        return Math.toIntExact(ChronoUnit.YEARS.between(startDate, endDate));
     }
 
     /**
@@ -151,7 +146,7 @@ public record TimePeriod(DurationType durationType,
      * @return a new data representing the supplied date plus the TimePeriod; startDate if the supplied TimePeriod is null
      * @throws IllegalArgumentException if DurationType is not one of the above
      */
-    private static Date addTimePeriodUsingDurationValues(final Date startDate, final TimePeriod pTP)
+    private static LocalDate addTimePeriodUsingDurationValues(final LocalDate startDate, final TimePeriod pTP)
     {
         final String _METHODNAME = "addTimePeriod(): ";
 
@@ -167,12 +162,12 @@ public record TimePeriod(DurationType durationType,
         final int duration = pTP.duration();
         final DurationType tpType = pTP.durationType();
 
-        return Date.from((switch (tpType)
+        return switch (tpType)
         {
-            case DAYS -> startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusDays(duration);
+            case DAYS -> startDate.plusDays(duration);
             case MONTHS ->
             {
-                LocalDate startLD = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate startLD = startDate;
                 final int dayOfMonthBeforeCalculation = startLD.getDayOfMonth();
                 startLD = startLD.plusMonths(duration);
                 if (startLD.getDayOfMonth() < dayOfMonthBeforeCalculation && startLD.isEqual(
@@ -183,10 +178,10 @@ public record TimePeriod(DurationType durationType,
 
                 yield startLD;
             }
-            case WEEKS -> startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusWeeks(duration);
+            case WEEKS -> startDate.plusWeeks(duration);
             case YEARS ->
             {
-                LocalDate startLD = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate startLD = startDate;
                 final int dayOfMonthBeforeCalculation = startLD.getDayOfMonth();
                 startLD = startLD.plusYears(duration);
                 if (startLD.getDayOfMonth() < dayOfMonthBeforeCalculation && startLD.isEqual(
@@ -197,7 +192,7 @@ public record TimePeriod(DurationType durationType,
 
                 yield startLD;
             }
-        }).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        };
     }
 
     /**
@@ -205,7 +200,7 @@ public record TimePeriod(DurationType durationType,
      *
      * @return a new date representing the supplied date plus the TimePeriod; startDate if the supplied TimePeriod is null
      */
-    public static Date addTimePeriod(final Date startDate, final TimePeriod pTP)
+    public static LocalDate addTimePeriod(final LocalDate startDate, final TimePeriod pTP)
     {
         if (pTP == null || startDate == null)
             return null;
@@ -220,7 +215,7 @@ public record TimePeriod(DurationType durationType,
      * @return a new date representing the supplied date plus the TimePeriod; startDate if the supplied TimePeriod is null
      * @throws IllegalArgumentException if TimePeriod representation has format errors
      */
-    public static Date addTimePeriod(final Date startDate, final String pTimePeriodStr)
+    public static LocalDate addTimePeriod(final LocalDate startDate, final String pTimePeriodStr)
     {
         final String _METHODNAME = "addTimePeriod(Date, String): ";
 
@@ -244,7 +239,7 @@ public record TimePeriod(DurationType durationType,
             log.debug("TimePeriod String Supplied: {}", pTimePeriodStr);
 
         TimePeriod tp;
-        Date interimDate = startDate;
+        LocalDate interimDate = startDate;
         StringBuilder token = new StringBuilder();
         for (int i = 0; i < pTimePeriodStr.length(); i++)
         {
@@ -344,7 +339,7 @@ public record TimePeriod(DurationType durationType,
     /**
      * Calculate time period in whole units. e.g. 45 days = 1 month; 364 days = 0 years; 9 days = 1 week
      */
-    public static TimePeriod calculateElapsedTimePeriod(final Date pD1, final Date pD2, final DurationType pDurationType)
+    public static TimePeriod calculateElapsedTimePeriod(final LocalDate pD1, final LocalDate pD2, final DurationType pDurationType)
             throws TimePeriodException
     {
         return calculateElapsedTimePeriod(pD1, pD2, pDurationType, false);
@@ -355,7 +350,7 @@ public record TimePeriod(DurationType durationType,
      * @throws IllegalArgumentException if one or more of the supplied date parameters are invalid (e.g. - null)
      * @throws TimePeriodException      if elapsed time period could not be calculated due to an internal error
      */
-    public static TimePeriod calculateElapsedTimePeriod(final Date pD1, final Date pD2, final DurationType pDurationType,
+    public static TimePeriod calculateElapsedTimePeriod(final LocalDate pD1, final LocalDate pD2, final DurationType pDurationType,
             final boolean absoluteValue) throws TimePeriodException
     {
         final String _METHODNAME = "calculateTimePeriod(): ";
@@ -369,11 +364,11 @@ public record TimePeriod(DurationType durationType,
         if (log.isDebugEnabled())
             log.debug(_METHODNAME + "Date 1 is {}, Date 2 is {}", pD1, pD2);
 
-        Date d1 = pD1;
-        Date d2 = pD2;
+        LocalDate d1 = pD1;
+        LocalDate d2 = pD2;
         if (absoluteValue)
         {
-            if (pD2.before(pD1))
+            if (pD2.isBefore(pD1))
             {
                 d1 = pD2;
                 d2 = pD1;
@@ -396,12 +391,12 @@ public record TimePeriod(DurationType durationType,
         };
     }
 
-    public static int compareElapsedTimePeriodToDateRange(final Date pD1, final Date pD2, final TimePeriod tp)
+    public static int compareElapsedTimePeriodToDateRange(final LocalDate pD1, final LocalDate pD2, final TimePeriod tp)
     {
         return compareElapsedTimePeriodToDateRange(pD1, pD2, tp, false);
     }
 
-    public static int compareElapsedTimePeriodToDateRange(final Date pD1, final Date pD2, final TimePeriod tp,
+    public static int compareElapsedTimePeriodToDateRange(final LocalDate pD1, final LocalDate pD2, final TimePeriod tp,
             final boolean absoluteValue)
     {
         final String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, TimePeriod): ";
@@ -415,7 +410,7 @@ public record TimePeriod(DurationType durationType,
         return compareElapsedTimePeriodToDateRange(pD1, pD2, tp.timePeriodRepresentation, absoluteValue);
     }
 
-    public static int compareElapsedTimePeriodToDateRange(final Date pD1, final Date pD2, final String pTimePeriodStr)
+    public static int compareElapsedTimePeriodToDateRange(final LocalDate pD1, final LocalDate pD2, final String pTimePeriodStr)
     {
         return compareElapsedTimePeriodToDateRange(pD1, pD2, pTimePeriodStr, false);
     }
@@ -426,7 +421,7 @@ public record TimePeriod(DurationType durationType,
      *
      * @throws IllegalArgumentException if either date or TimePeriod is not supplied
      */
-    public static int compareElapsedTimePeriodToDateRange(final Date pD1, final Date pD2, final String pTimePeriodStr,
+    public static int compareElapsedTimePeriodToDateRange(final LocalDate pD1, final LocalDate pD2, final String pTimePeriodStr,
             final boolean absoluteValue)
     {
         final String _METHODNAME = "compareElapsedTimePeriodToDateRange(Date, Date, String, boolean): ";
@@ -455,28 +450,28 @@ public record TimePeriod(DurationType durationType,
         if (log.isDebugEnabled())
             log.debug("TimePeriod String Supplied: {}", pTimePeriodStr);
 
-        final Date d1 = absoluteValue && pD2.before(pD1) ? pD2 : pD1;
-        final LocalDate d2 = ICELogicHelper.toLocalDate(absoluteValue && pD2.before(pD1) ? pD1 : pD2);
+        final LocalDate d1 = absoluteValue && pD2.isBefore(pD1) ? pD2 : pD1;
+        final LocalDate d2 = absoluteValue && pD2.isBefore(pD1) ? pD1 : pD2;
 
         if (log.isDebugEnabled())
             log.debug(_METHODNAME + "Date d1 is {}; Date d2 is {}", d1, d2);
 
-        return d2.compareTo(ICELogicHelper.toLocalDate(addTimePeriod(d1, pTimePeriodStr)));
+        return d2.compareTo(Objects.requireNonNull(addTimePeriod(d1, pTimePeriodStr)));
     }
 
     /**
      * Return a Date from a string. String provided must be in format used by Drools: dd-MMM-yyyy. e.g. - "04-Jul-1999")
      * If no string is provided, null is returned;
      */
-    public static Date generateDateFromStringInDroolsDateFormat(final String pDateAsString)
+    public static LocalDate generateDateFromStringInDroolsDateFormat(final String pDateAsString)
     {
         if (ObjectUtils.isEmpty(pDateAsString))
             return null;
 
-        final Date lDateToReturn;
+        final LocalDate lDateToReturn;
         try
         {
-            lDateToReturn = new SimpleDateFormat("dd-MMM-yyyy").parse(pDateAsString);
+            lDateToReturn = LocalDate.parse(pDateAsString, DateTimeFormatter.ofPattern("dd-MMM-yyyy"));
         }
         catch (final Exception e)
         {
@@ -548,7 +543,7 @@ public record TimePeriod(DurationType durationType,
     /**
      * Compare two time periods of the same type
      *
-     * @return true if the TimePeriod is less than [or equal to] the supplied parameter, false if it is not. If supplied TimePeriod is set to null, then it is treated as a
+     * @return true if the TimePeriod is less than [or equal to] the supplied parameters, false if it is not. If supplied TimePeriod is set to null, then it is treated as a
      * TimePeriod with of zero days
      * @throws IllegalArgumentException if TimePeriod is of a different DurationType than this one
      */
@@ -560,9 +555,9 @@ public record TimePeriod(DurationType durationType,
         if (pTD == null)
             lTimePeriod = TimePeriod.ZERO;
 
-        final Date lReferenceDate = new Date();
-        final Date lTPDate1 = addTimePeriod(lReferenceDate, this);
-        final Date lTPDate2 = addTimePeriod(lReferenceDate, lTimePeriod);
+        final LocalDate lReferenceDate = LocalDate.now();
+        final LocalDate lTPDate1 = addTimePeriod(lReferenceDate, this);
+        final LocalDate lTPDate2 = addTimePeriod(lReferenceDate, lTimePeriod);
 
         final int compareTo = lTPDate1.compareTo(lTPDate2);
         return orEqualTo ? compareTo <= 0 : compareTo < 0;
@@ -581,7 +576,7 @@ public record TimePeriod(DurationType durationType,
     /**
      * Compare two time periods of the same type. Return true if this TimePeriod is greater than (greater than/equal to) the supplied TimePeriod.
      *
-     * @return true if the TimePeriod is less than [or equal to] the supplied parameter, false if it is not. If supplied TimePeriod is set to null, then it is treated as a
+     * @return true if the TimePeriod is less than [or equal to] the supplied parameters, false if it is not. If supplied TimePeriod is set to null, then it is treated as a
      * TimePeriod with of zero days
      */
     public boolean isGreaterThan(final TimePeriod pTD, final boolean orEqualTo)
@@ -592,9 +587,9 @@ public record TimePeriod(DurationType durationType,
         if (pTD == null)
             lTimePeriod = TimePeriod.ZERO;
 
-        final Date lReferenceDate = new Date();
-        final Date lTPDate1 = addTimePeriod(lReferenceDate, this);
-        final Date lTPDate2 = addTimePeriod(lReferenceDate, lTimePeriod);
+        final LocalDate lReferenceDate = LocalDate.now();
+        final LocalDate lTPDate1 = addTimePeriod(lReferenceDate, this);
+        final LocalDate lTPDate2 = addTimePeriod(lReferenceDate, lTimePeriod);
 
         final int compareTo = lTPDate1.compareTo(lTPDate2);
         return orEqualTo ? compareTo >= 0 : compareTo > 0;
@@ -614,7 +609,7 @@ public record TimePeriod(DurationType durationType,
     /**
      * Compare two time periods of the same type. Return true if this TimePeriod is equal to the supplied TimePeriod.
      *
-     * @return true if the TimePeriod is less than [or equal to] the supplied parameter, false if it is not. If supplied TimePeriod is set to null, then it is treated as a
+     * @return true if the TimePeriod is less than [or equal to] the supplied parameters, false if it is not. If supplied TimePeriod is set to null, then it is treated as a
      * TimePeriod with of zero days
      */
     public boolean isEqualTo(final TimePeriod pTD)
@@ -623,10 +618,10 @@ public record TimePeriod(DurationType durationType,
         if (pTD == null)
             lTimePeriod = TimePeriod.ZERO;
 
-        final Date lReferenceDate = new Date();
-        final Date lTPDate1 = addTimePeriod(lReferenceDate, this);
-        final Date lTPDate2 = addTimePeriod(lReferenceDate, lTimePeriod);
+        final LocalDate lReferenceDate = LocalDate.now();
+        final LocalDate lTPDate1 = addTimePeriod(lReferenceDate, this);
+        final LocalDate lTPDate2 = addTimePeriod(lReferenceDate, lTimePeriod);
 
-        return lTPDate1.compareTo(lTPDate2) == 0;
+        return lTPDate1.isEqual(lTPDate2);
     }
 }

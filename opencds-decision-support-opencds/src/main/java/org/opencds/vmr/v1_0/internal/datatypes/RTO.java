@@ -11,6 +11,6 @@ import lombok.ToString;
 @ToString
 public class RTO extends QTY
 {
-    protected double numerator;
-    protected double denominator;
+    private double numerator;
+    private double denominator;
 }

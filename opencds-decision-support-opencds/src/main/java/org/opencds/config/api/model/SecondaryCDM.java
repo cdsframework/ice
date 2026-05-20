@@ -1,8 +1,11 @@
 package org.opencds.config.api.model;
 
-public interface SecondaryCDM
+public record SecondaryCDM(CDMId cdmId,
+                           SupportMethod supportMethod)
 {
-    CDMId getCDMId();
-
-    SupportMethod getSupportMethod();
+    public SecondaryCDM
+    {
+        assert cdmId != null;
+        assert supportMethod != null;
+    }
 }

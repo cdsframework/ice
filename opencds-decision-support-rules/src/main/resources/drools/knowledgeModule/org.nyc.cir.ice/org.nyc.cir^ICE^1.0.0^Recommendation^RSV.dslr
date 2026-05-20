@@ -3,7 +3,6 @@ package knowledgeModule.org.nyc.cir.ice;
 import java.util.List;
 
 import java.util.Set;
-import java.util.Date;
 import org.opencds.vmr.v1_0.internal.EvalTime;
 import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
 import org.cdsframework.ice.service.DiseaseImmunity;
@@ -25,7 +24,7 @@ import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 global org.cdsframework.ice.service.Schedule schedule;
 
 rule "RSV: If the evaluation date is >= 6/21/2023 and < 10/1/2023, and the patient is < 8 months of age, set the earliest/recommended to 10/1/2023"

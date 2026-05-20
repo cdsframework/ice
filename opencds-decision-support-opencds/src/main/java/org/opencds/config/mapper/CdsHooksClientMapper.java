@@ -3,7 +3,6 @@ package org.opencds.config.mapper;
 import java.util.List;
 
 import org.opencds.config.api.model.CdsHooksClient;
-import org.opencds.config.api.model.impl.CdsHooksClientImpl;
 import org.opencds.config.schema.CDSHooksClient;
 import org.opencds.config.schema.CdsHooksClients;
 
@@ -13,6 +12,7 @@ public class CdsHooksClientMapper
     {
         if (clients == null)
             return null;
+
         return clients.getCdsHooksClient().stream().map(CdsHooksClientMapper::internal).toList();
     }
 
@@ -20,7 +20,8 @@ public class CdsHooksClientMapper
     {
         if (hooksClient == null)
             return null;
-        return CdsHooksClientImpl.create(hooksClient.getId(), hooksClient.getDescription(),
+
+        return new CdsHooksClient(hooksClient.getId(), hooksClient.getDescription(),
                 IssuersMapper.internal(hooksClient.getIssuers()), hooksClient.getTenant());
     }
 
@@ -28,6 +29,7 @@ public class CdsHooksClientMapper
     {
         if (hooksClient == null)
             return null;
+
         final var cdsHooksClient = new CDSHooksClient();
         cdsHooksClient.setId(hooksClient.id());
         cdsHooksClient.setDescription(hooksClient.description());
@@ -40,6 +42,7 @@ public class CdsHooksClientMapper
     {
         if (hooksClients == null)
             return null;
+
         final var clients = new CdsHooksClients();
         hooksClients.stream().map(CdsHooksClientMapper::external).forEach(e -> clients.getCdsHooksClient().add(e));
         return clients;

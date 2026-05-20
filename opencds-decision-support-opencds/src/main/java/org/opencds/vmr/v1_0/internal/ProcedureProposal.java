@@ -15,7 +15,7 @@ import lombok.ToString;
 @ToString
 public class ProcedureProposal extends ProcedureBase
 {
-    protected CD criticality;
-    protected IVLDate proposedProcedureTime;
-    protected INT repeatNumber;
+    private CD criticality;
+    private IVLDate proposedProcedureTime;
+    private INT repeatNumber;
 }

@@ -1,19 +1,51 @@
 package org.opencds.config.api.dao;
 
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.opencds.config.api.dao.util.PathUtil;
 import org.opencds.config.api.model.PPId;
 import org.opencds.config.api.model.PluginPackage;
+import org.opencds.config.mapper.util.RestConfigUtil;
 
-public interface PluginPackageDao
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class PluginPackageDao
 {
-    PluginPackage find(PPId ppId);
+    private final Map<PPId, PluginPackage> cache;
 
-    List<PluginPackage> getAll();
+    public PluginPackageDao(final Path path)
+    {
+        final RestConfigUtil restConfigUtil = new RestConfigUtil();
 
-    void persist(PluginPackage pluginPackage);
+        log.debug("Finding plugin resources in path: {}", path);
 
-    void persist(List<PluginPackage> pluginPackages);
+        cache = PathUtil.findFiles(path, false)
+                .stream()
+                .peek(resource ->
+                {
+                    log.debug("Loading resource: {}", resource);
+                    log.debug("Loading resource as PluginPackages (resource was not a PluginPackage instance)");
+                })
+                .map(PathUtil::getResourceAsStream)
+                .map(restConfigUtil::unmarshalPluginPackages)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .collect(Collectors.toMap(PluginPackage::identifier, Function.identity()));
+    }
 
-    void delete(PluginPackage pluginPackage);
+    public PluginPackage find(final PPId ppId)
+    {
+        return cache.get(ppId);
+    }
+
+    public List<PluginPackage> getAll()
+    {
+        return List.copyOf(cache.values());
+    }
 }

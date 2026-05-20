@@ -26,9 +26,9 @@
 
 package org.cdsframework.ice.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -84,7 +84,7 @@ public class TargetDoseInitializationTracker
             throw new IllegalArgumentException(errStr);
         }
 
-        final Date adminDate;
+        final LocalDate adminDate;
         try
         {
             adminDate = ICELogicHelper.extractSingularDateValueFromIVLDate(sae.getAdministrationTimeInterval());

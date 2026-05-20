@@ -1,5 +1,7 @@
 package org.opencds.vmr.v1_0.internal;
 
+import java.time.LocalDate;
+
 import org.opencds.vmr.v1_0.internal.datatypes.BL;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.opencds.vmr.v1_0.internal.datatypes.INT;
@@ -23,18 +25,18 @@ import lombok.ToString;
 @ToString
 public class GoalValue
 {
-    protected BL _boolean;
-    protected CD concept;
-    protected REAL decimal;
-    protected IVLREAL decimalRange;
-    protected INT integer;
-    protected IVLINT integerRange;
-    protected PQ physicalQuantity;
-    protected IVLPQ physicalQuantityRange;
-    protected RTO ratio;
-    protected IVLRTO ratioRange;
-    protected String simpleConcept;
-    protected String text;
-    protected java.util.Date time;
-    protected IVLDate timeRange;
+    private BL _boolean;
+    private CD concept;
+    private REAL decimal;
+    private IVLREAL decimalRange;
+    private INT integer;
+    private IVLINT integerRange;
+    private PQ physicalQuantity;
+    private IVLPQ physicalQuantityRange;
+    private RTO ratio;
+    private IVLRTO ratioRange;
+    private String simpleConcept;
+    private String text;
+    private LocalDate time;
+    private IVLDate timeRange;
 }

@@ -1,23 +1,29 @@
 package org.opencds.config.api.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
-public interface ExecutionEngine
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+
+public record ExecutionEngine(String identifier,
+                              String adapter,
+                              String context,
+                              String knowledgeLoader,
+                              String description,
+                              LocalDate timestamp,
+                              String userId,
+                              List<DssOperation> supportedOperations)
 {
-    String getIdentifier();
-
-    String getAdapter();
-
-    String getContext();
-
-    String getKnowledgeLoader();
-
-    String getDescription();
-
-    Date getTimestamp();
-
-    String getUserId();
-
-    List<DssOperation> getSupportedOperations();
+    public ExecutionEngine
+    {
+        assert StringUtils.hasText(identifier);
+        assert StringUtils.hasText(adapter);
+        assert StringUtils.hasText(context);
+        assert StringUtils.hasText(knowledgeLoader);
+        assert StringUtils.hasText(description);
+        assert timestamp != null;
+        assert !ObjectUtils.isEmpty(supportedOperations);
+        supportedOperations = List.copyOf(supportedOperations);
+    }
 }

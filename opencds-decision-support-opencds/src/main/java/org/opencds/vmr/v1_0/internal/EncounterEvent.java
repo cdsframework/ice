@@ -13,5 +13,5 @@ import lombok.ToString;
 @ToString
 public class EncounterEvent extends EncounterBase
 {
-    protected IVLDate encounterEventTime;
+    private IVLDate encounterEventTime;
 }

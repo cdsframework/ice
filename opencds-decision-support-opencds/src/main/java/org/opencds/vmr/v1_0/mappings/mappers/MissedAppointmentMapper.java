@@ -34,7 +34,8 @@ public class MissedAppointmentMapper extends EncounterBaseMapper
         }
 
         if (source.getAppointmentTime() != null)
-            target.setAppointmentTime(MappingUtility.iVLTS2IVLDateInternal(source.getAppointmentTime()));
+            target.setAppointmentTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getAppointmentTime(), factLists.getParsedDatesCache()));
 
         factLists.put(MissedAppointment.class, target);
 
@@ -67,9 +68,9 @@ public class MissedAppointmentMapper extends EncounterBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getMissedAppointments() == null)
+        if (organizedResults.output().getMissedAppointments() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setMissedAppointments(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.MissedAppointments());
         }
 

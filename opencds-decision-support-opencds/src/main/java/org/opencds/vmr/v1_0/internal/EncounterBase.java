@@ -13,5 +13,5 @@ import lombok.ToString;
 @ToString
 public abstract class EncounterBase extends ClinicalStatement
 {
-    protected CD encounterType;
+    private CD encounterType;
 }

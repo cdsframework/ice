@@ -1,0 +1,211 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "ice-series-plan-definition",
+  "url": "http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition",
+  "version": "1.0.0",
+  "name": "IceSeriesPlanDefinition",
+  "title": "ICE Series PlanDefinition",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-04-24",
+  "publisher": "CDS Framework",
+  "description": "Profile for representing ICE SeriesData as a PlanDefinition with one action per dose.",
+  "purpose": "Supports validation of dose-level terminology and timing semantics using PlanDefinition.action and relatedAction.",
+  "fhirVersion": "4.0.1",
+  "kind": "resource",
+  "abstract": false,
+  "type": "PlanDefinition",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/PlanDefinition",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "PlanDefinition",
+        "path": "PlanDefinition",
+        "short": "ICE series PlanDefinition"
+      },
+      {
+        "id": "PlanDefinition.url",
+        "path": "PlanDefinition.url",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "PlanDefinition.version",
+        "path": "PlanDefinition.version",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "PlanDefinition.status",
+        "path": "PlanDefinition.status",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "PlanDefinition.type",
+        "path": "PlanDefinition.type",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "PlanDefinition.extension",
+        "path": "PlanDefinition.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 1,
+        "max": "*"
+      },
+      {
+        "id": "PlanDefinition.extension:seriesMetadata",
+        "path": "PlanDefinition.extension",
+        "sliceName": "seriesMetadata",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": [
+              "http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "PlanDefinition.action",
+        "path": "PlanDefinition.action",
+        "short": "Dose actions",
+        "definition": "Each action represents one dose in the series.",
+        "min": 1,
+        "max": "*"
+      },
+      {
+        "id": "PlanDefinition.action.id",
+        "path": "PlanDefinition.action.id",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "PlanDefinition.action.title",
+        "path": "PlanDefinition.action.title",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "PlanDefinition.action.relatedAction",
+        "path": "PlanDefinition.action.relatedAction",
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "PlanDefinition.action.relatedAction.actionId",
+        "path": "PlanDefinition.action.relatedAction.actionId",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "PlanDefinition.action.relatedAction.relationship",
+        "path": "PlanDefinition.action.relatedAction.relationship",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "PlanDefinition.action.relatedAction.extension",
+        "path": "PlanDefinition.action.relatedAction.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "PlanDefinition.action.relatedAction.extension:doseIntervalConstraint",
+        "path": "PlanDefinition.action.relatedAction.extension",
+        "sliceName": "doseIntervalConstraint",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": [
+              "http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "PlanDefinition.action.extension",
+        "path": "PlanDefinition.action.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 2,
+        "max": "*"
+      },
+      {
+        "id": "PlanDefinition.action.extension:doseNumber",
+        "path": "PlanDefinition.action.extension",
+        "sliceName": "doseNumber",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": [
+              "http://cdsframework.org/fhir/StructureDefinition/ice-dose-number"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "PlanDefinition.action.extension:doseAgeConstraint",
+        "path": "PlanDefinition.action.extension",
+        "sliceName": "doseAgeConstraint",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": [
+              "http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "PlanDefinition.action.extension:doseVaccine",
+        "path": "PlanDefinition.action.extension",
+        "sliceName": "doseVaccine",
+        "min": 1,
+        "max": "*",
+        "type": [
+          {
+            "code": "Extension",
+            "profile": [
+              "http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

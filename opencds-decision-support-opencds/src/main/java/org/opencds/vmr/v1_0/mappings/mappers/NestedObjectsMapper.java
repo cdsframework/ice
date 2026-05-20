@@ -755,11 +755,11 @@ public abstract class NestedObjectsMapper
         final String _METHODNAME = "pushOutClinicalStatementNestedObjects(): ";
         final String targetClassName = target.getClass().getSimpleName();
 
-        if (organizedResults.getEntityChildren().get(source.getId()) != null)
+        if (organizedResults.entityChildren().get(source.getId()) != null)
         {
             if (log.isTraceEnabled())
                 log.trace(_METHODNAME + "Entity children of {}", source.getId());
-            for (final EntityRelationship oneInternalEntityRelationship : organizedResults.getEntityChildren().get(source.getId()))
+            for (final EntityRelationship oneInternalEntityRelationship : organizedResults.entityChildren().get(source.getId()))
             {
                 if (log.isTraceEnabled())
                     log.trace(_METHODNAME
@@ -841,11 +841,11 @@ public abstract class NestedObjectsMapper
             }
         }
 
-        if (organizedResults.getCsChildren().get(source.getId()) != null)
+        if (organizedResults.csChildren().get(source.getId()) != null)
         {
             if (log.isTraceEnabled())
                 log.trace(_METHODNAME + "Clinical Statement children of {}", source.getId());
-            for (final ClinicalStatement oneInternalRelatedClinicalStatement : organizedResults.getCsChildren().get(source.getId()))
+            for (final ClinicalStatement oneInternalRelatedClinicalStatement : organizedResults.csChildren().get(source.getId()))
             {
                 final org.opencds.vmr.v1_0.schema.RelatedClinicalStatement nestedTarget =
                         OneObjectMapper.pushOutRelatedClinicalStatement(oneInternalRelatedClinicalStatement, organizedResults);
@@ -954,12 +954,12 @@ public abstract class NestedObjectsMapper
         final String _METHODNAME = "pushOutRelatedEntityNestedObjects(): ";
         final String externalClassName = external.getClass().getSimpleName();
 
-        if (organizedResults.getEntityChildren().get(sourceId) == null)
+        if (organizedResults.entityChildren().get(sourceId) == null)
             return null;
 
         if (log.isTraceEnabled())
             log.trace(_METHODNAME + "Entity children of {}", sourceId);
-        for (final EntityRelationship oneInternalEntityRelationship : organizedResults.getEntityChildren().get(sourceId))
+        for (final EntityRelationship oneInternalEntityRelationship : organizedResults.entityChildren().get(sourceId))
         {
             final String targetEntityId = oneInternalEntityRelationship.getTargetEntityId();
 
@@ -967,7 +967,7 @@ public abstract class NestedObjectsMapper
                 log.trace(_METHODNAME + "push out source Entity Id {}, targetEntityId {}, with relationship {}", sourceId,
                         targetEntityId, oneInternalEntityRelationship.getTargetRole().toString());
 
-            final EntityBase thisInternalNestedEntity = organizedResults.getEntityList().get(targetEntityId);
+            final EntityBase thisInternalNestedEntity = organizedResults.entityList().get(targetEntityId);
             final String thisInternalNestedEntityClassName = thisInternalNestedEntity.getClass().getSimpleName();
 
             switch (thisInternalNestedEntityClassName)
@@ -977,7 +977,7 @@ public abstract class NestedObjectsMapper
                     final org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance schemaNestedEntity =
                             new org.opencds.vmr.v1_0.schema.RelatedEntity.AdministrableSubstance();
 
-                    AdministrableSubstanceMapper.pushOut((AdministrableSubstance) organizedResults.getEntityList()
+                    AdministrableSubstanceMapper.pushOut((AdministrableSubstance) organizedResults.entityList()
                             .get(oneInternalEntityRelationship.getTargetEntityId()), schemaNestedEntity, organizedResults);
 
                     final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
@@ -1025,7 +1025,7 @@ public abstract class NestedObjectsMapper
                             new org.opencds.vmr.v1_0.schema.RelatedEntity.Entity();
 
                     EntityMapper.pushOut(
-                            (Entity) organizedResults.getEntityList().get(oneInternalEntityRelationship.getTargetEntityId()),
+                            (Entity) organizedResults.entityList().get(oneInternalEntityRelationship.getTargetEntityId()),
                             schemaNestedEntity, organizedResults);
 
                     final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
@@ -1062,7 +1062,7 @@ public abstract class NestedObjectsMapper
                             new org.opencds.vmr.v1_0.schema.RelatedEntity.Facility();
 
                     FacilityMapper.pushOut(
-                            (Facility) organizedResults.getEntityList().get(oneInternalEntityRelationship.getTargetEntityId()),
+                            (Facility) organizedResults.entityList().get(oneInternalEntityRelationship.getTargetEntityId()),
                             schemaNestedEntity, organizedResults);
 
                     final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
@@ -1099,7 +1099,7 @@ public abstract class NestedObjectsMapper
                             new org.opencds.vmr.v1_0.schema.RelatedEntity.Organization();
 
                     OrganizationMapper.pushOut(
-                            (Organization) organizedResults.getEntityList().get(oneInternalEntityRelationship.getTargetEntityId()),
+                            (Organization) organizedResults.entityList().get(oneInternalEntityRelationship.getTargetEntityId()),
                             schemaNestedEntity, organizedResults);
 
                     final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
@@ -1136,7 +1136,7 @@ public abstract class NestedObjectsMapper
                             new org.opencds.vmr.v1_0.schema.RelatedEntity.Person();
 
                     PersonMapper.pushOut(
-                            (Person) organizedResults.getEntityList().get(oneInternalEntityRelationship.getTargetEntityId()),
+                            (Person) organizedResults.entityList().get(oneInternalEntityRelationship.getTargetEntityId()),
                             schemaNestedEntity, organizedResults);
 
                     final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =
@@ -1173,7 +1173,7 @@ public abstract class NestedObjectsMapper
                             new org.opencds.vmr.v1_0.schema.RelatedEntity.Specimen();
 
                     SpecimenMapper.pushOut(
-                            (Specimen) organizedResults.getEntityList().get(oneInternalEntityRelationship.getTargetEntityId()),
+                            (Specimen) organizedResults.entityList().get(oneInternalEntityRelationship.getTargetEntityId()),
                             schemaNestedEntity, organizedResults);
 
                     final org.opencds.vmr.v1_0.schema.RelatedEntity schemaRelatedEntity =

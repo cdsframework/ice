@@ -16,7 +16,7 @@ import lombok.ToString;
 @ToString
 public class ObservationResult extends ObservationBase
 {
-    protected IVLDate observationEventTime;
-    protected ObservationValue observationValue;
-    protected List<CD> interpretation;
+    private IVLDate observationEventTime;
+    private ObservationValue observationValue;
+    private List<CD> interpretation;
 }

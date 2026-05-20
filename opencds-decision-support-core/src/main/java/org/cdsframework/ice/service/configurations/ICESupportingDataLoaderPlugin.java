@@ -34,15 +34,14 @@ import java.util.stream.Collectors;
 
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.ice.config.IceProperties;
-import org.cdsframework.ice.config.IceSupportingDataProperties;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Schedule;
 import org.cdsframework.ice.service.SupportingDataService;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.opencds.config.api.model.KMId;
+import org.opencds.plugin.api.OpencdsPlugin;
 import org.opencds.plugin.api.PluginDataCache;
-import org.opencds.plugin.api.PreProcessPlugin;
 import org.opencds.plugin.api.PreProcessPluginContext;
 import org.opencds.plugin.api.SupportingData;
 import org.springframework.util.ObjectUtils;
@@ -52,7 +51,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
+public class ICESupportingDataLoaderPlugin implements OpencdsPlugin<PreProcessPluginContext>
 {
     // Caches per KM ID so we only compute once per knowledge module
     private static final Map<String, Map<String, String>> cachedNumericToKeyByKmId = new HashMap<>();
@@ -63,8 +62,6 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
 
     @Setter
     private static IceProperties iceProperties;
-    @Setter
-    private static IceSupportingDataProperties iceSupportingDataProperties;
     @Setter
     private static SupportingDataService supportingDataService;
 
@@ -193,13 +190,19 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
 
     public static synchronized void preloadSchedules()
     {
-        if (iceProperties == null || iceSupportingDataProperties == null)
+        if (iceProperties == null)
         {
             log.warn("Cannot preload schedules: properties not initialized");
             return;
         }
 
-        iceProperties.getKnowledgeModules().forEach((kmId, properties) ->
+        if (supportingDataService == null)
+        {
+            log.warn("Cannot preload schedules: SupportingDataService not initialized");
+            return;
+        }
+
+        supportingDataService.getKnowledgeModulePropertiesByKmId().forEach((kmId, properties) ->
         {
             if (preloadedSchedules.containsKey(kmId))
                 return;
@@ -207,9 +210,7 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
             log.info("Preloading immunization schedule for Knowledge Module: {}", kmId);
             try
             {
-                final ICESupportingDataLoaderPlugin plugin = new ICESupportingDataLoaderPlugin();
-                final Schedule schedule = plugin.loadImmunizationSchedule(kmId, properties);
-                preloadedSchedules.put(kmId, schedule);
+                preloadedSchedules.put(kmId, new ICESupportingDataLoaderPlugin().loadImmunizationSchedule(kmId, properties));
             }
             catch (final Exception e)
             {
@@ -247,15 +248,17 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
 
         final PluginDataCache cache = context.cache();
 
-        final String lKMId = sd.getKmId();
+        final String lKMId = sd.kmId();
 
-        final IceProperties.KnowledgeModuleProperties knowledgeModuleProperties = iceProperties.getKnowledgeModules().get(lKMId);
-        if (knowledgeModuleProperties == null)
+        if (supportingDataService == null)
         {
-            final String lErrStr = "KnowledgeModuleProperties not found for: " + lKMId;
-            log.error(_METHODNAME + "{}", lErrStr);
-            throw new RuntimeException(lErrStr);
+            final String lErrStr = "SupportingDataService not initialized";
+            log.error(_METHODNAME + lErrStr);
+            throw new IllegalStateException(lErrStr);
         }
+
+        final IceProperties.KnowledgeModuleProperties knowledgeModuleProperties =
+                supportingDataService.getKnowledgeModulePropertiesForKmId(lKMId);
 
         Schedule schedule;
         synchronized (cache)
@@ -310,9 +313,13 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
                 .put("outputEarliestOverdueDates", iceProperties.getOutputEarliestAndOverdueDates()
                         .orElseGet(knowledgeModuleProperties::outputEarliestAndOverdueDates));
 
-        context.globals().put("outputNumberOfDosesRemaining", knowledgeModuleProperties.outputNumberOfDosesRemaining());
+        context.globals()
+                .put("outputNumberOfDosesRemaining", iceProperties.getOutputNumberOfDosesRemaining()
+                        .orElseGet(knowledgeModuleProperties::outputNumberOfDosesRemaining));
 
-        context.globals().put("outputSeriesInformation", knowledgeModuleProperties.outputSeriesInformation());
+        context.globals()
+                .put("outputSeriesInformation",
+                        iceProperties.getOutputSeriesInformation().orElseGet(knowledgeModuleProperties::outputSeriesInformation));
 
         context.globals()
                 .put("doseOverrideFeatureEnabled", iceProperties.getEnableDoseOverrideFeature()
@@ -321,6 +328,10 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
         context.globals()
                 .put("outputSupplementalText",
                         iceProperties.getOutputSupplementalText().orElseGet(knowledgeModuleProperties::outputSupplementalText));
+
+        context.globals()
+                .put("outputVaccineGroupRulesArtifact", iceProperties.getOutputVaccineGroupRulesArtifact()
+                        .orElseGet(knowledgeModuleProperties::outputVaccineGroupRulesArtifact));
 
         context.globals()
                 .put("vaccineGroupExclusions", normalizeVaccineGroupExclusionsForSchedule(
@@ -361,12 +372,14 @@ public class ICESupportingDataLoaderPlugin implements PreProcessPlugin
         final Schedule s;
         try
         {
-            s = new Schedule("requestedKmId", KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(
-                    iceProperties.getIceBaseRulesScopingEntityId(), lRequestedKMIdObject.getBusinessId(),
-                    iceProperties.getIceBaseRulesVersion()), List.of(kmId), iceSupportingDataProperties, supportingDataService,
+            if (supportingDataService == null)
+                throw new IllegalStateException("SupportingDataService not initialized");
+
+            s = new Schedule("requestedKmId", supportingDataService.getBaseKnowledgeModuleId(), List.of(kmId),
+                    supportingDataService,
                     iceProperties.getSupplementalTextMode().orElse(knowledgeModuleProperties.supplementalTextMode()));
         }
-        catch (final IllegalArgumentException | InconsistentConfigurationException ii)
+        catch (final IllegalArgumentException | IllegalStateException | InconsistentConfigurationException ii)
         {
             final String lErrStr = "Failed to initialize immunization schedule";
             log.error(_METHODNAME + lErrStr, ii);

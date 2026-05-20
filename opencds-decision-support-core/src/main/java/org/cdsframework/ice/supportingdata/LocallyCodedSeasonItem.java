@@ -26,8 +26,6 @@
 
 package org.cdsframework.ice.supportingdata;
 
-import java.util.Collection;
-
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsItem;
 import org.cdsframework.ice.service.Season;
@@ -41,10 +39,10 @@ public class LocallyCodedSeasonItem extends LocallyCodedCdsItem
 {
     private final Season season;
 
-    protected LocallyCodedSeasonItem(final String pCdsSeasonName, final CdsConcept pSeasonsCdsConcept,
-            final Collection<String> pCdsVersions, final Season pSeason) throws IllegalArgumentException
+    protected LocallyCodedSeasonItem(final String pCdsSeasonName, final CdsConcept pSeasonsCdsConcept, final Season pSeason)
+            throws IllegalArgumentException
     {
-        super(pCdsSeasonName, pSeasonsCdsConcept, pCdsVersions);
+        super(pCdsSeasonName, pSeasonsCdsConcept);
 
         final String _METHODNAME = "LocallyCodedSeasonItem(): ";
 
@@ -61,7 +59,6 @@ public class LocallyCodedSeasonItem extends LocallyCodedCdsItem
     @Override
     public String toString()
     {
-        return "LocallyCodedSeasonItem [getCdsItemName()=%s; getSeason()=%s; getCdsVersions()=%s]".formatted(getCdsItemName(),
-                this.season, getCdsVersions());
+        return "LocallyCodedSeasonItem [getCdsItemName()=%s; getSeason()=%s]".formatted(getCdsItemName(), this.season);
     }
 }

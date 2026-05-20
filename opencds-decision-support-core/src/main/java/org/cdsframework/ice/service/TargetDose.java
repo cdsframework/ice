@@ -26,17 +26,17 @@
 
 package org.cdsframework.ice.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.kie.api.definition.type.ClassReactive;
 import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
+import org.springframework.util.ObjectUtils;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -59,7 +59,7 @@ public class TargetDose
     private final Set<String> doseRulesProcessed;
     private VaccineComponent vaccineComponent;
     private int administeredShotNumberInSeries;
-    private Date administrationDate;
+    private LocalDate administrationDate;
     private int doseNumberInSeries;
     private int doseNumberCount;
     private boolean isPrimarySeriesShot;
@@ -88,7 +88,7 @@ public class TargetDose
      * @throws IllegalArgumentException if the Dose ID, vaccine or administration date is not populated
      */
     public TargetDose(final Vaccine pAdministeredVaccine, final VaccineComponent pVaccineComponentToBeEvaluated,
-            final Date pAdministrationDate, final TargetSeries pEncompassingTargetSeries,
+            final LocalDate pAdministrationDate, final TargetSeries pEncompassingTargetSeries,
             final SubstanceAdministrationEvent pAssociatedSAE)
     {
         if (pAdministeredVaccine == null || pVaccineComponentToBeEvaluated == null || pAdministrationDate == null
@@ -147,10 +147,7 @@ public class TargetDose
 
     public boolean onlyInvalidReasonsInSet(final Set<String> reasons)
     {
-        return Optional.ofNullable(invalidReasons)
-                .filter(ir -> !ir.isEmpty())
-                .flatMap(ir -> Optional.ofNullable(reasons).filter(r -> r.containsAll(ir)))
-                .isPresent();
+        return !ObjectUtils.isEmpty(reasons) && reasons.containsAll(invalidReasons);
     }
 
     public boolean containsAcceptedReason(final String openCdsConceptCode)
@@ -337,7 +334,7 @@ public class TargetDose
      *
      * @param administrationDate The administration date of the shot
      */
-    public void setAdministrationDate(final Date administrationDate)
+    public void setAdministrationDate(final LocalDate administrationDate)
     {
         final String _METHODNAME = "setAdministrationDate(): ";
         if (administrationDate == null)

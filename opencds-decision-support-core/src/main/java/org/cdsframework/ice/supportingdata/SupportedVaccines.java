@@ -26,13 +26,12 @@
 
 package org.cdsframework.ice.supportingdata;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,8 +43,8 @@ import org.cdsframework.cds.ConceptUtils;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
-import org.cdsframework.ice.dto.CodeSystemConceptProperty;
-import org.cdsframework.ice.dto.Coding;
+import org.cdsframework.fhir.CodeSystemConceptProperty;
+import org.cdsframework.fhir.Coding;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Vaccine;
@@ -61,7 +60,7 @@ public class SupportedVaccines implements SupportingData
 {
     // Supporting Data Cds List from which this vaccine supporting data is built
     private final SupportedCdsLists supportedCdsLists;
-    // Keep track of which vaccine items are fully specified; in order for a vaccine to be fully specified, all of its component vaccines must be fully specified as well. We
+    // Keep track of which vaccine items are fully specified; in order for a vaccine to be fully specified, all of its components vaccines must be fully specified as well. We
     // keep track of which Vaccines each VaccineComponent is associated so that they can be associated with the combination vaccine when/if that information comes available.
     private final Map<String, LocallyCodedVaccineItem> cdsListItemNameToVaccineItem;
     // cdsListItemName (cdsListCode.cdsListItemKey) to Vaccine
@@ -134,7 +133,7 @@ public class SupportedVaccines implements SupportingData
             return;
         }
 
-        // We need to process monovalent vaccines (those with 1 component) before combination vaccines
+        // We need to process monovalent vaccines (those with 1 components) before combination vaccines
         // to ensure vaccine components are defined.
         final List<LocallyCodedCdsListItem> sortedItems = vaccineCdsListItems.stream()
                 .sorted((a, b) -> Long.compare(a.getProperties().stream().filter(p -> "vaccineComponent".equals(p.code())).count(),
@@ -157,7 +156,7 @@ public class SupportedVaccines implements SupportingData
             return;
         }
 
-        // Identify the primary OpenCDS concept
+        // Identify the primary OpenCDS concepts
         final Collection<CdsConcept> lOpenCDSConcepts = lcccli.getOpencdsConceptMappings();
         if (ObjectUtils.isEmpty(lOpenCDSConcepts))
         {
@@ -178,8 +177,8 @@ public class SupportedVaccines implements SupportingData
         boolean lLiveVirusVaccine = false;
         boolean lUnspecifiedFormulation = false;
         boolean lSelectAdjuvantProduct = false;
-        Date lMinimumDateForUse = null;
-        Date lMaximumDateForUse = null;
+        LocalDate lMinimumDateForUse = null;
+        LocalDate lMaximumDateForUse = null;
         TimePeriod lValidMinimumAgeForUse = null;
         TimePeriod lValidMaximumAgeForUse = null;
         TimePeriod lRecommendedMinimumAgeForUse = null;
@@ -264,7 +263,7 @@ public class SupportedVaccines implements SupportingData
                 case "conceptMapping", "supported", "outboundCode" ->
                 {
                 }
-                default -> log.warn(_METHODNAME + "Unsupported property found for vaccine: {} - {}", lcccli.getCdsListItemName(),
+                default -> log.warn(_METHODNAME + "Unsupported properties found for vaccine: {} - {}", lcccli.getCdsListItemName(),
                         code);
             }
         }
@@ -351,7 +350,7 @@ public class SupportedVaccines implements SupportingData
         lVaccine.setMaximumDateForUse(lMaximumDateForUse);
 
         final LocallyCodedVaccineItem locallyCodedVaccineItem =
-                new LocallyCodedVaccineItem(lcccli.getCdsListItemName(), ic, lcccli.getCdsListVersions(), lVaccine);
+                new LocallyCodedVaccineItem(lcccli.getCdsListItemName(), ic, lVaccine);
 
         this.cdsListItemNameToVaccineItem.put(lcccli.getCdsListItemName(), locallyCodedVaccineItem);
 
@@ -363,22 +362,19 @@ public class SupportedVaccines implements SupportingData
         }
     }
 
-    private Date parseDate(final String value)
+    private LocalDate parseDate(final String value)
     {
         if (value == null)
             return null;
         try
         {
-            return Date.from(
-                    LocalDateTime.parse(value, DateTimeFormatter.ISO_LOCAL_DATE_TIME).atZone(ZoneId.systemDefault()).toInstant());
+            return LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         }
         catch (final DateTimeParseException e)
         {
             try
             {
-                return Date.from(java.time.LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant());
+                return LocalDate.parse(value, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay(ZoneId.systemDefault()).toLocalDate();
             }
             catch (final DateTimeParseException e2)
             {
@@ -426,7 +422,7 @@ public class SupportedVaccines implements SupportingData
             if (lAllPreviouslyEncounteredVaccinesWVaccineComponent == null)
             {
                 final String lErrStr =
-                        "Error: Unaccounted for inconsistency encountered during processing of vaccine supporting data. (Unaccounted for vaccine component when no vaccines have been defined)";
+                        "Error: Unaccounted for inconsistency encountered during processing of vaccine supporting data. (Unaccounted for vaccine components when no vaccines have been defined)";
                 log.error(_METHODNAME + lErrStr);
                 throw new ICECoreError(lErrStr);
             }
@@ -441,8 +437,8 @@ public class SupportedVaccines implements SupportingData
                 lAllPreviouslyEncounteredVaccinesWVaccineComponent.remove(lPreviousVaccineEncountered);
             if (lAllPreviouslyEncounteredVaccinesWVaccineComponent.isEmpty())
             {
-                // If all vaccines with this pending vaccine component have been handled, remove the fact that there were previously encountered
-                // vaccines that need this (now) fully specified vaccine component to be added to it
+                // If all vaccines with this pending vaccine components have been handled, remove the fact that there were previously encountered
+                // vaccines that need this (now) fully specified vaccine components to be added to it
                 this.vaccineComponentCDToVaccinesNotFullySpecified.remove(pVaccineComponentCD);
             }
         }

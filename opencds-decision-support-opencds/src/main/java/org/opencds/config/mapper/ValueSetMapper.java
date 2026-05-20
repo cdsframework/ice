@@ -1,7 +1,6 @@
 package org.opencds.config.mapper;
 
 import org.opencds.config.api.model.ValueSet;
-import org.opencds.config.api.model.impl.ValueSetImpl;
 
 public abstract class ValueSetMapper
 {
@@ -9,7 +8,8 @@ public abstract class ValueSetMapper
     {
         if (external == null)
             return null;
-        return ValueSetImpl.create(external.getOid(), external.getName());
+
+        return new ValueSet(external.getOid(), external.getName());
     }
 
     public static org.opencds.config.schema.ValueSet external(final ValueSet internal)
@@ -18,8 +18,8 @@ public abstract class ValueSetMapper
             return null;
 
         final org.opencds.config.schema.ValueSet external = new org.opencds.config.schema.ValueSet();
-        external.setOid(internal.getOid());
-        external.setName(internal.getName());
+        external.setOid(internal.oid());
+        external.setName(internal.name());
 
         return external;
     }

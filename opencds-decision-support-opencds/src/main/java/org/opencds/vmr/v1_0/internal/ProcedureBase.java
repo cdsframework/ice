@@ -13,8 +13,8 @@ import lombok.ToString;
 @ToString
 public abstract class ProcedureBase extends ClinicalStatement
 {
-    protected CD procedureCode;
-    protected CD procedureMethod;
-    protected BodySite approachBodySite;
-    protected BodySite targetBodySite;
+    private CD procedureCode;
+    private CD procedureMethod;
+    private BodySite approachBodySite;
+    private BodySite targetBodySite;
 }

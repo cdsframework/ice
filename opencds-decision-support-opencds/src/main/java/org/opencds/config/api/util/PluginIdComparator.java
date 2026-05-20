@@ -7,15 +7,16 @@ import java.util.stream.Collectors;
 import org.opencds.config.api.model.PluginId;
 import org.opencds.config.api.model.PrePostProcessPluginId;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class PluginIdComparator
 {
     public static List<PluginIdTuple> intersect(final List<PrePostProcessPluginId> prePostProcessPlugins,
             final List<PluginId> plugins)
     {
         return prePostProcessPlugins.stream()
-                .map(pppid -> Optional.of(match(plugins, pppid))
-                        .map(pluginId -> PluginIdTuple.create(pluginId, pppid))
-                        .orElse(null))
+                .map(pppid -> Optional.of(match(plugins, pppid)).map(pluginId -> new PluginIdTuple(pluginId, pppid)).orElse(null))
                 .collect(Collectors.toList());
     }
 
@@ -26,7 +27,7 @@ public class PluginIdComparator
 
     public static boolean compare(final PrePostProcessPluginId prePostProcessPlugin, final PluginId plugin)
     {
-        return prePostProcessPlugin.getScopingEntityId().equals(plugin.getScopingEntityId()) && prePostProcessPlugin.getBusinessId()
-                .equals(plugin.getBusinessId()) && prePostProcessPlugin.getVersion().equals(plugin.getVersion());
+        return prePostProcessPlugin.scopingEntityId().equals(plugin.scopingEntityId()) && prePostProcessPlugin.businessId()
+                .equals(plugin.businessId()) && prePostProcessPlugin.version().equals(plugin.version());
     }
 }

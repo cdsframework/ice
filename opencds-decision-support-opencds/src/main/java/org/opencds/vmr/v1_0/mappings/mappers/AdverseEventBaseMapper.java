@@ -41,9 +41,11 @@ public abstract class AdverseEventBaseMapper extends ClinicalStatementMapper
         if (source.getAdverseEventAgent() != null)
             target.setAdverseEventAgent(MappingUtility.cD2CDInternal(source.getAdverseEventAgent()));
         if (source.getAdverseEventTime() != null)
-            target.setAdverseEventTime(MappingUtility.iVLTS2IVLDateInternal(source.getAdverseEventTime()));
+            target.setAdverseEventTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getAdverseEventTime(), factLists.getParsedDatesCache()));
         if (source.getDocumentationTime() != null)
-            target.setDocumentationTime(MappingUtility.iVLTS2IVLDateInternal(source.getDocumentationTime()));
+            target.setDocumentationTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getDocumentationTime(), factLists.getParsedDatesCache()));
         if (source.getAffectedBodySite() != null)
         {
             target.setAffectedBodySite(new ArrayList<>());

@@ -14,8 +14,8 @@ import lombok.ToString;
 @ToString
 public class EN extends ANY
 {
-    protected List<ENXP> part;
-    protected List<EntityNameUse> use;
+    private List<ENXP> part;
+    private List<EntityNameUse> use;
 
     public List<ENXP> getPart()
     {

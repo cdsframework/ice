@@ -13,6 +13,6 @@ import lombok.ToString;
 @ToString
 public class RelationshipToSource
 {
-    protected String sourceId;
-    protected CD relationshipToSource;
+    private String sourceId;
+    private CD relationshipToSource;
 }

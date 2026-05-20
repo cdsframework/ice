@@ -14,7 +14,7 @@ import lombok.ToString;
 @ToString
 public abstract class SupplyBase extends ClinicalStatement
 {
-    protected CD supplyCode;
-    protected PQ quantity;
-    protected BodySite targetBodySite;
+    private CD supplyCode;
+    private PQ quantity;
+    private BodySite targetBodySite;
 }

@@ -4,7 +4,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.drools.core.base.accumulators.AbstractAccumulateFunction;
 
@@ -17,12 +17,12 @@ public class DateMinAccumulateFunction extends AbstractAccumulateFunction<DateMi
     @Setter
     public static class MinData implements Externalizable
     {
-        private Date min;
+        private LocalDate min;
 
         @Override
         public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException
         {
-            min = (Date) in.readObject();
+            min = (LocalDate) in.readObject();
         }
 
         @Override
@@ -63,17 +63,17 @@ public class DateMinAccumulateFunction extends AbstractAccumulateFunction<DateMi
     @Override
     public void accumulate(final MinData data, final Object value)
     {
-        if (value instanceof final Date dateValue)
-            data.setMin(data.getMin() == null || data.getMin().compareTo(dateValue) > 0 ? dateValue : data.getMin());
+        if (value instanceof final LocalDate dateValue)
+            data.setMin(data.getMin() == null || data.getMin().isAfter(dateValue) ? dateValue : data.getMin());
     }
 
     @Override
     public boolean tryReverse(final MinData data, final Object value)
     {
-        if (!(value instanceof final Date dateValue))
+        if (!(value instanceof final LocalDate dateValue))
             return true;
 
-        return data.getMin().compareTo(dateValue) < 0;
+        return data.getMin().isBefore(dateValue);
     }
 
     @Override
@@ -96,6 +96,6 @@ public class DateMinAccumulateFunction extends AbstractAccumulateFunction<DateMi
     @Override
     public Class<?> getResultType()
     {
-        return Date.class;
+        return LocalDate.class;
     }
 }

@@ -34,7 +34,8 @@ public class GoalMapper extends GoalBaseMapper
         }
 
         if (source.getGoalObserverEventTime() != null)
-            target.setGoalObserverEventTime(MappingUtility.iVLTS2IVLDateInternal(source.getGoalObserverEventTime()));
+            target.setGoalObserverEventTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getGoalObserverEventTime(), factLists.getParsedDatesCache()));
         if (source.getGoalStatus() != null)
             target.setGoalStatus(MappingUtility.cD2CDInternal(source.getGoalStatus()));
 
@@ -72,8 +73,8 @@ public class GoalMapper extends GoalBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getGoals() == null)
-            organizedResults.getOutput().setGoals(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.Goals());
+        if (organizedResults.output().getGoals() == null)
+            organizedResults.output().setGoals(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.Goals());
 
         return target;
     }

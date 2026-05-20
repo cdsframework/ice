@@ -3,38 +3,65 @@ spring:
     name: ice
   config:
     import:
-      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/iceSupportingData.yml
       - classpath:data/knowledgeCommon/org.cdsframework.ice/ice-supporting-data/iceSupportingData.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/iceSupportingData.yml
+      - classpath:data/supportedModulePlanDefinitions.yml
   threads:
     virtual:
       enabled: true
   jackson:
     default-property-inclusion: non_empty
 
+springdoc:
+  paths-to-match:
+    - '/cds/$immunization-forecast'
+    - '/cds/supporting-data/**'
+  api-docs:
+    path: /cds/ice-forecast/api-docs
+    enabled: false
+  swagger-ui:
+    path: /cds/ice-forecast/swagger-ui.html
+    config-url: /cds/ice-forecast/api-docs/swagger-config
+    url: /cds/ice-forecast/api-docs
+    enabled: false
+
 management:
   endpoints:
     access:
       max-permitted: none
 
-server:
-  servlet:
-    context-path: /opencds-decision-support-service
-
 cxf:
-  path: /evaluate
+  path: /opencds-decision-support-service/evaluate
 
 logging:
   level:
     org.drools: ERROR
 
+cds-engine:
+  experimental-features:
+    enable-fhir-r6: false
+
+open-api:
+  title: CDS Immunization Calculation Engine (ICE) Forecast API
+  description: 'FHIR operation endpoint for immunization forecasting: POST /cds/$immunization-forecast. The request body is a FHIR Parameters resource and the response is a FHIR Parameters resource.'
+  version: ${ice.ice-version}
+  contact:
+    name: ICE Support
+    email: ice@hln.com
+    url: http://www.hln.com/ice
+  license:
+    name: LGPL-3.0-or-later
+    url: https://www.gnu.org/licenses/lgpl-3.0.en.html
+
 ice:
   knowledge-modules:
-    '[org.nyc.cir^ICE^1.0.0]':
+    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
       output-earliest-and-overdue-dates: true
       enable-dose-override-feature: false
       output-supplemental-text: true
       output-number-of-doses-remaining: false
       output-series-information: false
+      output-vaccine-group-rules-artifact: false
       enable-unsupported-vaccines-group: false
       vaccine-group-exclusions:
         - ANTHRAX
@@ -47,10 +74,7 @@ ice:
       supplemental-text-mode: LEGACY
       drools-path: classpath:drools
   config-path: classpath:config
-  ice-base-rules-scoping-entity-id: org.cdsframework
-  ice-base-rules-version: 1.0.0
+  ice-base-module-canonical: http://cdsframework.org/PlanDefinition/common-ice-forecast|1.0.0
   enable-drools-event-logging: false
   fire-limit: 25000
-  experimental-features:
-    enable-fhir-r6: false
-  ice-version: ICE_2.56.1
+  ice-version: ICE_2.57-rc1

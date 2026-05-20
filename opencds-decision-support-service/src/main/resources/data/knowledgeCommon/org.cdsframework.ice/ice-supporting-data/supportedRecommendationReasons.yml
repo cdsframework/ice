@@ -1,0 +1,33 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/common-ice-forecast|1.0.0]':
+      code-systems:
+        RECOMMENDATION_REASON_CONCEPT:
+          name: RECOMMENDATION_REASON_CONCEPT
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.3.795.12.100.6
+          description: Supported recommendation reasons for display
+          url: http://terminology.cdsframework.org/ice/recommendation-reason
+          title: 'ICE Recommendation Reasons: All'
+          status: active
+          content: complete
+          concept:
+            - code: BOOSTER_DOSE
+              display: Booster dose.
+            - code: DUE_NOW
+              display: Due now.
+            - code: DUE_IN_FUTURE
+              display: Due in the future.
+            - code: COMPLETE
+              display: Completed vaccine series.
+            - code: HIGH_RISK
+              display: Recommended for high-risk groups.
+            - code: BELOW_REC_AGE_SERIES
+              display: Below recommended age for the series.
+            - code: NOT_SPECIFIED
+              display: Recommendation reason is not specified.
+            - code: NOT_SUPPORTED
+              display: The shots in the recommendation group were not evaluated.
+            - code: SUPPLEMENTAL_TEXT
+              display: Supplemental text is available for this recommendation.

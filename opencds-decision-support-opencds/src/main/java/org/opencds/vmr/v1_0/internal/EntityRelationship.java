@@ -14,9 +14,9 @@ import lombok.ToString;
 @ToString
 public class EntityRelationship
 {
-    protected String id;
-    protected String sourceId;
-    protected String targetEntityId;
-    protected CD targetRole;
-    protected IVLDate relationshipTimeInterval;
+    private String id;
+    private String sourceId;
+    private String targetEntityId;
+    private CD targetRole;
+    private IVLDate relationshipTimeInterval;
 }

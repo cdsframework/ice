@@ -13,5 +13,5 @@ import lombok.ToString;
 @ToString
 public class ScheduledProcedure extends ProcedureBase
 {
-    protected IVLDate procedureTime;
+    private IVLDate procedureTime;
 }

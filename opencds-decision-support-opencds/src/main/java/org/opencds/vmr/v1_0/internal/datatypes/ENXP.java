@@ -14,8 +14,8 @@ import lombok.ToString;
 @ToString
 public class ENXP extends XP
 {
-    protected EntityNamePartType type;
-    protected List<EntityNamePartQualifier> qualifier;
+    private EntityNamePartType type;
+    private List<EntityNamePartQualifier> qualifier;
 
     public List<EntityNamePartQualifier> getQualifier()
     {

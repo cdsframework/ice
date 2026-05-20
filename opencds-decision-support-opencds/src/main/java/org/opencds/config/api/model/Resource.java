@@ -1,8 +1,6 @@
 package org.opencds.config.api.model;
 
-public interface Resource
+public record Resource(String name,
+                       String query)
 {
-    String getName();
-
-    String getQuery();
 }

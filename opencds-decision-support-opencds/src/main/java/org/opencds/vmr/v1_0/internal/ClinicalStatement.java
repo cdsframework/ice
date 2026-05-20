@@ -15,12 +15,12 @@ import lombok.ToString;
 @ToString
 public abstract class ClinicalStatement
 {
-    protected String[] templateId;
-    protected String id;
-    protected CD dataSourceType;
-    protected String evaluatedPersonId;
-    protected boolean subjectIsFocalPerson;
-    protected boolean clinicalStatementToBeRoot;
-    protected boolean toBeReturned;
-    protected List<RelationshipToSource> relationshipToSources;
+    private String[] templateId;
+    private String id;
+    private CD dataSourceType;
+    private String evaluatedPersonId;
+    private boolean subjectIsFocalPerson;
+    private boolean clinicalStatementToBeRoot;
+    private boolean toBeReturned;
+    private List<RelationshipToSource> relationshipToSources;
 }

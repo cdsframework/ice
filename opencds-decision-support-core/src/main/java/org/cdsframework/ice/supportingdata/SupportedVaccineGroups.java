@@ -37,8 +37,8 @@ import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
-import org.cdsframework.ice.dto.CodeSystemConceptProperty;
-import org.cdsframework.ice.dto.Coding;
+import org.cdsframework.fhir.CodeSystemConceptProperty;
+import org.cdsframework.fhir.Coding;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
@@ -142,6 +142,7 @@ public class SupportedVaccineGroups implements SupportingData
             final List<String> lRelatedDiseasesCdsListItems = new ArrayList<>();
             int lPriority = 0;
             boolean lRoutine = true;
+            String lAdditionalInformationUrl = null;
 
             for (final CodeSystemConceptProperty cp : lcccli.getProperties())
             {
@@ -187,11 +188,16 @@ public class SupportedVaccineGroups implements SupportingData
                             lRelatedDiseasesCdsListItems.add(lRelatedDiseaseCdsListItem.getCdsListItemName());
                         }
                     }
+                    case "vaccineGroupRulesUrl" ->
+                    {
+                        if (cp.valueString() != null)
+                            lAdditionalInformationUrl = cp.valueString();
+                    }
                     // already processed
                     case "conceptMapping", "supported", "outboundCode" ->
                     {
                     }
-                    default -> log.warn(_METHODNAME + "Unsupported property found for vaccine group: {} - {}",
+                    default -> log.warn(_METHODNAME + "Unsupported properties found for vaccine group: {} - {}",
                             lVaccineGroupCdsListItemName, propertyCode);
                 }
             }
@@ -200,8 +206,8 @@ public class SupportedVaccineGroups implements SupportingData
             try
             {
                 locallyCodedVaccineGroupItem =
-                        new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lPrimaryOpenCdsConcept,
-                                lcccli.getCdsListVersions(), lRelatedDiseasesCdsListItems, lPriority, lRoutine);
+                        new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lPrimaryOpenCdsConcept, List.of(),
+                                lRelatedDiseasesCdsListItems, lPriority, lRoutine, lAdditionalInformationUrl);
             }
             catch (final IllegalArgumentException e)
             {

@@ -1,6 +1,5 @@
 package knowledgeCommon.org.cdsframework.ice;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +20,7 @@ import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.ice.util.TimePeriod.DurationType;
 import org.cdsframework.ice.service.Vaccine;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 /**
  * AI: Future implementation across across vaccine groups.
@@ -243,7 +242,7 @@ end
 /**
  *  If neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination then:
  */
-rule "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if vaccines different, neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
+rule "Duplicate Shot/Same Day Overview Abstract Rule #5: Make notes if vaccines different, neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	auto-focus true
@@ -258,7 +257,7 @@ rule "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if vaccines d
 end
 
 rule "Duplicate Shots/Same Day non-DTP Rule 5a: non-DTP shots; set the 2nd shot as Invalid w/ DUPLICATE_SHOT_SAME_DAY"
-	extends "Duplicate Shot/Same Day Overview Abstract Rule #5: Make note if vaccines different, neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
+	extends "Duplicate Shot/Same Day Overview Abstract Rule #5: Make notes if vaccines different, neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
 	dialect "java"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	activation-group "duplicateShotAbstractRule5"

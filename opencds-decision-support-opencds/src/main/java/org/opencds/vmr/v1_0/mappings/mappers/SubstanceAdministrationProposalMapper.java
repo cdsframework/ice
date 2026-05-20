@@ -42,10 +42,12 @@ public class SubstanceAdministrationProposalMapper extends SubstanceAdministrati
                             focalPersonId, factLists));
         if (source.getProposedAdministrationTimeInterval() != null)
             target.setProposedAdministrationTimeInterval(
-                    MappingUtility.iVLTS2IVLDateInternal(source.getProposedAdministrationTimeInterval()));
+                    MappingUtility.iVLTS2IVLDateInternal(source.getProposedAdministrationTimeInterval(),
+                            factLists.getParsedDatesCache()));
         if (source.getValidAdministrationTimeInterval() != null)
             target.setValidAdministrationTimeInterval(
-                    MappingUtility.iVLTS2IVLDateInternal(source.getValidAdministrationTimeInterval()));
+                    MappingUtility.iVLTS2IVLDateInternal(source.getValidAdministrationTimeInterval(),
+                            factLists.getParsedDatesCache()));
         if (source.getValidAdministrationTimeInterval() != null)
             target.setNumberFillsAllowed(MappingUtility.iNT2INTInternal(source.getNumberFillsAllowed()));
 
@@ -92,9 +94,9 @@ public class SubstanceAdministrationProposalMapper extends SubstanceAdministrati
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getSubstanceAdministrationProposals() == null)
+        if (organizedResults.output().getSubstanceAdministrationProposals() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setSubstanceAdministrationProposals(
                             new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.SubstanceAdministrationProposals());
         }

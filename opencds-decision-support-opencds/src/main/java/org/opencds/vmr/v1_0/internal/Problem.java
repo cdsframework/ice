@@ -15,9 +15,9 @@ import lombok.ToString;
 @ToString
 public class Problem extends ProblemBase
 {
-    protected CD importance;
-    protected CD severity;
-    protected CD problemStatus;
-    protected PQ ageAtOnset;
-    protected BL wasCauseOfDeath;
+    private CD importance;
+    private CD severity;
+    private CD problemStatus;
+    private PQ ageAtOnset;
+    private BL wasCauseOfDeath;
 }

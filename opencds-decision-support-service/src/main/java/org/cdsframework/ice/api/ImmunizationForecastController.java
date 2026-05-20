@@ -2,14 +2,15 @@ package org.cdsframework.ice.api;
 
 import java.time.LocalDateTime;
 
-import org.cdsframework.ice.dto.Parameters;
-import org.cdsframework.ice.service.VmrConversionComponent;
+import org.cdsframework.fhir.Parameters;
+import org.cdsframework.ice.service.conversion.VmrConversionComponent;
 import org.omg.dss.EvaluateAtSpecifiedTime;
-import org.opencds.dss.evaluate.impl.DSSEvaluation;
+import org.opencds.dss.evaluate.Evaluation;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,18 +28,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@ConditionalOnProperty(prefix = "ice.experimental-features", name = "enable-fhir-r6", havingValue = "true")
+@RequestMapping("/cds")
+@ConditionalOnProperty(prefix = "cds-engine.experimental-features", name = "enable-fhir-r6", havingValue = "true")
 @Tag(name = "Immunization Forecast", description = "FHIR operation endpoint for immunization forecast requests.")
 public class ImmunizationForecastController
 {
     private static final String FHIR_JSON_MEDIA_TYPE = "application/fhir+json";
-    private final DSSEvaluation evaluationService;
+    private final Evaluation evaluationService;
     private final VmrConversionComponent vmrConversionComponent;
 
     @Operation(operationId = "immunizationForecast", summary = "Run immunization forecast",
-               description = "Accepts a FHIR Parameters request and returns forecast output as FHIR Parameters. "
-                       + "Request supports `patient`, `assessmentDate`, `module`, repeated `immunization`, repeated `observation`, "
-                       + "or a single `data` bundle containing those resources.")
+               description = "Accepts a FHIR Parameters request and returns forecast output as FHIR Parameters. Request supports `patient`, `assessmentDate`, `module`, repeated `immunization`, repeated `observation`, or a single `data` bundle containing those resources.")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true,
                                                           description = "FHIR Parameters request for immunization forecast processing.",
                                                           content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -71,11 +71,6 @@ public class ImmunizationForecastController
     @PostMapping(value = "/$immunization-forecast", consumes = { MediaType.APPLICATION_JSON_VALUE, FHIR_JSON_MEDIA_TYPE },
                  produces = { MediaType.APPLICATION_JSON_VALUE, FHIR_JSON_MEDIA_TYPE })
     public Parameters immunizationForecast(@RequestBody @Valid @NotNull final Parameters parameters)
-    {
-        return evaluate(parameters);
-    }
-
-    private Parameters evaluate(final Parameters parameters)
     {
         final LocalDateTime requestDateTime = LocalDateTime.now();
         try

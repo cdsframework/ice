@@ -1,6 +1,7 @@
 package org.opencds.common.utilities;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -12,7 +13,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class XMLDateUtility
 {
-    private static XMLGregorianCalendar long2XMLGregorian(final long dateAsLong)
+    private static XMLGregorianCalendar localDateTime2XMLGregorian(final LocalDate date)
     {
         final DatatypeFactory dataTypeFactory;
         try
@@ -23,23 +24,17 @@ public class XMLDateUtility
         {
             throw new RuntimeException(e);
         }
-        final GregorianCalendar gc = new GregorianCalendar();
-        gc.setTimeInMillis(dateAsLong);
-        return dataTypeFactory.newXMLGregorianCalendar(gc);
+
+        return dataTypeFactory.newXMLGregorianCalendar(GregorianCalendar.from(date.atStartOfDay(ZoneId.systemDefault())));
     }
 
-    public static XMLGregorianCalendar date2XMLGregorian(final Date date)
+    public static XMLGregorianCalendar date2XMLGregorian(final LocalDate date)
     {
-        return long2XMLGregorian(date.getTime());
+        return localDateTime2XMLGregorian(date);
     }
 
-    public static GregorianCalendar xmlGregorian2Gregorian(final XMLGregorianCalendar xmlGC)
+    public static LocalDate xmlGregorian2Date(final XMLGregorianCalendar xmlGC)
     {
-        return xmlGC.toGregorianCalendar();
-    }
-
-    public static Date xmlGregorian2Date(final XMLGregorianCalendar xmlGC)
-    {
-        return xmlGC.toGregorianCalendar().getTime();
+        return xmlGC.toGregorianCalendar().toZonedDateTime().toLocalDate();
     }
 }

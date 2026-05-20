@@ -35,7 +35,6 @@ import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.ice.config.IceProperties;
-import org.cdsframework.ice.config.IceSupportingDataProperties;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.cdsframework.ice.supportingdata.ICESupportingDataConfiguration;
 import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
@@ -66,8 +65,7 @@ public class Schedule
      * @param pKnowledgeModules The CDS versions supported by this schedule
      */
     public Schedule(final String pScheduleId, final String pCommonLogicModule, final List<String> pKnowledgeModules,
-            final IceSupportingDataProperties iceSupportingDataProperties, final SupportingDataService supportingDataService,
-            final IceProperties.SupplementalTextMode supplementalTextMode)
+            final SupportingDataService supportingDataService, final IceProperties.SupplementalTextMode supplementalTextMode)
             throws IllegalArgumentException, InconsistentConfigurationException
     {
         final String _METHODNAME = "ScheduleImpl(): ";
@@ -84,8 +82,7 @@ public class Schedule
 
         // Initialize the supporting data for the common logic and knowledge modules specified and available
         this.iceSupportingDataConfiguration =
-                new ICESupportingDataConfiguration(pCommonLogicModule, pKnowledgeModules, iceSupportingDataProperties,
-                        supportingDataService);
+                new ICESupportingDataConfiguration(pCommonLogicModule, pKnowledgeModules, supportingDataService);
 
         this.supplementalTextMode = supplementalTextMode;
 

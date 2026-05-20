@@ -29,11 +29,10 @@ package org.cdsframework.ice.service.configurations;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.cdsframework.ice.config.IceProperties;
+import org.cdsframework.ice.service.SupportingDataService;
 import org.cdsframework.ice.util.KnowledgeModuleUtils;
 import org.drools.model.codegen.ExecutableModelProject;
 import org.kie.api.KieBase;
@@ -56,7 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowledgePackage>
 {
     @Setter
-    private static IceProperties iceProperties;
+    private static SupportingDataService supportingDataService;
 
     @Override
     public IceKnowledgePackage loadKnowledgePackage(final KnowledgeModule knowledgeModule,
@@ -70,7 +69,7 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
             throw new IllegalArgumentException(lErrStr);
         }
 
-        final KMId lKMId = knowledgeModule.getKMId();
+        final KMId lKMId = knowledgeModule.kmId();
         if (lKMId == null)
         {
             final String lErrStr = "KMId not populated";
@@ -78,7 +77,7 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
             throw new IllegalArgumentException(lErrStr);
         }
 
-        if (lKMId.getScopingEntityId() == null || lKMId.getBusinessId() == null || lKMId.getVersion() == null)
+        if (lKMId.scopingEntityId() == null || lKMId.businessId() == null || lKMId.version() == null)
         {
             final String errStr = "ScopingID and/or BusinessID and/or Version not specified";
             log.error(_METHODNAME + errStr);
@@ -86,18 +85,16 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
         }
 
         final String lRequestedKmId =
-                KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(lKMId.getScopingEntityId(),
-                        lKMId.getBusinessId(), lKMId.getVersion());
+                KnowledgeModuleUtils.returnStringRepresentationOfKnowledgeModuleName(lKMId.scopingEntityId(), lKMId.businessId(),
+                        lKMId.version());
 
-        log.debug("Initializing ICE3 Drools KnowledgeBase - Knowledge Module {}", lRequestedKmId);
+        log.info("Initializing ICE3 Drools KnowledgeBase - Knowledge Module {}", lRequestedKmId);
 
-        final IceProperties.KnowledgeModuleProperties knowledgeModuleProperties =
-                iceProperties.getKnowledgeModules().get(lRequestedKmId);
-        if (knowledgeModuleProperties == null)
+        if (supportingDataService == null)
         {
-            final String errStr = "KnowledgeModuleProperties not found for: " + lRequestedKmId;
-            log.error(_METHODNAME + "{}", errStr);
-            throw new IllegalArgumentException(errStr);
+            final String errStr = "SupportingDataService not initialized";
+            log.error(_METHODNAME + errStr);
+            throw new IllegalStateException(errStr);
         }
 
         final KieBase kieBase;
@@ -160,7 +157,7 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
             throw new RuntimeException(e);
         }
 
-        log.debug("Km Id: {}; Initialized: {}", lRequestedKmId, new Date());
+        log.debug("Km Id: {}", lRequestedKmId);
 
         return new IceKnowledgePackage(lKMId, kieBase);
     }

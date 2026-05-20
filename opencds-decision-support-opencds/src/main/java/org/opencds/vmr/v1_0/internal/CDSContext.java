@@ -13,9 +13,9 @@ import lombok.ToString;
 @ToString
 public class CDSContext
 {
-    protected CD cdsSystemUserType;
-    protected CD cdsSystemUserPreferredLanguage;
-    protected CD cdsInformationRecipientType;
-    protected CD cdsInformationRecipientPreferredLanguage;
-    protected CD cdsSystemUserTaskContext;
+    private CD cdsSystemUserType;
+    private CD cdsSystemUserPreferredLanguage;
+    private CD cdsInformationRecipientType;
+    private CD cdsInformationRecipientPreferredLanguage;
+    private CD cdsSystemUserTaskContext;
 }

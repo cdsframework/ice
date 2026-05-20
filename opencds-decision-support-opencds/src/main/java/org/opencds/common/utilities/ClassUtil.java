@@ -7,25 +7,15 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class ClassUtil
 {
+    @SuppressWarnings("unchecked")
     public static <T> T newInstance(final String className)
     {
         try
         {
-            return newInstance((Class<T>) Class.forName(className));
+            return (T) Class.forName(className).getDeclaredConstructor().newInstance();
         }
-        catch (final ClassNotFoundException e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> T newInstance(final Class<T> cls)
-    {
-        try
-        {
-            return cls.getDeclaredConstructor().newInstance();
-        }
-        catch (final InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e)
+        catch (final ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e)
         {
             throw new RuntimeException(e);
         }

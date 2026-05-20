@@ -13,5 +13,5 @@ import lombok.ToString;
 @ToString
 public class SupplyEvent extends SupplyBase
 {
-    protected IVLDate supplyTime;
+    private IVLDate supplyTime;
 }

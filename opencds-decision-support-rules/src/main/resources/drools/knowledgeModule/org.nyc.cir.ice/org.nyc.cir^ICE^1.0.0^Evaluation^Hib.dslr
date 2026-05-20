@@ -19,7 +19,7 @@ import org.cdsframework.ice.service.Vaccine;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 rule "Hib: Mark Shot with Invalid Vaccine as Invalid but do _not_ indicate VACCINE_NOT_ALLOWED_FOR_DOSE reason (overrides base vaccine check rule)"
 	dialect "mvel"

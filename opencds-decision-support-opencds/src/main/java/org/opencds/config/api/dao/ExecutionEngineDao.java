@@ -1,18 +1,41 @@
 package org.opencds.config.api.dao;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.opencds.config.api.dao.util.PathUtil;
 import org.opencds.config.api.model.ExecutionEngine;
+import org.opencds.config.mapper.util.RestConfigUtil;
 
-public interface ExecutionEngineDao
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class ExecutionEngineDao
 {
-    ExecutionEngine find(String identifier);
+    private final Map<String, ExecutionEngine> cache = new HashMap<>();
 
-    List<ExecutionEngine> getAll();
+    public ExecutionEngineDao(final Path path)
+    {
+        final RestConfigUtil restConfigUtil = new RestConfigUtil();
 
-    void persist(ExecutionEngine ee);
+        log.debug("Loading resource");
+        for (final ExecutionEngine ee : restConfigUtil.unmarshalExecutionEngines(PathUtil.getResourceAsStream(path)))
+        {
+            log.debug("Caching ExecutionEngine with identifier: {}", ee.identifier());
+            cache.put(ee.identifier(), ee);
+        }
+    }
 
-    void delete(ExecutionEngine ee);
+    public ExecutionEngine find(final String identifier)
+    {
+        return cache.get(identifier);
+    }
 
-    void persist(List<ExecutionEngine> ees);
+    public List<ExecutionEngine> getAll()
+    {
+        return new ArrayList<>(cache.values());
+    }
 }

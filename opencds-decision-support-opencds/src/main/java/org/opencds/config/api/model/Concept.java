@@ -1,16 +1,17 @@
 package org.opencds.config.api.model;
 
-public interface Concept
+import org.springframework.util.StringUtils;
+
+public record Concept(String code,
+                      String codeSystem,
+                      String codeSystemName,
+                      String displayName,
+                      String comment,
+                      ValueSet valueSet)
 {
-    String getCode();
-
-    String getCodeSystem();
-
-    String getCodeSystemName();
-
-    String getDisplayName();
-
-    String getComment();
-
-    ValueSet getValueSet();
+    public Concept
+    {
+        assert StringUtils.hasText(code);
+        assert StringUtils.hasText(codeSystem);
+    }
 }

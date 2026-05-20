@@ -3,6 +3,7 @@ package org.opencds.evaluation.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
@@ -39,7 +40,7 @@ public class ExecutionEngineAdapterCallable<I, O, KP> implements Callable<Evalua
     {
         final var knowledgeModule = knowledgeRepository.knowledgeModuleService().find(evaluationRequestKMItem.requestedKmId());
 
-        final var evaluationCtx = EvaluationContext.create(evaluationRequestKMItem, knowledgeModule.getPrimaryProcess());
+        final var evaluationCtx = EvaluationContext.create(evaluationRequestKMItem, knowledgeModule.primaryProcess());
 
         final var supportingData = SupportingDataUtil.getSupportingData(knowledgeRepository, knowledgeModule);
 
@@ -63,27 +64,15 @@ public class ExecutionEngineAdapterCallable<I, O, KP> implements Callable<Evalua
         }
         final Map<String, List<?>> resultFactLists = eeContext.getResults();
 
-        final Map<String, Object> namedObjects = evaluationCtx.namedObjects();
+        final Map<String, ?> namedObjects = evaluationCtx.namedObjects();
         if (namedObjects != null)
         {
-            for (final String key : namedObjects.keySet())
-            {
-                final Object oneNamedObject = namedObjects.get(key);
-                if (oneNamedObject != null)
-                {
-                    final String className = oneNamedObject.getClass().getSimpleName();
-                    @SuppressWarnings("unchecked")
-                    List<Object> oneList = (List<Object>) resultFactLists.get(className);
-                    if (oneList == null)
-                    {
-                        oneList = new ArrayList<>();
-                        oneList.add(oneNamedObject);
-                    }
-                    else
-                        oneList.add(oneNamedObject);
-                    resultFactLists.put(className, oneList);
-                }
-            }
+            //noinspection unchecked
+            namedObjects.values()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .forEach(oneNamedObject -> ((List<Object>) resultFactLists.computeIfAbsent(
+                            oneNamedObject.getClass().getSimpleName(), _ -> new ArrayList<>())).add(oneNamedObject));
         }
         PluginProcessor.postProcess(knowledgeRepository, knowledgeModule, supportingData, evaluationCtx);
 

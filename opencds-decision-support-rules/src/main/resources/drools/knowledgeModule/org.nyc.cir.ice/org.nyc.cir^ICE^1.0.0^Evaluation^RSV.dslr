@@ -21,7 +21,7 @@ import org.cdsframework.ice.service.Vaccine;
 
 expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.dsl;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 rule "RSV: If an Adult or otherwise unspecified RSV vaccine (CVX 303, CVX 304, CVX 305, CVX 314, CVX 326) is administered prior to 6/21/2023, evaluate the shot as Invalid with reason code VACCINE_NOT_YET_AVAILABLE_ON_DATE_SPECIFIED."
 	dialect "mvel"

@@ -26,9 +26,9 @@
 
 package org.cdsframework.ice.service.configurations;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +66,7 @@ public class IceExecutionEngineContext implements ExecutionEngineContext<List<Co
     public List<Command<?>> getInput()
     {
         final List<Command<?>> cmds = Collections.synchronizedList(new ArrayList<>());
-        final Date evalTime = evaluationContext.evalTime();
+        final LocalDate evalTime = evaluationContext.evalTime();
         // Date evalTime = new Date();
         final String clientLanguage = evaluationContext.clientLanguage();
         final String clientTimeZoneOffset = evaluationContext.clientTimeZoneOffset();

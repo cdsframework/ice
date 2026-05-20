@@ -26,7 +26,7 @@
 
 package org.cdsframework.ice.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.kie.api.definition.type.ClassReactive;
 
@@ -37,7 +37,7 @@ import lombok.Getter;
 public class DateFactType
 {
     private final String factName;
-    private Date factDate;
+    private LocalDate factDate;
     private boolean factDateSet;
 
     /**
@@ -53,14 +53,14 @@ public class DateFactType
     /**
      * Sets LiveVirusDate's date and isLiveVirusDateSet() to true
      */
-    public DateFactType(final String pFactName, final Date pFactDate)
+    public DateFactType(final String pFactName, final LocalDate pFactDate)
     {
         factName = pFactName;
         factDate = pFactDate;
         factDateSet = true;
     }
 
-    public void setFactDate(final Date pFactDate)
+    public void setFactDate(final LocalDate pFactDate)
     {
         this.factDate = pFactDate;
         this.factDateSet = this.factDate != null;

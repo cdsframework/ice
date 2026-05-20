@@ -1,0 +1,31 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/common-ice-forecast|1.0.0]':
+      module-plan-definition:
+        id: common-ice-forecast
+        url: http://cdsframework.org/PlanDefinition/common-ice-forecast
+        version: 1.0.0
+        name: IceCommonForecast
+        title: ICE Common Forecasting Base Module
+        status: active
+        experimental: false
+        date: 2026-04-23
+        publisher: CDS Framework
+        contact:
+          - name: CDS Framework
+        description: >-
+          PlanDefinition representing common ICE supporting data and shared
+          forecasting rules used across module-specific configurations.
+        purpose: >-
+          Provides canonical module identity for common/base ICE knowledge-module
+          configuration and rule assets.
+        type:
+          coding:
+            - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
+              code: eca-rule
+              display: ECA Rule
+          text: Clinical decision support base rule set
+        identifier:
+          - system: http://cdsframework.org/identifiers/knowledge-modules
+            value: org.cdsframework^ICE^1.0.0
+        versionAlgorithmString: semver

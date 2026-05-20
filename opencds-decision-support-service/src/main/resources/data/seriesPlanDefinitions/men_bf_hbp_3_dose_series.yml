@@ -1,0 +1,166 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+      plan-definitions:
+        MEN_BF_HBP_3_DOSE_SERIES:
+          resource-type: PlanDefinition
+          url: http://cdsframework.org/PlanDefinition/series/men_bf_hbp_3_dose_series
+          version: 1.0.0
+          name: MEN_BF_HBP_3_DOSE_SERIES
+          title: MenB FHbp 3-dose series
+          status: active
+          meta:
+            profile:
+              - http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition
+          type:
+            coding:
+              - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
+                code: eca-rule
+                display: ECA Rule
+          extension:
+            - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
+              extension:
+                - url: numberOfDosesInSeries
+                  value-integer: 3
+                - url: series
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.10
+                        code: MEN_BF_HBP_3_DOSE_SERIES
+                        version: ICE Vaccine Series
+                        display: MenB FHbp 3-dose series
+                    text: MenB FHbp 3-dose series
+                - url: vaccineGroup
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.1
+                        code: MENINGOCOCCAL_B
+                        version: ICE Vaccine Group
+                        display: Meningococcal B
+                    text: Meningococcal B
+          action:
+            - id: dose-1
+              title: Dose 1
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 1
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 10y-4d
+                    - url: minimumAge
+                      value-string: 10y
+                    - url: earliestRecommendedAge
+                      value-string: 10y
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '162'
+                            version: CVX
+                            display: Meningococcal B FHbp, recombinant
+                        text: Meningococcal B FHbp, recombinant
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '316'
+                            version: CVX
+                            display: Meningococcal polysaccharide (MenACWY-TT conjugate),
+                              (MenB), PF
+                        text: Meningococcal polysaccharide (MenACWY-TT conjugate), (MenB),
+                          PF
+                    - url: preferred
+                      value-boolean: true
+            - id: dose-2
+              title: Dose 2
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 2
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '162'
+                            version: CVX
+                            display: Meningococcal B FHbp, recombinant
+                        text: Meningococcal B FHbp, recombinant
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '316'
+                            version: CVX
+                            display: Meningococcal polysaccharide (MenACWY-TT conjugate),
+                              (MenB), PF
+                        text: Meningococcal polysaccharide (MenACWY-TT conjugate), (MenB),
+                          PF
+                    - url: preferred
+                      value-boolean: true
+              related-action:
+                - action-id: dose-1
+                  relationship: after-end
+                  extension:
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 4w-4d
+                        - url: minimumInterval
+                          value-string: 4w
+                        - url: earliestRecommendedInterval
+                          value-string: 4w
+            - id: dose-3
+              title: Dose 3
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 3
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '162'
+                            version: CVX
+                            display: Meningococcal B FHbp, recombinant
+                        text: Meningococcal B FHbp, recombinant
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '316'
+                            version: CVX
+                            display: Meningococcal polysaccharide (MenACWY-TT conjugate),
+                              (MenB), PF
+                        text: Meningococcal polysaccharide (MenACWY-TT conjugate), (MenB),
+                          PF
+                    - url: preferred
+                      value-boolean: true
+              related-action:
+                - action-id: dose-2
+                  relationship: after-end
+                  extension:
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 4m-4d
+                        - url: minimumInterval
+                          value-string: 4m
+                        - url: earliestRecommendedInterval
+                          value-string: 4m

@@ -1,0 +1,217 @@
+cds-engine:
+  module-canonical-definition-map:
+    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+      plan-definitions:
+        COVID_19_AUG_2025_GTE_65_SERIES:
+          resource-type: PlanDefinition
+          url: http://cdsframework.org/PlanDefinition/series/covid_19_aug_2025_gte_65_series
+          version: 1.0.0
+          name: COVID_19_AUG_2025_GTE_65_SERIES
+          title: COVID-19 Seasonal GTE65 Series
+          status: active
+          meta:
+            profile:
+              - http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition
+          type:
+            coding:
+              - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
+                code: eca-rule
+                display: ECA Rule
+          extension:
+            - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
+              extension:
+                - url: numberOfDosesInSeries
+                  value-integer: 2
+                - url: recurringDosesAfterSeriesComplete
+                  value-boolean: false
+                - url: series
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.10
+                        code: COVID_19_AUG_2025_GTE_65_SERIES
+                        version: ICE Vaccine Series
+                        display: COVID-19 Seasonal GTE65 Series
+                    text: COVID-19 Seasonal GTE65 Series
+                - url: vaccineGroup
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.1
+                        code: COVID_19
+                        version: ICE Vaccine Group
+                        display: COVID-19
+                    text: COVID-19
+                - url: season
+                  value-codeable-concept:
+                    coding:
+                      - system: urn:oid:2.16.840.1.113883.3.795.12.100.11
+                        code: COVID_19_AUG_2025_SEASON
+                        version: ICE Vaccine Season
+                        display: 2025-2026 COVID-19 Season
+                    text: 2025-2026 COVID-19 Season
+          action:
+            - id: dose-1
+              title: Dose 1
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 1
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                  extension:
+                    - url: absoluteMinimumAge
+                      value-string: 65y
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '213'
+                            version: CVX
+                            display: SARS-COV-2 (COVID-19) vaccine, UNSPECIFIED
+                        text: SARS-COV-2 (COVID-19) vaccine, UNSPECIFIED
+                    - url: preferred
+                      value-boolean: true
+                    - url: allowableMinimumAgeOfUse
+                      value-string: 6m-4d
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '309'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, tri-sucrose, 30 mcg/0.3 mL,
+                              Pfizer (Comirnaty, 12+ yrs)
+                        text: COVID-19, mRNA, LNP-S, PF, tri-sucrose, 30 mcg/0.3 mL, Pfizer
+                          (Comirnaty, 12+ yrs)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '312'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna (Spikevax,
+                              12+ yrs)
+                        text: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna (Spikevax,
+                          12+ yrs)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '313'
+                            version: CVX
+                            display: COVID-19, subunit, rS-nanoparticle, adjuvanted, PF, 5
+                              mcg/0.5 mL, Novavax (12+ yrs)
+                        text: COVID-19, subunit, rS-nanoparticle, adjuvanted, PF, 5 mcg/0.5
+                          mL, Novavax (12+ yrs)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '334'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna (mNEXSPIKE,
+                              12+ yrs)
+                        text: COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna (mNEXSPIKE,
+                          12+ yrs)
+                    - url: preferred
+                      value-boolean: true
+            - id: dose-2
+              title: Dose 2
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 2
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '213'
+                            version: CVX
+                            display: SARS-COV-2 (COVID-19) vaccine, UNSPECIFIED
+                        text: SARS-COV-2 (COVID-19) vaccine, UNSPECIFIED
+                    - url: preferred
+                      value-boolean: true
+                    - url: allowableMinimumAgeOfUse
+                      value-string: 6m-4d
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '309'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, tri-sucrose, 30 mcg/0.3 mL,
+                              Pfizer (Comirnaty, 12+ yrs)
+                        text: COVID-19, mRNA, LNP-S, PF, tri-sucrose, 30 mcg/0.3 mL, Pfizer
+                          (Comirnaty, 12+ yrs)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '312'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna (Spikevax,
+                              12+ yrs)
+                        text: COVID-19, mRNA, LNP-S, PF, 50 mcg/0.5 mL, Moderna (Spikevax,
+                          12+ yrs)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '313'
+                            version: CVX
+                            display: COVID-19, subunit, rS-nanoparticle, adjuvanted, PF, 5
+                              mcg/0.5 mL, Novavax (12+ yrs)
+                        text: COVID-19, subunit, rS-nanoparticle, adjuvanted, PF, 5 mcg/0.5
+                          mL, Novavax (12+ yrs)
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '334'
+                            version: CVX
+                            display: COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna (mNEXSPIKE,
+                              12+ yrs)
+                        text: COVID-19, mRNA, LNP-S, PF, 10 mcg/0.2 mL, Moderna (mNEXSPIKE,
+                          12+ yrs)
+                    - url: preferred
+                      value-boolean: true
+              related-action:
+                - action-id: dose-1
+                  relationship: after-end
+                  extension:
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 8w-4d
+                        - url: minimumInterval
+                          value-string: 8w
+                        - url: earliestRecommendedInterval
+                          value-string: 6m

@@ -16,12 +16,12 @@ import lombok.experimental.SuperBuilder;
 public abstract class VmrOpenCdsConcept
 {
     @EqualsAndHashCode.Include
-    protected String id;
+    private String id;
     @EqualsAndHashCode.Include
-    protected String conceptTargetId;
+    private String conceptTargetId;
     @EqualsAndHashCode.Include
-    protected String openCdsConceptCode;
+    private String openCdsConceptCode;
     @EqualsAndHashCode.Include
-    protected String determinationMethodCode;
-    protected String displayName;
+    private String determinationMethodCode;
+    private String displayName;
 }

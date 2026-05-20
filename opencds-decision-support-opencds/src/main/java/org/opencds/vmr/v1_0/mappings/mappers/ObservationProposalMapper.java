@@ -36,7 +36,8 @@ public class ObservationProposalMapper extends ObservationBaseMapper
         if (source.getCriticality() != null)
             target.setCriticality(MappingUtility.cD2CDInternal(source.getCriticality()));
         if (source.getProposedObservationTime() != null)
-            target.setProposedObservationTime(MappingUtility.iVLTS2IVLDateInternal(source.getProposedObservationTime()));
+            target.setProposedObservationTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getProposedObservationTime(), factLists.getParsedDatesCache()));
         if (source.getRepeatNumber() != null)
             target.setRepeatNumber(MappingUtility.iNT2INTInternal(source.getRepeatNumber()));
 
@@ -75,9 +76,9 @@ public class ObservationProposalMapper extends ObservationBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getObservationProposals() == null)
+        if (organizedResults.output().getObservationProposals() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setObservationProposals(
                             new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.ObservationProposals());
         }

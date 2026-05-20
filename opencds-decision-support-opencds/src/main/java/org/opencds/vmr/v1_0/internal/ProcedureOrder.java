@@ -15,8 +15,8 @@ import lombok.ToString;
 @ToString
 public class ProcedureOrder extends ProcedureBase
 {
-    protected CD criticality;
-    protected IVLDate orderEventTime;
-    protected IVLDate procedureTime;
-    protected INT repeatNumber;
+    private CD criticality;
+    private IVLDate orderEventTime;
+    private IVLDate procedureTime;
+    private INT repeatNumber;
 }

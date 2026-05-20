@@ -15,7 +15,7 @@ import lombok.ToString;
 @ToString
 public class SupplyProposal extends SupplyBase
 {
-    protected IVLDate proposedSupplyTime;
-    protected INT repeatNumber;
-    protected CD criticality;
+    private IVLDate proposedSupplyTime;
+    private INT repeatNumber;
+    private CD criticality;
 }

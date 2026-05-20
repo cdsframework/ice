@@ -26,7 +26,7 @@ public final class ImmunizationForecastOpenApiExamples
                                                         },
                                                         {
                                                           "name": "module",
-                                                          "valueCanonical": "http://nyc.gov/cir/PlanDefinition/ice-forecast|1.0.0"
+                                                          "valueCanonical": "http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0"
                                                         },
                                                         {
                                                           "name": "immunization",
@@ -94,64 +94,94 @@ public final class ImmunizationForecastOpenApiExamples
                                                     "resourceType": "Parameters",
                                                     "parameter": [
                                                       {
-                                                        "name": "assessmentDate",
-                                                        "valueDate": "2026-04-04"
-                                                      },
-                                                      {
-                                                        "name": "durationMs",
-                                                        "valueInteger": 187
-                                                      },
-                                                      {
-                                                        "name": "engineVersion",
-                                                        "valueString": "ICE_2.55.1"
-                                                      },
-                                                      {
-                                                        "name": "guidanceResponse",
-                                                        "resource": {
-                                                          "resourceType": "GuidanceResponse",
-                                                          "status": "success",
-                                                          "subject": {
-                                                            "reference": "Patient/44081025"
+                                                        "name": "output",
+                                                        "part": [
+                                                          {
+                                                            "name": "durationMs",
+                                                            "valueInteger": 187
                                                           },
-                                                          "occurrenceDateTime": "2026-04-04T16:20:00Z",
-                                                          "moduleCanonical": "http://nyc.gov/cir/PlanDefinition/ice-forecast|1.0.0"
-                                                        }
-                                                      },
-                                                      {
-                                                        "name": "evaluation",
-                                                        "resource": {
-                                                          "resourceType": "ImmunizationEvaluation",
-                                                          "status": "completed"
-                                                        }
-                                                      },
-                                                      {
-                                                        "name": "recommendation",
-                                                        "resource": {
-                                                          "resourceType": "ImmunizationRecommendation",
-                                                          "recommendation": [
-                                                            {
-                                                              "series": "Varicella2DoseSeries",
-                                                              "seriesDoses": {
-                                                                "text": "2"
+                                                          {
+                                                            "name": "engineVersion",
+                                                            "valueString": "ICE_2.55.1"
+                                                          },
+                                                          {
+                                                            "name": "guidanceResponse",
+                                                            "resource": {
+                                                              "resourceType": "GuidanceResponse",
+                                                              "status": "success",
+                                                              "subject": {
+                                                                "reference": "Patient/44081025"
                                                               },
-                                                              "extension": [
+                                                              "occurrenceDateTime": "2026-04-04T16:20:00Z",
+                                                              "moduleCanonical": "http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0"
+                                                            }
+                                                          },
+                                                          {
+                                                            "name": "evaluation",
+                                                            "resource": {
+                                                              "resourceType": "ImmunizationEvaluation",
+                                                              "status": "completed"
+                                                            }
+                                                          },
+                                                          {
+                                                            "name": "recommendation",
+                                                            "resource": {
+                                                              "resourceType": "ImmunizationRecommendation",
+                                                              "recommendation": [
                                                                 {
-                                                                  "url": "http://terminology.cdsframework.org/ice/StructureDefinition/series-selection-type",
-                                                                  "valueCodeableConcept": {
-                                                                    "coding": [
-                                                                      {
-                                                                        "system": "http://terminology.cdsframework.org/ice/series-display-type",
-                                                                        "code": "SERIES_DISPLAY_UNAMBIGUOUS",
-                                                                        "display": "SERIES_DISPLAY_UNAMBIGUOUS"
+                                                                  "series": "Influenza Vaccine Group",
+                                                                  "seriesDoses": {
+                                                                    "text": "2"
+                                                                  },
+                                                                  "extension": [
+                                                                    {
+                                                                      "url": "http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context",
+                                                                      "extension": [
+                                                                        {
+                                                                          "url": "selectedSeries",
+                                                                          "valueCodeableConcept": {
+                                                                            "coding": [
+                                                                              {
+                                                                                "system": "http://terminology.cdsframework.org/ice/series",
+                                                                                "code": "INFLUENZA_SERIES",
+                                                                                "display": "Influenza Vaccine Group"
+                                                                              }
+                                                                            ],
+                                                                            "text": "Influenza Vaccine Group"
+                                                                          }
+                                                                        },
+                                                                        {
+                                                                          "url": "seriesSelectionType",
+                                                                          "valueCodeableConcept": {
+                                                                            "coding": [
+                                                                              {
+                                                                                "system": "http://terminology.cdsframework.org/ice/series-display-selection-type",
+                                                                                "code": "SERIES_DISPLAY_UNAMBIGUOUS",
+                                                                                "display": "Series Selected for Display"
+                                                                              }
+                                                                            ],
+                                                                            "text": "Series Selected for Display"
+                                                                          }
+                                                                        }
+                                                                      ]
+                                                                    },
+                                                                    {
+                                                                      "url": "http://terminology.cdsframework.org/fhir/StructureDefinition/vaccine-group-rules-artifact",
+                                                                      "valueRelatedArtifact": {
+                                                                        "type": "documentation",
+                                                                        "label": "ICE Influenza Vaccine Group Rules",
+                                                                        "document": {
+                                                                          "contentType": "text/html",
+                                                                          "url": "https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/14352497/Influenza+Vaccine+Group"
+                                                                        }
                                                                       }
-                                                                    ],
-                                                                    "text": "SERIES_DISPLAY_UNAMBIGUOUS"
-                                                                  }
+                                                                    }
+                                                                  ]
                                                                 }
                                                               ]
                                                             }
-                                                          ]
-                                                        }
+                                                          }
+                                                        ]
                                                       }
                                                     ]
                                                   }
@@ -162,27 +192,32 @@ public final class ImmunizationForecastOpenApiExamples
                                                   "resourceType": "Parameters",
                                                   "parameter": [
                                                     {
-                                                      "name": "durationMs",
-                                                      "valueInteger": 4
-                                                    },
-                                                    {
-                                                      "name": "engineVersion",
-                                                      "valueString": "ICE_2.55.1"
-                                                    },
-                                                    {
-                                                      "name": "operationOutcome",
-                                                      "resource": {
-                                                        "resourceType": "OperationOutcome",
-                                                        "issue": [
-                                                          {
-                                                            "severity": "error",
-                                                            "code": "exception",
-                                                            "details": {
-                                                              "text": "Module canonical must be in '<canonical>|<version>' format"
-                                                            }
+                                                      "name": "output",
+                                                      "part": [
+                                                        {
+                                                          "name": "durationMs",
+                                                          "valueInteger": 4
+                                                        },
+                                                        {
+                                                          "name": "engineVersion",
+                                                          "valueString": "ICE_2.55.1"
+                                                        },
+                                                        {
+                                                          "name": "operationOutcome",
+                                                          "resource": {
+                                                            "resourceType": "OperationOutcome",
+                                                            "issue": [
+                                                              {
+                                                                "severity": "error",
+                                                                "code": "exception",
+                                                                "details": {
+                                                                  "text": "Module canonical must be in '<canonical>|<version>' format"
+                                                                }
+                                                              }
+                                                            ]
                                                           }
-                                                        ]
-                                                      }
+                                                        }
+                                                      ]
                                                     }
                                                   ]
                                                 }

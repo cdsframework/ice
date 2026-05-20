@@ -1,7 +1,6 @@
 package org.opencds.config.mapper;
 
 import org.opencds.config.api.model.KMId;
-import org.opencds.config.api.model.impl.KMIdImpl;
 
 public abstract class KMIdMapper
 {
@@ -9,17 +8,19 @@ public abstract class KMIdMapper
     {
         if (external == null)
             return null;
-        return KMIdImpl.create(external.getScopingEntityId(), external.getBusinessId(), external.getVersion());
+
+        return new KMId(external.getScopingEntityId(), external.getBusinessId(), external.getVersion());
     }
 
     public static org.opencds.config.schema.KMId external(final KMId internal)
     {
         if (internal == null)
             return null;
+
         final org.opencds.config.schema.KMId external = new org.opencds.config.schema.KMId();
-        external.setBusinessId(internal.getBusinessId());
-        external.setScopingEntityId(internal.getScopingEntityId());
-        external.setVersion(internal.getVersion());
+        external.setBusinessId(internal.businessId());
+        external.setScopingEntityId(internal.scopingEntityId());
+        external.setVersion(internal.version());
         return external;
     }
 }

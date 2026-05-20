@@ -11,10 +11,10 @@ import lombok.ToString;
 @ToString
 public class IVLPQ extends ANY
 {
-    protected String lowUnit;
-    protected double lowValue;
-    protected String highUnit;
-    protected double highValue;
-    protected Boolean lowIsInclusive;
-    protected Boolean highIsInclusive;
+    private String lowUnit;
+    private double lowValue;
+    private String highUnit;
+    private double highValue;
+    private Boolean lowIsInclusive;
+    private Boolean highIsInclusive;
 }

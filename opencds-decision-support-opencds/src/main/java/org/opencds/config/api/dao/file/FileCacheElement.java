@@ -7,26 +7,15 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 public record FileCacheElement(String id,
                                Path location) implements CacheElement
 {
-    public static FileCacheElement create(final String id, final Path cacheFileLocation)
-    {
-        return new FileCacheElement(id, cacheFileLocation);
-    }
-
     public FileCacheElement
     {
-        assert StringUtils.isNotBlank(id);
+        assert StringUtils.hasText(id);
         assert location != null;
-    }
-
-    @Override
-    public String id()
-    {
-        return id;
     }
 
     @Override

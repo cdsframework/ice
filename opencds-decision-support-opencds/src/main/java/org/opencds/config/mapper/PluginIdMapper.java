@@ -1,10 +1,8 @@
 package org.opencds.config.mapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.opencds.config.api.model.PluginId;
-import org.opencds.config.api.model.impl.PluginIdImpl;
 
 public class PluginIdMapper
 {
@@ -12,27 +10,27 @@ public class PluginIdMapper
     {
         if (external == null)
             return null;
-        return PluginIdImpl.create(external.getScopingEntityId(), external.getBusinessId(), external.getVersion());
+
+        return new PluginId(external.getScopingEntityId(), external.getBusinessId(), external.getVersion());
     }
 
     public static List<PluginId> internal(final List<org.opencds.config.schema.PluginId> plugins)
     {
         if (plugins == null)
             return null;
-        final List<PluginId> pids = new ArrayList<>();
-        for (final org.opencds.config.schema.PluginId pid : plugins)
-            pids.add(internal(pid));
-        return pids;
+
+        return plugins.stream().map(PluginIdMapper::internal).toList();
     }
 
     public static org.opencds.config.schema.PluginId external(final PluginId internal)
     {
         if (internal == null)
             return null;
+
         final org.opencds.config.schema.PluginId pid = new org.opencds.config.schema.PluginId();
-        pid.setScopingEntityId(internal.getScopingEntityId());
-        pid.setBusinessId(internal.getBusinessId());
-        pid.setVersion(internal.getVersion());
+        pid.setScopingEntityId(internal.scopingEntityId());
+        pid.setBusinessId(internal.businessId());
+        pid.setVersion(internal.version());
         return pid;
     }
 }

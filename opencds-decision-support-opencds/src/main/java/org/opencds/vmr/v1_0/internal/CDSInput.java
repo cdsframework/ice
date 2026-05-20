@@ -13,9 +13,9 @@ import lombok.ToString;
 @ToString
 public class CDSInput
 {
-    protected List<String> templateId;
-    protected List<CDSResource> cdsResource;
+    private List<String> templateId;
+    private List<CDSResource> cdsResource;
 
-    protected String focalPersonId;
-    protected CDSContext cdsContext;
+    private String focalPersonId;
+    private CDSContext cdsContext;
 }

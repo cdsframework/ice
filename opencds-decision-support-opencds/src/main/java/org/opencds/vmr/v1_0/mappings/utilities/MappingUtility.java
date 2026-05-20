@@ -1,17 +1,23 @@
 package org.opencds.vmr.v1_0.mappings.utilities;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.ResolverStyle;
+import java.time.format.SignStyle;
+import java.time.temporal.ChronoField;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.InvalidDataException;
-import org.opencds.common.utilities.DateUtility;
 import org.opencds.common.utilities.MiscUtility;
 import org.opencds.vmr.v1_0.internal.GoalValue;
 import org.opencds.vmr.v1_0.internal.ObservationValue;
@@ -21,7 +27,6 @@ import org.opencds.vmr.v1_0.internal.datatypes.ANY;
 import org.opencds.vmr.v1_0.internal.datatypes.AddressPartType;
 import org.opencds.vmr.v1_0.internal.datatypes.BL;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
-import org.opencds.vmr.v1_0.internal.datatypes.CS;
 import org.opencds.vmr.v1_0.internal.datatypes.EN;
 import org.opencds.vmr.v1_0.internal.datatypes.ENXP;
 import org.opencds.vmr.v1_0.internal.datatypes.EntityNamePartQualifier;
@@ -41,6 +46,7 @@ import org.opencds.vmr.v1_0.internal.datatypes.RTO;
 import org.opencds.vmr.v1_0.internal.datatypes.TEL;
 import org.opencds.vmr.v1_0.internal.datatypes.TelecommunicationAddressUse;
 import org.opencds.vmr.v1_0.internal.datatypes.TelecommunicationCapability;
+import org.springframework.util.ObjectUtils;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -49,41 +55,58 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class MappingUtility
 {
-    private static final class ParsedDatesCache
-    {
-        private static final ThreadLocal<Map<String, Date>> parsedDates = new ThreadLocal<>();
-
-        static void init()
-        {
-            parsedDates.set(new HashMap<>());
-        }
-
-        static void clear()
-        {
-            parsedDates.remove();
-        }
-
-        private boolean isEnabled()
-        {
-            return parsedDates.get() != null;
-        }
-
-        Date get(final String key)
-        {
-            return isEnabled() ? parsedDates.get().get(key) : null;
-        }
-
-        void cache(final String key, final Date date)
-        {
-            if (isEnabled())
-                parsedDates.get().put(key, date);
-        }
-    }
-
-    private static final CD noInformation = setNoInfo();
-    public static final CD OPENCDS_NO_INFORMATION = noInformation;
-    private static final ParsedDatesCache parsedDatesCache = new ParsedDatesCache();
-    private static final Log logger = LogFactory.getLog(MappingUtility.class);
+    public static final CD OPENCDS_NO_INFORMATION = setNoInfo();
+    private static final DateTimeFormatter DATE_TIME_FORMATTER_OUT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss.SSSZ");
+    private static final DateTimeFormatter FLEXIBLE_PARSER = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4)
+            .optionalStart()
+            .appendLiteral('-')
+            .optionalEnd()
+            .optionalStart()
+            .appendValue(ChronoField.MONTH_OF_YEAR, 1, 2, SignStyle.NOT_NEGATIVE)
+            .optionalStart()
+            .appendLiteral('-')
+            .optionalEnd()
+            .optionalStart()
+            .appendValue(ChronoField.DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+            .optionalStart()
+            .optionalStart()
+            .appendLiteral('T')
+            .optionalEnd()
+            .optionalStart()
+            .appendLiteral(' ')
+            .optionalEnd()
+            .appendValue(ChronoField.HOUR_OF_DAY, 1, 2, SignStyle.NOT_NEGATIVE)
+            .optionalStart()
+            .appendLiteral(':')
+            .optionalEnd()
+            .optionalStart()
+            .appendValue(ChronoField.MINUTE_OF_HOUR, 1, 2, SignStyle.NOT_NEGATIVE)
+            .optionalStart()
+            .appendLiteral(':')
+            .optionalEnd()
+            .optionalStart()
+            .appendValue(ChronoField.SECOND_OF_MINUTE, 1, 2, SignStyle.NOT_NEGATIVE)
+            .optionalStart()
+            .appendFraction(ChronoField.NANO_OF_SECOND, 1, 9, true)
+            .optionalEnd()
+            .optionalEnd()
+            .optionalEnd()
+            .optionalEnd()
+            .optionalEnd()
+            .optionalEnd()
+            .optionalStart()
+            .appendOffset("+HH:MM", "Z")
+            .optionalEnd()
+            .optionalStart()
+            .appendOffset("+HHMM", "Z")
+            .optionalEnd()
+            .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
+            .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
+            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+            .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+            .toFormatter()
+            .withResolverStyle(ResolverStyle.SMART);
 
     private static CD setNoInfo()
     {
@@ -91,16 +114,6 @@ public class MappingUtility
         noInfo.setCodeSystem("");
         noInfo.setCode("");
         return noInfo;
-    }
-
-    public static void initParsedDatesCache()
-    {
-        ParsedDatesCache.init();
-    }
-
-    public static void clearParsedDatesCache()
-    {
-        ParsedDatesCache.clear();
     }
 
     public static org.opencds.vmr.v1_0.schema.ANY aNYInternal2ANY(final ANY pANY)
@@ -111,7 +124,8 @@ public class MappingUtility
         return new org.opencds.vmr.v1_0.schema.ANY();
     }
 
-    public static GoalValue targetGoalValue2TargetGoalValueInternal(final org.opencds.vmr.v1_0.schema.GoalBase.TargetGoalValue pANY)
+    public static GoalValue targetGoalValue2TargetGoalValueInternal(final org.opencds.vmr.v1_0.schema.GoalBase.TargetGoalValue pANY,
+            final Map<String, LocalDate> parsedDatesCache)
     {
         if (pANY == null)
             return null;
@@ -155,10 +169,11 @@ public class MappingUtility
                                                         lANY.setText(sT2STInternal(pANY.getText()));
                                                     else
                                                         if (pANY.getTime() != null)
-                                                            lANY.setTime(tS2DateInternal(pANY.getTime()));
+                                                            lANY.setTime(tS2DateInternal(pANY.getTime(), parsedDatesCache));
                                                         else
                                                             if (pANY.getTimeRange() != null)
-                                                                lANY.setTimeRange(iVLTS2IVLDateInternal(pANY.getTimeRange()));
+                                                                lANY.setTimeRange(iVLTS2IVLDateInternal(pANY.getTimeRange(),
+                                                                        parsedDatesCache));
 
         return lANY;
     }
@@ -217,8 +232,8 @@ public class MappingUtility
     }
 
     public static ObservationValue observationValue2ObservationValueInternal(
-            final org.opencds.vmr.v1_0.schema.ObservationResult.ObservationValue pANY)
-            throws DataFormatException, InvalidDataException
+            final org.opencds.vmr.v1_0.schema.ObservationResult.ObservationValue pANY,
+            final Map<String, LocalDate> parsedDatesCache) throws DataFormatException, InvalidDataException
     {
         if (pANY == null)
             return null;
@@ -276,11 +291,13 @@ public class MappingUtility
                                                                         lANY.setText(sT2STInternal(pANY.getText()));
                                                                     else
                                                                         if (pANY.getTime() != null)
-                                                                            lANY.setTime(tS2DateInternal(pANY.getTime()));
+                                                                            lANY.setTime(tS2DateInternal(pANY.getTime(),
+                                                                                    parsedDatesCache));
                                                                         else
                                                                             if (pANY.getTimeRange() != null)
                                                                                 lANY.setTimeRange(
-                                                                                        iVLTS2IVLDateInternal(pANY.getTimeRange()));
+                                                                                        iVLTS2IVLDateInternal(pANY.getTimeRange(),
+                                                                                                parsedDatesCache));
 
         return lANY;
     }
@@ -381,6 +398,7 @@ public class MappingUtility
         {
             return null;
         }
+
         final org.opencds.vmr.v1_0.schema.CD cd = new org.opencds.vmr.v1_0.schema.CD();
         try
         {
@@ -389,10 +407,11 @@ public class MappingUtility
                     || (cdInternal.getCodeSystem().isEmpty())))))
             {
                 throw new RuntimeException(
-                        "CDInternal2CD(code=" + cdInternal.getCode() + ", codeSystem=" + cdInternal.getCodeSystem() + ", "
-                                + cdInternal.getDisplayName() + ", " + cdInternal.getCodeSystemName() + ", originalText="
-                                + cdInternal.getOriginalText() + ") must have both codeSystem and (code OR originalText).");
+                        "CDInternal2CD(code=%s, codeSystem=%s, %s, %s, originalText=%s) must have both codeSystem and (code OR originalText).".formatted(
+                                cdInternal.getCode(), cdInternal.getCodeSystem(), cdInternal.getDisplayName(),
+                                cdInternal.getCodeSystemName(), cdInternal.getOriginalText()));
             }
+
             if (cdInternal.getCode() != null)
                 cd.setCode(cdInternal.getCode());
             if (cdInternal.getCodeSystem() != null)
@@ -407,8 +426,9 @@ public class MappingUtility
         catch (final Exception e)
         {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("cDInternal2CD(" + cdInternal + ") had errors: " + e.getMessage());
+            throw new RuntimeException("cDInternal2CD(%s) had errors: %s".formatted(cdInternal, e.getMessage()));
         }
+
         return cd;
     }
 
@@ -420,6 +440,7 @@ public class MappingUtility
         {
             return OPENCDS_NO_INFORMATION;
         }
+
         final CD cd = new CD();
         try
         {
@@ -428,10 +449,11 @@ public class MappingUtility
                     cdSchema.getCodeSystem()))))
             {
                 throw new RuntimeException(
-                        "cD2CDInternal(" + cdSchema.getCode() + "," + cdSchema.getCodeSystem() + "," + cdSchema.getDisplayName()
-                                + "," + cdSchema.getCodeSystemName() + "," + cdSchema.getOriginalText()
-                                + ") both codeSystem and (code OR originalText) must have a value.");
+                        "cD2CDInternal(%s,%s,%s,%s,%s) both codeSystem and (code OR originalText) must have a value.".formatted(
+                                cdSchema.getCode(), cdSchema.getCodeSystem(), cdSchema.getDisplayName(),
+                                cdSchema.getCodeSystemName(), cdSchema.getOriginalText()));
             }
+
             if (cdSchema.getCode() != null)
                 cd.setCode(cdSchema.getCode());
             if (cdSchema.getCodeSystem() != null)
@@ -446,8 +468,9 @@ public class MappingUtility
         catch (final Exception e)
         {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("cD2CDInternal(" + cdSchema + ") had errors: " + e.getMessage());
+            throw new RuntimeException("cD2CDInternal(%s) had errors: %s".formatted(cdSchema, e.getMessage()));
         }
+
         return cd;
     }
 
@@ -461,8 +484,9 @@ public class MappingUtility
         catch (final Exception e)
         {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("cSInternal2CS(" + code + ") had errors: " + e.getMessage());
+            throw new RuntimeException("cSInternal2CS(%s) had errors: %s".formatted(code, e.getMessage()));
         }
+
         return cs;
     }
 
@@ -475,20 +499,7 @@ public class MappingUtility
         catch (final Exception e)
         {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("cS2Code(" + cs.toString() + ") had errors: " + e.getMessage());
-        }
-    }
-
-    public static String cS2Code(final CS cd)
-    {
-        try
-        {
-            return cd.getCode();
-        }
-        catch (final Exception e)
-        {
-            log.error(e.getMessage(), e);
-            throw new RuntimeException("cS2Code(" + cd.toString() + ") had errors: " + e.getMessage());
+            throw new RuntimeException("cS2Code(%s) had errors: %s".formatted(cs.toString(), e.getMessage()));
         }
     }
 
@@ -499,7 +510,7 @@ public class MappingUtility
             if ((ii == null) || (ii.getRoot() == null))
             {
                 throw new DataFormatException(
-                        context + " context: iI2Root(" + ii + ") had errors: TemplateID must have GUID or OID as root");
+                        "%s context: iI2Root(%s) had errors: TemplateID must have GUID or OID as root".formatted(context, ii));
             }
 
             return ii.getRoot();
@@ -513,16 +524,14 @@ public class MappingUtility
 
     public static List<org.opencds.vmr.v1_0.schema.II> iIFlatList2IIList(final String[] rootCaratExtensionList)
     {
-        final List<org.opencds.vmr.v1_0.schema.II> output = new ArrayList<>();
-        for (final String input : rootCaratExtensionList)
-            output.add(iIFlat2II(input));
-        return output;
+        return Arrays.stream(rootCaratExtensionList).map(MappingUtility::iIFlat2II).toList();
     }
 
     public static org.opencds.vmr.v1_0.schema.II iIFlat2II(final String rootCaratExtension)
     {
-        if ((rootCaratExtension == null) || (rootCaratExtension.isEmpty()))
+        if (ObjectUtils.isEmpty(rootCaratExtension))
             return null;
+
         final int positionCarat = rootCaratExtension.indexOf("^");
         final String root;
         String extension = null;
@@ -533,6 +542,7 @@ public class MappingUtility
             root = rootCaratExtension.substring(0, positionCarat);
             extension = rootCaratExtension.substring(positionCarat + 1);
         }
+
         final org.opencds.vmr.v1_0.schema.II ii = new org.opencds.vmr.v1_0.schema.II();
         try
         {
@@ -542,8 +552,9 @@ public class MappingUtility
         catch (final Exception e)
         {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("iIFlat2II(" + rootCaratExtension + ") had errors: " + e.getMessage());
+            throw new RuntimeException("iIFlat2II(%s) had errors: %s".formatted(rootCaratExtension, e.getMessage()));
         }
+
         return ii;
     }
 
@@ -551,10 +562,8 @@ public class MappingUtility
     {
         if (iiList == null)
             return null;
-        final String[] output = new String[iiList.size()];
-        for (int i = 0; i < iiList.size(); i++)
-            output[i] = iI2FlatId(iiList.get(i));
-        return output;
+
+        return iiList.stream().map(MappingUtility::iI2FlatId).toArray(String[]::new);
     }
 
     public static String iI2FlatId(final org.opencds.vmr.v1_0.schema.II ii)
@@ -569,8 +578,9 @@ public class MappingUtility
         catch (final Exception e)
         {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("iI2FlatId(" + ii.toString() + ") had errors: " + e.getMessage());
+            throw new RuntimeException("iI2FlatId(%s) had errors: %s".formatted(ii.toString(), e.getMessage()));
         }
+
         return iD;
     }
 
@@ -596,13 +606,15 @@ public class MappingUtility
 
     public static org.opencds.vmr.v1_0.schema.PQ pQInternal2PQ(final PQ pqInternal)
     {
-        if (((pqInternal == null)))
+        if (pqInternal == null)
             return null;
+
         final org.opencds.vmr.v1_0.schema.PQ pq = new org.opencds.vmr.v1_0.schema.PQ();
         try
         {
             if ((pqInternal.getUnit() == null) || (pqInternal.getUnit().isEmpty()))
-                throw new RuntimeException("pQInternal2PQ( " + pqInternal + " ) must have a valid unit.");
+                throw new RuntimeException("pQInternal2PQ( %s ) must have a valid unit.".formatted(pqInternal));
+
             pq.setValue(pqInternal.getValue());
             pq.setUnit(pqInternal.getUnit());
 
@@ -610,20 +622,23 @@ public class MappingUtility
         catch (final Exception e)
         {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("pQInternal2PQ( " + pqInternal + " ) had errors: " + e.getMessage());
+            throw new RuntimeException("pQInternal2PQ( %s ) had errors: %s".formatted(pqInternal, e.getMessage()));
         }
+
         return pq;
     }
 
     public static PQ pQ2PQInternal(final org.opencds.vmr.v1_0.schema.PQ pqSchema)
     {
-        if (((pqSchema == null)))
+        if (pqSchema == null)
             return null;
+
         final PQ pq = new PQ();
         try
         {
             if ((pqSchema.getUnit() == null) || ("".equals(pqSchema.getUnit())))
-                throw new RuntimeException("pQ2PQInternal( " + pqSchema + " ) must have a valid unit.");
+                throw new RuntimeException("pQ2PQInternal( %s ) must have a valid unit.".formatted(pqSchema));
+
             pq.setValue(pqSchema.getValue());
             pq.setUnit(pqSchema.getUnit());
 
@@ -631,8 +646,9 @@ public class MappingUtility
         catch (final Exception e)
         {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("pQ2PQInternal( " + pqSchema + " ) had errors: " + e.getMessage());
+            throw new RuntimeException("pQ2PQInternal( %s ) had errors: %s".formatted(pqSchema, e.getMessage()));
         }
+
         return pq;
     }
 
@@ -678,60 +694,76 @@ public class MappingUtility
         return lRTO;
     }
 
-    public static java.util.Date tS2DateInternal(final org.opencds.vmr.v1_0.schema.TS pTS)
+    private static LocalDate getDateFromString(final String dateAsString)
+    {
+        try
+        {
+            return LocalDate.parse(dateAsString, DateTimeFormatter.BASIC_ISO_DATE);
+        }
+        catch (final DateTimeException ignored)
+        {
+        }
+
+        try
+        {
+            return LocalDate.parse(dateAsString, DateTimeFormatter.ISO_LOCAL_DATE);
+        }
+        catch (final DateTimeException ignored)
+        {
+        }
+
+        try
+        {
+            return LocalDate.from(
+                    FLEXIBLE_PARSER.parseBest(dateAsString, OffsetDateTime::from, LocalDateTime::from, LocalDate::from));
+        }
+        catch (final DateTimeException ignored)
+        {
+        }
+
+        log.error("Could not parse date: {}", dateAsString);
+
+        throw new RuntimeException("Could not parse date: " + dateAsString);
+    }
+
+    private static String getDateAsString(final LocalDate date)
+    {
+        try
+        {
+            return DATE_TIME_FORMATTER_OUT.format(date.atStartOfDay(ZoneId.systemDefault()));
+        }
+        catch (final DateTimeException e)
+        {
+            throw new RuntimeException("Could not format date: " + date, e);
+        }
+    }
+
+    public static LocalDate tS2DateInternal(final org.opencds.vmr.v1_0.schema.TS pTS, final Map<String, LocalDate> parsedDatesCache)
     {
         final String _METHODNAME = "tS2TSInternal(): ";
 
         if ((pTS == null) || ("".equals(pTS.getValue())) || ("null".equalsIgnoreCase(pTS.getValue())))
             return null;
 
-        final String errStr;
         final String hl7Time = pTS.getValue();
         if (hl7Time == null)
         {
-            errStr = _METHODNAME + "TS.getValue() is null";
-            logger.error(errStr);
+            final String errStr = _METHODNAME + "TS.getValue() is null";
+            log.error(errStr);
             throw new RuntimeException(errStr);
         }
 
-        Date parsedDate = parsedDatesCache.get(hl7Time);
-        if (parsedDate == null)
-        {
-            try
-            {
-                parsedDate = DateUtility.getInstance().getDateFromString(hl7Time, TSDateFormat.forInput(hl7Time));
-                parsedDatesCache.cache(hl7Time, parsedDate);
-            }
-            catch (final Exception e)
-            {
-                errStr = _METHODNAME + "TS.getValue() \"" + hl7Time + "\" is in an invalid format";
-                throw new RuntimeException(errStr + ": " + e.getMessage(), e);
-            }
-        }
-        return parsedDate;
+        return parsedDatesCache.computeIfAbsent(hl7Time, MappingUtility::getDateFromString);
     }
 
-    public static org.opencds.vmr.v1_0.schema.TS dateInternal2TS(final java.util.Date pDate)
+    public static org.opencds.vmr.v1_0.schema.TS dateInternal2TS(final LocalDate pDate)
     {
-        final String _METHODNAME = "tSInternal2TS(): ";
-
         if (pDate == null)
             return null;
 
-        final String errStr;
-        final String formatTemplate = "yyyyMMddHHmmss.SSSZZZZZ";
-
         final org.opencds.vmr.v1_0.schema.TS lTS = new org.opencds.vmr.v1_0.schema.TS();
-        try
-        {
-            lTS.setValue(DateUtility.getInstance().getDateAsString(pDate, formatTemplate));
-            return lTS;
-        }
-        catch (final Exception e)
-        {
-            errStr = _METHODNAME + "java.util.Date \"" + pDate + "\" threw exception trying to format as: " + formatTemplate;
-            throw new RuntimeException(errStr + ": " + e.getMessage());
-        }
+        lTS.setValue(getDateAsString(pDate));
+        return lTS;
     }
 
     public static org.opencds.vmr.v1_0.schema.ST sTInternal2ST(final String pST)
@@ -820,7 +852,8 @@ public class MappingUtility
         return lIVLPQ;
     }
 
-    public static IVLDate iVLTS2IVLDateInternal(final org.opencds.vmr.v1_0.schema.IVLTS pIVLTS)
+    public static IVLDate iVLTS2IVLDateInternal(final org.opencds.vmr.v1_0.schema.IVLTS pIVLTS,
+            final Map<String, LocalDate> parsedDatesCache)
     {
         if (pIVLTS == null)
             return null;
@@ -831,14 +864,14 @@ public class MappingUtility
         {
             final org.opencds.vmr.v1_0.schema.TS low = new org.opencds.vmr.v1_0.schema.TS();
             low.setValue(pIVLTS.getLow());
-            lIVLDate.setLow(tS2DateInternal(low));
+            lIVLDate.setLow(tS2DateInternal(low, parsedDatesCache));
         }
 
         if ((pIVLTS.getHigh() != null) && (!"null".equals(pIVLTS.getHigh())) && (!"".equals(pIVLTS.getHigh())))
         {
             final org.opencds.vmr.v1_0.schema.TS high = new org.opencds.vmr.v1_0.schema.TS();
             high.setValue(pIVLTS.getHigh());
-            lIVLDate.setHigh(tS2DateInternal(high));
+            lIVLDate.setHigh(tS2DateInternal(high, parsedDatesCache));
         }
 
         if (pIVLTS.isLowIsInclusive() != null)
@@ -858,14 +891,14 @@ public class MappingUtility
 
         if (pIVLDate.getLow() != null)
         {
-            final java.util.Date low = pIVLDate.getLow();
+            final LocalDate low = pIVLDate.getLow();
             final org.opencds.vmr.v1_0.schema.TS lowExternal = dateInternal2TS(low);
             lIVLTS.setLow(lowExternal.getValue());
         }
 
         if (pIVLDate.getHigh() != null)
         {
-            final java.util.Date high = pIVLDate.getHigh();
+            final LocalDate high = pIVLDate.getHigh();
             final org.opencds.vmr.v1_0.schema.TS highExternal = dateInternal2TS(high);
             lIVLTS.setHigh(highExternal.getValue());
         }
@@ -956,8 +989,8 @@ public class MappingUtility
         if (lIntEntityPart == null || lIntEntityPart.isEmpty())
         {
             errStr = _METHODNAME + "List<ENXP> element of internal EN datatype not populated - required by vmr spec";
-            if (logger.isDebugEnabled())
-                logger.debug(errStr);
+            if (log.isDebugEnabled())
+                log.debug(errStr);
             throw new DataFormatException(errStr);
         }
         final Iterator<ENXP> lIntEntityPartIter = lIntEntityPart.iterator();
@@ -973,19 +1006,14 @@ public class MappingUtility
         {
             errStr = _METHODNAME
                     + "No int->ext translations of List<ENXP> successful - at least one member of List<ENXP> required by vmr spec";
-            if (logger.isDebugEnabled())
-                logger.debug(errStr);
+            if (log.isDebugEnabled())
+                log.debug(errStr);
             throw new InvalidDataException(errStr);
         }
 
         final List<EntityNameUse> lEntityNameUseListInt = pENInt.getUse();
-        if (lEntityNameUseListInt != null && !lEntityNameUseListInt.isEmpty())
-        {
-            final Iterator<EntityNameUse> lEntityNameUseIntIter = lEntityNameUseListInt.iterator();
-            final EntityNameUse lEntityNameUseInt = lEntityNameUseIntIter.next();
-            final org.opencds.vmr.v1_0.schema.EntityNameUse lEntityNameUseExt = eNNameUseInternal2ENNameUse(lEntityNameUseInt);
-            lENExt.getUse().add(lEntityNameUseExt);
-        }
+        if (!ObjectUtils.isEmpty(lEntityNameUseListInt))
+            lENExt.getUse().add(eNNameUseInternal2ENNameUse(lEntityNameUseListInt.getFirst()));
 
         return lENExt;
     }
@@ -999,8 +1027,8 @@ public class MappingUtility
             return null;
 
         final String lEntityNameUseStrInt = pENU.toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "Internal EntityNameUse value: " + lEntityNameUseStrInt);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "Internal EntityNameUse value: {}", lEntityNameUseStrInt);
         final org.opencds.vmr.v1_0.schema.EntityNameUse lEntityNameUseExt;
         try
         {
@@ -1008,8 +1036,8 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the internal to external enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the internal to external enumeration");
         }
 
         return lEntityNameUseExt;
@@ -1028,13 +1056,12 @@ public class MappingUtility
 
         final EntityNamePartType lEntityNamePartTypeInt = pENXP.getType();
         if (lEntityNamePartTypeInt == null)
-        {
-            final String errStr = _METHODNAME + "EntityPartType of external ENXP datatype not populated; required by vmr spec";
-            throw new DataFormatException(errStr);
-        }
+            throw new DataFormatException(
+                    _METHODNAME + "EntityPartType of external ENXP datatype not populated; required by vmr spec");
+
         final String lEntityNamePartTypeStrInt = lEntityNamePartTypeInt.toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "Internal EntityNamePartType value: " + lEntityNamePartTypeStrInt);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "Internal EntityNamePartType value: {}", lEntityNamePartTypeStrInt);
 
         final org.opencds.vmr.v1_0.schema.EntityNamePartType lEntityNamePartTypeExt;
         try
@@ -1043,22 +1070,20 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the internal to external enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the internal to external enumeration");
         }
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External EntityNamePartType value: " + lEntityNamePartTypeExt);
+
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External EntityNamePartType value: {}", lEntityNamePartTypeExt);
+
         lENXPExt.setType(lEntityNamePartTypeExt);
 
         final List<EntityNamePartQualifier> lPartQualifierListInt = pENXP.getQualifier();
         if (lPartQualifierListInt != null)
         {
             for (final EntityNamePartQualifier lPartQualifierInt : lPartQualifierListInt)
-            {
-                final org.opencds.vmr.v1_0.schema.EntityNamePartQualifier lPartQualifierExt =
-                        eNPartQualifierInternal2ENPartQualifier(lPartQualifierInt);
-                lENXPExt.getQualifier().add(lPartQualifierExt);
-            }
+                lENXPExt.getQualifier().add(eNPartQualifierInternal2ENPartQualifier(lPartQualifierInt));
         }
 
         return lENXPExt;
@@ -1073,8 +1098,9 @@ public class MappingUtility
             return null;
 
         final String lPartQualifierStrInt = pENPQInt.toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "Internal EntityNamePartQualifier value: " + lPartQualifierStrInt);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "Internal EntityNamePartQualifier value: {}", lPartQualifierStrInt);
+
         final org.opencds.vmr.v1_0.schema.EntityNamePartQualifier lPartQualifierInt;
         try
         {
@@ -1082,8 +1108,8 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the internal to external enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the internal to external enumeration");
         }
 
         return lPartQualifierInt;
@@ -1103,8 +1129,8 @@ public class MappingUtility
         if (lExtEntityPart == null || lExtEntityPart.isEmpty())
         {
             errStr = _METHODNAME + "List<ENXP element of EN datatype not populated - required by vmr spec";
-            if (logger.isDebugEnabled())
-                logger.debug(errStr);
+            if (log.isDebugEnabled())
+                log.debug(errStr);
             throw new DataFormatException(errStr);
         }
         final Iterator<org.opencds.vmr.v1_0.schema.ENXP> lExtEntityPartIter = lExtEntityPart.iterator();
@@ -1120,19 +1146,14 @@ public class MappingUtility
         {
             errStr = _METHODNAME
                     + "No ext->int translations of List<ENXP> successful - at least one member of List<ENXP> required by vmr spec";
-            if (logger.isDebugEnabled())
-                logger.debug(errStr);
+            if (log.isDebugEnabled())
+                log.debug(errStr);
             throw new InvalidDataException(errStr);
         }
 
         final List<org.opencds.vmr.v1_0.schema.EntityNameUse> lEntityNameUseListExt = pENExt.getUse();
         if (lEntityNameUseListExt != null && !lEntityNameUseListExt.isEmpty())
-        {
-            final Iterator<org.opencds.vmr.v1_0.schema.EntityNameUse> lEntityNameUseExtIter = lEntityNameUseListExt.iterator();
-            final org.opencds.vmr.v1_0.schema.EntityNameUse lEntityNameUseExt = lEntityNameUseExtIter.next();
-            final EntityNameUse lEntityNameUseInt = eNNameUse2eNNameUseInternal(lEntityNameUseExt);
-            lENInt.getUse().add(lEntityNameUseInt);
-        }
+            lENInt.getUse().add(eNNameUse2eNNameUseInternal(lEntityNameUseListExt.getFirst()));
 
         return lENInt;
     }
@@ -1146,8 +1167,9 @@ public class MappingUtility
             return null;
 
         final String lEntityNameUseStrExt = pENU.toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External EntityNameUse value: " + lEntityNameUseStrExt);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External EntityNameUse value: {}", lEntityNameUseStrExt);
+
         final EntityNameUse lEntityNameUseInt;
         try
         {
@@ -1155,8 +1177,8 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the external to internal enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the external to internal enumeration");
         }
 
         return lEntityNameUseInt;
@@ -1174,16 +1196,13 @@ public class MappingUtility
 
         final org.opencds.vmr.v1_0.schema.EntityNamePartType lEntityNamePartTypeExt = pENXP.getType();
         if (lEntityNamePartTypeExt == null)
-        {
-            final String errStr = _METHODNAME + "EntityPartType of external ENXP datatype not populated; required by vmr spec";
-            logger.warn(errStr);
-
-        }
+            log.warn(_METHODNAME + "EntityPartType of external ENXP datatype not populated; required by vmr spec");
         else
         {
             final String lEntityNamePartTypeStrExt = lEntityNamePartTypeExt.toString();
-            if (logger.isDebugEnabled())
-                logger.debug(_METHODNAME + "External EntityNamePartType value: " + lEntityNamePartTypeStrExt);
+            if (log.isDebugEnabled())
+                log.debug(_METHODNAME + "External EntityNamePartType value: {}", lEntityNamePartTypeStrExt);
+
             final EntityNamePartType lEntityNamePartTypeInt;
             try
             {
@@ -1191,11 +1210,13 @@ public class MappingUtility
             }
             catch (final IllegalArgumentException iae)
             {
-                final String errStr = _METHODNAME + "there was no direct value mapping from the external to internal enumeration";
-                throw new InvalidDataException(errStr);
+                throw new InvalidDataException(
+                        _METHODNAME + "there was no direct value mapping from the external to internal enumeration");
             }
-            if (logger.isDebugEnabled())
-                logger.debug(_METHODNAME + "Internal EntityNamePartType value: " + lEntityNamePartTypeInt);
+
+            if (log.isDebugEnabled())
+                log.debug(_METHODNAME + "Internal EntityNamePartType value: {}", lEntityNamePartTypeInt);
+
             lENXPInt.setType(lEntityNamePartTypeInt);
         }
 
@@ -1203,10 +1224,7 @@ public class MappingUtility
         if (lPartQualifierListExt != null)
         {
             for (final org.opencds.vmr.v1_0.schema.EntityNamePartQualifier lPartQualifierExt : lPartQualifierListExt)
-            {
-                final EntityNamePartQualifier lPartQualifierInt = eNPartQualifier2eNPartQualifierInternal(lPartQualifierExt);
-                lENXPInt.getQualifier().add(lPartQualifierInt);
-            }
+                lENXPInt.getQualifier().add(eNPartQualifier2eNPartQualifierInternal(lPartQualifierExt));
         }
 
         return lENXPInt;
@@ -1221,8 +1239,9 @@ public class MappingUtility
             return null;
 
         final String lPartQualifierStrInt = pENPQExt.toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External EntityNamePartQualifier value: " + lPartQualifierStrInt);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External EntityNamePartQualifier value: {}", lPartQualifierStrInt);
+
         final EntityNamePartQualifier lPartQualifierInt;
         try
         {
@@ -1230,8 +1249,8 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the external to internal enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the external to internal enumeration");
         }
 
         return lPartQualifierInt;
@@ -1253,20 +1272,14 @@ public class MappingUtility
         if (lTelAddrListExt != null)
         {
             for (final org.opencds.vmr.v1_0.schema.TelecommunicationAddressUse lTelAddrExt : lTelAddrListExt)
-            {
-                final TelecommunicationAddressUse lTelAddrInt = tELTelecomAddrUse2TELTelecomAddrUseInternal(lTelAddrExt);
-                lTELInt.getUse().add(lTelAddrInt);
-            }
+                lTELInt.getUse().add(tELTelecomAddrUse2TELTelecomAddrUseInternal(lTelAddrExt));
         }
 
         final List<org.opencds.vmr.v1_0.schema.TelecommunicationCapability> lTelecomCapaListExt = pTELExt.getCapabilities();
         if (lTelecomCapaListExt != null)
         {
             for (final org.opencds.vmr.v1_0.schema.TelecommunicationCapability lTelecomCapExt : lTelecomCapaListExt)
-            {
-                final TelecommunicationCapability lTelecomCapaInt = tELTelecomCapa2TELTelecomCapaInternal(lTelecomCapExt);
-                lTELInt.getCapabilities().add(lTelecomCapaInt);
-            }
+                lTELInt.getCapabilities().add(tELTelecomCapa2TELTelecomCapaInternal(lTelecomCapExt));
         }
 
         return lTELInt;
@@ -1287,22 +1300,14 @@ public class MappingUtility
         if (lTelAddrListInt != null)
         {
             for (final TelecommunicationAddressUse lTelAddrInt : lTelAddrListInt)
-            {
-                final org.opencds.vmr.v1_0.schema.TelecommunicationAddressUse lTelAddrExt =
-                        tELTelecomAddrUseInternal2TELTelecomAddrUse(lTelAddrInt);
-                lTELExt.getUse().add(lTelAddrExt);
-            }
+                lTELExt.getUse().add(tELTelecomAddrUseInternal2TELTelecomAddrUse(lTelAddrInt));
         }
 
         final List<TelecommunicationCapability> lTelecomCapaListInt = pTELInt.getCapabilities();
         if (lTelecomCapaListInt != null)
         {
             for (final TelecommunicationCapability lTelecomCapInt : lTelecomCapaListInt)
-            {
-                final org.opencds.vmr.v1_0.schema.TelecommunicationCapability lTelecomCapaExt =
-                        tELTelecomCapaInternal2TelecomCapa(lTelecomCapInt);
-                lTELExt.getCapabilities().add(lTelecomCapaExt);
-            }
+                lTELExt.getCapabilities().add(tELTelecomCapaInternal2TelecomCapa(lTelecomCapInt));
         }
 
         return lTELExt;
@@ -1317,8 +1322,9 @@ public class MappingUtility
             return null;
 
         final String lTCStrExt = pTC.toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External TelecommunicationAddressUse value: " + lTCStrExt);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External TelecommunicationAddressUse value: {}", lTCStrExt);
+
         final TelecommunicationAddressUse lTCInt;
         try
         {
@@ -1326,8 +1332,8 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the external to internal enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the external to internal enumeration");
         }
 
         return lTCInt;
@@ -1341,8 +1347,9 @@ public class MappingUtility
         if (pTC == null)
             return null;
 
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "Internal TelecommunicationAddressUse value: " + pTC);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "Internal TelecommunicationAddressUse value: {}", pTC);
+
         final org.opencds.vmr.v1_0.schema.TelecommunicationAddressUse lTelecomCapaExt;
         try
         {
@@ -1350,11 +1357,12 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the internal to external enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the internal to external enumeration");
         }
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External TelecommunicationAddressUse value: " + lTelecomCapaExt.value());
+
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External TelecommunicationAddressUse value: {}", lTelecomCapaExt.value());
 
         return lTelecomCapaExt;
     }
@@ -1368,8 +1376,9 @@ public class MappingUtility
             return null;
 
         final String lTCStrExt = pTC.toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External TelecommunicationCapability value: " + lTCStrExt);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External TelecommunicationCapability value: {}", lTCStrExt);
+
         final TelecommunicationCapability lTCInt;
         try
         {
@@ -1377,8 +1386,8 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the external to internal enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the external to internal enumeration");
         }
 
         return lTCInt;
@@ -1392,8 +1401,9 @@ public class MappingUtility
         if (pTC == null)
             return null;
 
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "Internal TelecommunicationCapability value: " + pTC);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "Internal TelecommunicationCapability value: {}", pTC);
+
         final org.opencds.vmr.v1_0.schema.TelecommunicationCapability lTelecomCapaExt;
         try
         {
@@ -1401,11 +1411,12 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the internal to external enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the internal to external enumeration");
         }
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External TelecommunicationCapability value: " + lTelecomCapaExt.value());
+
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External TelecommunicationCapability value: {}", lTelecomCapaExt.value());
 
         return lTelecomCapaExt;
     }
@@ -1417,32 +1428,31 @@ public class MappingUtility
         if (pADExt == null)
             return null;
 
-        final String errStr;
         final AD lADInt = new AD();
 
         final List<org.opencds.vmr.v1_0.schema.ADXP> lExtAddressPart = pADExt.getPart();
-        if (lExtAddressPart == null || lExtAddressPart.isEmpty())
+        if (Objects.isNull(lExtAddressPart))
         {
-            errStr = _METHODNAME + "List<ADXP> element of external AD datatype not populated - required by vmr spec";
-            if (logger.isDebugEnabled())
-                logger.debug(errStr);
+            final String errStr = _METHODNAME + "List<ADXP> element of external AD datatype not populated - required by vmr spec";
+            if (log.isDebugEnabled())
+                log.debug(errStr);
             throw new DataFormatException(errStr);
         }
+
         final Iterator<org.opencds.vmr.v1_0.schema.ADXP> lExtAddressPartIter = lExtAddressPart.iterator();
         int count = 0;
         while (lExtAddressPartIter.hasNext())
         {
-            final org.opencds.vmr.v1_0.schema.ADXP lADXPExt = lExtAddressPartIter.next();
-            final ADXP lADXPInt = aDXP2ADXPInternal(lADXPExt);
-            lADInt.getPart().add(lADXPInt);
+            lADInt.getPart().add(aDXP2ADXPInternal(lExtAddressPartIter.next()));
             count++;
         }
+
         if (count < 1)
         {
-            errStr = _METHODNAME
+            final String errStr = _METHODNAME
                     + "No ext->int translations of List<ADXP> successful - at least one member of List<ADXP> required by vmr spec";
-            if (logger.isDebugEnabled())
-                logger.debug(errStr);
+            if (log.isDebugEnabled())
+                log.debug(errStr);
             throw new DataFormatException(errStr);
         }
 
@@ -1450,10 +1460,7 @@ public class MappingUtility
         if (lExtAddressUseList != null)
         {
             for (final org.opencds.vmr.v1_0.schema.PostalAddressUse lExtAddressUse : lExtAddressUseList)
-            {
-                final PostalAddressUse lIntAddressUse = aDPostalAddressUse2ADPostalAddressUseInternal(lExtAddressUse);
-                lADInt.getUse().add(lIntAddressUse);
-            }
+                lADInt.getUse().add(aDPostalAddressUse2ADPostalAddressUseInternal(lExtAddressUse));
         }
 
         return lADInt;
@@ -1466,43 +1473,36 @@ public class MappingUtility
         if (pADInt == null)
             return null;
 
-        final String errStr;
         final org.opencds.vmr.v1_0.schema.AD lADExt = new org.opencds.vmr.v1_0.schema.AD();
 
         final List<ADXP> lIntAddressPart = pADInt.getPart();
         if (lIntAddressPart == null || lIntAddressPart.isEmpty())
         {
-            errStr = _METHODNAME + "List<ADXP> element of internal AD datatype not populated - required by vmr spec";
-            if (logger.isDebugEnabled())
-                logger.debug(errStr);
+            final String errStr = _METHODNAME + "List<ADXP> element of internal AD datatype not populated - required by vmr spec";
+            if (log.isDebugEnabled())
+                log.debug(errStr);
             throw new DataFormatException(errStr);
         }
+
         final Iterator<ADXP> lIntAddressPartIter = lIntAddressPart.iterator();
         int count = 0;
         while (lIntAddressPartIter.hasNext())
         {
-            final ADXP lADXPInt = lIntAddressPartIter.next();
-            final org.opencds.vmr.v1_0.schema.ADXP lADXPExt = aDXPInternal2ADXP(lADXPInt);
-            lADExt.getPart().add(lADXPExt);
+            lADExt.getPart().add(aDXPInternal2ADXP(lIntAddressPartIter.next()));
             count++;
         }
+
         if (count < 1)
-        {
-            errStr = _METHODNAME
-                    + "No int->ext translations of List<ADXP> successful - at least one member of List<ADXP> required by vmr spec";
-            throw new InvalidDataException(errStr);
-        }
+            throw new InvalidDataException(_METHODNAME
+                    + "No int->ext translations of List<ADXP> successful - at least one member of List<ADXP> required by vmr spec");
 
         final List<PostalAddressUse> lIntAddressUseList = pADInt.getUse();
         if (lIntAddressUseList != null)
         {
             for (final PostalAddressUse lIntAddressUse : lIntAddressUseList)
-            {
-                final org.opencds.vmr.v1_0.schema.PostalAddressUse lExtAddressUse =
-                        aDPostalAddressUseInternal2ADPostalAddressUse(lIntAddressUse);
-                lADExt.getUse().add(lExtAddressUse);
-            }
+                lADExt.getUse().add(aDPostalAddressUseInternal2ADPostalAddressUse(lIntAddressUse));
         }
+
         return lADExt;
     }
 
@@ -1519,13 +1519,13 @@ public class MappingUtility
 
         final org.opencds.vmr.v1_0.schema.AddressPartType lAddressPartTypeExt = pADXP.getType();
         if (lAddressPartTypeExt == null)
-        {
-            final String errStr = _METHODNAME + "AddressPartType of external ADXP datatype not populated; required by vmr spec";
-            throw new DataFormatException(errStr);
-        }
+            throw new DataFormatException(
+                    _METHODNAME + "AddressPartType of external ADXP datatype not populated; required by vmr spec");
+
         final String lAddrPartTypeStrExt = pADXP.getType().toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External AddressPartType value: " + lAddrPartTypeStrExt);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External AddressPartType value: {}", lAddrPartTypeStrExt);
+
         final AddressPartType lAddrPartTypeInt;
         try
         {
@@ -1533,11 +1533,12 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the external to internal enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the external to internal enumeration");
         }
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "Internal AddressPartType value: " + lAddrPartTypeInt);
+
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "Internal AddressPartType value: {}", lAddrPartTypeInt);
 
         lADXPInt.setType(lAddrPartTypeInt);
 
@@ -1555,8 +1556,9 @@ public class MappingUtility
         lADXPExt.setValue(pADXPInternal.getValue());
 
         final String lIntAddrPartTypeStr = pADXPInternal.getType().toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "Internal AddressPartType value: " + lIntAddrPartTypeStr);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "Internal AddressPartType value: {}", lIntAddrPartTypeStr);
+
         final org.opencds.vmr.v1_0.schema.AddressPartType lAddrPartTypeExt;
         try
         {
@@ -1564,11 +1566,11 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the internal to external enumeration";
-            throw new RuntimeException(errStr);
+            throw new RuntimeException(_METHODNAME + "there was no direct value mapping from the internal to external enumeration");
         }
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External AddressPartType value: " + lAddrPartTypeExt);
+
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External AddressPartType value: {}", lAddrPartTypeExt);
 
         lADXPExt.setType(lAddrPartTypeExt);
 
@@ -1583,8 +1585,9 @@ public class MappingUtility
         if (pPAUInternal == null)
             return null;
 
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "Internal PostalAddressUse value: " + pPAUInternal);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "Internal PostalAddressUse value: {}", pPAUInternal);
+
         final org.opencds.vmr.v1_0.schema.PostalAddressUse lPostalAddressExt;
         try
         {
@@ -1592,11 +1595,12 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the internal to external enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the internal to external enumeration");
         }
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External PostAddressUse value: " + lPostalAddressExt.value());
+
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External PostAddressUse value: {}", lPostalAddressExt.value());
 
         return lPostalAddressExt;
     }
@@ -1610,8 +1614,9 @@ public class MappingUtility
             return null;
 
         final String lExtAddressUseStr = pPAUExt.toString();
-        if (logger.isDebugEnabled())
-            logger.debug(_METHODNAME + "External PostalAddressUse value: " + pPAUExt);
+        if (log.isDebugEnabled())
+            log.debug(_METHODNAME + "External PostalAddressUse value: {}", pPAUExt);
+
         final PostalAddressUse lPostalAddressInt;
         try
         {
@@ -1619,8 +1624,8 @@ public class MappingUtility
         }
         catch (final IllegalArgumentException iae)
         {
-            final String errStr = _METHODNAME + "there was no direct value mapping from the external to internal enumeration";
-            throw new InvalidDataException(errStr);
+            throw new InvalidDataException(
+                    _METHODNAME + "there was no direct value mapping from the external to internal enumeration");
         }
 
         return lPostalAddressInt;

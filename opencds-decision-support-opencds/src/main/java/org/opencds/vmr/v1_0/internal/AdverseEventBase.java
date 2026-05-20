@@ -16,9 +16,9 @@ import lombok.ToString;
 @ToString
 public abstract class AdverseEventBase extends ClinicalStatement
 {
-    protected CD adverseEventCode;
-    protected CD adverseEventAgent;
-    protected IVLDate adverseEventTime;
-    protected IVLDate documentationTime;
-    protected List<BodySite> affectedBodySite;
+    private CD adverseEventCode;
+    private CD adverseEventAgent;
+    private IVLDate adverseEventTime;
+    private IVLDate documentationTime;
+    private List<BodySite> affectedBodySite;
 }

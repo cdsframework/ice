@@ -84,8 +84,8 @@ public class ProblemMapper extends ProblemBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getProblems() == null)
-            organizedResults.getOutput().setProblems(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.Problems());
+        if (organizedResults.output().getProblems() == null)
+            organizedResults.output().setProblems(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.Problems());
 
         return target;
     }

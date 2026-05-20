@@ -43,7 +43,8 @@ public class SubstanceDispensationEventMapper extends SubstanceAdministrationBas
                     DoseRestrictionMapper.pullIn(source.getDoseRestriction(), new DoseRestriction(), null, subjectPersonId,
                             focalPersonId, factLists));
         if (source.getDispensationTime() != null)
-            target.setDispensationTime(MappingUtility.iVLTS2IVLDateInternal(source.getDispensationTime()));
+            target.setDispensationTime(
+                    MappingUtility.iVLTS2IVLDateInternal(source.getDispensationTime(), factLists.getParsedDatesCache()));
         if (source.getFillNumber() != null)
             target.setFillNumber(MappingUtility.iNT2INTInternal(source.getFillNumber()));
         if (source.getFillsRemaining() != null)
@@ -92,9 +93,9 @@ public class SubstanceDispensationEventMapper extends SubstanceAdministrationBas
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getSubstanceDispensationEvents() == null)
+        if (organizedResults.output().getSubstanceDispensationEvents() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setSubstanceDispensationEvents(
                             new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.SubstanceDispensationEvents());
         }

@@ -13,8 +13,8 @@ import lombok.ToString;
 @ToString
 public class ClinicalStatementRelationship
 {
-    protected String id;
-    protected String sourceId;
-    protected String targetId;
-    protected CD targetRelationshipToSource;
+    private String id;
+    private String sourceId;
+    private String targetId;
+    private CD targetRelationshipToSource;
 }

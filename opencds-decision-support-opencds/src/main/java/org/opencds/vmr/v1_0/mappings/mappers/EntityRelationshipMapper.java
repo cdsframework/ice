@@ -35,7 +35,8 @@ public class EntityRelationshipMapper
         target.setSourceId(sourceId);
         target.setTargetEntityId(targetIdString);
         target.setTargetRole(MappingUtility.cD2CDInternal(targetRelationshipToSource));
-        target.setRelationshipTimeInterval(MappingUtility.iVLTS2IVLDateInternal(relationshipTimeInterval));
+        target.setRelationshipTimeInterval(
+                MappingUtility.iVLTS2IVLDateInternal(relationshipTimeInterval, factLists.getParsedDatesCache()));
         factLists.put(EntityRelationship.class, target);
     }
 

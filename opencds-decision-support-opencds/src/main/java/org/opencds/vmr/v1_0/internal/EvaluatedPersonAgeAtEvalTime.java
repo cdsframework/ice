@@ -39,7 +39,7 @@ public class EvaluatedPersonAgeAtEvalTime
     @Setter
     public static String AGE_UNIT_SECOND = "13";
 
-    protected String personId;
-    protected Integer age;
-    protected String ageUnit;
+    private String personId;
+    private Integer age;
+    private String ageUnit;
 }

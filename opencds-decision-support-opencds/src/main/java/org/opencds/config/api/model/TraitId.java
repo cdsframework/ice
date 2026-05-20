@@ -1,5 +1,7 @@
 package org.opencds.config.api.model;
 
-public interface TraitId extends EntityIdentifier
+public record TraitId(String scopingEntityId,
+                      String businessId,
+                      String version)
 {
 }

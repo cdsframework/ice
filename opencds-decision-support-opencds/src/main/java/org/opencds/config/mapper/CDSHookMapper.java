@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.opencds.config.api.model.CDSHook;
 import org.opencds.config.api.model.FhirVersion;
-import org.opencds.config.api.model.impl.CDSHookImpl;
 import org.opencds.config.schema.CDSHook.CdsHookClientIds;
 
 public class CDSHookMapper
@@ -14,7 +13,8 @@ public class CDSHookMapper
     {
         if (external == null)
             return null;
-        return CDSHookImpl.create(external.getHook(), external.getId(), external.getTitle(), external.getDescription(),
+
+        return new CDSHook(external.getHook(), external.getId(), external.getTitle(), external.getDescription(),
                 Optional.ofNullable(external.getCdsHookClientIds())
                         .map(CdsHookClientIds::getClientId)
                         .map(List::copyOf)
@@ -26,15 +26,16 @@ public class CDSHookMapper
     {
         if (internal == null)
             return null;
+
         final org.opencds.config.schema.CDSHook cdsHook = new org.opencds.config.schema.CDSHook();
-        cdsHook.setHook(internal.getHook());
-        cdsHook.setTitle(internal.getTitle());
-        cdsHook.setDescription(internal.getDescription());
-        cdsHook.setId(internal.getId());
+        cdsHook.setHook(internal.hook());
+        cdsHook.setTitle(internal.title());
+        cdsHook.setDescription(internal.description());
+        cdsHook.setId(internal.id());
         cdsHook.setCdsHookClientIds(new CdsHookClientIds());
-        internal.getClientIds().forEach(cdsHook.getCdsHookClientIds().getClientId()::add);
-        cdsHook.setPrefetch(PrefetchMapper.external(internal.getPrefetch()));
-        cdsHook.setFhirVersion(internal.getFhirVersion().toString());
+        internal.clientIds().forEach(cdsHook.getCdsHookClientIds().getClientId()::add);
+        cdsHook.setPrefetch(PrefetchMapper.external(internal.prefetch()));
+        cdsHook.setFhirVersion(internal.fhirVersion().toString());
         return cdsHook;
     }
 }

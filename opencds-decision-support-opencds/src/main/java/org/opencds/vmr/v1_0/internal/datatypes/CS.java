@@ -11,5 +11,5 @@ import lombok.ToString;
 @ToString
 public class CS extends ANY
 {
-    protected String code;
+    private String code;
 }

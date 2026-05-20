@@ -1,30 +1,56 @@
 package org.opencds.config.api.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.opencds.common.utilities.ClassUtil;
 import org.opencds.config.api.ExecutionEngineAdapter;
 import org.opencds.config.api.ExecutionEngineContext;
 import org.opencds.config.api.KnowledgeLoader;
+import org.opencds.config.api.dao.ExecutionEngineDao;
 import org.opencds.config.api.model.ExecutionEngine;
 
-public interface ExecutionEngineService
+public class ExecutionEngineService
 {
-    ExecutionEngine find(String identifier);
+    private final Map<String, ExecutionEngine> executionEngineMap;
+    private final Map<ExecutionEngine, ExecutionEngineAdapter<?, ?, ?>> executionEngineAdapterMap = new ConcurrentHashMap<>();
+    private final Map<ExecutionEngine, KnowledgeLoader<?, ?>> knowledgeLoaderMap = new ConcurrentHashMap<>();
 
-    List<ExecutionEngine> getAll();
+    public ExecutionEngineService(final ExecutionEngineDao dao)
+    {
+        executionEngineMap =
+                dao.getAll().stream().collect(Collectors.toConcurrentMap(ExecutionEngine::identifier, Function.identity()));
+    }
 
-    void persist(ExecutionEngine ee);
+    public ExecutionEngine find(final String identifier)
+    {
+        return executionEngineMap.get(identifier);
+    }
 
-    void persist(List<ExecutionEngine> internal);
+    public List<ExecutionEngine> getAll()
+    {
+        return List.copyOf(executionEngineMap.values());
+    }
 
-    void delete(String identifier);
+    @SuppressWarnings("unchecked")
+    public <I, O, P, E extends ExecutionEngineAdapter<I, O, P>> E getExecutionEngineAdapter(final ExecutionEngine engine)
+    {
+        return (E) executionEngineAdapterMap.computeIfAbsent(engine, _ -> ClassUtil.newInstance(engine.adapter()));
+    }
 
-    @Deprecated(forRemoval = true)
-    <T> T getExecutionEngineInstance(ExecutionEngine engine);
+    public <I, O, C extends ExecutionEngineContext<I, O>> C createContext(final ExecutionEngine engine)
+    {
+        return ClassUtil.newInstance(engine.context());
+    }
 
-    <I, O, P, E extends ExecutionEngineAdapter<I, O, P>> E getExecutionEngineAdapter(ExecutionEngine engine);
-
-    <I, O, KL extends KnowledgeLoader<I, O>> KL getKnowledgeLoader(ExecutionEngine ee);
-
-    <I, O, C extends ExecutionEngineContext<I, O>> C createContext(ExecutionEngine ee);
+    @SuppressWarnings("unchecked")
+    public <I, O, KL extends KnowledgeLoader<I, O>> KL getKnowledgeLoader(final ExecutionEngine engine)
+    {
+        return (KL) knowledgeLoaderMap.computeIfAbsent(engine,
+                _ -> ClassUtil.newInstance(Optional.ofNullable(engine.knowledgeLoader()).orElseGet(engine::identifier)));
+    }
 }

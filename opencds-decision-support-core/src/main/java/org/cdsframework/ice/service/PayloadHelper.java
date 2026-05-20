@@ -1,15 +1,16 @@
 package org.cdsframework.ice.service;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
+import org.cdsframework.fhir.CodeSystemConceptProperty;
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
@@ -387,8 +388,11 @@ public class PayloadHelper
     private final Schedule backingSchedule;
     private final Drools drools;
     private final Map<String, Object> namedObjects;
+    private final boolean outputSupplementalText;
+    private final boolean outputVaccineGroupRulesArtifact;
 
-    public PayloadHelper(final Schedule backingSchedule, final Drools drools, final Map<String, Object> namedObjects)
+    public PayloadHelper(final Schedule backingSchedule, final Drools drools, final Map<String, Object> namedObjects,
+            final boolean outputSupplementalText, final boolean outputVaccineGroupRulesArtifact)
     {
         if (backingSchedule == null || !backingSchedule.isScheduleInitialized())
         {
@@ -414,21 +418,22 @@ public class PayloadHelper
         this.backingSchedule = backingSchedule;
         this.drools = drools;
         this.namedObjects = namedObjects;
+        this.outputSupplementalText = outputSupplementalText;
+        this.outputVaccineGroupRulesArtifact = outputVaccineGroupRulesArtifact;
     }
 
     @SuppressWarnings("unused")
     public void outputNestedImmEvaluationResult(final EvalTime evalTime, final String focalPersonId, final String cdsSource,
             final SubstanceAdministrationEvent incomingSAE, final String vg, final TargetDose targetDose,
-            final boolean outputSupplementalText, final boolean outputDoseCountInsteadOfDoseNumberInSeries)
+            final boolean outputDoseCountInsteadOfDoseNumberInSeries)
     {
-        outputNestedImmEvaluationResult(evalTime, focalPersonId, cdsSource, incomingSAE, vg, targetDose, outputSupplementalText,
+        outputNestedImmEvaluationResult(evalTime, focalPersonId, cdsSource, incomingSAE, vg, targetDose,
                 outputDoseCountInsteadOfDoseNumberInSeries, -1);
     }
 
     public void outputNestedImmEvaluationResult(final EvalTime evalTime, final String focalPersonId, final String cdsSource,
             final SubstanceAdministrationEvent incomingSAE, final String vg, final TargetDose targetDose,
-            final boolean outputSupplementalText, final boolean outputDoseCountInsteadOfDoseNumberInSeries,
-            final int doseNumberCountToOutput)
+            final boolean outputDoseCountInsteadOfDoseNumberInSeries, final int doseNumberCountToOutput)
     {
         final String _METHODNAME = "outputNestedImmEvaluationResult: ";
         if (evalTime == null || incomingSAE == null || targetDose == null)
@@ -485,6 +490,10 @@ public class PayloadHelper
         final ClinicalStatementRelationship rel = createPertinentRelationship(incomingSAE.getId(), uniqueSarIdValue);
         droolsInsert("rel" + uniqueSarIdValue, rel);
 
+        // Include Wiki URL if additional info enabled and URL exists for this vaccine group
+        if (outputVaccineGroupRulesArtifact)
+            createVaccineGroupUrlObservation(focalPersonId, vg, embeddedSAE.getId());
+
         // Include series display if captured
         if (targetDose.getSeriesDisplaySelectionType() != null)
             createEvaluationSeriesDisplayObservation(focalPersonId, targetDose, embeddedSAE);
@@ -502,8 +511,7 @@ public class PayloadHelper
             default -> new ArrayList<>();
         };
 
-        createEvaluationObservation(uniqueSarIdValue, nestedIdValue, focalPersonId, evalTime, vg, doseStatus,
-                outputSupplementalText, lReasons, null);
+        createEvaluationObservation(uniqueSarIdValue, nestedIdValue, focalPersonId, evalTime, vg, doseStatus, lReasons, null);
     }
 
     private void createEvaluationSeriesDisplayObservation(final String focalPersonId, final TargetDose targetDose,
@@ -602,8 +610,8 @@ public class PayloadHelper
                 getLocalCodeForEvaluationReason(BaseDataEvaluationReason._VACCINE_NOT_SUPPORTED_REASON.getCdsListItemName(),
                         this.backingSchedule));
 
-        createEvaluationObservation(uniqueSarIdValue, nestedIdValue, focalPersonId, evalTime, vg, DoseStatus.NOT_EVALUATED, false,
-                null, notSupportedReasons);
+        createEvaluationObservation(uniqueSarIdValue, nestedIdValue, focalPersonId, evalTime, vg, DoseStatus.NOT_EVALUATED, null,
+                notSupportedReasons);
     }
 
     /**
@@ -634,8 +642,8 @@ public class PayloadHelper
      */
     @SuppressWarnings("unused")
     public SubstanceAdministrationProposal outputRootImmRecommendationSubstanceAdministrationProposal(final String focalPersonId,
-            final String cdsSource, final TargetSeries ts, final boolean outputEarliestOverdue,
-            final boolean outputSupplementalText) throws IllegalArgumentException, InconsistentConfigurationException
+            final String cdsSource, final TargetSeries ts, final boolean outputEarliestOverdue)
+            throws IllegalArgumentException, InconsistentConfigurationException
     {
         final String _METHODNAME = "outputRootImmRecommendationSubstanceAdministrationProposal: ";
 
@@ -665,8 +673,8 @@ public class PayloadHelper
                 createCD("2.16.840.1.113883.6.5", "384810002", "Immunization/vaccination management (procedure)", "SNOMED CT"));
 
         // Set the Earliest valid date, recommendation date and/or latest recommendation date
-        final Date finalEarliestDate = ts.getFinalEarliestDate();
-        final Date finalRecommendationDate = ts.getFinalRecommendationDate();
+        final LocalDate finalEarliestDate = ts.getFinalEarliestDate();
+        final LocalDate finalRecommendationDate = ts.getFinalRecommendationDate();
         if (!outputEarliestOverdue)
         {
             // Only the recommended forecast date should be set
@@ -681,7 +689,7 @@ public class PayloadHelper
         else
         {
             // The earliest, recommended and latest recommended should be set
-            final Date finalLatestRecommendationDate = ts.getFinalOverdueDate();
+            final LocalDate finalLatestRecommendationDate = ts.getFinalOverdueDate();
             // We do not support returning the "latest" possible date separately in payload, as of now
             if (finalRecommendationDate != null || finalLatestRecommendationDate != null)
             {
@@ -705,6 +713,7 @@ public class PayloadHelper
                 sap.setValidAdministrationTimeInterval(obsTime);
             }
         }
+
         // Set the AdministrableSubstance - may be a vaccine or a vaccine group
         final CD vaccGroupCode = getLocalCodeConceptForRecommendationConcept(ts, true);
         final AdministrableSubstance substance = new AdministrableSubstance();
@@ -722,7 +731,10 @@ public class PayloadHelper
         final String[] observationResultTemplateArr = { "2.16.840.1.113883.3.795.11.6.3.1" };
         sap.setTemplateId(observationResultTemplateArr);
 
-        createRecommendationObservation(uniqueSarIdValue, nestedIdValue, focalPersonId, ts, outputSupplementalText);
+        createRecommendationObservation(uniqueSarIdValue, nestedIdValue, focalPersonId, ts);
+
+        if (outputVaccineGroupRulesArtifact)
+            createVaccineGroupUrlObservation(focalPersonId, ts.getVaccineGroup(), uniqueSarIdValue);
 
         return sap;
     }
@@ -802,13 +814,12 @@ public class PayloadHelper
      * @param evalTime               Evaluation time
      * @param vaccineGroup           Vaccine group code
      * @param doseStatus             Status of the dose
-     * @param outputSupplementalText Whether to output supplemental text
      * @param reasons                Collection of reasons for the status
      * @return Configured ObservationResult for evaluation
      */
     private ObservationResult createEvaluationObservation(final String sourceId, final String nestedIdValue,
             final String focalPersonId, final EvalTime evalTime, final String vaccineGroup, final DoseStatus doseStatus,
-            final boolean outputSupplementalText, final Collection<String> reasons, final List<CD> interpretationsOverride)
+            final Collection<String> reasons, final List<CD> interpretationsOverride)
     {
         final ObservationResult childObs = new ObservationResult();
         final String[] obsTemplateArr = { "2.16.840.1.113883.3.795.11.6.1.1" };
@@ -891,13 +902,11 @@ public class PayloadHelper
      * @param nestedIdValue          Unique ID for the observation
      * @param focalPersonId          Patient ID
      * @param targetSeries           The target series with recommendation info
-     * @param outputSupplementalText Whether to output supplemental text
      * @return Configured ObservationResult for recommendation
      * @throws IllegalArgumentException If recommendation status is invalid
      */
     private ObservationResult createRecommendationObservation(final String sourceId, final String nestedIdValue,
-            final String focalPersonId, final TargetSeries targetSeries, final boolean outputSupplementalText)
-            throws IllegalArgumentException
+            final String focalPersonId, final TargetSeries targetSeries) throws IllegalArgumentException
     {
         final String _METHODNAME = "createRecommendationObservation: ";
 
@@ -945,6 +954,7 @@ public class PayloadHelper
                         {
                             interpretations.addAll(Optional.ofNullable(
                                             getOutboundCDForSupplementalTextReason(recommendationReasonCode, this.backingSchedule))
+                                    .map(cdList -> cdList.stream().filter(cd -> !interpretations.contains(cd)).toList())
                                     .orElseGet(ArrayList::new));
                         }
                         else
@@ -1145,6 +1155,40 @@ public class PayloadHelper
         droolsInsert("rel" + lSeriesToDisplayObs.getId(), srel);
 
         return lSeriesToDisplayObs;
+    }
+
+    private void createVaccineGroupUrlObservation(final String focalPersonId, final String vg, final String sourceId)
+    {
+        Optional.ofNullable(this.backingSchedule.getICESupportingDataConfiguration().getSupportedVaccineGroups().getCdsListItem(vg))
+                .map(LocallyCodedCdsListItem::getProperties)
+                .flatMap(properties -> properties.stream()
+                        .filter(property -> property.code().equals("vaccineGroupRulesUrl"))
+                        .findFirst()
+                        .map(CodeSystemConceptProperty::valueString))
+                .ifPresent(url ->
+                {
+                    final ObservationResult lVaccineGroupUrlObservation =
+                            generateObservationResult(ICELogicHelper.generateUniqueString(), focalPersonId, true);
+
+                    // Set the Observation Focus to additional information (this is a placeholder code and should be replaced with the actual code from supporting data)
+                    lVaccineGroupUrlObservation.setObservationFocus(
+                            createCD("2.16.840.1.113883.3.795.12.100.500", "VACCINE_GROUP_RULES_URL",
+                                    "URL for the vaccine group rules (i.e., logic specification)", null));
+
+                    final ObservationValue lSeriesToDisplayObsValue = new ObservationValue();
+                    lSeriesToDisplayObsValue.setText(url);
+                    lVaccineGroupUrlObservation.setObservationValue(lSeriesToDisplayObsValue);
+
+                    lVaccineGroupUrlObservation.setClinicalStatementToBeRoot(false);
+                    lVaccineGroupUrlObservation.setToBeReturned(true);
+
+                    droolsInsert("childObs" + lVaccineGroupUrlObservation.getId(), lVaccineGroupUrlObservation);
+
+                    // Finally, relate the top-level ObservationResult collection to the SubstanceAdministrationProposal
+                    final ClinicalStatementRelationship rel =
+                            createPertinentRelationship(sourceId, lVaccineGroupUrlObservation.getId());
+                    droolsInsert("rel" + lVaccineGroupUrlObservation.getId(), rel);
+                });
     }
 
     private CD getLocalCodeForSeriesDisplaySelectionType(final SeriesDisplaySelectionType seriesDisplaySelectionType)

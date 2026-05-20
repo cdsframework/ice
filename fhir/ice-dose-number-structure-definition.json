@@ -1,0 +1,58 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "ice-dose-number",
+  "url": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-number",
+  "version": "1.0.0",
+  "name": "IceDoseNumber",
+  "title": "ICE Dose Number",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-04-24",
+  "publisher": "CDS Framework",
+  "description": "Identifies the dose number represented by a PlanDefinition.action entry.",
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "PlanDefinition.action"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Dose number",
+        "definition": "Dose number for the current PlanDefinition.action.",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-number"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      }
+    ]
+  }
+}

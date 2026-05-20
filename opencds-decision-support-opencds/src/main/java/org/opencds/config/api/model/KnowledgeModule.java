@@ -1,44 +1,39 @@
 package org.opencds.config.api.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
-public interface KnowledgeModule
+import org.springframework.util.StringUtils;
+
+public record KnowledgeModule(KMId kmId,
+                              KMStatus status,
+                              CDSHook cdsHook,
+                              String executionEngine,
+                              SSId ssId,
+                              CDMId primaryCDM,
+                              List<SecondaryCDM> secondaryCDMs,
+                              String packageType,
+                              String packageId,
+                              boolean preload,
+                              String primaryProcess,
+                              List<TraitId> traitIds,
+                              List<PrePostProcessPluginId> preProcessPluginIds,
+                              List<PrePostProcessPluginId> postProcessPluginIds,
+                              LocalDate timestamp,
+                              String userId)
 {
-    KMId getKMId();
-
-    KMStatus getStatus();
-
-    CDSHook getCDSHook();
-
-    default boolean hasCdsHook()
+    public KnowledgeModule
     {
-        return getCDSHook() != null;
+        assert kmId != null;
+        assert status != null;
+        assert StringUtils.hasText(executionEngine);
+        assert ssId != null;
+        assert StringUtils.hasText(packageType);
+        assert StringUtils.hasText(packageId);
+        assert timestamp != null;
+        secondaryCDMs = secondaryCDMs == null ? List.of() : List.copyOf(secondaryCDMs);
+        traitIds = traitIds == null ? List.of() : List.copyOf(traitIds);
+        preProcessPluginIds = preProcessPluginIds == null ? List.of() : List.copyOf(preProcessPluginIds);
+        postProcessPluginIds = postProcessPluginIds == null ? List.of() : List.copyOf(postProcessPluginIds);
     }
-
-    String getExecutionEngine();
-
-    SSId getSSId();
-
-    CDMId getPrimaryCDM();
-
-    List<SecondaryCDM> getSecondaryCDMs();
-
-    String getPackageType();
-
-    String getPackageId();
-
-    boolean isPreload();
-
-    String getPrimaryProcess();
-
-    List<TraitId> getTraitIds();
-
-    List<PrePostProcessPluginId> getPreProcessPluginIds();
-
-    List<PrePostProcessPluginId> getPostProcessPluginIds();
-
-    Date getTimestamp();
-
-    String getUserId();
 }

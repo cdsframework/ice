@@ -1,6 +1,5 @@
 package knowledgeModule.org.nyc.cir.ice;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +20,7 @@ import org.cdsframework.ice.util.TimePeriod;
 import org.cdsframework.ice.util.TimePeriod.DurationType;
 import org.cdsframework.ice.service.Vaccine;
 
-global java.util.Date evalTime;
+global java.time.LocalDate evalTime;
 
 /**
  * Fall back rule: If 2 shots are VALID and the series is complete, mark the latter administered shot as Invalid /
@@ -54,7 +53,7 @@ end
 /**
  *  If neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination then:
  */
-rule "Duplicate Shot/Same Day Overview Abstract Pneumococcal Rule #5: Make note if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
+rule "Duplicate Shot/Same Day Overview Abstract Pneumococcal Rule #5: Make notes if neither shot is an NOS CVX, neither shot is a combination, or both shots are a combination"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
 	activation-group "duplicateShotAbstractRule5"

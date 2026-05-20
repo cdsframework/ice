@@ -1,0 +1,194 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "ice-dose-vaccine",
+  "url": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine",
+  "version": "1.0.0",
+  "name": "IceDoseVaccine",
+  "title": "ICE Dose Vaccine",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-04-24",
+  "publisher": "CDS Framework",
+  "description": "Permitted vaccine terminology for a given dose action.",
+  "fhirVersion": "4.0.1",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "PlanDefinition.action"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Dose vaccine constraint",
+        "definition": "A vaccine candidate and preference metadata for a specific dose action.",
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "rules": "open"
+        },
+        "min": 1,
+        "max": "*"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:vaccine",
+        "path": "Extension.extension",
+        "sliceName": "vaccine",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:vaccine.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:vaccine.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "vaccine"
+      },
+      {
+        "id": "Extension.extension:vaccine.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:preferred",
+        "path": "Extension.extension",
+        "sliceName": "preferred",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:preferred.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:preferred.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "preferred"
+      },
+      {
+        "id": "Extension.extension:preferred.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:allowableMinimumAgeOfUse",
+        "path": "Extension.extension",
+        "sliceName": "allowableMinimumAgeOfUse",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:allowableMinimumAgeOfUse.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:allowableMinimumAgeOfUse.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "allowableMinimumAgeOfUse"
+      },
+      {
+        "id": "Extension.extension:allowableMinimumAgeOfUse.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.extension:allowableMaximumAgeOfUse",
+        "path": "Extension.extension",
+        "sliceName": "allowableMaximumAgeOfUse",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension:allowableMaximumAgeOfUse.extension",
+        "path": "Extension.extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.extension:allowableMaximumAgeOfUse.url",
+        "path": "Extension.extension.url",
+        "fixedUri": "allowableMaximumAgeOfUse"
+      },
+      {
+        "id": "Extension.extension:allowableMaximumAgeOfUse.value[x]",
+        "path": "Extension.extension.value[x]",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "min": 1,
+        "max": "1"
+      }
+    ]
+  }
+}

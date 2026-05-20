@@ -37,9 +37,11 @@ public class ObservationResultMapper extends ObservationBaseMapper
         }
 
         if (external.getObservationEventTime() != null)
-            internal.setObservationEventTime(MappingUtility.iVLTS2IVLDateInternal(external.getObservationEventTime()));
+            internal.setObservationEventTime(
+                    MappingUtility.iVLTS2IVLDateInternal(external.getObservationEventTime(), factLists.getParsedDatesCache()));
         if (external.getObservationValue() != null)
-            internal.setObservationValue(MappingUtility.observationValue2ObservationValueInternal(external.getObservationValue()));
+            internal.setObservationValue(MappingUtility.observationValue2ObservationValueInternal(external.getObservationValue(),
+                    factLists.getParsedDatesCache()));
         if (external.getInterpretation() != null)
         {
             internal.setInterpretation(new ArrayList<>());
@@ -84,9 +86,9 @@ public class ObservationResultMapper extends ObservationBaseMapper
 
         NestedObjectsMapper.pushOutClinicalStatementNestedObjects(source, target, organizedResults);
 
-        if (organizedResults.getOutput().getObservationResults() == null)
+        if (organizedResults.output().getObservationResults() == null)
         {
-            organizedResults.getOutput()
+            organizedResults.output()
                     .setObservationResults(new org.opencds.vmr.v1_0.schema.EvaluatedPerson.ClinicalStatements.ObservationResults());
         }
 

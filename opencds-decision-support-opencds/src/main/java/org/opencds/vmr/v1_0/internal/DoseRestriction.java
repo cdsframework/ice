@@ -13,6 +13,6 @@ import lombok.ToString;
 @ToString
 public class DoseRestriction
 {
-    protected PQ maxDoseForInterval;
-    protected PQ timeInterval;
+    private PQ maxDoseForInterval;
+    private PQ timeInterval;
 }

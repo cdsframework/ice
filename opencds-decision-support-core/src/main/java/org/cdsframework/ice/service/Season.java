@@ -28,8 +28,6 @@ package org.cdsframework.ice.service;
 
 import java.time.LocalDate;
 import java.time.MonthDay;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -88,7 +86,7 @@ public class Season
      *
      * @param pSeason a default Season
      */
-    public static Season constructFullySpecifiedSeasonFromDefaultSeasonAndDate(final Season pSeason, final Date applicableDate)
+    public static Season constructFullySpecifiedSeasonFromDefaultSeasonAndDate(final Season pSeason, final LocalDate applicableDate)
     {
         if (pSeason == null || applicableDate == null)
             return null;
@@ -96,9 +94,8 @@ public class Season
         if (!pSeason.isDefaultSeason())
             return pSeason;
 
-        final LocalDate requestDate = applicableDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        final int requestYear = requestDate.getYear();
-        final int requestMonth = requestDate.getMonthValue();
+        final int requestYear = applicableDate.getYear();
+        final int requestMonth = applicableDate.getMonthValue();
         final int defaultStartMonth = pSeason.defaultStartMonthAndDay.getMonthValue();
         final int defaultStartDay = pSeason.defaultStartMonthAndDay.getDayOfMonth();
         final int defaultEndMonth = pSeason.defaultEndMonthAndDay.getMonthValue();
@@ -107,8 +104,8 @@ public class Season
         int startYear = requestYear;
         int endYear = requestYear;
 
-        final MonthDay applicableDateMonthDay = MonthDay.from(applicableDate.toInstant().atZone(ZoneId.systemDefault()));
-        if (monthAndDayFallsWithinRange(requestMonth, requestDate.getDayOfMonth(), defaultStartMonth, defaultStartDay,
+        final MonthDay applicableDateMonthDay = MonthDay.from(applicableDate);
+        if (monthAndDayFallsWithinRange(requestMonth, applicableDate.getDayOfMonth(), defaultStartMonth, defaultStartDay,
                 defaultEndMonth, defaultEndDay))
         {
             if (applicableDateMonthDay.compareTo(pSeason.defaultEndMonthAndDay) <= 0)
@@ -588,14 +585,13 @@ public class Season
     /**
      * Date falls within the off-season
      */
-    public boolean dateIsApplicableToOffSeason(final Date pDate)
+    public boolean dateIsApplicableToOffSeason(final LocalDate pDate)
     {
         if (pDate == null)
             return false;
 
-        final LocalDate lDate = pDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         if (isDefaultSeason())
-            return !monthAndDayFallsWithinRange(lDate.getMonthValue(), lDate.getDayOfMonth(),
+            return !monthAndDayFallsWithinRange(pDate.getMonthValue(), pDate.getDayOfMonth(),
                     this.getDefaultSeasonStartMonthAndDay(), this.getDefaultSeasonEndMonthAndDay());
 
         final LocalDate lOffSeasonStartDate = getFullySpecifiedSeasonOffSeasonStartDate();
@@ -605,27 +601,15 @@ public class Season
         if (this.offSeasonEndDate.equals(lOffSeasonStartDate))
             return false;
 
-        return !lDate.isAfter(this.offSeasonEndDate) && !lDate.isBefore(lOffSeasonStartDate);
+        return !pDate.isAfter(this.offSeasonEndDate) && !pDate.isBefore(lOffSeasonStartDate);
     }
 
     /**
      * Overload to dateIsApplicableToSeason(Date, boolean), with the 2nd parameter set to true.
      */
-    public boolean dateIsApplicableToSeason(final Date pDate)
+    public boolean dateIsApplicableToSeason(final LocalDate pDate)
     {
         return dateIsApplicableToSeason(pDate, true);
-    }
-
-    /**
-     * If the date falls between the season start date and off-season end date (inclusive), return true, else false. If the date is on or after season start date, the includeOffSeason
-     * is set to true, and there is no off-season end date, true is returned.
-     */
-    public boolean dateIsApplicableToSeason(final Date pDate, final boolean includeOffSeason)
-    {
-        if (pDate == null)
-            return false;
-
-        return dateIsApplicableToSeason(pDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), includeOffSeason);
     }
 
     /**
@@ -634,7 +618,7 @@ public class Season
      * and off-season end date. Otherwise, it checks is the date falls between the start date and regular season end date.
      * (2) If the season is a default season, returns true always if off-season should be included. Otherwise checks to see if the date falls between the start date and end date.
      */
-    private boolean dateIsApplicableToSeason(final LocalDate pDate, final boolean includeOffSeason)
+    public boolean dateIsApplicableToSeason(final LocalDate pDate, final boolean includeOffSeason)
     {
         final String _METHODNAME = "dateIsApplicableToSeason(LocalDate, boolean): ";
         if (pDate == null)

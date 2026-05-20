@@ -14,6 +14,6 @@ import lombok.ToString;
 @ToString
 public class Goal extends GoalBase
 {
-    protected IVLDate goalObserverEventTime;
-    protected CD goalStatus;
+    private IVLDate goalObserverEventTime;
+    private CD goalStatus;
 }
