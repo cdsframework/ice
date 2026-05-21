@@ -20,7 +20,8 @@ public class ConfigurationService
         if (ObjectUtils.isEmpty(configStrategies))
             throw new IllegalArgumentException("At least one configuration strategy must be provided.");
 
-        final ConfigStrategy configStrategy = configStrategies.stream().filter(cs -> cs.supports(configData.configType()))
+        final ConfigStrategy configStrategy = configStrategies.stream()
+                .filter(cs -> cs.supports(configData.configType()))
                 .findFirst()
                 .orElseThrow(() -> new OpenCDSRuntimeException("Unsupported configuration type: " + configData.configType()));
 

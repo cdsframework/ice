@@ -67,8 +67,8 @@ public class CdsOutputResultSetBuilder
         final Map<String, List<ClinicalStatementRelationship>> clinicalStmtRelsByTargetId = allClinicalStmtRels == null
                                                                                             ? Map.of()
                                                                                             : allClinicalStmtRels.stream()
-                                                                                              .collect(Collectors.groupingBy(
-                                                                                                      ClinicalStatementRelationship::getTargetId));
+                                                                                                    .collect(Collectors.groupingBy(
+                                                                                                            ClinicalStatementRelationship::getTargetId));
 
         if (getResults(results, "CDSInput") != null)
         {

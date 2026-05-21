@@ -182,7 +182,7 @@ public final class IceApiClient
                 .build();
 
         var httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-        var parameters = objectMapper.readValue(httpResponse.body(), Parameters.class);
+        final var parameters = objectMapper.readValue(httpResponse.body(), Parameters.class);
         return ForecastResponseParser.parse(parameters);
     }
 }
@@ -234,7 +234,7 @@ public class IceClientConfiguration
 {
 
     @Bean
-    WebClient iceWebClient(IceProperties properties)
+    WebClient iceWebClient(final IceProperties properties)
     {
         return WebClient.builder()
                 .baseUrl(properties.getBaseUrl())
@@ -253,7 +253,7 @@ public class IceForecastClient
 {
     private final WebClient webClient;
 
-    public IceForecastClient(WebClient webClient)
+    public IceForecastClient(final WebClient webClient)
     {
         this.webClient = webClient;
     }

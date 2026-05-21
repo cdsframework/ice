@@ -361,7 +361,7 @@ rule "InitializeSeriesAndSeasons: Log TargetSeasons Tracked for this Request"
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetSeasons: " + $tseasons.toString());
 end
 
-
+		
 /**
  * Identify Candidate Series Ruleflow Group - TargetSeries Initialization
  */
@@ -488,7 +488,7 @@ rule "CandidateSeriesIdentification: Initialize *Past* Season TargetSeries when 
 		not Season(isDefaultSeason() == false, vaccineGroup == $vg, dateIsApplicableToSeason($shotDate))
 		// Note: for TargetSeries, do not match on series name when there is a default seasons because we do not want a TargetSeries created for the default season if another TargetSeries
 		// already handles that season
-		not (TargetSeries(targetSeason != null, targetSeason == Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate($season, $shotDate)))
+		not (TargetSeries(targetSeason != null, targetSeason == Season.constructFullySpecifiedSeasonFromDefaultSeasonAndDate($season, $shotDate))) 
 		$tseasons : TargetSeasons()
 		eval(schedule.vaccineTargetsOneOrMoreOfSpecifiedDiseases(schedule.getVaccineByCdsConceptValue($occ), schedule.getDiseasesTargetedByVaccineGroup($vg)) == true)
 		$evaluatedPerson : EvaluatedPerson($birthDate : demographics.birthTime)
@@ -668,7 +668,7 @@ end
 /**
  * Record Disease Immunity
  */
-
+ 
 /**
  * If the patient has immunity to a disease and it is on or after the immunity date, mark the patient as immune to the disease in
  * the series
@@ -2797,7 +2797,7 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - CB1 - COVID
 		$numberOfPreviousDosesAcrossAllSeasons: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", administrationDate < $td.administrationDate, isValid == true), count($acctd))
 	then
 		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
-        int doseNumberToDisplay = $numberOfPreviousDosesAcrossAllSeasons.intValue() == 0 ? 1 : $numberOfPreviousDosesAcrossAllSeasons.intValue()+1;
+        	int doseNumberToDisplay = $numberOfPreviousDosesAcrossAllSeasons.intValue() == 0 ? 1 : $numberOfPreviousDosesAcrossAllSeasons.intValue()+1;
 		p.outputNestedImmEvaluationResult($evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, true, doseNumberToDisplay);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
@@ -2816,7 +2816,7 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - CB1 - COVID
 	salience 11
 	when
   		exists TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", seasonStartDate < $seasonStartDate, isSeriesComplete() == true)
-        $numberOfPreviousDosesInThisSeason: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", associatedTargetSeries == $ts, isValid == true, administrationDate >= $seasonStartDate, administrationDate <= $td.administrationDate,
+        	$numberOfPreviousDosesInThisSeason: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", associatedTargetSeries == $ts, isValid == true, administrationDate >= $seasonStartDate, administrationDate <= $td.administrationDate,
 		    administeredShotNumberInSeries < $td.administeredShotNumberInSeries), count($acctd))
 	then
 		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));

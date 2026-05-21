@@ -647,8 +647,8 @@ public class VmrConversionComponent
                 .immunizationEvent(!StringUtils.hasText(extension)
                                    ? null
                                    : Reference.builder()
-                                     .reference("%s%s".formatted(REFERENCE_PREFIX_IMMUNIZATION, extension))
-                                     .build())
+                                           .reference("%s%s".formatted(REFERENCE_PREFIX_IMMUNIZATION, extension))
+                                           .build())
                 .doseStatus(doseStatus)
                 .doseStatusReason(doseStatusReasons)
                 .extension(protocolContext.extensions())
@@ -845,10 +845,10 @@ public class VmrConversionComponent
                         && !StringUtils.hasText(conceptValue.getDisplayName()))
                 ? Optional.empty()
                 : Optional.of(Coding.builder()
-                              .code(conceptValue.getCode())
-                              .system(conceptValue.getCodeSystem())
-                              .display(conceptValue.getDisplayName())
-                              .build());
+                        .code(conceptValue.getCode())
+                        .system(conceptValue.getCodeSystem())
+                        .display(conceptValue.getDisplayName())
+                        .build());
 
         final CodeableConcept.CodeableConceptBuilder conceptBuilder =
                 CodeableConcept.builder().text(Optional.ofNullable(conceptValue.getDisplayName()).orElse(conceptValue.getCode()));
@@ -935,8 +935,9 @@ public class VmrConversionComponent
                             : StringUtils.hasText(codeText)
                               ? codeText
                               : Optional.ofNullable(focusConcept)
-                                .map(CodeableConcept::text)
-                                .orElse(Optional.ofNullable(observationFocus.getDisplayName()).orElse(observationFocus.getCode()));
+                                      .map(CodeableConcept::text)
+                                      .orElse(Optional.ofNullable(observationFocus.getDisplayName())
+                                              .orElse(observationFocus.getCode()));
 
         if (codings.isEmpty() && !StringUtils.hasText(text))
             return null;

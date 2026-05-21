@@ -139,7 +139,9 @@ public class ConceptServiceImpl implements ConceptService, PropertyChangeListene
     @Override
     public ConceptService byKM(final KnowledgeModule knowledgeModule)
     {
-        return Optional.ofNullable(knowledgeModule).map(KnowledgeModule::kmId).map(kmConceptServiceMap::get)
+        return Optional.ofNullable(knowledgeModule)
+                .map(KnowledgeModule::kmId)
+                .map(kmConceptServiceMap::get)
                 .orElseGet(() -> cacheConceptServiceByKM(knowledgeModule));
     }
 
