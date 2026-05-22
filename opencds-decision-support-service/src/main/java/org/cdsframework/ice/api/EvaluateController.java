@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/opencds-decision-support-service/api/resources")
+@RequestMapping("/api/resources")
 public class EvaluateController
 {
     private static String getEvalInfo(final EvaluateAtSpecifiedTime eval)

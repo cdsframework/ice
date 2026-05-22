@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @RestController
-@RequestMapping("/opencds-decision-support-service")
+@RequestMapping
 public class HealthController
 {
     private final VersionData versionData;

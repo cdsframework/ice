@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/opencds-decision-support-service/cds")
+@RequestMapping("/cds")
 public class CdsRequestController
 {
     private final Evaluation evaluationService;
