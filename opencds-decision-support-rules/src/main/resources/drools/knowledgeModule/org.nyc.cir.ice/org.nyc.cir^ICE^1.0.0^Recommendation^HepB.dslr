@@ -221,10 +221,8 @@ rule "HepB: Recommend both an earliest and recommended interval of 56 days betwe
 	then
 		Create a Recommendation as $r for the Series $targetSeries
 		Add "56d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Add "18m+4w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculatedOverdue
 		Set the recommendation Earliest Forecast Date for $r to $dtCalculated
 		Set the recommendation Recommended Forecast Date for $r to $dtCalculated
-		Set the recommendation Overdue Forecast Date for $r to $dtCalculatedOverdue
 		Include the Recommendation $r for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
