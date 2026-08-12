@@ -15,6 +15,7 @@ import org.cdsframework.fhir.Observation;
 import org.cdsframework.fhir.Patient;
 import org.cdsframework.ice.service.SupportingDataService;
 import org.opencds.vmr.v1_0.schema.AdministrableSubstance;
+import org.opencds.vmr.v1_0.schema.BL;
 import org.opencds.vmr.v1_0.schema.CD;
 import org.opencds.vmr.v1_0.schema.CDSContext;
 import org.opencds.vmr.v1_0.schema.CDSInput;
@@ -38,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FhirToVmrInputAdapter
 {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final String SCHEDULE_FLAGS_CODE_SYSTEM_OID = "2.16.840.1.113883.3.795.12.100.502";
     private static final String ADMIN_GENDER_CODE_MALE = "M";
     private static final String ADMIN_GENDER_CODE_FEMALE = "F";
     private static final String ADMIN_GENDER_CODE_UNKNOWN = "UN";
@@ -80,15 +82,15 @@ public class FhirToVmrInputAdapter
     private final SupportingDataService supportingDataService;
 
     public CDSInput createCdsInput(final String kmId, final Patient patient, final List<Immunization> immunizations,
-            final List<Observation> observations)
+            final List<Observation> observations, final List<String> scheduleFlags)
     {
         return createCdsInput(List.of(copyIi(templateIdCdsInputPrototype)), createCdsContext(copyCd(clientLanguageCdPrototype)),
                 createVmr(List.of(copyIi(templateIdCdsInputPrototype)),
-                        createEvaluatedPerson(kmId, patient, immunizations, observations)));
+                        createEvaluatedPerson(kmId, patient, immunizations, observations, scheduleFlags)));
     }
 
     private EvaluatedPerson createEvaluatedPerson(final String kmId, final Patient patient, final List<Immunization> immunizations,
-            final List<Observation> observations)
+            final List<Observation> observations, final List<String> scheduleFlags)
     {
         final EvaluatedPerson evaluatedPerson = new EvaluatedPerson();
 
@@ -121,6 +123,13 @@ public class FhirToVmrInputAdapter
                         .stream()
                         .flatMap(Collection::stream)
                         .map(observation -> createObservationResult(kmId, observation))
+                        .toList());
+        clinicalStatements.getObservationResults()
+                .getObservationResult()
+                .addAll(Optional.ofNullable(scheduleFlags)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(scheduleFlag -> createScheduleFlagObservationResult(kmId, scheduleFlag))
                         .toList());
 
         clinicalStatements.setSubstanceAdministrationEvents(createSubstanceAdministrationEvents(Optional.ofNullable(immunizations)
@@ -229,6 +238,26 @@ public class FhirToVmrInputAdapter
         return observationResult;
     }
 
+    private ObservationResult createScheduleFlagObservationResult(final String kmId, final String scheduleFlag)
+    {
+        final CodeableConcept scheduleFlagConcept =
+                supportingDataService.getCodeableConcept(kmId, scheduleFlag, null, SCHEDULE_FLAGS_CODE_SYSTEM_OID, null);
+        final CD scheduleFlagCd = createCd(kmId, scheduleFlagConcept);
+
+        final ObservationResult observationResult = new ObservationResult();
+        observationResult.getTemplateId().add(copyIi(templateIdObservationResultPrototype));
+        observationResult.setId(createIi(UUID.randomUUID().toString(), null));
+        observationResult.setObservationFocus(scheduleFlagCd);
+
+        final ObservationResult.ObservationValue observationValue = new ObservationResult.ObservationValue();
+        final BL value = new BL();
+        value.setValue(true);
+        observationValue.setBoolean(value);
+        observationResult.setObservationValue(observationValue);
+
+        return observationResult;
+    }
+
     private CD createObservationValueCd(final String kmId, final CodeableConcept valueCodeableConcept)
     {
         final CD cd = createCd(kmId, valueCodeableConcept);
@@ -267,13 +296,21 @@ public class FhirToVmrInputAdapter
         substanceAdministrationEvent.setSubstanceAdministrationGeneralPurpose(
                 copyCd(substanceAdministrationGeneralPurposeCdPrototype));
         final String immunizationIdentifier = extractPrimaryIdentifierValue(immunization.identifier());
-        substanceAdministrationEvent.setId(createIi(IMMUNIZATION_ID_ROOT,
-                StringUtils.hasText(immunizationIdentifier) ? immunizationIdentifier : UUID.randomUUID().toString()));
+        final String eventIdentifier = StringUtils.hasText(immunizationIdentifier)
+                                       ? immunizationIdentifier
+                                       : StringUtils.hasText(immunization.id()) ? immunization.id() : UUID.randomUUID().toString();
+        substanceAdministrationEvent.setId(createIi(IMMUNIZATION_ID_ROOT, eventIdentifier));
         substanceAdministrationEvent.setAdministrationTimeInterval(Optional.ofNullable(immunization.occurrenceDateTime())
                 .map(this::parseIsoLocalDate)
                 .map(FhirToVmrInputAdapter::formatVmrDate)
                 .map(d -> createIvlts(d, d))
                 .orElse(null));
+        if (Boolean.TRUE.equals(immunization.isSubpotent()))
+        {
+            final BL isValid = new BL();
+            isValid.setValue(false);
+            substanceAdministrationEvent.setIsValid(isValid);
+        }
         substanceAdministrationEvent.setSubstance(createAdministrableSubstance(createIi(UUID.randomUUID().toString(), null),
                 createCd(kmId, immunization.vaccineCode())));
         return substanceAdministrationEvent;

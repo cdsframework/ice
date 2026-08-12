@@ -2,12 +2,11 @@ cds-engine:
   module-canonical-definition-map:
     '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
       plan-definitions:
-        ZOSTER_SERIES:
+        ZOSTER_3_DOSE_SERIES:
           resource-type: PlanDefinition
-          url: http://cdsframework.org/PlanDefinition/series/zoster_series
           version: 1.0.0
-          name: ZOSTER_SERIES
-          title: Zoster Series
+          name: ZOSTER_3_DOSE_SERIES
+          title: Zoster 3-Dose Series
           status: active
           meta:
             profile:
@@ -21,15 +20,15 @@ cds-engine:
             - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
               extension:
                 - url: numberOfDosesInSeries
-                  value-integer: 2
+                  value-integer: 3
                 - url: series
                   value-codeable-concept:
                     coding:
                       - system: urn:oid:2.16.840.1.113883.3.795.12.100.10
-                        code: ZOSTER_SERIES
+                        code: ZOSTER_3_DOSE_SERIES
                         version: ICE Vaccine Series
-                        display: Zoster Series
-                    text: Zoster Series
+                        display: Zoster 3-Dose Series
+                    text: Zoster 3-Dose Series
                 - url: vaccineGroup
                   value-codeable-concept:
                     coding:
@@ -47,11 +46,11 @@ cds-engine:
                 - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
                   extension:
                     - url: absoluteMinimumAge
-                      value-string: 18y
+                      value-string: 50y
                     - url: minimumAge
-                      value-string: 50y
+                      value-string: 60y
                     - url: earliestRecommendedAge
-                      value-string: 50y
+                      value-string: 60y
                 - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
@@ -64,6 +63,11 @@ cds-engine:
                         text: Zoster vaccine, live
                     - url: preferred
                       value-boolean: false
+            - id: dose-2
+              title: Dose 2
+              extension:
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                  value-integer: 2
                 - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
@@ -76,43 +80,23 @@ cds-engine:
                         text: Zoster recombinant
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+              related-action:
+                - action-id: dose-1
+                  relationship: after-end
                   extension:
-                    - url: vaccine
-                      value-codeable-concept:
-                        coding:
-                          - system: urn:oid:2.16.840.1.113883.12.292
-                            code: '188'
-                            version: CVX
-                            display: Zoster, unspecified formulation
-                        text: Zoster, unspecified formulation
-                    - url: preferred
-                      value-boolean: false
-            - id: dose-2
-              title: Dose 2
+                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                      extension:
+                        - url: absoluteMinimumInterval
+                          value-string: 52d
+                        - url: minimumInterval
+                          value-string: 56d
+                        - url: earliestRecommendedInterval
+                          value-string: 56d
+            - id: dose-3
+              title: Dose 3
               extension:
                 - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
-                  value-integer: 2
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
-                  extension:
-                    - url: absoluteMinimumAge
-                      value-string: 18y
-                    - url: minimumAge
-                      value-string: 50y
-                    - url: earliestRecommendedAge
-                      value-string: 50y
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
-                  extension:
-                    - url: vaccine
-                      value-codeable-concept:
-                        coding:
-                          - system: urn:oid:2.16.840.1.113883.12.292
-                            code: '121'
-                            version: CVX
-                            display: Zoster vaccine, live
-                        text: Zoster vaccine, live
-                    - url: preferred
-                      value-boolean: false
+                  value-integer: 3
                 - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
@@ -138,7 +122,7 @@ cds-engine:
                     - url: preferred
                       value-boolean: false
               related-action:
-                - action-id: dose-1
+                - action-id: dose-2
                   relationship: after-end
                   extension:
                     - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint

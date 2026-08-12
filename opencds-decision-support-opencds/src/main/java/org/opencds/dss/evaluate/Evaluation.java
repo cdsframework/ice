@@ -44,11 +44,19 @@ public class Evaluation
 {
     private final EvaluationService evaluationService;
     private final ConfigurationService configurationService;
+    private final EvaluationRequestPreProcessor evaluationRequestPreProcessor;
 
     public EvaluationResponse evaluate(final InteractionIdentifier interactionId, final EvaluationRequest evaluationRequest)
             throws UnrecognizedScopedEntityExceptionFault, EvaluationExceptionFault, DSSRuntimeExceptionFault
     {
         log.debug("II: {}EvaluationSoapService.evaluate started", interactionId.getInteractionId());
+        final long preProcessingStartedAtNanos = System.nanoTime();
+        final EvaluationRequestPreProcessor.Result preProcessingResult = evaluationRequestPreProcessor.process(evaluationRequest);
+        final long preProcessingDurationMillis = (System.nanoTime() - preProcessingStartedAtNanos) / 1_000_000L;
+        log.debug(
+                "II: {} evaluation request preprocessing completed in {} ms; payloads={}, augmentedPayloads={}, addedScheduleFlags={}",
+                interactionId.getInteractionId(), preProcessingDurationMillis, preProcessingResult.payloadCount(),
+                preProcessingResult.augmentedPayloadCount(), preProcessingResult.addedScheduleFlagCount());
 
         final List<FinalKMEvaluationResponse> responses =
                 evaluateInternal(configurationService.getKnowledgeRepository(), interactionId.getInteractionId(), evaluationRequest,
@@ -84,6 +92,13 @@ public class Evaluation
     {
         final long startedAtNanos = System.nanoTime();
         log.debug("II: {} EvaluationSoapService.evaluateAtSpecifiedTime started", interactionId.getInteractionId());
+        final long preProcessingStartedAtNanos = System.nanoTime();
+        final EvaluationRequestPreProcessor.Result preProcessingResult = evaluationRequestPreProcessor.process(evaluationRequest);
+        final long preProcessingDurationMillis = (System.nanoTime() - preProcessingStartedAtNanos) / 1_000_000L;
+        log.debug(
+                "II: {} evaluation request preprocessing completed in {} ms; payloads={}, augmentedPayloads={}, addedScheduleFlags={}",
+                interactionId.getInteractionId(), preProcessingDurationMillis, preProcessingResult.payloadCount(),
+                preProcessingResult.augmentedPayloadCount(), preProcessingResult.addedScheduleFlagCount());
 
         final List<FinalKMEvaluationResponse> responses =
                 evaluateInternal(configurationService.getKnowledgeRepository(), interactionId.getInteractionId(), evaluationRequest,

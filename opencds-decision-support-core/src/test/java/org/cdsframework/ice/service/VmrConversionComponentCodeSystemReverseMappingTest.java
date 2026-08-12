@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import org.cdsframework.fhir.AdministrativeGender;
@@ -26,6 +27,7 @@ import org.cdsframework.fhir.PublicationStatusEnum;
 import org.cdsframework.ice.config.CdsEngineProperties;
 import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.service.conversion.FhirToVmrInputAdapter;
+import org.cdsframework.ice.service.conversion.ScheduleAuthorityExtensionBuilder;
 import org.cdsframework.ice.service.conversion.SelectionContextExtensionBuilder;
 import org.cdsframework.ice.service.conversion.VaccineGroupRulesArtifactExtensionBuilder;
 import org.cdsframework.ice.service.conversion.VmrConversionComponent;
@@ -37,6 +39,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
 {
     private static final String KM_ID = "org.nyc.cir^ICE^1.0.0";
     private static final String MODULE_CANONICAL = "http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
+    private static final String SCHEDULE_FLAGS_OID = "2.16.840.1.113883.3.795.12.100.502";
 
     private static CdsEngineProperties createCdsEngineProperties()
     {
@@ -47,12 +50,19 @@ class VmrConversionComponentCodeSystemReverseMappingTest
 
     private static IceProperties createIceProperties()
     {
+        return createIceProperties(List.of());
+    }
+
+    private static IceProperties createIceProperties(final java.util.List<String> scheduleFlags)
+    {
         final IceProperties properties = new IceProperties();
         properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
         properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
-                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, java.util.List.of(),
+                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, false,
+                        java.util.List.of(),
                         java.util.List.of(), false, IceProperties.SupplementalTextMode.LEGACY,
                         new ByteArrayResource(new byte[0]))));
+        properties.setScheduleFlags(scheduleFlags);
         return properties;
     }
 
@@ -63,7 +73,7 @@ class VmrConversionComponentCodeSystemReverseMappingTest
         properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
         properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
                 new IceProperties.KnowledgeModuleProperties(true, false, true, outputNumberOfDosesRemaining,
-                        outputSeriesInformation, false, false, java.util.List.of(), java.util.List.of(), false,
+                        outputSeriesInformation, false, false, false, java.util.List.of(), java.util.List.of(), false,
                         IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         return properties;
     }
@@ -72,7 +82,8 @@ class VmrConversionComponentCodeSystemReverseMappingTest
             final IceProperties iceProperties)
     {
         return new VmrConversionComponent(supportingDataService, iceProperties, new FhirToVmrInputAdapter(supportingDataService),
-                new SelectionContextExtensionBuilder(supportingDataService), new VaccineGroupRulesArtifactExtensionBuilder());
+                new SelectionContextExtensionBuilder(supportingDataService), new VaccineGroupRulesArtifactExtensionBuilder(),
+                new ScheduleAuthorityExtensionBuilder());
     }
 
     private static CdsEngineProperties.ModuleCanonicalDefinition createModuleCanonicalDefinition()
@@ -132,6 +143,19 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                 .status(PublicationStatusEnum.ACTIVE)
                 .content(CodeSystemContentModeEnum.COMPLETE)
                 .concept(CodeSystemConcept.builder().code("10").display("IPV").build())
+                .build(), "SUPPORTED_SCHEDULE_FLAGS", CodeSystem.builder()
+                .name("SUPPORTED_SCHEDULE_FLAGS")
+                .identifier(
+                        Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:%s".formatted(SCHEDULE_FLAGS_OID)).build())
+                .url("http://terminology.cdsframework.org/ice/schedule-flags")
+                .status(PublicationStatusEnum.ACTIVE)
+                .content(CodeSystemContentModeEnum.COMPLETE)
+                .concept(CodeSystemConcept.builder().code("HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID")
+                        .display("Evaluate Invalid 3rd Hep B Dose as Accepted Extra Dose")
+                        .build())
+                .concept(CodeSystemConcept.builder().code("POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID")
+                        .display("Evaluate 4th/5th Polio Dose Below Minimum Age as Accepted Extra Dose")
+                        .build())
                 .build()), Map.of("2.16.840.1.113883.6.96", "http://snomed.info/sct", "2.16.840.1.113883.6.1", "http://loinc.org",
                 "2.16.840.1.113883.6.103", "http://hl7.org/fhir/sid/icd-9-cm", "2.16.840.1.113883.6.90",
                 "http://hl7.org/fhir/sid/icd-10-cm", "2.16.840.1.113883.6.3", "http://hl7.org/fhir/sid/icd-10",
@@ -139,9 +163,9 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                 "2.16.840.1.113883.3.795.12.100.500", "http://terminology.cdsframework.org/ice/series-display-options"));
     }
 
-    private static Parameters createRequest(final String moduleCanonical)
+    private static Parameters createRequest(final String moduleCanonical, final String... scheduleFlags)
     {
-        return Parameters.builder()
+        final Parameters.ParametersBuilder builder = Parameters.builder()
                 .resourceType("Parameters")
                 .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-04").build())
                 .parameter(ParametersParameter.builder().name("module").valueCanonical(moduleCanonical).build())
@@ -202,8 +226,13 @@ class VmrConversionComponentCodeSystemReverseMappingTest
                                         .build())
                                 .effectiveDateTime("2020-03-15")
                                 .build())
-                        .build())
-                .build();
+                        .build());
+        if (scheduleFlags != null)
+        {
+            for (final String scheduleFlag : scheduleFlags)
+                builder.parameter(ParametersParameter.builder().name("scheduleFlag").valueCode(scheduleFlag).build());
+        }
+        return builder.build();
     }
 
     @Test
@@ -634,6 +663,65 @@ class VmrConversionComponentCodeSystemReverseMappingTest
 
         assertTrue(xml.contains("interpretation code=\"IS_IMMUNE\""));
         assertTrue(xml.contains("codeSystem=\"2.16.840.1.113883.3.795.12.100.9\""));
+    }
+
+    @Test
+    void injectsRequestScheduleFlagsIntoVmrPayload()
+    {
+        final IceProperties iceProperties = createIceProperties();
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
+        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
+
+        final Parameters request = createRequest("http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0",
+                "HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID");
+
+        final var evaluateAtSpecifiedTime = vmrConversionComponent.convertToEvaluateAtSpecifiedTime(request);
+        final String xml = new String(evaluateAtSpecifiedTime.getEvaluationRequest()
+                .getDataRequirementItemData()
+                .getFirst()
+                .getData()
+                .getBase64EncodedPayload()
+                .getFirst(), StandardCharsets.UTF_8);
+
+        assertTrue(xml.contains("code=\"HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID\""));
+        assertTrue(xml.contains("codeSystem=\"" + SCHEDULE_FLAGS_OID + "\""));
+        assertTrue(xml.contains("<observationValue><boolean value=\"true\"/></observationValue>"));
+    }
+
+    @Test
+    void injectsConfiguredScheduleFlagsIntoVmrPayload()
+    {
+        final IceProperties iceProperties = createIceProperties(java.util.List.of("POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID"));
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
+        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
+
+        final var evaluateAtSpecifiedTime = vmrConversionComponent.convertToEvaluateAtSpecifiedTime(
+                createRequest("http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0"));
+        final String xml = new String(evaluateAtSpecifiedTime.getEvaluationRequest()
+                .getDataRequirementItemData()
+                .getFirst()
+                .getData()
+                .getBase64EncodedPayload()
+                .getFirst(), StandardCharsets.UTF_8);
+
+        assertTrue(xml.contains("code=\"POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID\""));
+        assertTrue(xml.contains("codeSystem=\"" + SCHEDULE_FLAGS_OID + "\""));
+        assertTrue(xml.contains("<observationValue><boolean value=\"true\"/></observationValue>"));
+    }
+
+    @Test
+    void rejectsUnsupportedRequestScheduleFlags()
+    {
+        final IceProperties iceProperties = createIceProperties();
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
+        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
+
+        final Parameters request = createRequest("http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0", "DOES_NOT_EXIST");
+
+        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> vmrConversionComponent.convertToEvaluateAtSpecifiedTime(request));
+
+        assertTrue(exception.getMessage().contains("DOES_NOT_EXIST"));
     }
 
     @Test

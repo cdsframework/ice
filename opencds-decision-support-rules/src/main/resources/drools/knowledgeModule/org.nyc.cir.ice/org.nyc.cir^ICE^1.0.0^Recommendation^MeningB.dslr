@@ -48,86 +48,6 @@ rule "Mening B: Do not recommend a specific vaccine if no (valid) doses have bee
 end
 
 /**
- * When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
- */
-rule "Mening B: Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose Series"
-	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the name of the series is "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
-			- the Series is not complete
-			- the dose number to recommend is > 1
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_163"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-/**
- * When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
- */
-rule "Mening B: Recommend CVX 163 for the 2nd target dose and later in the MenB 4C 3-dose Series"
-	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the name of the series is "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES"
-			- the series is not complete
-			- the dose number to recommend is > 1
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_163"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-/**
- * When recommending in the MenB FHbp 2-dose Series, recommend CVX 162 for the next target dose.
- */
-rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 3-dose Series"
-	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the name of the series is "SUPPORTED_SERIES.MEN_BF_HBP_3_DOSE_SERIES"
-			- the Series is not complete
-			- the dose number to recommend is > 1
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_162"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-/**
- * When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
- */
-rule "Mening B: Recommend CVX 162 for the next target dose in the MenB FHbp 2-dose Series"
-	dialect "mvel"
-	ruleflow-group "RecommendationForecast^customRecommendationRule"
-	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the name of the series is "SUPPORTED_SERIES.MEN_BF_HBP_2_DOSE_SERIES"
-			- the Series is not complete
-			- the dose number to recommend is > 1
-	then
-		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_162"
-		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
-end
-
-/**
  * For any of the Mening B series, if patient has at least one CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) and at least
  * one CVX 163 (Meningococcal B 4C, OMV (Bexsero)) on record, recommend CVX 163 and include the reason codes: DUE_NOW or
  * DUE_IN_FUTURE and OTHER_VACCINE_PRODUCT_POSSIBLE.
@@ -148,8 +68,8 @@ rule "Mening B: If a patient has at least one CVX 162 or CVX 316 and at least on
 			- the vaccine administered a member of ("VACCINE_CVX_163", "VACCINE_CVX_328")
 	then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
-		Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.OTHER_VACCINE_PRODUCT_POSSIBLE"
-		Include the Recommendation $oRecommendation for Consideration in the final Forecast of the Series
+		    Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.OTHER_VACCINE_PRODUCT_POSSIBLE"
+		    Include the Recommendation $oRecommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
@@ -162,40 +82,45 @@ rule "Mening B: If the patient < 10yrs and no doses on record, recommendation is
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+		There is a series $targetSeries that needs forecasting
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the number of doses administered is == 0
-		The Patient information $patientInfo must be known to complete writing this rule
-			- make note of the Patient's birthdate as $birthdate
+		The patient information $patientInfo must be known to complete writing this rule
+			- make note of the patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and evalTime < "10y"
 	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.NOT_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
+		Create a recommendation as $recommendation with status RecommendationStatus.NOT_RECOMMENDED for the series $targetSeries
+		    Set the recommendation reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_HIGH_RISK_SERIES"
+		    Include the recommendation $recommendation for consideration in the final forecast of the series
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
 end
 
-rule "Mening B: If the patient >= 10yrs and < 16yrs and no doses on record, recommendation is CONDITIONAL/HIGH_RISK"
+rule "Mening B: If the patient >= 10yrs and < 16yrs and no doses on record, recommendation is CONDITIONAL/HIGH_RISK and SUPPLEMENTAL_TEXT"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
-		There is a Series $targetSeries that needs forecasting
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+		There is a series $targetSeries that needs forecasting
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
 			- the number of doses administered is == 0
-		The Patient information $patientInfo must be known to complete writing this rule
-			- make note of the Patient's birthdate as $birthdate
+		The patient information $patientInfo must be known to complete writing this rule
+			- make note of the patient's birthdate as $birthdate
 		Confirm elapsed time between $birthdate and evalTime >= "10y"
 		Confirm elapsed time between $birthdate and evalTime < "16y"
 	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
+		Create a recommendation as $recommendation with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+		    Set the recommendation reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+            Include the recommendation $recommendation for consideration in the final forecast of the series
+
+        Create a recommendation as $recommendationSupplementalText with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+            Set the recommendation supplemental text for $recommendationSupplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.MENINGB_RISK_BASED_RECOMMENDATION"
+            Include the recommendation $recommendationSupplementalText for consideration in the final forecast of the series
+
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
 end
 
-rule "Mening B: If the patient >= 16yrs and < 24yrs and no doses on record, recommendation is CONDITIONAL/CLINICAL_PATIENT_DISCRETION"
+rule "Mening B: If the patient >= 16yrs and < 24yrs and no doses on record, recommendation is CONDITIONAL/CLINICAL_PATIENT_DISCRETION and SUPPLEMENTAL_TEXT"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -207,11 +132,14 @@ rule "Mening B: If the patient >= 16yrs and < 24yrs and no doses on record, reco
 		Confirm elapsed time between $birthdate and evalTime >= "16y"
 		Confirm elapsed time between $birthdate and evalTime < "24y"
 	then
-		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
-		Record that this Series Rule was Processed for the TargetSeries $targetSeries
-		Log that this Series Rule fired for the Series $targetSeries
+		Create a recommendation as $recommendation with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+		    Set the recommendation reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.CLINICAL_PATIENT_DISCRETION"
+		    Include the recommendation $recommendation for consideration in the final forecast of the series
+        Create a recommendation as $recommendationSupplementalText with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+            Set the recommendation supplemental text for $recommendationSupplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.MENINGB_RISK_BASED_RECOMMENDATION"
+            Include the recommendation $recommendationSupplementalText for consideration in the final forecast of the series
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
 end
 
 rule "Mening B: If the patient >= 24yrs and no doses on record, recommendation is CONDITIONAL/HIGH_RISK"
@@ -226,8 +154,65 @@ rule "Mening B: If the patient >= 24yrs and no doses on record, recommendation i
 		Confirm elapsed time between $birthdate and evalTime >= "24y"
 	then
 		Create a Recommendation as $recommendation with Status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the Series $targetSeries
-		Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
-		Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		    Set the Recommendation Reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.HIGH_RISK"
+		    Include the Recommendation $recommendation for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Mening B: The patient has completed the series"
+    dialect "mvel"
+    ruleflow-group "RecommendationForecast^customRecommendationRule"
+    when
+        There is a series $targetSeries
+            - The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+            - The series is complete
+            - A forecast for the series has not been made yet
+    then
+        Create a recommendation as $recommendation with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+            Set the recommendation reason for $recommendation to "RECOMMENDATION_REASON_CONCEPT.COMPLETE_HIGH_RISK"
+            Include the recommendation $recommendation for consideration in the final forecast of the series
+        Create a recommendation as $recommendationSupplementalText with status RecommendationStatus.CONDITIONALLY_RECOMMENDED for the series $targetSeries
+            Set the recommendation supplemental text for $recommendationSupplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.MENINGB_COMPLETE_HIGH_RISK"
+            Include the recommendation $recommendationSupplementalText for consideration in the final forecast of the series
+		Mark forecasting of the series $targetSeries complete
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
+end
+
+rule "MenB(FHbp 2-Dose Series): Recommend CVX 162 for the next target dose in the MenB FHbp 2-dose Series"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+			- the name of the series is "SUPPORTED_SERIES.MEN_BF_HBP_2_DOSE_SERIES"
+			- the Series is not complete
+			- the dose number to recommend is > 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		    Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_162"
+		    Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * When recommending in the MenB FHbp 3-dose Series, recommend CVX 162 for the next target dose.
+ */
+rule "MenB(FHbp 3-Dose Series): Recommend CVX 162 for the next target dose in the MenB FHbp 3-dose Series"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+			- the name of the series is "SUPPORTED_SERIES.MEN_BF_HBP_3_DOSE_SERIES"
+			- the Series is not complete
+			- the dose number to recommend is > 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		    Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_162"
+		    Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
@@ -235,7 +220,7 @@ end
 /**
  * Recommended interval between Dose 1 and Dose 3 in Men B FHbp 3-dose series is 6 months
  */
-rule "MeningB: Recommend minimum interval & recommended interval of at 6 months between doses 1 & 3 in FHbp 3-dose Series"
+rule "MenB(FHbp 3-dose Series): Recommend minimum interval & recommended interval of at 6 months between doses 1 & 3 in FHbp 3-dose Series"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs Forecasting
@@ -257,25 +242,21 @@ rule "MeningB: Recommend minimum interval & recommended interval of at 6 months 
 end
 
 /**
- * Recommended interval between Dose 1 and Dose 3 in Men B 4C 3-dose series is 6 months
+ * When recommending in the MenB 4C 2-dose Series, recommend CVX 163 for the next target dose.
  */
-rule "MenB(4C 3-Dose Series): Recommend minimum & recommended interval of at 6 months between doses 1 & 3"
+rule "MenB(4C 2-Dose Series): Recommend CVX 163 for the 2nd target dose in the MenB 4C 2-dose Series"
+	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
 		There is a Series $targetSeries that needs forecasting
-			- the name of the Series is "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES"
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the Series is not Complete
-			- the effective dose number in the Series is == 3
-		There is an Administered Shot $dose1
-			- the Shot belongs to the Series $targetSeries
-			- the Dose Number in the Series is == 1
-			- that has already been Evaluated and whose Shot Validity is VALID
-			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+			- the name of the series is "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
+			- the Series is not complete
+			- the dose number to recommend is > 1
 	then
-		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
-		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
-		Set the Recommendation Earliest Forecast Date for $r to $dtCalculated
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		    Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_163"
+		    Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
@@ -293,13 +274,13 @@ rule "MenB(4C 2-Dose Series): If (valid) dose 1 was >= 10/25/2024, the minimum i
 			- the Dose Number in the Series is == 1
 			- that has already been Evaluated and whose Shot Validity is VALID
 			- the administration date of the shot is >= "25-Oct-2024"
-			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+			- Make note of the Date this Shot was Administered as $administrationDate
 	then
-		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Add "6m" to $administrationDate and make note of the newly calculated date as $administrationDatePlus6Months
 		Create a recommendation as $r for the Series $targetSeries
-		Set the recommendation recommended forecast date for $r to the latter of $dtCalculated and "25-Oct-2024"
-		Set the recommendation earliest forecast date for $r to the latter of $dtCalculated and "25-Oct-2024"
-		Include the Recommendation $r for Consideration in the final forecast of the Series
+		    Set the recommendation recommended forecast date for $r to the latter of $administrationDatePlus6Months and "25-Oct-2024"
+		    Set the recommendation earliest forecast date for $r to the latter of $administrationDatePlus6Months and "25-Oct-2024"
+		    Include the Recommendation $r for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end
@@ -313,7 +294,7 @@ rule "MenB(4C 2-Dose Series): If the (valid) dose 1 was administered >= 10/25/20
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If no shots were administered and the evalTime < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
+rule "MenB(4C 2-Dose Series): If no shots were administered and the evalTime < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
@@ -336,7 +317,7 @@ rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If no shots were administered 
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If an (invalid) shot was 1 was administered < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
+rule "MenB(4C 2-Dose Series): If an (invalid) shot was 1 was administered < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
@@ -364,34 +345,78 @@ rule "MenB(4C 2-Dose Series; Target Dose 1; CRR): If an (invalid) shot was 1 was
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "MenB(4C 2-Dose Series; Target Dose 2; CRR): If a (valid) dose 1 administered was < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
+rule "MenB(4C 2-Dose Series): If a (valid) dose 1 administered was < 10/25/2024, modify DoseRule1 as follows: (1) set the minimum age and recommended age to 10 years; (2) set the minimum interval and recommended interval from dose 1 to dose 2 to 1 month"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
 	salience 999
 	when
-		There is a Series $targetSeries that needs forecasting
-			- the name of the Series is "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
-			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
-			- the Series is not Complete
+		There is a series $targetSeries that needs forecasting
+			- the name of the series is "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+			- the series is not complete
 			- the number of doses administered is == 1
 		There exists an administered shot
-			- the shot belongs to the Series $targetSeries
+			- the shot belongs to the series $targetSeries
 			- that has already been evaluated and whose shot validity is VALID
 			- the dose number in the Series is == 1
 			- the administration date of the shot is < "25-Oct-2024"
 	then
-		Obtain the existing DoseRule for Dose Number 2 in the Series $targetSeries as $assign_oDoseRule2
-		Set the Minimum Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
-		Set the Recommended Age for DoseRule $assign_oDoseRule2 to TimePeriod "10y+1m"
-		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule2
-		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
+		Obtain the existing DoseRule for Dose Number 2 in the Series $targetSeries as $doseRule2
+		Set the Recommended Age for DoseRule $doseRule2 to TimePeriod "10y+1m"
+		Replace the existing DoseRule in the Series $targetSeries with $doseRule2
 
+		Obtain the existing DoseRule for Dose Number 1 in the Series $targetSeries as $assign_oDoseRule1
 		Set the Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
 		Set the Recommended Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y"
 		Set the Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
 		Set the Recommended Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m"
 		Replace the existing DoseRule in the Series $targetSeries with $assign_oDoseRule1
+
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * When recommending in the MenB 4C 3-dose Series, recommend CVX 163 for the next target dose.
+ */
+rule "MenB(4C 3-Dose Series): Recommend CVX 163 for the 2nd target dose and later in the MenB 4C 3-dose Series"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+			- the name of the series is "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES"
+			- the series is not complete
+			- the dose number to recommend is > 1
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		    Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_163"
+		    Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * Recommended interval between Dose 1 and Dose 3 in Men B 4C 3-dose series is 6 months
+ */
+rule "MenB(4C 3-Dose Series): Recommend minimum & recommended interval of at 6 months between doses 1 & 3"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the name of the Series is "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES"
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+			- the Series is not Complete
+			- the effective dose number in the Series is == 3
+		There is an Administered Shot $dose1
+			- the Shot belongs to the Series $targetSeries
+			- the Dose Number in the Series is == 1
+			- that has already been Evaluated and whose Shot Validity is VALID
+			- Make note of the Date this Shot was Administered as $dtAdministrationDate
+	then
+		Add "6m" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Include a Recommendation as $r with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
+		Set the Recommendation Earliest Forecast Date for $r to $dtCalculated
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end

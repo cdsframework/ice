@@ -54,12 +54,12 @@
       "type": "Observation"
     },
     {
-      "name": "parameters",
+      "name": "scheduleFlag",
       "use": "in",
       "min": 0,
-      "max": "1",
-      "documentation": "Optional implementation-specific tuning or execution parameters.",
-      "type": "Parameters"
+      "max": "*",
+      "documentation": "Explicit per-request schedule flags that ICE should apply while evaluating the forecast. Send one top-level Parameters.parameter entry per flag using name='scheduleFlag' and valueCode='<SUPPORTED_SCHEDULE_FLAGS code>'. Codes must come from the SUPPORTED_SCHEDULE_FLAGS code system.",
+      "type": "code"
     },
     {
       "name": "output",

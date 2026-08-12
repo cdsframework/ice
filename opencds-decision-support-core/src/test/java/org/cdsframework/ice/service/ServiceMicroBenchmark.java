@@ -20,6 +20,7 @@ import org.cdsframework.fhir.PublicationStatusEnum;
 import org.cdsframework.ice.config.CdsEngineProperties;
 import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.service.conversion.FhirToVmrInputAdapter;
+import org.cdsframework.ice.service.conversion.ScheduleAuthorityExtensionBuilder;
 import org.cdsframework.ice.service.conversion.SelectionContextExtensionBuilder;
 import org.cdsframework.ice.service.conversion.VaccineGroupRulesArtifactExtensionBuilder;
 import org.cdsframework.ice.service.conversion.VmrConversionComponent;
@@ -79,7 +80,8 @@ public class ServiceMicroBenchmark
         final IceProperties properties = new IceProperties();
         properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
         properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
-                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, List.of(), List.of(),
+                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, false, List.of(),
+                        List.of(),
                         false, IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         return properties;
     }
@@ -127,7 +129,7 @@ public class ServiceMicroBenchmark
         final VmrConversionComponent vmrConversionComponent =
                 new VmrConversionComponent(supportingDataService, iceProperties, new FhirToVmrInputAdapter(supportingDataService),
                         new SelectionContextExtensionBuilder(supportingDataService),
-                        new VaccineGroupRulesArtifactExtensionBuilder());
+                        new VaccineGroupRulesArtifactExtensionBuilder(), new ScheduleAuthorityExtensionBuilder());
         final Parameters request = createBenchmarkRequest();
 
         runBenchmark("SupportingDataService.getCodeableConcept", 10_000, 200_000,

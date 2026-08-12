@@ -1444,7 +1444,7 @@ public class TargetSeries
         final boolean lTargetSeasonExists = targetSeasonExists();
         if (lIsSeriesComplete && !lTargetSeasonExists)
         {
-            if (!this.seriesRules.recurringDosesOccurAfterSeriesComplete())
+            if (!this.seriesRules.isRecurringDosesOccurAfterSeriesComplete())
             {
                 // The series is complete, and no other future shots are recommended. If shots are recurring for this series, it is assumed that a custom rule handles this
                 final Recommendation rec = new Recommendation(this);
@@ -1592,7 +1592,7 @@ public class TargetSeries
             final boolean lIsSeriesComplete = isSeriesComplete();
             if (lIsSeriesComplete && !lTargetSeasonExists)
             { // (lTargetSeasonExists == false || (lTargetSeasonExists == true && targetSeason.getFullySpecifiedSeasonOffSeasonEndDate() == null))) {
-                if (!this.seriesRules.recurringDosesOccurAfterSeriesComplete())
+                if (!this.seriesRules.isRecurringDosesOccurAfterSeriesComplete())
                 {
                     // The series is complete, and no other future shots are recommended. If shots are recurring for this series, it is assumed that a custom rule handles this
                     final Recommendation rec = new Recommendation(this);
@@ -3229,8 +3229,11 @@ public class TargetSeries
         if (targetDoses == null)
             return 0;
 
-        final String lDuplicateShotReason = BaseDataEvaluationReason._DUPLICATE_SAME_DAY_REASON.getCdsListItemName();
-        return Math.toIntExact(targetDoses.stream().filter(td -> !td.containsReason(lDuplicateShotReason)).count());
+        return (int) targetDoses.stream()
+                .map(TargetDose::getAdministrationDate)
+                .filter(Objects::nonNull)
+                .distinct()
+                .count();
     }
 
     /**

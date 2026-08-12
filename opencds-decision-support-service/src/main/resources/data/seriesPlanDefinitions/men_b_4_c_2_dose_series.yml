@@ -99,21 +99,21 @@ cds-engine:
                       value-codeable-concept:
                         coding:
                           - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '164'
+                            version: CVX
+                            display: Meningococcal B, NOS
+                        text: Meningococcal B, NOS
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
                             code: '328'
                             version: CVX
                             display: Meningococcal MenABCWY (Penmenvy)
                         text: Meningococcal MenABCWY (Penmenvy)
                     - url: preferred
                       value-boolean: true
-              related-action:
-                - action-id: dose-1
-                  relationship: after-end
-                  extension:
-                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
-                      extension:
-                        - url: absoluteMinimumInterval
-                          value-string: 4m-4d
-                        - url: minimumInterval
-                          value-string: 4m
-                        - url: earliestRecommendedInterval
-                          value-string: 4m

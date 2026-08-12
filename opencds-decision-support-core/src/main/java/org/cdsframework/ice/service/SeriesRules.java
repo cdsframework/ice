@@ -66,9 +66,9 @@ public class SeriesRules
         lSR.numberOfDosesInSeries = pSR.numberOfDosesInSeries;
         lSR.seriesStartAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pSR.seriesStartAge);
         lSR.seriesEndAge = TimePeriod.constructDeepCopyOfTimePeriodObject(pSR.seriesEndAge);
-        lSR.recurringDosesAfterSeriesComplete = pSR.recurringDosesAfterSeriesComplete;
-        lSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered =
-                pSR.doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
+        lSR.recurringDosesOccurAfterSeriesComplete = pSR.recurringDosesOccurAfterSeriesComplete;
+        lSR.doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered =
+                pSR.doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered;
         lSR.applicableSeasons = new ArrayList<>();
 
         // Copy Doses
@@ -96,8 +96,8 @@ public class SeriesRules
     private int seriesGroupToTransitionTo;
     private TimePeriod seriesStartAge;
     private TimePeriod seriesEndAge;
-    private boolean recurringDosesAfterSeriesComplete;
-    private boolean doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
+    private boolean recurringDosesOccurAfterSeriesComplete;
+    private boolean doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered;
     private List<DoseRule> seriesDoseRules;
     private List<Season> applicableSeasons;
 
@@ -129,8 +129,8 @@ public class SeriesRules
         numberOfDosesInSeries = 0;
         seriesStartAge = null;
         seriesEndAge = null;
-        doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = true;
-        recurringDosesAfterSeriesComplete = false;
+        doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered = true;
+        recurringDosesOccurAfterSeriesComplete = false;
     }
 
     /**
@@ -156,29 +156,9 @@ public class SeriesRules
         this.seriesName = seriesName;
     }
 
-    public CdsConcept getVaccineGroupConcept()
-    {
-        return vaccineGroupConcept;
-    }
-
     public String getVaccineGroup()
     {
         return vaccineGroupConcept.getOpenCdsConceptCode();
-    }
-
-    public boolean isDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered()
-    {
-        return doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered;
-    }
-
-    public void setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(final boolean yesno)
-    {
-        doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered = yesno;
-    }
-
-    public boolean recurringDosesOccurAfterSeriesComplete()
-    {
-        return recurringDosesAfterSeriesComplete;
     }
 
     /**
@@ -380,7 +360,8 @@ public class SeriesRules
         final StringBuilder toStr = new StringBuilder(
                 "SeriesRules [seriesId = %s; Series Name = %s; vaccineGroupConcept name = %s; Number of Doses In Series = %d; Recurring Doses (After Series Complete)? = %s; Dose Number Calculated By Diseases Targeted By Each Vaccine = %s".formatted(
                         seriesId, seriesName, vaccineGroupConcept.getOpenCdsConceptCode(), numberOfDosesInSeries,
-                        recurringDosesAfterSeriesComplete, doseNumberCalculatedBasedOnDiseasesTargetedByEachVaccineAdministered));
+                        recurringDosesOccurAfterSeriesComplete,
+                        doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered));
 
         int i = 1;
         toStr.append("\nDose Rules [[ ");

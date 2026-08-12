@@ -1,6 +1,7 @@
 package org.cdsframework.ice.service.conversion;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -34,11 +35,10 @@ public class OpenCdsTransportAdapter
     public static EvaluateAtSpecifiedTime createEvaluateAtSpecifiedTime(final EntityIdentifier kmEntityIdentifier,
             final LocalDate assessmentDate, final String clientTimeZoneOffset, final byte[] payload)
     {
-        final GregorianCalendar specifiedTimeCalendar = GregorianCalendar.from(assessmentDate.atStartOfDay(ZoneId.systemDefault()));
-
-        return createEvaluateAtSpecifiedTime(createInteractionIdentifier(UUID.randomUUID().toString(),
-                        DATATYPE_FACTORY.newXMLGregorianCalendar(new GregorianCalendar()), kmEntityIdentifier.getScopingEntityId()),
-                DATATYPE_FACTORY.newXMLGregorianCalendar(specifiedTimeCalendar),
+        return createEvaluateAtSpecifiedTime(
+                createInteractionIdentifier(UUID.randomUUID().toString(), toXmlGregorianCalendar(OffsetDateTime.now()),
+                        kmEntityIdentifier.getScopingEntityId()),
+                toXmlGregorianCalendar(assessmentDate.atStartOfDay(ZoneId.systemDefault()).toOffsetDateTime()),
                 createEvaluationRequest(clientTimeZoneOffset, List.of(createKmEvaluationRequest(kmEntityIdentifier)),
                         List.of(createDataRequirementItemData(createItemIdentifier(
                                 createEntityIdentifier(kmEntityIdentifier.getScopingEntityId(),
@@ -123,5 +123,10 @@ public class OpenCdsTransportAdapter
         interactionIdentifier.setInteractionId(interactionId);
         interactionIdentifier.setSubmissionTime(submissionTime);
         return interactionIdentifier;
+    }
+
+    private static XMLGregorianCalendar toXmlGregorianCalendar(final OffsetDateTime dateTime)
+    {
+        return DATATYPE_FACTORY.newXMLGregorianCalendar(GregorianCalendar.from(dateTime.toZonedDateTime()));
     }
 }

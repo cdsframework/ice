@@ -434,7 +434,7 @@ public class SupportedSeries implements SupportingData
             series1Rules.setSeriesEndAge(new TimePeriod(pSeriesData.patientEndAge()));
 
         series1Rules.setSeriesDoseRules(getDoseRules(pSeriesData, lDosesMap, lSeriesCode, series1Rules));
-        series1Rules.setRecurringDosesAfterSeriesComplete(
+        series1Rules.setRecurringDosesOccurAfterSeriesComplete(
                 Optional.ofNullable(pSeriesData.recurringDosesAfterSeriesComplete()).orElse(false));
         series1Rules.setDoseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(
                 Optional.ofNullable(pSeriesData.doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered()).orElse(true));

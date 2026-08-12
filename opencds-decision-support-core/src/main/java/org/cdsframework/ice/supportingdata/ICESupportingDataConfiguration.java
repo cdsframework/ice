@@ -29,14 +29,19 @@ package org.cdsframework.ice.supportingdata;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.cdsframework.cds.supportingdata.SupportedCdsConcepts;
 import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.fhir.CodeSystem;
@@ -44,6 +49,7 @@ import org.cdsframework.fhir.CodeSystemConcept;
 import org.cdsframework.fhir.PlanDefinition;
 
 import org.cdsframework.ice.config.CdsEngineProperties;
+import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.service.DoseStatus;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
@@ -68,6 +74,7 @@ public class ICESupportingDataConfiguration
     private final SupportedCdsLists supportedCdsLists;
     private final SupportedVaccineGroups supportedVaccineGroups;
     private final SupportedVaccines supportedVaccines;
+    private final SupportedScheduleAuthorities supportedScheduleAuthorities;
     private final SupportedSeasons supportedSeasons;
     private final SupportedSeries supportedSeries;
 
@@ -149,12 +156,6 @@ public class ICESupportingDataConfiguration
             log.error(_METHODNAME + lErrStr, e);
             throw new ICECoreError(lErrStr);
         }
-        if (log.isDebugEnabled())
-        {
-            String lDebugStr = "The following CdsLists have been initialized into the " + this.getClass().getName() + ": \n";
-            lDebugStr += this.supportedCdsLists.toString();
-            log.debug(_METHODNAME + "{}", lDebugStr);
-        }
 
         // Check to make sure that the required base data codes have been supplied
         if (!allBaseSupportingDataCdsListItemInitialized())
@@ -182,7 +183,7 @@ public class ICESupportingDataConfiguration
         {
             String lDebugStr = "The following Vaccine Groups have been initialized into the " + this.getClass().getName() + ": \n";
             lDebugStr += this.supportedVaccineGroups.toString();
-            log.debug(_METHODNAME + "{}", lDebugStr);
+            log.debug(_METHODNAME + "{}", StringUtils.normalizeSpace(lDebugStr));
         }
 
         // Initialize the Vaccine supporting data
@@ -201,7 +202,7 @@ public class ICESupportingDataConfiguration
         {
             String lDebugStr = "The following Vaccines have been initialized into the " + this.getClass().getName() + ": \n";
             lDebugStr += this.supportedVaccines.toString();
-            log.debug(_METHODNAME + "{}", lDebugStr);
+            log.debug(_METHODNAME + "{}", StringUtils.normalizeSpace(lDebugStr));
         }
 
         if (!this.supportedVaccines.isSupportingDataConsistent())
@@ -212,11 +213,43 @@ public class ICESupportingDataConfiguration
             throw new InconsistentConfigurationException(lErrStr);
         }
 
+        // Initialize Schedule Authority supporting data
+        this.supportedScheduleAuthorities = new SupportedScheduleAuthorities(this);
+        try
+        {
+            this.supportedScheduleAuthorities.initializeFromCdsLists();
+        }
+        catch (final Exception e)
+        {
+            final String lErrStr = "An error occurred processing supporting *Schedule Authority* data";
+            log.error(_METHODNAME + lErrStr, e);
+            throw new ICECoreError(lErrStr);
+        }
+        if (log.isDebugEnabled())
+        {
+            String lDebugStr = "The following Schedule Authorities have been initialized into the "
+                    + this.getClass().getName() + ": \n";
+            lDebugStr += this.supportedScheduleAuthorities.toString();
+            log.debug(_METHODNAME + "{}", lDebugStr);
+        }
+
+        if (!this.supportedScheduleAuthorities.isSupportingDataConsistent())
+        {
+            final String lErrStr =
+                    "The schedule authority data supplied is inconsistent. Please ensure that all schedule authorities have been defined in the supporting data";
+            log.error(_METHODNAME + lErrStr);
+            throw new InconsistentConfigurationException(lErrStr);
+        }
+
         // Initialize Seasons supporting data
         this.supportedSeasons = new SupportedSeasons(this);
         try
         {
-            this.supportedSeasons.initializeFromCdsLists();
+            this.supportedSeasons.initializeFromCdsLists(supportingDataService.getSeasonOverrides());
+        }
+        catch (final InconsistentConfigurationException e)
+        {
+            throw e;
         }
         catch (final Exception e)
         {
@@ -229,7 +262,7 @@ public class ICESupportingDataConfiguration
         {
             String lDebugStr = "The following Seasons have been initialized into the " + this.getClass().getName() + ":\n";
             lDebugStr += this.supportedSeasons.toString();
-            log.debug(_METHODNAME + "{}", lDebugStr);
+            log.debug(_METHODNAME + "{}", StringUtils.normalizeSpace(lDebugStr));
         }
 
         // Initialize Series supporting data
@@ -243,13 +276,12 @@ public class ICESupportingDataConfiguration
                             .stream()
                             .flatMap(java.util.Collection::stream)
                             .sorted(Comparator.comparing(sd -> sd.series().displayName()))
-                            .forEach(sd ->
-                            {
-                                loadedSeriesData.add(sd);
-                                this.addSupportedSeriesFromIceProperties(sd);
-                            }));
-            validateSupportedSeriesConsistency(pSupportedKnowledgeModules, supportingDataService, loadedSeriesData);
-            validateSupportedSeasonsReferencedBySeriesData(loadedSeriesData);
+                            .forEach(loadedSeriesData::add));
+            final List<SeriesData> effectiveSeriesData =
+                    applySeriesOverrides(loadedSeriesData, supportingDataService.getSeriesOverrides());
+            effectiveSeriesData.forEach(this::addSupportedSeriesFromIceProperties);
+            validateSupportedSeriesConsistency(pSupportedKnowledgeModules, supportingDataService, effectiveSeriesData);
+            validateSupportedSeasonsReferencedBySeriesData(effectiveSeriesData);
         }
         catch (final InconsistentConfigurationException e)
         {
@@ -265,7 +297,7 @@ public class ICESupportingDataConfiguration
         {
             String lDebugStr = "The following Series have been initialized into the " + this.getClass().getName() + ":\n";
             lDebugStr += this.supportedSeries.toString();
-            log.debug(_METHODNAME + "{}", lDebugStr);
+            log.debug(_METHODNAME + "{}", StringUtils.normalizeSpace(lDebugStr));
         }
 
         // Log configuration data parameters of data initialized
@@ -307,6 +339,264 @@ public class ICESupportingDataConfiguration
                 .filter(code -> !code.isEmpty())
                 .forEach(supportedSeriesCodes::add);
         return supportedSeriesCodes;
+    }
+
+    private List<SeriesData> applySeriesOverrides(final List<SeriesData> loadedSeriesData,
+            final Map<String, IceProperties.SeriesOverride> seriesOverrides)
+    {
+        if (ObjectUtils.isEmpty(loadedSeriesData))
+            return List.of();
+
+        if (ObjectUtils.isEmpty(seriesOverrides))
+            return loadedSeriesData;
+
+        final String _METHODNAME = "applySeriesOverrides(): ";
+        final Set<String> validSeriesCodes = loadedSeriesData.stream()
+                .map(SeriesData::series)
+                .filter(Objects::nonNull)
+                .map(Series::code)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        final Set<String> unknownSeriesOverrides = new TreeSet<>(seriesOverrides.keySet());
+        unknownSeriesOverrides.removeAll(validSeriesCodes);
+        if (!unknownSeriesOverrides.isEmpty())
+        {
+            final String lErrStr = "Series override key(s) do not reference existing series: " + unknownSeriesOverrides;
+            log.error("{}{}", _METHODNAME, lErrStr);
+            throw new InconsistentConfigurationException(lErrStr);
+        }
+
+        return loadedSeriesData.stream().map(sd -> applySeriesOverride(sd, seriesOverrides)).toList();
+    }
+
+    private SeriesData applySeriesOverride(final SeriesData loadedSeriesData,
+            final Map<String, IceProperties.SeriesOverride> seriesOverrides)
+    {
+        if (loadedSeriesData == null || loadedSeriesData.series() == null || loadedSeriesData.series().code() == null)
+            return loadedSeriesData;
+
+        final String seriesCode = loadedSeriesData.series().code();
+        final IceProperties.SeriesOverride seriesOverride = seriesOverrides.get(seriesCode);
+        if (seriesOverride == null)
+            return loadedSeriesData;
+
+        return new SeriesData(loadedSeriesData.series(),
+                firstNonNull(seriesOverride.numberOfDosesInSeries(), loadedSeriesData.numberOfDosesInSeries()),
+                firstNonNull(seriesOverride.recurringDosesAfterSeriesComplete(),
+                        loadedSeriesData.recurringDosesAfterSeriesComplete()),
+                overrideSeasonsMap(loadedSeriesData.seasons(), seriesOverride.seasons()), loadedSeriesData.vaccineGroup(),
+                loadedSeriesData.seriesGroup(), loadedSeriesData.patientStartAge(), loadedSeriesData.patientEndAge(),
+                loadedSeriesData.doseNumberCalculationBasedOnDiseasesTargetedByVaccinesAdministered(),
+                overrideDosesMap(seriesCode, loadedSeriesData.doses(), seriesOverride.doseOverrides()),
+                overrideDoseIntervalsMap(seriesCode, loadedSeriesData.doseIntervals(), seriesOverride.doseIntervalOverrides()));
+    }
+
+    private Map<String, Season> overrideSeasonsMap(final Map<String, Season> originalSeasons,
+            final List<String> overrideSeasonCodes)
+    {
+        if (overrideSeasonCodes == null)
+            return originalSeasons;
+
+        final Map<String, Season> source = Optional.ofNullable(originalSeasons)
+                .map(map -> map.values().stream().collect(Collectors.toMap(Season::code, Function.identity())))
+                .orElseGet(HashMap::new);
+
+        return overrideSeasonCodes.stream().filter(Objects::nonNull).map(seasonCode ->
+        {
+            final Season resolvedSeason = resolveSeasonOverride(seasonCode, source);
+            return resolvedSeason != null ? Map.entry(seasonCode, resolvedSeason) : null;
+        }).filter(Objects::nonNull).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Season resolveSeasonOverride(final String seasonCode, final Map<String, Season> source)
+    {
+        final Season existing = source.get(seasonCode);
+        if (existing != null)
+            return existing;
+
+        final LocallyCodedSeasonItem supportedSeasonItem = Optional.ofNullable(this.supportedSeasons)
+                .map(supported -> supported.getSeasonItem(
+                        String.format("%s.%s", ICEConceptType.SEASON.getIceConceptTypeValue(), seasonCode)))
+                .orElse(null);
+
+        if (supportedSeasonItem == null)
+            return null;
+
+        final Season templateSeason = source.values().stream().filter(Objects::nonNull).findFirst().orElse(null);
+        if (templateSeason == null)
+            return null;
+
+        return new Season(seasonCode, templateSeason.codeSystem(), templateSeason.codeSystemName(),
+                Optional.ofNullable(supportedSeasonItem.getSeason())
+                        .map(org.cdsframework.ice.service.Season::getSeasonName)
+                        .orElse(seasonCode));
+    }
+
+    private Map<String, Dose> overrideDosesMap(final String seriesCode, final Map<String, Dose> originalDoses,
+            final Map<Integer, IceProperties.SeriesDoseOverride> doseOverrides)
+    {
+        final Map<String, Dose> originalDosesWithDoseNumbers = Optional.ofNullable(originalDoses)
+                .map(doses -> doses.entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey,
+                                entry -> entry.getValue().copyWithDoseNumber(Integer.valueOf(entry.getKey()))))).orElseGet(Map::of);
+
+        if (ObjectUtils.isEmpty(doseOverrides))
+            return originalDosesWithDoseNumbers;
+
+        final String _METHODNAME = "overrideDosesMap(): ";
+        final Set<Integer> validDoseNumbers =
+                originalDosesWithDoseNumbers.values().stream().map(Dose::doseNumber).collect(Collectors.toSet());
+
+        final Set<Integer> unknownDoseOverrides = new TreeSet<>(doseOverrides.keySet());
+        unknownDoseOverrides.removeAll(validDoseNumbers);
+        if (!unknownDoseOverrides.isEmpty())
+        {
+            final String lErrStr = "Dose override key(s) for series '%s' do not reference existing doses: %s".formatted(seriesCode,
+                    unknownDoseOverrides);
+            log.error("{}{}", _METHODNAME, lErrStr);
+            throw new InconsistentConfigurationException(lErrStr);
+        }
+
+        return originalDosesWithDoseNumbers.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> applyDoseOverride(seriesCode, e.getValue(), doseOverrides),
+                        (_, b) -> b, LinkedHashMap::new));
+    }
+
+    private Dose applyDoseOverride(final String seriesCode, final Dose dose,
+            final Map<Integer, IceProperties.SeriesDoseOverride> doseOverrides)
+    {
+        if (dose == null)
+            return null;
+
+        final Integer doseNumber = dose.doseNumber();
+        if (doseNumber == null)
+            return dose;
+
+        final IceProperties.SeriesDoseOverride doseOverride = doseOverrides.get(doseNumber);
+        if (doseOverride == null)
+            return dose;
+
+        return new Dose(doseNumber, firstNonNull(doseOverride.absoluteMinimumAge(), dose.absoluteMinimumAge()),
+                firstNonNull(doseOverride.minimumAge(), dose.minimumAge()),
+                firstNonNull(resolveEarliestRecommendedAgeOverride(doseOverride), dose.earliestRecommendedAge()),
+                dose.latestRecommendedAge(), firstNonNull(doseOverride.absoluteMaximumAge(), dose.absoluteMaximumAge()),
+                overrideDoseVaccinesMap(seriesCode, doseNumber, dose.doseVaccines(), doseOverride.seriesVaccineOverrides()));
+    }
+
+    private String resolveEarliestRecommendedAgeOverride(final IceProperties.SeriesDoseOverride doseOverride)
+    {
+        if (doseOverride == null)
+            return null;
+
+        if (doseOverride.earliestRecommendedAge() != null)
+            return doseOverride.earliestRecommendedAge();
+
+        return Optional.ofNullable(doseOverride.earliestRecommendedDate()).map(Object::toString).orElse(null);
+    }
+
+    private Map<String, DoseVaccine> overrideDoseVaccinesMap(final String seriesCode, final Integer doseNumber,
+            final Map<String, DoseVaccine> originalDoseVaccines,
+            final Map<String, IceProperties.SeriesDoseVaccineOverride> vaccineOverrides)
+    {
+        if (ObjectUtils.isEmpty(vaccineOverrides))
+            return originalDoseVaccines;
+
+        final String _METHODNAME = "overrideDoseVaccinesMap(): ";
+        final Set<String> validVaccineCodes =
+                originalDoseVaccines.values().stream().map(DoseVaccine::vaccine).map(Vaccine::code).collect(Collectors.toSet());
+
+        final Set<String> unknownVaccineOverrides = new TreeSet<>(vaccineOverrides.keySet());
+        unknownVaccineOverrides.removeAll(validVaccineCodes);
+        if (!unknownVaccineOverrides.isEmpty())
+        {
+            final String lErrStr =
+                    "Series vaccine override key(s) for series '%s', dose '%d' do not reference vaccine codes for doses for the series: %s".formatted(
+                            seriesCode, doseNumber, unknownVaccineOverrides);
+            log.error("{}{}", _METHODNAME, lErrStr);
+            throw new InconsistentConfigurationException(lErrStr);
+        }
+
+        return Map.copyOf(getDoseVaccineOverrides(originalDoseVaccines, vaccineOverrides));
+    }
+
+    private Map<String, DoseVaccine> getDoseVaccineOverrides(final Map<String, DoseVaccine> originalDoseVaccines,
+            final Map<String, IceProperties.SeriesDoseVaccineOverride> vaccineOverrides)
+    {
+        return Optional.ofNullable(originalDoseVaccines)
+                .orElse(Map.of())
+                .entrySet()
+                .stream()
+                .collect(LinkedHashMap::new, (map, e) -> map.put(e.getKey(),
+                        Optional.ofNullable(vaccineOverrides.get(e.getValue().vaccine().code()))
+                                .map(vaccineOverride -> new DoseVaccine(
+                                        firstNonNull(vaccineOverride.preferred(), e.getValue().preferred()), e.getValue().vaccine(),
+                                        firstNonNull(vaccineOverride.allowableMinimumAgeOfUse(),
+                                                e.getValue().allowableMinimumAgeOfUse()), e.getValue().allowableMaximumAgeOfUse()))
+                                .orElse(e.getValue())), LinkedHashMap::putAll);
+    }
+
+    private Map<String, DoseInterval> overrideDoseIntervalsMap(final String seriesCode,
+            final Map<String, DoseInterval> originalDoseIntervals,
+            final Map<Integer, Map<Integer, IceProperties.SeriesDoseIntervalOverride>> doseIntervalOverrides)
+    {
+        if (ObjectUtils.isEmpty(doseIntervalOverrides))
+            return originalDoseIntervals;
+
+        final String _METHODNAME = "overrideDoseIntervalsMap(): ";
+        final Map<String, DoseInterval> source = Optional.ofNullable(originalDoseIntervals).orElse(Map.of());
+
+        for (final Map.Entry<Integer, Map<Integer, IceProperties.SeriesDoseIntervalOverride>> fromEntry : doseIntervalOverrides.entrySet())
+        {
+            final Integer fromDoseNumber = fromEntry.getKey();
+            for (final Integer toDoseNumber : fromEntry.getValue().keySet())
+            {
+                if (source.values()
+                        .stream()
+                        .noneMatch(di -> Objects.equals(di.fromDoseNumber(), fromDoseNumber) && Objects.equals(di.toDoseNumber(),
+                                toDoseNumber)))
+                {
+                    final String lErrStr =
+                            "Dose interval override (from: %d, to: %d) for series '%s' does not reference an existing dose interval".formatted(
+                                    fromDoseNumber, toDoseNumber, seriesCode);
+                    log.error("{}{}", _METHODNAME, lErrStr);
+                    throw new InconsistentConfigurationException(lErrStr);
+                }
+            }
+        }
+
+        return source.entrySet()
+                .stream()
+                .collect(LinkedHashMap::new, (map, e) -> map.put(e.getKey(), e.getValue() == null
+                                                                             ? null
+                                                                             : applyDoseIntervalOverride(e.getValue(),
+                                                                                     doseIntervalOverrides.get(
+                                                                                             e.getValue().fromDoseNumber()))),
+                        LinkedHashMap::putAll);
+    }
+
+    private DoseInterval applyDoseIntervalOverride(final DoseInterval doseInterval,
+            final Map<Integer, IceProperties.SeriesDoseIntervalOverride> fromOverrides)
+    {
+        if (doseInterval == null || ObjectUtils.isEmpty(fromOverrides))
+            return doseInterval;
+
+        final IceProperties.SeriesDoseIntervalOverride intervalOverride = fromOverrides.get(doseInterval.toDoseNumber());
+        if (intervalOverride == null)
+            return doseInterval;
+
+        return new DoseInterval(doseInterval.fromDoseNumber(), doseInterval.toDoseNumber(),
+                firstNonNull(intervalOverride.absoluteMinimumInterval(), doseInterval.absoluteMinimumInterval()),
+                firstNonNull(intervalOverride.minimumInterval(), doseInterval.minimumInterval()),
+                firstNonNull(intervalOverride.earliestRecommendedInterval(), doseInterval.earliestRecommendedInterval()),
+                firstNonNull(intervalOverride.latestRecommendedInterval(), doseInterval.latestRecommendedInterval()));
+    }
+
+    private <T> T firstNonNull(final T candidate, final T fallback)
+    {
+        return candidate != null ? candidate : fallback;
     }
 
     private Set<String> validateSeriesPlanDefinitionMapKeysAndNames(final List<String> supportedKnowledgeModules,
@@ -487,6 +777,11 @@ public class ICESupportingDataConfiguration
         return getSupportedCdsLists().getSupportedCdsConcepts();
     }
 
+    public SupportedScheduleAuthorities getSupportedScheduleAuthorities()
+    {
+        return this.supportedScheduleAuthorities;
+    }
+
     private boolean allBaseSupportingDataCdsListItemInitialized()
     {
         // Verify that all DoseStatus enumeration items been provided
@@ -535,7 +830,7 @@ public class ICESupportingDataConfiguration
             final String lCdsListItemName = baseData.getCdsListItemName();
             if (log.isDebugEnabled())
                 log.debug(_METHODNAME + "BaseData cdsListItemName{}.{}", pEnum.getSimpleName(), lCdsListItemName);
-            if (lCdsListItemName != null && !this.supportedCdsLists.cdsListItemExists(lCdsListItemName))
+            if (lCdsListItemName != null && !supportedCdsLists.cdsListItemExists(lCdsListItemName))
             {
                 log.warn(_METHODNAME + "CdsListItemName {} not found", lCdsListItemName);
                 return false;
@@ -558,99 +853,7 @@ public class ICESupportingDataConfiguration
                 return new InconsistentConfigurationException(lErrStr);
             });
 
-            if (log.isDebugEnabled())
-            {
-                final StringBuilder lDebugStrb = new StringBuilder();
-                lDebugStrb.append(_METHODNAME).append(s.getClass().getName());
-                // Code
-                lDebugStrb.append("\ngetCode(): ").append(s.series().code());
-                // Name
-                lDebugStrb.append("\ngetName(): ").append(s.series().displayName());
-                // Number of Doses in Series
-                lDebugStrb.append("\ngetNumberOfDosesInSeries(): ").append(s.numberOfDosesInSeries());
-                // Vaccine groups
-                lDebugStrb.append("\ngetVaccineGroups(): ");
-                Optional.ofNullable(s.vaccineGroup()).map(Map::values).ifPresentOrElse(values ->
-                {
-                    int i = 1;
-                    for (final VaccineGroup lVaccineGroup : values)
-                        lDebugStrb.append("\n\t(").append(i++).append("): ").append(lVaccineGroup);
-                }, () -> lDebugStrb.append("\n\tNo Vaccine Group information supplied"));
-
-                // Seasons
-                lDebugStrb.append("\ngetSeasonCodes(): ");
-                Optional.ofNullable(s.seasons()).map(Map::values).ifPresentOrElse(values ->
-                {
-                    int i = 1;
-                    for (final Season lSeason : values)
-                        lDebugStrb.append("\n\t(").append(i++).append("): ").append(lSeason.code());
-                }, () -> lDebugStrb.append("\n\tNo Seasons information supplied"));
-
-                // Series Dose Specifications
-                lDebugStrb.append("\ngetIceSeriesDoses(): ");
-                Optional.ofNullable(s.doses()).map(Map::values).ifPresentOrElse(values ->
-                {
-                    int i = 1;
-                    for (final Dose lDose : values)
-                    {
-                        lDebugStrb.append("\n\t(")
-                                .append(i++)
-                                .append("): absolute minimum age: ")
-                                .append(lDose.absoluteMinimumAge())
-                                .append("; earliest recommended age: ")
-                                .append(lDose.earliestRecommendedAge())
-                                .append("; latest recommended age: ")
-                                .append(lDose.latestRecommendedAge())
-                                .append("; minimum age: ")
-                                .append(lDose.minimumAge())
-                                .append("; maximum age: ")
-                                .append(lDose.absoluteMaximumAge());
-
-                        // Doses -> Vaccines
-                        lDebugStrb.append("\n\t\tgetDoseVaccines(): ");
-                        Optional.ofNullable(lDose.doseVaccines()).map(Map::values).ifPresentOrElse(doseVaccines ->
-                        {
-                            int j = 1;
-                            for (final DoseVaccine lDV : doseVaccines)
-                            {
-                                lDebugStrb.append("\n\t\t\t(")
-                                        .append(j++)
-                                        .append("): preferred: ")
-                                        .append(lDV.preferred())
-                                        .append("; vaccine: ")
-                                        .append(lDV.vaccine());
-                            }
-                        }, () -> lDebugStrb.append("\n\t\t\tNo Vaccine information supplied"));
-                    }
-                }, () -> lDebugStrb.append("\t\nNo IceSeriesDoses specified"));
-
-                // Series Dose Intervals
-                lDebugStrb.append("\ngetDoseIntervals(): ");
-                Optional.ofNullable(s.doseIntervals()).map(Map::values).ifPresentOrElse(values ->
-                {
-                    int i = 1;
-                    for (final DoseInterval lDoseInterval : values)
-                        lDebugStrb.append("\n\t(")
-                                .append(i++)
-                                .append("): from dose number: ")
-                                .append(lDoseInterval.fromDoseNumber())
-                                .append("; to dose number: ")
-                                .append(lDoseInterval.toDoseNumber())
-                                .append("; absolute minimum interval: ")
-                                .append(lDoseInterval.absoluteMinimumInterval())
-                                .append("; minimum interval: ")
-                                .append(lDoseInterval.minimumInterval())
-                                .append("; earliest recommended interval: ")
-                                .append(lDoseInterval.earliestRecommendedInterval())
-                                .append("; latest recommended interval: ")
-                                .append(lDoseInterval.latestRecommendedInterval());
-                }, () -> lDebugStrb.append("\t\nNo Dose Interval information provided"));
-
-                log.debug(lDebugStrb.toString());
-            }
-
             this.supportedSeries.addSupportedSeriesItemFromProperties(s);
         }, () -> log.warn(_METHODNAME + "Series object not specified; read of supporting data properties skipped"));
     }
-
 }

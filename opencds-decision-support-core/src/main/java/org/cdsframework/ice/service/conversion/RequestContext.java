@@ -13,6 +13,7 @@ record RequestContext(LocalDate assessmentDate,
                       Patient patient,
                       List<Immunization> immunizations,
                       List<Observation> observations,
+                      List<String> scheduleFlags,
                       List<OperationOutcome.Issue> validationIssues)
 {
 }

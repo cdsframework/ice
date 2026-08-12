@@ -51,6 +51,19 @@ public final class ImmunizationForecastOpenApiExamples
                                                             "patient": {
                                                               "reference": "Patient/44081025"
                                                             },
+                                                            "isSubpotent": true,
+                                                            "subpotentReason": [
+                                                              {
+                                                                "coding": [
+                                                                  {
+                                                                    "system": "http://terminology.hl7.org/CodeSystem/immunization-subpotent-reason",
+                                                                    "code": "coldchainbreak",
+                                                                    "display": "Cold Chain Break"
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ],
+                                                            "lotNumber": "ABC1234",
                                                             "occurrenceDateTime": "2016-02-02"
                                                           }
                                                         },
@@ -84,6 +97,14 @@ public final class ImmunizationForecastOpenApiExamples
                                                             },
                                                             "effectiveDateTime": "2016-01-01"
                                                           }
+                                                        },
+                                                        {
+                                                          "name": "scheduleFlag",
+                                                          "valueCode": "HEP_B_EXTRA_DOSE_INVALID"
+                                                        },
+                                                        {
+                                                          "name": "scheduleFlag",
+                                                          "valueCode": "POLIO_EXTRA_DOSE_INVALID"
                                                         }
                                                       ]
                                                     }

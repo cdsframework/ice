@@ -44,8 +44,8 @@ cds-engine:
     enable-fhir-r6: false
 
 open-api:
-  title: CDS Immunization Calculation Engine (ICE) Forecast API
-  description: 'FHIR operation endpoint for immunization forecasting: POST /cds/$immunization-forecast. The request body is a FHIR Parameters resource and the response is a FHIR Parameters resource.'
+  title: CDS Immunization Calculation Engine API
+  description: 'FHIR operation endpoint for immunization evaluation and forecasting: POST /cds/$immunization-forecast. The request body is a FHIR Parameters resource and the response is a FHIR Parameters resource.'
   version: ${ice.ice-version}
   contact:
     name: ICE Support
@@ -64,6 +64,7 @@ ice:
       output-number-of-doses-remaining: false
       output-series-information: false
       output-vaccine-group-rules-artifact: false
+      output-schedule-authorities: false
       enable-unsupported-vaccines-group: false
       vaccine-group-exclusions:
         - ANTHRAX
@@ -79,4 +80,4 @@ ice:
   ice-base-module-canonical: http://cdsframework.org/PlanDefinition/common-ice-forecast|1.0.0
   enable-drools-event-logging: false
   fire-limit: 25000
-  ice-version: ICE_2.57.2
+  ice-version: ICE_2.58.1

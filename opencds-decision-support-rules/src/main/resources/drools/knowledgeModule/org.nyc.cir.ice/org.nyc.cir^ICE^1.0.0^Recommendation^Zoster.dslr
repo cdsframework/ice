@@ -40,7 +40,13 @@ rule "Zoster: Always recommend Zoster recombinant (CVX 187)"
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "Zoster: If patient is administered adult varicella (CVX 21) doses, the minimum interval and recommended interval between the adult varicella (CVX 21) doses to Zoster is 8 weeks"
+/**
+ * The minimum interval and recommended interval between varicella (CVX 21) to Zoster is 8 weeks. Example:
+ * - Varicella (CVX 21) at 50 years, 1 month.
+ * - Varicella (CVX 21) at 50 years, 3 months.
+ * Recommend Zoster (CVX 187) at Varicella Dose 2 + recommended interval (8 weeks)
+ */
+rule "Zoster: If patient is administered varicella (CVX 21) doses, the minimum interval and recommended interval between the varicella (CVX 21) doses to Zoster is 8 weeks"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	when
@@ -63,10 +69,6 @@ rule "Zoster: If patient is administered adult varicella (CVX 21) doses, the min
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-/**
- * If patient is administered adult varicella (CVX 21) doses, the minimum interval and recommended interval between the adult
- * varicella (CVX 21) doses to Zoster is 8 weeks. Example:
- */
 rule "Zoster: If patient is administered a CVX 121 or 188, the minimum interval and recommended interval is 8 weeks"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
@@ -74,16 +76,17 @@ rule "Zoster: If patient is administered a CVX 121 or 188, the minimum interval 
 		There is a Series $targetSeries that needs Forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.ZOSTER"
 			- the Series is not Complete
-		There is an administered shot $varicellaShot
+		There is an administered shot $priorShot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.ZOSTER"
 			- the vaccine administered a member of ("VACCINE_CVX_121", "VACCINE_CVX_188")
+		    - the administration date of the shot is <= "17-Nov-2020"
 			- make note of the date this shot was administered as $dtAdministrationDate
 		There does not exist another administered shot
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.ZOSTER"
 			- the vaccine administered a member of ("VACCINE_CVX_121", "VACCINE_CVX_188")
 			- the administration date of the shot is > $dtAdministrationDate
 	then
-		Add "8w" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
+		Add "56d" to $dtAdministrationDate and make note of the newly calculated date as $dtCalculated
 		Include a Recommendation as $recommendation with Recommended Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Include a Recommendation as $earliest with Earliest Forecast Date $dtCalculated for consideration in the final Forecast of the Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries

@@ -1,5 +1,6 @@
 package org.opencds.vmr.v1_0.mappings.mappers;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
@@ -653,7 +654,7 @@ public abstract class NestedObjectsMapper
         final String _METHODNAME = "pullInRelatedEntityNestedObjects: ";
         final String externalClassName = external.getClass().getSimpleName();
         if (log.isTraceEnabled())
-            log.trace(_METHODNAME + "{}, {}", externalClassName, parentId);
+            log.trace(_METHODNAME + "{}, {}", StringUtils.normalizeSpace(externalClassName), StringUtils.normalizeSpace(parentId));
 
         switch (externalClassName)
         {
@@ -758,14 +759,9 @@ public abstract class NestedObjectsMapper
         if (organizedResults.entityChildren().get(source.getId()) != null)
         {
             if (log.isTraceEnabled())
-                log.trace(_METHODNAME + "Entity children of {}", source.getId());
+                log.trace(_METHODNAME + "Entity children of {}", StringUtils.normalizeSpace(source.getId()));
             for (final EntityRelationship oneInternalEntityRelationship : organizedResults.entityChildren().get(source.getId()))
             {
-                if (log.isTraceEnabled())
-                    log.trace(_METHODNAME
-                                    + "push out source Entity or Clinical Statement Id {}, targetEntityId {}, with relationship {}",
-                            oneInternalEntityRelationship.getSourceId(), oneInternalEntityRelationship.getTargetEntityId(),
-                            oneInternalEntityRelationship.getTargetRole().toString());
                 final org.opencds.vmr.v1_0.schema.RelatedEntity oneSchemaNestedEntity;
 
                 oneSchemaNestedEntity =
@@ -844,7 +840,7 @@ public abstract class NestedObjectsMapper
         if (organizedResults.csChildren().get(source.getId()) != null)
         {
             if (log.isTraceEnabled())
-                log.trace(_METHODNAME + "Clinical Statement children of {}", source.getId());
+                log.trace(_METHODNAME + "Clinical Statement children of {}", StringUtils.normalizeSpace(source.getId()));
             for (final ClinicalStatement oneInternalRelatedClinicalStatement : organizedResults.csChildren().get(source.getId()))
             {
                 final org.opencds.vmr.v1_0.schema.RelatedClinicalStatement nestedTarget =
@@ -958,14 +954,10 @@ public abstract class NestedObjectsMapper
             return null;
 
         if (log.isTraceEnabled())
-            log.trace(_METHODNAME + "Entity children of {}", sourceId);
+            log.trace(_METHODNAME + "Entity children of {}", StringUtils.normalizeSpace(sourceId));
         for (final EntityRelationship oneInternalEntityRelationship : organizedResults.entityChildren().get(sourceId))
         {
             final String targetEntityId = oneInternalEntityRelationship.getTargetEntityId();
-
-            if (log.isTraceEnabled())
-                log.trace(_METHODNAME + "push out source Entity Id {}, targetEntityId {}, with relationship {}", sourceId,
-                        targetEntityId, oneInternalEntityRelationship.getTargetRole().toString());
 
             final EntityBase thisInternalNestedEntity = organizedResults.entityList().get(targetEntityId);
             final String thisInternalNestedEntityClassName = thisInternalNestedEntity.getClass().getSimpleName();

@@ -26,6 +26,7 @@ This guide reflects the current implementation and `fhir/*.json` artifacts in th
 | `ice-dose-age-constraint-structure-definition.json`      | StructureDefinition | `http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint`                    | Dose age constraint extension                          |
 | `ice-dose-interval-constraint-structure-definition.json` | StructureDefinition | `http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint`               | Dose interval constraint extension                     |
 | `ice-dose-vaccine-structure-definition.json`             | StructureDefinition | `http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine`                           | Dose vaccine extension                                 |
+| `ice-schedule-authority-structure-definition.json`       | StructureDefinition | `http://terminology.cdsframework.org/fhir/StructureDefinition/ice-schedule-authority`         | Schedule authority extension                           |
 | `ice-custom-code-systems.json`                           | Bundle              | n/a                                                                                           | Custom code systems/value sets used by ICE             |
 
 ## Operation Contract
@@ -119,6 +120,22 @@ Implementation Implications:
 - Important:
     - `RelatedArtifact.url` is intentionally omitted to avoid duplicate URL representation.
 
+### 3) ICE Schedule Authority
+
+- Canonical URL: `http://terminology.cdsframework.org/fhir/StructureDefinition/ice-schedule-authority`
+- Allowed on:
+    - `ImmunizationRecommendation.recommendation`
+- Shape:
+    - `valueReference` to an `Organization` with:
+        - `type = "Organization"`
+        - `identifier` with:
+            - `system = "http://terminology.cdsframework.org/ice/schedule-authority"`
+            - `value` = authority code (e.g., `ACIP_CDC`, `AAP`, `AAFP`)
+        - `display` = authority name
+- Implementation guarantee:
+    - Multiple extensions may be present, one per schedule authority.
+    - Emitted only for recommendations, not evaluations.
+
 ## Runtime Mapping Rules
 
 - `targetDisease` can include multiple codings (for component/multi-disease contexts) under a single `CodeableConcept`.
@@ -126,13 +143,53 @@ Implementation Implications:
 - Narrative and description fields are human-readable convenience text only.
     - Consumers should rely on structured fields and extensions, not text parsing.
 
+## Immunization Subpotent Support
+
+The FHIR `Immunization` input model supports the R6 subpotent fields:
+
+- `Immunization.isSubpotent` (`boolean`)
+- `Immunization.subpotentReason` (`CodeableConcept[]`)
+
+Runtime mapping behavior:
+
+- When `Immunization.isSubpotent = true`, the vMR input sets
+  `SubstanceAdministrationEvent.isValid` to `false`.
+- If `isSubpotent` is absent or `false`, no invalidity override is applied by this mapping.
+- `subpotentReason` is accepted in the FHIR payload for interoperability with R6 content and code validation use cases.
+
+Supported terminology:
+
+- CodeSystem URL:
+  `http://terminology.hl7.org/CodeSystem/immunization-subpotent-reason`
+- OID:
+  `2.16.840.1.113883.4.642.1.1098`
+- Supporting data source in this repository:
+  `opencds-decision-support-service/src/main/resources/data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedImmunizationSubpotentReasons.yml`
+
 ## Configuration Controls
+YAML keys are relative to ice.knowledge-modules.'[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]'
+
+Key properties controlling selection context and number of doses remaining output:
+
+- YAML key: `output-series-information`
+- Java property: `outputSeriesInformation`
+- Drools global: `outputSeriesInformation`
+
+- YAML key: `output-number-of-doses-remaining`
+- Java property: `outputNumberOfDosesRemaining`
+- Drools global: `outputNumberOfDosesRemaining`
 
 Key property controlling rules-artifact output:
 
 - YAML key: `output-vaccine-group-rules-artifact`
 - Java property: `outputVaccineGroupRulesArtifact`
 - Drools global: `outputVaccineGroupRulesArtifact`
+
+Key property controlling schedule-authority output:
+
+- YAML key: `output-schedule-authorities`
+- Java property: `outputScheduleAuthorities`
+- Drools global: `outputScheduleAuthorities`
 
 ## Conformance Notes
 

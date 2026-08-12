@@ -39,18 +39,20 @@ public class ExecutionEngineService
     @SuppressWarnings("unchecked")
     public <I, O, P, E extends ExecutionEngineAdapter<I, O, P>> E getExecutionEngineAdapter(final ExecutionEngine engine)
     {
-        return (E) executionEngineAdapterMap.computeIfAbsent(engine, _ -> ClassUtil.newInstance(engine.adapter()));
+        return (E) executionEngineAdapterMap.computeIfAbsent(engine,
+                _ -> ClassUtil.newInstance(engine.adapter(), ExecutionEngineAdapter.class));
     }
 
     public <I, O, C extends ExecutionEngineContext<I, O>> C createContext(final ExecutionEngine engine)
     {
-        return ClassUtil.newInstance(engine.context());
+        return (C) ClassUtil.newInstance(engine.context(), ExecutionEngineContext.class);
     }
 
     @SuppressWarnings("unchecked")
     public <I, O, KL extends KnowledgeLoader<I, O>> KL getKnowledgeLoader(final ExecutionEngine engine)
     {
         return (KL) knowledgeLoaderMap.computeIfAbsent(engine,
-                _ -> ClassUtil.newInstance(Optional.ofNullable(engine.knowledgeLoader()).orElseGet(engine::identifier)));
+                _ -> ClassUtil.newInstance(Optional.ofNullable(engine.knowledgeLoader()).orElseGet(engine::identifier),
+                        KnowledgeLoader.class));
     }
 }

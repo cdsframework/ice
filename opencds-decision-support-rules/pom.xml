@@ -12,6 +12,25 @@
         <version>1.0.0</version>
     </parent>
 
+    <properties>
+        <kie.plugin.phase>none</kie.plugin.phase>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>compile-rules</id>
+            <activation>
+                <property>
+                    <name>env.ICE_COMPILE_RULES</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <kie.plugin.phase>compile</kie.plugin.phase>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>org.drools</groupId>
@@ -33,10 +52,20 @@
                 <artifactId>kie-maven-plugin</artifactId>
                 <version>${drools.version}</version>
                 <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>default-build</id>
+                        <phase>${kie.plugin.phase}</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <generateModel>YES</generateModel>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>

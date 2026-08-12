@@ -1,5 +1,6 @@
 package org.cdsframework.ice.config;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,6 +65,8 @@ public class IceProperties
                                             @NotNull
                                             Boolean outputSeriesInformation,
                                             @NotNull
+                                            Boolean outputScheduleAuthorities,
+                                            @NotNull
                                             Boolean outputVaccineGroupRulesArtifact,
                                             @NotNull
                                             Boolean enableUnsupportedVaccinesGroup,
@@ -85,6 +88,42 @@ public class IceProperties
         }
     }
 
+    public record SeasonOverride(LocalDate startDate,
+                                 LocalDate endDate,
+                                 String defaultStartMonthAndDay,
+                                 String defaultStopMonthAndDay)
+    {
+    }
+
+    public record SeriesOverride(Map<@Positive Integer, @NotNull @Valid SeriesDoseOverride> doseOverrides,
+                                 Map<@NotNull @Positive Integer, Map<@NotNull @Positive Integer, @NotNull @Valid SeriesDoseIntervalOverride>> doseIntervalOverrides,
+                                 Integer numberOfDosesInSeries,
+                                 Boolean recurringDosesAfterSeriesComplete,
+                                 List<String> seasons)
+    {
+    }
+
+    public record SeriesDoseOverride(String absoluteMinimumAge,
+                                     String minimumAge,
+                                     String earliestRecommendedAge,
+                                     LocalDate earliestRecommendedDate,
+                                     String absoluteMaximumAge,
+                                     Map<@NotBlank String, SeriesDoseVaccineOverride> seriesVaccineOverrides)
+    {
+    }
+
+    public record SeriesDoseVaccineOverride(Boolean preferred,
+                                            String allowableMinimumAgeOfUse)
+    {
+    }
+
+    public record SeriesDoseIntervalOverride(String absoluteMinimumInterval,
+                                             String minimumInterval,
+                                             String earliestRecommendedInterval,
+                                             String latestRecommendedInterval)
+    {
+    }
+
     @NotBlank
     private String iceBaseModuleCanonical;
 
@@ -95,6 +134,12 @@ public class IceProperties
 
     private List<@NotBlank String> vaccineGroupInclusions;
 
+    private Map<@NotBlank String, @NotNull @Valid SeriesOverride> seriesOverrides;
+
+    private Map<@NotBlank String, @NotNull @Valid SeasonOverride> seasonOverrides;
+
+    private List<@NotBlank String> scheduleFlags;
+
     private Optional<Boolean> outputEarliestAndOverdueDates = Optional.empty();
 
     private Optional<Boolean> enableDoseOverrideFeature = Optional.empty();
@@ -104,6 +149,8 @@ public class IceProperties
     private Optional<Boolean> outputNumberOfDosesRemaining = Optional.empty();
 
     private Optional<Boolean> outputSeriesInformation = Optional.empty();
+
+    private Optional<Boolean> outputScheduleAuthorities = Optional.empty();
 
     private Optional<Boolean> outputVaccineGroupRulesArtifact = Optional.empty();
 

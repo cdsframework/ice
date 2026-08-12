@@ -350,9 +350,9 @@ cds-engine:
                     display: Hep B NOS
                 - code: vaccineComponent
                   valueCoding:
-                    code: '107'
+                    code: '01'
                     system: 2.16.840.1.113883.12.292
-                    display: DTaP NOS
+                    display: DTP
                 - code: diseaseImmunity
                   valueCoding:
                     code: HIB
@@ -808,9 +808,9 @@ cds-engine:
                     display: IPV
                 - code: vaccineComponent
                   valueCoding:
-                    code: '20'
+                    code: '106'
                     system: 2.16.840.1.113883.12.292
-                    display: DTaP
+                    display: DTaP, 5 pertussis antigens
                 - code: vaccineComponent
                   valueCoding:
                     code: '48'
@@ -862,6 +862,10 @@ cds-engine:
                     code: ZOSTER
                     system: 2.16.840.1.113883.3.795.12.1.1
                     display: Zoster
+                - code: validMinimumAgeForUse
+                  valueString: 50y
+                - code: maximumDateForUse
+                  valueString: '2020-11-17'
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_121
@@ -1345,9 +1349,9 @@ cds-engine:
                     display: IPV
                 - code: vaccineComponent
                   valueCoding:
-                    code: '107'
+                    code: '106'
                     system: 2.16.840.1.113883.12.292
-                    display: DTaP NOS
+                    display: DTaP, 5 pertussis antigens
                 - code: diseaseImmunity
                   valueCoding:
                     code: HEP_B
@@ -1712,6 +1716,29 @@ cds-engine:
                   valueCoding:
                     code: VACCINE_CVX_163
                     display: Meningococcal B 4C, OMV (Bexsero)
+                - code: supported
+                  valueBoolean: true
+            - code: '164'
+              display: Meningococcal B, NOS
+              property:
+                - code: liveVirusVaccine
+                  valueBoolean: false
+                - code: vaccineComponent
+                  valueCoding:
+                    code: '164'
+                    system: 2.16.840.1.113883.12.292
+                    display: Meningococcal B, NOS
+                - code: diseaseImmunity
+                  valueCoding:
+                    code: MENINGOCOCCAL_B
+                    system: 2.16.840.1.113883.3.795.12.1.1
+                    display: Meningococcal B
+                - code: validMinimumAgeForUse
+                  valueString: 10y-4d
+                - code: conceptMapping
+                  valueCoding:
+                    code: VACCINE_CVX_164
+                    display: Meningococcal B, NOS
                 - code: supported
                   valueBoolean: true
             - code: '165'
@@ -2102,6 +2129,8 @@ cds-engine:
                     code: ZOSTER
                     system: 2.16.840.1.113883.3.795.12.1.1
                     display: Zoster
+                - code: validMinimumAgeForUse
+                  valueString: 18y-4d
                 - code: selectAdjuvantProduct
                   valueBoolean: true
                 - code: conceptMapping
@@ -2125,6 +2154,8 @@ cds-engine:
                     code: ZOSTER
                     system: 2.16.840.1.113883.3.795.12.1.1
                     display: Zoster
+                - code: validMinimumAgeForUse
+                  valueString: 18y-4d
                 - code: unspecifiedFormulation
                   valueBoolean: true
                 - code: conceptMapping
@@ -3036,6 +3067,8 @@ cds-engine:
                     code: TETANUS
                     system: 2.16.840.1.113883.3.795.12.1.1
                     display: Tetanus
+                - code: maximumDateForUse
+                  valueString: '2023-04-30'
                 - code: conceptMapping
                   valueCoding:
                     code: VACCINE_CVX_28

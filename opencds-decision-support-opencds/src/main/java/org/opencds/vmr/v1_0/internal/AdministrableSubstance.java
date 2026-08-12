@@ -21,4 +21,4 @@ public class AdministrableSubstance extends EntityBase
     private CD substanceGenericCode;
     private CD manufacturer;
     private String lotNo;
-}
+}/**/

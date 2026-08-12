@@ -45,7 +45,7 @@ public class FhirParametersResponseAdapter
             final List<ImmunizationEvaluation> immunizationEvaluations,
             final List<ImmunizationRecommendation> immunizationRecommendations)
     {
-        final int durationMs = (int) Math.max(0, ChronoUnit.MILLIS.between(requestDateTime, LocalDateTime.now()));
+        final int durationMs = Math.max(0, Math.toIntExact(ChronoUnit.MILLIS.between(requestDateTime, LocalDateTime.now())));
         final List<OperationOutcome.Issue> issues = new ArrayList<>();
         Optional.ofNullable(validationIssues).stream().flatMap(Collection::stream).forEach(issues::add);
         if (immunizationEvaluations.isEmpty() && immunizationRecommendations.isEmpty())
@@ -85,7 +85,7 @@ public class FhirParametersResponseAdapter
     public static Parameters createErrorParametersResponse(final String outcomeCode, final String detailText,
             final LocalDateTime requestDateTime, final String engineVersion)
     {
-        final int durationMs = (int) Math.max(0, ChronoUnit.MILLIS.between(requestDateTime, LocalDateTime.now()));
+        final int durationMs = Math.max(0, Math.toIntExact(ChronoUnit.MILLIS.between(requestDateTime, LocalDateTime.now())));
         final OperationOutcome operationOutcome =
                 createOperationOutcome(List.of(createOperationOutcomeIssue(outcomeCode, detailText, OUTCOME_SEVERITY_ERROR)));
         return Parameters.builder()

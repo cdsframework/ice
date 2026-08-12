@@ -145,6 +145,7 @@ end
 rule "Polio: Polio4DoseSeries - Mark target dose 4 administered >= 8/7/2009 and before absolute minimum age as VALID with reason EXTRA_DOSE"
     ruleflow-group "HistoryEvaluation^customEvaluationRule"
     when
+        The schedule flag "POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID" is not set
         There is a series $targetSeries
             - The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.POLIO"
             - The name of the series is "SUPPORTED_SERIES.POLIO_4_DOSE_SERIES"
@@ -174,9 +175,30 @@ rule "Polio: Polio4DoseSeries - Mark target dose 4 administered >= 8/7/2009 and 
         Log that this dose rule fired for the dose $targetDose4 in the series $targetSeries
 end
 
+rule "Polio: Polio4DoseSeries - Mark target dose 4 administered >= 8/7/2009 and before absolute minimum age as ACCEPTED with reason BELOW_MINIMUM_AGE_FINAL_DOSE when POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID is set"
+    ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+    when
+      The schedule flag "POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID" is set
+      There is an Administered Shot $dose4
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
+        - the shot belongs to the series with name "SUPPORTED_SERIES.POLIO_4_DOSE_SERIES"
+        - The administration date of the shot is >= "07-Aug-2009"
+        - the dose number in the series is == 4
+        - that has already been evaluated and whose shot validity is INVALID
+        - the invalid reasons are members of ("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_SERIES")
+        - make note of the associated series as $targetSeries
+    then
+      Set the Shot Status of $dose4 to Accepted
+      Remove all evaluation reasons from shot $dose4
+      Include the reason for shot $dose4 Accepted due to "Below Minimum Age for Final Dose"
+      Refresh all facts for the Shot $dose4
+      Log that this Series Rule fired for the Series $targetSeries
+end
+
 rule "Polio: PoliofIPVDoseSeries - Mark target dose 5 administered >= 8/7/2009 and before absolute minimum age as VALID with reason EXTRA_DOSE"
     ruleflow-group "HistoryEvaluation^customEvaluationRule"
     when
+        The schedule flag "POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID" is not set
         There is a series $targetSeries
             - The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.POLIO"
             - The name of the series is "SUPPORTED_SERIES.POLIO_FRACTIONAL_IPV_SERIES"
@@ -204,6 +226,26 @@ rule "Polio: PoliofIPVDoseSeries - Mark target dose 5 administered >= 8/7/2009 a
 
         Record that this dose rule was processed for the TargetDose $targetDose5
         Log that this dose rule fired for the dose $targetDose5 in the series $targetSeries
+end
+
+rule "Polio: PoliofIPVDoseSeries - Mark target dose 5 administered >= 8/7/2009 and before absolute minimum age as ACCEPTED with reason BELOW_MINIMUM_AGE_FINAL_DOSE when POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID is set"
+    ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+    when
+      The schedule flag "POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID" is set
+      There is an Administered Shot $dose5
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.POLIO"
+        - the shot belongs to the series with name "SUPPORTED_SERIES.POLIO_FRACTIONAL_IPV_SERIES"
+        - The administration date of the shot is >= "07-Aug-2009"
+        - the dose number in the series is == 5
+        - that has already been evaluated and whose shot validity is INVALID
+        - the invalid reasons are members of ("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_SERIES")
+        - make note of the associated series as $targetSeries
+    then
+      Set the Shot Status of $dose5 to Accepted
+      Remove all evaluation reasons from shot $dose5
+      Include the reason for shot $dose5 Accepted due to "Below Minimum Age for Final Dose"
+      Refresh all facts for the Shot $dose5
+      Log that this Series Rule fired for the Series $targetSeries
 end
 
 rule "Polio: Booster Dose >=18 first booster dose is valid"

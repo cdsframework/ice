@@ -9,23 +9,17 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.cdsframework.fhir.CodeableConcept;
 import org.cdsframework.fhir.Coding;
@@ -36,15 +30,10 @@ import org.cdsframework.ice.cdsrr.dto.ImmunizationEvaluation;
 import org.cdsframework.ice.cdsrr.dto.ImmunizationRecommendation;
 import org.cdsframework.ice.cdsrr.dto.Observation;
 import org.cdsframework.ice.service.SupportingDataService;
-import org.omg.dss.DataRequirementItemData;
-import org.omg.dss.EntityIdentifier;
+import org.cdsframework.ice.service.conversion.OpenCdsTransportAdapter;
 import org.omg.dss.EvaluateAtSpecifiedTime;
-import org.omg.dss.EvaluationRequest;
 import org.omg.dss.EvaluationResponse;
 import org.omg.dss.FinalKMEvaluationResponse;
-import org.omg.dss.InteractionIdentifier;
-import org.omg.dss.ItemIdentifier;
-import org.omg.dss.KMEvaluationRequest;
 import org.omg.dss.KMEvaluationResultData;
 import org.omg.dss.SemanticPayload;
 import org.opencds.vmr.v1_0.schema.AdministrableSubstance;
@@ -131,21 +120,12 @@ public class CdsRequestResponseConversionComponent
 
     public EvaluateAtSpecifiedTime convertToEvaluateAtSpecifiedTime(final String kmId, final CdsRequest cdsRequest)
     {
-        final GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(Date.from(cdsRequest.assessmentDate().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-
         final byte[] payload = createPayload(getCdsInput(cdsRequest));
         if (log.isDebugEnabled())
             log.debug("payload: {}", new String(payload, StandardCharsets.UTF_8));
 
-        return createEvaluateAtSpecifiedTime(kmId, createInteractionIdentifier(UUID.randomUUID().toString(),
-                        DatatypeFactory.newDefaultInstance().newXMLGregorianCalendar(new GregorianCalendar())),
-                DatatypeFactory.newDefaultInstance().newXMLGregorianCalendar(calendar), createEvaluationRequest(getTimezone(),
-                        List.of(createKmEvaluationRequest(createEntityIdentifier("org.nyc.cir", "ICE", "1.0.0"))),
-                        List.of(createDataRequirementItemData(
-                                createItemIdentifier(createEntityIdentifier("org.nyc.cir", "ICEData", "1.0.0")),
-                                createSemanticPayload(createEntityIdentifier("org.opencds.vmr", "VMR", "1.0"),
-                                        List.of(payload))))));
+        return OpenCdsTransportAdapter.createEvaluateAtSpecifiedTime(supportingDataService.parseKmEntityIdentifier(kmId),
+                cdsRequest.assessmentDate(), getTimezone(), payload);
     }
 
     public CdsResponse convertToCdsResponse(final String kmId, final EvaluationResponse evaluateAtSpecifiedTimeResponse,
@@ -383,30 +363,6 @@ public class CdsRequestResponseConversionComponent
         }
     }
 
-    private EvaluateAtSpecifiedTime createEvaluateAtSpecifiedTime(final String kmId, final InteractionIdentifier interactionId,
-            final XMLGregorianCalendar specifiedTime, final EvaluationRequest evaluationRequest)
-    {
-        final EvaluateAtSpecifiedTime evaluateAtSpecifiedTime = new EvaluateAtSpecifiedTime();
-
-        evaluateAtSpecifiedTime.setInteractionId(interactionId);
-        evaluateAtSpecifiedTime.setSpecifiedTime(specifiedTime);
-        evaluateAtSpecifiedTime.setEvaluationRequest(evaluationRequest);
-        return evaluateAtSpecifiedTime;
-    }
-
-    private EvaluationRequest createEvaluationRequest(final String clientTimeZoneOffset,
-            final List<KMEvaluationRequest> kmEvaluationRequest, final List<DataRequirementItemData> dataRequirementItemData)
-    {
-        final EvaluationRequest request = new EvaluationRequest();
-        request.setClientLanguage("en");
-        request.setClientTimeZoneOffset(clientTimeZoneOffset);
-        if (kmEvaluationRequest != null)
-            request.getKmEvaluationRequest().addAll(kmEvaluationRequest);
-        if (dataRequirementItemData != null)
-            request.getDataRequirementItemData().addAll(dataRequirementItemData);
-        return request;
-    }
-
     private CDSInput getCdsInput(final CdsRequest cdsRequest)
     {
         return createCdsInput(List.of(createIi("2.16.840.1.113883.3.795.11.1.1", null)),
@@ -417,39 +373,6 @@ public class CdsRequestResponseConversionComponent
     private String getTimezone()
     {
         return ZonedDateTime.now().format(tzFormat);
-    }
-
-    private DataRequirementItemData createDataRequirementItemData(final ItemIdentifier driId, final SemanticPayload data)
-    {
-        final DataRequirementItemData itemData = new DataRequirementItemData();
-        itemData.setDriId(driId);
-        itemData.setData(data);
-        return itemData;
-    }
-
-    private KMEvaluationRequest createKmEvaluationRequest(final EntityIdentifier kmId)
-    {
-        final KMEvaluationRequest request = new KMEvaluationRequest();
-        request.setKmId(kmId);
-        return request;
-    }
-
-    private SemanticPayload createSemanticPayload(final EntityIdentifier informationModelSSId,
-            final List<byte[]> base64EncodedPayload)
-    {
-        final SemanticPayload payload = new SemanticPayload();
-        payload.setInformationModelSSId(informationModelSSId);
-        if (base64EncodedPayload != null)
-            payload.getBase64EncodedPayload().addAll(base64EncodedPayload);
-        return payload;
-    }
-
-    private ItemIdentifier createItemIdentifier(final EntityIdentifier containingEntityId)
-    {
-        final ItemIdentifier itemIdentifier = new ItemIdentifier();
-        itemIdentifier.setContainingEntityId(containingEntityId);
-        itemIdentifier.setItemId("cdsPayload");
-        return itemIdentifier;
     }
 
     private EvaluatedPerson createEvaluatedPerson(final CdsRequest cdsRequest)
@@ -496,24 +419,6 @@ public class CdsRequestResponseConversionComponent
         if (substanceAdministrationEvent != null)
             substanceAdministrationEvents.getSubstanceAdministrationEvent().addAll(substanceAdministrationEvent);
         return substanceAdministrationEvents;
-    }
-
-    private EntityIdentifier createEntityIdentifier(final String scopingEntityId, final String businessId, final String version)
-    {
-        final EntityIdentifier entityIdentifier = new EntityIdentifier();
-        entityIdentifier.setScopingEntityId(scopingEntityId);
-        entityIdentifier.setBusinessId(businessId);
-        entityIdentifier.setVersion(version);
-        return entityIdentifier;
-    }
-
-    private InteractionIdentifier createInteractionIdentifier(final String interactionId, final XMLGregorianCalendar submissionTime)
-    {
-        final InteractionIdentifier interactionIdentifier = new InteractionIdentifier();
-        interactionIdentifier.setScopingEntityId("org.nyc.cir");
-        interactionIdentifier.setInteractionId(interactionId);
-        interactionIdentifier.setSubmissionTime(submissionTime);
-        return interactionIdentifier;
     }
 
     private CDSInput createCdsInput(final List<II> templateId, final CDSContext cdsContext, final VMR vmrInput)

@@ -12,6 +12,7 @@ import org.cdsframework.ice.service.configurations.ICEDecisionEngineDSSEvaluatio
 import org.cdsframework.ice.service.configurations.ICESupportingDataLoaderPlugin;
 import org.cdsframework.ice.service.configurations.IceExecutionEngineContext;
 import org.cdsframework.ice.service.configurations.IceKnowledgeLoader;
+import org.cdsframework.ice.service.conversion.ConfiguredVmrScheduleFlagEvaluationRequestProcessor;
 import org.opencds.config.api.ConfigData;
 import org.opencds.config.api.ConfigurationService;
 import org.opencds.config.api.strategy.ConfigStrategy;
@@ -38,9 +39,10 @@ public class OpenCdsConfig
     }
 
     @Bean
-    public Evaluation dssEvaluation(final EvaluationService evaluationService, final ConfigurationService configurationService)
+    public Evaluation dssEvaluation(final EvaluationService evaluationService, final ConfigurationService configurationService,
+            final ConfiguredVmrScheduleFlagEvaluationRequestProcessor configuredVmrScheduleFlagEvaluationRequestProcessor)
     {
-        return new Evaluation(evaluationService, configurationService);
+        return new Evaluation(evaluationService, configurationService, configuredVmrScheduleFlagEvaluationRequestProcessor);
     }
 
     @Bean

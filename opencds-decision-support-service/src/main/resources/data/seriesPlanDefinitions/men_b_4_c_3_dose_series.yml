@@ -101,6 +101,19 @@ cds-engine:
                         text: Meningococcal B 4C, OMV
                     - url: preferred
                       value-boolean: true
+                # this can only be valid if dose 2 was administered at least 6 months - 4 days from (valid) dose 1 only, not the previous shot
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '164'
+                            version: CVX
+                            display: Meningococcal B, NOS
+                        text: Meningococcal B, NOS
+                    - url: preferred
+                      value-boolean: true
                 - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
@@ -150,6 +163,18 @@ cds-engine:
                             version: CVX
                             display: Meningococcal B 4C, OMV
                         text: Meningococcal B 4C, OMV
+                    - url: preferred
+                      value-boolean: true
+                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                  extension:
+                    - url: vaccine
+                      value-codeable-concept:
+                        coding:
+                          - system: urn:oid:2.16.840.1.113883.12.292
+                            code: '164'
+                            version: CVX
+                            display: Meningococcal B, NOS
+                        text: Meningococcal B, NOS
                     - url: preferred
                       value-boolean: true
                 - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine

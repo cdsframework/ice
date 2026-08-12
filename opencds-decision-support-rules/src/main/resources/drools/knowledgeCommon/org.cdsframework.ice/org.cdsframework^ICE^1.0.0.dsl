@@ -21,6 +21,9 @@
 [condition][][Tt]he [Pp]atient is [Ii]mmune to all of the [Dd]iseases in {refer_oCollectionOfDiseases}=List(size == {refer_oCollectionOfDiseases}.size()) from accumulate(DiseaseImmunity($d : disease, dateOfImmunity <= evalTime, disease memberOf {refer_oCollectionOfDiseases}), collectList($d))
 
 [condition][]The [Ii]mmunization [Hh]istory indicates that the [Pp]atient has obtained [Ii]mmunity to {ddOpenCdsImmunityConcept1Disease} due to reason {ddOpenCdsReasonConcept}=$of : ObservationFocusConcept(openCdsConceptCode == {ddOpenCdsImmunityConcept1Disease}) and $ov : ObservationCodedValueConcept(conceptTargetId == $of.conceptTargetId, openCdsConceptCode == {ddOpenCdsReasonConcept}) and $or : ObservationResult(id == $ov.conceptTargetId)
+[condition][][Mm]ake [Nn]ote of [Ww]hether the [Ss]chedule [Ff]lag {ddOpenCdsScheduleFlag:[\"][A-Z0-9._]+[\"]} is [Ss]et as {assign_bScheduleFlag:[$]?[a-zA-Z0-9._]+}={assign_bScheduleFlag} : Boolean() from accumulate(ObservationFocusConcept(openCdsConceptCode == {ddOpenCdsScheduleFlag}, $targetId : conceptTargetId) and ObservationResult(id == $targetId, observationValue != null, $val : observationValue._boolean.value), init(boolean flag = false;), action(flag = $val;), result(flag))
+[condition][][Tt]he [Ss]chedule [Ff]lag {ddOpenCdsScheduleFlag:[\"][A-Z0-9._]+[\"]} is [Ss]et=$flagObsFocusConcept : ObservationFocusConcept(openCdsConceptCode == {ddOpenCdsScheduleFlag}) and ObservationResult(id == $flagObsFocusConcept.conceptTargetId && observationValue != null && observationValue._boolean.value == true)
+[condition][][Tt]he [Ss]chedule [Ff]lag {ddOpenCdsScheduleFlag:[\"][A-Z0-9._]+[\"]} is [Nn]ot [Ss]et=not ($flagObsFocusConcept : ObservationFocusConcept(openCdsConceptCode == {ddOpenCdsScheduleFlag}) and ObservationResult(id == $flagObsFocusConcept.conceptTargetId && observationValue != null && observationValue._boolean.value == true))
 [consequence][]Make [Nn]ote of the [Pp]atient's [Ii]mmunity to {ddOpenCdsDiseaseConcept} with [Ii]mmunity [Dd]ate as {assign_oDate} and [Ee]valuation [Rr]eason {ddEvaluationReason} and [Rr]ecommendation [Rr]eason {ddRecommendationReason}=LocalDate {assign_oDate} = ICELogicHelper.extractSingularDateValueFromIVLDate($or.getObservationEventTime()); DiseaseImmunity diseaseImmunity = new DiseaseImmunity({ddOpenCdsDiseaseConcept}, {assign_oDate}, {ddEvaluationReason}, {ddRecommendationReason}); insert(diseaseImmunity);
 [consequence][]Log that [Ii]mmunity was noted for {sDiseaseName} and [Ii]mmunity [Dd]ate {refer_oDate}=ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Added {sDiseaseName} Immunity as of date " + {refer_oDate}.toString());
 
@@ -70,6 +73,7 @@
 [condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity is VALID=status == DoseStatus.VALID
 [condition][]- [Tt]hat has already been [Ee]valuated and whose [Ss]hot [Vv]alidity is ACCEPTED=status == DoseStatus.ACCEPTED
 [condition][]- [Tt]hat has already been [Ee]valuated=status == DoseStatus.INVALID || status == DoseStatus.VALID || status == DoseStatus.ACCEPTED
+[condition][]- [Mm]ake [Nn]ote of the [Ss]hot [Vv]alidity [Ss]tatus as {assign_oShotValidityStatus}={assign_oShotValidityStatus} : status, ({assign_oShotValidityStatus} == DoseStatus.INVALID || {assign_oShotValidityStatus} == DoseStatus.VALID || {assign_oShotValidityStatus} == DoseStatus.ACCEPTED)
 [condition][]- [Tt]hat has not already been [Ee]valuated=status == DoseStatus.EVALUATION_NOT_STARTED
 [condition][]- [Tt]he [Ii]nvalid [Rr]easons are members of \({list_oInvalidReasons:[\"][A-Z._]+[\"](?:,\s*[\"][A-Z._]+[\"])*}\)=onlyInvalidReasonsInSet(Set.of({list_oInvalidReasons}))
 [condition][]- [Tt]he [Aa]dministration [Dd]ate of the [Ss]hot is {aOp:[\=!]\=|[<>]\=?}  {strDate:[\"][0-9]{1,2}[-][a-zA-Z]{3}[-][0-9]{4}[\"]}=administrationDate {aOp} {strDate}
@@ -204,10 +208,6 @@
 [condition][]- [Mm]ake [Nn]ote of the [Oo]ff [Ss]eason [Ss]tart [Dd]ate as {assign_dtOffSeasonStartDate}={assign_dtOffSeasonStartDate} : getOffSeasonStartDate(), {assign_dtOffSeasonStartDate} != null
 [condition][]- [Mm]ake [Nn]ote of the [Oo]ff [Ss]eason [Ee]nd [Dd]ate as {assign_dtOffSeasonEndDate}={assign_dtOffSeasonEndDate} : getOffSeasonEndDate(), {assign_dtOffSeasonEndDate} != null
 [condition][]- [Mm]ake [Nn]ote of the [Ll]ast [Ss]hot [Aa]dministered in the [Ss]eries as {assign_oLastShotInSeries}={assign_oLastShotInSeries} : getLastShotAdministeredInSeries()
-[condition][]- [Mm]ake [Nn]ote of [Ss]hot [Aa]dministered by [Ss]hot [Nn]umber {nShotNumber} in the [Ss]eries as {assign_oShotInSeries}={assign_oShotInSeries} : getTargetDoseByAdministeredShotNumber({nShotNumber})
-[condition][]- [Mm]ake [Nn]ote of [Aa]ll [Vv]accines [Pp]ermitted for [Dd]ose {nDoseNumber} in the [Ss]eries as {assign_oListVaccines}={assign_oListVaccines} : getAllPermittedVaccinesForTargetDose({nDoseNumber})
-[condition][]- [Mm]ake [Nn]ote of the [Aa]llowable [Vv]accines for [Dd]ose {nDoseNumber} in the [Ss]eries as {assign_oListVaccines}={assign_oListVaccines} : getAllowableVaccinesForTargetDose({nDoseNumber})
-[condition][]- [Mm]ake [Nn]ote of the [Pp]referable [Vv]accines for [Dd]ose {nDoseNumber} in the [Ss]eries as {assign_oListVaccines}={assign_oListVaccines} : getPreferableVaccinesForTargetDose({nDoseNumber})
 [condition][]- [Mm]ake [Nn]ote of the [Ff]inal [Rr]ecommendations as {assign_oRecommendations}={assign_oRecommendations} : finalRecommendations, {assign_oRecommendations} != null
 [condition][]- [Tt]he [Cc]ollection {oCollection} contains {oCollectionElement}={oCollection} contains {oCollectionElement}
 [condition][]- [Tt]he [Cc]ollection {oCollection} does not contain {oCollectionElement}={oCollection} not contains {oCollectionElement}
@@ -218,7 +218,7 @@
 [condition][]- [Tt]he [Dd]ate {dtDateOne} {aOp:[\=!]\=|[<>]\=?}  {strDate:[\"][0-9]{1,2}[-][a-zA-Z]{3}[-][0-9]{4}[\"]}={dtDateOne} {aOp} {strDate}
 [condition][]- [Tt]he [Dd]ate {dtObjectOne} {aOp:[\=!]\=|[<>]\=?}  {dtObjectTwo}={dtObjectOne} != null && {dtObjectTwo} != null && {dtObjectOne} {aOp} {dtObjectTwo}
 [condition][]- [Tt]he [Oo]bject {oObjectOne:[$]?[a-zA-Z0-9._]+} is {aOp:[\=!]\=|[<>]\=?}  {oObjectTwo:[$]?[a-zA-Z0-9._]+}={oObjectOne} {aOp} {oObjectTwo}
-
+[condition][][Tt]he [Vv]accine {vaccine} is not [Pp]ermitted for [Dd]ose {doseNumber} in the [Ss]eries {targetSeries}=eval( !{targetSeries}.getAllPermittedVaccinesForTargetDose({doseNumber}).contains({vaccine}) )
 // Season
 [condition][]There exists {entity:a |another |}[Ss]eason=exists Season()
 [condition][]There does not exist {entity:a |another |}[Ss]eason=not Season()
@@ -274,9 +274,11 @@
 // CONSEQUENCES
 
 // TargetDose Actions
+[consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Aa]ccepted if {bOverrideFlag} [Ee]lse [Vv]alid={refer_oTargetDose}.setStatus({bOverrideFlag} ? DoseStatus.ACCEPTED : DoseStatus.VALID);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Vv]alid={refer_oTargetDose}.setStatus(DoseStatus.VALID);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Aa]ccepted={refer_oTargetDose}.setStatus(DoseStatus.ACCEPTED);
 [consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Ii]nvalid={refer_oTargetDose}.setStatus(DoseStatus.INVALID);
+[consequence][][Ss]et the [Ss]hot [Ss]tatus of {refer_oTargetDose} to [Nn]ot [Ee]valuated={refer_oTargetDose}.setStatus(DoseStatus.NOT_EVALUATED);
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid due to "Booster Dose"={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.BOOSTER_DOSE");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid due to "Outside Season"={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.OUTSIDE_SEASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Vv]alid due to "Extra Dose"={refer_oTargetDose}.addValidReason("EVALUATION_REASON_CONCEPT.EXTRA_DOSE");
@@ -319,7 +321,7 @@
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Aa]ccepted for this [Ss]eries={refer_oTargetDose}.addAcceptedReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid for this [Ss]eries={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.UNSPECIFIED_REASON");
 [consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Ii]nvalid due to "Vaccine Not Part of This Series"={refer_oTargetDose}.addInvalidReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_PART_OF_THIS_SERIES");
-[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Nn]ot [Ee]valuated due to "Vaccine Not Supported"={refer_oTargetDose}.addNotEvalatedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED");
+[consequence][][Ii]nclude the [Rr]eason for [Ss]hot {refer_oTargetDose} [Nn]ot [Ee]valuated due to "Vaccine Not Supported"={refer_oTargetDose}.addNotEvaluatedReason("EVALUATION_REASON_CONCEPT.VACCINE_NOT_SUPPORTED");
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {strReason:[\"][A-Z0-9._]+[\"]} from [Ss]hot {refer_oTargetDose:[$]?[a-zA-Z0-9._]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({strReason});
 [consequence][][Rr]emove [Ee]valuation [Rr]eason {oReason:[$]?[a-zA-Z0-9_]+} from [Ss]hot {refer_oTargetDose:[$]?[a-zA-Z0-9._]+}={refer_oTargetDose}.removeEvaluationReasonFromAllReasonSets({oReason});
 [consequence][][Rr]emove [Aa]ll [Ee]valuation [Rr]easons from [Ss]hot {refer_oTargetDose:[$]?[a-zA-Z0-9._]+}={refer_oTargetDose}.removeAllEvaluationReasonsFromAllReasonSets();
@@ -330,6 +332,7 @@
 [consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Vv]alid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addValidReason({sSupplementalText});
 [consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Aa]ccepted [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addAcceptedReason({sSupplementalText});
 [consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Ii]nvalid [Ss]hot {refer_oTargetDose}={refer_oTargetDose}.addInvalidReason({sSupplementalText});
+[consequence][][Ii]nclude [Ss]upplemental [Tt]ext {sSupplementalText} for [Ss]hot {refer_oTargetDose} with [Vv]alidity [Ss]tatus {oShotValidityStatus}=if ({oShotValidityStatus} == DoseStatus.VALID) \{ {refer_oTargetDose}.addValidReason({sSupplementalText}); \} else if ({oShotValidityStatus} == DoseStatus.ACCEPTED) \{ {refer_oTargetDose}.addAcceptedReason({sSupplementalText}); \} else if ({oShotValidityStatus} == DoseStatus.INVALID) \{ {refer_oTargetDose}.addInvalidReason({sSupplementalText}); \}
 [consequence][][Rr]efresh all [Ff]acts for the [Ss]hot {refer_oTargetDose}=update({refer_oTargetDose});
 
 // TargetSeries Actions

@@ -1,6 +1,5 @@
 package org.opencds.config.api.service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.opencds.common.exceptions.OpenCDSConfigurationException;
 import org.opencds.common.exceptions.OpenCDSRuntimeException;
+import org.opencds.common.utilities.ClassUtil;
 import org.opencds.config.api.dao.PluginPackageDao;
 import org.opencds.config.api.model.LoadContext;
 import org.opencds.config.api.model.PPId;
@@ -55,16 +55,15 @@ public class PluginPackageService
 
         return (OpencdsPlugin<CTX>) pluginClassMap.computeIfAbsent(pluginId, k ->
         {
+            final var plugin = pp.getPlugin(k);
+            if (plugin == null)
+                throw new OpenCDSConfigurationException("Plugin not found in configuration: " + k);
+
             try
             {
-                final var plugin = pp.getPlugin(k);
-                if (plugin == null)
-                    throw new OpenCDSConfigurationException("Plugin not found in configuration: " + k);
-
-                return (OpencdsPlugin<CTX>) Class.forName(plugin.className()).getDeclaredConstructor().newInstance();
+                return (OpencdsPlugin<CTX>) ClassUtil.newInstance(plugin.className(), OpencdsPlugin.class);
             }
-            catch (final InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException |
-                         InvocationTargetException e)
+            catch (final RuntimeException e)
             {
                 throw new OpenCDSConfigurationException(
                         "Unable to load plugin '%s' due to exception: %s".formatted(k, e.getMessage()), e);

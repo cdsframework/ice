@@ -3,6 +3,7 @@ package org.opencds.vmr.v1_0.mappings.mappers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.opencds.common.exceptions.DataFormatException;
 import org.opencds.common.exceptions.ImproperUsageException;
 import org.opencds.common.exceptions.InvalidDataException;
@@ -64,13 +65,13 @@ public abstract class OneObjectMapper
         if (source == null)
         {
             final String errStr = _METHODNAME + "improper usage: source supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
         if (target == null)
         {
             final String errStr = _METHODNAME + "improper usage: target supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
         final String sourceClassName = source.getClass().getSimpleName();
@@ -167,18 +168,19 @@ public abstract class OneObjectMapper
         if (sourceRelatedEntity == null)
         {
             final String errStr = _METHODNAME + "improper usage: source supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
         if (parentId == null)
         {
             final String errStr = _METHODNAME + "improper usage: parentId supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
 
         if (log.isTraceEnabled())
-            log.trace(_METHODNAME + "{}, {}", sourceRelatedEntity.getClass().getSimpleName(), parentId);
+            log.trace(_METHODNAME + "{}, {}", StringUtils.normalizeSpace(sourceRelatedEntity.getClass().getSimpleName()),
+                    StringUtils.normalizeSpace(parentId));
 
         if (sourceRelatedEntity.getAdministrableSubstance() != null)
         {
@@ -233,7 +235,7 @@ public abstract class OneObjectMapper
                             {
                                 final String errStr = _METHODNAME + "improper usage: source class not recognized: "
                                         + sourceRelatedEntity.getClass().getName() + " for sourceId: " + parentId + ".";
-                                log.error(errStr);
+                                log.error("{}", StringUtils.normalizeSpace(errStr));
                                 throw new ImproperUsageException(errStr);
                             }
     }
@@ -247,13 +249,13 @@ public abstract class OneObjectMapper
         if (source == null)
         {
             final String errStr = _METHODNAME + "improper usage: source supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
         if (sourceId == null)
         {
             final String errStr = _METHODNAME + "improper usage: sourceId supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
 
@@ -712,13 +714,13 @@ public abstract class OneObjectMapper
         if (source == null)
         {
             final String errStr = _METHODNAME + "improper usage: source supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
         if (target == null)
         {
             final String errStr = _METHODNAME + "improper usage: target supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
         final String sourceClassName = source.getClass().getSimpleName();
@@ -727,7 +729,7 @@ public abstract class OneObjectMapper
             return;
 
         if (log.isTraceEnabled())
-            log.trace(_METHODNAME + "{}", sourceClassName);
+            log.trace(_METHODNAME + "{}", StringUtils.normalizeSpace(sourceClassName));
 
         switch (sourceClassName)
         {
@@ -969,13 +971,15 @@ public abstract class OneObjectMapper
         if (internalVMR == null)
         {
             final String errStr = _METHODNAME + "improper usage: internalVMR ClinicalStatement supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
 
         final String internalVMRClassName = internalVMR.getClass().getSimpleName();
         if (log.isTraceEnabled())
-            log.trace(_METHODNAME + "{}, {}: {}", internalVMRClassName, internalVMR.getId(), internalVMR.getEvaluatedPersonId());
+            log.trace(_METHODNAME + "{}, {}: {}", StringUtils.normalizeSpace(internalVMRClassName),
+                    StringUtils.normalizeSpace(internalVMR.getId()),
+                    StringUtils.normalizeSpace(internalVMR.getEvaluatedPersonId()));
 
         org.opencds.vmr.v1_0.schema.RelatedClinicalStatement relatedClinicalStatement = null;
 
@@ -1187,13 +1191,13 @@ public abstract class OneObjectMapper
         if (internal == null)
         {
             final String errStr = _METHODNAME + "improper usage: source supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
         if (external == null)
         {
             final String errStr = _METHODNAME + "improper usage: target supplied is null";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
 
@@ -1202,16 +1206,10 @@ public abstract class OneObjectMapper
         {
             final String errStr = _METHODNAME + "improper usage: looking up entity Object for ID=" + internal.getTargetEntityId()
                     + ", and it does not exist.";
-            log.error(errStr);
+            log.error("{}", StringUtils.normalizeSpace(errStr));
             throw new ImproperUsageException(errStr);
         }
         final String oneInternalEntityObjectClassName = oneInternalEntityObject.getClass().getSimpleName();
-
-        if (log.isTraceEnabled())
-            log.trace(_METHODNAME
-                            + "push out {}, sourceEntity Id {}, targetEntityId {}, relationshipTimeInterval {}, with relationship {}",
-                    oneInternalEntityObjectClassName, internal.getSourceId(), internal.getTargetEntityId(),
-                    internal.getRelationshipTimeInterval(), internal.getTargetRole().toString());
 
         if (internal.getSourceId().equals(internal.getTargetEntityId()))
         {
@@ -1329,7 +1327,7 @@ public abstract class OneObjectMapper
             {
                 final String errStr =
                         _METHODNAME + "improper usage: listedEntity not recognized: " + oneInternalEntityObjectClassName;
-                log.error(errStr);
+                log.error("{}", StringUtils.normalizeSpace(errStr));
                 throw new InvalidDataException(errStr);
             }
         }

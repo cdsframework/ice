@@ -38,7 +38,7 @@ public class ImmunizationForecastController
     private final VmrConversionComponent vmrConversionComponent;
 
     @Operation(operationId = "immunizationForecast", summary = "Run immunization forecast",
-               description = "Accepts a FHIR Parameters request and returns forecast output as FHIR Parameters. Request supports `patient`, `assessmentDate`, `module`, repeated `immunization`, repeated `observation`, or a single `data` bundle containing those resources.")
+               description = "Accepts a FHIR Parameters request and returns forecast output as FHIR Parameters. Request supports `patient`, `assessmentDate`, `module`, repeated `immunization`, repeated `observation`, repeated top-level `scheduleFlag` parameters using `valueCode`, or a single `data` bundle containing the FHIR resources.")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true,
                                                           description = "FHIR Parameters request for immunization forecast processing.",
                                                           content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,

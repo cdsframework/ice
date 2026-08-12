@@ -74,6 +74,7 @@ public class VmrConversionComponent
     private static final String PATIENT_PARAM = "patient";
     private static final String IMMUNIZATION_PARAM = "immunization";
     private static final String OBSERVATION_PARAM = "observation";
+    private static final String OPTION_FLAG_PARAM = "scheduleFlag";
     private static final String DATA_PARAM = "data";
     private static final String EVALUATION_PARAM = "evaluation";
     private static final String RECOMMENDATION_PARAM = "recommendation";
@@ -113,19 +114,23 @@ public class VmrConversionComponent
     private final FhirToVmrInputAdapter fhirToVmrInputAdapter;
     private final SelectionContextExtensionBuilder selectionContextExtensionBuilder;
     private final VaccineGroupRulesArtifactExtensionBuilder vaccineGroupRulesArtifactExtensionBuilder;
+    private final ScheduleAuthorityExtensionBuilder scheduleAuthorityExtensionBuilder;
     private final Map<String, Boolean> outputSeriesContextByKm;
     private final Map<String, Boolean> outputVaccineGroupRulesArtifactByKm;
+    private final Map<String, Boolean> outputScheduleAuthoritiesByKm;
 
     public VmrConversionComponent(final SupportingDataService supportingDataService, final IceProperties iceProperties,
             final FhirToVmrInputAdapter fhirToVmrInputAdapter,
             final SelectionContextExtensionBuilder selectionContextExtensionBuilder,
-            final VaccineGroupRulesArtifactExtensionBuilder vaccineGroupRulesArtifactExtensionBuilder)
+            final VaccineGroupRulesArtifactExtensionBuilder vaccineGroupRulesArtifactExtensionBuilder,
+            final ScheduleAuthorityExtensionBuilder scheduleAuthorityExtensionBuilder)
     {
         this.supportingDataService = supportingDataService;
         this.iceProperties = iceProperties;
         this.fhirToVmrInputAdapter = fhirToVmrInputAdapter;
         this.selectionContextExtensionBuilder = selectionContextExtensionBuilder;
         this.vaccineGroupRulesArtifactExtensionBuilder = vaccineGroupRulesArtifactExtensionBuilder;
+        this.scheduleAuthorityExtensionBuilder = scheduleAuthorityExtensionBuilder;
         this.outputSeriesContextByKm = supportingDataService.getKnowledgeModulePropertiesByKmId()
                 .entrySet()
                 .stream()
@@ -139,6 +144,11 @@ public class VmrConversionComponent
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() != null && Boolean.TRUE.equals(
                         iceProperties.getOutputVaccineGroupRulesArtifact()
                                 .orElseGet(entry.getValue()::outputVaccineGroupRulesArtifact))));
+        this.outputScheduleAuthoritiesByKm = supportingDataService.getKnowledgeModulePropertiesByKmId()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() != null && Boolean.TRUE.equals(
+                        iceProperties.getOutputScheduleAuthorities().orElseGet(entry.getValue()::outputScheduleAuthorities))));
     }
 
     private CodeableConcept toFhirCodeableConcept(final String kmId, final CD cd)
@@ -155,7 +165,7 @@ public class VmrConversionComponent
 
         final byte[] payload = createPayload(
                 fhirToVmrInputAdapter.createCdsInput(moduleContext.kmId(), requestContext.patient(), requestContext.immunizations(),
-                        requestContext.observations()));
+                        requestContext.observations(), requestContext.scheduleFlags()));
         if (log.isDebugEnabled())
             log.debug("payload: {}", new String(payload, StandardCharsets.UTF_8));
 
@@ -179,9 +189,8 @@ public class VmrConversionComponent
 
     private int forecastEntryCount(final Parameters parameters)
     {
-        return (int) streamParameters(parameters).map(ParametersParameter::name)
-                .filter(name -> EVALUATION_PARAM.equals(name) || RECOMMENDATION_PARAM.equals(name))
-                .count();
+        return Math.toIntExact(streamParameters(parameters).map(ParametersParameter::name)
+                .filter(name -> EVALUATION_PARAM.equals(name) || RECOMMENDATION_PARAM.equals(name)).count());
     }
 
     private Parameters createParametersResponse(final ModuleContext moduleContext, final CDSOutput cdsOutput,
@@ -350,7 +359,15 @@ public class VmrConversionComponent
                 .filter(Observation.class::isInstance)
                 .map(Observation.class::cast), observationBundleResources.stream()).toList();
 
-        return new RequestContext(assessmentDate, moduleCanonical, patient, immunizations, observations, List.of());
+        final List<ParametersParameter> scheduleFlagParameters =
+                params.stream().filter(parameter -> OPTION_FLAG_PARAM.equals(parameter.name())).toList();
+        final List<String> scheduleFlags = scheduleFlagParameters.stream().peek(parameter ->
+        {
+            if (!StringUtils.hasText(parameter.valueCode()))
+                throw new IllegalArgumentException("scheduleFlag parameters must use valueCode");
+        }).map(parameter -> parameter.valueCode().trim()).distinct().toList();
+
+        return new RequestContext(assessmentDate, moduleCanonical, patient, immunizations, observations, scheduleFlags, List.of());
     }
 
     private Stream<ParametersParameter> streamParameters(final Parameters parameters)
@@ -379,9 +396,12 @@ public class VmrConversionComponent
                 .flatMap(Collection::stream)
                 .filter(immunization -> isSupportedImmunization(moduleContext, immunization, validationIssues))
                 .toList();
+        final List<String> resolvedScheduleFlags = supportingDataService.validateScheduleFlagsForKmId(moduleContext.kmId(),
+                Stream.concat(supportingDataService.getConfiguredScheduleFlags().stream(),
+                        Optional.ofNullable(requestContext.scheduleFlags()).stream().flatMap(Collection::stream)).toList());
 
         return new RequestContext(requestContext.assessmentDate(), requestContext.moduleCanonical(), requestContext.patient(),
-                validatedImmunizations, requestContext.observations(), List.copyOf(validationIssues));
+                validatedImmunizations, requestContext.observations(), resolvedScheduleFlags, List.copyOf(validationIssues));
     }
 
     private boolean isSupportedImmunization(final ModuleContext moduleContext, final Immunization immunization,
@@ -401,8 +421,7 @@ public class VmrConversionComponent
         final String codeSystem = Optional.ofNullable(coding.system()).map(String::trim).orElse(null);
         if (!StringUtils.hasText(codeSystem))
         {
-            validationIssues.add(createOperationOutcomeIssue(OUTCOME_CODE_PROCESSING, buildMissingCodeSystemMessage(immunization),
-                    OUTCOME_SEVERITY_ERROR));
+            validationIssues.add(createOperationOutcomeIssue(buildMissingCodeSystemMessage(immunization), OUTCOME_SEVERITY_ERROR));
             return false;
         }
 
@@ -413,7 +432,7 @@ public class VmrConversionComponent
         }
         catch (final IllegalArgumentException e)
         {
-            validationIssues.add(createOperationOutcomeIssue(OUTCOME_CODE_PROCESSING,
+            validationIssues.add(createOperationOutcomeIssue(
                     buildUnsupportedCodeSystemMessage(moduleContext.moduleCanonical(), immunization, codeSystem),
                     OUTCOME_SEVERITY_ERROR));
             return false;
@@ -428,8 +447,7 @@ public class VmrConversionComponent
         if (!isKnownCvxCode)
         {
             validationIssues.add(
-                    createOperationOutcomeIssue(OUTCOME_CODE_PROCESSING, buildUnsupportedCvxWarning(immunization, cvxCode),
-                            OUTCOME_SEVERITY_WARNING));
+                    createOperationOutcomeIssue(buildUnsupportedCvxWarning(immunization, cvxCode), OUTCOME_SEVERITY_WARNING));
             return false;
         }
 
@@ -439,8 +457,7 @@ public class VmrConversionComponent
             return true;
 
         validationIssues.add(
-                createOperationOutcomeIssue(OUTCOME_CODE_PROCESSING, buildConfiguredUnsupportedCvxWarning(immunization, cvxCode),
-                        OUTCOME_SEVERITY_WARNING));
+                createOperationOutcomeIssue(buildConfiguredUnsupportedCvxWarning(immunization, cvxCode), OUTCOME_SEVERITY_WARNING));
         return false;
     }
 
@@ -519,7 +536,7 @@ public class VmrConversionComponent
         recommendationBuilder.forecastReason(forecastReasons);
 
         final ProtocolContext protocolContext =
-                extractProtocolContext(kmId, relatedClinicalStatements, shouldOutputSeriesContext(kmId));
+                extractProtocolContext(kmId, relatedClinicalStatements, shouldOutputSeriesContext(kmId), true);
         recommendationBuilder.series(protocolContext.series());
         recommendationBuilder.seriesDoses(protocolContext.seriesDoses());
         recommendationBuilder.description(Optional.ofNullable(
@@ -632,7 +649,7 @@ public class VmrConversionComponent
                 .toList();
 
         final ProtocolContext protocolContext =
-                extractProtocolContext(kmId, relatedClinicalStatements, shouldOutputSeriesContext(kmId));
+                extractProtocolContext(kmId, relatedClinicalStatements, shouldOutputSeriesContext(kmId), false);
 
         return Stream.of(ImmunizationEvaluation.builder()
                 .id(extension)
@@ -868,11 +885,15 @@ public class VmrConversionComponent
     }
 
     private ProtocolContext extractProtocolContext(final String kmId,
-            final List<RelatedClinicalStatement> relatedClinicalStatements, final boolean outputSeriesContext)
+            final List<RelatedClinicalStatement> relatedClinicalStatements, final boolean outputSeriesContext,
+            final boolean includeScheduleAuthorities)
     {
         final List<Extension> extensions = new ArrayList<>();
         if (shouldOutputVaccineGroupRulesArtifact(kmId))
             vaccineGroupRulesArtifactExtensionBuilder.build(relatedClinicalStatements).ifPresent(extensions::add);
+
+        if (includeScheduleAuthorities && shouldOutputScheduleAuthorities(kmId))
+            extensions.addAll(scheduleAuthorityExtensionBuilder.build(relatedClinicalStatements));
 
         if (!outputSeriesContext)
             return new ProtocolContext(null, null, null, null, extensions);
@@ -1070,6 +1091,11 @@ public class VmrConversionComponent
         return Boolean.TRUE.equals(outputVaccineGroupRulesArtifactByKm.get(kmId));
     }
 
+    private boolean shouldOutputScheduleAuthorities(final String kmId)
+    {
+        return Boolean.TRUE.equals(outputScheduleAuthoritiesByKm.get(kmId));
+    }
+
     private String buildRecommendationDescriptionFallback(final CodeableConcept forecastStatus,
             final List<CodeableConcept> forecastReasons)
     {
@@ -1140,11 +1166,11 @@ public class VmrConversionComponent
         return localDate.toString();
     }
 
-    private OperationOutcome.Issue createOperationOutcomeIssue(final String code, final String detailText, final String severity)
+    private OperationOutcome.Issue createOperationOutcomeIssue(final String detailText, final String severity)
     {
         return OperationOutcome.Issue.builder()
                 .severity(severity)
-                .code(code)
+                .code(VmrConversionComponent.OUTCOME_CODE_PROCESSING)
                 .details(CodeableConcept.builder().text(detailText).build())
                 .build();
     }

@@ -33,9 +33,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
@@ -43,6 +47,7 @@ import org.cdsframework.cds.supportingdata.SupportedCdsLists;
 import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.fhir.CodeSystemConceptProperty;
 import org.cdsframework.fhir.Coding;
+import org.cdsframework.ice.config.IceProperties;
 import org.cdsframework.ice.service.ICECoreError;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
 import org.cdsframework.ice.service.Season;
@@ -113,7 +118,8 @@ public class SupportedSeasons implements SupportingData
         return this.cdsListItemNameToSeasonItem.get(pSeasonItemName);
     }
 
-    public void initializeFromCdsLists() throws InconsistentConfigurationException
+    public void initializeFromCdsLists(final Map<String, IceProperties.SeasonOverride> seasonOverrides)
+            throws InconsistentConfigurationException
     {
         final String _METHODNAME = "initializeFromCdsLists(): ";
 
@@ -146,7 +152,7 @@ public class SupportedSeasons implements SupportingData
                 final String lPropCode = cp.code();
                 switch (lPropCode)
                 {
-                    case "defaultSeason" -> lDefaultSeason = java.util.Objects.requireNonNullElse(cp.valueBoolean(), false);
+                    case "defaultSeason" -> lDefaultSeason = Objects.requireNonNullElse(cp.valueBoolean(), false);
                     case "startDate" -> lStartDateStr = cp.valueString();
                     case "endDate" -> lEndDateStr = cp.valueString();
                     case "defaultStartMonthAndDay" -> lDefaultStartMonthAndDayStr = cp.valueString();
@@ -245,9 +251,29 @@ public class SupportedSeasons implements SupportingData
                         startDate.getYear(), endDate.getMonthValue(), endDate.getDayOfMonth(), endDate.getYear());
             }
 
+            if (seasonOverrides != null)
+                Optional.ofNullable(seasonOverrides.get(locallyCodedCdsSeasonListItem.getCdsListItemKey()))
+                        .ifPresent(seasonOverride -> applySeasonOverride(lS, seasonOverride));
+
             lSeasonsListForVG.add(lS);
             this.cdsListItemNameToSeasonItem.put(lSeasonCode, new LocallyCodedSeasonItem(lSeasonCode, lPrimaryOpenCdsConcept, lS));
             this.vaccineGroupItemToSeasons.put(lcvgi, lSeasonsListForVG);
+        }
+
+        if (seasonOverrides != null)
+        {
+            final Set<String> validSeasonKeys =
+                    lIceConceptEntry.values().stream().map(LocallyCodedCdsListItem::getCdsListItemKey).collect(Collectors.toSet());
+
+            final Set<String> unknownSeasonOverrides = new TreeSet<>(seasonOverrides.keySet());
+            unknownSeasonOverrides.removeAll(validSeasonKeys);
+            if (!unknownSeasonOverrides.isEmpty())
+            {
+                final String lErrStr =
+                        "Season override key(s) do not reference existing seasons: " + String.join(", ", unknownSeasonOverrides);
+                log.error(_METHODNAME + "{}", lErrStr);
+                throw new InconsistentConfigurationException(lErrStr);
+            }
         }
     }
 
@@ -266,7 +292,7 @@ public class SupportedSeasons implements SupportingData
     /**
      * Get MonthDay object for month and day string represented by MM-DD
      */
-    private MonthDay getMonthDayObjectForSDMonthDayStr(final String pMonthAndDay) throws IllegalArgumentException
+    protected MonthDay getMonthDayObjectForSDMonthDayStr(final String pMonthAndDay) throws IllegalArgumentException
     {
         final String _METHODNAME = "getMonthDayObjectForSDMonthDayStr(): ";
 
@@ -296,6 +322,35 @@ public class SupportedSeasons implements SupportingData
             log.error(_METHODNAME + "{}", lErrStr);
             throw new ICECoreError(_METHODNAME + lErrStr);
         }
+    }
+
+    private void applySeasonOverride(final Season season, final IceProperties.SeasonOverride override)
+            throws InconsistentConfigurationException
+    {
+        if (season == null || override == null)
+            return;
+
+        if (season.isDefaultSeason())
+        {
+            if (override.startDate() != null || override.endDate() != null)
+                throw new InconsistentConfigurationException(
+                        "Attempt to set season start or end date for a default season: " + season.getSeasonName());
+        }
+        else
+        {
+            if (override.defaultStartMonthAndDay() != null || override.defaultStopMonthAndDay() != null)
+                throw new InconsistentConfigurationException(
+                        "Attempt to set default start or end month and day for a non-default season: " + season.getSeasonName());
+        }
+
+        Optional.ofNullable(override.startDate()).ifPresent(season::setSeasonStartDate);
+        Optional.ofNullable(override.endDate()).ifPresent(season::setSeasonEndDate);
+        Optional.ofNullable(override.defaultStartMonthAndDay())
+                .map(this::getMonthDayObjectForSDMonthDayStr)
+                .ifPresent(season::setDefaultStartMonthAndDay);
+        Optional.ofNullable(override.defaultStopMonthAndDay())
+                .map(this::getMonthDayObjectForSDMonthDayStr)
+                .ifPresent(season::setDefaultEndMonthAndDay);
     }
 
     @Override

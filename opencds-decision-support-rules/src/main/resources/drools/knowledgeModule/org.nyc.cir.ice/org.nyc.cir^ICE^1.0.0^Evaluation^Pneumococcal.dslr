@@ -587,7 +587,7 @@ rule "Pneumococcal Child Series: Evaluate PCV Shot as Invalid if Patient < 5yrs,
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries
 end
 
-rule "Pneumococcal Child Series: Exception 1: Evaluate Shot as Below Minimum Age for Final Dose if 4th Dose Administered < the Absolute Minimum Age (1y-4d) and Received 0 Doses Administered Prior to 7m of Age"
+rule "Pneumococcal Child Series: Exception 1: Evaluate Shot as Below Minimum Age for Final Dose if 4th Dose Administered < the Absolute Minimum Age (1y-4d) and Received 0 or 1 Doses Administered Prior to 7m of Age"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseAgeCheck"
@@ -604,7 +604,7 @@ rule "Pneumococcal Child Series: Exception 1: Evaluate Shot as Below Minimum Age
 		There is a Series $targetSeries identified by $associatedTargetSeries
 			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.PNEUMOCOCCAL"
 			- the name of the Series is "SUPPORTED_SERIES.PNEUMOCOCCAL_SERIES"
-			- the Number of Doses Administered before $dateOfInterest is == 0
+			- the Number of Doses Administered before $dateOfInterest is < 2
 		Confirm elapsed time between $dtBirthDate and $assign_dtAdministrationDate < $absMinAgeDose4
 	then
 		Include the reason for shot $currentDose Invalid due to "Below Minimum Age for Final Dose"

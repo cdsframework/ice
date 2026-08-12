@@ -39,6 +39,12 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class ICELogicHelper
 {
+    public static <T> T log(T obj, String message)
+    {
+        log.info("{}: {}", message, obj);
+        return obj;
+    }
+
     public static void logDRLDebugMessage(final String pDRLRule, final String pMessageToLog)
     {
         if (log.isDebugEnabled())

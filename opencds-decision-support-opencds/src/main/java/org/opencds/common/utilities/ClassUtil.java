@@ -1,23 +1,30 @@
 package org.opencds.common.utilities;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class ClassUtil
 {
-    @SuppressWarnings("unchecked")
-    public static <T> T newInstance(final String className)
+    public static <T> T newInstance(final String className, final Class<T> serviceType)
     {
         try
         {
-            return (T) Class.forName(className).getDeclaredConstructor().newInstance();
+            return ServiceLoader.load(serviceType, Thread.currentThread().getContextClassLoader())
+                    .stream()
+                    .filter(provider -> provider.type().getName().equals(className))
+                    .findFirst()
+                    .map(ServiceLoader.Provider::get)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "No registered %s implementation found for class '%s'".formatted(serviceType.getSimpleName(),
+                                    className)));
         }
-        catch (final ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException |
-                     NoSuchMethodException e)
+        catch (final ServiceConfigurationError e)
         {
-            throw new RuntimeException(e);
+            throw new RuntimeException(
+                    "Unable to initialize service provider '%s' for type '%s'".formatted(className, serviceType.getName()), e);
         }
     }
 }

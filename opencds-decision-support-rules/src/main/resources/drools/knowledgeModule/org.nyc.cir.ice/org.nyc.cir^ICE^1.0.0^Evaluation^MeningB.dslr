@@ -23,6 +23,90 @@ expander ../../knowledgeCommon/org.cdsframework.ice/org.cdsframework^ICE^1.0.0.d
 global java.time.LocalDate evalTime;
 
 /**
+* If CVX 164 is reported for a target dose other than the final dose in the series, then evaluate as Not Evaluated and the reason
+* code is VACCINE_NOT_SUPPORTED. Ignore the reported CVX 164 when determining the recommended vaccine and calculating the
+* recommended due date for the next target dose.
+**/
+rule "MenB: CVX 164 can only be valid for the last dose and should be ignored otherwise (handle dose 1)"
+    dialect "mvel"
+    ruleflow-group "HistoryEvaluation^customEvaluationRule"
+    when
+        There is an administered shot $currentShot that needs to be evaluated
+            - the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+            - the shot belongs to the series with name a member of ("SUPPORTED_SERIES.MEN_BF_HBP_2_DOSE_SERIES", "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES", "SUPPORTED_SERIES.MEN_BF_HBP_3_DOSE_SERIES", "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES")
+            - the vaccine administered is "VACCINE_CVX_164"
+            - the dose number in the series is == 1
+    then
+        Set the shot status of $currentShot to not evaluated
+        Include the reason for shot $currentShot not evaluated due to "Vaccine Not Supported"
+        Mark the shot $currentShot as Ignored
+        Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
+        Record that this dose rule was processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot
+end
+
+/**
+* If dose 2 was administered at least 6 months - 4 days from (valid) dose 1 only, not the previous shot, then the series is complete with 2 doses.
+* CVX 164 may be considered a Valid CVX Code for dose 2 when this series exception rule applies.
+**/
+rule "MenB: CVX 164 can only be valid for the last dose and should be ignored otherwise (3 dose series) - except when 3 dose series are complete with 2 doses"
+    dialect "mvel"
+    ruleflow-group "HistoryEvaluation^customEvaluationRule"
+    when
+        There is a series $targetSeries
+            - The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+            - The name of the series a member of ("SUPPORTED_SERIES.MEN_BF_HBP_3_DOSE_SERIES", "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES")
+        There is an administered shot $currentShot that needs to be evaluated
+            - the shot belongs to the series $targetSeries
+            - the vaccine administered is "VACCINE_CVX_164"
+            - the dose number in the series is == 2
+            - make note of the date this shot was administered as $dose2AdminDate
+        There does not exist an administered shot
+            - the shot belongs to the series $targetSeries
+            - the dose number in the series is == 1
+            - that has already been evaluated and whose shot validity is VALID
+            - make note of the date that is "6m-4d" after administration as $dateSixMonthsMinus4DaysAfterDose1
+            - the date $dose2AdminDate >= $dateSixMonthsMinus4DaysAfterDose1
+    then
+        Set the shot status of $currentShot to not evaluated
+        Include the reason for shot $currentShot not evaluated due to "Vaccine Not Supported"
+        Mark the shot $currentShot as Ignored
+        Mark that evaluation of shot $currentShot is complete and therefore should not be reevaluated by any other rules
+        Record that this dose rule was processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $currentShot in the series $targetSeries
+end
+
+/**
+* Series complete with 2 doses:
+* If dose 2 was administered at least 6 months - 4 days from (valid) dose 1 only, not the previous shot, then the series is complete
+* with 2 doses. CVX 164 may be considered a Valid CVX Code for dose 2 when this series exception rule applies.
+**/
+rule "MenB: 3 dose series can be complete with 2 doses"
+    dialect "mvel"
+    ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+    when
+        There is a series $targetSeries
+            - The series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+            - The name of the series a member of ("SUPPORTED_SERIES.MEN_BF_HBP_3_DOSE_SERIES", "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES")
+        There is an administered shot $currentShot
+            - the shot belongs to the series $targetSeries
+            - the dose number in the series is == 2
+            - that has already been evaluated and whose shot validity is VALID
+            - make note of the date this shot was administered as $dose2AdminDate
+        There is an administered shot $previousShot
+            - the shot belongs to the series $targetSeries
+            - the dose number in the series is == 1
+            - that has already been evaluated and whose shot validity is VALID
+            - make note of the date that is "6m-4d" after administration as $dateSixMonthsMinus4DaysAfterDose1
+            - the date $dose2AdminDate >= $dateSixMonthsMinus4DaysAfterDose1
+    then
+        Mark the series $targetSeries complete
+        Record that this dose rule was processed for the TargetDose $currentShot
+        Log that this dose rule fired for the dose $previousShot
+        Log that this dose rule fired for the dose $currentShot in the series $targetSeries
+end
+
+/**
  * If CVX 163 (Meningococcal B 4C, OMV (Bexsero)) is reported in Men B FHbp 2-dose series, evaluate as Accepted and the reason code
  * is VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN.
  * Ignore the reported CVX 163 when determining the recommended vaccine and calculating the recommended due date for the next
@@ -135,6 +219,32 @@ rule "MenB(FHbp 3-Dose Series): Regardless of the interval between dose 2 and ta
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
 end
 
+rule "MenB(FHbp 3-dose Series): Complete with 2 Doses"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is a series $targetSeries that needs forecasting
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+			- the name of the series is "SUPPORTED_SERIES.MEN_BF_HBP_3_DOSE_SERIES"
+			- the series is not complete
+        There exists an administered shot
+            - the shot belongs to the series $targetSeries
+            - that has already been evaluated and whose shot validity is VALID
+            - the dose number in the series is == 1
+            - make note of the date this shot was administered as $dose1AdminDate
+		There exists an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the dose number in the series is == 2
+			- make note of the date this shot was administered as $dose2AdminDate
+            - make note of the date that is "6m-4d" after administration as $dateSixMonthsMinus4DaysAfterDose1
+            - the date $dose2AdminDate >= $dateSixMonthsMinus4DaysAfterDose1
+    then
+        Mark the series $targetSeries complete
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
+end
+
 /**
  * If CVX 162 (Meningococcal B FHbp, recombinant (Trumenba)) is reported, then evaluate as Accepted and the reason code is
  * VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN
@@ -190,7 +300,7 @@ end
 
 /**
  * If dose 2 was administered >= 10/25/2024, the absolute minimum interval from Valid Dose 1 (not necessarily the immediately prior
- * shot) to target dose 2  is 6 months-4 days.
+ * shot) to target dose 2 is 6 months-4 days.
  * (This is different than the table interval rule, which checks that there is a 4m-4d interval between the immediate last shot and
  * the current shot.)
  */
@@ -199,23 +309,49 @@ rule "MenB(4C 2-Dose Series): If dose 2 was administered >= 10/25/2024, the abso
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	activation-group "doseIntervalCheck"
 	when
-		There is an administered shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
-			- the dose number in the Series is == 2
+		There is an administered shot $dose2 that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the series with name "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
+			- the dose number in the series is == 2
 			- the administration date of the shot is >= "25-Oct-2024"
-			- the Series that the shot belongs to is not complete
-			- make note of the date this shot was administered as $currentShotDate
+			- the series that the shot belongs to is not complete
+			- make note of the date this shot was administered as $dose2Date
 			- make note of the associated series as $associatedTargetSeries
-		There is an administered shot $priorDose
-			- the shot belongs to the Series $associatedTargetSeries
-			- the dose number in the Series is == 1
+		There is an administered shot $dose1
+			- the shot belongs to the series $associatedTargetSeries
+			- the dose number in the series is == 1
 			- that has already been evaluated and whose shot validity is VALID
-			- make note of the date this shot was administered as $priorDoseDate
-		Confirm elapsed time between $priorDoseDate and $currentShotDate < "6m-4d"
+			- make note of the date this shot was administered as $dose1Date
+		Confirm elapsed time between $dose1Date and $dose2Date < "6m-4d"
 	then
-		Include the reason for shot $currentShot Invalid due to "Below Minimum Interval"
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+		Include the reason for shot $dose2 Invalid due to "Below Minimum Interval"
+		Record that this dose rule was processed for the TargetDose $dose2
+		Log that this dose rule fired for the dose $dose2 in the series $associatedTargetSeries
+end
+
+rule "MenB(4C 2-Dose Series): If dose 2 was administered >= 10/25/2024, the minimum interval from the previous shot to target dose 2 is 4 months minus 4 days"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	activation-group "doseIntervalCheck"
+	when
+		There is an administered shot $dose2 that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the series with name "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
+			- the dose number in the series is == 2
+			- the administration date of the shot is >= "25-Oct-2024"
+			- the series that the shot belongs to is not complete
+			- make note of the date this shot was administered as $dose2Date
+			- make note of the associated series as $associatedTargetSeries
+		There is an administered shot $dose1
+			- the shot belongs to the series $associatedTargetSeries
+			- the dose number in the series is == 1
+			- make note of the date this shot was administered as $dose1Date
+		Confirm elapsed time between $dose1Date and $dose2Date < "4m-4d"
+	then
+        Obtain the existing DoseRule for dose number 1 in the Series $associatedTargetSeries as $doseRule1
+            Set the absolute minimum interval for DoseRule $doseRule1 to TimePeriod "4m-4d"
+            Set the minimum interval for DoseRule $doseRule1 to TimePeriod "4m"
+            Replace the existing DoseRule in the series $associatedTargetSeries with $doseRule1
+		Record that this dose rule was processed for the TargetDose $dose2
+		Log that this dose rule fired for the dose $dose2 in the series $associatedTargetSeries
 end
 
 /**
@@ -227,20 +363,21 @@ rule "MenB(4C 2-Dose Series): If target dose 1 is administered < 10/25/2024, the
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	salience 999
 	when
-		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
-			- the dose number in the Series is == 1
+		There is an administered shot $dose1 that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the series with name "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
+			- the dose number in the series is == 1
 			- the administration date of the shot is < "25-Oct-2024"
-			- the Series that the shot belongs to is not complete
+			- the series that the shot belongs to is not complete
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
 	then
-		Obtain the existing DoseRule for Dose Number 1 in the Series $associatedTargetSeries as $assign_oDoseRule1
-		Set the Absolute Minimum Age for DoseRule $assign_oDoseRule1 to TimePeriod "10y-4d"
-		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m-4d"
-		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule1
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+		Obtain the existing DoseRule for dose number 1 in the series $associatedTargetSeries as $doseRule1
+            Set the absolute minimum age for DoseRule $doseRule1 to TimePeriod "10y-4d"
+            Set the minimum age for DoseRule $doseRule1 to TimePeriod "10y"
+            Replace the existing DoseRule in the series $associatedTargetSeries with $doseRule1
+
+		Record that this dose rule was processed for the TargetDose $dose1
+		Log that this dose rule fired for the dose $dose1 in the Series $associatedTargetSeries
 end
 
 /**
@@ -253,19 +390,20 @@ rule "MenB(4C 2-Dose Series): If target dose 2 is administered < 10/25/2024, the
 	ruleflow-group "HistoryEvaluation^customEvaluationRule"
 	salience 999
 	when
-		There is an Administered Shot $currentShot that needs to be evaluated
-			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the Series with name "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
-			- the dose number in the Series is == 2
+		There is an administered shot $dose2 that needs to be evaluated
+			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B" and the series with name "SUPPORTED_SERIES.MEN_B_4_C_2_DOSE_SERIES"
+			- the dose number in the series is == 2
 			- the administration date of the shot is < "25-Oct-2024"
-			- the Series that the shot belongs to is not complete
+			- the series that the shot belongs to is not complete
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
 	then
-		Obtain the existing DoseRule for Dose Number 1 in the Series $associatedTargetSeries as $assign_oDoseRule1
-		Set the Absolute Minimum Interval for DoseRule $assign_oDoseRule1 to TimePeriod "1m-4d"
-		Replace the existing DoseRule in the Series $associatedTargetSeries with $assign_oDoseRule1
-		Record that this dose rule was Processed for the TargetDose $currentShot
-		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+		Obtain the existing DoseRule for dose number 1 in the Series $associatedTargetSeries as $doseRule1
+            Set the absolute minimum interval for DoseRule $doseRule1 to TimePeriod "1m-4d"
+            Set the minimum interval for DoseRule $doseRule1 to TimePeriod "1m"
+		    Replace the existing DoseRule in the series $associatedTargetSeries with $doseRule1
+		Record that this dose rule was processed for the TargetDose $dose2
+		Log that this dose rule fired for the dose $dose2 in the Series $associatedTargetSeries
 end
 
 /**
@@ -397,4 +535,30 @@ rule "MenB(4C 3-Dose Series): Regardless of the interval between dose 2 and targ
 		Set the Shot Status of $currentShot to Valid
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $associatedTargetSeries
+end
+
+rule "MenB(4C 3-Dose Series): Complete with 2 Doses"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^customEvaluationRule"
+	when
+		There is a series $targetSeries that needs forecasting
+			- the series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B"
+			- the name of the series is "SUPPORTED_SERIES.MEN_B_4_C_3_DOSE_SERIES"
+			- the series is not complete
+        There exists an administered shot
+            - the shot belongs to the series $targetSeries
+            - that has already been evaluated and whose shot validity is VALID
+            - the dose number in the series is == 1
+            - make note of the date this shot was administered as $dose1AdminDate
+		There exists an administered shot
+			- the shot belongs to the series $targetSeries
+			- that has already been evaluated and whose shot validity is VALID
+			- the dose number in the series is == 2
+			- make note of the date this shot was administered as $dose2AdminDate
+            - make note of the date that is "6m-4d" after administration as $dateSixMonthsMinus4DaysAfterDose1
+            - the date $dose2AdminDate >= $dateSixMonthsMinus4DaysAfterDose1
+    then
+        Mark the series $targetSeries complete
+		Record that this series rule was processed for the TargetSeries $targetSeries
+		Log that this series rule fired for the series $targetSeries
 end

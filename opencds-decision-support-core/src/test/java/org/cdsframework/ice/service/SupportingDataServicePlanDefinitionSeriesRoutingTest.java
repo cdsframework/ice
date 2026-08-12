@@ -120,7 +120,8 @@ class SupportingDataServicePlanDefinitionSeriesRoutingTest
         final IceProperties properties = new IceProperties();
         properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
         properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
-                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, List.of(), List.of(),
+                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, false, List.of(),
+                        List.of(),
                         false, IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         return properties;
     }

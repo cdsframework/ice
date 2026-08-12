@@ -386,7 +386,6 @@ rule "Hep B: When evaluating a CVX 189 and the series is complete, if there is a
 			- the shot belongs to the vaccine group "VACCINE_GROUP_CONCEPT.HEP_B"
 			- the shot belongs to the series $targetSeries
 			- the vaccine administered is not "VACCINE_CVX_189"
-			- that has already been evaluated and whose shot validity status is not ACCEPTED
 			- make note of all evaluation reasons for this shot as $allEvaluationReasons
 			- the collection $allEvaluationReasons does not contain "EVALUATION_REASON_CONCEPT.VACCINE_NOT_COUNTED_BASED_ON_MOST_RECENT_VACCINE_GIVEN"
 			- the administration date of the shot is <= $targetDoseDate
@@ -486,6 +485,7 @@ rule "Hep B: Switch from Hep B 3-dose Child/Adolescent Series to 4-dose Series i
     dialect "mvel"
     ruleflow-group "HistoryEvaluation^postEvaluationCheck"
     when
+      The schedule flag "HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID" is not set
       There is an Administered Shot $dose3
         - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
         - the shot belongs to the series with name "SUPPORTED_SERIES.HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES"
@@ -502,6 +502,27 @@ rule "Hep B: Switch from Hep B 3-dose Child/Adolescent Series to 4-dose Series i
       Remove all evaluation reasons from shot $dose3
       Include the reason for shot $dose3 Valid due to "Extra Dose"
       Refresh all facts in the Series $targetSeries for Evaluation
+      Refresh all facts for the Shot $dose3
+      Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "Hep B: Mark dose 3 in Hep B 3-dose Child/Adolescent Series as Accepted when invalid only due to absolute minimum interval or absolute minimum age and HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID is set"
+    dialect "mvel"
+    ruleflow-group "HistoryEvaluation^postEvaluationCheck"
+    when
+      The schedule flag "HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID" is set
+      There is an Administered Shot $dose3
+        - the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.HEP_B"
+        - the shot belongs to the series with name "SUPPORTED_SERIES.HEP_B_3_DOSE_CHILD_ADOLESCENT_SERIES"
+        - the dose number in the series is == 3
+        - that has already been evaluated and whose shot validity is INVALID
+        - the invalid reasons are members of ("EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_INTERVAL", "EVALUATION_REASON_CONCEPT.BELOW_MINIMUM_AGE_SERIES")
+        - make note of the associated series as $targetSeries
+    then
+      Set the Shot Status of $dose3 to Accepted
+      Remove all evaluation reasons from shot $dose3
+      Include the reason for shot $dose3 Accepted due to "Extra Dose"
+      Mark the shot $dose3 as ignored
       Refresh all facts for the Shot $dose3
       Log that this Series Rule fired for the Series $targetSeries
 end

@@ -33,9 +33,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import org.cdsframework.cds.CdsConcept;
 import org.kie.api.definition.type.ClassReactive;
 import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
 import org.opencds.vmr.v1_0.internal.concepts.ImmunizationConcept;
@@ -58,13 +61,30 @@ public class TargetDoseInitializationTracker
     public List<TargetDose> addTargetDoseInitialization(final Vaccine vaccineAdministered, final SubstanceAdministrationEvent sae,
             final TargetSeries ts, final Schedule scheduleBackingSeries, final VaccineComponent addThisVaccineComponentOnly)
     {
-        return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, addThisVaccineComponentOnly, false);
+        return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, addThisVaccineComponentOnly,
+                (VaccineComponent) null, false);
+    }
+
+    public List<TargetDose> addTargetDoseInitialization(final Vaccine vaccineAdministered, final SubstanceAdministrationEvent sae,
+            final TargetSeries ts, final Schedule scheduleBackingSeries, final VaccineComponent addThisVaccineComponentOnly,
+            final VaccineComponent reportingVaccineComponent)
+    {
+        return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, addThisVaccineComponentOnly,
+                reportingVaccineComponent, false);
+    }
+
+    public List<TargetDose> addTargetDoseInitialization(final Vaccine vaccineAdministered, final SubstanceAdministrationEvent sae,
+            final TargetSeries ts, final Schedule scheduleBackingSeries, final VaccineComponent addThisVaccineComponentOnly,
+            final String reportingVaccineComponentConceptCode)
+    {
+        return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, addThisVaccineComponentOnly,
+                reportingVaccineComponentConceptCode, false);
     }
 
     public List<TargetDose> addTargetDoseInitialization(final Vaccine vaccineAdministered, final SubstanceAdministrationEvent sae,
             final TargetSeries ts, final Schedule scheduleBackingSeries, final boolean overrideSeasonalDateRestriction)
     {
-        return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, null,
+        return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, null, (VaccineComponent) null,
                 overrideSeasonalDateRestriction);
     }
 
@@ -75,6 +95,32 @@ public class TargetDoseInitializationTracker
     public List<TargetDose> addTargetDoseInitialization(final Vaccine vaccineAdministered, final SubstanceAdministrationEvent sae,
             final TargetSeries ts, final Schedule scheduleBackingSeries, final VaccineComponent addThisVaccineComponentOnly,
             final boolean overrideSeasonalDateRestriction)
+    {
+        return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, addThisVaccineComponentOnly,
+                (VaccineComponent) null, overrideSeasonalDateRestriction);
+    }
+
+    public List<TargetDose> addTargetDoseInitialization(final Vaccine vaccineAdministered, final SubstanceAdministrationEvent sae,
+            final TargetSeries ts, final Schedule scheduleBackingSeries, final VaccineComponent addThisVaccineComponentOnly,
+            final String reportingVaccineComponentConceptCode, final boolean overrideSeasonalDateRestriction)
+    {
+        final VaccineComponent reportingVaccineComponent = reportingVaccineComponentConceptCode == null
+                                                           ? null
+                                                           : new VaccineComponent(
+                                                                   new CdsConcept(reportingVaccineComponentConceptCode),
+                                                                   scheduleBackingSeries.getDiseasesTargetedByVaccineGroup(
+                                                                           ts.getSeriesRules().getVaccineGroup()));
+        return addTargetDoseInitialization(vaccineAdministered, sae, ts, scheduleBackingSeries, addThisVaccineComponentOnly,
+                reportingVaccineComponent, overrideSeasonalDateRestriction);
+    }
+
+    /**
+     * @return List of TargetDoses that were added to the initialization tracker; empty if none are added
+     * @throws IllegalArgumentException If any of the parameters are null or SubstanceAdministrationDates are inconsistent
+     */
+    public List<TargetDose> addTargetDoseInitialization(final Vaccine vaccineAdministered, final SubstanceAdministrationEvent sae,
+            final TargetSeries ts, final Schedule scheduleBackingSeries, final VaccineComponent addThisVaccineComponentOnly,
+            final VaccineComponent reportingVaccineComponent, final boolean overrideSeasonalDateRestriction)
     {
         final String _METHODNAME = "addTargetDoseInitialization(): ";
         if (vaccineAdministered == null || sae == null || ts == null || scheduleBackingSeries == null)
@@ -145,6 +191,9 @@ public class TargetDoseInitializationTracker
                     .equals(vaccineGroupStr))
             {
                 final TargetDose td = new TargetDose(vaccineAdministered, vc, adminDate, ts, sae);
+                if (reportingVaccineComponent != null)
+                    td.setReportingVaccineComponent(reportingVaccineComponent);
+
                 final boolean lTargetDoseAdded;
                 if (overrideSeasonalDateRestriction)
                     lTargetDoseAdded = ts.addTargetDoseToSeries(td, true);
@@ -211,12 +260,34 @@ public class TargetDoseInitializationTracker
     public boolean shotAdministeredIsEligibleForInclusionInTargetSeries(final ImmunizationConcept ic, final String svgc,
             final SubstanceAdministrationEvent sae, final TargetSeries targetSeries, final Vaccine vaccineAdministered)
     {
-        // If not all vaccine components of the Vaccine have been initialized for the ....
-        // AI:
+        return shotAdministeredIsEligibleForInclusionInTargetSeries(ic, svgc, sae, targetSeries, vaccineAdministered, null);
+    }
+
+    /**
+     * Determines whether an administered shot is eligible for inclusion in a target series, accounting for an optional mapped vaccine.
+     *
+     * @param ic                       ImmunizationConcept
+     * @param svgc                     Vaccine Group
+     * @param sae                      SubstanceAdministrationEvent
+     * @param targetSeries             TargetSeries to which the shot may be added
+     * @param vaccineAdministered      Vaccine administered
+     * @param mappedVaccineConceptCode Concept code of a vaccine that may already have been initialized for this shot and series
+     * @return true if the shot is eligible for inclusion; false otherwise
+     */
+    public boolean shotAdministeredIsEligibleForInclusionInTargetSeries(final ImmunizationConcept ic, final String svgc,
+            final SubstanceAdministrationEvent sae, final TargetSeries targetSeries, final Vaccine vaccineAdministered,
+            final String mappedVaccineConceptCode)
+    {
+        final boolean mappedTargetDoseInitialized = mappedVaccineConceptCode == null
+                                                        ? containsMappedTargetDoseForSameShotAndSeries(sae, targetSeries,
+                                                                vaccineAdministered)
+                                                        : isMappedVaccineAlreadyInitializedForSameShotAndSeries(sae, targetSeries,
+                                                                mappedVaccineConceptCode);
 
         return specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(ic,
-                svgc) && atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(sae,
-                targetSeries, vaccineAdministered);
+                svgc) && !mappedTargetDoseInitialized
+                && atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(sae,
+                        targetSeries, vaccineAdministered);
 
         // If there is a season associated with the SeriesRules, ensure that the shot administration date falls within the set of dates
         /*
@@ -242,6 +313,52 @@ public class TargetDoseInitializationTracker
          * }
          * * * * * * * *
          */
+    }
+
+    /**
+     * Determines whether the same shot and series already contains a mapped target dose that is not a component of the administered
+     * vaccine.
+     */
+    private boolean containsMappedTargetDoseForSameShotAndSeries(final SubstanceAdministrationEvent sae,
+            final TargetSeries targetSeries, final Vaccine vaccineAdministered)
+    {
+        if (sae == null || targetSeries == null || vaccineAdministered == null)
+            return false;
+
+        final String conceptTargetId = sae.getId();
+        final String targetSeriesIdentifier = targetSeries.getTargetSeriesIdentifier();
+        if (conceptTargetId == null || targetSeriesIdentifier == null)
+            return false;
+
+        final Set<String> expectedTargetDoseKeys = vaccineAdministered.getVaccineComponents()
+                .stream()
+                .map(VaccineComponent::getCdsConceptName)
+                .filter(Objects::nonNull)
+                .map(componentConceptCode -> conceptTargetId + componentConceptCode + targetSeriesIdentifier)
+                .collect(Collectors.toSet());
+        if (expectedTargetDoseKeys.isEmpty())
+            return false;
+
+        return initializedTargetDoseList.stream()
+                .filter(key -> key.startsWith(conceptTargetId) && key.endsWith(targetSeriesIdentifier))
+                .anyMatch(Predicate.not(expectedTargetDoseKeys::contains));
+    }
+
+    /**
+     * Determines whether a mapped vaccine has already been initialized for the same shot and series.
+     */
+    private boolean isMappedVaccineAlreadyInitializedForSameShotAndSeries(final SubstanceAdministrationEvent sae,
+            final TargetSeries targetSeries, final String mappedVaccineConceptCode)
+    {
+        if (sae == null || targetSeries == null || mappedVaccineConceptCode == null)
+            return false;
+
+        final String conceptTargetId = sae.getId();
+        final String targetSeriesIdentifier = targetSeries.getTargetSeriesIdentifier();
+        if (conceptTargetId == null || targetSeriesIdentifier == null)
+            return false;
+
+        return initializedTargetDoseList.contains(conceptTargetId + mappedVaccineConceptCode + targetSeriesIdentifier);
     }
 
     private boolean atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(

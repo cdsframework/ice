@@ -1,0 +1,253 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "ice-schedule-authority",
+  "url": "http://terminology.cdsframework.org/fhir/StructureDefinition/ice-schedule-authority",
+  "version": "1.0.0",
+  "name": "IceScheduleAuthority",
+  "title": "ICE Schedule Authority",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-05-27",
+  "publisher": "CDS Framework",
+  "description": "A reference to a schedule authority (Organization) that recommends vaccine schedules.",
+  "fhirVersion": "6.0.0-ballot4",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "ImmunizationRecommendation.recommendation"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Schedule authority",
+        "definition": "Reference to the schedule authority for this recommendation.",
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "max": "0"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://terminology.cdsframework.org/fhir/StructureDefinition/ice-schedule-authority"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "short": "Reference to the schedule authority",
+        "definition": "A reference to an Organization that serves as the schedule authority.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Extension.valueReference.type",
+        "path": "Extension.valueReference.type",
+        "short": "Type of the referenced resource",
+        "definition": "The type of the resource being referenced (Organization).",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.valueReference.identifier",
+        "path": "Extension.valueReference.identifier",
+        "short": "Identifier for the schedule authority",
+        "definition": "The business identifier for the schedule authority Organization.",
+        "min": 1,
+        "max": "1"
+      },
+      {
+        "id": "Extension.valueReference.identifier.system",
+        "path": "Extension.valueReference.identifier.system",
+        "short": "System for the identifier",
+        "definition": "The URL for the schedule authority code system.",
+        "min": 1,
+        "max": "1",
+        "fixedUri": "http://terminology.cdsframework.org/ice/schedule-authority"
+      },
+      {
+        "id": "Extension.valueReference.display",
+        "path": "Extension.valueReference.display",
+        "short": "Display name of the schedule authority",
+        "definition": "The display name for the schedule authority Organization.",
+        "min": 1,
+        "max": "1"
+      }
+    ]
+  },
+  "snapshot": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Schedule authority",
+        "definition": "Reference to the schedule authority for this recommendation.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Extension",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "Extension.id",
+        "path": "Extension.id",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "max": "0",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://terminology.cdsframework.org/fhir/StructureDefinition/ice-schedule-authority",
+        "base": {
+          "path": "Extension.url",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ]
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "short": "Reference to the schedule authority",
+        "definition": "A reference to an Organization that serves as the schedule authority.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Extension.value[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Extension.valueReference.type",
+        "path": "Extension.valueReference.type",
+        "short": "Type of the referenced resource",
+        "definition": "The type of the resource being referenced (Organization).",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Reference.type",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ]
+      },
+      {
+        "id": "Extension.valueReference.identifier",
+        "path": "Extension.valueReference.identifier",
+        "short": "Identifier for the schedule authority",
+        "definition": "The business identifier for the schedule authority Organization.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Reference.identifier",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ]
+      },
+      {
+        "id": "Extension.valueReference.identifier.system",
+        "path": "Extension.valueReference.identifier.system",
+        "short": "System for the identifier",
+        "definition": "The URL for the schedule authority code system.",
+        "min": 1,
+        "max": "1",
+        "fixedUri": "http://terminology.cdsframework.org/ice/schedule-authority",
+        "base": {
+          "path": "Identifier.system",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ]
+      },
+      {
+        "id": "Extension.valueReference.display",
+        "path": "Extension.valueReference.display",
+        "short": "Display name of the schedule authority",
+        "definition": "The display name for the schedule authority Organization.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Reference.display",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -10,10 +10,10 @@ import java.util.Optional;
 
 import org.cdsframework.cds.CdsConcept;
 import org.cdsframework.cds.supportingdata.LocallyCodedCdsListItem;
-import org.cdsframework.fhir.CodeSystemConceptProperty;
 import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.cdsframework.ice.supportingdata.BaseDataRecommendationReason;
 import org.cdsframework.ice.supportingdata.ICEConceptType;
+import org.cdsframework.ice.supportingdata.LocallyCodedVaccineGroupItem;
 import org.cdsframework.ice.supportingdata.SupplementalReasonSupport;
 import org.drools.model.Drools;
 import org.jspecify.annotations.NonNull;
@@ -28,6 +28,7 @@ import org.opencds.vmr.v1_0.internal.datatypes.BL;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.opencds.vmr.v1_0.internal.datatypes.INT;
 import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -389,10 +390,12 @@ public class PayloadHelper
     private final Drools drools;
     private final Map<String, Object> namedObjects;
     private final boolean outputSupplementalText;
+    private final boolean outputScheduleAuthorities;
     private final boolean outputVaccineGroupRulesArtifact;
 
     public PayloadHelper(final Schedule backingSchedule, final Drools drools, final Map<String, Object> namedObjects,
-            final boolean outputSupplementalText, final boolean outputVaccineGroupRulesArtifact)
+            final boolean outputSupplementalText, final boolean outputScheduleAuthorities,
+            final boolean outputVaccineGroupRulesArtifact)
     {
         if (backingSchedule == null || !backingSchedule.isScheduleInitialized())
         {
@@ -419,6 +422,7 @@ public class PayloadHelper
         this.drools = drools;
         this.namedObjects = namedObjects;
         this.outputSupplementalText = outputSupplementalText;
+        this.outputScheduleAuthorities = outputScheduleAuthorities;
         this.outputVaccineGroupRulesArtifact = outputVaccineGroupRulesArtifact;
     }
 
@@ -538,10 +542,13 @@ public class PayloadHelper
         final AdministrableSubstance lAS = new AdministrableSubstance();
         lAS.setId(ICELogicHelper.generateUniqueString());
         // Get the associated vaccine concept associated with the TargetDose
+        final VaccineComponent vaccineComponentForOutput = targetDose.getReportingVaccineComponent() == null
+                                                           ? targetDose.getVaccineComponent()
+                                                           : targetDose.getReportingVaccineComponent();
         final LocallyCodedCdsListItem lSVC = this.backingSchedule.getICESupportingDataConfiguration()
                 .getSupportedCdsConcepts()
                 .getCdsListItemAssociatedWithICEConceptTypeAndICEConcept(ICEConceptType.OPENCDS,
-                        targetDose.getVaccineComponent().getCdsConcept());
+                        vaccineComponentForOutput.getCdsConcept());
         if (lSVC == null)
         {
             final String lErrStr = "LocallyCodedCdsListItem Vaccine not found for specified TargetDose; this should not occur";
@@ -736,6 +743,9 @@ public class PayloadHelper
         if (outputVaccineGroupRulesArtifact)
             createVaccineGroupUrlObservation(focalPersonId, ts.getVaccineGroup(), uniqueSarIdValue);
 
+        if (outputScheduleAuthorities)
+            createVaccineGroupScheduleAuthoritiesObservation(focalPersonId, ts.getVaccineGroup(), uniqueSarIdValue);
+
         return sap;
     }
 
@@ -809,12 +819,12 @@ public class PayloadHelper
     /**
      * Create an evaluation observation for a dose status.
      *
-     * @param nestedIdValue          Unique ID for the observation
-     * @param focalPersonId          Patient ID
-     * @param evalTime               Evaluation time
-     * @param vaccineGroup           Vaccine group code
-     * @param doseStatus             Status of the dose
-     * @param reasons                Collection of reasons for the status
+     * @param nestedIdValue Unique ID for the observation
+     * @param focalPersonId Patient ID
+     * @param evalTime      Evaluation time
+     * @param vaccineGroup  Vaccine group code
+     * @param doseStatus    Status of the dose
+     * @param reasons       Collection of reasons for the status
      * @return Configured ObservationResult for evaluation
      */
     private ObservationResult createEvaluationObservation(final String sourceId, final String nestedIdValue,
@@ -899,9 +909,9 @@ public class PayloadHelper
     /**
      * Create a recommendation observation for a target series.
      *
-     * @param nestedIdValue          Unique ID for the observation
-     * @param focalPersonId          Patient ID
-     * @param targetSeries           The target series with recommendation info
+     * @param nestedIdValue Unique ID for the observation
+     * @param focalPersonId Patient ID
+     * @param targetSeries  The target series with recommendation info
      * @return Configured ObservationResult for recommendation
      * @throws IllegalArgumentException If recommendation status is invalid
      */
@@ -1159,12 +1169,10 @@ public class PayloadHelper
 
     private void createVaccineGroupUrlObservation(final String focalPersonId, final String vg, final String sourceId)
     {
-        Optional.ofNullable(this.backingSchedule.getICESupportingDataConfiguration().getSupportedVaccineGroups().getCdsListItem(vg))
-                .map(LocallyCodedCdsListItem::getProperties)
-                .flatMap(properties -> properties.stream()
-                        .filter(property -> property.code().equals("vaccineGroupRulesUrl"))
-                        .findFirst()
-                        .map(CodeSystemConceptProperty::valueString))
+        Optional.ofNullable(this.backingSchedule.getICESupportingDataConfiguration()
+                        .getSupportedVaccineGroups()
+                        .getVaccineGroupItem(vg))
+                .map(LocallyCodedVaccineGroupItem::getVaccineGroupRulesUrl)
                 .ifPresent(url ->
                 {
                     final ObservationResult lVaccineGroupUrlObservation =
@@ -1189,6 +1197,62 @@ public class PayloadHelper
                             createPertinentRelationship(sourceId, lVaccineGroupUrlObservation.getId());
                     droolsInsert("rel" + lVaccineGroupUrlObservation.getId(), rel);
                 });
+    }
+
+    private void createVaccineGroupScheduleAuthoritiesObservation(final String focalPersonId, final String vg,
+            final String sourceId)
+    {
+        final String _METHODNAME = "createVaccineGroupScheduleAuthoritiesObservation: ";
+        final LocallyCodedVaccineGroupItem lVGI = this.backingSchedule.getICESupportingDataConfiguration()
+                .getSupportedVaccineGroups()
+                .getVaccineGroupItem(vg);
+
+        if (lVGI == null)
+        {
+            log.warn(_METHODNAME + "LocallyCodedVaccineGroupItem not found for vaccine group: " + vg);
+            return;
+        }
+
+        final Collection<String> lScheduleAuthorityCodes = lVGI.getScheduleAuthorityCdsListItemNames();
+        if (ObjectUtils.isEmpty(lScheduleAuthorityCodes))
+            return;
+
+        final ObservationResult lObservationResult =
+                generateObservationResult(ICELogicHelper.generateUniqueString(), focalPersonId, true);
+
+        lObservationResult.setObservationFocus(
+                createCD("2.16.840.1.113883.3.795.12.100.500", "ICE_VACCINE_GROUP_SCHEDULE_AUTHORITIES",
+                        "Schedule authority or authorities for the vaccine group.", null));
+
+        final List<CD> lInterpretations = new ArrayList<>();
+        final String scheduleAuthorityCdsListCode = ICEConceptType.SCHEDULE_AUTHORITY.getIceConceptTypeValue();
+        for (final String lSACode : lScheduleAuthorityCodes)
+        {
+            final String lSAItemName = "%s.%s".formatted(scheduleAuthorityCdsListCode, lSACode);
+            final LocallyCodedCdsListItem lSALI = this.backingSchedule.getICESupportingDataConfiguration()
+                    .getSupportedCdsLists()
+                    .getCdsListItem(lSAItemName);
+
+            if (lSALI != null)
+            {
+                final CD lCD = copyCD(lSALI.getCdsListItemCD());
+                if (lCD != null && !lInterpretations.contains(lCD))
+                    lInterpretations.add(lCD);
+            }
+        }
+
+        if (!lInterpretations.isEmpty())
+            lObservationResult.setInterpretation(lInterpretations);
+        else
+            return;
+
+        lObservationResult.setClinicalStatementToBeRoot(false);
+        lObservationResult.setToBeReturned(true);
+
+        droolsInsert("childObs" + lObservationResult.getId(), lObservationResult);
+
+        final ClinicalStatementRelationship rel = createPertinentRelationship(sourceId, lObservationResult.getId());
+        droolsInsert("rel" + lObservationResult.getId(), rel);
     }
 
     private CD getLocalCodeForSeriesDisplaySelectionType(final SeriesDisplaySelectionType seriesDisplaySelectionType)

@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
 import org.kie.api.definition.type.ClassReactive;
 import org.opencds.vmr.v1_0.internal.SubstanceAdministrationEvent;
 import org.springframework.util.ObjectUtils;
@@ -58,6 +57,7 @@ public class TargetDose
     private final Set<String> notEvaluatedReasons;
     private final Set<String> doseRulesProcessed;
     private VaccineComponent vaccineComponent;
+    private VaccineComponent reportingVaccineComponent;
     private int administeredShotNumberInSeries;
     private LocalDate administrationDate;
     private int doseNumberInSeries;
@@ -75,9 +75,6 @@ public class TargetDose
     private Set<String> validReasons;
     private Set<String> acceptedReasons;
     private Set<String> invalidReasons;
-    private Set<String> supplementalTextsForValidShots;
-    private Set<String> supplementalTextsForAcceptedShots;
-    private Set<String> supplementalTextsForInvalidShots;
     private String evaluatedSeriesName;
     private SeriesDisplaySelectionType seriesDisplaySelectionType;
     private Season evaluatedSeriesSeason;
@@ -115,9 +112,6 @@ public class TargetDose
         invalidReasons = new HashSet<>();
         notEvaluatedReasons = new HashSet<>();
         doseRulesProcessed = new HashSet<>();
-        supplementalTextsForValidShots = new HashSet<>();
-        supplementalTextsForAcceptedShots = new HashSet<>();
-        supplementalTextsForInvalidShots = new HashSet<>();
         isPrimarySeriesShot = false;
         isValid = false;
         isShotIgnored = false;
@@ -196,39 +190,6 @@ public class TargetDose
             validReasons.remove(openCdsConceptCode);
             notEvaluatedReasons.remove(openCdsConceptCode);
         }
-    }
-
-    public void removeAllSupplementalTextsForValidShot()
-    {
-        supplementalTextsForValidShots = new HashSet<>();
-    }
-
-    public void removeSupplementalTextForValidShot(final String supplementalText)
-    {
-        if (supplementalText != null)
-            supplementalTextsForValidShots.remove(supplementalText);
-    }
-
-    public void removeAllSupplementalTextsForAcceptedShot()
-    {
-        supplementalTextsForAcceptedShots = new HashSet<>();
-    }
-
-    public void removeSupplementalTextForAcceptedShot(final String supplementalText)
-    {
-        if (supplementalText != null)
-            supplementalTextsForAcceptedShots.remove(supplementalText);
-    }
-
-    public void removeAllSupplementalTextsForInvalidShot()
-    {
-        supplementalTextsForInvalidShots = new HashSet<>();
-    }
-
-    public void removeSupplementalTextForInvalidShot(final String supplementalText)
-    {
-        if (supplementalText != null)
-            supplementalTextsForInvalidShots.remove(supplementalText);
     }
 
     public void removeValidReason(final String openCdsConceptCode)
@@ -315,11 +276,7 @@ public class TargetDose
             if (status == DoseStatus.VALID)
                 setIsValid(true);
             else
-            {
-                if (hasBeenEvaluated())
-                    removeAllSupplementalTextsForValidShot();
                 setIsValid(false);
-            }
             if (status == DoseStatus.EVALUATION_NOT_STARTED || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
             {
                 setPostEvaluationCheckCompleted(false);
@@ -397,46 +354,12 @@ public class TargetDose
     }
 
     /**
-     * Adds the invalid reason, if not already present
+     * Adds the not evaluated reason, if not already present
      */
-    public void addNotEvalatedReason(final String reason)
+    public void addNotEvaluatedReason(final String reason)
     {
         if (reason != null)
             notEvaluatedReasons.add(reason);
-    }
-
-    /**
-     * Add the supplemental text, if not already present
-     */
-    public void addSupplementalTextForValidShot(final String supplementalTextForValidShots)
-    {
-        addValidReason(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
-        if (supplementalTextForValidShots != null)
-            supplementalTextsForValidShots.add(supplementalTextForValidShots);
-    }
-
-    public Collection<String> getSupplementalTextsForValidShot()
-    {
-        return supplementalTextsForValidShots;
-    }
-
-    public void addSupplementalTextForAcceptedShot(final String supplementalTextForAcceptedShots)
-    {
-        addAcceptedReason(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
-        if (supplementalTextForAcceptedShots != null)
-            supplementalTextsForAcceptedShots.add(supplementalTextForAcceptedShots);
-    }
-
-    public Collection<String> getSupplementalTextsForAcceptedShot()
-    {
-        return supplementalTextsForAcceptedShots;
-    }
-
-    public void addSupplementalTextForInvalidShot(final String supplementalTextForInvalidShots)
-    {
-        addInvalidReason(BaseDataEvaluationReason._SUPPLEMENTAL_TEXT.getCdsListItemName());
-        if (supplementalTextForInvalidShots != null)
-            supplementalTextsForInvalidShots.add(supplementalTextForInvalidShots);
     }
 
     public void captureEvaluationContext(final TargetSeries evaluatedSeries, final int vgSeriesCount)
@@ -448,16 +371,11 @@ public class TargetDose
         this.evaluatedSeriesSeason = evaluatedSeries.getTargetSeason();
     }
 
-    public Collection<String> getSupplementalTextsForInvalidShot()
-    {
-        return supplementalTextsForInvalidShots;
-    }
-
     @Override
     public String toString()
     {
         final StringBuilder s = new StringBuilder(
-                "TargetDose [uniqueId=%s, doseId=%s, administeredShotNumber=%d; doseNumber=%d, doseNumberCount=%d, vaccine=%s, isPrimarySeriesShot=%s; vaccineComponent=%s, administrationDate=%s, status=%s; isValid=%s; preEvaluationCheck=%s; isLiveVirus: %s; isCombinationVaccine: %s; componentIsLiveVirus: %s; isAdjuvant: %s; componentIsAdjuvant: %s; isDuplicateShotSameDayCheckCompleted: %s, isUnspecifiedFormulation(): %s; hasBeenEvaluated: %s".formatted(
+                "TargetDose [uniqueId=%s, doseId=%s, administeredShotNumber=%d; doseNumberInSeries=%d, doseNumberCount=%d, vaccine=%s, isPrimarySeriesShot=%s; vaccineComponent=%s, administrationDate=%s, status=%s; isValid=%s; preEvaluationCheck=%s; isLiveVirus: %s; isCombinationVaccine: %s; componentIsLiveVirus: %s; isAdjuvant: %s; componentIsAdjuvant: %s; isDuplicateShotSameDayCheckCompleted: %s, isUnspecifiedFormulation(): %s; hasBeenEvaluated: %s".formatted(
                         uniqueId, doseId, administeredShotNumberInSeries, doseNumberInSeries, doseNumberCount,
                         administeredVaccine.getCdsConceptName(), isPrimarySeriesShot(), vaccineComponent.getCdsConceptName(),
                         administrationDate, status, isValid, preEvaluationCheckCompleted,
@@ -497,18 +415,6 @@ public class TargetDose
                 s.append(", invalidReasons={\"").append(reason).append("\"");
             else
                 s.append("\"").append(reason).append("\"");
-        }
-
-        if (i > 0)
-            s.append("}");
-
-        i = 0;
-        for (final String supplementalText : supplementalTextsForValidShots)
-        {
-            if (i++ == 0)
-                s.append(", supplementalTexts={\"").append(supplementalText).append("\"");
-            else
-                s.append("\"").append(supplementalText).append("\"");
         }
 
         if (i > 0)

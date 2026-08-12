@@ -26,6 +26,7 @@
 
 package org.cdsframework.ice.service.configurations;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,6 +48,7 @@ import org.opencds.config.api.model.KnowledgeModule;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +58,69 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
 {
     @Setter
     private static SupportingDataService supportingDataService;
+
+    private static KieBase getKieBase() throws IOException
+    {
+        final KieServices kieServices = KieServices.Factory.get();
+
+        final ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+        final Resource[] droolsModelResources = resolver.getResources("classpath*:META-INF/kie/**/drools-model");
+        if (droolsModelResources.length > 1)
+            throw new IllegalStateException(
+                    "Found %d instances of drools-model in classpath".formatted(droolsModelResources.length));
+
+        if (droolsModelResources.length == 1)
+        {
+            log.info("Found pre-compiled Drools in classpath");
+
+            final String url = droolsModelResources[0].getURL().toString();
+            final Resource resource = new UrlResource(url.substring(4, url.indexOf("!/")));
+            log.info("Loading ICE KnowledgeBase from jar: {}", resource);
+
+            try (final InputStream is = resource.getInputStream())
+            {
+                return kieServices.newKieContainer(kieServices.getRepository()
+                        .addKieModule(kieServices.getResources().newInputStreamResource(is))
+                        .getReleaseId()).getKieBase();
+            }
+        }
+
+        log.info("No pre-compiled Drools found in classpath");
+
+        final Resource[] kmoduleResources = resolver.getResources("classpath*:META-INF/kmodule.xml");
+        if (kmoduleResources.length != 1)
+            throw new IllegalStateException("Found %d instances of kmodule.xml in classpath".formatted(kmoduleResources.length));
+
+        final Resource resource = kmoduleResources[0].createRelative("../drools");
+        log.info("Loading ICE KnowledgeBase from filesystem: {}", resource);
+
+        final Path droolsPath = Path.of(resource.getURI());
+
+        final KieFileSystem kfs = kieServices.newKieFileSystem();
+
+        try (final Stream<Path> stream = Files.find(droolsPath, Integer.MAX_VALUE, (p, a) -> a.isRegularFile()))
+        {
+            for (final Path path : stream.toList())
+            {
+                final ResourceType resourceType = ResourceType.determineResourceType(path.getFileName().toString());
+                if (resourceType == null)
+                    continue;
+
+                final org.kie.api.io.Resource droolsResource =
+                        kieServices.getResources().newInputStreamResource(Files.newInputStream(path));
+                droolsResource.setTargetPath(droolsPath.relativize(path).toString());
+                droolsResource.setResourceType(resourceType);
+                kfs.write(droolsResource);
+            }
+        }
+
+        final KieBuilder kieBuilder = kieServices.newKieBuilder(kfs).buildAll(ExecutableModelProject.class);
+        if (kieBuilder.getResults().hasMessages(Message.Level.ERROR))
+            throw new RuntimeException("KieBuilder had errors: " + kieBuilder.getResults().getMessages());
+
+        return kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId()).getKieBase();
+    }
 
     @Override
     public IceKnowledgePackage loadKnowledgePackage(final KnowledgeModule knowledgeModule,
@@ -97,68 +162,13 @@ public class IceKnowledgeLoader implements KnowledgeLoader<InputStream, IceKnowl
             throw new IllegalStateException(errStr);
         }
 
-        final KieBase kieBase;
-
         try
         {
-            final KieServices kieServices = KieServices.Factory.get();
-
-            final Resource[] resources = new PathMatchingResourcePatternResolver().getResources("classpath*:META-INF/kmodule.xml");
-            if (resources.length != 1)
-                throw new IllegalStateException("Found %d instances of kmodule.xml in classpath".formatted(resources.length));
-
-            final String url = resources[0].getURL().toString();
-            if (url.startsWith("jar:"))
-            {
-                final Resource resource = new UrlResource(url.substring(4, url.indexOf("!/")));
-                log.info("Loading ICE KnowledgeBase from jar: {}", resource);
-
-                try (final InputStream is = resource.getInputStream())
-                {
-                    kieBase = kieServices.newKieContainer(kieServices.getRepository()
-                            .addKieModule(kieServices.getResources().newInputStreamResource(is))
-                            .getReleaseId()).getKieBase();
-                }
-            }
-            else
-            {
-                final Resource resource = resources[0].createRelative("../drools");
-                log.info("Loading ICE KnowledgeBase from filesystem: {}", resource);
-
-                final Path droolsPath = Path.of(resource.getURI());
-
-                final KieFileSystem kfs = kieServices.newKieFileSystem();
-
-                try (final Stream<Path> stream = Files.find(droolsPath, Integer.MAX_VALUE, (p, a) -> a.isRegularFile()))
-                {
-                    for (final Path path : stream.toList())
-                    {
-                        final ResourceType resourceType = ResourceType.determineResourceType(path.getFileName().toString());
-                        if (resourceType == null)
-                            continue;
-
-                        final org.kie.api.io.Resource droolsResource =
-                                kieServices.getResources().newInputStreamResource(Files.newInputStream(path));
-                        droolsResource.setTargetPath(droolsPath.relativize(path).toString());
-                        droolsResource.setResourceType(resourceType);
-                        kfs.write(droolsResource);
-                    }
-                }
-
-                final KieBuilder kieBuilder = kieServices.newKieBuilder(kfs).buildAll(ExecutableModelProject.class);
-                if (kieBuilder.getResults().hasMessages(Message.Level.ERROR))
-                    throw new RuntimeException("KieBuilder had errors: " + kieBuilder.getResults().getMessages());
-
-                kieBase = kieServices.newKieContainer(kieServices.getRepository().getDefaultReleaseId()).getKieBase();
-            }
+            return new IceKnowledgePackage(lKMId, getKieBase());
         }
-        catch (final Exception e)
+        catch (final IOException e)
         {
             throw new RuntimeException(e);
         }
-
-        log.debug("Km Id: {}", lRequestedKmId);
-
-        return new IceKnowledgePackage(lKMId, kieBase);
     }
 }

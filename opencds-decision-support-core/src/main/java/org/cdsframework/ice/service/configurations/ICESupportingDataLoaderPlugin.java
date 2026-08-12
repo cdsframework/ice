@@ -322,6 +322,10 @@ public class ICESupportingDataLoaderPlugin implements OpencdsPlugin<PreProcessPl
                         iceProperties.getOutputSeriesInformation().orElseGet(knowledgeModuleProperties::outputSeriesInformation));
 
         context.globals()
+                .put("outputScheduleAuthorities",
+                        iceProperties.getOutputScheduleAuthorities().orElseGet(knowledgeModuleProperties::outputScheduleAuthorities));
+
+        context.globals()
                 .put("doseOverrideFeatureEnabled", iceProperties.getEnableDoseOverrideFeature()
                         .orElseGet(knowledgeModuleProperties::enableDoseOverrideFeature));
 

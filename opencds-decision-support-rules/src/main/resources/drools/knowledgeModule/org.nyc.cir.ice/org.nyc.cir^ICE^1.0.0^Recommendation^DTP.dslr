@@ -76,10 +76,10 @@ rule "DTP: Recommend at the vaccine level in DTP series; if the patient < 7yrs, 
 end
 
 /**
- * If a patient is >=7 years; has _not_ completed the series and has received a dose of pertussis at >=7 years of age, then the next
- * dose in the series should be recommended as Td (CVX 09).
+ * If a patient is >=7 years and < 11 years, has _not_ completed the series and has received a dose of pertussis at >=7 years of age, then the next
+ * dose in the series should be recommended at vaccine level with ADMINISTER_TDAP_OR_TD reason and supplemental text.
  */
-rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if series is not complete, patient >= 7yrs, has received a dose of pertussis >= 7yrs"
+rule "DTP: Recommend earliest/recommended/latest at 7yrs of age if series is not complete, patient >= 7yrs and < 11yrs, has received a dose of pertussis >= 7yrs"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationAgeCheck"
@@ -93,8 +93,8 @@ rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if s
 		There exists an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- there is an associated administered shot in the series $targetSeries as well as IceResult administration date >= $dtDateAtAge
-		Confirm elapsed time between $dtBirthdate and evalTime >= "7y"
-	then
+		Confirm elapsed time between $dtBirthdate and evalTime >= "7y" && elapsed time between $dtBirthdate and evalTime < "11y"
+    then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
@@ -111,10 +111,10 @@ rule "DTP: Recommend earliest/recommended/latest Td (CVX 09) at 7yrs of age if s
 end
 
 /**
- * If a patient is >=7 years, has _not_ completed the series and has _not_ received a dose of pertussis at >=7 years of age, then
+ * If a patient is >=7 years and < 11 years, has _not_ completed the series and has _not_ received a dose of pertussis at >=7 years of age, then
  * the next dose in the series should be Tdap (CVX 115).
  */
-rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) at age 7yrs if series is not complete, if patient >= 7yrs and has _not_ received a dose of Pertussis >= 7yrs"
+rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) at age 7yrs if series is not complete, if patient >= 7yrs < 11yrs and has _not_ received a dose of Pertussis >= 7yrs"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	activation-group "recommendationAgeCheck"
@@ -128,13 +128,105 @@ rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) at age 7yrs if 
 		There does not exist an IceFact
 			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
 			- there is an associated administered shot in the series $targetSeries as well as IceResult administration date >= $dtDateAtAge
-		Confirm elapsed time between $dtBirthdate and evalTime >= "7y"
-	then
+		Confirm elapsed time between $dtBirthdate and evalTime >= "7y" && elapsed time between $dtBirthdate and evalTime < "11y"
+    then
 		Create a Recommendation as $oRecommendation for the Series $targetSeries
 		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_115"
 		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge
 		Set the Recommendation Overdue Forecast Date for $oRecommendation to $dtDateAtAge
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * If a patient is >=11 years, has _not_ completed the series and has _not_ received a dose of pertussis at >=10 years of age, then
+ * the next dose in the series should be Tdap (CVX 115).
+ */
+rule "DTP: Recommend Tdap (CVX 115) if patient >= 11yrs and has _not_ received a dose of Pertussis >= 10yrs"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationAgeCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
+			- the Series is not complete
+		The Patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthdate
+			- make note of the date as $dtDateAtAge7 when the patient is "7y" of age
+			- make note of the date as $dtDateAtAge10 when the patient is "10y" of age
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- there is an associated administered shot in the series $targetSeries as well as IceResult administration date >= $dtDateAtAge10
+		Confirm elapsed time between $dtBirthdate and evalTime >= "11y"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_115"
+        Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtDateAtAge7
+        Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge7
+        Set the Recommendation Overdue Forecast Date for $oRecommendation to $dtDateAtAge7
+		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * If a patient is >=11 years, has _not_ completed the series and has received a dose of pertussis at >=10 years of age, then the next
+ * dose in the series should be recommended as at vaccine level with ADMINISTER_TDAP_OR_TD reason and supplemental text.
+ */
+rule "DTP: Recommend earliest/recommmended/latest at group level with reason and supplemental text if patient >= 11yrs and has received a dose of Pertussis >= 10yrs"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationAgeCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
+			- the Series is not complete
+		The Patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthdate
+			- make note of the date as $dtDateAtAge7 when the patient is "7y" of age
+			- make note of the date as $dtDateAtAge10 when the patient is "10y" of age
+		There exists an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- there is an associated administered shot in the series $targetSeries as well as IceResult administration date >= $dtDateAtAge10
+		Confirm elapsed time between $dtBirthdate and evalTime >= "11y"
+	then
+		Create a recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Reason for $oRecommendation to "RECOMMENDATION_REASON_CONCEPT.ADMINISTER_TDAP_OR_TD"
+		Set the Recommendation Earliest Forecast Date for $oRecommendation to $dtDateAtAge7
+		Set the Recommendation Recommended Forecast Date for $oRecommendation to $dtDateAtAge7
+		Set the Recommendation Overdue Forecast Date for $oRecommendation to $dtDateAtAge7
+		Include the Recommendation $oRecommendation for Consideration in the final Forecast of the Series
+		Create a recommendation as $rSupplementalText for the Series $targetSeries
+		Set the Recommendation Supplemental Text for $rSupplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.SUPPLEMENTAL_TEXT_ADMINISTER_TDAP_OR_TD"
+		Include the Recommendation $rSupplementalText for Consideration in the final Forecast of the Series
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+/**
+ * If a patient is >=11 years, has _not_ completed the series and has _not_ received a dose of pertussis at >=10 years of age, then
+ * the next dose in the series should be Tdap (CVX 115).
+ */
+rule "DTP: Recommend earliest/recommmended/latest Tdap (CVX 115) if patient >= 11yrs and has _not_ received a dose of Pertussis >= 10yrs"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	activation-group "recommendationAgeCheck"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
+			- the Series is not complete
+		The Patient information $oEvaluatedPerson must be known to complete writing this rule
+			- make note of the patient's birthdate as $dtBirthdate
+			- make note of the date as $dtDateAtAge when the patient is "10y" of age
+		There does not exist an IceFact
+			- that has finding SupportedFactConcept._DOSE_OF_PERTUSSIS.conceptCodeValue
+			- there is an associated administered shot in the series $targetSeries as well as IceResult administration date >= $dtDateAtAge
+		Confirm elapsed time between $dtBirthdate and evalTime >= "11y"
+	then
+		Create a Recommendation as $oRecommendation for the Series $targetSeries
+		Set the Recommendation Vaccine for $oRecommendation to "VACCINE_CVX_115"
 		Include the Recommendation $oRecommendation for Consideration in the final forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -458,7 +550,38 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Mark the 5-Dose Series Complete for
 		Log that this Series Rule fired for the Series $targetSeries
 end
 
-rule "DTP: (5-Dose Series Exception Rule 1)- Skip to Dose 4 if patient >= 7yrs and has had 2 doses with the first dose at >= 12m and one dose at >= 4 yrs"
+rule "DTP(Abstract): (5-Dose Series Exception Rule for Recommendation)- Skip Dose Number to 5 with 2 doses and dose 1 at >= 12m-4d"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		There is a Series $targetSeries that needs forecasting
+			- the Series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.DTP"
+			- the name of the Series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
+			- the number of doses administered is == 2
+			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
+			- make note of the dose number to recommend as $nDoseNumberToRecommend
+			- the numeric $nEffectiveDoseNumber is == 3
+			- the numeric $nDoseNumberToRecommend is < 5
+		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
+			- make note of the date as $dtDateAtAge7y when the patient is "7y" of age
+			- make note of the date as $dtDateAtAge12mMinus4d when the patient is "12m-4d" of age
+		There exists an Administered Shot
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the Administration Date of the shot is >= $dtDateAtAge12mMinus4d
+			- the Administration Date of the shot is < $dtDateAtAge7y
+			- the Dose Number in the series is == 1
+		There is an Administered Shot $dose2
+			- the shot belongs to the Series $targetSeries
+			- that has already been evaluated and whose Shot Validity is VALID
+			- the Dose Number in the series is == 2
+			- make note of the Date this Shot was Administered as $dtDose2AdministrationDate
+	then
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "DTP: (5-Dose Series Exception Rule for Recommendation)- Set Recommendation Forecast Dose Number to 5 when History Evaluation already skipped to Dose 5"
 	dialect "mvel"
 	ruleflow-group "RecommendationForecast^customRecommendationRule"
 	no-loop true
@@ -468,25 +591,35 @@ rule "DTP: (5-Dose Series Exception Rule 1)- Skip to Dose 4 if patient >= 7yrs a
 			- the name of the Series is "SUPPORTED_SERIES.DTP_5_DOSE_SERIES"
 			- the number of doses administered is == 2
 			- make note of the effective dose number in the Series as $nEffectiveDoseNumber
-			- the numeric $nEffectiveDoseNumber is == 3
-		The patient information $assign_oEvaluatedPerson must be known to complete writing this rule
-			- make note of the patient's birthdate as $dtBirthDate
-			- make note of the date as $dtDateAtAge4y when the patient is "4y" of age
-			- make note of the date as $dtDateAtAge12m when the Patient is "12m" of age
-		There exists an Administered Shot
-			- the shot belongs to the Series $targetSeries
-			- that has already been evaluated and whose Shot Validity is VALID
-			- the Administration Date of the shot is >= $dtDateAtAge12m
-			- the Dose Number in the series is == 1
-		There exists an Administered Shot
-			- the shot belongs to the Series $targetSeries
-			- that has already been evaluated and whose Shot Validity is VALID
-			- the Administration Date of the shot is >= $dtDateAtAge4y
-			- the Dose Number in the series is >= 2
-		Confirm elapsed time between $dtBirthDate and evalTime >= "7y"
+			- the numeric $nEffectiveDoseNumber is == 5
 	then
-		Skip Series Dose Number to 4 from $nEffectiveDoseNumber for all diseases in the Series $targetSeries
-		Set the Dose Number of Recommendation Forecast to 4 in Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 5 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "DTP: (5-Dose Series Exception Rule for Recommendation)- Skip Dose Number to 5 if Patient is >= 7y or dose 2 was administered at >= 7y"
+	extends "DTP(Abstract): (5-Dose Series Exception Rule for Recommendation)- Skip Dose Number to 5 with 2 doses and dose 1 at >= 12m-4d"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		Confirm elapsed time between $dtDateAtAge7y and evalTime >= "0d" || elapsed time between $dtDateAtAge7y and $dtDose2AdministrationDate >= "0d"
+	then
+		Skip Series Dose Number to 5 from $nEffectiveDoseNumber for all diseases in the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 5 in Series $targetSeries
+		Record that this Series Rule was Processed for the TargetSeries $targetSeries
+		Log that this Series Rule fired for the Series $targetSeries
+end
+
+rule "DTP: (5-Dose Series Exception Rule for Recommendation)- Skip Dose Number to 5 if Patient will be >= 7y at target dose 3 due date (28d)"
+	extends "DTP(Abstract): (5-Dose Series Exception Rule for Recommendation)- Skip Dose Number to 5 with 2 doses and dose 1 at >= 12m-4d"
+	dialect "mvel"
+	ruleflow-group "RecommendationForecast^customRecommendationRule"
+	when
+		Confirm elapsed time between $dtDose2AdministrationDate and $dtDateAtAge7y <= "28d"
+	then
+		Skip Series Dose Number to 5 from $nEffectiveDoseNumber for all diseases in the Series $targetSeries
+		Set the Dose Number of Recommendation Forecast to 5 in Series $targetSeries
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
 end

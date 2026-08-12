@@ -17,6 +17,9 @@ public record Immunization(String id,
                            List<Identifier> identifier,
                            CodeableConcept vaccineCode,
                            Reference patient,
+                           Boolean isSubpotent,
+                           @Singular("subpotentReason")
+                           List<CodeableConcept> subpotentReason,
                            String occurrenceDateTime) implements FhirResource
 {
     public enum Status

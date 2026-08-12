@@ -76,6 +76,7 @@ global java.util.List vaccineGroupExclusions;
 global java.lang.Boolean enableUnsupportedVaccinesGroup;
 global java.lang.Boolean outputNumberOfDosesRemaining;
 global java.lang.Boolean outputSeriesInformation;
+global java.lang.Boolean outputScheduleAuthorities;
 global java.lang.Boolean outputVaccineGroupRulesArtifact;
 global java.lang.Boolean disableCovid19DoseNumberReset;
 global java.lang.Boolean disableOutputEarliestOverdueDatesForPneumococcalAdultSeries;
@@ -197,7 +198,7 @@ rule "InitializeReferenceData: Output Number of Doses Remaining Fact Object"
         eval(outputNumberOfDosesRemaining != null && outputNumberOfDosesRemaining.booleanValue() == true)
     then
         insert(new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_NUMBER_OF_DOSES_REMAINING.conceptCodeValue));
-        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output number of doses remaining? Initialized");
+        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output number of doses remaining Initialized");
 end
 
 /**
@@ -211,7 +212,21 @@ rule "InitializeReferenceData: Output Series Information Fact Object"
         eval(outputSeriesInformation != null && outputSeriesInformation.booleanValue() == true)
     then
         insert(new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_SERIES_INFORMATION.conceptCodeValue));
-        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output series information? Initialized");
+        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output series information Initialized");
+end
+
+/**
+ * General Design rule... Do not Edit
+ */
+rule "InitializeReferenceData: Output Schedule Authorities Fact Object"
+	ruleflow-group "ImmunizationReferenceData"
+	dialect "mvel"
+    when
+        not ICEFactTypeFinding(iceResultFinding == SupportedFactConcept._OUTPUT_SCHEDULE_AUTHORITIES.conceptCodeValue)
+        eval(outputScheduleAuthorities != null && outputScheduleAuthorities.booleanValue() == true)
+    then
+        insert(new ICEFactTypeFinding(SupportedFactConcept._OUTPUT_SCHEDULE_AUTHORITIES.conceptCodeValue));
+        ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Output schedule authorities Initialized");
 end
 
 /**
@@ -943,7 +958,7 @@ rule "Duplicate Shot/Same Day: If this is a duplicate shot/same day, mark the do
 	when
 		eval(
 			$tdprev.isShotIgnored() == false &&
-			($doseNumber > $targetSeries.getSeriesRules().getNumberOfDosesInSeries() && $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false) ||
+			($doseNumber > $targetSeries.getSeriesRules().getNumberOfDosesInSeries() && $targetSeries.getSeriesRules().isRecurringDosesOccurAfterSeriesComplete() == false) ||
 			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) != null &&
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() != null &&
 			! $tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS))))
@@ -968,7 +983,7 @@ rule "Duplicate Shot/Same Day: duplicate shots on same day where interval is 0 d
 	no-loop true
 	when
 		eval($tdprev.isShotIgnored() == true ||
-			(($doseNumber <= $targetSeries.getSeriesRules().getNumberOfDosesInSeries() || $targetSeries.getSeriesRules().recurringDosesOccurAfterSeriesComplete() == true) &&
+			(($doseNumber <= $targetSeries.getSeriesRules().getNumberOfDosesInSeries() || $targetSeries.getSeriesRules().isRecurringDosesOccurAfterSeriesComplete() == true) &&
 			($tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber) == null ||
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval() == null ||
 			$tdprev.getAssociatedTargetSeries().obtainDoseRuleForSeriesByDoseNumber($tdprevDoseNumber).getAbsoluteMinimumInterval().isEqualTo(new TimePeriod(0, DurationType.DAYS)))))
@@ -2532,7 +2547,7 @@ rule "RecommendationForecast: Recommend Earliest Recommended Age Date in Next Se
 	salience 110
 	activation-group "recommendationAgeCheck"
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, $vg : vaccineGroup, targetSeason.dateIsApplicableToOffSeason(evalTime),
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.isRecurringDosesOccurAfterSeriesComplete() == false, $vg : vaccineGroup, targetSeason.dateIsApplicableToOffSeason(evalTime),
 			$offSeasonEndDate : targetSeason.fullySpecifiedSeasonOffSeasonEndDate)
 		not Season(isDefaultSeason() == false, vaccineGroup == $vg, fullySpecifiedSeasonStartDate == $offSeasonEndDate.plusDays(1))
 		$defaultSeason : Season(isDefaultSeason() == true, vaccineGroup == $vg)
@@ -2561,7 +2576,7 @@ rule "RecommendationForecast: Recommend at Earliest Recommended Age Date in Next
 	salience 110
 	activation-group "recommendationAgeCheck"
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, targetSeason.dateIsApplicableToOffSeason(evalTime),
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.isRecurringDosesOccurAfterSeriesComplete() == false, targetSeason.dateIsApplicableToOffSeason(evalTime),
 			$offSeasonEndDate : targetSeason.fullySpecifiedSeasonOffSeasonEndDate, $offSeasonEndDate != null)
 		$fullySpecifiedNextseason : Season(isDefaultSeason() == false, vaccineGroup == $ts.vaccineGroup, fullySpecifiedSeasonStartDate == $offSeasonEndDate.plusDays(1))
 		$sr : SeriesRules(vaccineGroup == $ts.vaccineGroup, $fullySpecifiedNextseason memberOf seasons, getSeriesDoseRuleByDoseNumber(1) != null,
@@ -2590,7 +2605,7 @@ rule "RecommendationForecast: Recommend Next Season Earliest Start Date if durin
 	salience 110
 	activation-group "earliestIntervalCheck"
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, targetSeason.dateIsApplicableToOffSeason(evalTime))
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.isRecurringDosesOccurAfterSeriesComplete() == false, targetSeason.dateIsApplicableToOffSeason(evalTime))
 	then
 		Recommendation recommendation = new Recommendation($ts);
 		recommendation.setEarliestDate($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1));
@@ -2611,7 +2626,7 @@ rule "RecommendationForecast: Recommend Next Season Recommended Start Date if du
 	salience 110
 	activation-group "recommendationIntervalCheck"
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, targetSeason.dateIsApplicableToOffSeason(evalTime))
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, seriesRules.isRecurringDosesOccurAfterSeriesComplete() == false, targetSeason.dateIsApplicableToOffSeason(evalTime))
 	then
 		Recommendation recommendation = new Recommendation($ts);
 		recommendation.setRecommendationDate($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1));
@@ -2631,7 +2646,7 @@ rule "RecommendationForecast: Recommend Next Season Start Date if Current Season
 	dialect "mvel"
 	salience 100
 	when
-		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false, isSeriesComplete() == true)
+		$ts : TargetSeries(recommendationStatus == recommendationStatus.FORECASTING_IN_PROGRESS, targetSeason != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null, seriesRules.isRecurringDosesOccurAfterSeriesComplete() == false, isSeriesComplete() == true)
 	then
 		Recommendation recommendation = new Recommendation($ts);
 		recommendation.setRecommendationDate($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate().plusDays(1));
@@ -2651,7 +2666,7 @@ rule "RecommendationForecast/Post Recommendation Check: Recommend Next Season St
 	ruleflow-group "RecommendationForecast^postRecommendationCheck"
 	when
 		$ts : TargetSeries(isPostForecastCheckCompleted() == false, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE || recommendationStatus == RecommendationStatus.CONDITIONALLY_RECOMMENDED, finalRecommendationDate != null, $pcvRecommendationDate : finalRecommendationDate,
-			targetSeason != null, finalRecommendationDate != null, targetSeason.fullySpecifiedSeasonOffSeasonStartDate != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null, seriesRules.recurringDosesOccurAfterSeriesComplete() == false)
+			targetSeason != null, finalRecommendationDate != null, targetSeason.fullySpecifiedSeasonOffSeasonStartDate != null, targetSeason.fullySpecifiedSeasonOffSeasonEndDate != null, seriesRules.isRecurringDosesOccurAfterSeriesComplete() == false)
 		eval($ts.getFinalRecommendationDate().compareTo($ts.getTargetSeason().getFullySpecifiedSeasonEndDate()) > 0 &&
 			$ts.getFinalRecommendationDate().compareTo($ts.getTargetSeason().getFullySpecifiedSeasonOffSeasonEndDate()) <= 0)
 	then
@@ -2756,7 +2771,7 @@ rule "ProcessResults: Return Evaluations"
 		not ICEFactTypeFinding(iceResultFinding == $sae.id, targetDose == $td)
 		$evalTime: EvalTime()
 	then
-		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+  PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
 		p.outputNestedImmEvaluationResult($evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, true);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
@@ -2796,8 +2811,8 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - CB1 - COVID
 		not TargetSeries(vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", seasonStartDate < $seasonStartDate, isSeriesComplete() == true)
 		$numberOfPreviousDosesAcrossAllSeasons: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", administrationDate < $td.administrationDate, isValid == true), count($acctd))
 	then
-		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
-        	int doseNumberToDisplay = $numberOfPreviousDosesAcrossAllSeasons.intValue() == 0 ? 1 : $numberOfPreviousDosesAcrossAllSeasons.intValue()+1;
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+		int doseNumberToDisplay = $numberOfPreviousDosesAcrossAllSeasons.intValue() == 0 ? 1 : $numberOfPreviousDosesAcrossAllSeasons.intValue()+1;
 		p.outputNestedImmEvaluationResult($evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, true, doseNumberToDisplay);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
@@ -2819,7 +2834,7 @@ rule "ProcessResults(COVID-19): Return COVID-19 Season Evaluations - CB1 - COVID
         	$numberOfPreviousDosesInThisSeason: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", associatedTargetSeries == $ts, isValid == true, administrationDate >= $seasonStartDate, administrationDate <= $td.administrationDate,
 		    administeredShotNumberInSeries < $td.administeredShotNumberInSeries), count($acctd))
 	then
-		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
 		p.outputNestedImmEvaluationResult($evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, true, $numberOfPreviousDosesInThisSeason.intValue()+1);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
@@ -2844,7 +2859,7 @@ rule "ProcessResults(COVID-19): Return Sept 2023 Season Evaluations - CB2 - do _
 		$numberOfPreviousDosesAcrossAllSeasons: Integer() from accumulate($acctd: TargetDose(associatedVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", administrationDate < $td.administrationDate, isValid == true), count($acctd))
 		$evalTime: EvalTime()
 	then
-		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
 		p.outputNestedImmEvaluationResult($evalTime, focalPersonId, iceVersion, $sae, $vaccineGroup, $td, true, $numberOfPreviousDosesAcrossAllSeasons.intValue()+1);
 		$sae.setToBeReturned(true);
 		ICEFactTypeFinding saeEvaluation = new ICEFactTypeFinding($sae.id, $td);
@@ -2866,7 +2881,7 @@ rule "ProcessResults: Mark Unprocessed Shots as Vaccine Not Supported"
 		not TargetDose(doseId == $sae.id)
 		$evalTime: EvalTime()
 	then
-		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+  PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
 		p.outputNestedImmEvaluationNotSupported($evalTime, focalPersonId, iceVersion, $sae, "VACCINE_GROUP_CONCEPT.OTHER");
 		$sae.setToBeReturned(true);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing: " + $sae);
@@ -2884,7 +2899,7 @@ rule "ProcessResults: Return Recommendations for Vaccines Not Supported"
 		not ObservationResult(observationValue != null && observationValue.concept != null &&
 			observationValue.concept == PayloadHelper.getLocalCodeForRecommendationStatus(RecommendationStatus.RECOMMENDATION_NOT_AVAILABLE, schedule))
 	then
-		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+  PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
 		p.outputOtherImmRecommendationSubstanceAdministrationProposal(focalPersonId, iceVersion);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
@@ -2966,7 +2981,7 @@ rule "ProcessResults: Return Recommendation for Non-Seasonal Series"
 		not TargetSeries(vaccineGroup == $ts.vaccineGroup, seriesRules.seriesGroup > $ts.seriesRules.seriesGroup)
 		$evalTime: EvalTime()
 	then
-		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+  PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
 		SubstanceAdministrationProposal sap = p.outputRootImmRecommendationSubstanceAdministrationProposal(focalPersonId, iceVersion, $ts, outputEarliestOverdueDates);
 		insert(sap);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
@@ -2985,7 +3000,7 @@ rule "ProcessResults: Return Recommendations For Seasonal Series"
 		not TargetSeries(vaccineGroup == $vg, seriesRules.seriesGroup > $ts.seriesRules.seriesGroup)
 		not TargetSeries(vaccineGroup == $vg, targetSeason != null,	targetSeason.fullySpecifiedSeasonStartDate.isAfter($tseasonStartDate))
 	then
-		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+  PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
 		p.outputRootImmRecommendationSubstanceAdministrationProposal(focalPersonId, iceVersion, $ts, outputEarliestOverdueDates);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Results processing");
 end
@@ -3134,7 +3149,7 @@ rule "Series Display: Set Number of Doses Remaining to Zero Doses for a Series t
 	salience 5
 	when
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == false)
-		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == true, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
+		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == true, getSeriesRules().isRecurringDosesOccurAfterSeriesComplete() == false, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
 	then
 		String lStrNumberRemaining = "0 doses remaining in series; one or more additional doses may still be recommended";
 		modify($ss) {
@@ -3155,7 +3170,7 @@ rule "Series Display: Set Number of Doses Remaining to Zero Doses for a Series t
 	salience 5
 	when
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == false)
-		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == true, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == false, recommendationStatus != RecommendationStatus.RECOMMENDED && recommendationStatus != RecommendationStatus.RECOMMENDED_IN_FUTURE)
+		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == true, getSeriesRules().isRecurringDosesOccurAfterSeriesComplete() == false, recommendationStatus != RecommendationStatus.RECOMMENDED && recommendationStatus != RecommendationStatus.RECOMMENDED_IN_FUTURE)
 	then
 		String lStrNumberRemaining = "0";
 		modify($ss) {
@@ -3176,7 +3191,7 @@ rule "Series Display: Set Number of Doses Remaining to 'Recurring' for a Series 
 	salience 5
 	when
 		$ss : SeriesDisplaySelection(seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == false)
-		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == true, getSeriesRules().recurringDosesOccurAfterSeriesComplete() == true, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
+		$tssamevg : TargetSeries(vaccineGroup == $ss.vaccineGroup, isSeriesComplete() == true, getSeriesRules().isRecurringDosesOccurAfterSeriesComplete() == true, recommendationStatus == RecommendationStatus.RECOMMENDED || recommendationStatus == RecommendationStatus.RECOMMENDED_IN_FUTURE)
 	then
 		modify($ss) {
 			setNumberOfDosesRemaining("Recurring"),
@@ -3218,7 +3233,7 @@ rule "Series Display: Output Series Display Selections and Number of Doses Remai
 		$sdlist : List() from
 			accumulate($sdthis : SeriesDisplaySelection(targetSeries.vaccineGroup == $ts.vaccineGroup, seriesDisplaySelectionType != SeriesDisplaySelectionType.SERIES_DISPLAY_NONE, isSeriesDisplaySelectionDeterminationComplete() == true), collectList($sdthis));
 	then
-		PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
+  PayloadHelper p = new PayloadHelper(schedule, drools, namedObjects, Boolean.TRUE.equals(outputSupplementalText), Boolean.TRUE.equals(outputScheduleAuthorities), Boolean.TRUE.equals(outputVaccineGroupRulesArtifact));
 		p.outputSeriesDisplaySelectionsAndDosesRemainingInEmbeddedSubstanceAdministrationProposals(focalPersonId, $sdlist, $sap, outputNumberOfDosesRemaining);
 		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "Series Display Selection \": " + $ts.seriesName);
 end

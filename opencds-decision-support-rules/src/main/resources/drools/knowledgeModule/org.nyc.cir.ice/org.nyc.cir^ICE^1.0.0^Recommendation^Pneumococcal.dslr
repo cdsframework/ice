@@ -610,7 +610,7 @@ end
 
 /**
  * When recommending in the Child Series, always recommend at the vaccine group level with reason code SUPPLEMENTAL_TEXT and
- * Descriptive Text: "Administer either PCV15 or PCV20; if PCV15 or PCV20 is not available, PCV13 should be used."
+ * Descriptive Text: "Administer either PCV15 or PCV20."
  */
 rule "Pneumococcal Child: When recommending in the child series, always recommend at the vaccine group level with reason code SUPPLEMENTAL_TEXT"
 	dialect "mvel"
@@ -631,7 +631,7 @@ rule "Pneumococcal Child: When recommending in the child series, always recommen
 		Unset the recommended vaccine for the forecast in the Series $targetSeries
 		Create a Recommendation as $sRecommendation for the Series $targetSeries
 		Set the Recommendation Status for $sRecommendation to $recommendationStatus
-		Set the Recommendation Supplemental Text for $sRecommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.PCV15_OR_PCV20_PCV13_IF_UNAVAILABLE"
+		Set the Recommendation Supplemental Text for $sRecommendation to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.PCV15_OR_PCV20"
 		Include the Recommendation $sRecommendation for Consideration in the final Forecast of the Series
 		Record that this Series Rule was Processed for the TargetSeries $targetSeries
 		Log that this Series Rule fired for the Series $targetSeries
@@ -715,7 +715,7 @@ rule "Pneumococcal Child Series: Recommend PCV13/PCV15/PCV20/PCV21 dose if serie
 		Add "8w" to $shotDate and make note of the newly calculated date as $dtCalculated
 		Include a recommendation as $recommendation with recommended forecast date $dtCalculated for consideration in the final forecast of the series $targetSeries
 		Create a recommendation as $supplementalText for the Series $targetSeries
-		Set the recommendation supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.PCV15_OR_PCV20_PCV13_IF_UNAVAILABLE"
+		Set the recommendation supplemental text for $supplementalText to "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT.PCV15_OR_PCV20"
 		Include the recommendation $supplementalText for consideration in the final forecast of the Series
 		Mark forecasting of the Series $targetSeries Complete
 		Insert an IceFact SupportedFactConcept._PNEUMOCOCCAL_RECOMMENDED_CHILD_RECEIVE_PCV13_DOSE.getConceptCodeValue() with TargetSeries $targetSeries into working memory

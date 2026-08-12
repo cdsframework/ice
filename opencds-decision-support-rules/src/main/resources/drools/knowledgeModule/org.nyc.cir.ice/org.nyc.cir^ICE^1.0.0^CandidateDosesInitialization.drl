@@ -59,16 +59,31 @@ end
 /**
  * Meningococcal B vaccines (CVX 162, 163) always initializes the Meningococcal B vaccine group
  */
-rule "CandidateDosesIdentification: Initialize Meningococcal B vaccines (CVX 162, 163) in the Meningococcal B vaccine group"
+rule "CandidateDosesIdentification: Initialize Meningococcal B vaccines (CVX 162, 163, 164) in the Meningococcal B vaccine group"
 	dialect "java"
 	ruleflow-group "CandidateDosesIdentification^customCandidateDosesIdentificationRule"
 	salience 60
 	no-loop true
 	when
-		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() in ("VACCINE_CVX_162", "VACCINE_CVX_163"), $occ : getOpenCdsConceptCode())
-		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval())
-		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B",	vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode())))
-		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
+		$i : ImmunizationConcept(
+                $ctid : getConceptTargetId(),
+                $occ : getOpenCdsConceptCode(),
+                $occ in ("VACCINE_CVX_162", "VACCINE_CVX_163", "VACCINE_CVX_164")
+             )
+		$sae : SubstanceAdministrationEvent(
+		        id == $ctid,
+		        $saeAdminDate : getAdministrationTimeInterval()
+		       )
+		$s : SeriesRules(
+		        $sseriesName : getSeriesName(),
+		        $vg : getVaccineGroup(),
+		        getVaccineGroup() == "VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_B",
+		        vaccineIsAllowableInOneOrMoreDoseRules(schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode()))
+		     )
+		$ts : TargetSeries(
+		        seriesName == $sseriesName,
+		        $tsid : targetSeriesIdentifier
+		      )
 		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ)) == true)
 	then
 		Vaccine administeredVaccine = schedule.getVaccineByCdsConceptValue($i.getOpenCdsConceptCode());
@@ -202,6 +217,35 @@ rule "CandidateDosesIdentification: Initialize Meningococcal vaccine (CVX 328) i
 		VaccineComponent vaccineComponentOfInterest = new VaccineComponent(new CdsConcept("VACCINE_CVX_136"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.MENINGOCOCCAL_ACWY"));
 		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(administeredVaccine, $sae, $ts, schedule, vaccineComponentOfInterest)) {
 			insert(initializedTargetDose);
+		}
+		update($ts);
+		update($tdit);
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), "TargetDose initialized in TargetSeries " + $ts.getSeriesName() + " ; vaccine: " + $occ + "; vaccine group " + $vg + "; shotdate " + $saeAdminDate);
+end
+
+/**
+ * Any CVX 28 administered in DTP vaccine group on or after 2023-05-01 should be evaluated as CVX 107
+ */
+rule "CandidateDosesIdentification: Initialize DTP-related DT component (CVX 28) as CVX 107 in DTP vaccine group on or after 2023-05-01"
+	dialect "java"
+	ruleflow-group "CandidateDosesIdentification^customCandidateDosesIdentificationRule"
+	salience 60
+	no-loop true
+	when
+		$i : ImmunizationConcept($ctid : getConceptTargetId(), getOpenCdsConceptCode() == "VACCINE_CVX_28", $occ : getOpenCdsConceptCode())
+		$sae : SubstanceAdministrationEvent(id == $ctid, $saeAdminDate : getAdministrationTimeInterval(),
+			$shotDate : ICELogicHelper.extractSingularDateValueFromIVLDate(getAdministrationTimeInterval()))
+		$s : SeriesRules($sseriesName : getSeriesName(), $vg : getVaccineGroup(), getVaccineGroup() == "VACCINE_GROUP_CONCEPT.DTP")
+		$ts : TargetSeries(seriesName == $sseriesName, $tsid : targetSeriesIdentifier)
+		$tdit : TargetDoseInitializationTracker(shotAdministeredIsEligibleForInclusionInTargetSeries($i, $vg, $sae, $ts, schedule.getVaccineByCdsConceptValue($occ), "VACCINE_CVX_107") == true)
+		eval($shotDate != null && !$shotDate.isBefore(java.time.LocalDate.parse("2023-05-01")))
+		eval($tdit.isTargetDoseInitializedInSeries($sae, new VaccineComponent(new CdsConcept("VACCINE_CVX_107"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.DTP")), $ts) == false)
+	then
+		Vaccine vaccineForTargetDoseInitialization = schedule.getVaccineByCdsConceptValue("VACCINE_CVX_107");
+		VaccineComponent vaccineComponentOfInterest = new VaccineComponent(new CdsConcept("VACCINE_CVX_107"), schedule.getDiseasesTargetedByVaccineGroup("VACCINE_GROUP_CONCEPT.DTP"));
+		for (TargetDose initializedTargetDose : $tdit.addTargetDoseInitialization(vaccineForTargetDoseInitialization, $sae, $ts, schedule, vaccineComponentOfInterest, "VACCINE_CVX_28")) {
+			insert(initializedTargetDose);
+			insert(new ICEFactTypeFinding(SupportedFactConcept._DT_ADMINISTERED_ON_OR_AFTER_20230501_EVALUATE_AS_CVX_107.getConceptCodeValue(), initializedTargetDose));
 		}
 		update($ts);
 		update($tdit);

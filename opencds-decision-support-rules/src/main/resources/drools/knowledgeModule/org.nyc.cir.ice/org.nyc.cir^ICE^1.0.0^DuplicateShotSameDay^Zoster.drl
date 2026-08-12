@@ -1,0 +1,52 @@
+package knowledgeModule.org.nyc.cir.ice;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import org.opencds.vmr.v1_0.internal.EvalTime;
+import org.opencds.vmr.v1_0.internal.EvaluatedPerson;
+import org.cdsframework.ice.service.DiseaseImmunity;
+import org.cdsframework.ice.service.DoseStatus;
+import org.cdsframework.ice.service.ICEFactTypeFinding;
+import org.cdsframework.ice.service.ICELogicHelper;
+import org.cdsframework.ice.service.Recommendation;
+import org.cdsframework.ice.service.RecommendationStatus;
+import org.cdsframework.ice.service.SeriesRules;
+import org.cdsframework.ice.supportingdata.BaseDataEvaluationReason;
+import org.cdsframework.ice.supportingdatatmp.SupportedFactConcept;
+import org.cdsframework.ice.service.TargetDose;
+import org.cdsframework.ice.service.TargetSeries;
+import org.cdsframework.ice.util.TimePeriod;
+import org.cdsframework.ice.util.TimePeriod.DurationType;
+import org.cdsframework.ice.service.Vaccine;
+
+global java.time.LocalDate evalTime;
+
+rule "Duplicate Shots/Same Day (Zoster): If CVX 121 and CVX 187 are both administered on the same day in the Zoster 3-dose series and CVX 121 is Valid dose 1, evaluate CVX 121 as Valid dose 1 and CVX 187 as Valid dose 2"
+	dialect "mvel"
+	ruleflow-group "HistoryEvaluation^duplicateShotSameDay"
+	auto-focus true
+	no-loop true
+	salience 10
+	when
+		$td121: TargetDose(hasBeenEvaluated == true, associatedTargetSeries.vaccineGroup == "VACCINE_GROUP_CONCEPT.ZOSTER", associatedTargetSeries.seriesName == "SUPPORTED_SERIES.ZOSTER_3_DOSE_SERIES", status == DoseStatus.VALID,
+			isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "VACCINE_CVX_121", doseNumberInSeries == 1)
+		$td187: TargetDose(this != $td121, associatedTargetSeries == $td121.associatedTargetSeries, administrationDate == $td121.administrationDate, hasBeenEvaluated == true,
+			isDoseStatusOverridden() == false, vaccineComponent.cdsConceptName == "VACCINE_CVX_187", isDuplicateShotSameDayCheckCompleted() == false || $td121.isDuplicateShotSameDayCheckCompleted() == false)
+	    $ts: TargetSeries(this == $td187.associatedTargetSeries, seriesRules.numberOfDosesInSeries == 3)
+	then
+		modify($td121) {
+			setStatus(DoseStatus.VALID),
+			setDoseNumberInSeries(1),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets()
+		};
+		modify($td187) {
+			setStatus(DoseStatus.VALID),
+			setDoseNumberInSeries(2),
+			setDuplicateShotSameDayCheckCompleted(true),
+			removeAllEvaluationReasonsFromAllReasonSets()
+		};
+		update($ts)
+		ICELogicHelper.logDRLDebugMessage(drools.getRule().getName(), $td187 + " in TargetSeries " + $td121.associatedTargetSeries);
+end

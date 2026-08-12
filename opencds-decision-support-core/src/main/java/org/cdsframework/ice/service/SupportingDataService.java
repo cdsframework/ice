@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -44,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SupportingDataService
 {
     private static final String SUPPORTED_SERIES_CODE_SYSTEM_NAME = "SUPPORTED_SERIES";
+    private static final String SUPPORTED_SCHEDULE_FLAGS_CODE_SYSTEM_NAME = "SUPPORTED_SCHEDULE_FLAGS";
     private static final String SERIES_OPENCDS_PREFIX = "VACCINE_SERIES_";
     private static final String SERIES_CONCEPT_TYPE_PREFIX = ICEConceptType.SERIES.getIceConceptTypeValue() + ".";
     private static final String OID_URN_PREFIX = "urn:oid:";
@@ -241,6 +243,8 @@ public class SupportingDataService
 
                     return Map.copyOf(displayByCodeSystem);
                 }));
+
+        validateConfiguredScheduleFlags();
     }
 
     public String getKmIdFromModuleCanonicalUrl(final String moduleCanonical)
@@ -330,6 +334,16 @@ public class SupportingDataService
                 .orElseThrow(() -> new IllegalStateException("KnowledgeModuleProperties not found for kmId: %s".formatted(kmId)));
     }
 
+    public Map<String, IceProperties.SeriesOverride> getSeriesOverrides()
+    {
+        return Optional.ofNullable(iceProperties).map(IceProperties::getSeriesOverrides).orElse(Map.of());
+    }
+
+    public Map<String, IceProperties.SeasonOverride> getSeasonOverrides()
+    {
+        return Optional.ofNullable(iceProperties).map(IceProperties::getSeasonOverrides).orElse(Map.of());
+    }
+
     private Map<String, CdsEngineProperties.ModuleCanonicalDefinition> getRawSupportingKnowledgeModules()
     {
         return Optional.ofNullable(cdsEngineProperties).map(CdsEngineProperties::getModuleCanonicalDefinitionMap).orElse(Map.of());
@@ -338,6 +352,18 @@ public class SupportingDataService
     private Map<String, IceProperties.KnowledgeModuleProperties> getRawKnowledgeModuleProperties()
     {
         return Optional.ofNullable(iceProperties).map(IceProperties::getKnowledgeModules).orElse(Map.of());
+    }
+
+    public List<String> getConfiguredScheduleFlags()
+    {
+        return Optional.ofNullable(iceProperties)
+                .map(IceProperties::getScheduleFlags)
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .distinct()
+                .toList();
     }
 
     private Map<String, CdsEngineProperties.ModuleCanonicalDefinition> buildSupportingKnowledgeModulesByKmId()
@@ -466,6 +492,69 @@ public class SupportingDataService
     private Stream<CdsEngineProperties.ModuleCanonicalDefinition> streamCandidateKnowledgeModules(final String kmId)
     {
         return streamCandidateKnowledgeModuleIds(kmId).map(this::getKnowledgeModule);
+    }
+
+    private void validateConfiguredScheduleFlags()
+    {
+        final List<String> configuredScheduleFlags = getConfiguredScheduleFlags();
+        if (configuredScheduleFlags.isEmpty())
+            return;
+
+        for (final String kmId : new java.util.TreeSet<>(!knowledgeModulePropertiesByKmId.isEmpty()
+                                                         ? knowledgeModulePropertiesByKmId.keySet()
+                                                         : supportingKnowledgeModulesByKmId.keySet()))
+        {
+            try
+            {
+                validateScheduleFlagsForKmId(kmId, configuredScheduleFlags);
+            }
+            catch (final IllegalArgumentException e)
+            {
+                throw new IllegalStateException(
+                        "Configured ice.schedule-flags are invalid for knowledge module '%s': %s".formatted(kmId, e.getMessage()), e);
+            }
+        }
+    }
+
+    public List<String> validateScheduleFlagsForKmId(final String kmId, final Collection<String> scheduleFlags)
+    {
+        if (!StringUtils.hasText(kmId))
+            throw new IllegalArgumentException("kmId must be provided");
+
+        final List<String> normalizedScheduleFlags = Optional.ofNullable(scheduleFlags)
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .distinct()
+                .toList();
+        if (normalizedScheduleFlags.isEmpty())
+            return List.of();
+
+        final Set<String> supportedScheduleFlags =
+                streamCandidateKnowledgeModules(kmId).map(CdsEngineProperties.ModuleCanonicalDefinition::codeSystems)
+                        .filter(Objects::nonNull)
+                        .map(codeSystems -> codeSystems.get(SUPPORTED_SCHEDULE_FLAGS_CODE_SYSTEM_NAME))
+                        .filter(Objects::nonNull)
+                        .map(CodeSystem::concept)
+                        .filter(Objects::nonNull)
+                        .flatMap(Collection::stream)
+                        .filter(Objects::nonNull)
+                        .map(CodeSystemConcept::code)
+                        .filter(StringUtils::hasText)
+                        .map(String::trim)
+                        .collect(Collectors.toCollection(java.util.TreeSet::new));
+        if (supportedScheduleFlags.isEmpty())
+            throw new IllegalArgumentException("no %s code system was loaded".formatted(SUPPORTED_SCHEDULE_FLAGS_CODE_SYSTEM_NAME));
+
+        final List<String> unsupportedScheduleFlags =
+                normalizedScheduleFlags.stream().filter(flag -> !supportedScheduleFlags.contains(flag)).toList();
+        if (!unsupportedScheduleFlags.isEmpty())
+            throw new IllegalArgumentException(
+                    "unsupported code(s): %s; supported %s codes: %s".formatted(String.join(", ", unsupportedScheduleFlags),
+                            SUPPORTED_SCHEDULE_FLAGS_CODE_SYSTEM_NAME, String.join(", ", supportedScheduleFlags)));
+
+        return normalizedScheduleFlags;
     }
 
     @Cacheable("diseaseGroupMapping")

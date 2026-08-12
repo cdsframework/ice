@@ -140,6 +140,7 @@ public class SupportedVaccineGroups implements SupportingData
             });
 
             final List<String> lRelatedDiseasesCdsListItems = new ArrayList<>();
+            final List<String> lScheduleAuthorityCdsListItems = new ArrayList<>();
             int lPriority = 0;
             boolean lRoutine = true;
             String lAdditionalInformationUrl = null;
@@ -193,6 +194,13 @@ public class SupportedVaccineGroups implements SupportingData
                         if (cp.valueString() != null)
                             lAdditionalInformationUrl = cp.valueString();
                     }
+                    case "scheduleAuthority" ->
+                    {
+                        if (cp.valueCoding() instanceof final Coding scheduleAuthorityCoding)
+                        {
+                            lScheduleAuthorityCdsListItems.add(scheduleAuthorityCoding.code());
+                        }
+                    }
                     // already processed
                     case "conceptMapping", "supported", "outboundCode" ->
                     {
@@ -206,8 +214,9 @@ public class SupportedVaccineGroups implements SupportingData
             try
             {
                 locallyCodedVaccineGroupItem =
-                        new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lPrimaryOpenCdsConcept, List.of(),
-                                lRelatedDiseasesCdsListItems, lPriority, lRoutine, lAdditionalInformationUrl);
+                        new LocallyCodedVaccineGroupItem(lVaccineGroupCdsListItemName, lPrimaryOpenCdsConcept,
+                                lRelatedDiseasesCdsListItems, lScheduleAuthorityCdsListItems, lPriority, lRoutine,
+                                lAdditionalInformationUrl);
             }
             catch (final IllegalArgumentException e)
             {

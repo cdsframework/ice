@@ -40,13 +40,15 @@ import lombok.extern.slf4j.Slf4j;
 public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
 {
     private final Collection<String> relatedDiseasesCdsListItemNames;
+    private final Collection<String> scheduleAuthorityCdsListItemNames;
     private final int priority;
     private final boolean routine;
     private final String vaccineGroupRulesUrl;
 
     protected LocallyCodedVaccineGroupItem(final String pVaccineGroupCdsListItemName, final CdsConcept pVaccineGroupCdsConcept,
-            final Collection<String> pCdsVersions, final Collection<String> pRelatedDiseasesCdsListItemNames, final int pPriority,
-            final boolean routine, final String pVaccineGroupRulesUrl) throws IllegalArgumentException
+            final Collection<String> pRelatedDiseasesCdsListItemNames,
+            final Collection<String> pScheduleAuthorityCdsListItemNames, final int pPriority, final boolean routine,
+            final String pVaccineGroupRulesUrl) throws IllegalArgumentException
     {
         super(pVaccineGroupCdsListItemName, pVaccineGroupCdsConcept);
 
@@ -61,6 +63,9 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
         }
 
         this.relatedDiseasesCdsListItemNames = pRelatedDiseasesCdsListItemNames;
+        this.scheduleAuthorityCdsListItemNames = pScheduleAuthorityCdsListItemNames != null
+                ? pScheduleAuthorityCdsListItemNames
+                : new ArrayList<>();
         this.priority = pPriority;
         this.routine = routine;
         this.vaccineGroupRulesUrl = pVaccineGroupRulesUrl;
@@ -79,6 +84,14 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
         return new ArrayList<>(this.relatedDiseasesCdsListItemNames);
     }
 
+    public Collection<String> getCopyOfScheduleAuthorityCdsListItemNames()
+    {
+        if (this.scheduleAuthorityCdsListItemNames == null)
+            return null;
+
+        return new ArrayList<>(this.scheduleAuthorityCdsListItemNames);
+    }
+
     @Override
     public String toString()
     {
@@ -89,6 +102,10 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
         lStr.append("\nrelatedDiseases= [");
         for (final String lDisease : getRelatedDiseasesCdsListItemNames())
             lStr.append("\tRelatedDiseaseCdsListItemName=").append(lDisease).append("\n");
+        lStr.append("\t]\n");
+        lStr.append("scheduleAuthorities= [");
+        for (final String lSA : getScheduleAuthorityCdsListItemNames())
+            lStr.append("\tScheduleAuthorityCdsListItemName=").append(lSA).append("\n");
         lStr.append("\t]\n");
         lStr.append("]");
         return lStr.toString();
