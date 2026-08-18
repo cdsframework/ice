@@ -1,0 +1,47 @@
+{
+  "resourceType": "CapabilityStatement",
+  "name": "IceImmDsForecastCapabilityStatement",
+  "title": "ICE ImmDS Forecast Capability Statement",
+  "version": "1.0.0",
+  "status": "active",
+  "date": "2026-06-05",
+  "kind": "instance",
+  "fhirVersion": "6.0.0",
+  "format": [
+    "application/json",
+    "application/fhir+json"
+  ],
+  "implementation": {
+    "url": "https://ice-service.cdsframework.org/opencds-decision-support-service/cds",
+    "description": "ICE Decision Support Service - proposed R6 ImmDS forecast"
+  },
+  "software": {
+    "name": "ICE Decision Support Service",
+    "version": "1.0.0"
+  },
+  "rest": [
+    {
+      "mode": "server",
+      "security": {
+        "cors": true,
+        "service": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/restful-security-service",
+                "code": "SMART-on-FHIR"
+              }
+            ]
+          }
+        ]
+      },
+      "operation": [
+        {
+          "name": "immds-forecast",
+          "definition": "https://terminology.cdsframework.org/ice/OperationDefinition/immds-forecast",
+          "documentation": "Proposed R6 ICE adaptation of the ImmDS forecast operation. Produces ImmunizationRecommendation and ImmunizationEvaluation resources from patient demographics, immunizations, observations, and a selected knowledge base."
+        }
+      ]
+    }
+  ]
+}

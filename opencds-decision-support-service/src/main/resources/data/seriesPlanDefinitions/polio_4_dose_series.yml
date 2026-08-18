@@ -1,24 +1,24 @@
 cds-engine:
-  module-canonical-definition-map:
-    "[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]":
+  knowledge-base-definition-map:
+    "[https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0]":
       plan-definitions:
         POLIO_4_DOSE_SERIES:
           resource-type: PlanDefinition
-          url: http://cdsframework.org/PlanDefinition/series/polio_4_dose_series
+          url: https://terminology.cdsframework.org/ice/PlanDefinition/series/polio_4_dose_series
           version: 1.0.0
           name: POLIO_4_DOSE_SERIES
           title: Polio 4-Dose Series
           status: active
           meta:
             profile:
-              - http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition
+              - https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition
           type:
             coding:
               - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
                 code: eca-rule
                 display: ECA Rule
           extension:
-            - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
+            - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-metadata
               extension:
                 - url: numberOfDosesInSeries
                   value-integer: 5
@@ -42,9 +42,9 @@ cds-engine:
             - id: dose-1
               title: Dose 1
               extension:
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number
                   value-integer: 1
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint
                   extension:
                     - url: absoluteMinimumAge
                       value-string: 38d
@@ -54,7 +54,7 @@ cds-engine:
                       value-string: 2m
                     - url: latestRecommendedAge
                       value-string: 3m+4w
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -66,7 +66,7 @@ cds-engine:
                         text: IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -78,7 +78,7 @@ cds-engine:
                         text: Polio NOS
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -90,7 +90,7 @@ cds-engine:
                         text: OPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -102,7 +102,7 @@ cds-engine:
                         text: DTaP-HepB-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -114,7 +114,7 @@ cds-engine:
                         text: DTaP-Hib-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -126,7 +126,7 @@ cds-engine:
                         text: DTaP-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -138,7 +138,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-Hep B, historical
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -150,7 +150,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-Hep B
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -162,7 +162,7 @@ cds-engine:
                         text: DTaP-IPV-Hib
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -174,7 +174,7 @@ cds-engine:
                         text: OPV unspecified
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -186,7 +186,7 @@ cds-engine:
                         text: DT-IPV adsorbed non-US
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -198,7 +198,7 @@ cds-engine:
                         text: OPV bivalent
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -213,9 +213,9 @@ cds-engine:
             - id: dose-2
               title: Dose 2
               extension:
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number
                   value-integer: 2
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint
                   extension:
                     - url: absoluteMinimumAge
                       value-string: 66d
@@ -225,7 +225,7 @@ cds-engine:
                       value-string: 4m
                     - url: latestRecommendedAge
                       value-string: 5m+4w
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -237,7 +237,7 @@ cds-engine:
                         text: IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -249,7 +249,7 @@ cds-engine:
                         text: polio NOS
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -261,7 +261,7 @@ cds-engine:
                         text: OPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -273,7 +273,7 @@ cds-engine:
                         text: DTaP-HepB-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -285,7 +285,7 @@ cds-engine:
                         text: DTaP-Hib-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -297,7 +297,7 @@ cds-engine:
                         text: DTaP-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -309,7 +309,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-Hep B, historical
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -321,7 +321,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-HepB
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -333,7 +333,7 @@ cds-engine:
                         text: DTaP-IPV-Hib
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -345,7 +345,7 @@ cds-engine:
                         text: OPV unspecified
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -357,7 +357,7 @@ cds-engine:
                         text: DT-IPV adsorbed non-US
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -369,7 +369,7 @@ cds-engine:
                         text: OPV bivalent
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -385,7 +385,7 @@ cds-engine:
                 - action-id: dose-1
                   relationship: after-end
                   extension:
-                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                    - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint
                       extension:
                         - url: absoluteMinimumInterval
                           value-string: 24d
@@ -398,9 +398,9 @@ cds-engine:
             - id: dose-3
               title: Dose 3
               extension:
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number
                   value-integer: 3
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint
                   extension:
                     - url: absoluteMinimumAge
                       value-string: 94d
@@ -410,7 +410,7 @@ cds-engine:
                       value-string: 6m
                     - url: latestRecommendedAge
                       value-string: 19m+4w
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -422,7 +422,7 @@ cds-engine:
                         text: IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -434,7 +434,7 @@ cds-engine:
                         text: polio NOS
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -446,7 +446,7 @@ cds-engine:
                         text: OPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -458,7 +458,7 @@ cds-engine:
                         text: DTaP-HepB-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -470,7 +470,7 @@ cds-engine:
                         text: DTaP-Hib-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -482,7 +482,7 @@ cds-engine:
                         text: DTaP-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -494,7 +494,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-Hep B, historical
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -506,7 +506,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-HepB
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -518,7 +518,7 @@ cds-engine:
                         text: DTaP-IPV-Hib
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -530,7 +530,7 @@ cds-engine:
                         text: OPV unspecified
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -542,7 +542,7 @@ cds-engine:
                         text: DT-IPV adsorbed non-US
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -554,7 +554,7 @@ cds-engine:
                         text: OPV bivalent
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -570,7 +570,7 @@ cds-engine:
                 - action-id: dose-2
                   relationship: after-end
                   extension:
-                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                    - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint
                       extension:
                         - url: absoluteMinimumInterval
                           value-string: 24d
@@ -583,9 +583,9 @@ cds-engine:
             - id: dose-4
               title: Dose 4
               extension:
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number
                   value-integer: 4
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint
                   extension:
                     - url: absoluteMinimumAge
                       value-string: 4y - 4d
@@ -595,7 +595,7 @@ cds-engine:
                       value-string: 4y
                     - url: latestRecommendedAge
                       value-string: 7y+4w
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -607,7 +607,7 @@ cds-engine:
                         text: IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -619,7 +619,7 @@ cds-engine:
                         text: polio NOS
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -631,7 +631,7 @@ cds-engine:
                         text: OPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -643,7 +643,7 @@ cds-engine:
                         text: DTaP-HepB-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -655,7 +655,7 @@ cds-engine:
                         text: DTaP-Hib-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -667,7 +667,7 @@ cds-engine:
                         text: DTaP-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -679,7 +679,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-Hep B, historical
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -691,7 +691,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-HepB
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -703,7 +703,7 @@ cds-engine:
                         text: DTaP-IPV-Hib
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -715,7 +715,7 @@ cds-engine:
                         text: OPV unspecified
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -727,7 +727,7 @@ cds-engine:
                         text: DT-IPV adsorbed non-US
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -739,7 +739,7 @@ cds-engine:
                         text: OPV bivalent
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -755,7 +755,7 @@ cds-engine:
                 - action-id: dose-3
                   relationship: after-end
                   extension:
-                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                    - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint
                       extension:
                         - url: absoluteMinimumInterval
                           value-string: 6m-4d
@@ -768,9 +768,9 @@ cds-engine:
             - id: dose-5
               title: Dose 5
               extension:
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number
                   value-integer: 5
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint
                   extension:
                     - url: absoluteMinimumAge
                       value-string: 4y - 4d
@@ -780,7 +780,7 @@ cds-engine:
                       value-string: 4y
                     - url: latestRecommendedAge
                       value-string: 7y+4w
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -792,7 +792,7 @@ cds-engine:
                         text: IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -804,7 +804,7 @@ cds-engine:
                         text: polio NOS
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -816,7 +816,7 @@ cds-engine:
                         text: OPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -828,7 +828,7 @@ cds-engine:
                         text: DTaP-HepB-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -840,7 +840,7 @@ cds-engine:
                         text: DTaP-Hib-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -852,7 +852,7 @@ cds-engine:
                         text: DTaP-IPV
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -864,7 +864,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-Hep B, historical
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -876,7 +876,7 @@ cds-engine:
                         text: DTaP-IPV-Hib-HepB
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -888,7 +888,7 @@ cds-engine:
                         text: DTaP-IPV-Hib
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -900,7 +900,7 @@ cds-engine:
                         text: OPV unspecified
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -912,7 +912,7 @@ cds-engine:
                         text: DT-IPV adsorbed non-US
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -924,7 +924,7 @@ cds-engine:
                         text: OPV bivalent
                     - url: preferred
                       value-boolean: false
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -940,7 +940,7 @@ cds-engine:
                 - action-id: dose-4
                   relationship: after-end
                   extension:
-                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                    - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint
                       extension:
                         - url: absoluteMinimumInterval
                           value-string: 6m-4d

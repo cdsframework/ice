@@ -3229,11 +3229,7 @@ public class TargetSeries
         if (targetDoses == null)
             return 0;
 
-        return (int) targetDoses.stream()
-                .map(TargetDose::getAdministrationDate)
-                .filter(Objects::nonNull)
-                .distinct()
-                .count();
+        return (int) targetDoses.stream().map(TargetDose::getAdministrationDate).filter(Objects::nonNull).distinct().count();
     }
 
     /**

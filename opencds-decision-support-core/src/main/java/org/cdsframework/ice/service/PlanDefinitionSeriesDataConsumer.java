@@ -29,15 +29,17 @@ public class PlanDefinitionSeriesDataConsumer
     }
 
     public static final String SERIES_PLAN_DEFINITION_PROFILE_URL =
-            "http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition";
     public static final String SERIES_METADATA_EXTENSION_URL =
-            "http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata";
-    private static final String DOSE_NUMBER_EXTENSION_URL = "http://cdsframework.org/fhir/StructureDefinition/ice-dose-number";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-metadata";
+    private static final String DOSE_NUMBER_EXTENSION_URL =
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number";
     private static final String DOSE_AGE_CONSTRAINT_EXTENSION_URL =
-            "http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint";
     private static final String DOSE_INTERVAL_CONSTRAINT_EXTENSION_URL =
-            "http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint";
-    private static final String DOSE_VACCINE_EXTENSION_URL = "http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint";
+    private static final String DOSE_VACCINE_EXTENSION_URL =
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine";
     private static final String SERIES_CODE_EXTENSION_URL = "series";
     private static final String NUMBER_OF_DOSES_IN_SERIES_EXTENSION_URL = "numberOfDosesInSeries";
     private static final String RECURRING_DOSES_AFTER_COMPLETE_EXTENSION_URL = "recurringDosesAfterSeriesComplete";

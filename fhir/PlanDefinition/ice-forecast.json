@@ -1,7 +1,7 @@
 {
   "resourceType": "PlanDefinition",
   "id": "ice-forecast",
-  "url": "http://cdsframework.org/PlanDefinition/ice-forecast",
+  "url": "https://terminology.cdsframework.org/PlanDefinition/ice-forecast",
   "version": "1.0.0",
   "name": "IceForecast",
   "title": "ICE Immunization Forecast",
@@ -14,8 +14,8 @@
       "name": "CDS Framework"
     }
   ],
-  "description": "PlanDefinition representing the ICE immunization forecasting module used by the CDS Framework FHIR immunization forecast operation.",
-  "purpose": "Provides the canonical module identity referenced by GuidanceResponse.moduleCanonical for ICE immunization forecasting results.",
+  "description": "PlanDefinition representing the ICE immunization forecasting knowledge base used by the CDS Framework FHIR Patient ImmDS forecast operation.",
+  "purpose": "Provides the canonical knowledge base identity used to select ICE immunization forecasting behavior for ImmDS forecast requests.",
   "type": {
     "coding": [
       {
@@ -28,12 +28,12 @@
   },
   "identifier": [
     {
-      "system": "http://cdsframework.org/identifiers/knowledge-modules",
+      "system": "https://terminology.cdsframework.org/ice/identifiers/knowledge-bases",
       "value": "org.nyc.cir^ICE^1.0.0"
     }
   ],
   "versionAlgorithmString": "semver",
   "library": [
-    "http://cdsframework.org/Library/ice-forecast-logic|1.0.0"
+    "https://terminology.cdsframework.org/ice/Library/ice-forecast-logic|1.0.0"
   ]
 }

@@ -202,7 +202,7 @@ public class ICESupportingDataLoaderPlugin implements OpencdsPlugin<PreProcessPl
             return;
         }
 
-        supportingDataService.getKnowledgeModulePropertiesByKmId().forEach((kmId, properties) ->
+        supportingDataService.getKnowledgeBasePropertiesByKmId().forEach((kmId, properties) ->
         {
             if (preloadedSchedules.containsKey(kmId))
                 return;
@@ -257,8 +257,8 @@ public class ICESupportingDataLoaderPlugin implements OpencdsPlugin<PreProcessPl
             throw new IllegalStateException(lErrStr);
         }
 
-        final IceProperties.KnowledgeModuleProperties knowledgeModuleProperties =
-                supportingDataService.getKnowledgeModulePropertiesForKmId(lKMId);
+        final IceProperties.KnowledgeBaseProperties knowledgeBaseProperties =
+                supportingDataService.getKnowledgeBasePropertiesForKmId(lKMId);
 
         Schedule schedule;
         synchronized (cache)
@@ -277,7 +277,7 @@ public class ICESupportingDataLoaderPlugin implements OpencdsPlugin<PreProcessPl
                 {
                     // Schedule has not been stored in supporting data - load it - This should only happen once.
                     log.debug("Loading immunization schedule for Knowledge Module: {}", lKMId);
-                    schedule = loadImmunizationSchedule(lKMId, knowledgeModuleProperties);
+                    schedule = loadImmunizationSchedule(lKMId, knowledgeBaseProperties);
                     log.debug(_METHODNAME + "Immunization schedule loaded for knowledge module: {}", lKMId);
 
                     cache.put(sd, schedule);
@@ -311,53 +311,53 @@ public class ICESupportingDataLoaderPlugin implements OpencdsPlugin<PreProcessPl
 
         context.globals()
                 .put("outputEarliestOverdueDates", iceProperties.getOutputEarliestAndOverdueDates()
-                        .orElseGet(knowledgeModuleProperties::outputEarliestAndOverdueDates));
+                        .orElseGet(knowledgeBaseProperties::outputEarliestAndOverdueDates));
 
         context.globals()
                 .put("outputNumberOfDosesRemaining", iceProperties.getOutputNumberOfDosesRemaining()
-                        .orElseGet(knowledgeModuleProperties::outputNumberOfDosesRemaining));
+                        .orElseGet(knowledgeBaseProperties::outputNumberOfDosesRemaining));
 
         context.globals()
                 .put("outputSeriesInformation",
-                        iceProperties.getOutputSeriesInformation().orElseGet(knowledgeModuleProperties::outputSeriesInformation));
+                        iceProperties.getOutputSeriesInformation().orElseGet(knowledgeBaseProperties::outputSeriesInformation));
 
         context.globals()
                 .put("outputScheduleAuthorities",
-                        iceProperties.getOutputScheduleAuthorities().orElseGet(knowledgeModuleProperties::outputScheduleAuthorities));
+                        iceProperties.getOutputScheduleAuthorities().orElseGet(knowledgeBaseProperties::outputScheduleAuthorities));
 
         context.globals()
-                .put("doseOverrideFeatureEnabled", iceProperties.getEnableDoseOverrideFeature()
-                        .orElseGet(knowledgeModuleProperties::enableDoseOverrideFeature));
+                .put("doseOverrideFeatureEnabled",
+                        iceProperties.getEnableDoseOverrideFeature().orElseGet(knowledgeBaseProperties::enableDoseOverrideFeature));
 
         context.globals()
                 .put("outputSupplementalText",
-                        iceProperties.getOutputSupplementalText().orElseGet(knowledgeModuleProperties::outputSupplementalText));
+                        iceProperties.getOutputSupplementalText().orElseGet(knowledgeBaseProperties::outputSupplementalText));
 
         context.globals()
                 .put("outputVaccineGroupRulesArtifact", iceProperties.getOutputVaccineGroupRulesArtifact()
-                        .orElseGet(knowledgeModuleProperties::outputVaccineGroupRulesArtifact));
+                        .orElseGet(knowledgeBaseProperties::outputVaccineGroupRulesArtifact));
 
         context.globals()
                 .put("vaccineGroupExclusions", normalizeVaccineGroupExclusionsForSchedule(
                         Optional.ofNullable(iceProperties.getVaccineGroupExclusions())
-                                .orElseGet(knowledgeModuleProperties::vaccineGroupExclusions),
+                                .orElseGet(knowledgeBaseProperties::vaccineGroupExclusions),
                         Optional.ofNullable(iceProperties.getVaccineGroupInclusions())
-                                .orElseGet(knowledgeModuleProperties::vaccineGroupInclusions), schedule, lKMId));
+                                .orElseGet(knowledgeBaseProperties::vaccineGroupInclusions), schedule, lKMId));
 
         context.globals()
                 .put("enableUnsupportedVaccinesGroup", iceProperties.getEnableUnsupportedVaccinesGroup()
-                        .orElseGet(knowledgeModuleProperties::enableUnsupportedVaccinesGroup));
+                        .orElseGet(knowledgeBaseProperties::enableUnsupportedVaccinesGroup));
 
         context.globals()
                 .put("disableCovid19DoseNumberReset", iceProperties.getDisableCovid19Sep2023DoseNumberReset()
-                        .orElseGet(knowledgeModuleProperties::disableCovid19Sep2023DoseNumberReset));
+                        .orElseGet(knowledgeBaseProperties::disableCovid19Sep2023DoseNumberReset));
     }
 
     /**
      * Given an ICE knowledge module identifier in the correct format, load its corresponding Schedule into the provided cache
      */
     protected synchronized Schedule loadImmunizationSchedule(final String kmId,
-            final IceProperties.KnowledgeModuleProperties knowledgeModuleProperties)
+            final IceProperties.KnowledgeBaseProperties knowledgeBaseProperties)
     {
         final String _METHODNAME = "loadImmunizationSchedule(): ";
 
@@ -379,9 +379,8 @@ public class ICESupportingDataLoaderPlugin implements OpencdsPlugin<PreProcessPl
             if (supportingDataService == null)
                 throw new IllegalStateException("SupportingDataService not initialized");
 
-            s = new Schedule("requestedKmId", supportingDataService.getBaseKnowledgeModuleId(), List.of(kmId),
-                    supportingDataService,
-                    iceProperties.getSupplementalTextMode().orElse(knowledgeModuleProperties.supplementalTextMode()));
+            s = new Schedule("requestedKmId", supportingDataService.getBaseKnowledgeBaseId(), List.of(kmId), supportingDataService,
+                    iceProperties.getSupplementalTextMode().orElse(knowledgeBaseProperties.supplementalTextMode()));
         }
         catch (final IllegalArgumentException | IllegalStateException | InconsistentConfigurationException ii)
         {

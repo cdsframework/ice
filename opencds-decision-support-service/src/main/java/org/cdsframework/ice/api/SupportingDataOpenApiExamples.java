@@ -106,10 +106,10 @@ public final class SupportingDataOpenApiExamples
                                                                     {
                                                                       "id": "ice-forecast",
                                                                       "resourceType": "PlanDefinition",
-                                                                      "url": "http://cdsframework.org/PlanDefinition/ice-forecast",
+                                                                      "url": "https://terminology.cdsframework.org/PlanDefinition/ice-forecast",
                                                                       "identifier": [
                                                                         {
-                                                                          "system": "http://cdsframework.org/identifiers/knowledge-modules",
+                                                                          "system": "https://terminology.cdsframework.org/ice/identifiers/knowledge-bases",
                                                                           "value": "org.nyc.cir^ICE^1.0.0"
                                                                         }
                                                                       ],
@@ -137,9 +137,9 @@ public final class SupportingDataOpenApiExamples
                                                                         }
                                                                       ],
                                                                       "description": "PlanDefinition representing the ICE immunization forecasting module used by the CDS Framework FHIR immunization forecast operation.",
-                                                                      "purpose": "Provides the canonical module identity referenced by GuidanceResponse.moduleCanonical for ICE immunization forecasting results.",
+                                                                      "purpose": "Provides the canonical knowledge base identity used for ICE immunization forecasting results.",
                                                                       "library": [
-                                                                        "http://cdsframework.org/Library/ice-forecast-logic|1.0.0"
+                                                                        "https://terminology.cdsframework.org/ice/Library/ice-forecast-logic|1.0.0"
                                                                       ]
                                                                     }
                                                                   ]""";
@@ -194,14 +194,14 @@ public final class SupportingDataOpenApiExamples
                                                                               {
                                                                                 "VARICELLA_2_DOSE_SERIES": {
                                                                                   "resourceType": "PlanDefinition",
-                                                                                  "url": "http://cdsframework.org/PlanDefinition/series/varicella_2_dose_series",
+                                                                                  "url": "https://terminology.cdsframework.org/ice/PlanDefinition/series/varicella_2_dose_series",
                                                                                   "version": "1.0.0",
                                                                                   "name": "VARICELLA_2_DOSE_SERIES",
                                                                                   "title": "Varicella 2-Dose Series",
                                                                                   "status": "active",
                                                                                   "meta": {
                                                                                     "profile": [
-                                                                                      "http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition"
+                                                                                      "https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition"
                                                                                     ]
                                                                                   },
                                                                                   "action": [

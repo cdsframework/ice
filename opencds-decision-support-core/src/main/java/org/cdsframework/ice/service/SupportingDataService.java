@@ -50,7 +50,8 @@ public class SupportingDataService
     private static final String SERIES_CONCEPT_TYPE_PREFIX = ICEConceptType.SERIES.getIceConceptTypeValue() + ".";
     private static final String OID_URN_PREFIX = "urn:oid:";
     private static final String IDENTIFIER_SYSTEM_URN_RFC_3986 = "urn:ietf:rfc:3986";
-    private static final String IDENTIFIER_SYSTEM_KNOWLEDGE_MODULES = "http://cdsframework.org/identifiers/knowledge-modules";
+    private static final String IDENTIFIER_SYSTEM_KNOWLEDGE_BASES =
+            "https://terminology.cdsframework.org/ice/identifiers/knowledge-bases";
     private static final String DISEASE_IMMUNITY_SOURCE_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.8";
     private static final String RECOMMENDATION_REASON_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.6";
     private static final String EVALUATION_REASON_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.3";
@@ -93,12 +94,12 @@ public class SupportingDataService
 
     private final CdsEngineProperties cdsEngineProperties;
     private final IceProperties iceProperties;
-    private final Map<String, String> canonicalToKmId;
-    private final String baseKnowledgeModuleId;
-    private final Map<String, CdsEngineProperties.ModuleCanonicalDefinition> supportingKnowledgeModulesByKmId;
+    private final Map<String, String> knowledgeBaseToKmId;
+    private final String baseKnowledgeBaseId;
+    private final Map<String, CdsEngineProperties.KnowledgeBaseDefinition> supportingKnowledgeBasesByKmId;
     private final PlanDefinitionSeriesDataConsumer planDefinitionSeriesDataConsumer;
     @Getter
-    private final Map<String, IceProperties.KnowledgeModuleProperties> knowledgeModulePropertiesByKmId;
+    private final Map<String, IceProperties.KnowledgeBaseProperties> knowledgeBasePropertiesByKmId;
     private final Map<String, Map<String, String>> outboundCodeSystemMapByKm;
     private final Map<String, Map<String, String>> inboundCodeSystemOidMapByKm;
     private final Map<String, Map<String, Map<String, String>>> conceptDisplayLookupByKm;
@@ -109,50 +110,50 @@ public class SupportingDataService
         this.iceProperties = iceProperties;
         this.planDefinitionSeriesDataConsumer = new PlanDefinitionSeriesDataConsumer();
 
-        this.canonicalToKmId = Optional.ofNullable(cdsEngineProperties)
-                .map(CdsEngineProperties::getModuleCanonicalDefinitionMap)
+        this.knowledgeBaseToKmId = Optional.ofNullable(cdsEngineProperties)
+                .map(CdsEngineProperties::getKnowledgeBaseDefinitionMap)
                 .map(Map::entrySet)
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(entry -> StringUtils.hasText(entry.getKey()))
                 .map(entry -> Map.entry(entry.getKey().trim(),
-                        extractKnowledgeModuleIdentifier(entry.getValue().modulePlanDefinition())))
+                        extractKnowledgeBaseIdentifier(entry.getValue().knowledgeBasePlanDefinition())))
                 .filter(entry -> entry.getValue().isPresent())
                 .map(entry -> Map.entry(entry.getKey(), entry.getValue().get()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (_, replacement) -> replacement,
                         LinkedHashMap::new));
 
-        this.baseKnowledgeModuleId = Optional.ofNullable(iceProperties)
-                .map(IceProperties::getIceBaseModuleCanonical)
+        this.baseKnowledgeBaseId = Optional.ofNullable(iceProperties)
+                .map(IceProperties::getIceBaseKnowledgeBase)
                 .map(String::trim)
                 .filter(StringUtils::hasText)
-                .map(baseModuleCanonical -> Optional.ofNullable(canonicalToKmId.get(baseModuleCanonical))
+                .map(baseKnowledgeBase -> Optional.ofNullable(knowledgeBaseToKmId.get(baseKnowledgeBase))
                         .filter(StringUtils::hasText)
                         .orElseThrow(() -> new IllegalStateException(
-                                "No plan-definition mapping found for configured ice-base-module-canonical '%s'".formatted(
-                                        baseModuleCanonical))))
-                .orElseThrow(() -> new IllegalStateException("ice-base-module-canonical must be configured"));
+                                "No plan-definition mapping found for configured ice-base-knowledge-base '%s'".formatted(
+                                        baseKnowledgeBase))))
+                .orElseThrow(() -> new IllegalStateException("ice-base-knowledge-base must be configured"));
 
-        this.supportingKnowledgeModulesByKmId = buildSupportingKnowledgeModulesByKmId();
+        this.supportingKnowledgeBasesByKmId = buildSupportingKnowledgeBasesByKmId();
 
-        this.knowledgeModulePropertiesByKmId = buildKnowledgeModulePropertiesByKmId();
+        this.knowledgeBasePropertiesByKmId = buildKnowledgeBasePropertiesByKmId();
 
         this.outboundCodeSystemMapByKm =
-                supportingKnowledgeModulesByKmId.keySet().stream().collect(Collectors.toMap(Function.identity(), kmId ->
+                supportingKnowledgeBasesByKmId.keySet().stream().collect(Collectors.toMap(Function.identity(), kmId ->
                 {
                     final Map<String, String> merged = new HashMap<>();
 
-                    Optional.ofNullable(supportingKnowledgeModulesByKmId.get(baseKnowledgeModuleId))
-                            .map(CdsEngineProperties.ModuleCanonicalDefinition::outboundCodeSystemMap)
+                    Optional.ofNullable(supportingKnowledgeBasesByKmId.get(baseKnowledgeBaseId))
+                            .map(CdsEngineProperties.KnowledgeBaseDefinition::outboundCodeSystemMap)
                             .ifPresent(merged::putAll);
 
-                    Optional.ofNullable(supportingKnowledgeModulesByKmId.get(kmId))
-                            .map(CdsEngineProperties.ModuleCanonicalDefinition::outboundCodeSystemMap)
+                    Optional.ofNullable(supportingKnowledgeBasesByKmId.get(kmId))
+                            .map(CdsEngineProperties.KnowledgeBaseDefinition::outboundCodeSystemMap)
                             .ifPresent(merged::putAll);
 
-                    streamCandidateKnowledgeModuleIds(kmId).map(supportingKnowledgeModulesByKmId::get)
+                    streamCandidateKnowledgeBaseIds(kmId).map(supportingKnowledgeBasesByKmId::get)
                             .filter(Objects::nonNull)
-                            .map(CdsEngineProperties.ModuleCanonicalDefinition::codeSystems)
+                            .map(CdsEngineProperties.KnowledgeBaseDefinition::codeSystems)
                             .filter(Objects::nonNull)
                             .map(Map::values)
                             .flatMap(Collection::stream)
@@ -195,12 +196,12 @@ public class SupportingDataService
                 }));
 
         this.conceptDisplayLookupByKm =
-                supportingKnowledgeModulesByKmId.keySet().stream().collect(Collectors.toMap(Function.identity(), kmId ->
+                supportingKnowledgeBasesByKmId.keySet().stream().collect(Collectors.toMap(Function.identity(), kmId ->
                 {
                     final Map<String, Map<String, String>> displayByCodeSystem = new HashMap<>();
-                    streamCandidateKnowledgeModuleIds(kmId).map(supportingKnowledgeModulesByKmId::get)
+                    streamCandidateKnowledgeBaseIds(kmId).map(supportingKnowledgeBasesByKmId::get)
                             .filter(Objects::nonNull)
-                            .map(CdsEngineProperties.ModuleCanonicalDefinition::codeSystems)
+                            .map(CdsEngineProperties.KnowledgeBaseDefinition::codeSystems)
                             .filter(Objects::nonNull)
                             .map(Map::values)
                             .flatMap(Collection::stream)
@@ -247,51 +248,51 @@ public class SupportingDataService
         validateConfiguredScheduleFlags();
     }
 
-    public String getKmIdFromModuleCanonicalUrl(final String moduleCanonical)
+    public String getKmIdFromKnowledgeBaseUrl(final String knowledgeBaseUrl)
     {
-        return Optional.ofNullable(moduleCanonical)
+        return Optional.ofNullable(knowledgeBaseUrl)
                 .map(String::trim)
-                .map(canonicalToKmId::get)
+                .map(knowledgeBaseToKmId::get)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Knowledge module mapping not found for canonical module: %s".formatted(moduleCanonical)));
+                        "Knowledge base mapping not found for: %s".formatted(knowledgeBaseUrl)));
     }
 
-    private Optional<String> extractKnowledgeModuleIdentifier(final PlanDefinition planDefinition)
+    private Optional<String> extractKnowledgeBaseIdentifier(final PlanDefinition planDefinition)
     {
         return Optional.ofNullable(planDefinition)
                 .map(PlanDefinition::identifier)
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
-                .filter(identifier -> IDENTIFIER_SYSTEM_KNOWLEDGE_MODULES.equals(identifier.system()))
+                .filter(identifier -> IDENTIFIER_SYSTEM_KNOWLEDGE_BASES.equals(identifier.system()))
                 .map(Identifier::value)
                 .filter(StringUtils::hasText)
                 .map(String::trim)
                 .findFirst();
     }
 
-    public CdsEngineProperties.ModuleCanonicalDefinition getKnowledgeModuleFromCanonicalUrlVersion(final String moduleCanonical,
-            final String moduleVersion)
+    public CdsEngineProperties.KnowledgeBaseDefinition getKnowledgeBaseFromCanonicalUrlVersion(final String knowledgeBaseUrl,
+            final String version)
     {
-        return getKnowledgeModuleFromCanonicalUrl("%s|%s".formatted(moduleCanonical, moduleVersion));
+        return getKnowledgeBaseFromCanonicalUrl("%s|%s".formatted(knowledgeBaseUrl, version));
     }
 
-    public CdsEngineProperties.ModuleCanonicalDefinition getKnowledgeModuleFromCanonicalUrl(final String moduleCanonical)
+    public CdsEngineProperties.KnowledgeBaseDefinition getKnowledgeBaseFromCanonicalUrl(final String knowledgeBaseUrl)
     {
-        return getSupportingKnowledgeModuleByCanonical(moduleCanonical);
+        return getSupportingKnowledgeBaseByCanonical(knowledgeBaseUrl);
     }
 
-    public CodeSystem lookupCodeSystemFromCanonicalUrlVersion(final String moduleCanonical, final String moduleVersion,
+    public CodeSystem lookupCodeSystemFromCanonicalUrlVersion(final String knowledgeBaseUrl, final String version,
             final String codeSystemName)
     {
-        return lookupCodeSystemFromCanonicalUrl("%s|%s".formatted(moduleCanonical, moduleVersion), codeSystemName);
+        return lookupCodeSystemFromCanonicalUrl("%s|%s".formatted(knowledgeBaseUrl, version), codeSystemName);
     }
 
-    public CodeSystem lookupCodeSystemFromCanonicalUrl(final String moduleCanonical, final String codeSystemName)
+    public CodeSystem lookupCodeSystemFromCanonicalUrl(final String knowledgeBaseUrl, final String codeSystemName)
     {
-        return Optional.ofNullable(getKnowledgeModuleFromCanonicalUrl(moduleCanonical).codeSystems().get(codeSystemName))
+        return Optional.ofNullable(getKnowledgeBaseFromCanonicalUrl(knowledgeBaseUrl).codeSystems().get(codeSystemName))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Code system not found for canonical module: %s and code system name: %s".formatted(moduleCanonical,
+                        "Code system not found for knowledgeBase: %s and code system name: %s".formatted(knowledgeBaseUrl,
                                 codeSystemName)));
     }
 
@@ -308,30 +309,30 @@ public class SupportingDataService
         return entityIdentifier;
     }
 
-    public CdsEngineProperties.ModuleCanonicalDefinition getSupportingKnowledgeModuleByCanonical(final String moduleCanonical)
+    public CdsEngineProperties.KnowledgeBaseDefinition getSupportingKnowledgeBaseByCanonical(final String knowledgeBaseUrl)
     {
-        if (!StringUtils.hasText(moduleCanonical))
-            throw new IllegalArgumentException("moduleCanonical must be provided");
+        if (!StringUtils.hasText(knowledgeBaseUrl))
+            throw new IllegalArgumentException("knowledgeBaseUrl must be provided");
 
-        return getSupportingKnowledgeModuleByKmId(getKmIdFromModuleCanonicalUrl(moduleCanonical.trim()));
+        return getSupportingKnowledgeBaseByKmId(getKmIdFromKnowledgeBaseUrl(knowledgeBaseUrl.trim()));
     }
 
-    public CdsEngineProperties.ModuleCanonicalDefinition getSupportingKnowledgeModuleByKmId(final String kmId)
+    public CdsEngineProperties.KnowledgeBaseDefinition getSupportingKnowledgeBaseByKmId(final String kmId)
     {
         if (!StringUtils.hasText(kmId))
             throw new IllegalArgumentException("kmId must be provided");
 
-        return Optional.ofNullable(supportingKnowledgeModulesByKmId.get(kmId.trim()))
-                .orElseThrow(() -> new IllegalStateException("Supporting knowledge module not found for kmId: %s".formatted(kmId)));
+        return Optional.ofNullable(supportingKnowledgeBasesByKmId.get(kmId.trim()))
+                .orElseThrow(() -> new IllegalStateException("Supporting knowledge base not found for kmId: %s".formatted(kmId)));
     }
 
-    public IceProperties.KnowledgeModuleProperties getKnowledgeModulePropertiesForKmId(final String kmId)
+    public IceProperties.KnowledgeBaseProperties getKnowledgeBasePropertiesForKmId(final String kmId)
     {
         if (!StringUtils.hasText(kmId))
             throw new IllegalArgumentException("kmId must be provided");
 
-        return Optional.ofNullable(knowledgeModulePropertiesByKmId.get(kmId.trim()))
-                .orElseThrow(() -> new IllegalStateException("KnowledgeModuleProperties not found for kmId: %s".formatted(kmId)));
+        return Optional.ofNullable(knowledgeBasePropertiesByKmId.get(kmId.trim()))
+                .orElseThrow(() -> new IllegalStateException("KnowledgeBaseProperties not found for kmId: %s".formatted(kmId)));
     }
 
     public Map<String, IceProperties.SeriesOverride> getSeriesOverrides()
@@ -342,16 +343,6 @@ public class SupportingDataService
     public Map<String, IceProperties.SeasonOverride> getSeasonOverrides()
     {
         return Optional.ofNullable(iceProperties).map(IceProperties::getSeasonOverrides).orElse(Map.of());
-    }
-
-    private Map<String, CdsEngineProperties.ModuleCanonicalDefinition> getRawSupportingKnowledgeModules()
-    {
-        return Optional.ofNullable(cdsEngineProperties).map(CdsEngineProperties::getModuleCanonicalDefinitionMap).orElse(Map.of());
-    }
-
-    private Map<String, IceProperties.KnowledgeModuleProperties> getRawKnowledgeModuleProperties()
-    {
-        return Optional.ofNullable(iceProperties).map(IceProperties::getKnowledgeModules).orElse(Map.of());
     }
 
     public List<String> getConfiguredScheduleFlags()
@@ -366,42 +357,52 @@ public class SupportingDataService
                 .toList();
     }
 
-    private Map<String, CdsEngineProperties.ModuleCanonicalDefinition> buildSupportingKnowledgeModulesByKmId()
+    private Map<String, CdsEngineProperties.KnowledgeBaseDefinition> getRawSupportingKnowledgeBases()
     {
-        final Map<String, CdsEngineProperties.ModuleCanonicalDefinition> rawKnowledgeModules = getRawSupportingKnowledgeModules();
-        if (rawKnowledgeModules.isEmpty())
+        return Optional.ofNullable(cdsEngineProperties).map(CdsEngineProperties::getKnowledgeBaseDefinitionMap).orElse(Map.of());
+    }
+
+    private Map<String, IceProperties.KnowledgeBaseProperties> getRawKnowledgeBaseProperties()
+    {
+        return Optional.ofNullable(iceProperties).map(IceProperties::getKnowledgeBases).orElse(Map.of());
+    }
+
+    private Map<String, CdsEngineProperties.KnowledgeBaseDefinition> buildSupportingKnowledgeBasesByKmId()
+    {
+        final Map<String, CdsEngineProperties.KnowledgeBaseDefinition> rawKnowledgeBases = getRawSupportingKnowledgeBases();
+        if (rawKnowledgeBases.isEmpty())
             return Map.of();
 
-        final Map<String, CdsEngineProperties.ModuleCanonicalDefinition> normalized = new LinkedHashMap<>();
-        rawKnowledgeModules.forEach((moduleKey, moduleData) ->
+        final Map<String, CdsEngineProperties.KnowledgeBaseDefinition> normalized = new LinkedHashMap<>();
+        rawKnowledgeBases.forEach((knowledgeBaseKey, knowledgeBaseData) ->
         {
-            final String kmId = resolveConfiguredModuleKeyToKmId(moduleKey);
+            final String kmId = resolveConfiguredKnowledgeBaseKeyToKmId(knowledgeBaseKey);
             if (!StringUtils.hasText(kmId))
                 return;
-            normalized.merge(kmId, routePlanDefinitionsToSeriesData(moduleData), this::mergeKnowledgeModules);
+            normalized.merge(kmId, routePlanDefinitionsToSeriesData(knowledgeBaseData), this::mergeKnowledgeBases);
         });
         return Map.copyOf(normalized);
     }
 
-    private Map<String, IceProperties.KnowledgeModuleProperties> buildKnowledgeModulePropertiesByKmId()
+    private Map<String, IceProperties.KnowledgeBaseProperties> buildKnowledgeBasePropertiesByKmId()
     {
-        final Map<String, IceProperties.KnowledgeModuleProperties> rawKnowledgeModules = getRawKnowledgeModuleProperties();
-        if (rawKnowledgeModules.isEmpty())
+        final Map<String, IceProperties.KnowledgeBaseProperties> rawKnowledgeBases = getRawKnowledgeBaseProperties();
+        if (rawKnowledgeBases.isEmpty())
             return Map.of();
 
-        final Map<String, IceProperties.KnowledgeModuleProperties> normalized = new LinkedHashMap<>();
-        rawKnowledgeModules.forEach((moduleKey, moduleProperties) ->
+        final Map<String, IceProperties.KnowledgeBaseProperties> normalized = new LinkedHashMap<>();
+        rawKnowledgeBases.forEach((knowledgeBaseKey, knowledgeBaseProperties) ->
         {
-            final String kmId = resolveConfiguredModuleKeyToKmId(moduleKey);
+            final String kmId = resolveConfiguredKnowledgeBaseKeyToKmId(knowledgeBaseKey);
             if (!StringUtils.hasText(kmId))
                 return;
-            normalized.put(kmId, moduleProperties);
+            normalized.put(kmId, knowledgeBaseProperties);
         });
         return Map.copyOf(normalized);
     }
 
-    private CdsEngineProperties.ModuleCanonicalDefinition mergeKnowledgeModules(
-            final CdsEngineProperties.ModuleCanonicalDefinition left, final CdsEngineProperties.ModuleCanonicalDefinition right)
+    private CdsEngineProperties.KnowledgeBaseDefinition mergeKnowledgeBases(final CdsEngineProperties.KnowledgeBaseDefinition left,
+            final CdsEngineProperties.KnowledgeBaseDefinition right)
     {
         if (left == null)
             return right;
@@ -419,14 +420,15 @@ public class SupportingDataService
         outboundCodeSystemMap.putAll(Optional.ofNullable(left.outboundCodeSystemMap()).orElse(Map.of()));
         outboundCodeSystemMap.putAll(Optional.ofNullable(right.outboundCodeSystemMap()).orElse(Map.of()));
 
-        final PlanDefinition planDefinition = Optional.ofNullable(right.modulePlanDefinition()).orElse(left.modulePlanDefinition());
+        final PlanDefinition planDefinition =
+                Optional.ofNullable(right.knowledgeBasePlanDefinition()).orElse(left.knowledgeBasePlanDefinition());
         return routePlanDefinitionsToSeriesData(
-                new CdsEngineProperties.ModuleCanonicalDefinition(planDefinition, Map.copyOf(planDefinitions), Map.of(),
+                new CdsEngineProperties.KnowledgeBaseDefinition(planDefinition, Map.copyOf(planDefinitions), Map.of(),
                         Map.copyOf(codeSystems), Map.copyOf(outboundCodeSystemMap)));
     }
 
-    private CdsEngineProperties.ModuleCanonicalDefinition routePlanDefinitionsToSeriesData(
-            final CdsEngineProperties.ModuleCanonicalDefinition definition)
+    private CdsEngineProperties.KnowledgeBaseDefinition routePlanDefinitionsToSeriesData(
+            final CdsEngineProperties.KnowledgeBaseDefinition definition)
     {
         if (definition == null)
             return null;
@@ -434,7 +436,8 @@ public class SupportingDataService
         final Map<String, PlanDefinition> planDefinitions =
                 new LinkedHashMap<>(Optional.ofNullable(definition.planDefinitions()).orElse(Map.of()));
 
-        return new CdsEngineProperties.ModuleCanonicalDefinition(definition.modulePlanDefinition(), Map.copyOf(planDefinitions),
+        return new CdsEngineProperties.KnowledgeBaseDefinition(definition.knowledgeBasePlanDefinition(),
+                Map.copyOf(planDefinitions),
                 new LinkedHashMap<>(planDefinitionSeriesDataConsumer.toSeriesDataMap(filterSeriesPlanDefinitions(planDefinitions))),
                 Map.copyOf(Optional.ofNullable(definition.codeSystems()).orElse(Map.of())),
                 Map.copyOf(Optional.ofNullable(definition.outboundCodeSystemMap()).orElse(Map.of())));
@@ -457,19 +460,19 @@ public class SupportingDataService
         return Map.copyOf(seriesPlanDefinitions);
     }
 
-    private String resolveConfiguredModuleKeyToKmId(final String moduleKey)
+    private String resolveConfiguredKnowledgeBaseKeyToKmId(final String knowledgeBaseKey)
     {
-        if (!StringUtils.hasText(moduleKey))
-            throw new IllegalArgumentException("knowledge-module configuration key must not be blank");
+        if (!StringUtils.hasText(knowledgeBaseKey))
+            throw new IllegalArgumentException("knowledge base configuration key must not be blank");
 
-        final String key = moduleKey.trim();
+        final String key = knowledgeBaseKey.trim();
         if (isKmId(key))
             return key;
 
-        final String kmId = canonicalToKmId.get(key);
+        final String kmId = knowledgeBaseToKmId.get(key);
         if (!StringUtils.hasText(kmId))
             throw new IllegalStateException(
-                    "No plan-definition mapping found for configured knowledge-module key: %s".formatted(key));
+                    "No plan-definition mapping found for configured knowledge base key: %s".formatted(key));
 
         return kmId;
     }
@@ -479,19 +482,19 @@ public class SupportingDataService
         return StringUtils.hasText(value) && value.contains("^");
     }
 
-    private Stream<String> streamCandidateKnowledgeModuleIds(final String kmId)
+    private Stream<String> streamCandidateKnowledgeBaseIds(final String kmId)
     {
-        return Stream.of(kmId, baseKnowledgeModuleId).filter(StringUtils::hasText).map(String::trim).distinct();
+        return Stream.of(kmId, baseKnowledgeBaseId).filter(StringUtils::hasText).map(String::trim).distinct();
     }
 
-    private CdsEngineProperties.ModuleCanonicalDefinition getKnowledgeModule(final String kmId)
+    private CdsEngineProperties.KnowledgeBaseDefinition getKnowledgeBase(final String kmId)
     {
-        return getSupportingKnowledgeModuleByKmId(kmId);
+        return getSupportingKnowledgeBaseByKmId(kmId);
     }
 
-    private Stream<CdsEngineProperties.ModuleCanonicalDefinition> streamCandidateKnowledgeModules(final String kmId)
+    private Stream<CdsEngineProperties.KnowledgeBaseDefinition> streamCandidateKnowledgeBases(final String kmId)
     {
-        return streamCandidateKnowledgeModuleIds(kmId).map(this::getKnowledgeModule);
+        return streamCandidateKnowledgeBaseIds(kmId).map(this::getKnowledgeBase);
     }
 
     private void validateConfiguredScheduleFlags()
@@ -500,9 +503,9 @@ public class SupportingDataService
         if (configuredScheduleFlags.isEmpty())
             return;
 
-        for (final String kmId : new java.util.TreeSet<>(!knowledgeModulePropertiesByKmId.isEmpty()
-                                                         ? knowledgeModulePropertiesByKmId.keySet()
-                                                         : supportingKnowledgeModulesByKmId.keySet()))
+        for (final String kmId : new java.util.TreeSet<>(!knowledgeBasePropertiesByKmId.isEmpty()
+                                                         ? knowledgeBasePropertiesByKmId.keySet()
+                                                         : supportingKnowledgeBasesByKmId.keySet()))
         {
             try
             {
@@ -511,7 +514,7 @@ public class SupportingDataService
             catch (final IllegalArgumentException e)
             {
                 throw new IllegalStateException(
-                        "Configured ice.schedule-flags are invalid for knowledge module '%s': %s".formatted(kmId, e.getMessage()), e);
+                        "Configured ice.schedule-flags are invalid for knowledge base '%s': %s".formatted(kmId, e.getMessage()), e);
             }
         }
     }
@@ -532,7 +535,7 @@ public class SupportingDataService
             return List.of();
 
         final Set<String> supportedScheduleFlags =
-                streamCandidateKnowledgeModules(kmId).map(CdsEngineProperties.ModuleCanonicalDefinition::codeSystems)
+                streamCandidateKnowledgeBases(kmId).map(CdsEngineProperties.KnowledgeBaseDefinition::codeSystems)
                         .filter(Objects::nonNull)
                         .map(codeSystems -> codeSystems.get(SUPPORTED_SCHEDULE_FLAGS_CODE_SYSTEM_NAME))
                         .filter(Objects::nonNull)
@@ -565,17 +568,17 @@ public class SupportingDataService
 
         final String normalizedVaccineGroupCode = vaccineGroupCode.trim();
 
-        final var knowledgeModule = getKnowledgeModule(kmId);
-        if (knowledgeModule.codeSystems() == null)
+        final var knowledgeBase = getKnowledgeBase(kmId);
+        if (knowledgeBase.codeSystems() == null)
             return List.of();
 
         final List<CodeSystemConcept> supportedDiseaseConcepts =
-                Optional.ofNullable(knowledgeModule.codeSystems().get("SUPPORTED_DISEASE_CONCEPT"))
+                Optional.ofNullable(knowledgeBase.codeSystems().get("SUPPORTED_DISEASE_CONCEPT"))
                         .map(CodeSystem::concept)
                         .orElse(List.of());
 
         final Optional<CodeSystemConcept> vaccineGroupConcept =
-                Optional.ofNullable(knowledgeModule.codeSystems().get("VACCINE_GROUP_CONCEPT"))
+                Optional.ofNullable(knowledgeBase.codeSystems().get("VACCINE_GROUP_CONCEPT"))
                         .map(CodeSystem::concept)
                         .orElse(List.of())
                         .stream()
@@ -668,8 +671,8 @@ public class SupportingDataService
         if (!StringUtils.hasText(normalizedSeriesCode))
             return null;
 
-        final var knowledgeModule = getKnowledgeModule(kmId);
-        final String displayFromSeriesData = Optional.ofNullable(knowledgeModule.series())
+        final var knowledgeBase = getKnowledgeBase(kmId);
+        final String displayFromSeriesData = Optional.ofNullable(knowledgeBase.series())
                 .orElse(Map.of())
                 .entrySet()
                 .stream()
@@ -689,7 +692,7 @@ public class SupportingDataService
         if (displayFromSeriesData != null)
             return displayFromSeriesData;
 
-        final String displayFromSeriesPlanDefinition = Optional.ofNullable(knowledgeModule.planDefinitions())
+        final String displayFromSeriesPlanDefinition = Optional.ofNullable(knowledgeBase.planDefinitions())
                 .orElse(Map.of())
                 .entrySet()
                 .stream()
@@ -709,7 +712,7 @@ public class SupportingDataService
         if (displayFromSeriesPlanDefinition != null)
             return displayFromSeriesPlanDefinition;
 
-        return Optional.ofNullable(knowledgeModule.codeSystems())
+        return Optional.ofNullable(knowledgeBase.codeSystems())
                 .map(codeSystems -> codeSystems.get(SUPPORTED_SERIES_CODE_SYSTEM_NAME))
                 .map(CodeSystem::concept)
                 .orElse(List.of())
@@ -727,7 +730,7 @@ public class SupportingDataService
         if (!StringUtils.hasText(selectionTypeCode))
             return null;
 
-        return streamCandidateKnowledgeModules(kmId).map(CdsEngineProperties.ModuleCanonicalDefinition::codeSystems)
+        return streamCandidateKnowledgeBases(kmId).map(CdsEngineProperties.KnowledgeBaseDefinition::codeSystems)
                 .filter(Objects::nonNull)
                 .map(codeSystems -> codeSystems.get("SERIES_DISPLAY_SELECTION_TYPE"))
                 .filter(Objects::nonNull)
@@ -746,7 +749,7 @@ public class SupportingDataService
         if (!StringUtils.hasText(codeSystemName) || !StringUtils.hasText(code))
             return false;
 
-        return streamCandidateKnowledgeModules(kmId).map(CdsEngineProperties.ModuleCanonicalDefinition::codeSystems)
+        return streamCandidateKnowledgeBases(kmId).map(CdsEngineProperties.KnowledgeBaseDefinition::codeSystems)
                 .filter(Objects::nonNull)
                 .map(codeSystems -> codeSystems.get(codeSystemName))
                 .filter(Objects::nonNull)
@@ -764,7 +767,7 @@ public class SupportingDataService
         if (!StringUtils.hasText(codeSystemName) || !StringUtils.hasText(code))
             return false;
 
-        return streamCandidateKnowledgeModules(kmId).map(CdsEngineProperties.ModuleCanonicalDefinition::codeSystems)
+        return streamCandidateKnowledgeBases(kmId).map(CdsEngineProperties.KnowledgeBaseDefinition::codeSystems)
                 .filter(Objects::nonNull)
                 .map(codeSystems -> codeSystems.get(codeSystemName))
                 .filter(Objects::nonNull)
@@ -776,6 +779,34 @@ public class SupportingDataService
                 .findFirst()
                 .map(this::isConceptSupported)
                 .orElse(false);
+    }
+
+    public Optional<Coding> getConceptPropertyCoding(final String kmId, final String codeSystemName, final String sourceCodeSystem,
+            final String code, final String propertyCode)
+    {
+        if (!StringUtils.hasText(kmId) || !StringUtils.hasText(codeSystemName) || !StringUtils.hasText(sourceCodeSystem)
+                || !StringUtils.hasText(code) || !StringUtils.hasText(propertyCode))
+            return Optional.empty();
+
+        final String normalizedSourceCodeSystem = sourceCodeSystem.trim();
+        return streamCandidateKnowledgeBases(kmId).map(CdsEngineProperties.KnowledgeBaseDefinition::codeSystems)
+                .filter(Objects::nonNull)
+                .map(codeSystems -> codeSystems.get(codeSystemName))
+                .filter(Objects::nonNull)
+                .filter(codeSystem -> normalizedSourceCodeSystem.equals(codeSystem.url()))
+                .map(CodeSystem::concept)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .filter(concept -> code.equals(concept.code()))
+                .map(CodeSystemConcept::property)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
+                .filter(property -> propertyCode.equals(property.code()))
+                .map(CodeSystemConceptProperty::valueCoding)
+                .filter(Objects::nonNull)
+                .findFirst();
     }
 
     private boolean isConceptSupported(final CodeSystemConcept concept)
@@ -873,7 +904,7 @@ public class SupportingDataService
             return oidOrMapped;
 
         throw new IllegalArgumentException(
-                "Unsupported code system '%s' for knowledge module '%s'; no outbound-code-system-map mapping found".formatted(
+                "Unsupported code system '%s' for knowledge base '%s'; no outbound-code-system-map mapping found".formatted(
                         codeSystem, kmId));
     }
 
@@ -893,13 +924,13 @@ public class SupportingDataService
         return Optional.ofNullable(inboundCodeSystemOidMapByKm.get(kmId)).orElseGet(Map::of);
     }
 
-    public String getBaseKnowledgeModuleId()
+    public String getBaseKnowledgeBaseId()
     {
-        if (!StringUtils.hasText(baseKnowledgeModuleId))
+        if (!StringUtils.hasText(baseKnowledgeBaseId))
             throw new IllegalStateException(
-                    "Base knowledge module ID is not available; verify ice-base-module-canonical and plan-definition mappings");
+                    "Base knowledge base ID is not available; verify ice-base-knowledge-base and plan-definition mappings");
 
-        return baseKnowledgeModuleId;
+        return baseKnowledgeBaseId;
     }
 
     private Optional<String> resolveConceptDisplayName(final String kmId, final String codeSystem, final String code)

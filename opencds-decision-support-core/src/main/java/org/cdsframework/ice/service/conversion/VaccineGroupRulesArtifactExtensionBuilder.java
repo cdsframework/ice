@@ -29,7 +29,7 @@ public class VaccineGroupRulesArtifactExtensionBuilder
     private static final String VACCINE_GROUP_RULES_ARTIFACT_FOCUS_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.500";
     private static final String VACCINE_GROUP_FOCUS_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.1";
     private static final String VACCINE_GROUP_RULES_ARTIFACT_EXTENSION_URL =
-            "http://terminology.cdsframework.org/fhir/StructureDefinition/vaccine-group-rules-artifact";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact";
     private static final String RELATED_ARTIFACT_TYPE_DOCUMENTATION = "documentation";
 
     Optional<Extension> build(final List<RelatedClinicalStatement> relatedClinicalStatements)

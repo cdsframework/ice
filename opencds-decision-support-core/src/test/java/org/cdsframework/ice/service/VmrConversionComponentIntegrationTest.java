@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,10 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
 
 import org.cdsframework.fhir.AdministrativeGender;
 import org.cdsframework.fhir.CodeSystem;
@@ -32,6 +27,7 @@ import org.cdsframework.fhir.Identifier;
 import org.cdsframework.fhir.Immunization;
 import org.cdsframework.fhir.ImmunizationEvaluation;
 import org.cdsframework.fhir.ImmunizationRecommendation;
+import org.cdsframework.fhir.Observation;
 import org.cdsframework.fhir.OperationOutcome;
 import org.cdsframework.fhir.Parameters;
 import org.cdsframework.fhir.ParametersParameter;
@@ -46,7 +42,6 @@ import org.cdsframework.ice.service.conversion.SelectionContextExtensionBuilder;
 import org.cdsframework.ice.service.conversion.VaccineGroupRulesArtifactExtensionBuilder;
 import org.cdsframework.ice.service.conversion.VmrConversionComponent;
 import org.junit.jupiter.api.Test;
-import org.omg.dss.EvaluateAtSpecifiedTime;
 import org.omg.dss.EvaluationResponse;
 import org.omg.dss.FinalKMEvaluationResponse;
 import org.omg.dss.KMEvaluationResultData;
@@ -63,48 +58,40 @@ import org.opencds.vmr.v1_0.schema.SubstanceAdministrationProposal;
 import org.opencds.vmr.v1_0.schema.VMR;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.ObjectUtils;
-import org.xml.sax.InputSource;
 
 import tools.jackson.dataformat.xml.XmlMapper;
 
 class VmrConversionComponentIntegrationTest
 {
     private static final String KM_ID = "org.nyc.cir^ICE^1.0.0";
-    private static final String MODULE_CANONICAL = "http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
+    private static final String KNOWLEDGE_BASE = "https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
     private static final String VACCINE_GROUP_OID = "2.16.840.1.113883.3.795.12.100.1";
     private static final String SERIES_OPTIONS_OID = "2.16.840.1.113883.3.795.12.100.500";
     private static final String SERIES_SELECTION_TYPE_OID = "2.16.840.1.113883.3.795.12.100.501";
+    private static final String SCHEDULE_FLAGS_OID = "2.16.840.1.113883.3.795.12.100.502";
     private static final String SERIES_OID = "2.16.840.1.113883.3.795.12.100.10";
     private static final String SEASON_OID = "2.16.840.1.113883.3.795.12.100.11";
     private static final String RECOMMENDATION_REASON_OID = "2.16.840.1.113883.3.795.12.100.6";
     private static final String SELECTION_CONTEXT_EXTENSION_URL =
-            "http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context";
     private static final String SCHEDULE_AUTHORITY_EXTENSION_URL =
-            "http://terminology.cdsframework.org/fhir/StructureDefinition/ice-schedule-authority";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-schedule-authority";
 
     private static CdsEngineProperties createCdsEngineProperties()
     {
         final CdsEngineProperties properties = new CdsEngineProperties();
-        properties.setModuleCanonicalDefinitionMap(Map.of(MODULE_CANONICAL, createModuleCanonicalDefinition()));
+        properties.setKnowledgeBaseDefinitionMap(Map.of(KNOWLEDGE_BASE, createKnowledgeBaseDefinition()));
         return properties;
     }
 
     private static IceProperties createIceProperties(final boolean outputSeriesInformation,
-            @SuppressWarnings("SameParameterValue") final boolean outputNumberOfDosesRemaining,
-            final boolean enableDoseOverrideFeature)
-    {
-        return createIceProperties(outputSeriesInformation, outputNumberOfDosesRemaining, enableDoseOverrideFeature, false);
-    }
-
-    private static IceProperties createIceProperties(final boolean outputSeriesInformation,
-            final boolean outputNumberOfDosesRemaining, final boolean enableDoseOverrideFeature,
-            final boolean outputScheduleAuthorities)
+            final boolean outputNumberOfDosesRemaining, final boolean outputScheduleAuthorities)
     {
         final IceProperties properties = new IceProperties();
-        properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
-        properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
-                new IceProperties.KnowledgeModuleProperties(true, enableDoseOverrideFeature, true, outputNumberOfDosesRemaining,
-                        outputSeriesInformation, outputScheduleAuthorities, false, false, List.of(), List.of(), false,
+        properties.setIceBaseKnowledgeBase(KNOWLEDGE_BASE);
+        properties.setKnowledgeBases(Map.of(KNOWLEDGE_BASE,
+                new IceProperties.KnowledgeBaseProperties(true, false, true, outputNumberOfDosesRemaining, outputSeriesInformation,
+                        outputScheduleAuthorities, false, false, List.of(), List.of(), false,
                         IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         return properties;
     }
@@ -132,39 +119,49 @@ class VmrConversionComponentIntegrationTest
         return builder.build();
     }
 
-    private static CdsEngineProperties.ModuleCanonicalDefinition createModuleCanonicalDefinition()
+    private static CdsEngineProperties.KnowledgeBaseDefinition createKnowledgeBaseDefinition()
     {
-        return new CdsEngineProperties.ModuleCanonicalDefinition(PlanDefinition.builder()
-                .identifier(
-                        Identifier.builder().system("http://cdsframework.org/identifiers/knowledge-modules").value(KM_ID).build())
+        return new CdsEngineProperties.KnowledgeBaseDefinition(PlanDefinition.builder()
+                .identifier(Identifier.builder()
+                        .system("https://terminology.cdsframework.org/ice/identifiers/knowledge-bases")
+                        .value(KM_ID)
+                        .build())
                 .build(), Map.of(), Map.of(), Map.of("VACCINE_GROUP_CONCEPT",
                 simpleCodeSystem("VACCINE_GROUP_CONCEPT", VACCINE_GROUP_OID,
-                        "http://terminology.cdsframework.org/ice/vaccine-group",
+                        "https://terminology.cdsframework.org/ice/vaccine-group",
                         CodeSystemConcept.builder().code("100").display("Test Vaccine Group").build()), "SUPPORTED_SERIES",
-                simpleCodeSystem("SUPPORTED_SERIES", SERIES_OID, "http://terminology.cdsframework.org/ice/series",
-                        CodeSystemConcept.builder().code("ZOSTER_2_DOSE_SERIES").display("Zoster 2-Dose Series").build()),
+                simpleCodeSystem("SUPPORTED_SERIES", SERIES_OID, "https://terminology.cdsframework.org/ice/series",
+                        CodeSystemConcept.builder().code("ZOSTER_SERIES").display("Zoster Series").build()),
                 "SERIES_DISPLAY_SELECTION_TYPE", simpleCodeSystem("SERIES_DISPLAY_SELECTION_TYPE", SERIES_SELECTION_TYPE_OID,
-                        "http://terminology.cdsframework.org/ice/series-display-selection-type", CodeSystemConcept.builder()
+                        "https://terminology.cdsframework.org/ice/series-display-selection-type", CodeSystemConcept.builder()
                                 .code("SERIES_DISPLAY_UNAMBIGUOUS")
                                 .display("Series Selected for Display")
                                 .build()), "SUPPORTED_SEASON",
-                simpleCodeSystem("SUPPORTED_SEASON", SEASON_OID, "http://terminology.cdsframework.org/ice/season",
+                simpleCodeSystem("SUPPORTED_SEASON", SEASON_OID, "https://terminology.cdsframework.org/ice/season",
                         CodeSystemConcept.builder().code("SEASON_2026_2027").display("2026-2027 Season").build()),
                 "RECOMMENDATION_REASON_CONCEPT", simpleCodeSystem("RECOMMENDATION_REASON_CONCEPT", RECOMMENDATION_REASON_OID,
-                        "http://terminology.cdsframework.org/ice/recommendation-reason",
+                        "https://terminology.cdsframework.org/ice/recommendation-reason",
                         CodeSystemConcept.builder().code("RECOMMENDED").display("Recommended").build(),
-                        CodeSystemConcept.builder().code("DUE_NOW").display("Due Now").build()), "SUPPORTED_VACCINES",
+                        CodeSystemConcept.builder().code("DUE_NOW").display("Due Now").build()),
+                "SUPPORTED_CONTEXTUAL_CONDITION_CODES",
+                simpleCodeSystem("SUPPORTED_CONTEXTUAL_CONDITION_CODES", "2.16.840.1.113883.3.795.12.100.52",
+                        "http://ivci.org/CodeSystem/contextual-condition"), "SUPPORTED_VACCINES",
                 simpleCodeSystem("SUPPORTED_VACCINES", "2.16.840.1.113883.12.292", "http://hl7.org/fhir/sid/cvx",
                         CodeSystemConcept.builder().code("10").display("IPV").build(), CodeSystemConcept.builder()
                                 .code("24")
                                 .display("Anthrax, pre-exposure prophylaxis, post-exposure prophylaxis")
                                 .property(CodeSystemConceptProperty.builder().code("supported").valueBoolean(false).build())
+                                .build()), "SUPPORTED_SCHEDULE_FLAGS",
+                simpleCodeSystem("SUPPORTED_SCHEDULE_FLAGS", SCHEDULE_FLAGS_OID,
+                        "https://terminology.cdsframework.org/ice/schedule-flags", CodeSystemConcept.builder()
+                                .code("HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID")
+                                .display("Evaluate Invalid 3rd Hep B Dose as Accepted Extra Dose")
                                 .build())),
                 Map.of("2.16.840.1.113883.6.96", "http://snomed.info/sct", "2.16.840.1.113883.6.1", "http://loinc.org",
                         "2.16.840.1.113883.6.103", "http://hl7.org/fhir/sid/icd-9-cm", "2.16.840.1.113883.6.90",
                         "http://hl7.org/fhir/sid/icd-10-cm", "2.16.840.1.113883.6.3", "http://hl7.org/fhir/sid/icd-10",
-                        "2.16.840.1.113883.3.795.12.100.4", "http://terminology.cdsframework.org/ice/unknown",
-                        "2.16.840.1.113883.3.795.12.100.500", "http://terminology.cdsframework.org/ice/series-display-options"));
+                        "2.16.840.1.113883.3.795.12.100.4", "https://terminology.cdsframework.org/ice/unknown",
+                        "2.16.840.1.113883.3.795.12.100.500", "https://terminology.cdsframework.org/ice/series-display-options"));
     }
 
     private static VmrConversionComponent createVmrConversionComponent(final SupportingDataService supportingDataService,
@@ -180,7 +177,7 @@ class VmrConversionComponentIntegrationTest
         return Parameters.builder()
                 .resourceType("Parameters")
                 .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-09").build())
-                .parameter(ParametersParameter.builder().name("module").valueCanonical(MODULE_CANONICAL).build())
+                .parameter(ParametersParameter.builder().name("knowledgeBase").valueCanonical(KNOWLEDGE_BASE).build())
                 .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()
@@ -198,7 +195,7 @@ class VmrConversionComponentIntegrationTest
         return Parameters.builder()
                 .resourceType("Parameters")
                 .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-09").build())
-                .parameter(ParametersParameter.builder().name("module").valueCanonical(MODULE_CANONICAL).build())
+                .parameter(ParametersParameter.builder().name("knowledgeBase").valueCanonical(KNOWLEDGE_BASE).build())
                 .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()
@@ -234,7 +231,7 @@ class VmrConversionComponentIntegrationTest
         return Parameters.builder()
                 .resourceType("Parameters")
                 .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-09").build())
-                .parameter(ParametersParameter.builder().name("module").valueCanonical(MODULE_CANONICAL).build())
+                .parameter(ParametersParameter.builder().name("knowledgeBase").valueCanonical(KNOWLEDGE_BASE).build())
                 .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()
@@ -270,7 +267,7 @@ class VmrConversionComponentIntegrationTest
         return Parameters.builder()
                 .resourceType("Parameters")
                 .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-09").build())
-                .parameter(ParametersParameter.builder().name("module").valueCanonical(MODULE_CANONICAL).build())
+                .parameter(ParametersParameter.builder().name("knowledgeBase").valueCanonical(KNOWLEDGE_BASE).build())
                 .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()
@@ -301,12 +298,44 @@ class VmrConversionComponentIntegrationTest
                 .build();
     }
 
+    private static Parameters createRequestParametersWithUnsupportedContextualCondition()
+    {
+        return Parameters.builder()
+                .resourceType("Parameters")
+                .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-09").build())
+                .parameter(ParametersParameter.builder().name("knowledgeBase").valueCanonical(KNOWLEDGE_BASE).build())
+                .parameter(ParametersParameter.builder()
+                        .name("patient")
+                        .resource(Patient.builder()
+                                .identifier(
+                                        Identifier.builder().system("http://nyc.gov/cir/identifier/patient-id").value("p1").build())
+                                .birthDate(LocalDate.parse("1990-01-01"))
+                                .gender(AdministrativeGender.FEMALE)
+                                .build())
+                        .build())
+                .parameter(ParametersParameter.builder()
+                        .name("observation")
+                        .resource(Observation.builder()
+                                .status("final")
+                                .code(CodeableConcept.builder()
+                                        .coding(Coding.builder()
+                                                .system("http://ivci.org/CodeSystem/contextual-condition")
+                                                .code("999")
+                                                .display("Unsupported contextual condition")
+                                                .build())
+                                        .build())
+                                .valueDateTime("2026-04-01")
+                                .build())
+                        .build())
+                .build();
+    }
+
     private static Parameters createRequestParametersWithUnsupportedCvxAndCodeSystem()
     {
         return Parameters.builder()
                 .resourceType("Parameters")
                 .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-09").build())
-                .parameter(ParametersParameter.builder().name("module").valueCanonical(MODULE_CANONICAL).build())
+                .parameter(ParametersParameter.builder().name("knowledgeBase").valueCanonical(KNOWLEDGE_BASE).build())
                 .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()
@@ -355,50 +384,6 @@ class VmrConversionComponentIntegrationTest
                 .build();
     }
 
-    private static Parameters createRequestParametersWithSubpotentImmunization()
-    {
-        return Parameters.builder()
-                .resourceType("Parameters")
-                .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-09").build())
-                .parameter(ParametersParameter.builder().name("module").valueCanonical(MODULE_CANONICAL).build())
-                .parameter(ParametersParameter.builder()
-                        .name("patient")
-                        .resource(Patient.builder()
-                                .identifier(
-                                        Identifier.builder().system("http://nyc.gov/cir/identifier/patient-id").value("p1").build())
-                                .birthDate(LocalDate.parse("1990-01-01"))
-                                .gender(AdministrativeGender.FEMALE)
-                                .build())
-                        .build())
-                .parameter(ParametersParameter.builder()
-                        .name("immunization")
-                        .resource(Immunization.builder()
-                                .identifier(Identifier.builder()
-                                        .system("http://nyc.gov/cir/identifier/immunization-id")
-                                        .value("imm-1")
-                                        .build())
-                                .isSubpotent(true)
-                                .subpotentReason(CodeableConcept.builder()
-                                        .coding(Coding.builder()
-                                                .system("http://terminology.hl7.org/CodeSystem/immunization-subpotent-reason")
-                                                .code("coldchainbreak")
-                                                .display("Cold Chain Break")
-                                                .build())
-                                        .build())
-                                .vaccineCode(CodeableConcept.builder()
-                                        .coding(Coding.builder()
-                                                .system("http://hl7.org/fhir/sid/cvx")
-                                                .code("10")
-                                                .display("IPV")
-                                                .build())
-                                        .text("IPV")
-                                        .build())
-                                .occurrenceDateTime("2026-04-01")
-                                .build())
-                        .build())
-                .build();
-    }
-
     private static CD createCd(final String code, final String codeSystem, final String display)
     {
         final CD cd = new CD();
@@ -433,7 +418,7 @@ class VmrConversionComponentIntegrationTest
         final ObservationResult seriesSelection = new ObservationResult();
         seriesSelection.setObservationFocus(createCd("SERIES_DISPLAY_UNAMBIGUOUS", SERIES_SELECTION_TYPE_OID, null));
         final ObservationResult.ObservationValue seriesSelectionValue = new ObservationResult.ObservationValue();
-                seriesSelectionValue.setConcept(createCd("ZOSTER_2_DOSE_SERIES", SERIES_OID, "Zoster 2-Dose Series"));
+        seriesSelectionValue.setConcept(createCd("ZOSTER_SERIES", SERIES_OID, "Zoster Series"));
         seriesSelection.setObservationValue(seriesSelectionValue);
         seriesSelection.getRelatedClinicalStatement().add(asRelatedObservation(dosesRemaining));
 
@@ -489,11 +474,6 @@ class VmrConversionComponentIntegrationTest
         return proposal;
     }
 
-    private static SubstanceAdministrationEvent createEventWithSeriesContext()
-    {
-        return createEventWithSeriesContext("2");
-    }
-
     private static SubstanceAdministrationEvent createEventWithSeriesContext(final String dosesRemainingValue)
     {
         final SubstanceAdministrationEvent event = new SubstanceAdministrationEvent();
@@ -533,6 +513,53 @@ class VmrConversionComponentIntegrationTest
 
         final SemanticPayload semanticPayload = new SemanticPayload();
         semanticPayload.getBase64EncodedPayload().add(payload);
+        final KMEvaluationResultData resultData = new KMEvaluationResultData();
+        resultData.setData(semanticPayload);
+        final FinalKMEvaluationResponse finalResponse = new FinalKMEvaluationResponse();
+        finalResponse.getKmEvaluationResultData().add(resultData);
+        final EvaluationResponse evaluationResponse = new EvaluationResponse();
+        evaluationResponse.getFinalKMEvaluationResponse().add(finalResponse);
+        return evaluationResponse;
+    }
+
+    private static ObservationResult createScheduleAuthoritiesObservation()
+    {
+        final ObservationResult observation = new ObservationResult();
+        final CD focus = new CD();
+        focus.setCode("ICE_VACCINE_GROUP_SCHEDULE_AUTHORITIES");
+        focus.setCodeSystem(SERIES_OPTIONS_OID);
+        observation.setObservationFocus(focus);
+
+        final CD acip = new CD();
+        acip.setCode("ACIP");
+        acip.setDisplayName("Advisory Committee on Immunization Practices");
+        final CD cdc = new CD();
+        cdc.setCode("CDC");
+        cdc.setDisplayName("Centers for Disease Control and Prevention");
+        observation.getInterpretation().add(acip);
+        observation.getInterpretation().add(cdc);
+        return observation;
+    }
+
+    private static EvaluationResponse createEvaluationResponseWithScheduleAuthorities()
+    {
+        final SubstanceAdministrationProposal proposal = createProposalWithSeriesContext();
+        proposal.getRelatedClinicalStatement().add(asRelatedObservation(createScheduleAuthoritiesObservation()));
+        final CDSOutput cdsOutput = new CDSOutput();
+        final VMR vmrOutput = new VMR();
+        final EvaluatedPerson person = new EvaluatedPerson();
+        final EvaluatedPerson.ClinicalStatements clinicalStatements = new EvaluatedPerson.ClinicalStatements();
+        final EvaluatedPerson.ClinicalStatements.SubstanceAdministrationProposals proposals =
+                new EvaluatedPerson.ClinicalStatements.SubstanceAdministrationProposals();
+        proposals.getSubstanceAdministrationProposal().add(proposal);
+        clinicalStatements.setSubstanceAdministrationProposals(proposals);
+        person.setClinicalStatements(clinicalStatements);
+        vmrOutput.setPatient(person);
+        cdsOutput.setVmrOutput(vmrOutput);
+
+        final XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).findAndAddModules().build();
+        final SemanticPayload semanticPayload = new SemanticPayload();
+        semanticPayload.getBase64EncodedPayload().add(xmlMapper.writeValueAsBytes(cdsOutput));
         final KMEvaluationResultData resultData = new KMEvaluationResultData();
         resultData.setData(semanticPayload);
         final FinalKMEvaluationResponse finalResponse = new FinalKMEvaluationResponse();
@@ -654,7 +681,7 @@ class VmrConversionComponentIntegrationTest
     @Test
     void doesNotEmitSeriesSeasonOrDosesWhenOutputFlagsAreDisabled()
     {
-        final IceProperties iceProperties = createIceProperties(false, false, false);
+        final IceProperties iceProperties = createIceProperties(false, false);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
@@ -677,7 +704,7 @@ class VmrConversionComponentIntegrationTest
     @Test
     void emitsSeriesSeasonAndDosesWhenOutputFlagIsEnabled()
     {
-        final IceProperties iceProperties = createIceProperties(true, false, false);
+        final IceProperties iceProperties = createIceProperties(true, false);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
@@ -687,8 +714,8 @@ class VmrConversionComponentIntegrationTest
         final ImmunizationEvaluation evaluation = firstEvaluation(response);
         final var rec = recommendation.recommendation().getFirst();
 
-        assertEquals("Zoster 2-Dose Series", rec.series());
-        assertEquals("Zoster 2-Dose Series", evaluation.series());
+        assertEquals("Zoster Series", rec.series());
+        assertEquals("Zoster Series", evaluation.series());
         assertNotNull(rec.seriesDoses());
         assertEquals("2", rec.seriesDoses().text());
         assertEquals(1, rec.extension().size());
@@ -700,7 +727,7 @@ class VmrConversionComponentIntegrationTest
                 .anyMatch(ext -> "selectedSeries".equals(ext.url()) && ext.valueCodeableConcept()
                         .coding()
                         .stream()
-                        .anyMatch(coding -> "ZOSTER_2_DOSE_SERIES".equals(coding.code()))));
+                        .anyMatch(coding -> "ZOSTER_SERIES".equals(coding.code()))));
         assertTrue(contextExtension.extension()
                 .stream()
                 .anyMatch(ext -> "seriesSelectionType".equals(ext.url()) && ext.valueCodeableConcept()
@@ -715,14 +742,14 @@ class VmrConversionComponentIntegrationTest
                         .anyMatch(coding -> "SEASON_2026_2027".equals(coding.code()))));
         assertEquals(1, evaluation.extension().size());
         assertEquals(SELECTION_CONTEXT_EXTENSION_URL, evaluation.extension().getFirst().url());
-        assertTrue(rec.description().contains("Series: Zoster 2-Dose Series"));
+        assertTrue(rec.description().contains("Series: Zoster Series"));
         assertTrue(rec.description().contains("Season: 2026-2027 Season"));
     }
 
     @Test
     void doesNotEmitSeriesDosesWhenDosesRemainingIsZero()
     {
-        final IceProperties iceProperties = createIceProperties(true, false, false);
+        final IceProperties iceProperties = createIceProperties(true, false);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
@@ -735,7 +762,7 @@ class VmrConversionComponentIntegrationTest
 
         assertNull(rec.seriesDoses());
         assertNull(evaluation.seriesDoses());
-        assertTrue(rec.description().contains("Series: Zoster 2-Dose Series"));
+        assertTrue(rec.description().contains("Series: Zoster Series"));
         assertTrue(rec.description().contains("Season: 2026-2027 Season"));
         assertFalse(rec.description().contains("Recommended number of doses for immunity: 0"));
     }
@@ -743,7 +770,7 @@ class VmrConversionComponentIntegrationTest
     @Test
     void emitsSingleRecommendationResourceWithNestedEntries()
     {
-        final IceProperties iceProperties = createIceProperties(true, false, false);
+        final IceProperties iceProperties = createIceProperties(true, false);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
@@ -759,7 +786,7 @@ class VmrConversionComponentIntegrationTest
     @Test
     void emitsWarningWhenUnsupportedCvxImmunizationIsIgnored()
     {
-        final IceProperties iceProperties = createIceProperties(true, false, false);
+        final IceProperties iceProperties = createIceProperties(true, false);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
@@ -780,9 +807,65 @@ class VmrConversionComponentIntegrationTest
     }
 
     @Test
+    void emitsWarningWhenUnsupportedContextualConditionIsIgnored()
+    {
+        final IceProperties iceProperties = createIceProperties(true, false);
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
+        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
+        final Parameters request = createRequestParametersWithUnsupportedContextualCondition();
+
+        final String vmrPayload = new String(vmrConversionComponent.convertImmDsToEvaluateAtSpecifiedTime(request)
+                .getEvaluationRequest()
+                .getDataRequirementItemData()
+                .getFirst()
+                .getData()
+                .getBase64EncodedPayload()
+                .getFirst(), StandardCharsets.UTF_8);
+        final Parameters response =
+                vmrConversionComponent.convertImmDsToParametersResponse(createEvaluationResponseWithSeriesContext(), request,
+                        LocalDateTime.now());
+        final OperationOutcome operationOutcome = operationOutcome(response);
+
+        assertFalse(vmrPayload.contains("code=\"999\""));
+        assertTrue(operationOutcome.issue()
+                .stream()
+                .anyMatch(issue -> "warning".equals(issue.severity()) && issue.details() != null && issue.details().text() != null
+                        && issue.details().text().contains("Unsupported contextual-condition code '999'") && issue.details()
+                        .text()
+                        .contains("observation was ignored")));
+    }
+
+    @Test
+    void convertsImmDsScheduleFlag()
+    {
+        final IceProperties iceProperties = createIceProperties(true, false);
+        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
+        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
+        final Parameters request = Parameters.builder()
+                .resourceType("Parameters")
+                .parameter(createRequestParameters().parameter())
+                .parameter(ParametersParameter.builder()
+                        .name("scheduleFlag")
+                        .valueCode("HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID")
+                        .build())
+                .build();
+
+        final String vmrPayload = new String(vmrConversionComponent.convertImmDsToEvaluateAtSpecifiedTime(request)
+                .getEvaluationRequest()
+                .getDataRequirementItemData()
+                .getFirst()
+                .getData()
+                .getBase64EncodedPayload()
+                .getFirst(), StandardCharsets.UTF_8);
+
+        assertTrue(vmrPayload.contains("code=\"HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID\""));
+        assertTrue(vmrPayload.contains("codeSystem=\"%s\"".formatted(SCHEDULE_FLAGS_OID)));
+    }
+
+    @Test
     void emitsErrorWhenUnsupportedImmunizationCodeSystemIsIgnored()
     {
-        final IceProperties iceProperties = createIceProperties(true, false, false);
+        final IceProperties iceProperties = createIceProperties(true, false);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
@@ -795,7 +878,7 @@ class VmrConversionComponentIntegrationTest
                 .stream()
                 .anyMatch(issue -> "error".equals(issue.severity()) && issue.details() != null && issue.details().text() != null
                         && issue.details().text().contains("Unsupported code system 'http://hl7.org/fhir/sid/cvxs'")
-                        && issue.details().text().contains("moduleCanonical '%s'".formatted(MODULE_CANONICAL)) && !issue.details()
+                        && issue.details().text().contains("knowledgeBase '%s'".formatted(KNOWLEDGE_BASE)) && !issue.details()
                         .text()
                         .contains("org.nyc.cir^ICE^1.0.0") && issue.details().text().contains("not evaluated")));
         assertTrue(guidanceResponse.text().div().contains("generated successfully with errors."));
@@ -806,7 +889,7 @@ class VmrConversionComponentIntegrationTest
     @Test
     void emitsErrorAndWarningSummaryWhenBothArePresent()
     {
-        final IceProperties iceProperties = createIceProperties(true, false, false);
+        final IceProperties iceProperties = createIceProperties(true, false);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
@@ -822,7 +905,7 @@ class VmrConversionComponentIntegrationTest
     @Test
     void emitsWarningWhenConfiguredUnsupportedCvxImmunizationIsIgnored()
     {
-        final IceProperties iceProperties = createIceProperties(true, false, false);
+        final IceProperties iceProperties = createIceProperties(true, false);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
@@ -842,122 +925,28 @@ class VmrConversionComponentIntegrationTest
     }
 
     @Test
-    void setsIsValidFalseInVmrPayloadForSubpotentImmunization() throws Exception
+    void emitsScheduleAuthorityExtensionsWhenOutputFlagIsEnabled()
     {
         final IceProperties iceProperties = createIceProperties(true, false, true);
         final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
         final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
 
-        final EvaluateAtSpecifiedTime request =
-                vmrConversionComponent.convertToEvaluateAtSpecifiedTime(createRequestParametersWithSubpotentImmunization());
-
-        final byte[] payload = request.getEvaluationRequest()
-                .getDataRequirementItemData()
-                .getFirst()
-                .getData()
-                .getBase64EncodedPayload()
-                .getFirst();
-        final String payloadXml = new String(payload, StandardCharsets.UTF_8);
-        final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        documentBuilderFactory.setNamespaceAware(true);
-        final var documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        final var document = documentBuilder.parse(new InputSource(new StringReader(payloadXml)));
-        final var xPath = XPathFactory.newInstance().newXPath();
-        final var hasInvalidDoseMarker =
-                (boolean) xPath.evaluate("boolean(//*[local-name()='isValid' and @value='false'])", document,
-                        XPathConstants.BOOLEAN);
-        assertTrue(hasInvalidDoseMarker);
-    }
-
-    @Test
-    void emitsScheduleAuthorityExtensionsWhenOutputFlagIsEnabled()
-    {
-        final IceProperties iceProperties = createIceProperties(true, false, false, true);
-        final SupportingDataService supportingDataService = new SupportingDataService(createCdsEngineProperties(), iceProperties);
-        final VmrConversionComponent vmrConversionComponent = createVmrConversionComponent(supportingDataService, iceProperties);
-
-        final Parameters response =
+        final ImmunizationRecommendation recommendation = firstRecommendation(
                 vmrConversionComponent.convertToParametersResponse(createEvaluationResponseWithScheduleAuthorities(),
-                        createRequestParameters(), LocalDateTime.now());
-        final ImmunizationRecommendation recommendation = firstRecommendation(response);
-        final var rec = recommendation.recommendation().getFirst();
+                        createRequestParameters(), LocalDateTime.now()));
+        final List<org.cdsframework.fhir.Extension> authorities = recommendation.recommendation()
+                .getFirst()
+                .extension()
+                .stream()
+                .filter(extension -> SCHEDULE_AUTHORITY_EXTENSION_URL.equals(extension.url()))
+                .toList();
 
-        final List<org.cdsframework.fhir.Extension> saExtensions =
-                rec.extension().stream().filter(ext -> SCHEDULE_AUTHORITY_EXTENSION_URL.equals(ext.url())).toList();
-        assertEquals(2, saExtensions.size());
-
-        final var saExtension1 = saExtensions.stream()
-                .filter(ext -> ext.valueReference().identifier().value().equals("ACIP"))
-                .findFirst()
-                .orElseThrow();
-        assertEquals("Organization", saExtension1.valueReference().type());
-        assertEquals("http://terminology.cdsframework.org/ice/schedule-authority",
-                saExtension1.valueReference().identifier().system());
-        assertEquals("Advisory Committee on Immunization Practices", saExtension1.valueReference().display());
-
-        final var saExtension2 = saExtensions.stream()
-                .filter(ext -> ext.valueReference().identifier().value().equals("CDC"))
-                .findFirst()
-                .orElseThrow();
-        assertEquals("Organization", saExtension2.valueReference().type());
-        assertEquals("http://terminology.cdsframework.org/ice/schedule-authority",
-                saExtension2.valueReference().identifier().system());
-        assertEquals("Centers for Disease Control and Prevention", saExtension2.valueReference().display());
-    }
-
-    private static ObservationResult createScheduleAuthoritiesObservation()
-    {
-        final ObservationResult observation = new ObservationResult();
-        final CD focus = new CD();
-        focus.setCode("ICE_VACCINE_GROUP_SCHEDULE_AUTHORITIES");
-        focus.setCodeSystem("2.16.840.1.113883.3.795.12.100.500");
-        observation.setObservationFocus(focus);
-
-        final CD sa1 = new CD();
-        sa1.setCode("ACIP");
-        sa1.setDisplayName("Advisory Committee on Immunization Practices");
-
-        final CD sa2 = new CD();
-        sa2.setCode("CDC");
-        sa2.setDisplayName("Centers for Disease Control and Prevention");
-
-        observation.getInterpretation().add(sa1);
-        observation.getInterpretation().add(sa2);
-        return observation;
-    }
-
-    private static SubstanceAdministrationProposal createProposalWithScheduleAuthorities()
-    {
-        final SubstanceAdministrationProposal proposal = createProposalWithSeriesContext();
-        proposal.getRelatedClinicalStatement().add(asRelatedObservation(createScheduleAuthoritiesObservation()));
-        return proposal;
-    }
-
-    private static EvaluationResponse createEvaluationResponseWithScheduleAuthorities()
-    {
-        final CDSOutput cdsOutput = new CDSOutput();
-        final VMR vmrOutput = new VMR();
-        final EvaluatedPerson person = new EvaluatedPerson();
-        final EvaluatedPerson.ClinicalStatements clinicalStatements = new EvaluatedPerson.ClinicalStatements();
-        final EvaluatedPerson.ClinicalStatements.SubstanceAdministrationProposals proposals =
-                new EvaluatedPerson.ClinicalStatements.SubstanceAdministrationProposals();
-        proposals.getSubstanceAdministrationProposal().add(createProposalWithScheduleAuthorities());
-        clinicalStatements.setSubstanceAdministrationProposals(proposals);
-        person.setClinicalStatements(clinicalStatements);
-        vmrOutput.setPatient(person);
-        cdsOutput.setVmrOutput(vmrOutput);
-
-        final XmlMapper xmlMapper = XmlMapper.xmlBuilder().defaultUseWrapper(false).findAndAddModules().build();
-        final byte[] payload = xmlMapper.writeValueAsBytes(cdsOutput);
-
-        final SemanticPayload semanticPayload = new SemanticPayload();
-        semanticPayload.getBase64EncodedPayload().add(payload);
-        final KMEvaluationResultData resultData = new KMEvaluationResultData();
-        resultData.setData(semanticPayload);
-        final FinalKMEvaluationResponse finalResponse = new FinalKMEvaluationResponse();
-        finalResponse.getKmEvaluationResultData().add(resultData);
-        final EvaluationResponse evaluationResponse = new EvaluationResponse();
-        evaluationResponse.getFinalKMEvaluationResponse().add(finalResponse);
-        return evaluationResponse;
+        assertEquals(2, authorities.size());
+        assertTrue(authorities.stream()
+                .anyMatch(extension -> "ACIP".equals(extension.valueReference().identifier().value())
+                        && "Advisory Committee on Immunization Practices".equals(extension.valueReference().display())));
+        assertTrue(authorities.stream()
+                .anyMatch(extension -> "CDC".equals(extension.valueReference().identifier().value())
+                        && "Centers for Disease Control and Prevention".equals(extension.valueReference().display())));
     }
 }

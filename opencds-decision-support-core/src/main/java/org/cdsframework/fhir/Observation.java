@@ -13,10 +13,9 @@ public record Observation(String resourceType,
                           List<Identifier> identifier,
                           String status,
                           CodeableConcept code,
-                          Reference subject,
                           @Singular("performer")
                           List<Reference> performer,
-                          String effectiveDateTime,
+                          String valueDateTime,
                           String issued,
                           CodeableConcept valueCodeableConcept,
                           @Singular("component")

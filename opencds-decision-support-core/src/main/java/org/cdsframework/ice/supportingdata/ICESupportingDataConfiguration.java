@@ -144,7 +144,7 @@ public class ICESupportingDataConfiguration
         {
             Stream.concat(Stream.of(pCommonLogicModule), pSupportedKnowledgeModules.stream())
                     .distinct()
-                    .map(supportingDataService::getSupportingKnowledgeModuleByKmId)
+                    .map(supportingDataService::getSupportingKnowledgeBaseByKmId)
                     .forEach(knowledgeModule -> Optional.ofNullable(knowledgeModule.codeSystems())
                             .ifPresent(codeSystemMap -> codeSystemMap.values()
                                     .forEach(codeSystem -> this.supportedCdsLists.addSupportedCodeSystem(codeSystem,
@@ -227,8 +227,8 @@ public class ICESupportingDataConfiguration
         }
         if (log.isDebugEnabled())
         {
-            String lDebugStr = "The following Schedule Authorities have been initialized into the "
-                    + this.getClass().getName() + ": \n";
+            String lDebugStr =
+                    "The following Schedule Authorities have been initialized into the " + this.getClass().getName() + ": \n";
             lDebugStr += this.supportedScheduleAuthorities.toString();
             log.debug(_METHODNAME + "{}", lDebugStr);
         }
@@ -271,7 +271,7 @@ public class ICESupportingDataConfiguration
         try
         {
             pSupportedKnowledgeModules.forEach(
-                    kmId -> Optional.ofNullable(supportingDataService.getSupportingKnowledgeModuleByKmId(kmId).series())
+                    kmId -> Optional.ofNullable(supportingDataService.getSupportingKnowledgeBaseByKmId(kmId).series())
                             .map(Map::values)
                             .stream()
                             .flatMap(java.util.Collection::stream)
@@ -325,8 +325,8 @@ public class ICESupportingDataConfiguration
         Optional.ofNullable(supportedKnowledgeModules)
                 .orElse(List.of())
                 .stream()
-                .map(supportingDataService::getSupportingKnowledgeModuleByKmId)
-                .map(CdsEngineProperties.ModuleCanonicalDefinition::codeSystems)
+                .map(supportingDataService::getSupportingKnowledgeBaseByKmId)
+                .map(CdsEngineProperties.KnowledgeBaseDefinition::codeSystems)
                 .filter(Objects::nonNull)
                 .map(codeSystems -> codeSystems.get(SUPPORTED_SERIES_CODE_SYSTEM_NAME))
                 .filter(Objects::nonNull)
@@ -362,7 +362,8 @@ public class ICESupportingDataConfiguration
         unknownSeriesOverrides.removeAll(validSeriesCodes);
         if (!unknownSeriesOverrides.isEmpty())
         {
-            final String lErrStr = "Series override key(s) do not reference existing series: " + unknownSeriesOverrides;
+            final String lErrStr =
+                    "Series override key(s) do not reference existing series: " + String.join(", ", unknownSeriesOverrides);
             log.error("{}{}", _METHODNAME, lErrStr);
             throw new InconsistentConfigurationException(lErrStr);
         }
@@ -440,7 +441,8 @@ public class ICESupportingDataConfiguration
                 .map(doses -> doses.entrySet()
                         .stream()
                         .collect(Collectors.toMap(Map.Entry::getKey,
-                                entry -> entry.getValue().copyWithDoseNumber(Integer.valueOf(entry.getKey()))))).orElseGet(Map::of);
+                                entry -> entry.getValue().copyWithDoseNumber(Integer.valueOf(entry.getKey())))))
+                .orElseGet(Map::of);
 
         if (ObjectUtils.isEmpty(doseOverrides))
             return originalDosesWithDoseNumbers;
@@ -454,7 +456,7 @@ public class ICESupportingDataConfiguration
         if (!unknownDoseOverrides.isEmpty())
         {
             final String lErrStr = "Dose override key(s) for series '%s' do not reference existing doses: %s".formatted(seriesCode,
-                    unknownDoseOverrides);
+                    unknownDoseOverrides.stream().map(String::valueOf).collect(Collectors.joining(", ")));
             log.error("{}{}", _METHODNAME, lErrStr);
             throw new InconsistentConfigurationException(lErrStr);
         }
@@ -514,7 +516,7 @@ public class ICESupportingDataConfiguration
         {
             final String lErrStr =
                     "Series vaccine override key(s) for series '%s', dose '%d' do not reference vaccine codes for doses for the series: %s".formatted(
-                            seriesCode, doseNumber, unknownVaccineOverrides);
+                            seriesCode, doseNumber, String.join(", ", unknownVaccineOverrides));
             log.error("{}{}", _METHODNAME, lErrStr);
             throw new InconsistentConfigurationException(lErrStr);
         }
@@ -608,8 +610,8 @@ public class ICESupportingDataConfiguration
         Optional.ofNullable(supportedKnowledgeModules)
                 .orElse(List.of())
                 .stream()
-                .map(supportingDataService::getSupportingKnowledgeModuleByKmId)
-                .map(CdsEngineProperties.ModuleCanonicalDefinition::planDefinitions)
+                .map(supportingDataService::getSupportingKnowledgeBaseByKmId)
+                .map(CdsEngineProperties.KnowledgeBaseDefinition::planDefinitions)
                 .filter(Objects::nonNull)
                 .forEach(planDefinitions -> planDefinitions.forEach((planDefinitionKey, planDefinition) ->
                 {

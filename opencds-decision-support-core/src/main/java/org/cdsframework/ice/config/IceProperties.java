@@ -54,38 +54,39 @@ public class IceProperties
     {
     }
 
-    public record KnowledgeModuleProperties(@NotNull
-                                            Boolean outputEarliestAndOverdueDates,
-                                            @NotNull
-                                            Boolean enableDoseOverrideFeature,
-                                            @NotNull
-                                            Boolean outputSupplementalText,
-                                            @NotNull
-                                            Boolean outputNumberOfDosesRemaining,
-                                            @NotNull
-                                            Boolean outputSeriesInformation,
-                                            @NotNull
-                                            Boolean outputScheduleAuthorities,
-                                            @NotNull
-                                            Boolean outputVaccineGroupRulesArtifact,
-                                            @NotNull
-                                            Boolean enableUnsupportedVaccinesGroup,
-                                            @NotNull
-                                            List<@NotBlank String> vaccineGroupExclusions,
-                                            @NotNull
-                                            List<@NotBlank String> vaccineGroupInclusions,
-                                            @NotNull
-                                            Boolean disableCovid19Sep2023DoseNumberReset,
-                                            @NotNull
-                                            SupplementalTextMode supplementalTextMode,
-                                            @NotNull
-                                            Resource droolsPath)
+    public record KnowledgeBaseProperties(@NotNull
+                                          Boolean outputEarliestAndOverdueDates,
+                                          @NotNull
+                                          Boolean enableDoseOverrideFeature,
+                                          @NotNull
+                                          Boolean outputSupplementalText,
+                                          @NotNull
+                                          Boolean outputNumberOfDosesRemaining,
+                                          @NotNull
+                                          Boolean outputSeriesInformation,
+                                          @NotNull
+                                          Boolean outputScheduleAuthorities,
+                                          @NotNull
+                                          Boolean outputVaccineGroupRulesArtifact,
+                                          @NotNull
+                                          Boolean enableUnsupportedVaccinesGroup,
+                                          @NotNull
+                                          List<@NotBlank String> vaccineGroupExclusions,
+                                          @NotNull
+                                          List<@NotBlank String> vaccineGroupInclusions,
+                                          @NotNull
+                                          Boolean disableCovid19Sep2023DoseNumberReset,
+                                          @NotNull
+                                          SupplementalTextMode supplementalTextMode,
+                                          @NotNull
+                                          Resource droolsPath)
     {
-        public KnowledgeModuleProperties
+        public KnowledgeBaseProperties
         {
             vaccineGroupExclusions = Objects.requireNonNullElseGet(vaccineGroupExclusions, List::of);
             vaccineGroupInclusions = Objects.requireNonNullElseGet(vaccineGroupInclusions, List::of);
         }
+
     }
 
     public record SeasonOverride(LocalDate startDate,
@@ -125,20 +126,20 @@ public class IceProperties
     }
 
     @NotBlank
-    private String iceBaseModuleCanonical;
+    private String iceBaseKnowledgeBase;
 
     @NotEmpty
-    private Map<@NotBlank String, @NotNull @Valid KnowledgeModuleProperties> knowledgeModules;
+    private Map<@NotBlank String, @NotNull @Valid KnowledgeBaseProperties> knowledgeBases;
 
     private List<@NotBlank String> vaccineGroupExclusions;
 
     private List<@NotBlank String> vaccineGroupInclusions;
 
+    private List<@NotBlank String> scheduleFlags;
+
     private Map<@NotBlank String, @NotNull @Valid SeriesOverride> seriesOverrides;
 
     private Map<@NotBlank String, @NotNull @Valid SeasonOverride> seasonOverrides;
-
-    private List<@NotBlank String> scheduleFlags;
 
     private Optional<Boolean> outputEarliestAndOverdueDates = Optional.empty();
 

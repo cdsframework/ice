@@ -7,40 +7,71 @@ Implementation Guide for Integrating with ICE
 **Documentation Release 4.27**  
 **May 22nd, 2026**
 
-
 # ICE Documentation
 
-The most complete source of information about the Immunization Calculation Engine (ICE) is the official ICE Wiki which is publicly accessible at: [https://www.cdsframework.org](http://cdsframework.org/). Any future releases of this document will be posted on that website.
+The most complete source of information about the Immunization Calculation Engine (ICE) is the official ICE Wiki which is publicly
+accessible at: [https://www.cdsframework.org](http://cdsframework.org/). Any future releases of this document will be posted on that
+website.
 
 In addition, HLN Consulting, LLC publishes some ICE information at: [https://www.hln.com/ice](https://www.hln.com/ice).
 
 # Purpose of this Document
 
-The purpose of this document is to describe what steps must be taken for a client application to invoke the ICE Web Service. This document describes the format of the data that must be passed to the service, and the format of the data that is passed back from the service. This document also provides guidance on how to interpret the information populated in the message structure.
+The purpose of this document is to describe what steps must be taken for a client application to invoke the ICE Web Service. This
+document describes the format of the data that must be passed to the service, and the format of the data that is passed back from
+the service. This document also provides guidance on how to interpret the information populated in the message structure.
 
-Note that the code systems and code values specified in this document are specific to the default configuration of ICE (i.e. the “out of the box” rules that are shipped with ICE). An ICE deployment that has been configured with different rules might use different code systems and values, but the structure of the ICE messages will stay the same.
+Note that the code systems and code values specified in this document are specific to the default configuration of ICE (i.e. the
+“out of the box” rules that are shipped with ICE). An ICE deployment that has been configured with different rules might use
+different code systems and values, but the structure of the ICE messages will stay the same.
 
 # ICE Overview
 
-The **Immunization Calculation Engine** (**ICE**) is a state-of-the-art open-source software system that provides clinical decision support for immunizations (CDSi), commonly referred to as "immunization forecasting".
+The  **Immunization Calculation Engine**  (**ICE**) is a state-of-the-art open-source software system that provides clinical
+decision support for immunizations (CDSi), commonly referred to as "immunization forecasting".
 
-Organizations may freely adopt ICE due to its open source license and complete lack of dependence on any commercial software. The ICE software system has been publicly released as an open-source software system, under the GNU Lesser General Public License v3 (LGPL v3). Through its standards-based Web Service interface, ICE easily integrates with third party clinical information systems such as electronic health record systems (EHR-S), patient portals, immunization information systems (IIS), school health systems, and health information exchanges (HIEs) - regardless of their software architecture (.NET, Java, or other). Because of ICE’s Java-based implementation, it can be deployed in diverse technical environments.
+Organizations may freely adopt ICE due to its open source license and complete lack of dependence on any commercial software. The
+ICE software system has been publicly released as an open-source software system, under the GNU Lesser General Public License v3
+(LGPL v3). Through its standards-based Web Service interface, ICE easily integrates with third party clinical information systems
+such as electronic health record systems (EHR-S), patient portals, immunization information systems (IIS), school health systems,
+and health information exchanges (HIEs) - regardless of their software architecture (.NET, Java, or other). Because of ICE’s
+Java-based implementation, it can be deployed in diverse technical environments.
 
-The ICE software system has been developed and configured by a collaborative partnership of public health and information technology experts from the New York City Department of Health and Mental Hygiene, Citywide Immunization Registry (CIR); HLN Consulting, LLC; the Alabama Department of Public Health (ADPH); and the OpenCDS collaboration led by researchers at the University of Utah, Department of Biomedical Informatics.
+The ICE software system has been developed and configured by a collaborative partnership of public health and information technology
+experts from the New York City Department of Health and Mental Hygiene, Citywide Immunization Registry (CIR); HLN Consulting, LLC;
+the Alabama Department of Public Health (ADPH); and the OpenCDS collaboration led by researchers at the University of Utah,
+Department of Biomedical Informatics.
 
-The ICE Web Service has been implemented as a clinical module within **OpenCDS**, an open-source software framework that provides developers with a set of tools for implementing clinical decision support services. More information about OpenCDS can be found at: [http://www.opencds.org](http://www.opencds.org).
+The ICE Web Service has been implemented as a clinical module within  **OpenCDS**, an open-source software framework that provides
+developers with a set of tools for implementing clinical decision support services. More information about OpenCDS can be found
+at: [http://www.opencds.org](http://www.opencds.org).
 
-ICE comes pre-configured with the childhood, adolescent, and adult immunization schedules for routinely administered vaccine groups. The pre-configured ICE rules are thoroughly documented on the publicly accessible ICE Wiki at: https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/14352468/Default+Immunization+Schedule. These rules are based on the recommendations of the Advisory Committee on Immunization Practices (ACIP) as interpreted by a team of subject matter experts from the CIR, ADPH, and HLN.
+ICE comes pre-configured with the childhood, adolescent, and adult immunization schedules for routinely administered vaccine groups.
+The pre-configured ICE rules are thoroughly documented on the publicly accessible ICE
+Wiki at: https://cdsframework.atlassian.net/wiki/spaces/ICE/pages/14352468/Default+Immunization+Schedule. These rules are based on
+the recommendations of the Advisory Committee on Immunization Practices (ACIP) as interpreted by a team of subject matter experts
+from the CIR, ADPH, and HLN.
 
 # Communicating with the ICE Service
 
-Clinical information systems may utilize ICE by making SOAP Web Service calls to the ICE Web Service. The interface of the ICE Web Service conforms to the Decision Support Service (DSS) standard which specifies the technical capabilities and interfaces of a decision support service. The DSS standard has been specified by both HL7 International and the Object Management Group (OMG).
+Clinical information systems may utilize ICE by making SOAP Web Service calls to the ICE Web Service. The interface of the ICE Web
+Service conforms to the Decision Support Service (DSS) standard which specifies the technical capabilities and interfaces of a
+decision support service. The DSS standard has been specified by both HL7 International and the Object Management Group (OMG).
 
-To communicate with the ICE Web Service, clinical information systems must send and receive XML-formatted data that conforms to the Virtual Medical Record (vMR) standard. The vMR standard was developed by the HL7 Clinical Decision Support Workgroup and is a data model and message specification format for representing clinical data relevant to a clinical decision support service. The workgroup strived to develop as flexible of a format as possible by drawing upon the collective CDS expertise of its members, an examination of the data requirements of 20 CDS systems across 4 nations, as well as applicable HL7 standards that already existed.
+To communicate with the ICE Web Service, clinical information systems must send and receive XML-formatted data that conforms to the
+Virtual Medical Record (vMR) standard. The vMR standard was developed by the HL7 Clinical Decision Support Workgroup and is a data
+model and message specification format for representing clinical data relevant to a clinical decision support service. The workgroup
+strived to develop as flexible of a format as possible by drawing upon the collective CDS expertise of its members, an examination
+of the data requirements of 20 CDS systems across 4 nations, as well as applicable HL7 standards that already existed.
 
-HLN chose the vMR specification for ICE’s inputs and outputs in order to support the project’s overarching goal of enabling non-technical subject matter experts to create and maintain immunization evaluation and forecasting rules without the assistance of a software developer. If new data elements are ever needed to support new types of rules, the vMR should be able to support this. In addition, the vMR standard continues to be actively worked on and updated by the HL7 community, enabling new and better ways of representing clinical information in a standardized format.
+HLN chose the vMR specification for ICE’s inputs and outputs in order to support the project’s overarching goal of enabling
+non-technical subject matter experts to create and maintain immunization evaluation and forecasting rules without the assistance of
+a software developer. If new data elements are ever needed to support new types of rules, the vMR should be able to support this. In
+addition, the vMR standard continues to be actively worked on and updated by the HL7 community, enabling new and better ways of
+representing clinical information in a standardized format.
 
-Below is a high level summary of the inputs and outputs to the ICE Web Service. The inputs and outputs are specified in much greater detail throughout the remainder of this document.
+Below is a high level summary of the inputs and outputs to the ICE Web Service. The inputs and outputs are specified in much greater
+detail throughout the remainder of this document.
 
 **Inputs**
 
@@ -72,9 +103,14 @@ Below is a high level summary of the inputs and outputs to the ICE Web Service. 
 
 Client applications invoke the ICE service by way of SOAP method calls conforming to the Decision Support Service (DSS) standards.
 
-Although OpenCDS itself implements several DSS operations, ICE currently only makes use of two operations within the Evaluate Interface: evaluate and evaluateAtSpecifiedTime. Callers should use evaluate if they would like ICE to evaluate the immunizations and make recommendations based on the current date, and use evaluateAtSpecifiedTime if they would like ICE to evaluate and recommend with respect to a specified date. The ICE TestManager tool always utilizes the latter operation. In the case that forecasting should occur with respect to today’s date, the TestManager simply specifies today’s date.
+Although OpenCDS itself implements several DSS operations, ICE currently only makes use of two operations within the Evaluate
+Interface: evaluate and evaluateAtSpecifiedTime. Callers should use evaluate if they would like ICE to evaluate the immunizations
+and make recommendations based on the current date, and use evaluateAtSpecifiedTime if they would like ICE to evaluate and recommend
+with respect to a specified date. The ICE TestManager tool always utilizes the latter operation. In the case that forecasting should
+occur with respect to today’s date, the TestManager simply specifies today’s date.
 
-When constructing the SOAP invocation request using the evaluateAtSpecifiedTime operation, the following are the WSDL and SOAP action parameters:
+When constructing the SOAP invocation request using the evaluateAtSpecifiedTime operation, the following are the WSDL and SOAP
+action parameters:
 
 - Service is “DecisionSupportService”
 
@@ -82,11 +118,14 @@ When constructing the SOAP invocation request using the evaluateAtSpecifiedTime 
 
 - Operation is “evaluateAtSpecifiedTime”
 
-- URL is [location of the ICE3 service]. The exact URL will vary depending on your application server software and where you install ICE. As an example, if ICE is unpacked as opencds-decision-support-service in Tomcat’s webapp directory, the URL is simply “http://`<hostname>`/opencds-decision-support-service/evaluate”
+- URL is [location of the ICE3 service]. The exact URL will vary depending on your application server software and where you install
+  ICE. As an example, if ICE is unpacked as opencds-decision-support-service in Tomcat’s webapp directory, the URL is simply
+  “http://`<hostname>`/opencds-decision-support-service/evaluate”
 
 - SOAP action is “http://www.omg.org/spec/CDSS/201105/dssWsdl:operation:evaluateAtSpecifiedTime”
 
-In the DSS request, it is necessary to tell ICE which immunization schedule should be used. Since only one immunization schedule has been configured at this point, specify the following attributes for the <kmEvaluationRequest><kmId> node:
+In the DSS request, it is necessary to tell ICE which immunization schedule should be used. Since only one immunization schedule has
+been configured at this point, specify the following attributes for the <kmEvaluationRequest><kmId> node:
 
 - scopingEntityId=“org.nyc.cir”
 
@@ -94,7 +133,8 @@ In the DSS request, it is necessary to tell ICE which immunization schedule shou
 
 - version=“1.0.0”
 
-In the DSS request, it is necessary to tell ICE which version of the VMR message format to use. Specify the below attribute values for the <kmEvaluationRequest><dataRequirementItemData><data><informationModelSSId> node:
+In the DSS request, it is necessary to tell ICE which version of the VMR message format to use. Specify the below attribute values
+for the <kmEvaluationRequest><dataRequirementItemData><data><informationModelSSId> node:
 
 - scopingEntityId=“org.opencds.vmr”
 
@@ -102,7 +142,8 @@ In the DSS request, it is necessary to tell ICE which version of the VMR message
 
 - version=“1.0”
 
-In the DSS request, base64 encode the contents of the VMR message within <kmEvaluationRequest><dataRequirementItemData><data><base64EncodedPayload>.
+In the DSS request, base64 encode the contents of the VMR message
+within <kmEvaluationRequest><dataRequirementItemData><data><base64EncodedPayload>.
 
 Following the above guidelines, a complete SOAP request will look like the following:
 
@@ -111,66 +152,82 @@ Following the above guidelines, a complete SOAP request will look like the follo
 
 <S:Envelope xmlns:S="http://www.w3.org/2003/05/soap-envelope">
 
-<S:Body>
+    <S:Body>
 
-<ns2:evaluateAtSpecifiedTime xmlns:ns2="http://www.omg.org/spec/CDSS/201105/dss">
+        <ns2:evaluateAtSpecifiedTime xmlns:ns2="http://www.omg.org/spec/CDSS/201105/dss">
 
-<interactionId scopingEntityId="gov.nyc.health" interactionId="123456"/>
+            <interactionId scopingEntityId="gov.nyc.health" interactionId="123456"/>
 
-<specifiedTime>2012-01-14T00:00:00.000-05:00</specifiedTime>
+            <specifiedTime>2012-01-14T00:00:00.000-05:00</specifiedTime>
 
-<evaluationRequest clientLanguage="" clientTimeZoneOffset="">
+            <evaluationRequest clientLanguage="" clientTimeZoneOffset="">
 
-<kmEvaluationRequest>
+                <kmEvaluationRequest>
 
-<kmId scopingEntityId="org.nyc.cir" businessId="ICE" version="1.0.0"/>
+                    <kmId scopingEntityId="org.nyc.cir" businessId="ICE" version="1.0.0"/>
 
-</kmEvaluationRequest>
+                </kmEvaluationRequest>
 
-<dataRequirementItemData>
+                <dataRequirementItemData>
 
-<driId itemId="cdsPayload">
+                    <driId itemId="cdsPayload">
 
-<containingEntityId scopingEntityId="gov.nyc.health" businessId="ICEData" version="1.0.0.0"/>
+                        <containingEntityId scopingEntityId="gov.nyc.health" businessId="ICEData" version="1.0.0.0"/>
 
-</driId>
+                    </driId>
 
-<data>
+                    <data>
 
-<informationModelSSId scopingEntityId="org.opencds.vmr" businessId="VMR" version="1.0"/> <base64EncodedPayload>**BASE64_ENCODED_VMR_MESSAGE**</base64EncodedPayload>
+                        <informationModelSSId scopingEntityId="org.opencds.vmr" businessId="VMR" version="1.0"/>
+                        <base64EncodedPayload>**BASE64_ENCODED_VMR_MESSAGE**</base64EncodedPayload>
 
-</data>
+                    </data>
 
-</dataRequirementItemData>
+                </dataRequirementItemData>
 
-</evaluationRequest>
+            </evaluationRequest>
 
-</ns2:evaluateAtSpecifiedTime>
+        </ns2:evaluateAtSpecifiedTime>
 
-</S:Body>
+    </S:Body>
 
 </S:Envelope>
 ```
 
 ## Virtual Medical Record Format (VMR)
 
-All messages to and from the ICE service conform to version 1.0 of the vMR. The vMR 1.0 XML Schema Definition files are required for client application development. These XSD files can be downloaded from the ICE Wiki’s Technical Documentation page, which is at the following URL: [https://cdsframework.atlassian.net/wiki/display/CDSF/Technical+Documentation](https://cdsframework.atlassian.net/wiki/display/CDSF/Technical+Documentation). In addition, there are links on this page to sample clients for interacting with the ICE Web Service. The sample clients are written in Java and C# and are a good starting point for writing your own ICE client. (The source code projects are stored in a Bitbucket repository and they also include the aforementioned XSD files.)
+All messages to and from the ICE service conform to version 1.0 of the vMR. The vMR 1.0 XML Schema Definition files are required for
+client application development. These XSD files can be downloaded from the ICE Wiki’s Technical Documentation page, which is at the
+following
+URL: [https://cdsframework.atlassian.net/wiki/display/CDSF/Technical+Documentation](https://cdsframework.atlassian.net/wiki/display/CDSF/Technical+Documentation).
+In addition, there are links on this page to sample clients for interacting with the ICE Web Service. The sample clients are written
+in Java and C# and are a good starting point for writing your own ICE client. (The source code projects are stored in a Bitbucket
+repository and they also include the aforementioned XSD files.)
 
-This document describes the aspects of the vMR that are relevant to ICE, including identifying essential ICE data elements and vocabulary. It should be all that’s needed to successfully interface with the ICE Web Service. The implementer may also find it useful to import the vMR XSD files into an XML editor to understand the general structure of the vMR input and output messages, or to review the vMR Domain Analysis Model. The Domain Analysis Model is also available for download from the Technical Documentation page of the ICE Wiki.
+This document describes the aspects of the vMR that are relevant to ICE, including identifying essential ICE data elements and
+vocabulary. It should be all that’s needed to successfully interface with the ICE Web Service. The implementer may also find it
+useful to import the vMR XSD files into an XML editor to understand the general structure of the vMR input and output messages, or
+to review the vMR Domain Analysis Model. The Domain Analysis Model is also available for download from the Technical Documentation
+page of the ICE Wiki.
 
 ## ICE Input Message
 
-The vMR input message must specify basic demographic information about the patient and his or her immunization history. The demographic information consists of the patient’s birthdate and gender. The immunization history consists of the complete set of shots administered to the patient during his/her lifetime, and a record (if any) of disease immunity for that patient.
+The vMR input message must specify basic demographic information about the patient and his or her immunization history. The
+demographic information consists of the patient’s birthdate and gender. The immunization history consists of the complete set of
+shots administered to the patient during his/her lifetime, and a record (if any) of disease immunity for that patient.
 
 The ICE-specific immunization input message conforms to the cdsInput.xsd, and the XML template on the next page.
 
 - XML messages must follow the ordering and structure of this template. The order of elements should not deviate from the template.
 
-- Wherever there is a `<root/>` element, **the ID supplied** **must be unique** and **cannot be repeated** for any other `<root/>` element in the message.
+- Wherever there is a `<root/>` element, **the ID supplied** **must be unique** and **cannot be repeated** for any other `<root/>`
+  element in the message.
 
-- Some elements may not be present in all messages or may repeat, as described in the comments of the template as well as in the XSD.
+- Some elements may not be present in all messages or may repeat, as described in the comments of the template as well as in the
+  XSD.
 
-- Wherever a code system value, templateId value, or other value is specified in this template, that same value must be used at that location for *all* messages sent to the service.
+- Wherever a code system value, templateId value, or other value is specified in this template, that same value must be used at that
+  location for *all* messages sent to the service.
 
 - Values in set brackets (*i.e.* – “{..}”) must be supplied by the calling application.
 
@@ -186,7 +243,8 @@ The ICE-specific immunization input message conforms to the cdsInput.xsd, and th
 >
 > `<!-- **CDSInput Section Begins (mandatory)** -->`
 >
-> `<ns4:cdsInput xmlns:ns2="org.opencds" xmlns:ns3="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput" xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">`
+>
+`<ns4:cdsInput xmlns:ns2="org.opencds" xmlns:ns3="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput" xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">`
 >
 > `<templateId root="2.16.840.1.113883.3.795.11.1.1"/>`
 >
@@ -216,17 +274,23 @@ The ICE-specific immunization input message conforms to the cdsInput.xsd, and th
 >
 > `<templateId root="2.16.840.1.113883.3.795.11.2.1.1"/>`
 >
+
 ```xml
-> <id root="{UNIQUE_ROOT_ID}" extension="{UNIQUE_ROOT_EXTENSION}"/> <!-- root & extension attributes appended together must be unique across all root & root/extension values for the entire message. The unique identifier cannot be repeated anywhere in the message. Suggestion: use the Globally Unique Identifer (GUID) algorithm to generate the root attribute value only and do not bother specifying the extension. Example GUID value: 0368a1b4-0f93-402e-841d-e0b02943300d -->
+>
+<id root="{UNIQUE_ROOT_ID}"
+    extension="{UNIQUE_ROOT_EXTENSION}"/> <!-- root & extension attributes appended together must be unique across all root & root/extension values for the entire message. The unique identifier cannot be repeated anywhere in the message. Suggestion: use the Globally Unique Identifer (GUID) algorithm to generate the root attribute value only and do not bother specifying the extension. Example GUID value: 0368a1b4-0f93-402e-841d-e0b02943300d -->
 ```
+
 >
 > `<!-- **Patient Birthdate and Gender Section** **Begins** **(mandatory)** -->`
 >
 > `<demographics>`
 >
+
 ```xml
 > <birthTime value="{YYYYMMDD}"/> <!-- e.g. February 29, 2012 would be specified by 20120229 -->
 ```
+
 >
 > `<gender code="{GENDER_CODE}" codeSystem="2.16.840.1.113883.5.1" displayName="{Optional_Value}"/>`
 >
@@ -246,13 +310,20 @@ The ICE-specific immunization input message conforms to the cdsInput.xsd, and th
 >
 > `<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>`
 >
+
 ```xml
-> <id root="{UNIQUE_IDENTIFIER2}"/> <!-- Suggestion: Use Globally Unique Identifier algorithm (GUID) -->
-```
 >
-```xml
-> <observationFocus code="{DISEASE_IMMUNITY_FOCUS_CODE}" codeSystem="2.16.840.1.113883.6.103" displayName=".." originalText=".."/> <!—codeSystem may be OID for ICD-9-CM, SNOMED-CT, or ICD-10. See Disease code tables -->
+<id root="{UNIQUE_IDENTIFIER2}"/> <!-- Suggestion: Use Globally Unique Identifier algorithm (GUID) -->
 ```
+
+>
+
+```xml
+>
+<observationFocus code="{DISEASE_IMMUNITY_FOCUS_CODE}" codeSystem="2.16.840.1.113883.6.103" displayName=".."
+                  originalText=".."/> <!—codeSystem may be OID for ICD-9-CM, SNOMED-CT, or ICD-10. See Disease code tables -->
+```
+
 >
 > `<!-- ObservationEventTime low and high attributes are dates in YYYYMMDD format, and they must be the same value -->`
 >
@@ -264,7 +335,8 @@ The ICE-specific immunization input message conforms to the cdsInput.xsd, and th
 >
 > `</observationValue>`
 >
-> `<interpretation code="{DISEASE_IMMUNITY_INTERPRETATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.9" displayName=".." originalText=".."/>`
+>
+`<interpretation code="{DISEASE_IMMUNITY_INTERPRETATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.9" displayName=".." originalText=".."/>`
 >
 > `</observationResult>`
 >
@@ -410,7 +482,8 @@ Below is a sample XML message with the values populated.
 
 > `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`
 >
-> `<ns4:cdsInput xmlns:ns2="org.opencds" xmlns:ns3="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput" xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">`
+>
+`<ns4:cdsInput xmlns:ns2="org.opencds" xmlns:ns3="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput" xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">`
 >
 > `<templateId root="2.16.840.1.113883.3.795.11.1.1"/>`
 >
@@ -454,11 +527,13 @@ Below is a sample XML message with the values populated.
 >
 > `<observationValue>`
 >
-> `<concept code="DISEASE_DOCUMENTED" codeSystem="2.16.840.1.113883.3.795.12.100.8" displayName="Disease Documented" originalText="DISEASE_DOCUMENTED"/>`
+>
+`<concept code="DISEASE_DOCUMENTED" codeSystem="2.16.840.1.113883.3.795.12.100.8" displayName="Disease Documented" originalText="DISEASE_DOCUMENTED"/>`
 >
 > `</observationValue>`
 >
-> `<interpretation code="IS_IMMUNE" codeSystem="2.16.840.1.113883.3.795.12.100.9" displayName="Is Immune" originalText="IS_IMMUNE"/>`
+>
+`<interpretation code="IS_IMMUNE" codeSystem="2.16.840.1.113883.3.795.12.100.9" displayName="Is Immune" originalText="IS_IMMUNE"/>`
 >
 > `</observationResult>`
 >
@@ -558,7 +633,9 @@ Below is a sample XML message with the values populated.
 
 ### Input Node Elements and Attributes
 
-The table below lists the XML nodes and attributes that may be utilized in the input message. Usage notes are provided. Some attribute values are coded; the complete set of accepted code values is listed in the [Code Tables section](#code-tables) of this document.
+The table below lists the XML nodes and attributes that may be utilized in the input message. Usage notes are provided. Some
+attribute values are coded; the complete set of accepted code values is listed in the [Code Tables section](#code-tables) of this
+document.
 
 <table>
 <thead>
@@ -869,13 +946,16 @@ The table below lists the XML nodes and attributes that may be utilized in the i
 
 ## ICE Output Message
 
-When producing the output of evaluations and recommendations to the client, ICE will first mirror what was provided in the VMR input message and then supplements the provided information with additional elements and attributes. In some cases, where additional nested output is conveyed, ICE will do so by adding `<relatedClinicalStatement/>` nodes.
+When producing the output of evaluations and recommendations to the client, ICE will first mirror what was provided in the VMR input
+message and then supplements the provided information with additional elements and attributes. In some cases, where additional
+nested output is conveyed, ICE will do so by adding `<relatedClinicalStatement/>` nodes.
 
 The ICE-specific immunization output message conforms to the cdsOutput.xsd, and the XML template on the next page.
 
 - XML messages must follow the ordering and structure of this template. The order of elements do not deviate from the template.
 
-- Some elements may not be present in all messages or may repeat, as described in the comments of the template as well as in the XSD.
+- Some elements may not be present in all messages or may repeat, as described in the comments of the template as well as in the
+  XSD.
 
 - Refer to the [Output Node Elements and Attributes Section](#output-node-elements-and-attributes) for additional usage information.
 
@@ -888,59 +968,63 @@ The ICE-specific immunization output message conforms to the cdsOutput.xsd, and 
 
 <!-- **CDSOutput Section Begins (always present)** -->
 
-<ns5:cdsOutput xmlns:ns2="org.opencds" xmlns:ns3="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput" xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">
+<ns5:cdsOutput xmlns:ns2="org.opencds" xmlns:ns3="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput"
+               xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">
 
-<!-- **VMR Output Section Begins (always present)** -->
+    <!-- **VMR Output Section Begins (always present)** -->
 
-<vmrOutput>
+    <vmrOutput>
 
-<templateId root="2.16.840.1.113883.3.795.11.1.1"/>
+        <templateId root="2.16.840.1.113883.3.795.11.1.1"/>
 
-<!-- **Patient Output Section Begins (always present)** -->
+        <!-- **Patient Output Section Begins (always present)** -->
 
-<patient>
+        <patient>
 
-<templateId root="2.16.840.1.113883.3.795.11.2.1.1"/>
+            <templateId root="2.16.840.1.113883.3.795.11.2.1.1"/>
 
-<id root="{UNIQUE_IDENTIFIER1}"/>
+            <id root="{UNIQUE_IDENTIFIER1}"/>
 
-<!-- **Patient Birthdate and Gender Section Begins (always present; no differences from input message)** -->
+            <!-- **Patient Birthdate and Gender Section Begins (always present; no differences from input message)** -->
 
-<demographics>
+            <demographics>
 
-<birthTime value="{YYYYMMDD}"/>
+                <birthTime value="{YYYYMMDD}"/>
 
-<gender code="{GENDER_CODE}" codeSystem="2.16.840.1.113883.5.1" displayName="…" originalText="…"/>
+                <gender code="{GENDER_CODE}" codeSystem="2.16.840.1.113883.5.1" displayName="…" originalText="…"/>
 
-</demographics>
+            </demographics>
 
-<!-- **Patient Birthdate and Gender Section Ends** -->
+            <!-- **Patient Birthdate and Gender Section Ends** -->
 
-<clinicalStatements>
+            <clinicalStatements>
 
-<!-- **Patient Disease Immunity Section Begins (only present if provided on input; no differences from input message)** -->
+                <!-- **Patient Disease Immunity Section Begins (only present if provided on input; no differences from input message)** -->
 
-<observationResults>
+                <observationResults>
 
-<observationResult>
+                    <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="{UNIQUE_IDENTIFIER2}"/>
+                        <id root="{UNIQUE_IDENTIFIER2}"/>
 
-<observationFocus code="{DISEASE_IMMUNITY_FOCUS_CODE" codeSystem="2.16.840.1.113883.6.103" displayName="…" originalText="…"/>
+                        <observationFocus code="{DISEASE_IMMUNITY_FOCUS_CODE" codeSystem="2.16.840.1.113883.6.103" displayName="…"
+                                          originalText="…"/>
 
-<observationEventTime low="{YYYYMMDD}" high="{YYYYMMDD}"/>
+                        <observationEventTime low="{YYYYMMDD}" high="{YYYYMMDD}"/>
 
-<observationValue>
+                        <observationValue>
 
-<concept code="{DISEASE_DOCUMENTATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.8" displayName="…" originalText="…"/>
+                            <concept code="{DISEASE_DOCUMENTATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.8"
+                                     displayName="…" originalText="…"/>
 
-</observationValue>
+                        </observationValue>
 
-<interpretation code="{DISEASE_IMMUNITY_INTERPRETATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.9" displayName="…" originalText="…"/>
+                        <interpretation code="{DISEASE_IMMUNITY_INTERPRETATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.9"
+                                        displayName="…" originalText="…"/>
 
-</observationResult>
+                    </observationResult>
 ```
 
 > `<observationResult>`
@@ -958,107 +1042,111 @@ The ICE-specific immunization output message conforms to the cdsOutput.xsd, and 
 ```xml
 </observationResults>
 
-<!-- **Patient Disease Immunity Section Ends** -->
+        <!-- **Patient Disease Immunity Section Ends** -->
 
-<!-- **List of Vaccines Administered Section Begins. Note that each <SubstanceAdministrationEvent/> provided in the input message is also listed in this output** -->
+        <!-- **List of Vaccines Administered Section Begins. Note that each <SubstanceAdministrationEvent/> provided in the input message is also listed in this output** -->
 
 <substanceAdministrationEvents>
 
-<!-- **SubstanceAdministrationEvent for administered vaccine \#1; evaluation information is added by ICE** -->
+    <!-- **SubstanceAdministrationEvent for administered vaccine \#1; evaluation information is added by ICE** -->
 
-<substanceAdministrationEvent>
+    <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+        <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="{UNIQUE_IDENTIFIER3}"/>
+        <id root="{UNIQUE_IDENTIFIER3}"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+        <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+        <substance>
 
-<id root="{UNIQUE_IDENTIFIER4}"/>
+            <id root="{UNIQUE_IDENTIFIER4}"/>
 
-<!-- **Vaccine code supplied by client application; note that this could be a composite vaccine** -->
+            <!-- **Vaccine code supplied by client application; note that this could be a composite vaccine** -->
 
-<substanceCode code="{CVX_CODE}" codeSystem="2.16.840.1.113883.12.292" displayName="…" originalText="…"/>
+            <substanceCode code="{CVX_CODE}" codeSystem="2.16.840.1.113883.12.292" displayName="…" originalText="…"/>
 
-</substance>
+        </substance>
 
-<administrationTimeInterval low="{YYYYMMDD}" high="{YYYYMMDD}"/>
+        <administrationTimeInterval low="{YYYYMMDD}" high="{YYYYMMDD}"/>
 
-<!-- **Evaluation Information Section Begins; this <relatedClinicalStatement/> is repeated for each component vaccine implemented in ICE** -->
+        <!-- **Evaluation Information Section Begins; this <relatedClinicalStatement/> is repeated for each component vaccine implemented in ICE** -->
 
-<relatedClinicalStatement>
+        <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<substanceAdministrationEvent>
+            <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="{UNIQUE_IDENTIFIER5}"/>
+                <id root="{UNIQUE_IDENTIFIER5}"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                <substance>
 
-<id root="{UNIQUE_IDENTIFIER6}"/>
+                    <id root="{UNIQUE_IDENTIFIER6}"/>
 
-<!-- **Component Vaccine in focus within this <relatedClinicalStatement/>; note that if the vaccine supplied by the client application is not a composite vaccine, this vaccine code will be the same as the above** -->
+                    <!-- **Component Vaccine in focus within this <relatedClinicalStatement/>; note that if the vaccine supplied by the client application is not a composite vaccine, this vaccine code will be the same as the above** -->
 
-<substanceCode code="{CVX_CODE}" codeSystem="2.16.840.1.113883.12.292" displayName="…" originalText="…"/>
+                    <substanceCode code="{CVX_CODE}" codeSystem="2.16.840.1.113883.12.292" displayName="…" originalText="…"/>
 
-</substance>
+                </substance>
 
-<administrationTimeInterval low="{YYYYMMDD}" high="{YYYYMMDD}"/>
+                <administrationTimeInterval low="{YYYYMMDD}" high="{YYYYMMDD}"/>
 
-<!-- **Validity of Component Vaccine; true if VALID, or false if ACCEPTED or INVALID. This summary value is supplied for convenience only; it is strongly recommended that the client application use the below nested <relatedClinicalStatement/> for validity information** -->
+                <!-- **Validity of Component Vaccine; true if VALID, or false if ACCEPTED or INVALID. This summary value is supplied for convenience only; it is strongly recommended that the client application use the below nested <relatedClinicalStatement/> for validity information** -->
 
-<isValid value="{TRUE_OR_FALSE}"/>
+                <isValid value="{TRUE_OR_FALSE}"/>
 
-<relatedClinicalStatement>
+                <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+                    <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<!-- **Component Vaccine Validity Information** -->
+                    <!-- **Component Vaccine Validity Information** -->
 
-<observationResult>
+                    <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="{UNIQUE_IDENTIFIER7}"/>
+                        <id root="{UNIQUE_IDENTIFIER7}"/>
 
-<!-- **ObservationFocus to specify which component was evaluated** -->
+                        <!-- **ObservationFocus to specify which component was evaluated** -->
 
-<observationFocus code="{IMMUNIZATION_VALIDITY_FOCUS}" codeSystem="2.16.840.1.113883.3.795.12.100.1" displayName="…" originalText="…"/>
+                        <observationFocus code="{IMMUNIZATION_VALIDITY_FOCUS}" codeSystem="2.16.840.1.113883.3.795.12.100.1"
+                                          displayName="…" originalText="…"/>
 
-<!-- **ObservationValue to specify validity of component vaccine (*i.e.* VALID, ACCEPTED, or INVALID)** -->
+                        <!-- **ObservationValue to specify validity of component vaccine (*i.e.* VALID, ACCEPTED, or INVALID)** -->
 
-<observationValue>
+                        <observationValue>
 
-<concept code="{VALIDITY_VALUE}" codeSystem="2.16.840.1.113883.3.795.12.100.2" displayName="…" originalText="…"/>
+                            <concept code="{VALIDITY_VALUE}" codeSystem="2.16.840.1.113883.3.795.12.100.2" displayName="…"
+                                     originalText="…"/>
 
-</observationValue>
+                        </observationValue>
 
-<!-- **Optional (repeatable) interpretation element specify why a vaccine is VALID, INVALID or ACCEPTED** -->
+                        <!-- **Optional (repeatable) interpretation element specify why a vaccine is VALID, INVALID or ACCEPTED** -->
 
-<interpretation code="{REASON_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.3" displayName="…" originalText="…"/>
+                        <interpretation code="{REASON_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.3" displayName="…"
+                                        originalText="…"/>
 
-<interpretation code="{REASON_CODE2}" codeSystem="2.16.840.1.113883.3.795.12.100.3" displayName="…" originalText="…"/>
+                        <interpretation code="{REASON_CODE2}" codeSystem="2.16.840.1.113883.3.795.12.100.3" displayName="…"
+                                        originalText="…"/>
 
-</observationResult>
+                    </observationResult>
 
-</relatedClinicalStatement>
+                </relatedClinicalStatement>
 
-</substanceAdministrationEvent>
+            </substanceAdministrationEvent>
 
-</relatedClinicalStatement>
+        </relatedClinicalStatement>
 
-<!-- **Evaluation Information Section Ends for this component vaccine** -->
+        <!-- **Evaluation Information Section Ends for this component vaccine** -->
 
-<!-- **Evaluation Information Section Begins for next component vaccine (if any)** -->
+        <!-- **Evaluation Information Section Begins for next component vaccine (if any)** -->
 
-<relatedClinicalStatement>
+        <relatedClinicalStatement>
 ```
 
 ...
@@ -1066,13 +1154,13 @@ The ICE-specific immunization output message conforms to the cdsOutput.xsd, and 
 ```xml
 </relatedClinicalStatement>
 
-<!-- **Evaluation Information Section Ends for this component vaccine** -->
+        <!-- **Evaluation Information Section Ends for this component vaccine** -->
 
-</substanceAdministrationEvent>
+        </substanceAdministrationEvent>
 
-<!-- **SubstanceAdministrationEvent Section Ends for this administered vaccine** -->
+        <!-- **SubstanceAdministrationEvent Section Ends for this administered vaccine** -->
 
-<!-- **SubstanceAdministrationEvent Section Begins for next administered vaccine \#2, \#3, etc. (if any)** -->
+        <!-- **SubstanceAdministrationEvent Section Begins for next administered vaccine \#2, \#3, etc. (if any)** -->
 
 <substanceAdministrationEvent>
 ```
@@ -1082,129 +1170,145 @@ The ICE-specific immunization output message conforms to the cdsOutput.xsd, and 
 ```xml
 </substanceAdministrationEvent>
 
-<!-- **SubstanceAdministrationEvent Section Ends for this administered vaccine** -->
+        <!-- **SubstanceAdministrationEvent Section Ends for this administered vaccine** -->
 
-</substanceAdministrationEvents>
+        </substanceAdministrationEvents>
 
-<!-- **List of Vaccines Administered Section Ends** -->
+        <!-- **List of Vaccines Administered Section Ends** -->
 
-<!-- **ICE Recommendations Section Begins (always present). Note that each <SubstanceAdministrationProposal/> corresponds to a recommendation for 1 vaccine group** -->
+        <!-- **ICE Recommendations Section Begins (always present). Note that each <SubstanceAdministrationProposal/> corresponds to a recommendation for 1 vaccine group** -->
 
 <substanceAdministrationProposals>
 
-<!-- **SubstanceAdministrationProposal for vaccine group \#1** -->
+    <!-- **SubstanceAdministrationProposal for vaccine group \#1** -->
 
-<substanceAdministrationProposal>
+    <substanceAdministrationProposal>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.3.1"/>
+        <templateId root="2.16.840.1.113883.3.795.11.9.3.1"/>
 
-<id root="{UNIQUE_IDENTIFIER8}"/>
+        <id root="{UNIQUE_IDENTIFIER8}"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+        <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+        <substance>
 
-<id root="{UNIQUE_IDENTIFIER9}"/>
+            <id root="{UNIQUE_IDENTIFIER9}"/>
 
-<!— **substanceCode specifies the vaccine or vaccine group for this recommendation. If a specific vaccine is recommended, ICE will populate this with a CVX code. More commonly, this attribute will be populated with the vaccine group code using code system 2.16.840.1.113883.3.795.12.100.1 as in the example below In this example, substanceCode specifies the vaccine group for this recommendation** -->
+            <!— **substanceCode specifies the vaccine or vaccine group for this recommendation. If a specific vaccine is
+            recommended, ICE will populate this with a CVX code. More commonly, this attribute will be populated with the vaccine
+            group code using code system 2.16.840.1.113883.3.795.12.100.1 as in the example below In this example, substanceCode
+            specifies the vaccine group for this recommendation** -->
 
-<substanceCode code="{VACCINE_GROUP_OR_VACCINE_SPECIFIC_CODE}" codeSystem="<2.16.840.1.113883.12.292 if vaccine> or < 2.16.840.1.113883.3.795.12.100.1 if vaccine group>" displayName="…" originalText="…"/>
+            <substanceCode code="{VACCINE_GROUP_OR_VACCINE_SPECIFIC_CODE}"
+                           codeSystem="<2.16.840.1.113883.12.292 if vaccine> or < 2.16.840.1.113883.3.795.12.100.1 if vaccine group>"
+                           displayName="…" originalText="…"/>
 
-</substance>
+        </substance>
 
-<!-- **<relatedClinicalStatement/>** **contains the recommendation forecast and associated reasons for the vaccine group specified by the below <observationFocus/> element** -->
+        <!-- **<relatedClinicalStatement/>** **contains the recommendation forecast and associated reasons for the vaccine group specified by the below <observationFocus/> element** -->
 
-<relatedClinicalStatement>
+        <relatedClinicalStatement>
 
-<targetRelationshipToSource code="RSON" codeSystem="2.16.840.1.113883.5.1002"/>
+            <targetRelationshipToSource code="RSON" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<observationResult>
+            <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="{UNIQUE_IDENTIFIER10}"/>
+                <id root="{UNIQUE_IDENTIFIER10}"/>
 
-<!-- **observationFocus specifies the vaccine group for this recommendation** -->
+                <!-- **observationFocus specifies the vaccine group for this recommendation** -->
 
-<observationFocus code="{VACCINE_GROUP_RECOMMENDATION_FOCUS_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.1" displayName="…" originalText="…"/>
+                <observationFocus code="{VACCINE_GROUP_RECOMMENDATION_FOCUS_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.1"
+                                  displayName="…" originalText="…"/>
 
-<!-- **observationValue specifies the recommendation; currently either RECOMMENDED, FUTURE_RECOMMENDED, CONDITIONALLY_RECOMMENDED or NOT_RECOMMENDED** -->
+                <!-- **observationValue specifies the recommendation; currently either RECOMMENDED, FUTURE_RECOMMENDED, CONDITIONALLY_RECOMMENDED or NOT_RECOMMENDED** -->
 
-<observationValue>
+                <observationValue>
 
-<concept code="{RECOMMENDATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.5" displayName="…" originalText="…"/>
+                    <concept code="{RECOMMENDATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.5" displayName="…"
+                             originalText="…"/>
 
-</observationValue>
+                </observationValue>
 
-<!-- **Optional (repeatable) interpretation element specify why the reason for the above recommendation value** -->
+                <!-- **Optional (repeatable) interpretation element specify why the reason for the above recommendation value** -->
 
-<interpretation code="{RECOMMENDATION_REASON_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.6" displayName="…" originalText="…"/>
+                <interpretation code="{RECOMMENDATION_REASON_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.6" displayName="…"
+                                originalText="…"/>
 
-</observationResult>
+            </observationResult>
 
-</relatedClinicalStatement>
+        </relatedClinicalStatement>
 
-</substanceAdministrationProposal>
+    </substanceAdministrationProposal>
 
-<!-- **SubstanceAdministrationProposal Section Ends for vaccine group \#1** -->
+    <!-- **SubstanceAdministrationProposal Section Ends for vaccine group \#1** -->
 
-<!-- **SubstanceAdministrationProposal for vaccine group \#2** -->
+    <!-- **SubstanceAdministrationProposal for vaccine group \#2** -->
 
-<substanceAdministrationProposal>
+    <substanceAdministrationProposal>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.3.1"/>
+        <templateId root="2.16.840.1.113883.3.795.11.9.3.1"/>
 
-<id root="{UNIQUE_IDENTIFIER11}"/>
+        <id root="{UNIQUE_IDENTIFIER11}"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+        <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+        <substance>
 
-<id root="{UNIQUE_IDENTIFIER12}"/>
+            <id root="{UNIQUE_IDENTIFIER12}"/>
 
-<!— **substanceCode specifies the vaccine or vaccine group for this recommendation. If a specific vaccine is recommended, ICE will populate this with a CVX code. More commonly, this attribute will be populated with the vaccine group code using code system 2.16.840.1.113883.3.795.12.100.1 as in the example below In this example, substanceCode specifies the vaccine group for this recommendation** -->
+            <!— **substanceCode specifies the vaccine or vaccine group for this recommendation. If a specific vaccine is
+            recommended, ICE will populate this with a CVX code. More commonly, this attribute will be populated with the vaccine
+            group code using code system 2.16.840.1.113883.3.795.12.100.1 as in the example below In this example, substanceCode
+            specifies the vaccine group for this recommendation** -->
 
-<substanceCode code="{VACCINE_GROUP_OR_VACCINE_SPECIFIC_CODE}" codeSystem="<2.16.840.1.113883.12.292 if vaccine> or < 2.16.840.1.113883.3.795.12.100.1 if vaccine group>" displayName="…" originalText="…"/>
+            <substanceCode code="{VACCINE_GROUP_OR_VACCINE_SPECIFIC_CODE}"
+                           codeSystem="<2.16.840.1.113883.12.292 if vaccine> or < 2.16.840.1.113883.3.795.12.100.1 if vaccine group>"
+                           displayName="…" originalText="…"/>
 
-</substance>
+        </substance>
 
-<!-- **<relatedClinicalStatement/>** **contains the recommendation forecast and associated reasons for the vaccine group specified by the below <observationFocus/> element** -->
+        <!-- **<relatedClinicalStatement/>** **contains the recommendation forecast and associated reasons for the vaccine group specified by the below <observationFocus/> element** -->
 
-<relatedClinicalStatement>
+        <relatedClinicalStatement>
 
-<targetRelationshipToSource code="RSON" codeSystem="2.16.840.1.113883.5.1002"/>
+            <targetRelationshipToSource code="RSON" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<observationResult>
+            <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="{UNIQUE_IDENTIFIER13}"/>
+                <id root="{UNIQUE_IDENTIFIER13}"/>
 
-<!-- **observationFocus specifies the vaccine group for this recommendation.** -->
+                <!-- **observationFocus specifies the vaccine group for this recommendation.** -->
 
-<observationFocus code="{VACCINE_RECOMMENDATION_FOCUS_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.1" displayName="…" originalText="…"/>
+                <observationFocus code="{VACCINE_RECOMMENDATION_FOCUS_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.1"
+                                  displayName="…" originalText="…"/>
 
-<!-- **observationValue specifies the recommendation; currently either RECOMMENDED, FUTURE_RECOMMENDED, CONDITIONALLY_RECOMMENDED or NOT_RECOMMENDED** -->
+                <!-- **observationValue specifies the recommendation; currently either RECOMMENDED, FUTURE_RECOMMENDED, CONDITIONALLY_RECOMMENDED or NOT_RECOMMENDED** -->
 
-<observationValue>
+                <observationValue>
 
-<concept code="{RECOMMENDATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.5" displayName="…" originalText="…"/>
+                    <concept code="{RECOMMENDATION_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.5" displayName="…"
+                             originalText="…"/>
 
-</observationValue>
+                </observationValue>
 
-<!-- **Optional (repeatable) interpretation element specify why the reason for the above recommendation value** -->
+                <!-- **Optional (repeatable) interpretation element specify why the reason for the above recommendation value** -->
 
-<interpretation code="{RECOMMENDATION_REASON_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.6" displayName="…" originalText="…"/>
+                <interpretation code="{RECOMMENDATION_REASON_CODE}" codeSystem="2.16.840.1.113883.3.795.12.100.6" displayName="…"
+                                originalText="…"/>
 
-</observationResult>
+            </observationResult>
 
-</relatedClinicalStatement>
+        </relatedClinicalStatement>
 
-</substanceAdministrationProposal>
+    </substanceAdministrationProposal>
 
-<!-- **SubstanceAdministrationProposal Section Ends for vaccine group \#2** -->
+    <!-- **SubstanceAdministrationProposal Section Ends for vaccine group \#2** -->
 
-<!-- **SubstanceAdministrationProposal Section Repeated for remaining vaccine group**
+    <!-- **SubstanceAdministrationProposal Section Repeated for remaining vaccine group**
 ```
 
 > **or vaccine-specific recommendations** --\>
@@ -1243,407 +1347,440 @@ The ICE-specific immunization output message conforms to the cdsOutput.xsd, and 
 
 ### Sample Output Message
 
-The following sample output shows the evaluations for 4 administered shots and one accompanying Hep B recommendation. The patient was born on 1/1/1990. Disease immunity was documented on 3/15/1996 and the test was executed when the patient’s age was 21 years, 11 months and 11 days old (*i.e.* – 8015 days). (Recall that ICE will evaluate and forecast at a specified time via the DSS evaluatedAtSpecifiedTime operation.)
+The following sample output shows the evaluations for 4 administered shots and one accompanying Hep B recommendation. The patient
+was born on 1/1/1990. Disease immunity was documented on 3/15/1996 and the test was executed when the patient’s age was 21 years, 11
+months and 11 days old (*i.e.* – 8015 days). (Recall that ICE will evaluate and forecast at a specified time via the DSS
+evaluatedAtSpecifiedTime operation.)
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<ns5:cdsOutput xmlns:ns2="org.opencds" xmlns:ns3="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput" xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">
+<ns5:cdsOutput xmlns:ns2="org.opencds" xmlns:ns3="org.opencds.vmr.v1_0.schema.vmr" xmlns:ns4="org.opencds.vmr.v1_0.schema.cdsinput"
+               xmlns:ns5="org.opencds.vmr.v1_0.schema.cdsoutput">
 
-<vmrOutput>
+    <vmrOutput>
 
-<templateId root="2.16.840.1.113883.3.795.11.1.1"/>
+        <templateId root="2.16.840.1.113883.3.795.11.1.1"/>
 
-<patient>
+        <patient>
 
-<templateId root="2.16.840.1.113883.3.795.11.2.1.1"/>
+            <templateId root="2.16.840.1.113883.3.795.11.2.1.1"/>
 
-<id root="2.16.840.1.113883.3.795.12.100.11" extension="92"/>
+            <id root="2.16.840.1.113883.3.795.12.100.11" extension="92"/>
 
-<demographics>
+            <demographics>
 
-<birthTime value="19900101"/>
+                <birthTime value="19900101"/>
 
-<gender code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male" originalText="M"/>
+                <gender code="M" codeSystem="2.16.840.1.113883.5.1" displayName="Male" originalText="M"/>
 
-</demographics>
+            </demographics>
 
-<clinicalStatements>
+            <clinicalStatements>
 
-<observationResults>
+                <observationResults>
 
-<observationResult>
+                    <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="617478b8-b6eb-4988-853a-b5f5c2441eb8"/>
+                        <id root="617478b8-b6eb-4988-853a-b5f5c2441eb8"/>
 
-<observationFocus code="070.30" codeSystem="2.16.840.1.113883.6.103" displayName="Hepatitis B" originalText="070.30"/>
+                        <observationFocus code="070.30" codeSystem="2.16.840.1.113883.6.103" displayName="Hepatitis B"
+                                          originalText="070.30"/>
 
-<observationEventTime low="19960315" high="19960315"/>
+                        <observationEventTime low="19960315" high="19960315"/>
 
-<observationValue>
+                        <observationValue>
 
-<concept code="DISEASE_DOCUMENTED" codeSystem="2.16.840.1.113883.3.795.12.100.8" displayName="Disease Documented" originalText="DISEASE_DOCUMENTED"/>
+                            <concept code="DISEASE_DOCUMENTED" codeSystem="2.16.840.1.113883.3.795.12.100.8"
+                                     displayName="Disease Documented" originalText="DISEASE_DOCUMENTED"/>
 
-</observationValue>
+                        </observationValue>
 
-<interpretation code="IS_IMMUNE" codeSystem="2.16.840.1.113883.3.795.12.100.9" displayName="Is Immune" originalText="IS_IMMUNE"/>
+                        <interpretation code="IS_IMMUNE" codeSystem="2.16.840.1.113883.3.795.12.100.9" displayName="Is Immune"
+                                        originalText="IS_IMMUNE"/>
 
-</observationResult>
+                    </observationResult>
 
-</observationResults>
+                </observationResults>
 
-<substanceAdministrationEvents>
+                <substanceAdministrationEvents>
 
-<substanceAdministrationEvent>
+                    <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                        <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="2.16.840.1.113883.3.795.12.100.10" extension="230"/>
+                        <id root="2.16.840.1.113883.3.795.12.100.10" extension="230"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                        <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                        <substance>
 
-<id root="1094b5c2-03f7-472d-bf62-989138841492"/>
+                            <id root="1094b5c2-03f7-472d-bf62-989138841492"/>
 
-<substanceCode code="45" codeSystem="2.16.840.1.113883.12.292" displayName="HepB NOS" originalText="45"/>
+                            <substanceCode code="45" codeSystem="2.16.840.1.113883.12.292" displayName="HepB NOS"
+                                           originalText="45"/>
 
-</substance>
+                        </substance>
 
-<administrationTimeInterval low="19900315" high="19900315"/>
+                        <administrationTimeInterval low="19900315" high="19900315"/>
 
-<relatedClinicalStatement>
+                        <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<substanceAdministrationEvent>
+                            <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                                <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="7de6fc89-f6a7-4926-ad84-82708d87aaff"/>
+                                <id root="7de6fc89-f6a7-4926-ad84-82708d87aaff"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                                <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                                <substance>
 
-<id root="4d0ea31e-04ac-4bd7-8fbf-3e1f7423b5e0"/>
+                                    <id root="4d0ea31e-04ac-4bd7-8fbf-3e1f7423b5e0"/>
 
-<substanceCode code="45" codeSystem="2.16.840.1.113883.12.292" displayName="HepB NOS" originalText="45"/>
+                                    <substanceCode code="45" codeSystem="2.16.840.1.113883.12.292" displayName="HepB NOS"
+                                                   originalText="45"/>
 
-</substance>
+                                </substance>
 
-<administrationTimeInterval low="19900315" high="19900315"/>
+                                <administrationTimeInterval low="19900315" high="19900315"/>
 
-<isValid value="true"/>
+                                <isValid value="true"/>
 
-<relatedClinicalStatement>
+                                <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+                                    <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<observationResult>
+                                    <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="6c360bc7-afb8-4585-823e-f3297db42048"/>
+                                        <id root="6c360bc7-afb8-4585-823e-f3297db42048"/>
 
-<observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1" displayName="Immunization Validity (Hep B Component)" originalText="100"/>
+                                        <observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1"
+                                                          displayName="Immunization Validity (Hep B Component)" originalText="100"/>
 
-<observationValue>
+                                        <observationValue>
 
-<concept code="VALID" codeSystem="2.16.840.1.113883.3.795.12.100.2" displayName="Valid Immunization" originalText="VALID"/>
+                                            <concept code="VALID" codeSystem="2.16.840.1.113883.3.795.12.100.2"
+                                                     displayName="Valid Immunization" originalText="VALID"/>
 
-</observationValue>
+                                        </observationValue>
 
-</observationResult>
+                                    </observationResult>
 
-</relatedClinicalStatement>
+                                </relatedClinicalStatement>
 
-</substanceAdministrationEvent>
+                            </substanceAdministrationEvent>
 
-</relatedClinicalStatement>
+                        </relatedClinicalStatement>
 
-</substanceAdministrationEvent>
+                    </substanceAdministrationEvent>
 
-<substanceAdministrationEvent>
+                    <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                        <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="2.16.840.1.113883.3.795.12.100.10" extension="229"/>
+                        <id root="2.16.840.1.113883.3.795.12.100.10" extension="229"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                        <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                        <substance>
 
-<id root="7bc7d976-1d21-458f-b0ea-21262a1314db"/>
+                            <id root="7bc7d976-1d21-458f-b0ea-21262a1314db"/>
 
-<substanceCode code="45" codeSystem="2.16.840.1.113883.12.292" displayName="HepB NOS" originalText="45"/>
+                            <substanceCode code="45" codeSystem="2.16.840.1.113883.12.292" displayName="HepB NOS"
+                                           originalText="45"/>
 
-</substance>
+                        </substance>
 
-<administrationTimeInterval low="19900401" high="19900401"/>
+                        <administrationTimeInterval low="19900401" high="19900401"/>
 
-<relatedClinicalStatement>
+                        <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<substanceAdministrationEvent>
+                            <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                                <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="b84dd4d8-c942-443a-911e-424834327bca"/>
+                                <id root="b84dd4d8-c942-443a-911e-424834327bca"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                                <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                                <substance>
 
-<id root="a8bca109-4b9f-4186-a4f5-8053d74c4a51"/>
+                                    <id root="a8bca109-4b9f-4186-a4f5-8053d74c4a51"/>
 
-<substanceCode code="45" codeSystem="2.16.840.1.113883.12.292" displayName="HepB NOS" originalText="45"/>
+                                    <substanceCode code="45" codeSystem="2.16.840.1.113883.12.292" displayName="HepB NOS"
+                                                   originalText="45"/>
 
-</substance>
+                                </substance>
 
-<administrationTimeInterval low="19900401" high="19900401"/>
+                                <administrationTimeInterval low="19900401" high="19900401"/>
 
-<isValid value="false"/>
+                                <isValid value="false"/>
 
-<relatedClinicalStatement>
+                                <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+                                    <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<observationResult>
+                                    <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="b088d0e5-05e4-4aa5-8067-dba69a79e4f1"/>
+                                        <id root="b088d0e5-05e4-4aa5-8067-dba69a79e4f1"/>
 
-<observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1" displayName="Immunization Validity (Hep B Component)" originalText="100"/>
+                                        <observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1"
+                                                          displayName="Immunization Validity (Hep B Component)" originalText="100"/>
 
-<observationValue>
+                                        <observationValue>
 
-<concept code="INVALID" codeSystem="2.16.840.1.113883.3.795.12.100.2" displayName="Invalid Immunization" originalText="INVALID"/>
+                                            <concept code="INVALID" codeSystem="2.16.840.1.113883.3.795.12.100.2"
+                                                     displayName="Invalid Immunization" originalText="INVALID"/>
 
-</observationValue>
+                                        </observationValue>
 
-<interpretation code="BELOW_MINIMUM_INTERVAL" codeSystem="2.16.840.1.113883.3.795.12.100.3" displayName="Below Minimum Interval" originalText="BELOW_MINIMUM_INTERVAL"/>
+                                        <interpretation code="BELOW_MINIMUM_INTERVAL" codeSystem="2.16.840.1.113883.3.795.12.100.3"
+                                                        displayName="Below Minimum Interval" originalText="BELOW_MINIMUM_INTERVAL"/>
 
-</observationResult>
+                                    </observationResult>
 
-</relatedClinicalStatement>
+                                </relatedClinicalStatement>
 
-</substanceAdministrationEvent>
+                            </substanceAdministrationEvent>
 
-</relatedClinicalStatement>
+                        </relatedClinicalStatement>
 
-</substanceAdministrationEvent>
+                    </substanceAdministrationEvent>
 
-<substanceAdministrationEvent>
+                    <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                        <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="2.16.840.1.113883.3.795.12.100.10" extension="228"/>
+                        <id root="2.16.840.1.113883.3.795.12.100.10" extension="228"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                        <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                        <substance>
 
-<id root="85818577-26e6-49a0-bd64-8062518b40da"/>
+                            <id root="85818577-26e6-49a0-bd64-8062518b40da"/>
 
-<substanceCode code="08" codeSystem="2.16.840.1.113883.12.292" displayName="HepB peds &lt; 20yrs" originalText="08"/>
+                            <substanceCode code="08" codeSystem="2.16.840.1.113883.12.292" displayName="HepB peds &lt; 20yrs"
+                                           originalText="08"/>
 
-</substance>
+                        </substance>
 
-<administrationTimeInterval low="19960315" high="19960315"/>
+                        <administrationTimeInterval low="19960315" high="19960315"/>
 
-<relatedClinicalStatement>
+                        <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<substanceAdministrationEvent>
+                            <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                                <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="6d32bcec-4244-4e89-8d17-62097b775714"/>
+                                <id root="6d32bcec-4244-4e89-8d17-62097b775714"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                                <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                                <substance>
 
-<id root="7c8035f2-d860-4b80-8b9e-5673d3ba6c36"/>
+                                    <id root="7c8035f2-d860-4b80-8b9e-5673d3ba6c36"/>
 
-<substanceCode code="08" codeSystem="2.16.840.1.113883.12.292" displayName="HepB peds &lt; 20yrs" originalText="08"/>
+                                    <substanceCode code="08" codeSystem="2.16.840.1.113883.12.292"
+                                                   displayName="HepB peds &lt; 20yrs" originalText="08"/>
 
-</substance>
+                                </substance>
 
-<administrationTimeInterval low="19960315" high="19960315"/>
+                                <administrationTimeInterval low="19960315" high="19960315"/>
 
-<isValid value="false"/>
+                                <isValid value="false"/>
 
-<relatedClinicalStatement>
+                                <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+                                    <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<observationResult>
+                                    <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="d792be0e-1037-4d09-93e6-25ce729d93e0"/>
+                                        <id root="d792be0e-1037-4d09-93e6-25ce729d93e0"/>
 
-<observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1" displayName="Immunization Validity (Hep B Component)" originalText="100"/>
+                                        <observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1"
+                                                          displayName="Immunization Validity (Hep B Component)" originalText="100"/>
 
-<observationValue>
+                                        <observationValue>
 
-<concept code="ACCEPTED" codeSystem="2.16.840.1.113883.3.795.12.100.2" displayName="Accepted Immunization" originalText="ACCEPTED"/>
+                                            <concept code="ACCEPTED" codeSystem="2.16.840.1.113883.3.795.12.100.2"
+                                                     displayName="Accepted Immunization" originalText="ACCEPTED"/>
 
-</observationValue>
+                                        </observationValue>
 
-<interpretation code="PROOF_OF_IMMUNITY" codeSystem="2.16.840.1.113883.3.795.12.100.3" displayName="Proof of Immunity" originalText="PROOF_OF_IMMUNITY"/>
+                                        <interpretation code="PROOF_OF_IMMUNITY" codeSystem="2.16.840.1.113883.3.795.12.100.3"
+                                                        displayName="Proof of Immunity" originalText="PROOF_OF_IMMUNITY"/>
 
-</observationResult>
+                                    </observationResult>
 
-</relatedClinicalStatement>
+                                </relatedClinicalStatement>
 
-</substanceAdministrationEvent>
+                            </substanceAdministrationEvent>
 
-</relatedClinicalStatement>
+                        </relatedClinicalStatement>
 
-</substanceAdministrationEvent>
+                    </substanceAdministrationEvent>
 
-<substanceAdministrationEvent>
+                    <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                        <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="2.16.840.1.113883.3.795.12.100.10" extension="227"/>
+                        <id root="2.16.840.1.113883.3.795.12.100.10" extension="227"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                        <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                        <substance>
 
-<id root="20ce1691-1e81-4af6-8c25-e40773159cd2"/>
+                            <id root="20ce1691-1e81-4af6-8c25-e40773159cd2"/>
 
-<substanceCode code="08" codeSystem="2.16.840.1.113883.12.292" displayName="HepB peds &lt; 20yrs" originalText="08"/>
+                            <substanceCode code="08" codeSystem="2.16.840.1.113883.12.292" displayName="HepB peds &lt; 20yrs"
+                                           originalText="08"/>
 
-</substance>
+                        </substance>
 
-<administrationTimeInterval low="20100201" high="20100201"/>
+                        <administrationTimeInterval low="20100201" high="20100201"/>
 
-<relatedClinicalStatement>
+                        <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+                            <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<substanceAdministrationEvent>
+                            <substanceAdministrationEvent>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
+                                <templateId root="2.16.840.1.113883.3.795.11.9.1.1"/>
 
-<id root="efaf05b0-6664-47fa-9fad-0a7a68f48049"/>
+                                <id root="efaf05b0-6664-47fa-9fad-0a7a68f48049"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                                <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                                <substance>
 
-<id root="6a2b2fb2-a55a-4919-9937-a5af77fa400a"/>
+                                    <id root="6a2b2fb2-a55a-4919-9937-a5af77fa400a"/>
 
-<substanceCode code="08" codeSystem="2.16.840.1.113883.12.292" displayName="HepB peds &lt; 20yrs" originalText="08"/>
+                                    <substanceCode code="08" codeSystem="2.16.840.1.113883.12.292"
+                                                   displayName="HepB peds &lt; 20yrs" originalText="08"/>
 
-</substance>
+                                </substance>
 
-<administrationTimeInterval low="20100201" high="20100201"/>
+                                <administrationTimeInterval low="20100201" high="20100201"/>
 
-<isValid value="false"/>
+                                <isValid value="false"/>
 
-<relatedClinicalStatement>
+                                <relatedClinicalStatement>
 
-<targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
+                                    <targetRelationshipToSource code="PERT" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<observationResult>
+                                    <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                                        <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="46ef3a8c-da1c-4c2f-943a-513552494a46"/>
+                                        <id root="46ef3a8c-da1c-4c2f-943a-513552494a46"/>
 
-<observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1" displayName="Immunization Validity (Hep B Component)" originalText="100"/>
+                                        <observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1"
+                                                          displayName="Immunization Validity (Hep B Component)" originalText="100"/>
 
-<observationValue>
+                                        <observationValue>
 
-<concept code="ACCEPTED" codeSystem="2.16.840.1.113883.3.795.12.100.2" displayName="Accepted Immunization" originalText="ACCEPTED"/>
+                                            <concept code="ACCEPTED" codeSystem="2.16.840.1.113883.3.795.12.100.2"
+                                                     displayName="Accepted Immunization" originalText="ACCEPTED"/>
 
-</observationValue>
+                                        </observationValue>
 
-<interpretation code="PROOF_OF_IMMUNITY" codeSystem="2.16.840.1.113883.3.795.12.100.3" displayName="Proof of Immunity" originalText="PROOF_OF_IMMUNITY"/>
+                                        <interpretation code="PROOF_OF_IMMUNITY" codeSystem="2.16.840.1.113883.3.795.12.100.3"
+                                                        displayName="Proof of Immunity" originalText="PROOF_OF_IMMUNITY"/>
 
-</observationResult>
+                                    </observationResult>
 
-</relatedClinicalStatement>
+                                </relatedClinicalStatement>
 
-</substanceAdministrationEvent>
+                            </substanceAdministrationEvent>
 
-</relatedClinicalStatement>
+                        </relatedClinicalStatement>
 
-</substanceAdministrationEvent>
+                    </substanceAdministrationEvent>
 
-</substanceAdministrationEvents>
+                </substanceAdministrationEvents>
 
-<substanceAdministrationProposals>
+                <substanceAdministrationProposals>
 
-<substanceAdministrationProposal>
+                    <substanceAdministrationProposal>
 
-<templateId root="2.16.840.1.113883.3.795.11.9.3.1"/>
+                        <templateId root="2.16.840.1.113883.3.795.11.9.3.1"/>
 
-<id root="88758294-7f20-4491-aaae-6450fb1fb3fc"/>
+                        <id root="88758294-7f20-4491-aaae-6450fb1fb3fc"/>
 
-<substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
+                        <substanceAdministrationGeneralPurpose code="384810002" codeSystem="2.16.840.1.113883.6.5"/>
 
-<substance>
+                        <substance>
 
-<id root="2a048d0b-e15e-46f0-9008-397742e90afa"/>
+                            <id root="2a048d0b-e15e-46f0-9008-397742e90afa"/>
 
-<substanceCode code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1" displayName="Immunization Recommendation Focus (Hep B)" originalText="100"/>
+                            <substanceCode code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1"
+                                           displayName="Immunization Recommendation Focus (Hep B)" originalText="100"/>
 
-</substance>
+                        </substance>
 
-<relatedClinicalStatement>
+                        <relatedClinicalStatement>
 
-<targetRelationshipToSource code="RSON" codeSystem="2.16.840.1.113883.5.1002"/>
+                            <targetRelationshipToSource code="RSON" codeSystem="2.16.840.1.113883.5.1002"/>
 
-<observationResult>
+                            <observationResult>
 
-<templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
+                                <templateId root="2.16.840.1.113883.3.795.11.6.3.1"/>
 
-<id root="f8592ea2-22b4-4619-bb4b-8a4865753561"/>
+                                <id root="f8592ea2-22b4-4619-bb4b-8a4865753561"/>
 
-<observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1" displayName="Immunization Recommendation Focus (Hep B)" originalText="100"/>
+                                <observationFocus code="100" codeSystem="2.16.840.1.113883.3.795.12.100.1"
+                                                  displayName="Immunization Recommendation Focus (Hep B)" originalText="100"/>
 
-<observationValue>
+                                <observationValue>
 
-<concept code="NOT_RECOMMENDED" codeSystem="2.16.840.1.113883.3.795.12.100.5" displayName="Not Recommended" originalText="NOT_RECOMMENDED"/>
+                                    <concept code="NOT_RECOMMENDED" codeSystem="2.16.840.1.113883.3.795.12.100.5"
+                                             displayName="Not Recommended" originalText="NOT_RECOMMENDED"/>
 
-</observationValue>
+                                </observationValue>
 
-<interpretation code="PROOF_OF_IMMUNITY" codeSystem="2.16.840.1.113883.3.795.12.100.6" displayName="Proof of Immunity" originalText="PROOF_OF_IMMUNITY"/>
+                                <interpretation code="PROOF_OF_IMMUNITY" codeSystem="2.16.840.1.113883.3.795.12.100.6"
+                                                displayName="Proof of Immunity" originalText="PROOF_OF_IMMUNITY"/>
 
-</observationResult>
+                            </observationResult>
 
-</relatedClinicalStatement>
+                        </relatedClinicalStatement>
 
-</substanceAdministrationProposal>
+                    </substanceAdministrationProposal>
 
-</substanceAdministrationProposals>
+                </substanceAdministrationProposals>
 
-</clinicalStatements>
+            </clinicalStatements>
 
-</patient>
+        </patient>
 
-</vmrOutput>
+    </vmrOutput>
 
 </ns5:cdsOutput>
 ```
 
 ### Output Node Elements and Attributes
 
-The table below lists the XML nodes and attributes that are utilized in the output message. Notice that the output message structure contains much of what was provided on input, with additional elements and attributes encompassing evaluations and forecasts. Usage notes are provided. Some attribute values are coded.
+The table below lists the XML nodes and attributes that are utilized in the output message. Notice that the output message structure
+contains much of what was provided on input, with additional elements and attributes encompassing evaluations and forecasts. Usage
+notes are provided. Some attribute values are coded.
 
-The complete set of accepted code values is listed in the [Code Tables section](#code-tables) of this document. Refer to the [Output Message Format Section](#output-message-format) for a description on the structure of the output message.
+The complete set of accepted code values is listed in the [Code Tables section](#code-tables) of this document. Refer to
+the [Output Message Format Section](#output-message-format) for a description on the structure of the output message.
 
 <table>
 <thead>
@@ -2432,13 +2569,15 @@ The complete set of accepted code values is listed in the [Code Tables section](
 
 # Code Tables
 
-Below are the code systems and values that are used in ICE’s input and output messages. When constructing or processing messages, client applications should use the code values in the tables below.
+Below are the code systems and values that are used in ICE’s input and output messages. When constructing or processing messages,
+client applications should use the code values in the tables below.
 
 ## Vaccines
 
 ### CVX - Code System 2.16.840.1.113883.12.292
 
-Below is a list of the CVX codes accepted by this version of ICE. See following tables in this section for mapping of these vaccines to those accepted by each vaccine group.
+Below is a list of the CVX codes accepted by this version of ICE. See following tables in this section for mapping of these vaccines
+to those accepted by each vaccine group.
 
 <table>
 <thead>
@@ -3204,22 +3343,22 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### Hep B
 
-| **CVX Code** | **Name**                                                   |
-|--------------|------------------------------------------------------------|
-| 08           | HepB peds `<20yrs                                          |
-| 42           | HepB high risk infant                                      |
-| 45           | HepB NOS                                                   |
-| 43           | HepB adult =>`20yrs                                        |
-| 44           | HepB-dialysis                                              |
-| 51           | Hib/HepB (Comvax)                                          |
-| 102          | <mark>DTP-Hib-HepB</mark>                                               |
-| 110          | DTaP-HepB-IPV (Pediarix)                                   |
-| 104          | HepA-HepB (Twinrix)                                        |
+| **CVX Code** | **Name**                                      |
+|--------------|-----------------------------------------------|
+| 08           | HepB peds `<20yrs                             |
+| 42           | HepB high risk infant                         |
+| 45           | HepB NOS                                      |
+| 43           | HepB adult =>`20yrs                           |
+| 44           | HepB-dialysis                                 |
+| 51           | Hib/HepB (Comvax)                             |
+| 102          | <mark>DTP-Hib-HepB</mark>                     |
+| 110          | DTaP-HepB-IPV (Pediarix)                      |
+| 104          | HepA-HepB (Twinrix)                           |
 | 132          | <mark>DTaP-IPV-Hib-HepB, historical</mark>    |
 | 146          | <mark>DTaP, IPV, Hib, Hep B</mark>            |
 | 189          | <mark>Hep B, adjuvanted</mark>                |
 | 198          | <mark>DTP-Hep B-Hib Pentavalent Non-US</mark> |
-| 220          | HepB recombinant, 3-antigen, Al(OH)3                       |
+| 220          | HepB recombinant, 3-antigen, Al(OH)3          |
 
 #### MMR
 
@@ -3251,17 +3390,17 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### Hib
 
-| **CVX Code** | **Name**                                                                                  |
-|--------------|-------------------------------------------------------------------------------------------|
-| 46           | Hib-PRP-D (ProHIBIT)                                                                      |
-| 47           | Hib-HbOC (HibTITER)                                                                       |
-| 48           | Hib-PRP-T (ActHIB, Hiberix)                                                               |
-| 49           | Hib-PRP-OMP (PedvaxHIB)                                                                   |
-| 17           | Hib NOS                                                                                   |
-| 50           | <mark>DTaP-Hib (TriHiBit)</mark>                                                                       |
-| 51           | Hep B-Hib (PRP-OMP (ComVAX)                                                               |
-| 120          | DTaP-Hib (PRP-T)-IPV                                                                      |
-| 22           | DTP-Hib  (Tetramune; OmniHib-DTP)                                                         |
+| **CVX Code** | **Name**                                                                     |
+|--------------|------------------------------------------------------------------------------|
+| 46           | Hib-PRP-D (ProHIBIT)                                                         |
+| 47           | Hib-HbOC (HibTITER)                                                          |
+| 48           | Hib-PRP-T (ActHIB, Hiberix)                                                  |
+| 49           | Hib-PRP-OMP (PedvaxHIB)                                                      |
+| 17           | Hib NOS                                                                      |
+| 50           | <mark>DTaP-Hib (TriHiBit)</mark>                                             |
+| 51           | Hep B-Hib (PRP-OMP (ComVAX)                                                  |
+| 120          | DTaP-Hib (PRP-T)-IPV                                                         |
+| 22           | DTP-Hib  (Tetramune; OmniHib-DTP)                                            |
 | 102          | <mark>DTP-Hib-HepB</mark>                                                    |
 | 132          | <mark>DTaP-IPV-Hib-HepB, historical</mark>                                   |
 | 146          | <mark>DTaP-IPV-Hib-HepB</mark>                                               |
@@ -3280,8 +3419,8 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### Pneumococcal
 
-| **CVX Code** | **Name**                                                                                              |
-|--------------|-------------------------------------------------------------------------------------------------------|
+| **CVX Code** | **Name**                                                                                 |
+|--------------|------------------------------------------------------------------------------------------|
 | 100          | <mark>Pneumococcal Conjugate 7 valent (PCV 7)</mark>                                     |
 | 133          | <mark>Pneumococcal Conjugate 13 (PCV 13)</mark>                                          |
 | 109          | <mark>Pneumococcal NOS</mark>                                                            |
@@ -3294,39 +3433,39 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### Influenza
 
-| **CVX Code** | **Name**                                                                               |
-|--------------|----------------------------------------------------------------------------------------|
-| 15           | influenza, split                                                                       |
-| 16           | influenza, whole                                                                       |
-| 88           | influenza, unspecified formulation                                                     |
-| 111          | influenza, live, intranasal                                                            |
-| 135          | influenza, high dose, seasonal                                                         |
-| 140          | influenza, seasonal, injectable, preservative free                                     |
-| 141          | influenza, seasonal, injectable                                                        |
-| 144          | influenza, seasonal, intradermal, preservative free                                    |
-| 149          | influenza, live, intranasal, quadrivalent                                              |
-| 150          | influenza, injectable, quadrivalent, preservative free                                 |
-| 151          | influenza nasal, unspecified formulation                                               |
-| 153          | influenza, injectable, MDCK, preservative free                                         |
-| 155          | influenza, recombinant, injectable, preservative free                                  |
-| 158          | Influenza-IIV4, IM (\>3yrs)                                                            |
-| 161          | Influenza, injectable, quadrivalent, preservative free, pediatric                      |
-| 166          | Influenza, intradermal, quadrivalent, preservative free, injectable                    |
-| 168          | Seasonal trivalent influenza vaccine, adjuvanted, preservative free                    |
-| 171          | Influenza, injectable, Madin Darby Canine Kidney, preservative free, quadrivalent      |
-| 185          | Influenza, recombinant, quadrivalent, injectable, preservative free                    |
-| 186          | Influenza, injectable, MDCK, quadrivalent                                              |
-| 194          | Influenza, Southern Hemisphere, unspecified formulation                                |
-| 197          | Influenza, high dose, quadrivalent                                                     |
-| 200          | Influenza, Southern Hemisphere, pediatric, preservative free                           |
-| 201          | Influenza, Southern Hemisphere, preservative free                                      |
-| 202          | Influenza, Southern Hemisphere, quadrivalent, with preservative                        |
-| 205          | Influenza, seasonal vaccine, quadrivalent, adjuvanted                                  |
-| 231          | Influenza, Southern Hemisphere, high-dose, quadrivalent                                |
-| 320          | Influenza, MDCK, trivalent, preservative                                               |
-| 331          | <mark>Influenza, Southern Hemisphere, trivalent, preservative free</mark> |
-| 333          | Influenza, live, intranasal, self/caregiver admin                                      |
-| 337          | Influenza, Southern Hemisphere, high-dose, trivalent, PF                               |
+| **CVX Code** | **Name**                                                                          |
+|--------------|-----------------------------------------------------------------------------------|
+| 15           | influenza, split                                                                  |
+| 16           | influenza, whole                                                                  |
+| 88           | influenza, unspecified formulation                                                |
+| 111          | influenza, live, intranasal                                                       |
+| 135          | influenza, high dose, seasonal                                                    |
+| 140          | influenza, seasonal, injectable, preservative free                                |
+| 141          | influenza, seasonal, injectable                                                   |
+| 144          | influenza, seasonal, intradermal, preservative free                               |
+| 149          | influenza, live, intranasal, quadrivalent                                         |
+| 150          | influenza, injectable, quadrivalent, preservative free                            |
+| 151          | influenza nasal, unspecified formulation                                          |
+| 153          | influenza, injectable, MDCK, preservative free                                    |
+| 155          | influenza, recombinant, injectable, preservative free                             |
+| 158          | Influenza-IIV4, IM (\>3yrs)                                                       |
+| 161          | Influenza, injectable, quadrivalent, preservative free, pediatric                 |
+| 166          | Influenza, intradermal, quadrivalent, preservative free, injectable               |
+| 168          | Seasonal trivalent influenza vaccine, adjuvanted, preservative free               |
+| 171          | Influenza, injectable, Madin Darby Canine Kidney, preservative free, quadrivalent |
+| 185          | Influenza, recombinant, quadrivalent, injectable, preservative free               |
+| 186          | Influenza, injectable, MDCK, quadrivalent                                         |
+| 194          | Influenza, Southern Hemisphere, unspecified formulation                           |
+| 197          | Influenza, high dose, quadrivalent                                                |
+| 200          | Influenza, Southern Hemisphere, pediatric, preservative free                      |
+| 201          | Influenza, Southern Hemisphere, preservative free                                 |
+| 202          | Influenza, Southern Hemisphere, quadrivalent, with preservative                   |
+| 205          | Influenza, seasonal vaccine, quadrivalent, adjuvanted                             |
+| 231          | Influenza, Southern Hemisphere, high-dose, quadrivalent                           |
+| 320          | Influenza, MDCK, trivalent, preservative                                          |
+| 331          | <mark>Influenza, Southern Hemisphere, trivalent, preservative free</mark>         |
+| 333          | Influenza, live, intranasal, self/caregiver admin                                 |
+| 337          | Influenza, Southern Hemisphere, high-dose, trivalent, PF                          |
 
 #### H1N1
 
@@ -3353,14 +3492,14 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### Polio
 
-| **CVX Code** | **Name**                                                                  |
-|--------------|---------------------------------------------------------------------------|
-| 02           | OPV                                                                       |
-| 10           | IPV                                                                       |
-| 89           | polio, unspecified formulation                                            |
-| 110          | DTaP/HepB/IPV                                                             |
-| 120          | DTaP/IPV/Hib                                                              |
-| 130          | DTaP/IPV                                                                  |
+| **CVX Code** | **Name**                                                     |
+|--------------|--------------------------------------------------------------|
+| 02           | OPV                                                          |
+| 10           | IPV                                                          |
+| 89           | polio, unspecified formulation                               |
+| 110          | DTaP/HepB/IPV                                                |
+| 120          | DTaP/IPV/Hib                                                 |
+| 130          | DTaP/IPV                                                     |
 | 132          | <mark>DTaP-IPV-Hib-HepB, historical</mark>                   |
 | 146          | <mark>DTaP-IPV-Hib-HepB</mark>                               |
 | 170          | <mark>DTaP-IPV-Hib</mark>                                    |
@@ -3371,25 +3510,25 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### DTP
 
-| **CVX Code** | **Name**                                                   |
-|--------------|------------------------------------------------------------|
-| 01           | DTP                                                        |
-| 09           | Td (adult), absorbed                                       |
-| 20           | DTaP                                                       |
+| **CVX Code** | **Name**                                      |
+|--------------|-----------------------------------------------|
+| 01           | DTP                                           |
+| 09           | Td (adult), absorbed                          |
+| 20           | DTaP                                          |
 | 22           | <mark>DTP-Hib (Tetramune; OmniHib-DTP)</mark> |
-| 28           | DT (pediatric)                                             |
+| 28           | DT (pediatric)                                |
 | 50           | <mark>DTaP-Hib (TriHiBit)</mark>              |
 | 102          | <mark>DTP-Hib-Hep B</mark>                    |
-| 106          | DTaP, 5 pertussis antigens                                 |
-| 107          | DTaP, unspecified formulation                              |
+| 106          | DTaP, 5 pertussis antigens                    |
+| 107          | DTaP, unspecified formulation                 |
 | 110          | <mark>DTaP-Hep B-IPV (Pediarix)</mark>        |
-| 113          | Td (adult) preservative free                               |
-| 115          | Tdap                                                       |
+| 113          | Td (adult) preservative free                  |
+| 115          | Tdap                                          |
 | 120          | <mark>DTaP-Hib-IPV (Pentacel)</mark>          |
 | 130          | <mark>DTaP-IPV</mark>                         |
 | 132          | <mark>DTaP-IPV-Hib-HepB, historical</mark>    |
-| 138          | Td (adult, not adsorbed)                                   |
-| 139          | Td (adult) NOS                                             |
+| 138          | Td (adult, not adsorbed)                      |
+| 139          | Td (adult) NOS                                |
 | 146          | <mark>DTaP, IPV, Hib, Hep B</mark>            |
 | 170          | <mark>DTaP-IPV-Hib</mark>                     |
 | 198          | <mark>DTP-Hep B-Hib Pentavalent Non-US</mark> |
@@ -3404,12 +3543,12 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### Meningococcal B
 
-| **CVX Code** | **Name**                                                               |
-|--------------|------------------------------------------------------------------------|
+| **CVX Code** | **Name**                                                  |
+|--------------|-----------------------------------------------------------|
 | 162          | <mark>Meningococcal B FHbp, recombinant (Trumenba)</mark> |
 | 163          | <mark>Meningococcal B 4C, OMV (Bexsero)</mark>            |
-| 316          | Meningococcal MenABCWY (Penbraya)                                      |
-| 328          | Meningococcal MenABCWY (Penmenvy)                                      |
+| 316          | Meningococcal MenABCWY (Penbraya)                         |
+| 328          | Meningococcal MenABCWY (Penmenvy)                         |
 
 #### COVID-19
 
@@ -3604,8 +3743,8 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### Mpox
 
-| **CVX Code** | **Name**                                                                               |
-|--------------|----------------------------------------------------------------------------------------|
+| **CVX Code** | **Name**                                                                  |
+|--------------|---------------------------------------------------------------------------|
 | 75           | <mark>vaccinia (smallpox, mpox), live</mark>                              |
 | 105          | <mark>vaccinia (smallpox) vaccine, diluted</mark>                         |
 | 206          | <mark>Vaccinia, smallpox mpox vaccine live, PF, SQ or ID injection</mark> |
@@ -3613,8 +3752,8 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### RSV
 
-| **CVX Code** | **Name**                                                                         |
-|--------------|----------------------------------------------------------------------------------|
+| **CVX Code** | **Name**                                                            |
+|--------------|---------------------------------------------------------------------|
 | 303          | <mark>RSV, recombinant (Adult)</mark>                               |
 | 304          | <mark>Respiratory syncytial virus (RSV), unspecified</mark>         |
 | 305          | <mark>RSV, bivalent, PF (Adult)</mark>                              |
@@ -3627,31 +3766,31 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 #### Cholera
 
-| **CVX Code** | **Name**                                                      |
-|--------------|---------------------------------------------------------------|
+| **CVX Code** | **Name**                                         |
+|--------------|--------------------------------------------------|
 | 174          | <mark>Cholera, live attenuated (Vaxchora)</mark> |
 
 #### Japanese Encephalitis
 
-| **CVX Code** | **Name**                                                    |
-|--------------|-------------------------------------------------------------|
+| **CVX Code** | **Name**                                       |
+|--------------|------------------------------------------------|
 | 134          | <mark>Japanese Encephalitis IM (Ixiaro)</mark> |
 
 #### Typhoid
 
-| **CVX Code** | **Name**                                                              |
-|--------------|-----------------------------------------------------------------------|
+| **CVX Code** | **Name**                                                 |
+|--------------|----------------------------------------------------------|
 | 25           | <mark>Typhoid, oral</mark>                               |
 | 101          | <mark>Typhoid, Vi capsular polysaccharide (ViCPS)</mark> |
 
 #### Yellow Fever
 
-| **CVX Code** | **Name**                                                              |
-|--------------|-----------------------------------------------------------------------|
+| **CVX Code** | **Name**                                                 |
+|--------------|----------------------------------------------------------|
 | 37           | <mark>Yellow fever live</mark>                           |
 | 183          | <mark>Yellow fever vaccine live - alt</mark>             |
 | 184          | <mark>Yellow fever, unspecified formulation (NOS)</mark> |
-|              |                                                                       |
+|              |                                                          |
 
 ## HL7 Administrative Gender - Code System 2.16.840.1.113883.5.1
 
@@ -3675,7 +3814,8 @@ Below is a list of the CVX codes accepted by this version of ICE. See following 
 
 ## Disease - Code System 2.16.840.1.113883.6.103
 
-When sending up disease immunity as per below codes to ICE, use the new code system specified in the below table for ICD-9-CM, or one of the next two sections.
+When sending up disease immunity as per below codes to ICE, use the new code system specified in the below table for ICD-9-CM, or
+one of the next two sections.
 
 | **Code Value** | **Description** |
 |----------------|-----------------|
@@ -3932,7 +4072,7 @@ When sending up disease immunity as per below codes to ICE, use the new code sys
 | NOT_RECOMMENDED                  | Not Recommended                                                                      |
 | RECOMMENDATION_NOT_AVAILABLE     | Recommendation Not Available (*e.g.* - ICE did not forecast for unsupported vaccine) |
 
-## 
+##    
 
 ## Recommendation Focus (Vaccine Group) - Code System 2.16.840.1.113883.3.795.12.100.1
 

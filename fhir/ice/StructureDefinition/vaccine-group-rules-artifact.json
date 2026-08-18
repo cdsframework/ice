@@ -1,0 +1,146 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "vaccine-group-rules-artifact",
+  "url": "https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact",
+  "version": "1.0.0",
+  "name": "VaccineGroupRulesArtifact",
+  "title": "Vaccine Group Rules Artifact",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-04-22",
+  "publisher": "CDS Framework",
+  "contact": [
+    {
+      "name": "CDS Framework"
+    }
+  ],
+  "description": "Associated with an ImmunizationEvaluation or ImmunizationRecommendation.recommendation, this extension contains a documentation RelatedArtifact for the vaccine group rules.",
+  "purpose": "Provides a machine-readable link to the vaccine group rules associated with an immunization evaluation or recommendation.",
+  "fhirVersion": "6.0.0-ballot4",
+  "kind": "complex-type",
+  "abstract": false,
+  "context": [
+    {
+      "type": "element",
+      "expression": "ImmunizationEvaluation"
+    },
+    {
+      "type": "element",
+      "expression": "ImmunizationRecommendation.recommendation"
+    }
+  ],
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Vaccine Group Rules Artifact",
+        "definition": "A documentation artifact pointing to the vaccine group rules associated with this immunization evaluation or recommendation.",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact"
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "short": "Vaccine group rules artifact",
+        "definition": "A RelatedArtifact describing and linking to the vaccine group rules associated with this immunization evaluation or recommendation. The label contains the display name, display may provide a UI-friendly title, and document.url conveys the HTML documentation URL. The top-level RelatedArtifact.url is intentionally omitted to avoid duplication.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "RelatedArtifact"
+          }
+        ]
+      }
+    ]
+  },
+  "snapshot": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "short": "Vaccine Group Rules Artifact",
+        "definition": "A documentation artifact pointing to the vaccine group rules associated with this immunization evaluation or recommendation.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Extension",
+          "min": 0,
+          "max": "*"
+        }
+      },
+      {
+        "id": "Extension.id",
+        "path": "Extension.id",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ]
+      },
+      {
+        "id": "Extension.extension",
+        "path": "Extension.extension",
+        "max": "0",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ]
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact",
+        "base": {
+          "path": "Extension.url",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ]
+      },
+      {
+        "id": "Extension.value[x]",
+        "path": "Extension.value[x]",
+        "short": "Vaccine group rules artifact",
+        "definition": "A RelatedArtifact describing and linking to the vaccine group rules associated with this immunization evaluation or recommendation. The label contains the display name, display may provide a UI-friendly title, and document.url conveys the HTML documentation URL. The top-level RelatedArtifact.url is intentionally omitted to avoid duplication.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Extension.value[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "RelatedArtifact"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -6,87 +6,114 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import org.cdsframework.cds.supportingdata.SupportedCdsLists;
-import org.cdsframework.cds.supportingdata.SupportingData;
 import org.cdsframework.fhir.CodeSystem;
 import org.cdsframework.fhir.CodeSystemConcept;
 import org.cdsframework.fhir.CodeSystemConceptProperty;
 import org.cdsframework.fhir.Coding;
 import org.cdsframework.fhir.Identifier;
 import org.cdsframework.ice.config.CdsEngineProperties;
-import org.cdsframework.ice.supportingdata.ICEConceptType;
+import org.cdsframework.ice.service.DoseStatus;
 import org.cdsframework.ice.service.InconsistentConfigurationException;
+import org.cdsframework.ice.service.RecommendationStatus;
 import org.cdsframework.ice.service.ScheduleAuthority;
 import org.cdsframework.ice.service.SupportingDataService;
-import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class ScheduleAuthorityIntegrationTest {
+class ScheduleAuthorityIntegrationTest
+{
 
     private static final String CDS_VERSION = "1.0.0";
     private static final String SCHEDULE_AUTHORITY_OID = "2.16.840.1.113883.3.795.12.100.12";
+    private static final String COMMON_KNOWLEDGE_MODULE = "org.cdsframework^ICE^1.0.0";
+    private static final String KNOWLEDGE_MODULE = "org.nyc.cir^ICE^1.0.0";
 
-    private CodeSystem createScheduleAuthorityCodeSystem() {
-        CodeSystemConcept acip = new CodeSystemConcept("ACIP_CDC", "ACIP/CDC Display", List.of());
-        CodeSystemConcept aap = new CodeSystemConcept("AAP", "AAP Display", List.of());
-
-        return new CodeSystem("SUPPORTED_SCHEDULE_AUTHORITY",
-                List.of(new Identifier(null, null, "urn:ietf:rfc:3986", "urn:oid:" + SCHEDULE_AUTHORITY_OID)),
-                null, SCHEDULE_AUTHORITY_OID, "SUPPORTED_SCHEDULE_AUTHORITY", CDS_VERSION,
-                null, null, null, List.of(acip, aap));
+    private CodeSystem createCodeSystem(final String name, final String oid, final List<CodeSystemConcept> concepts)
+    {
+        return new CodeSystem(name, List.of(new Identifier(null, null, "urn:ietf:rfc:3986", "urn:oid:" + oid)), null, oid, name,
+                CDS_VERSION, null, null, null, concepts);
     }
 
-    private CodeSystem createVaccineGroupCodeSystem() {
-        Coding acipCoding = new Coding(SCHEDULE_AUTHORITY_OID, null, "ACIP_CDC", "ACIP/CDC Display");
-        CodeSystemConceptProperty prop = new CodeSystemConceptProperty("scheduleAuthority", acipCoding, null, null, null);
+    private CodeSystem createBaseDataCodeSystem(final String name, final String oid, final BaseData... baseData)
+    {
+        final List<CodeSystemConcept> concepts = Stream.of(baseData)
+                .map(BaseData::getCdsListItemName)
+                .filter(java.util.Objects::nonNull)
+                .map(itemName -> itemName.substring(itemName.indexOf('.') + 1))
+                .map(code -> new CodeSystemConcept(code, code, List.of()))
+                .toList();
+        return createCodeSystem(name, oid, concepts);
+    }
 
-        CodeSystemConcept dtp = new CodeSystemConcept("DTP", "DTP Vaccine Group", List.of(prop));
+    private CodeSystem createScheduleAuthorityCodeSystem()
+    {
+        return createCodeSystem("SUPPORTED_SCHEDULE_AUTHORITY", SCHEDULE_AUTHORITY_OID,
+                List.of(new CodeSystemConcept("ACIP_CDC", "ACIP/CDC Display", List.of()),
+                        new CodeSystemConcept("AAP", "AAP Display", List.of())));
+    }
 
-        return new CodeSystem("VACCINE_GROUP_CONCEPT",
-                List.of(new Identifier(null, null, "urn:ietf:rfc:3986", "urn:oid:2.16.840.1.113883.3.795.12.100.1")),
-                null, "2.16.840.1.113883.3.795.12.100.1", "VACCINE_GROUP_CONCEPT", CDS_VERSION,
-                null, null, null, List.of(dtp));
+    private CodeSystem createVaccineGroupCodeSystem()
+    {
+        final Coding acipCoding = new Coding(SCHEDULE_AUTHORITY_OID, null, "ACIP_CDC", "ACIP/CDC Display");
+        final CodeSystemConceptProperty property = new CodeSystemConceptProperty("scheduleAuthority", acipCoding, null, null, null);
+        return createCodeSystem("VACCINE_GROUP_CONCEPT", "2.16.840.1.113883.3.795.12.100.1",
+                List.of(new CodeSystemConcept("DTP", "DTP Vaccine Group", List.of(property))));
+    }
+
+    private Map<String, CodeSystem> createCodeSystems()
+    {
+        return Map.of("SUPPORTED_SCHEDULE_AUTHORITY", createScheduleAuthorityCodeSystem(), "VACCINE_GROUP_CONCEPT",
+                createVaccineGroupCodeSystem(), "EVALUATION_STATUS_CONCEPT",
+                createBaseDataCodeSystem("EVALUATION_STATUS_CONCEPT", "2.16.840.1.113883.3.795.12.100.301", DoseStatus.values()),
+                "EVALUATION_REASON_CONCEPT",
+                createBaseDataCodeSystem("EVALUATION_REASON_CONCEPT", "2.16.840.1.113883.3.795.12.100.302",
+                        BaseDataEvaluationReason.values()), "RECOMMENDATION_STATUS_CONCEPT",
+                createBaseDataCodeSystem("RECOMMENDATION_STATUS_CONCEPT", "2.16.840.1.113883.3.795.12.100.303",
+                        RecommendationStatus.values()), "RECOMMENDATION_REASON_CONCEPT",
+                createBaseDataCodeSystem("RECOMMENDATION_REASON_CONCEPT", "2.16.840.1.113883.3.795.12.100.304",
+                        BaseDataRecommendationReason.values()), "SUPPLEMENTAL_EVALUATION_REASON_CONCEPT",
+                createCodeSystem("SUPPLEMENTAL_EVALUATION_REASON_CONCEPT", "2.16.840.1.113883.3.795.12.100.305",
+                        List.of(new CodeSystemConcept("TEST", "Test", List.of()))), "SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT",
+                createCodeSystem("SUPPLEMENTAL_RECOMMENDATION_REASON_CONCEPT", "2.16.840.1.113883.3.795.12.100.306",
+                        List.of(new CodeSystemConcept("TEST", "Test", List.of()))));
     }
 
     @Test
-    public void testScheduleAuthorityInitializationAndAssociation() throws InconsistentConfigurationException {
-        SupportingDataService supportingDataService = Mockito.mock(SupportingDataService.class);
-        
-        CodeSystem saCS = createScheduleAuthorityCodeSystem();
-        CodeSystem vgCS = createVaccineGroupCodeSystem();
+    void initializesAndAssociatesScheduleAuthorities() throws InconsistentConfigurationException
+    {
+        final SupportingDataService supportingDataService = Mockito.mock(SupportingDataService.class);
+        final Map<String, CodeSystem> codeSystems = createCodeSystems();
 
-        CdsEngineProperties.ModuleCanonicalDefinition commonModule = Mockito.mock(CdsEngineProperties.ModuleCanonicalDefinition.class);
-        Mockito.when(commonModule.codeSystems()).thenReturn(java.util.Map.of(
-            "SUPPORTED_SCHEDULE_AUTHORITY", saCS,
-            "VACCINE_GROUP_CONCEPT", vgCS
-        ));
+        final CdsEngineProperties.KnowledgeBaseDefinition commonModule =
+                Mockito.mock(CdsEngineProperties.KnowledgeBaseDefinition.class);
+        Mockito.when(commonModule.codeSystems()).thenReturn(codeSystems);
 
-        Mockito.when(supportingDataService.getSupportingKnowledgeModuleByKmId(Mockito.anyString())).thenReturn(commonModule);
-        Mockito.when(supportingDataService.extractCodeSystemOid(saCS)).thenReturn(SCHEDULE_AUTHORITY_OID);
-        Mockito.when(supportingDataService.extractCodeSystemOid(vgCS)).thenReturn("2.16.840.1.113883.3.795.12.100.1");
+        Mockito.when(supportingDataService.getSupportingKnowledgeBaseByKmId(Mockito.anyString())).thenReturn(commonModule);
+        Mockito.when(supportingDataService.extractCodeSystemOid(Mockito.any(CodeSystem.class))).thenAnswer(invocation ->
+        {
+            final CodeSystem codeSystem = invocation.getArgument(0, CodeSystem.class);
+            return codeSystem.identifier().getFirst().value().substring("urn:oid:".length());
+        });
 
-        ICESupportingDataConfiguration config = new ICESupportingDataConfiguration("common", List.of("km1"), supportingDataService);
+        final ICESupportingDataConfiguration configuration =
+                new ICESupportingDataConfiguration(COMMON_KNOWLEDGE_MODULE, List.of(KNOWLEDGE_MODULE), supportingDataService);
 
-        // Verify SupportedScheduleAuthorities
-        SupportedScheduleAuthorities ssa = config.getSupportedScheduleAuthorities();
-        assertNotNull(ssa);
-        assertFalse(ssa.isEmpty());
-        
-        Optional<ScheduleAuthority> acip = ssa.getScheduleAuthority("ACIP_CDC");
+        final SupportedScheduleAuthorities scheduleAuthorities = configuration.getSupportedScheduleAuthorities();
+        assertNotNull(scheduleAuthorities);
+        assertFalse(scheduleAuthorities.isEmpty());
+
+        final Optional<ScheduleAuthority> acip = scheduleAuthorities.getScheduleAuthority("SUPPORTED_SCHEDULE_AUTHORITY.ACIP_CDC");
         assertTrue(acip.isPresent());
-        assertEquals("ACIP_CDC", acip.get().getCode());
+        assertEquals("SUPPORTED_SCHEDULE_AUTHORITY.ACIP_CDC", acip.get().getCode());
         assertEquals("ACIP/CDC Display", acip.get().getDisplayName());
 
-        // Verify SupportedVaccineGroups association
-        SupportedVaccineGroups svg = config.getSupportedVaccineGroups();
-        LocallyCodedVaccineGroupItem dtpItem = svg.getVaccineGroupItem("DTP");
+        final SupportedVaccineGroups vaccineGroups = configuration.getSupportedVaccineGroups();
+        final LocallyCodedVaccineGroupItem dtpItem = vaccineGroups.getVaccineGroupItem("VACCINE_GROUP_CONCEPT.DTP");
         assertNotNull(dtpItem);
-        
-        java.util.Collection<String> saCodes = dtpItem.getCopyOfScheduleAuthorityCdsListItemNames();
-        assertNotNull(saCodes);
-        assertTrue(saCodes.contains("ACIP_CDC"));
+        assertTrue(dtpItem.getCopyOfScheduleAuthorityCdsListItemNames().contains("ACIP_CDC"));
     }
 }

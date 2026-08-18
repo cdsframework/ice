@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>ICE CodeSystem References</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #101318;
+            --panel: #171c23;
+            --text: #edf2f7;
+            --muted: #a8b3c2;
+            --border: #2b3441;
+            --header: #202733;
+            --link: #7cc4ff;
+            --status-bg: #163524;
+            --status-text: #80e0a7;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.45;
+        }
+
+        main {
+            width: min(1180px, calc(100% - 32px));
+            margin: 32px auto;
+        }
+
+        header {
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .summary {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 920px;
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: var(--header);
+            color: #c7d2e0;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: 0;
+        }
+
+        a {
+            color: var(--link);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        a:hover,
+        a:focus {
+            text-decoration: underline;
+        }
+
+        code {
+            color: #cbd5e1;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        .status {
+            display: inline-block;
+            min-width: 54px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: var(--status-bg);
+            color: var(--status-text);
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .count,
+        .version {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <h1>ICE CodeSystem References</h1>
+        <p class="summary">Standalone ICE-owned FHIR CodeSystem JSON files generated from the common ICE and NYC CIR ICE supporting
+            data.</p>
+    </header>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>File</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Concepts</th>
+                <th>Canonical URL</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><a href="ice/disease-immunity-reason.json">ice/disease-immunity-reason.json</a></td>
+                <td>ICE Disease Immunity Reason</td>
+                <td>Supported disease immunity reasons for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">1</td>
+                <td><code>https://terminology.cdsframework.org/ice/disease-immunity-reason</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/disease-immunity-source.json">ice/disease-immunity-source.json</a></td>
+                <td>ICE Disease Immunity Source</td>
+                <td>Supported disease immunity sources for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">2</td>
+                <td><code>https://terminology.cdsframework.org/ice/disease-immunity-source</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/disease.json">ice/disease.json</a></td>
+                <td>Supported Disease Concept</td>
+                <td>Supported disease concepts for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">28</td>
+                <td><code>https://terminology.cdsframework.org/ice/disease</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/evaluation-reason.json">ice/evaluation-reason.json</a></td>
+                <td>ICE Evaluation Reason</td>
+                <td>Supported evaluation reasons for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">41</td>
+                <td><code>https://terminology.cdsframework.org/ice/evaluation-reason</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/evaluation-status.json">ice/evaluation-status.json</a></td>
+                <td>ICE Evaluation Status</td>
+                <td>Supported evaluation statuses for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">9</td>
+                <td><code>https://terminology.cdsframework.org/ice/evaluation-status</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/recommendation-reason.json">ice/recommendation-reason.json</a></td>
+                <td>ICE Recommendation Reasons: All</td>
+                <td>Supported recommendation reasons for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">30</td>
+                <td><code>https://terminology.cdsframework.org/ice/recommendation-reason</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/recommendation-status.json">ice/recommendation-status.json</a></td>
+                <td>ICE Evaluation Status</td>
+                <td>Supported recommendation statuses for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">5</td>
+                <td><code>https://terminology.cdsframework.org/ice/recommendation-status</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/seasons.json">ice/seasons.json</a></td>
+                <td>ICE Vaccine Season</td>
+                <td>Supported seasons for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">12</td>
+                <td><code>https://terminology.cdsframework.org/ice/seasons</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/series-display-selection-type.json">ice/series-display-selection-type.json</a></td>
+                <td>ICE Series Display Type</td>
+                <td>Supported series selection types for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">4</td>
+                <td><code>https://terminology.cdsframework.org/ice/series-display-selection-type</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/series.json">ice/series.json</a></td>
+                <td>ICE Series</td>
+                <td>Supported series for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">60</td>
+                <td><code>https://terminology.cdsframework.org/ice/series</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/supplemental-evaluation-reason.json">ice/supplemental-evaluation-reason.json</a></td>
+                <td>ICE Supplemental Evaluation Reasons</td>
+                <td>Supported supplemental evaluation reasons for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">13</td>
+                <td><code>https://terminology.cdsframework.org/ice/supplemental-evaluation-reason</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/supplemental-recommendation-reason.json">ice/supplemental-recommendation-reason.json</a></td>
+                <td>ICE Supplemental Recommendation Reasons</td>
+                <td>Supported supplemental recommendation reasons for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">21</td>
+                <td><code>https://terminology.cdsframework.org/ice/supplemental-recommendation-reason</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/vaccine-group.json">ice/vaccine-group.json</a></td>
+                <td>Vaccine Groups</td>
+                <td>Supported vaccine groups for display</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td class="count">25</td>
+                <td><code>https://terminology.cdsframework.org/ice/vaccine-group</code></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

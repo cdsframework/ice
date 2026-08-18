@@ -21,27 +21,27 @@ import org.springframework.core.io.ByteArrayResource;
 class SupportingDataServiceSeriesDisplayNameTest
 {
     private static final String KM_ID = "org.nyc.cir^ICE^1.0.0";
-    private static final String MODULE_CANONICAL = "http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
-    private static final String SERIES_CODE = "ZOSTER_2_DOSE_SERIES";
+    private static final String KNOWLEDGE_BASE = "https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
+    private static final String SERIES_CODE = "ZOSTER_SERIES";
     private static final String SERIES_PLAN_DEFINITION_PROFILE_URL =
-            "http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition";
     private static final String SERIES_METADATA_EXTENSION_URL =
-            "http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-metadata";
 
     private static CdsEngineProperties createCdsEngineProperties(final Map<String, PlanDefinition> planDefinitions)
     {
         final CdsEngineProperties properties = new CdsEngineProperties();
-        properties.setModuleCanonicalDefinitionMap(Map.of(MODULE_CANONICAL, new CdsEngineProperties.ModuleCanonicalDefinition(
+        properties.setKnowledgeBaseDefinitionMap(Map.of(KNOWLEDGE_BASE, new CdsEngineProperties.KnowledgeBaseDefinition(
                 PlanDefinition.builder()
                         .identifier(Identifier.builder()
-                                .system("http://cdsframework.org/identifiers/knowledge-modules")
+                                .system("https://terminology.cdsframework.org/ice/identifiers/knowledge-bases")
                                 .value(KM_ID)
                                 .build())
                         .build(), planDefinitions, Map.of(), Map.of("SUPPORTED_SERIES", CodeSystem.builder()
                 .name("SUPPORTED_SERIES")
                 .identifier(
                         Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.10").build())
-                .url("http://terminology.cdsframework.org/ice/series")
+                .url("https://terminology.cdsframework.org/ice/series")
                 .concept(CodeSystemConcept.builder().code(SERIES_CODE).display("Code System Display").build())
                 .build()), Map.of())));
         return properties;
@@ -82,11 +82,11 @@ class SupportingDataServiceSeriesDisplayNameTest
                 .action(PlanDefinition.Action.builder()
                         .id("dose-1")
                         .extension(Extension.builder()
-                                .url("http://cdsframework.org/fhir/StructureDefinition/ice-dose-number")
+                                .url("https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number")
                                 .valueInteger(1)
                                 .build())
                         .extension(Extension.builder()
-                                .url("http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine")
+                                .url("https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine")
                                 .extension(Extension.builder()
                                         .url("vaccine")
                                         .valueCodeableConcept(CodeableConcept.builder()
@@ -107,10 +107,9 @@ class SupportingDataServiceSeriesDisplayNameTest
     private static IceProperties createIceProperties()
     {
         final IceProperties properties = new IceProperties();
-        properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
-        properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
-                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, false, List.of(),
-                        List.of(),
+        properties.setIceBaseKnowledgeBase(KNOWLEDGE_BASE);
+        properties.setKnowledgeBases(Map.of(KNOWLEDGE_BASE,
+                new IceProperties.KnowledgeBaseProperties(true, false, true, false, true, false, false, false, List.of(), List.of(),
                         false, IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         return properties;
     }

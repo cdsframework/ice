@@ -70,11 +70,11 @@ public class VmrConversionComponent
     private static final DateTimeFormatter tzFormat = DateTimeFormatter.ofPattern("Z");
     private static final String OID_URN_PREFIX = "urn:oid:";
     private static final String ASSESSMENT_DATE_PARAM = "assessmentDate";
-    private static final String MODULE_PARAM = "module";
+    private static final String KNOWLEDGE_BASE_PARAM = "knowledgeBase";
     private static final String PATIENT_PARAM = "patient";
     private static final String IMMUNIZATION_PARAM = "immunization";
     private static final String OBSERVATION_PARAM = "observation";
-    private static final String OPTION_FLAG_PARAM = "scheduleFlag";
+    private static final String SCHEDULE_FLAG_PARAM = "scheduleFlag";
     private static final String DATA_PARAM = "data";
     private static final String EVALUATION_PARAM = "evaluation";
     private static final String RECOMMENDATION_PARAM = "recommendation";
@@ -88,6 +88,8 @@ public class VmrConversionComponent
     private static final String XML_ROOT_CDS_INPUT = "cdsInput";
     private static final String CVX_OID = "2.16.840.1.113883.12.292";
     private static final String FHIR_CVX_SYSTEM = "http://hl7.org/fhir/sid/cvx";
+    private static final String CONTEXTUAL_CONDITION_OBSERVATION_FOCUS_PROPERTY = "observationFocus";
+    private static final String CONTEXTUAL_CONDITION_OBSERVATION_VALUE_PROPERTY = "observationValue";
     private static final String SERIES_SELECTION_TYPE_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.501";
     private static final String SERIES_DISPLAY_OPTIONS_FOCUS_CODE = "SERIES_DISPLAY_OPTIONS";
     private static final String SERIES_DISPLAY_OPTIONS_FOCUS_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.500";
@@ -131,20 +133,20 @@ public class VmrConversionComponent
         this.selectionContextExtensionBuilder = selectionContextExtensionBuilder;
         this.vaccineGroupRulesArtifactExtensionBuilder = vaccineGroupRulesArtifactExtensionBuilder;
         this.scheduleAuthorityExtensionBuilder = scheduleAuthorityExtensionBuilder;
-        this.outputSeriesContextByKm = supportingDataService.getKnowledgeModulePropertiesByKmId()
+        this.outputSeriesContextByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() != null && (Boolean.TRUE.equals(
                         iceProperties.getOutputSeriesInformation().orElseGet(entry.getValue()::outputSeriesInformation))
                         || Boolean.TRUE.equals(iceProperties.getOutputNumberOfDosesRemaining()
                         .orElseGet(entry.getValue()::outputNumberOfDosesRemaining)))));
-        this.outputVaccineGroupRulesArtifactByKm = supportingDataService.getKnowledgeModulePropertiesByKmId()
+        this.outputVaccineGroupRulesArtifactByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() != null && Boolean.TRUE.equals(
                         iceProperties.getOutputVaccineGroupRulesArtifact()
                                 .orElseGet(entry.getValue()::outputVaccineGroupRulesArtifact))));
-        this.outputScheduleAuthoritiesByKm = supportingDataService.getKnowledgeModulePropertiesByKmId()
+        this.outputScheduleAuthoritiesByKm = supportingDataService.getKnowledgeBasePropertiesByKmId()
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue() != null && Boolean.TRUE.equals(
@@ -159,29 +161,54 @@ public class VmrConversionComponent
 
     public EvaluateAtSpecifiedTime convertToEvaluateAtSpecifiedTime(final Parameters parameters)
     {
+        return convertToEvaluateAtSpecifiedTime(parameters, false);
+    }
+
+    public EvaluateAtSpecifiedTime convertImmDsToEvaluateAtSpecifiedTime(final Parameters parameters)
+    {
+        return convertToEvaluateAtSpecifiedTime(parameters, true);
+    }
+
+    private EvaluateAtSpecifiedTime convertToEvaluateAtSpecifiedTime(final Parameters parameters,
+            final boolean validateContextualConditions)
+    {
         final RequestContext parsedRequestContext = parseRequestContext(parameters);
-        final ModuleContext moduleContext = resolveModuleContext(parsedRequestContext);
-        final RequestContext requestContext = applyImmunizationValidation(moduleContext, parsedRequestContext);
+        final KnowledgeBaseContext knowledgeBaseContext = resolveKnowledgeBaseContext(parsedRequestContext);
+        final RequestContext requestContext =
+                applyRequestValidation(knowledgeBaseContext, parsedRequestContext, validateContextualConditions);
 
         final byte[] payload = createPayload(
-                fhirToVmrInputAdapter.createCdsInput(moduleContext.kmId(), requestContext.patient(), requestContext.immunizations(),
-                        requestContext.observations(), requestContext.scheduleFlags()));
+                fhirToVmrInputAdapter.createCdsInput(knowledgeBaseContext.kmId(), requestContext.patient(),
+                        requestContext.immunizations(), requestContext.observations(), requestContext.scheduleFlags()));
         if (log.isDebugEnabled())
             log.debug("payload: {}", new String(payload, StandardCharsets.UTF_8));
 
-        return OpenCdsTransportAdapter.createEvaluateAtSpecifiedTime(moduleContext.kmEntityIdentifier(),
+        return OpenCdsTransportAdapter.createEvaluateAtSpecifiedTime(knowledgeBaseContext.kmEntityIdentifier(),
                 requestContext.assessmentDate(), ZonedDateTime.now().format(tzFormat), payload);
     }
 
     public Parameters convertToParametersResponse(final EvaluationResponse evaluateAtSpecifiedTimeResponse,
             final Parameters requestParameters, final LocalDateTime requestDateTime)
     {
+        return convertToParametersResponse(evaluateAtSpecifiedTimeResponse, requestParameters, requestDateTime, false);
+    }
+
+    public Parameters convertImmDsToParametersResponse(final EvaluationResponse evaluateAtSpecifiedTimeResponse,
+            final Parameters requestParameters, final LocalDateTime requestDateTime)
+    {
+        return convertToParametersResponse(evaluateAtSpecifiedTimeResponse, requestParameters, requestDateTime, true);
+    }
+
+    private Parameters convertToParametersResponse(final EvaluationResponse evaluateAtSpecifiedTimeResponse,
+            final Parameters requestParameters, final LocalDateTime requestDateTime, final boolean validateContextualConditions)
+    {
         final RequestContext parsedRequestContext = parseRequestContext(requestParameters);
-        final ModuleContext moduleContext = resolveModuleContext(parsedRequestContext);
-        final RequestContext requestContext = applyImmunizationValidation(moduleContext, parsedRequestContext);
+        final KnowledgeBaseContext knowledgeBaseContext = resolveKnowledgeBaseContext(parsedRequestContext);
+        final RequestContext requestContext =
+                applyRequestValidation(knowledgeBaseContext, parsedRequestContext, validateContextualConditions);
         return OpenCdsResponseAdapter.extractCdsOutputs(evaluateAtSpecifiedTimeResponse)
                 .stream()
-                .map(cdsOutput -> createParametersResponse(moduleContext, cdsOutput, requestContext, requestDateTime))
+                .map(cdsOutput -> createParametersResponse(knowledgeBaseContext, cdsOutput, requestContext, requestDateTime))
                 .max(Comparator.comparingInt(this::forecastEntryCount))
                 .orElseGet(() -> FhirParametersResponseAdapter.createErrorParametersResponse(OUTCOME_CODE_PROCESSING,
                         "No forecast payload was returned by the evaluation engine.", requestDateTime, getEngineVersion()));
@@ -190,13 +217,14 @@ public class VmrConversionComponent
     private int forecastEntryCount(final Parameters parameters)
     {
         return Math.toIntExact(streamParameters(parameters).map(ParametersParameter::name)
-                .filter(name -> EVALUATION_PARAM.equals(name) || RECOMMENDATION_PARAM.equals(name)).count());
+                .filter(name -> EVALUATION_PARAM.equals(name) || RECOMMENDATION_PARAM.equals(name))
+                .count());
     }
 
-    private Parameters createParametersResponse(final ModuleContext moduleContext, final CDSOutput cdsOutput,
+    private Parameters createParametersResponse(final KnowledgeBaseContext knowledgeBaseContext, final CDSOutput cdsOutput,
             final RequestContext requestContext, final LocalDateTime requestDateTime)
     {
-        final String kmId = moduleContext.kmId();
+        final String kmId = knowledgeBaseContext.kmId();
         final Reference patientReference = Optional.ofNullable(requestContext.patient())
                 .map(Patient::identifier)
                 .map(this::extractPrimaryIdentifierValue)
@@ -209,8 +237,8 @@ public class VmrConversionComponent
                 buildImmunizationEvaluations(kmId, outputPatient, patientReference);
         final List<ImmunizationRecommendation> immunizationRecommendations =
                 buildImmunizationRecommendations(kmId, outputPatient, patientReference, requestContext.assessmentDate());
-        return FhirParametersResponseAdapter.createForecastParametersResponse(moduleContext.moduleCanonical(), patientReference,
-                requestDateTime, getEngineVersion(), requestContext.validationIssues(), immunizationEvaluations,
+        return FhirParametersResponseAdapter.createForecastParametersResponse(knowledgeBaseContext.knowledgeBase(),
+                patientReference, requestDateTime, getEngineVersion(), requestContext.validationIssues(), immunizationEvaluations,
                 immunizationRecommendations);
     }
 
@@ -285,11 +313,11 @@ public class VmrConversionComponent
                 .build());
     }
 
-    private ModuleContext resolveModuleContext(final RequestContext requestContext)
+    private KnowledgeBaseContext resolveKnowledgeBaseContext(final RequestContext requestContext)
     {
-        final String moduleCanonical = requestContext.moduleCanonical();
-        final String kmId = supportingDataService.getKmIdFromModuleCanonicalUrl(moduleCanonical);
-        return new ModuleContext(moduleCanonical, kmId, supportingDataService.parseKmEntityIdentifier(kmId));
+        final String knowledgeBaseCanonical = requestContext.knowledgeBaseCanonical();
+        final String kmId = supportingDataService.getKmIdFromKnowledgeBaseUrl(knowledgeBaseCanonical);
+        return new KnowledgeBaseContext(knowledgeBaseCanonical, kmId, supportingDataService.parseKmEntityIdentifier(kmId));
     }
 
     private RequestContext parseRequestContext(final Parameters parameters)
@@ -307,12 +335,12 @@ public class VmrConversionComponent
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Parameters must contain assessmentDate"));
 
-        final String moduleCanonical = params.stream()
-                .filter(parameter -> MODULE_PARAM.equals(parameter.name()))
+        final String knowledgeBaseCanonical = params.stream()
+                .filter(parameter -> KNOWLEDGE_BASE_PARAM.equals(parameter.name()))
                 .map(ParametersParameter::valueCanonical)
                 .filter(StringUtils::hasText)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Parameters must contain module valueCanonical"));
+                .orElseThrow(() -> new IllegalArgumentException("Parameters must contain knowledgeBase valueCanonical"));
 
         final Bundle dataBundle = params.stream()
                 .filter(parameter -> DATA_PARAM.equals(parameter.name()))
@@ -359,15 +387,15 @@ public class VmrConversionComponent
                 .filter(Observation.class::isInstance)
                 .map(Observation.class::cast), observationBundleResources.stream()).toList();
 
-        final List<ParametersParameter> scheduleFlagParameters =
-                params.stream().filter(parameter -> OPTION_FLAG_PARAM.equals(parameter.name())).toList();
-        final List<String> scheduleFlags = scheduleFlagParameters.stream().peek(parameter ->
-        {
-            if (!StringUtils.hasText(parameter.valueCode()))
-                throw new IllegalArgumentException("scheduleFlag parameters must use valueCode");
-        }).map(parameter -> parameter.valueCode().trim()).distinct().toList();
+        final List<String> scheduleFlags =
+                params.stream().filter(parameter -> SCHEDULE_FLAG_PARAM.equals(parameter.name())).peek(parameter ->
+                {
+                    if (!StringUtils.hasText(parameter.valueCode()))
+                        throw new IllegalArgumentException("scheduleFlag parameters must use valueCode");
+                }).map(ParametersParameter::valueCode).map(String::trim).distinct().toList();
 
-        return new RequestContext(assessmentDate, moduleCanonical, patient, immunizations, observations, scheduleFlags, List.of());
+        return new RequestContext(assessmentDate, knowledgeBaseCanonical, patient, immunizations, observations, scheduleFlags,
+                List.of());
     }
 
     private Stream<ParametersParameter> streamParameters(final Parameters parameters)
@@ -388,26 +416,63 @@ public class VmrConversionComponent
                 Optional.ofNullable(parameter.part()).stream().flatMap(Collection::stream).flatMap(this::flattenParameterTree));
     }
 
-    private RequestContext applyImmunizationValidation(final ModuleContext moduleContext, final RequestContext requestContext)
+    private RequestContext applyRequestValidation(final KnowledgeBaseContext knowledgeBaseContext,
+            final RequestContext requestContext, final boolean validateContextualConditions)
     {
         final List<OperationOutcome.Issue> validationIssues = new ArrayList<>();
         final List<Immunization> validatedImmunizations = Optional.ofNullable(requestContext.immunizations())
                 .stream()
                 .flatMap(Collection::stream)
-                .filter(immunization -> isSupportedImmunization(moduleContext, immunization, validationIssues))
+                .filter(immunization -> isSupportedImmunization(knowledgeBaseContext, immunization, validationIssues))
                 .toList();
-        final List<String> resolvedScheduleFlags = supportingDataService.validateScheduleFlagsForKmId(moduleContext.kmId(),
+        final List<Observation> validatedObservations =
+                validateContextualConditions ? Optional.ofNullable(requestContext.observations())
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .filter(observation -> isSupportedObservation(knowledgeBaseContext, observation, validationIssues))
+                        .toList() : requestContext.observations();
+        final List<String> resolvedScheduleFlags = supportingDataService.validateScheduleFlagsForKmId(knowledgeBaseContext.kmId(),
                 Stream.concat(supportingDataService.getConfiguredScheduleFlags().stream(),
                         Optional.ofNullable(requestContext.scheduleFlags()).stream().flatMap(Collection::stream)).toList());
 
-        return new RequestContext(requestContext.assessmentDate(), requestContext.moduleCanonical(), requestContext.patient(),
-                validatedImmunizations, requestContext.observations(), resolvedScheduleFlags, List.copyOf(validationIssues));
+        return new RequestContext(requestContext.assessmentDate(), requestContext.knowledgeBaseCanonical(),
+                requestContext.patient(), validatedImmunizations, validatedObservations, resolvedScheduleFlags,
+                List.copyOf(validationIssues));
     }
 
-    private boolean isSupportedImmunization(final ModuleContext moduleContext, final Immunization immunization,
+    private boolean isSupportedObservation(final KnowledgeBaseContext knowledgeBaseContext, final Observation observation,
             final List<OperationOutcome.Issue> validationIssues)
     {
-        final String kmId = moduleContext.kmId();
+        final Coding coding = Optional.ofNullable(observation)
+                .map(Observation::code)
+                .map(CodeableConcept::coding)
+                .stream()
+                .flatMap(Collection::stream)
+                .findFirst()
+                .orElse(null);
+        if (coding != null)
+        {
+            final boolean hasObservationFocus = supportingDataService.getConceptPropertyCoding(knowledgeBaseContext.kmId(),
+                    ICEConceptType.CONTEXTUAL_CONDITION.getIceConceptTypeValue(), coding.system(), coding.code(),
+                    CONTEXTUAL_CONDITION_OBSERVATION_FOCUS_PROPERTY).isPresent();
+            final boolean hasObservationValue = supportingDataService.getConceptPropertyCoding(knowledgeBaseContext.kmId(),
+                    ICEConceptType.CONTEXTUAL_CONDITION.getIceConceptTypeValue(), coding.system(), coding.code(),
+                    CONTEXTUAL_CONDITION_OBSERVATION_VALUE_PROPERTY).isPresent();
+            if (hasObservationFocus && hasObservationValue)
+                return true;
+        }
+
+        final String contextualConditionCode = coding != null && StringUtils.hasText(coding.code()) ? coding.code() : "<missing>";
+        log.warn("Unsupported contextual-condition code '{}' was provided; observation was ignored.", contextualConditionCode);
+        validationIssues.add(createOperationOutcomeIssue(buildUnsupportedContextualConditionWarning(contextualConditionCode),
+                OUTCOME_SEVERITY_WARNING));
+        return false;
+    }
+
+    private boolean isSupportedImmunization(final KnowledgeBaseContext knowledgeBaseContext, final Immunization immunization,
+            final List<OperationOutcome.Issue> validationIssues)
+    {
+        final String kmId = knowledgeBaseContext.kmId();
         final Coding coding = Optional.ofNullable(immunization)
                 .map(Immunization::vaccineCode)
                 .map(CodeableConcept::coding)
@@ -433,7 +498,7 @@ public class VmrConversionComponent
         catch (final IllegalArgumentException e)
         {
             validationIssues.add(createOperationOutcomeIssue(
-                    buildUnsupportedCodeSystemMessage(moduleContext.moduleCanonical(), immunization, codeSystem),
+                    buildUnsupportedCodeSystemMessage(knowledgeBaseContext.knowledgeBase(), immunization, codeSystem),
                     OUTCOME_SEVERITY_ERROR));
             return false;
         }
@@ -467,12 +532,13 @@ public class VmrConversionComponent
                 buildImmunizationIdentifier(immunization));
     }
 
-    private String buildUnsupportedCodeSystemMessage(final String moduleCanonical, final Immunization immunization,
+    private String buildUnsupportedCodeSystemMessage(final String knowledgeBaseCanonical, final Immunization immunization,
             final String codeSystem)
     {
-        final String canonicalRef = StringUtils.hasText(moduleCanonical) ? moduleCanonical : "<unknown-module-canonical>";
+        final String canonicalRef =
+                StringUtils.hasText(knowledgeBaseCanonical) ? knowledgeBaseCanonical : "<unknown-knowledge-base-canonical>";
         final String codeSystemRef = StringUtils.hasText(codeSystem) ? codeSystem : "<missing>";
-        return "Unsupported code system '%s' for moduleCanonical '%s' on immunization '%s'; this immunization was not evaluated.".formatted(
+        return "Unsupported code system '%s' for knowledgeBase '%s' on immunization '%s'; this immunization was not evaluated.".formatted(
                 codeSystemRef, canonicalRef, buildImmunizationIdentifier(immunization));
     }
 
@@ -486,6 +552,12 @@ public class VmrConversionComponent
     {
         return "CVX code '%s' is configured as not supported for immunization '%s'; this immunization was not evaluated.".formatted(
                 StringUtils.hasText(cvxCode) ? cvxCode : "<missing>", buildImmunizationIdentifier(immunization));
+    }
+
+    private String buildUnsupportedContextualConditionWarning(final String contextualConditionCode)
+    {
+        return "Unsupported contextual-condition code '%s' was provided; observation was ignored.".formatted(
+                contextualConditionCode);
     }
 
     private String buildImmunizationIdentifier(final Immunization immunization)

@@ -20,10 +20,10 @@ class PlanDefinitionR6ModelTest
                               "id": "varicella-2-dose-series",
                               "meta": {
                                 "profile": [
-                                  "http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition"
+                                  "https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition"
                                 ]
                               },
-                              "url": "http://cdsframework.org/PlanDefinition/series/VARICELLA_2_DOSE_SERIES",
+                              "url": "https://terminology.cdsframework.org/ice/PlanDefinition/series/VARICELLA_2_DOSE_SERIES",
                               "version": "1.0.0",
                               "status": "active",
                               "action": [
@@ -32,7 +32,7 @@ class PlanDefinitionR6ModelTest
                                   "title": "Dose 1",
                                   "extension": [
                                     {
-                                      "url": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-number",
+                                      "url": "https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number",
                                       "valueInteger": 1
                                     }
                                   ]
@@ -46,7 +46,7 @@ class PlanDefinitionR6ModelTest
                                       "relationship": "after-end",
                                       "extension": [
                                         {
-                                          "url": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint",
+                                          "url": "https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint",
                                           "extension": [
                                             {
                                               "url": "minimumInterval",
@@ -63,7 +63,7 @@ class PlanDefinitionR6ModelTest
                                   ],
                                   "extension": [
                                     {
-                                      "url": "http://cdsframework.org/fhir/StructureDefinition/ice-dose-number",
+                                      "url": "https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number",
                                       "valueInteger": 2
                                     }
                                   ]
@@ -76,7 +76,7 @@ class PlanDefinitionR6ModelTest
 
         assertEquals("PlanDefinition", planDefinition.resourceType());
         assertNotNull(planDefinition.meta());
-        assertEquals("http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition",
+        assertEquals("https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition",
                 planDefinition.meta().profile().getFirst());
         assertEquals(2, planDefinition.action().size());
         assertEquals("dose-1", planDefinition.action().getFirst().id());

@@ -29,14 +29,14 @@ public class CdsEngineProperties
     {
     }
 
-    public record ModuleCanonicalDefinition(@Valid
-                                            PlanDefinition modulePlanDefinition,
-                                            Map<String, @Valid PlanDefinition> planDefinitions,
-                                            Map<String, @Valid SeriesData> series,
-                                            Map<String, @Valid CodeSystem> codeSystems,
-                                            Map<String, @Valid String> outboundCodeSystemMap)
+    public record KnowledgeBaseDefinition(@Valid
+                                          PlanDefinition knowledgeBasePlanDefinition,
+                                          Map<String, @Valid PlanDefinition> planDefinitions,
+                                          Map<String, @Valid SeriesData> series,
+                                          Map<String, @Valid CodeSystem> codeSystems,
+                                          Map<String, @Valid String> outboundCodeSystemMap)
     {
-        public ModuleCanonicalDefinition
+        public KnowledgeBaseDefinition
         {
             planDefinitions = Objects.requireNonNullElseGet(planDefinitions, Map::of);
             series = Objects.requireNonNullElseGet(series, Map::of);
@@ -48,5 +48,5 @@ public class CdsEngineProperties
     @NotNull
     private ExperimentalFeature experimentalFeatures;
 
-    private Map<@NotBlank String, @Valid ModuleCanonicalDefinition> moduleCanonicalDefinitionMap;
+    private Map<@NotBlank String, @Valid KnowledgeBaseDefinition> knowledgeBaseDefinitionMap;
 }

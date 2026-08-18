@@ -8,6 +8,7 @@ import org.omg.dss.EvaluateAtSpecifiedTime;
 import org.opencds.dss.evaluate.Evaluation;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,61 +31,77 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/cds")
 @ConditionalOnProperty(prefix = "cds-engine.experimental-features", name = "enable-fhir-r6", havingValue = "true")
-@Tag(name = "Immunization Forecast", description = "FHIR operation endpoint for immunization forecast requests.")
-public class ImmunizationForecastController
+@Tag(name = "ImmDS Forecast", description = "FHIR operation endpoint for proposed R6 HLN ImmDS forecast requests.")
+public class ImmDsForecastController
 {
     private static final String FHIR_JSON_MEDIA_TYPE = "application/fhir+json";
+
     private final Evaluation evaluationService;
     private final VmrConversionComponent vmrConversionComponent;
+    private final CapabilityStatementProvider capabilityStatementProvider;
 
-    @Operation(operationId = "immunizationForecast", summary = "Run immunization forecast",
-               description = "Accepts a FHIR Parameters request and returns forecast output as FHIR Parameters. Request supports `patient`, `assessmentDate`, `module`, repeated `immunization`, repeated `observation`, repeated top-level `scheduleFlag` parameters using `valueCode`, or a single `data` bundle containing the FHIR resources.")
+    @Operation(operationId = "capabilityStatement", summary = "Get service capability statement",
+               description = "Returns the CapabilityStatement for the FHIR service base, including the system-level ImmDS forecast operation.")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "CapabilityStatement returned successfully.",
+                                         content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                                              schema = @Schema(implementation = String.class)),
+                                                 @Content(mediaType = FHIR_JSON_MEDIA_TYPE,
+                                                          schema = @Schema(implementation = String.class)) }) })
+    @GetMapping(value = "/metadata", produces = { MediaType.APPLICATION_JSON_VALUE, FHIR_JSON_MEDIA_TYPE })
+    public String capabilityStatement()
+    {
+        return capabilityStatementProvider.capabilityStatement();
+    }
+
+    @Operation(operationId = "immDsForecast", summary = "Run ImmDS forecast",
+               description = "Accepts a FHIR Parameters request for `/$immds-forecast` and returns forecast output as FHIR Parameters. Request supports `patient`, `assessmentDate`, `knowledgeBase`, repeated `immunization`, repeated `observation`, or a single `data` bundle containing those resources. Response parameters are returned at the top level without an `output.part` wrapper.")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true,
-                                                          description = "FHIR Parameters request for immunization forecast processing.",
+                                                          description = "FHIR Parameters request for proposed HLN ImmDS forecast processing.",
                                                           content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                                                                                schema = @Schema(implementation = Parameters.class),
-                                                                               examples = @ExampleObject(name = "ForecastRequest",
-                                                                                                         summary = "Request with patient, immunization and observation inputs",
-                                                                                                         value = ImmunizationForecastOpenApiExamples.REQUEST_PARAMETERS)),
+                                                                               examples = @ExampleObject(
+                                                                                       name = "ImmDsForecastRequest",
+                                                                                       summary = "Request with patient, immunization, observation, and knowledge base inputs",
+                                                                                       value = ImmDsForecastOpenApiExamples.REQUEST_PARAMETERS)),
                                                                   @Content(mediaType = FHIR_JSON_MEDIA_TYPE,
                                                                            schema = @Schema(implementation = Parameters.class),
                                                                            examples = @ExampleObject(
-                                                                                   name = "ForecastRequestFhirJson",
+                                                                                   name = "ImmDsForecastRequestFhirJson",
                                                                                    summary = "Same request using application/fhir+json",
-                                                                                   value = ImmunizationForecastOpenApiExamples.REQUEST_PARAMETERS)) })
+                                                                                   value = ImmDsForecastOpenApiExamples.REQUEST_PARAMETERS)) })
     @ApiResponses(value = { @ApiResponse(responseCode = "200",
                                          description = "Forecast completed. Response always returns FHIR Parameters; operation errors are conveyed in operationOutcome.",
                                          content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                                                               schema = @Schema(implementation = Parameters.class), examples = {
                                                  @ExampleObject(name = "Success",
-                                                                value = ImmunizationForecastOpenApiExamples.RESPONSE_SUCCESS),
+                                                                value = ImmDsForecastOpenApiExamples.RESPONSE_SUCCESS),
                                                  @ExampleObject(name = "HandledError",
-                                                                value = ImmunizationForecastOpenApiExamples.RESPONSE_ERROR) }),
+                                                                value = ImmDsForecastOpenApiExamples.RESPONSE_ERROR) }),
                                                  @Content(mediaType = FHIR_JSON_MEDIA_TYPE,
                                                           schema = @Schema(implementation = Parameters.class), examples = {
                                                          @ExampleObject(name = "SuccessFhirJson",
-                                                                        value = ImmunizationForecastOpenApiExamples.RESPONSE_SUCCESS),
+                                                                        value = ImmDsForecastOpenApiExamples.RESPONSE_SUCCESS),
                                                          @ExampleObject(name = "HandledErrorFhirJson",
-                                                                        value = ImmunizationForecastOpenApiExamples.RESPONSE_ERROR) }) }),
+                                                                        value = ImmDsForecastOpenApiExamples.RESPONSE_ERROR) }) }),
             @ApiResponse(responseCode = "400",
                          description = "Malformed JSON/FHIR payload or bean validation failure before controller execution.") })
-    @PostMapping(value = "/$immunization-forecast", consumes = { MediaType.APPLICATION_JSON_VALUE, FHIR_JSON_MEDIA_TYPE },
+    @PostMapping(value = "/$immds-forecast", consumes = { MediaType.APPLICATION_JSON_VALUE, FHIR_JSON_MEDIA_TYPE },
                  produces = { MediaType.APPLICATION_JSON_VALUE, FHIR_JSON_MEDIA_TYPE })
-    public Parameters immunizationForecast(@RequestBody @Valid @NotNull final Parameters parameters)
+    public Parameters immDsForecast(@RequestBody @Valid @NotNull final Parameters parameters)
     {
         final LocalDateTime requestDateTime = LocalDateTime.now();
         try
         {
             final EvaluateAtSpecifiedTime evaluateAtSpecifiedTime =
-                    vmrConversionComponent.convertToEvaluateAtSpecifiedTime(parameters);
-            return vmrConversionComponent.convertToParametersResponse(
+                    vmrConversionComponent.convertImmDsToEvaluateAtSpecifiedTime(parameters);
+            return vmrConversionComponent.convertImmDsToParametersResponse(
                     evaluationService.evaluateAtSpecifiedTime(evaluateAtSpecifiedTime.getInteractionId(),
                             evaluateAtSpecifiedTime.getSpecifiedTime(), evaluateAtSpecifiedTime.getEvaluationRequest()), parameters,
                     requestDateTime);
         }
         catch (final Exception e)
         {
-            log.error("FHIR forecast request processing failed", e);
+            log.error("FHIR ImmDS forecast request processing failed", e);
             final String detail = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
             return vmrConversionComponent.createErrorParametersResponse("exception", detail, requestDateTime);
         }

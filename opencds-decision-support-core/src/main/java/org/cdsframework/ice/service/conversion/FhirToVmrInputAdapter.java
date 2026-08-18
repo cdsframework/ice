@@ -9,11 +9,13 @@ import java.util.UUID;
 
 import org.cdsframework.fhir.AdministrativeGender;
 import org.cdsframework.fhir.CodeableConcept;
+import org.cdsframework.fhir.Coding;
 import org.cdsframework.fhir.Identifier;
 import org.cdsframework.fhir.Immunization;
 import org.cdsframework.fhir.Observation;
 import org.cdsframework.fhir.Patient;
 import org.cdsframework.ice.service.SupportingDataService;
+import org.cdsframework.ice.supportingdata.ICEConceptType;
 import org.opencds.vmr.v1_0.schema.AdministrableSubstance;
 import org.opencds.vmr.v1_0.schema.BL;
 import org.opencds.vmr.v1_0.schema.CD;
@@ -38,6 +40,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class FhirToVmrInputAdapter
 {
+    private record ContextualConditionObservationMapping(Coding observationFocus,
+                                                         Coding observationValue)
+    {
+    }
+
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String SCHEDULE_FLAGS_CODE_SYSTEM_OID = "2.16.840.1.113883.3.795.12.100.502";
     private static final String ADMIN_GENDER_CODE_MALE = "M";
@@ -55,6 +62,8 @@ public class FhirToVmrInputAdapter
     private static final String IMMUNIZATION_ID_ROOT = "2.16.840.1.113883.3.795.12.100.10";
     private static final String SUBSTANCE_ADMINISTRATION_GENERAL_PURPOSE_CODE = "384810002";
     private static final String SUBSTANCE_ADMINISTRATION_GENERAL_PURPOSE_CODE_SYSTEM = "2.16.840.1.113883.6.5";
+    private static final String OBSERVATION_FOCUS_PROPERTY = "observationFocus";
+    private static final String OBSERVATION_VALUE_PROPERTY = "observationValue";
 
     private static CD createDisplayCd(final String code, final String codeSystem, final String displayName)
     {
@@ -215,17 +224,49 @@ public class FhirToVmrInputAdapter
         return cd;
     }
 
+    private CD createCd(final String kmId, final Coding coding)
+    {
+        final CD cd = new CD();
+        cd.setCode(coding.code());
+        cd.setCodeSystem(supportingDataService.toRequiredInternalCodeSystemOid(kmId, coding.system()));
+        cd.setDisplayName(coding.display());
+        return cd;
+    }
+
+    private Optional<ContextualConditionObservationMapping> getContextualConditionObservationMapping(final String kmId,
+            final Observation observation)
+    {
+        return Optional.ofNullable(observation.code())
+                .map(CodeableConcept::coding)
+                .stream()
+                .flatMap(Collection::stream)
+                .findFirst()
+                .flatMap(coding -> supportingDataService.getConceptPropertyCoding(kmId,
+                                ICEConceptType.CONTEXTUAL_CONDITION.getIceConceptTypeValue(), coding.system(), coding.code(),
+                                OBSERVATION_FOCUS_PROPERTY)
+                        .flatMap(observationFocus -> supportingDataService.getConceptPropertyCoding(kmId,
+                                        ICEConceptType.CONTEXTUAL_CONDITION.getIceConceptTypeValue(), coding.system(), coding.code(),
+                                        OBSERVATION_VALUE_PROPERTY)
+                                .map(observationValue -> new ContextualConditionObservationMapping(observationFocus,
+                                        observationValue))));
+    }
+
     private ObservationResult createObservationResult(final String kmId, final Observation observation)
     {
         final ObservationResult observationResult = new ObservationResult();
         observationResult.getTemplateId().add(copyIi(templateIdObservationResultPrototype));
         observationResult.setId(createIi(UUID.randomUUID().toString(), null));
-        observationResult.setObservationEventTime(Optional.ofNullable(observation.effectiveDateTime())
+        observationResult.setObservationEventTime(Optional.ofNullable(observation.valueDateTime())
                 .map(this::parseIsoLocalDate)
                 .map(FhirToVmrInputAdapter::formatVmrDate)
                 .map(d -> createIvlts(d, d))
                 .orElse(null));
-        observationResult.setObservationFocus(createCd(kmId, observation.code()));
+        final Optional<ContextualConditionObservationMapping> contextualConditionObservationMapping =
+                getContextualConditionObservationMapping(kmId, observation);
+        observationResult.setObservationFocus(
+                contextualConditionObservationMapping.map(ContextualConditionObservationMapping::observationFocus)
+                        .map(coding -> createCd(kmId, coding))
+                        .orElseGet(() -> createCd(kmId, observation.code())));
         observationResult.getInterpretation()
                 .addAll(Optional.ofNullable(observation.interpretation())
                         .stream()
@@ -234,7 +275,10 @@ public class FhirToVmrInputAdapter
                         .toList());
         final ObservationResult.ObservationValue observationValue = new ObservationResult.ObservationValue();
         observationResult.setObservationValue(observationValue);
-        observationValue.setConcept(createObservationValueCd(kmId, observation.valueCodeableConcept()));
+        observationValue.setConcept(
+                contextualConditionObservationMapping.map(ContextualConditionObservationMapping::observationValue)
+                        .map(coding -> createCd(kmId, coding))
+                        .orElseGet(() -> createObservationValueCd(kmId, observation.valueCodeableConcept())));
         return observationResult;
     }
 

@@ -40,8 +40,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 public class FullSupportingDataLoadTest
 {
     private static final String SUPPORTED_SERIES_CODE_SYSTEM_NAME = "SUPPORTED_SERIES";
-    private static final String IMMUNIZATION_SUBPOTENT_REASON_CODE_SYSTEM = "IMMUNIZATION_SUBPOTENT_REASON";
     private static final String SUPPORTED_SCHEDULE_FLAGS_CODE_SYSTEM_NAME = "SUPPORTED_SCHEDULE_FLAGS";
+    private static final String IMMUNIZATION_SUBPOTENT_REASON_CODE_SYSTEM = "IMMUNIZATION_SUBPOTENT_REASON";
 
     private static String normalizeSeasonCode(final String code)
     {
@@ -75,9 +75,9 @@ public class FullSupportingDataLoadTest
         assertTrue(iceProperties.getScheduleFlags().contains("HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID"));
         assertTrue(iceProperties.getScheduleFlags().contains("POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID"));
         final SupportingDataService supportingDataService = new SupportingDataService(cdsEngineProperties, iceProperties);
-        final String baseKnowledgeModuleId = supportingDataService.getBaseKnowledgeModuleId();
-        final String nycKnowledgeModuleId =
-                supportingDataService.getKmIdFromModuleCanonicalUrl("http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0");
+        final String baseKnowledgeModuleId = supportingDataService.getBaseKnowledgeBaseId();
+        final String nycKnowledgeModuleId = supportingDataService.getKmIdFromKnowledgeBaseUrl(
+                "https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0");
 
         final ICESupportingDataConfiguration configuration = assertDoesNotThrow(
                 () -> new ICESupportingDataConfiguration(baseKnowledgeModuleId, List.of(nycKnowledgeModuleId),
@@ -107,8 +107,22 @@ public class FullSupportingDataLoadTest
         assertTrue(missingSeasonCodes.isEmpty(),
                 "Supported seasons not referenced by series data: " + String.join(", ", missingSeasonCodes));
 
-        final CdsEngineProperties.ModuleCanonicalDefinition nycModule =
-                supportingDataService.getSupportingKnowledgeModuleByKmId(nycKnowledgeModuleId);
+        final CdsEngineProperties.KnowledgeBaseDefinition nycModule =
+                supportingDataService.getSupportingKnowledgeBaseByKmId(nycKnowledgeModuleId);
+        final CodeSystem supportedScheduleFlags = Optional.ofNullable(nycModule.codeSystems())
+                .map(codeSystems -> codeSystems.get(SUPPORTED_SCHEDULE_FLAGS_CODE_SYSTEM_NAME))
+                .orElse(null);
+        assertNotNull(supportedScheduleFlags, "SUPPORTED_SCHEDULE_FLAGS code system should be loaded");
+        assertEquals("https://terminology.cdsframework.org/ice/schedule-flags", supportedScheduleFlags.url());
+        final Set<String> supportedScheduleFlagCodes = Optional.ofNullable(supportedScheduleFlags.concept())
+                .orElse(List.of())
+                .stream()
+                .map(CodeSystemConcept::code)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+        assertTrue(supportedScheduleFlagCodes.contains("HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID"));
+        assertTrue(supportedScheduleFlagCodes.contains("POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID"));
+
         final CodeSystem subpotentReasonCodeSystem = Optional.ofNullable(nycModule.codeSystems())
                 .map(codeSystems -> codeSystems.get(IMMUNIZATION_SUBPOTENT_REASON_CODE_SYSTEM))
                 .orElse(null);
@@ -119,21 +133,7 @@ public class FullSupportingDataLoadTest
                 .map(CodeSystemConcept::code)
                 .anyMatch("coldchainbreak"::equals), "Expected subpotent reason CodeSystem to include coldchainbreak");
 
-        final CodeSystem supportedScheduleFlags = Optional.ofNullable(nycModule.codeSystems())
-                .map(codeSystems -> codeSystems.get(SUPPORTED_SCHEDULE_FLAGS_CODE_SYSTEM_NAME))
-                .orElse(null);
-        assertNotNull(supportedScheduleFlags, "SUPPORTED_SCHEDULE_FLAGS code system should be loaded");
-        assertEquals("http://terminology.cdsframework.org/ice/schedule-flags", supportedScheduleFlags.url());
-        final Set<String> supportedScheduleFlagCodes = Optional.ofNullable(supportedScheduleFlags.concept())
-                .orElse(List.of())
-                .stream()
-                .map(CodeSystemConcept::code)
-                .filter(java.util.Objects::nonNull)
-                .collect(Collectors.toSet());
-        assertTrue(supportedScheduleFlagCodes.contains("HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID"));
-        assertTrue(supportedScheduleFlagCodes.contains("POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID"));
-
-        final Set<String> supportedSeriesCodes = Optional.of(nycModule.codeSystems())
+        final Set<String> supportedSeriesCodes = Optional.ofNullable(nycModule.codeSystems())
                 .map(codeSystems -> codeSystems.get(SUPPORTED_SERIES_CODE_SYSTEM_NAME))
                 .map(CodeSystem::concept)
                 .orElse(List.of())
@@ -182,7 +182,8 @@ public class FullSupportingDataLoadTest
                 .stream()
                 .map(org.cdsframework.ice.service.SeriesRules::getSeriesName)
                 .filter(java.util.Objects::nonNull)
-                .map(FullSupportingDataLoadTest::normalizeSeriesCode).filter(Predicate.not(String::isBlank))
+                .map(FullSupportingDataLoadTest::normalizeSeriesCode)
+                .filter(Predicate.not(String::isBlank))
                 .collect(Collectors.toCollection(TreeSet::new));
         final Set<String> supportedSeriesMissingFromSeriesData = new TreeSet<>(supportedSeriesCodes);
         supportedSeriesMissingFromSeriesData.removeAll(loadedSeriesCodes);

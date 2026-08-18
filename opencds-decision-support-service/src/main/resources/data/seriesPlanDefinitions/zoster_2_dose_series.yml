@@ -1,6 +1,6 @@
 cds-engine:
-  module-canonical-definition-map:
-    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+  knowledge-base-definition-map:
+    '[https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
       plan-definitions:
         ZOSTER_2_DOSE_SERIES:
           resource-type: PlanDefinition
@@ -10,14 +10,14 @@ cds-engine:
           status: active
           meta:
             profile:
-              - http://cdsframework.org/fhir/StructureDefinition/ice-series-plan-definition
+              - https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition
           type:
             coding:
               - system: http://terminology.hl7.org/CodeSystem/plan-definition-type
                 code: eca-rule
                 display: ECA Rule
           extension:
-            - url: http://cdsframework.org/fhir/StructureDefinition/ice-series-metadata
+            - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-metadata
               extension:
                 - url: numberOfDosesInSeries
                   value-integer: 2
@@ -41,9 +41,9 @@ cds-engine:
             - id: dose-1
               title: Dose 1
               extension:
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number
                   value-integer: 1
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint
                   extension:
                     - url: absoluteMinimumAge
                       value-string: 18y-4d
@@ -51,7 +51,7 @@ cds-engine:
                       value-string: 50y
                     - url: earliestRecommendedAge
                       value-string: 50y
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -66,15 +66,15 @@ cds-engine:
             - id: dose-2
               title: Dose 2
               extension:
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-number
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number
                   value-integer: 2
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-age-constraint
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint
                   extension:
                     - url: minimumAge
                       value-string: 50y
                     - url: earliestRecommendedAge
                       value-string: 50y
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -86,7 +86,7 @@ cds-engine:
                         text: Zoster recombinant
                     - url: preferred
                       value-boolean: true
-                - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-vaccine
+                - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine
                   extension:
                     - url: vaccine
                       value-codeable-concept:
@@ -102,7 +102,7 @@ cds-engine:
                 - action-id: dose-1
                   relationship: after-end
                   extension:
-                    - url: http://cdsframework.org/fhir/StructureDefinition/ice-dose-interval-constraint
+                    - url: https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint
                       extension:
                         - url: absoluteMinimumInterval
                           value-string: 24d

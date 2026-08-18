@@ -64,7 +64,7 @@ public class LocallyCodedScheduleAuthorityItem extends LocallyCodedCdsItem
     @Override
     public String toString()
     {
-        return "LocallyCodedScheduleAuthorityItem [getCdsItemName()=%s; getScheduleAuthority()=%s]".formatted(
-                getCdsItemName(), this.scheduleAuthority);
+        return "LocallyCodedScheduleAuthorityItem [getCdsItemName()=%s; getScheduleAuthority()=%s]".formatted(getCdsItemName(),
+                this.scheduleAuthority);
     }
 }

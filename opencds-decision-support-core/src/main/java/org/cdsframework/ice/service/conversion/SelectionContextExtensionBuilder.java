@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class SelectionContextExtensionBuilder
 {
     private static final String SELECTION_CONTEXT_EXTENSION_URL =
-            "http://terminology.cdsframework.org/fhir/StructureDefinition/immunization-selection-context";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context";
     private static final String SELECTION_CONTEXT_CHILD_URL_SELECTED_SERIES = "selectedSeries";
     private static final String SELECTION_CONTEXT_CHILD_URL_SERIES_SELECTION_TYPE = "seriesSelectionType";
     private static final String SELECTION_CONTEXT_CHILD_URL_SELECTED_SEASON = "selectedSeason";

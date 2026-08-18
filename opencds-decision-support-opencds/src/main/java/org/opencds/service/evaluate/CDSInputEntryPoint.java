@@ -70,7 +70,7 @@ public class CDSInputEntryPoint
                 || value instanceof Enum<?> || value instanceof II || !visited.add(value))
             return;
 
-        if (value instanceof Iterable<?> iterable)
+        if (value instanceof final Iterable<?> iterable)
         {
             for (final Object item : iterable)
                 visitForIds(item, ids, visited);
@@ -94,7 +94,7 @@ public class CDSInputEntryPoint
                 {
                     field.setAccessible(true);
                     final Object fieldValue = field.get(value);
-                    if ("id".equals(field.getName()) && fieldValue instanceof II id)
+                    if ("id".equals(field.getName()) && fieldValue instanceof final II id)
                     {
                         final String flatId = MappingUtility.iI2FlatId(id);
                         final String previousType = ids.putIfAbsent(flatId, value.getClass().getSimpleName());

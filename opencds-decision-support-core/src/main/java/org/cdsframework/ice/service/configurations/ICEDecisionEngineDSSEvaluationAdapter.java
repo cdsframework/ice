@@ -204,8 +204,7 @@ public class ICEDecisionEngineDSSEvaluationAdapter
             case final TargetDose dose ->
                     "TargetDose uniqueId=%s, Vaccine=%s, DoseNumber=%s, TargetSeries=%s, Status=%s".formatted(dose.getUniqueId(),
                             dose.getAdministeredVaccine().getCdsConceptName(), dose.getDoseNumberInSeries(),
-                            dose.getTargetSeries().getSeriesName(),
-                            dose.getStatus());
+                            dose.getTargetSeries().getSeriesName(), dose.getStatus());
             case final SeriesRules rules -> "SeriesRules=%s".formatted(rules.getSeriesName());
             case final ICEFactTypeFinding fact -> "Fact=%s, %s, %s, %s".formatted(fact.getIceResultFinding(),
                     Optional.ofNullable(fact.getAssociatedTargetDose())

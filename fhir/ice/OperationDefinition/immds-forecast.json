@@ -1,0 +1,130 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "immds-forecast",
+  "url": "https://terminology.cdsframework.org/ice/OperationDefinition/immds-forecast",
+  "version": "1.0.0",
+  "name": "ImmDsForecast",
+  "title": "ImmDS Forecast",
+  "status": "active",
+  "kind": "operation",
+  "code": "immds-forecast",
+  "system": true,
+  "type": false,
+  "instance": false,
+  "affectsState": false,
+  "description": "Produces immunization forecast output from patient demographics, immunizations, observations, and a selected forecasting knowledge base using the proposed R6 HLN ImmDS operation. Output includes ImmunizationRecommendation and ImmunizationEvaluation resources with ICE-specific extensions for series selection type and season.",
+  "parameter": [
+    {
+      "name": "patient",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "Patient demographic context for forecasting.",
+      "type": "Patient"
+    },
+    {
+      "name": "assessmentDate",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "The date on which the immunization forecast should be assessed.",
+      "type": "date"
+    },
+    {
+      "name": "knowledgeBase",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "The forecasting knowledge base to execute, expressed as a canonical PlanDefinition identifier and version.",
+      "type": "canonical"
+    },
+    {
+      "name": "immunization",
+      "use": "in",
+      "min": 0,
+      "max": "*",
+      "documentation": "Immunization resources to be considered in the forecast.",
+      "type": "Immunization"
+    },
+    {
+      "name": "observation",
+      "use": "in",
+      "min": 0,
+      "max": "*",
+      "documentation": "Observation resources relevant to forecasting.",
+      "type": "Observation"
+    },
+    {
+      "name": "scheduleFlag",
+      "use": "in",
+      "min": 0,
+      "max": "*",
+      "documentation": "Optional schedule flags expressed with valueCode.",
+      "type": "code"
+    },
+    {
+      "name": "data",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "Optional Bundle containing Patient, Immunization, and Observation input resources.",
+      "type": "Bundle"
+    },
+    {
+      "name": "parameters",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "Optional implementation-specific tuning or execution parameters.",
+      "type": "Parameters"
+    },
+    {
+      "name": "durationMs",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "documentation": "Execution duration in milliseconds.",
+      "type": "integer"
+    },
+    {
+      "name": "engineVersion",
+      "use": "out",
+      "min": 1,
+      "max": "1",
+      "documentation": "The CDS engine version that processed the request.",
+      "type": "string"
+    },
+    {
+      "name": "guidanceResponse",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "documentation": "Summary metadata describing the execution and outcome of the forecast. In the ImmDS variant this resource does not expose the legacy module field.",
+      "type": "GuidanceResponse"
+    },
+    {
+      "name": "evaluation",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "documentation": "ImmunizationEvaluation resources produced by the forecast. extension may include url https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context with nested extensions selectedSeries, seriesSelectionType, and selectedSeason, or url https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact containing a RelatedArtifact. targetDisease is represented as a single CodeableConcept and may contain multiple codings for component/multi-disease vaccines.",
+      "type": "ImmunizationEvaluation"
+    },
+    {
+      "name": "recommendation",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "documentation": "ImmunizationRecommendation resources produced by the forecast. recommendation.extension may include url https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context with nested extensions selectedSeries, seriesSelectionType, and selectedSeason, or url https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact containing a RelatedArtifact.",
+      "type": "ImmunizationRecommendation"
+    },
+    {
+      "name": "operationOutcome",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "documentation": "Warnings, informational notes, or errors related to processing.",
+      "type": "OperationOutcome"
+    }
+  ]
+}

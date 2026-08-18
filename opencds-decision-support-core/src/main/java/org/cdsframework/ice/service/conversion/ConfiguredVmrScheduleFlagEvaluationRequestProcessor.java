@@ -17,15 +17,17 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.cdsframework.fhir.CodeableConcept;
 import org.cdsframework.ice.service.SupportingDataService;
-import org.omg.dss.DataRequirementItemData;
 import org.omg.dss.EntityIdentifier;
 import org.omg.dss.EvaluationRequest;
 import org.omg.dss.KMEvaluationRequestBase;
 import org.omg.dss.SemanticPayload;
 import org.opencds.dss.evaluate.EvaluationRequestPreProcessor;
+import org.opencds.dss.evaluate.util.DssUtil;
 import org.opencds.vmr.v1_0.schema.BL;
 import org.opencds.vmr.v1_0.schema.CD;
 import org.opencds.vmr.v1_0.schema.CDSInput;
@@ -52,11 +54,16 @@ public class ConfiguredVmrScheduleFlagEvaluationRequestProcessor implements Eval
     {
     }
 
+    private record DataRequirementPayload(SemanticPayload data,
+                                          boolean gzipDesignated)
+    {
+    }
+
     private static final String VMR_SCOPING_ENTITY_ID = "org.opencds.vmr";
     private static final String VMR_BUSINESS_ID = "VMR";
     private static final String VMR_VERSION = "1.0";
     private static final String SCHEDULE_FLAGS_CODE_SYSTEM_OID = "2.16.840.1.113883.3.795.12.100.502";
-    private static final String SCHEDULE_FLAGS_CODE_SYSTEM_URL = "http://terminology.cdsframework.org/ice/schedule-flags";
+    private static final String SCHEDULE_FLAGS_CODE_SYSTEM_URL = "https://terminology.cdsframework.org/ice/schedule-flags";
     private static final String TEMPLATE_ID_OBSERVATION_RESULT = "2.16.840.1.113883.3.795.11.6.3.1";
     private static final XmlMapper xmlMapper = XmlMapper.xmlBuilder()
             .defaultUseWrapper(false)
@@ -111,6 +118,35 @@ public class ConfiguredVmrScheduleFlagEvaluationRequestProcessor implements Eval
         }
     }
 
+    private static byte[] readGzipPayload(final byte[] payload)
+    {
+        try (final GZIPInputStream gzipInputStream = new GZIPInputStream(new ByteArrayInputStream(payload));
+                final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(payload.length))
+        {
+            gzipInputStream.transferTo(outputStream);
+            return outputStream.toByteArray();
+        }
+        catch (final IOException e)
+        {
+            throw new IllegalArgumentException("Failed to decompress VMR payload", e);
+        }
+    }
+
+    private static byte[] writeGzipPayload(final byte[] payload)
+    {
+        try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(payload.length);
+                final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(outputStream))
+        {
+            gzipOutputStream.write(payload);
+            gzipOutputStream.finish();
+            return outputStream.toByteArray();
+        }
+        catch (final IOException e)
+        {
+            throw new IllegalArgumentException("Failed to compress VMR payload", e);
+        }
+    }
+
     private static byte[] writePayload(final CDSInput cdsInput)
     {
         try (final ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
@@ -144,7 +180,8 @@ public class ConfiguredVmrScheduleFlagEvaluationRequestProcessor implements Eval
                         .map(value -> Optional.ofNullable(value).map(String::trim).orElse(""))
                         .collect(java.util.stream.Collectors.joining("^")))
                 .filter(StringUtils::hasText)
-                .distinct().forEach(kmId ->
+                .distinct()
+                .forEach(kmId ->
                 {
                     primaryKmId.compareAndSet(null, kmId);
                     if (!ObjectUtils.isEmpty(configuredScheduleFlags))
@@ -161,10 +198,15 @@ public class ConfiguredVmrScheduleFlagEvaluationRequestProcessor implements Eval
         Optional.ofNullable(evaluationRequest.getDataRequirementItemData())
                 .stream()
                 .flatMap(Collection::stream)
-                .map(DataRequirementItemData::getData)
-                .filter(Objects::nonNull).filter(ConfiguredVmrScheduleFlagEvaluationRequestProcessor::isVmrPayload).forEach(payload ->
+                .filter(Objects::nonNull)
+                .filter(dataRequirementItemData -> dataRequirementItemData.getData() != null)
+                .map(dataRequirementItemData -> new DataRequirementPayload(dataRequirementItemData.getData(),
+                        DssUtil.isGZipDesignated(dataRequirementItemData)))
+                .filter(payload -> isVmrPayload(payload.data()))
+                .forEach(payload ->
                 {
-                    final Result payloadResult = augmentPayloads(primaryKmId.get(), configuredScheduleFlags, payload);
+                    final Result payloadResult =
+                            augmentPayloads(primaryKmId.get(), configuredScheduleFlags, payload.data(), payload.gzipDesignated());
                     payloadCount.accumulateAndGet(payloadResult.payloadCount(), Long::sum);
                     augmentedPayloadCount.accumulateAndGet(payloadResult.augmentedPayloadCount(), Long::sum);
                     addedScheduleFlagCount.accumulateAndGet(payloadResult.addedScheduleFlagCount(), Long::sum);
@@ -173,7 +215,8 @@ public class ConfiguredVmrScheduleFlagEvaluationRequestProcessor implements Eval
         return new Result(payloadCount.get(), augmentedPayloadCount.get(), addedScheduleFlagCount.get());
     }
 
-    private Result augmentPayloads(final String kmId, final List<String> configuredScheduleFlags, final SemanticPayload payload)
+    private Result augmentPayloads(final String kmId, final List<String> configuredScheduleFlags, final SemanticPayload payload,
+            final boolean gzipDesignated)
     {
         final List<byte[]> payloads = payload.getBase64EncodedPayload();
         if (ObjectUtils.isEmpty(payloads))
@@ -184,7 +227,8 @@ public class ConfiguredVmrScheduleFlagEvaluationRequestProcessor implements Eval
 
         for (int i = 0; i < payloads.size(); i++)
         {
-            final PayloadAugmentationResult result = addMissingScheduleFlags(kmId, configuredScheduleFlags, payloads.get(i));
+            final PayloadAugmentationResult result =
+                    addMissingScheduleFlags(kmId, configuredScheduleFlags, payloads.get(i), gzipDesignated);
             payloads.set(i, result.payload());
             if (result.addedScheduleFlagCount() > 0)
             {
@@ -197,12 +241,12 @@ public class ConfiguredVmrScheduleFlagEvaluationRequestProcessor implements Eval
     }
 
     private PayloadAugmentationResult addMissingScheduleFlags(final String kmId, final List<String> configuredScheduleFlags,
-            final byte[] payload)
+            final byte[] payload, final boolean gzipDesignated)
     {
         if (ObjectUtils.isEmpty(configuredScheduleFlags))
             return new PayloadAugmentationResult(payload, 0);
 
-        final CDSInput cdsInput = readPayload(payload);
+        final CDSInput cdsInput = readPayload(gzipDesignated ? readGzipPayload(payload) : payload);
         final EvaluatedPerson patient = Optional.ofNullable(cdsInput)
                 .map(CDSInput::getVmrInput)
                 .map(org.opencds.vmr.v1_0.schema.VMR::getPatient)
@@ -210,15 +254,15 @@ public class ConfiguredVmrScheduleFlagEvaluationRequestProcessor implements Eval
         if (patient == null)
             return new PayloadAugmentationResult(payload, 0);
 
-        patient.setClinicalStatements(Optional.ofNullable(patient.getClinicalStatements())
-                .orElseGet(EvaluatedPerson.ClinicalStatements::new));
-        patient.getClinicalStatements().setObservationResults(Optional.ofNullable(patient.getClinicalStatements().getObservationResults())
-                .orElseGet(EvaluatedPerson.ClinicalStatements.ObservationResults::new));
+        patient.setClinicalStatements(
+                Optional.ofNullable(patient.getClinicalStatements()).orElseGet(EvaluatedPerson.ClinicalStatements::new));
+        patient.getClinicalStatements()
+                .setObservationResults(Optional.ofNullable(patient.getClinicalStatements().getObservationResults())
+                        .orElseGet(EvaluatedPerson.ClinicalStatements.ObservationResults::new));
 
         final List<ObservationResult> observationResults =
                 patient.getClinicalStatements().getObservationResults().getObservationResult();
-        final Set<String> existingFlags = observationResults
-                .stream()
+        final Set<String> existingFlags = observationResults.stream()
                 .flatMap(ConfiguredVmrScheduleFlagEvaluationRequestProcessor::streamObservationResultTree)
                 .map(ObservationResult::getObservationFocus)
                 .flatMap(cd -> extractScheduleFlagCode(cd).stream())
@@ -229,7 +273,9 @@ public class ConfiguredVmrScheduleFlagEvaluationRequestProcessor implements Eval
             return new PayloadAugmentationResult(payload, 0);
 
         missingFlags.stream().map(flag -> createScheduleFlagObservationResult(kmId, flag)).forEach(observationResults::add);
-        return new PayloadAugmentationResult(writePayload(cdsInput), missingFlags.size());
+        final byte[] augmentedPayload = writePayload(cdsInput);
+        return new PayloadAugmentationResult(gzipDesignated ? writeGzipPayload(augmentedPayload) : augmentedPayload,
+                missingFlags.size());
     }
 
     private ObservationResult createScheduleFlagObservationResult(final String kmId, final String scheduleFlag)

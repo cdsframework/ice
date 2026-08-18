@@ -5,7 +5,7 @@ spring:
     import:
       - classpath:data/knowledgeCommon/org.cdsframework.ice/ice-supporting-data/iceSupportingData.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/iceSupportingData.yml
-      - classpath:data/supportedModulePlanDefinitions.yml
+      - classpath:data/supportedKnowledgeBasePlanDefinitions.yml
   threads:
     virtual:
       enabled: true
@@ -14,7 +14,8 @@ spring:
 
 springdoc:
   paths-to-match:
-    - '/cds/$immunization-forecast'
+    - '/cds/metadata'
+    - '/cds/$immds-forecast'
     - '/cds/supporting-data/**'
   api-docs:
     path: /cds/ice-forecast/api-docs
@@ -45,7 +46,7 @@ cds-engine:
 
 open-api:
   title: CDS Immunization Calculation Engine API
-  description: 'FHIR operation endpoint for immunization evaluation and forecasting: POST /cds/$immunization-forecast. The request body is a FHIR Parameters resource and the response is a FHIR Parameters resource.'
+  description: 'Proposed R6 ImmDS forecast operation: POST /cds/$immds-forecast. The request body is a FHIR Parameters resource and the response is a FHIR Parameters resource.'
   version: ${ice.ice-version}
   contact:
     name: ICE Support
@@ -56,8 +57,8 @@ open-api:
     url: https://www.gnu.org/licenses/lgpl-3.0.en.html
 
 ice:
-  knowledge-modules:
-    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+  knowledge-bases:
+    '[https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
       output-earliest-and-overdue-dates: true
       enable-dose-override-feature: false
       output-supplemental-text: true
@@ -77,7 +78,7 @@ ice:
       supplemental-text-mode: LEGACY
       drools-path: classpath:drools
   config-path: classpath:config
-  ice-base-module-canonical: http://cdsframework.org/PlanDefinition/common-ice-forecast|1.0.0
+  ice-base-knowledge-base: https://terminology.cdsframework.org/ice/PlanDefinition/common-ice-forecast|1.0.0
   enable-drools-event-logging: false
   fire-limit: 25000
   ice-version: ICE_2.58.1

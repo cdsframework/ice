@@ -165,23 +165,23 @@ public final class IceApiClient
     private final ObjectMapper objectMapper;
     private final URI baseUri;
 
-    public IceApiClient(HttpClient httpClient, ObjectMapper objectMapper, URI baseUri)
+    public IceApiClient(final HttpClient httpClient, final ObjectMapper objectMapper, final URI baseUri)
     {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
         this.baseUri = baseUri;
     }
 
-    public ForecastResponse forecast(Parameters request) throws IOException, InterruptedException
+    public ForecastResponse forecast(final Parameters request) throws IOException, InterruptedException
     {
-        var json = objectMapper.writeValueAsString(request);
-        var httpRequest = HttpRequest.newBuilder(baseUri.resolve("/cds/$immunization-forecast"))
+        final var json = objectMapper.writeValueAsString(request);
+        final var httpRequest = HttpRequest.newBuilder(baseUri.resolve("/cds/$immunization-forecast"))
                 .header("Content-Type", "application/fhir+json")
                 .header("Accept", "application/fhir+json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
 
-        var httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        final var httpResponse = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
         final var parameters = objectMapper.readValue(httpResponse.body(), Parameters.class);
         return ForecastResponseParser.parse(parameters);
     }
@@ -221,7 +221,7 @@ For Spring Boot, I would use:
 ```yaml
 ice:
   base-url: https://ice-service-development.cdsframework.org
-  module-canonical: http://cdsframework.org/PlanDefinition/ice-forecast
+  module-canonical: https://terminology.cdsframework.org/PlanDefinition/ice-forecast
   module-version: 1.0.0
 ```
 

@@ -2,10 +2,8 @@ package org.cdsframework.ice.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import java.util.Map;
 
 import org.cdsframework.fhir.CodeSystem;
@@ -23,15 +21,15 @@ import org.springframework.core.io.ByteArrayResource;
 class SupportingDataServiceCodeSystemMappingTest
 {
     private static final String KM_ID = "org.nyc.cir^ICE^1.0.0";
-    private static final String MODULE_CANONICAL = "http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
+    private static final String KNOWLEDGE_BASE = "https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
 
     private static CdsEngineProperties createCdsEngineProperties()
     {
         final CdsEngineProperties properties = new CdsEngineProperties();
-        properties.setModuleCanonicalDefinitionMap(Map.of(MODULE_CANONICAL, new CdsEngineProperties.ModuleCanonicalDefinition(
+        properties.setKnowledgeBaseDefinitionMap(Map.of(KNOWLEDGE_BASE, new CdsEngineProperties.KnowledgeBaseDefinition(
                 PlanDefinition.builder()
                         .identifier(Identifier.builder()
-                                .system("http://cdsframework.org/identifiers/knowledge-modules")
+                                .system("https://terminology.cdsframework.org/ice/identifiers/knowledge-bases")
                                 .value(KM_ID)
                                 .build())
                         .build(), Map.of(), Map.of(), Map.of("SUPPORTED_VACCINES", CodeSystem.builder()
@@ -48,19 +46,19 @@ class SupportingDataServiceCodeSystemMappingTest
                 .name("SUPPLEMENTAL_EVALUATION_REASON_CONCEPT")
                 .identifier(
                         Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.51").build())
-                .url("http://terminology.cdsframework.org/ice/supplemental-evaluation-reason")
+                .url("https://terminology.cdsframework.org/ice/supplemental-evaluation-reason")
                 .build(), "EVALUATION_REASON_CONCEPT", CodeSystem.builder()
                 .name("EVALUATION_REASON_CONCEPT")
                 .identifier(
                         Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.3").build())
-                .url("http://terminology.cdsframework.org/ice/evaluation-reason")
+                .url("https://terminology.cdsframework.org/ice/evaluation-reason")
                 .build(), "TEST_DISPLAY_CONCEPT", CodeSystem.builder()
                 .name("TEST_DISPLAY_CONCEPT")
                 .identifier(Identifier.builder()
                         .system("urn:ietf:rfc:3986")
                         .value("urn:oid:2.16.840.1.113883.3.795.12.100.700")
                         .build())
-                .url("http://terminology.cdsframework.org/ice/test-display")
+                .url("https://terminology.cdsframework.org/ice/test-display")
                 .concept(CodeSystemConcept.builder()
                         .code("PRIMARY")
                         .display("Primary Display")
@@ -69,76 +67,65 @@ class SupportingDataServiceCodeSystemMappingTest
                                 .valueCoding(Coding.builder().code("ALIAS").build())
                                 .build())
                         .build())
-                .build(), "SUPPORTED_SCHEDULE_FLAGS", CodeSystem.builder()
-                .name("SUPPORTED_SCHEDULE_FLAGS")
-                .identifier(Identifier.builder()
-                        .system("urn:ietf:rfc:3986")
-                        .value("urn:oid:2.16.840.1.113883.3.795.12.100.502")
-                        .build())
-                .url("http://terminology.cdsframework.org/ice/schedule-flags")
-                .concept(CodeSystemConcept.builder().code("HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID")
-                        .display("Evaluate Invalid 3rd Hep B Dose as Accepted Extra Dose")
-                        .build())
-                .concept(CodeSystemConcept.builder().code("POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID")
-                        .display("Evaluate 4th/5th Polio Dose Below Minimum Age as Accepted Extra Dose")
-                        .build())
                 .build()), Map.of("2.16.840.1.113883.6.103", "http://hl7.org/fhir/sid/icd-9-cm"))));
         return properties;
     }
 
-    private static IceProperties createIceProperties(final java.util.List<String> scheduleFlags)
+    private static IceProperties createIceProperties()
     {
         final IceProperties properties = new IceProperties();
-        properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
-        properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
-                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, false,
-                        java.util.List.of(),
+        properties.setIceBaseKnowledgeBase(KNOWLEDGE_BASE);
+        properties.setKnowledgeBases(Map.of(KNOWLEDGE_BASE,
+                new IceProperties.KnowledgeBaseProperties(true, false, true, false, true, false, false, false, java.util.List.of(),
                         java.util.List.of(), false, IceProperties.SupplementalTextMode.LEGACY,
                         new ByteArrayResource(new byte[0]))));
-        properties.setScheduleFlags(scheduleFlags);
         return properties;
     }
 
     private final SupportingDataService supportingDataService =
-            new SupportingDataService(createCdsEngineProperties(), createIceProperties(List.of()));
+            new SupportingDataService(createCdsEngineProperties(), createIceProperties());
 
     @Test
     void resolvesKnowledgeModuleIdFromCanonicalPlanDefinitionMapping()
     {
-        assertEquals(KM_ID, supportingDataService.getKmIdFromModuleCanonicalUrl(MODULE_CANONICAL));
+        assertEquals(KM_ID, supportingDataService.getKmIdFromKnowledgeBaseUrl(KNOWLEDGE_BASE));
     }
 
     @Test
     void mapsCvxOidToFhirSidUrl()
     {
-        assertEquals("http://hl7.org/fhir/sid/cvx",
-                supportingDataService.getCodeableConcept(KM_ID, "10", "IPV", "2.16.840.1.113883.12.292", null)
-                        .coding()
-                        .getFirst()
-                        .system());
+        final CodeableConcept concept =
+                supportingDataService.getCodeableConcept(KM_ID, "10", "IPV", "2.16.840.1.113883.12.292", null);
+
+        assertEquals("http://hl7.org/fhir/sid/cvx", concept.coding().getFirst().system());
     }
 
     @Test
     void mapsConfiguredIceOidToCanonicalUrl()
     {
-        assertEquals("http://terminology.cdsframework.org/ice/evaluation-reason",
-                supportingDataService.getCodeableConcept(KM_ID, "SUPPLEMENTAL_TEXT", "Supplemental",
-                        "2.16.840.1.113883.3.795.12.100.3", null).coding().getFirst().system());
+        final CodeableConcept concept = supportingDataService.getCodeableConcept(KM_ID, "SUPPLEMENTAL_TEXT", "Supplemental",
+                "2.16.840.1.113883.3.795.12.100.3", null);
+
+        assertEquals("https://terminology.cdsframework.org/ice/evaluation-reason", concept.coding().getFirst().system());
     }
 
     @Test
     void leavesHttpUrlUnchanged()
     {
-        assertEquals("http://example.org/fhir/CodeSystem/custom",
+        final CodeableConcept concept =
                 supportingDataService.getCodeableConcept(KM_ID, "code", "display", "http://example.org/fhir/CodeSystem/custom",
-                        null).coding().getFirst().system());
+                        null);
+
+        assertEquals("http://example.org/fhir/CodeSystem/custom", concept.coding().getFirst().system());
     }
 
     @Test
     void mapsConfiguredCanonicalUrlBackToOid()
     {
-        assertEquals("2.16.840.1.113883.3.795.12.100.51", supportingDataService.toRequiredInternalCodeSystemOid(KM_ID,
-                "http://terminology.cdsframework.org/ice/supplemental-evaluation-reason"));
+        final String oid = supportingDataService.toRequiredInternalCodeSystemOid(KM_ID,
+                "https://terminology.cdsframework.org/ice/supplemental-evaluation-reason");
+
+        assertEquals("2.16.840.1.113883.3.795.12.100.51", oid);
     }
 
     @Test
@@ -161,24 +148,5 @@ class SupportingDataServiceCodeSystemMappingTest
     void considersCodeUnsupportedWhenSupportedPropertyIsFalse()
     {
         assertFalse(supportingDataService.isCodeSupportedInCodeSystem(KM_ID, "SUPPORTED_VACCINES", "24"));
-    }
-
-    @Test
-    void acceptsConfiguredScheduleFlagsWhenAllCodesExist()
-    {
-        assertEquals(KM_ID, new SupportingDataService(createCdsEngineProperties(), createIceProperties(
-                java.util.List.of("HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID",
-                        "POLIO_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID"))).getKmIdFromModuleCanonicalUrl(
-                MODULE_CANONICAL));
-    }
-
-    @Test
-    void rejectsConfiguredScheduleFlagsWhenCodeMissing()
-    {
-        final IllegalStateException exception = assertThrows(IllegalStateException.class,
-                () -> new SupportingDataService(createCdsEngineProperties(),
-                        createIceProperties(java.util.List.of("HEP_B_EXTRA_DOSE_ACCEPTED_INSTEAD_OF_VALID", "DOES_NOT_EXIST"))));
-
-        assertTrue(exception.getMessage().contains("DOES_NOT_EXIST"));
     }
 }

@@ -278,16 +278,15 @@ public class TargetDoseInitializationTracker
             final SubstanceAdministrationEvent sae, final TargetSeries targetSeries, final Vaccine vaccineAdministered,
             final String mappedVaccineConceptCode)
     {
-        final boolean mappedTargetDoseInitialized = mappedVaccineConceptCode == null
-                                                        ? containsMappedTargetDoseForSameShotAndSeries(sae, targetSeries,
-                                                                vaccineAdministered)
-                                                        : isMappedVaccineAlreadyInitializedForSameShotAndSeries(sae, targetSeries,
-                                                                mappedVaccineConceptCode);
+        final boolean mappedTargetDoseInitialized =
+                mappedVaccineConceptCode == null
+                ? containsMappedTargetDoseForSameShotAndSeries(sae, targetSeries, vaccineAdministered)
+                : isMappedVaccineAlreadyInitializedForSameShotAndSeries(sae, targetSeries, mappedVaccineConceptCode);
 
         return specifiedSubstanceAdministrationEventAndAssociatedConceptHasNotPreviouslyBeenInitializedForAnotherVaccineGroup(ic,
                 svgc) && !mappedTargetDoseInitialized
                 && atLeastOneVaccineComponentHasNotBeenNotInitializedForSpecifiedSubstanceAdministrationEventAndSeries(sae,
-                        targetSeries, vaccineAdministered);
+                targetSeries, vaccineAdministered);
 
         // If there is a season associated with the SeriesRules, ensure that the shot administration date falls within the set of dates
         /*

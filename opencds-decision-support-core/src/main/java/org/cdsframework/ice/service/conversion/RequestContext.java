@@ -9,7 +9,7 @@ import org.cdsframework.fhir.OperationOutcome;
 import org.cdsframework.fhir.Patient;
 
 record RequestContext(LocalDate assessmentDate,
-                      String moduleCanonical,
+                      String knowledgeBaseCanonical,
                       Patient patient,
                       List<Immunization> immunizations,
                       List<Observation> observations,

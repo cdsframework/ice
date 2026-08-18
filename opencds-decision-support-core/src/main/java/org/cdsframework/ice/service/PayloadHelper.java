@@ -28,7 +28,6 @@ import org.opencds.vmr.v1_0.internal.datatypes.BL;
 import org.opencds.vmr.v1_0.internal.datatypes.CD;
 import org.opencds.vmr.v1_0.internal.datatypes.INT;
 import org.opencds.vmr.v1_0.internal.datatypes.IVLDate;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -1169,9 +1168,8 @@ public class PayloadHelper
 
     private void createVaccineGroupUrlObservation(final String focalPersonId, final String vg, final String sourceId)
     {
-        Optional.ofNullable(this.backingSchedule.getICESupportingDataConfiguration()
-                        .getSupportedVaccineGroups()
-                        .getVaccineGroupItem(vg))
+        Optional.ofNullable(
+                        this.backingSchedule.getICESupportingDataConfiguration().getSupportedVaccineGroups().getVaccineGroupItem(vg))
                 .map(LocallyCodedVaccineGroupItem::getVaccineGroupRulesUrl)
                 .ifPresent(url ->
                 {
@@ -1203,9 +1201,8 @@ public class PayloadHelper
             final String sourceId)
     {
         final String _METHODNAME = "createVaccineGroupScheduleAuthoritiesObservation: ";
-        final LocallyCodedVaccineGroupItem lVGI = this.backingSchedule.getICESupportingDataConfiguration()
-                .getSupportedVaccineGroups()
-                .getVaccineGroupItem(vg);
+        final LocallyCodedVaccineGroupItem lVGI =
+                this.backingSchedule.getICESupportingDataConfiguration().getSupportedVaccineGroups().getVaccineGroupItem(vg);
 
         if (lVGI == null)
         {
@@ -1229,9 +1226,8 @@ public class PayloadHelper
         for (final String lSACode : lScheduleAuthorityCodes)
         {
             final String lSAItemName = "%s.%s".formatted(scheduleAuthorityCdsListCode, lSACode);
-            final LocallyCodedCdsListItem lSALI = this.backingSchedule.getICESupportingDataConfiguration()
-                    .getSupportedCdsLists()
-                    .getCdsListItem(lSAItemName);
+            final LocallyCodedCdsListItem lSALI =
+                    this.backingSchedule.getICESupportingDataConfiguration().getSupportedCdsLists().getCdsListItem(lSAItemName);
 
             if (lSALI != null)
             {

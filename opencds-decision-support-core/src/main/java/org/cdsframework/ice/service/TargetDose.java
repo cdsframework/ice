@@ -273,10 +273,7 @@ public class TargetDose
         {
             if (status == DoseStatus.ACCEPTED || status == DoseStatus.INVALID || status == DoseStatus.VALID)
                 setHasBeenEvaluated(true);
-            if (status == DoseStatus.VALID)
-                setIsValid(true);
-            else
-                setIsValid(false);
+            setIsValid(status == DoseStatus.VALID);
             if (status == DoseStatus.EVALUATION_NOT_STARTED || status == DoseStatus.PRIMARY_SHOT_DETERMINATION_IN_PROCESS)
             {
                 setPostEvaluationCheckCompleted(false);

@@ -1,14 +1,14 @@
 cds-engine:
-  module-canonical-definition-map:
-    '[http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+  knowledge-base-definition-map:
+    '[https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
       outbound-code-system-map:
         "2.16.840.1.113883.6.96": "http://snomed.info/sct"
         "2.16.840.1.113883.6.1": "http://loinc.org"
         "2.16.840.1.113883.6.103": "http://hl7.org/fhir/sid/icd-9-cm"
         "2.16.840.1.113883.6.90": "http://hl7.org/fhir/sid/icd-10-cm"
         "2.16.840.1.113883.6.3": "http://hl7.org/fhir/sid/icd-10"
-        "2.16.840.1.113883.3.795.12.100.4": "http://terminology.cdsframework.org/ice/unknown"
-        "2.16.840.1.113883.3.795.12.100.500": "http://terminology.cdsframework.org/ice/series-display-options"
+        "2.16.840.1.113883.3.795.12.100.4": "https://terminology.cdsframework.org/ice/unknown"
+        "2.16.840.1.113883.3.795.12.100.500": "https://terminology.cdsframework.org/ice/series-display-options"
 
 spring:
   config:
@@ -16,12 +16,13 @@ spring:
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedDiseaseImmunitySources.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedDiseaseImmunityReasons.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedDiseaseConcept.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedContextualConditions.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedEvaluationReasons.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedSupplementalEvaluationReasons.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedRecommendationReasons.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedSupplementalRecommendationReasons.yml
-      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedImmunizationSubpotentReasons.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedScheduleFlags.yml
+      - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedImmunizationSubpotentReasons.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedSeasons.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedScheduleAuthority.yml
       - classpath:data/knowledgeModule/org.nyc.cir.ice/ice-supporting-data/supportedSeries.yml

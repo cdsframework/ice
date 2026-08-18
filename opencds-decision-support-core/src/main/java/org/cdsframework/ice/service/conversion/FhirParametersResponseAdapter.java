@@ -25,7 +25,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class FhirParametersResponseAdapter
 {
-    private static final String OUTPUT_PARAM = "output";
     private static final String DURATION_MS_PARAM = "durationMs";
     private static final String ENGINE_VERSION_PARAM = "engineVersion";
     private static final String EVALUATION_PARAM = "evaluation";
@@ -40,7 +39,7 @@ public class FhirParametersResponseAdapter
     private static final String OUTCOME_SEVERITY_WARNING = "warning";
     private static final String OUTCOME_SEVERITY_ERROR = "error";
 
-    public static Parameters createForecastParametersResponse(final String moduleCanonical, final Reference patientReference,
+    public static Parameters createForecastParametersResponse(final String knowledgeBase, final Reference patientReference,
             final LocalDateTime requestDateTime, final String engineVersion, final List<OperationOutcome.Issue> validationIssues,
             final List<ImmunizationEvaluation> immunizationEvaluations,
             final List<ImmunizationRecommendation> immunizationRecommendations)
@@ -64,22 +63,24 @@ public class FhirParametersResponseAdapter
                 .status(STATUS_SUCCESS)
                 .subject(patientReference)
                 .occurrenceDateTime(requestDateTime.atZone(ZoneId.systemDefault()).toInstant().toString())
-                .moduleCanonical(moduleCanonical)
+                .moduleCanonical(knowledgeBase)
                 .build();
 
-        final ParametersParameter.ParametersParameterBuilder outputBuilder = ParametersParameter.builder()
-                .name(OUTPUT_PARAM)
-                .part(ParametersParameter.builder().name(DURATION_MS_PARAM).valueInteger(durationMs).build())
-                .part(ParametersParameter.builder().name(ENGINE_VERSION_PARAM).valueString(engineVersion).build())
-                .part(ParametersParameter.builder().name(GUIDANCE_RESPONSE_PARAM).resource(guidanceResponse).build())
-                .part(ParametersParameter.builder().name(OPERATION_OUTCOME_PARAM).resource(createOperationOutcome(issues)).build());
+        final Parameters.ParametersBuilder parametersBuilder = Parameters.builder()
+                .parameter(ParametersParameter.builder().name(DURATION_MS_PARAM).valueInteger(durationMs).build())
+                .parameter(ParametersParameter.builder().name(ENGINE_VERSION_PARAM).valueString(engineVersion).build())
+                .parameter(ParametersParameter.builder().name(GUIDANCE_RESPONSE_PARAM).resource(guidanceResponse).build())
+                .parameter(ParametersParameter.builder()
+                        .name(OPERATION_OUTCOME_PARAM)
+                        .resource(createOperationOutcome(issues))
+                        .build());
 
-        immunizationEvaluations.forEach(immunizationEvaluation -> outputBuilder.part(
+        immunizationEvaluations.forEach(immunizationEvaluation -> parametersBuilder.parameter(
                 ParametersParameter.builder().name(EVALUATION_PARAM).resource(immunizationEvaluation).build()));
-        immunizationRecommendations.forEach(immunizationRecommendation -> outputBuilder.part(
+        immunizationRecommendations.forEach(immunizationRecommendation -> parametersBuilder.parameter(
                 ParametersParameter.builder().name(RECOMMENDATION_PARAM).resource(immunizationRecommendation).build()));
 
-        return Parameters.builder().parameter(outputBuilder.build()).build();
+        return parametersBuilder.build();
     }
 
     public static Parameters createErrorParametersResponse(final String outcomeCode, final String detailText,
@@ -89,12 +90,9 @@ public class FhirParametersResponseAdapter
         final OperationOutcome operationOutcome =
                 createOperationOutcome(List.of(createOperationOutcomeIssue(outcomeCode, detailText, OUTCOME_SEVERITY_ERROR)));
         return Parameters.builder()
-                .parameter(ParametersParameter.builder()
-                        .name(OUTPUT_PARAM)
-                        .part(ParametersParameter.builder().name(DURATION_MS_PARAM).valueInteger(durationMs).build())
-                        .part(ParametersParameter.builder().name(ENGINE_VERSION_PARAM).valueString(engineVersion).build())
-                        .part(ParametersParameter.builder().name(OPERATION_OUTCOME_PARAM).resource(operationOutcome).build())
-                        .build())
+                .parameter(ParametersParameter.builder().name(DURATION_MS_PARAM).valueInteger(durationMs).build())
+                .parameter(ParametersParameter.builder().name(ENGINE_VERSION_PARAM).valueString(engineVersion).build())
+                .parameter(ParametersParameter.builder().name(OPERATION_OUTCOME_PARAM).resource(operationOutcome).build())
                 .build();
     }
 

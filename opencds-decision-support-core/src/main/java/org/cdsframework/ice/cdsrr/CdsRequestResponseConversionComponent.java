@@ -490,7 +490,7 @@ public class CdsRequestResponseConversionComponent
         observationResult.getTemplateId().add(createIi("2.16.840.1.113883.3.795.11.6.3.1", null));
         observationResult.setId(createIi(UUID.randomUUID().toString(), null));
         observationResult.getInterpretation().add(createCd("IS_IMMUNE", "2.16.840.1.113883.3.795.12.100.9", "Is Immune"));
-        observationResult.setObservationEventTime(Optional.ofNullable(observation.effectiveDateTime())
+        observationResult.setObservationEventTime(Optional.ofNullable(observation.valueDateTime())
                 .map(CdsRequestResponseConversionComponent::convertDate)
                 .map((d) -> createIvlts(d, d))
                 .orElse(null));

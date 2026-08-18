@@ -51,7 +51,7 @@ public class ICESupportingDataLoaderPluginTest
         when(context.supportingData()).thenReturn(Collections.singletonMap("sd", supportingData));
         when(context.globals()).thenReturn(globals);
         when(supportingData.kmId()).thenReturn("testKmId");
-        when(supportingDataService.getKnowledgeModulePropertiesByKmId()).thenReturn(Collections.emptyMap());
+        when(supportingDataService.getKnowledgeBasePropertiesByKmId()).thenReturn(Collections.emptyMap());
 
         final IceProperties iceProperties = mock(IceProperties.class);
         when(iceProperties.getOutputEarliestAndOverdueDates()).thenReturn(Optional.empty());
@@ -84,18 +84,18 @@ public class ICESupportingDataLoaderPluginTest
     }
 
     @Test
-    public void testExecuteKnowledgeModulePropertiesNotFound()
+    public void testExecuteKnowledgeBasePropertiesNotFound()
     {
-        when(supportingDataService.getKnowledgeModulePropertiesForKmId("testKmId")).thenThrow(
-                new IllegalStateException("KnowledgeModuleProperties not found for kmId: testKmId"));
+        when(supportingDataService.getKnowledgeBasePropertiesForKmId("testKmId")).thenThrow(
+                new IllegalStateException("KnowledgeBaseProperties not found for kmId: testKmId"));
         assertThrows(RuntimeException.class, () -> plugin.execute(context));
     }
 
     @Test
     public void testExecuteSuccessful()
     {
-        final IceProperties.KnowledgeModuleProperties kmProps = createMockKmProps();
-        when(supportingDataService.getKnowledgeModulePropertiesForKmId("testKmId")).thenReturn(kmProps);
+        final IceProperties.KnowledgeBaseProperties kmProps = createMockKmProps();
+        when(supportingDataService.getKnowledgeBasePropertiesForKmId("testKmId")).thenReturn(kmProps);
 
         final Schedule schedule = mock(Schedule.class);
         when(schedule.isScheduleInitialized()).thenReturn(true);
@@ -120,8 +120,8 @@ public class ICESupportingDataLoaderPluginTest
     @Test
     public void testExecuteCacheHit()
     {
-        final IceProperties.KnowledgeModuleProperties kmProps = createMockKmProps();
-        when(supportingDataService.getKnowledgeModulePropertiesForKmId("testKmId")).thenReturn(kmProps);
+        final IceProperties.KnowledgeBaseProperties kmProps = createMockKmProps();
+        when(supportingDataService.getKnowledgeBasePropertiesForKmId("testKmId")).thenReturn(kmProps);
 
         final Schedule schedule = mock(Schedule.class);
         when(schedule.isScheduleInitialized()).thenReturn(true);
@@ -147,8 +147,8 @@ public class ICESupportingDataLoaderPluginTest
     @Test
     public void testExecuteScheduleNotInitialized()
     {
-        final IceProperties.KnowledgeModuleProperties kmProps = createMockKmProps();
-        when(supportingDataService.getKnowledgeModulePropertiesForKmId("testKmId")).thenReturn(kmProps);
+        final IceProperties.KnowledgeBaseProperties kmProps = createMockKmProps();
+        when(supportingDataService.getKnowledgeBasePropertiesForKmId("testKmId")).thenReturn(kmProps);
 
         final Schedule schedule = mock(Schedule.class);
         when(schedule.isScheduleInitialized()).thenReturn(false);
@@ -157,9 +157,9 @@ public class ICESupportingDataLoaderPluginTest
         assertThrows(RuntimeException.class, () -> plugin.execute(context));
     }
 
-    private IceProperties.KnowledgeModuleProperties createMockKmProps()
+    private IceProperties.KnowledgeBaseProperties createMockKmProps()
     {
-        final IceProperties.KnowledgeModuleProperties props = mock(IceProperties.KnowledgeModuleProperties.class);
+        final IceProperties.KnowledgeBaseProperties props = mock(IceProperties.KnowledgeBaseProperties.class);
         when(props.outputEarliestAndOverdueDates()).thenReturn(true);
         when(props.enableDoseOverrideFeature()).thenReturn(false);
         when(props.outputSupplementalText()).thenReturn(true);

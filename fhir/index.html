@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>ICE FHIR Artifacts</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #101318;
+            --panel: #171c23;
+            --text: #edf2f7;
+            --muted: #a8b3c2;
+            --border: #2b3441;
+            --header: #202733;
+            --link: #7cc4ff;
+            --status-bg: #163524;
+            --status-text: #80e0a7;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.45;
+        }
+
+        main {
+            width: min(1240px, calc(100% - 32px));
+            margin: 32px auto;
+        }
+
+        header {
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .summary {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .nav {
+            margin: 18px 0;
+        }
+
+        .nav a {
+            display: inline-block;
+            padding: 8px 0;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+
+        th,
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: var(--header);
+            color: #c7d2e0;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: 0;
+        }
+
+        a {
+            color: var(--link);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        a:hover,
+        a:focus {
+            text-decoration: underline;
+        }
+
+        code {
+            color: #cbd5e1;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        .status {
+            display: inline-block;
+            min-width: 54px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: var(--status-bg);
+            color: var(--status-text);
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .version {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header>
+        <h1>ICE FHIR Artifacts</h1>
+        <p class="summary">Public non-CodeSystem FHIR artifacts under the local <code>fhir/ice/</code> directory.</p>
+    </header>
+
+    <nav aria-label="Related indexes" class="nav">
+        <a href="code-systems.html">code-systems.html</a>
+    </nav>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>File</th>
+                <th>Type</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Canonical URL</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><a href="PlanDefinition/ice-forecast.json">PlanDefinition/ice-forecast.json</a></td>
+                <td>PlanDefinition</td>
+                <td>ICE Immunization Forecast</td>
+                <td>PlanDefinition representing the ICE immunization forecasting knowledge base used by the CDS Framework FHIR
+                    ImmDS forecast operation.
+                </td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/PlanDefinition/ice-forecast</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/OperationDefinition/immds-forecast.json">ice/OperationDefinition/immds-forecast.json</a>
+                </td>
+                <td>OperationDefinition</td>
+                <td>ImmDS Forecast</td>
+                <td>Produces immunization forecast output from patient demographics, immunizations, observations, and a selected
+                    forecasting knowledge base using the proposed R6 HLN ImmDS operation. Output includes
+                    ImmunizationRecommendation and ImmunizationEvaluation resources with ICE-specific extensions for series
+                    selection type and season.
+                </td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/OperationDefinition/immds-forecast</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/PlanDefinition/common-ice-forecast.json">ice/PlanDefinition/common-ice-forecast.json</a></td>
+                <td>PlanDefinition</td>
+                <td>ICE Common Forecasting Base Rules</td>
+                <td>PlanDefinition representing common ICE supporting data and shared forecasting rules used across
+                    knowledge-base-specific configurations.
+                </td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/PlanDefinition/common-ice-forecast</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/StructureDefinition/ice-dose-age-constraint.json">ice/StructureDefinition/ice-dose-age-constraint.json</a>
+                </td>
+                <td>StructureDefinition</td>
+                <td>ICE Dose Age Constraint</td>
+                <td>Age constraints for a vaccine dose represented by PlanDefinition.action.</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-age-constraint</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/StructureDefinition/ice-dose-interval-constraint.json">ice/StructureDefinition/ice-dose-interval-constraint.json</a>
+                </td>
+                <td>StructureDefinition</td>
+                <td>ICE Dose Interval Constraint</td>
+                <td>Interval constraints from a prior dose to the current dose.</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-interval-constraint</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/StructureDefinition/ice-dose-number.json">ice/StructureDefinition/ice-dose-number.json</a></td>
+                <td>StructureDefinition</td>
+                <td>ICE Dose Number</td>
+                <td>Identifies the dose number represented by a PlanDefinition.action entry.</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-number</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/StructureDefinition/ice-dose-vaccine.json">ice/StructureDefinition/ice-dose-vaccine.json</a></td>
+                <td>StructureDefinition</td>
+                <td>ICE Dose Vaccine</td>
+                <td>Permitted vaccine terminology for a given dose action.</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/StructureDefinition/ice-dose-vaccine</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/StructureDefinition/ice-series-metadata.json">ice/StructureDefinition/ice-series-metadata.json</a>
+                </td>
+                <td>StructureDefinition</td>
+                <td>ICE Series Metadata</td>
+                <td>Carries series-level coded terminology metadata for an ICE series PlanDefinition.</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-metadata</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/StructureDefinition/ice-series-plan-definition.json">ice/StructureDefinition/ice-series-plan-definition.json</a>
+                </td>
+                <td>StructureDefinition</td>
+                <td>ICE Series PlanDefinition</td>
+                <td>Profile for representing ICE SeriesData as a PlanDefinition with one action per dose.</td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/StructureDefinition/ice-series-plan-definition</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/StructureDefinition/immunization-selection-context.json">ice/StructureDefinition/immunization-selection-context.json</a>
+                </td>
+                <td>StructureDefinition</td>
+                <td>Immunization Selection Context</td>
+                <td>Captures the coded series selection, series selection type, and optional season selection associated with
+                    immunization evaluations and recommendations.
+                </td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/StructureDefinition/immunization-selection-context</code></td>
+            </tr>
+            <tr>
+                <td><a href="ice/StructureDefinition/vaccine-group-rules-artifact.json">ice/StructureDefinition/vaccine-group-rules-artifact.json</a>
+                </td>
+                <td>StructureDefinition</td>
+                <td>Vaccine Group Rules Artifact</td>
+                <td>Associated with an ImmunizationEvaluation or ImmunizationRecommendation.recommendation, this extension contains
+                    a documentation RelatedArtifact for the vaccine group rules.
+                </td>
+                <td class="version">1.0.0</td>
+                <td><span class="status">active</span></td>
+                <td><code>https://terminology.cdsframework.org/ice/StructureDefinition/vaccine-group-rules-artifact</code></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+</body>
+</html>

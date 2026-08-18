@@ -33,15 +33,15 @@ import org.springframework.core.io.ByteArrayResource;
 public class ServiceMicroBenchmark
 {
     private static final String KM_ID = "org.nyc.cir^ICE^1.0.0";
-    private static final String MODULE_CANONICAL = "http://cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
+    private static final String KNOWLEDGE_BASE = "https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0";
 
     private static CdsEngineProperties createCdsEngineProperties()
     {
         final CdsEngineProperties properties = new CdsEngineProperties();
-        properties.setModuleCanonicalDefinitionMap(Map.of(MODULE_CANONICAL, new CdsEngineProperties.ModuleCanonicalDefinition(
+        properties.setKnowledgeBaseDefinitionMap(Map.of(KNOWLEDGE_BASE, new CdsEngineProperties.KnowledgeBaseDefinition(
                 PlanDefinition.builder()
                         .identifier(Identifier.builder()
-                                .system("http://cdsframework.org/identifiers/knowledge-modules")
+                                .system("https://terminology.cdsframework.org/ice/identifiers/knowledge-bases")
                                 .value(KM_ID)
                                 .build())
                         .build(), Map.of(), Map.of(), Map.of("SUPPORTED_VACCINES", CodeSystem.builder()
@@ -55,7 +55,7 @@ public class ServiceMicroBenchmark
                 .name("RECOMMENDATION_REASON_CONCEPT")
                 .identifier(
                         Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.6").build())
-                .url("http://terminology.cdsframework.org/ice/recommendation-reason")
+                .url("https://terminology.cdsframework.org/ice/recommendation-reason")
                 .status(PublicationStatusEnum.ACTIVE)
                 .content(CodeSystemContentModeEnum.COMPLETE)
                 .concept(CodeSystemConcept.builder().code("RECOMMENDED").display("Recommended").build())
@@ -63,25 +63,24 @@ public class ServiceMicroBenchmark
                 .name("VACCINE_GROUP_CONCEPT")
                 .identifier(
                         Identifier.builder().system("urn:ietf:rfc:3986").value("urn:oid:2.16.840.1.113883.3.795.12.100.1").build())
-                .url("http://terminology.cdsframework.org/ice/vaccine-group")
+                .url("https://terminology.cdsframework.org/ice/vaccine-group")
                 .status(PublicationStatusEnum.ACTIVE)
                 .content(CodeSystemContentModeEnum.COMPLETE)
                 .concept(CodeSystemConcept.builder().code("100").display("Test Vaccine Group").build())
                 .build()), Map.of("2.16.840.1.113883.6.96", "http://snomed.info/sct", "2.16.840.1.113883.6.1", "http://loinc.org",
                 "2.16.840.1.113883.6.103", "http://hl7.org/fhir/sid/icd-9-cm", "2.16.840.1.113883.6.90",
                 "http://hl7.org/fhir/sid/icd-10-cm", "2.16.840.1.113883.6.3", "http://hl7.org/fhir/sid/icd-10",
-                "2.16.840.1.113883.3.795.12.100.4", "http://terminology.cdsframework.org/ice/unknown",
-                "2.16.840.1.113883.3.795.12.100.500", "http://terminology.cdsframework.org/ice/series-display-options"))));
+                "2.16.840.1.113883.3.795.12.100.4", "https://terminology.cdsframework.org/ice/unknown",
+                "2.16.840.1.113883.3.795.12.100.500", "https://terminology.cdsframework.org/ice/series-display-options"))));
         return properties;
     }
 
     private static IceProperties createIceProperties()
     {
         final IceProperties properties = new IceProperties();
-        properties.setIceBaseModuleCanonical(MODULE_CANONICAL);
-        properties.setKnowledgeModules(Map.of(MODULE_CANONICAL,
-                new IceProperties.KnowledgeModuleProperties(true, false, true, false, true, false, false, false, List.of(),
-                        List.of(),
+        properties.setIceBaseKnowledgeBase(KNOWLEDGE_BASE);
+        properties.setKnowledgeBases(Map.of(KNOWLEDGE_BASE,
+                new IceProperties.KnowledgeBaseProperties(true, false, true, false, true, false, false, false, List.of(), List.of(),
                         false, IceProperties.SupplementalTextMode.LEGACY, new ByteArrayResource(new byte[0]))));
         return properties;
     }
@@ -91,7 +90,7 @@ public class ServiceMicroBenchmark
         return Parameters.builder()
                 .resourceType("Parameters")
                 .parameter(ParametersParameter.builder().name("assessmentDate").valueDate("2026-04-09").build())
-                .parameter(ParametersParameter.builder().name("module").valueCanonical(MODULE_CANONICAL).build())
+                .parameter(ParametersParameter.builder().name("knowledgeBase").valueCanonical(KNOWLEDGE_BASE).build())
                 .parameter(ParametersParameter.builder()
                         .name("patient")
                         .resource(Patient.builder()

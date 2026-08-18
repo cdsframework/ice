@@ -20,15 +20,13 @@ public class ScheduleAuthorityExtensionBuilder
     private static final String SCHEDULE_AUTHORITY_FOCUS_CODE = "ICE_VACCINE_GROUP_SCHEDULE_AUTHORITIES";
     private static final String SCHEDULE_AUTHORITY_FOCUS_CODE_SYSTEM = "2.16.840.1.113883.3.795.12.100.500";
     private static final String SCHEDULE_AUTHORITY_EXTENSION_URL =
-            "http://terminology.cdsframework.org/fhir/StructureDefinition/ice-schedule-authority";
-    private static final String SCHEDULE_AUTHORITY_IDENTIFIER_SYSTEM =
-            "http://terminology.cdsframework.org/ice/schedule-authority";
+            "https://terminology.cdsframework.org/ice/StructureDefinition/ice-schedule-authority";
+    private static final String SCHEDULE_AUTHORITY_IDENTIFIER_SYSTEM = "http://terminology.cdsframework.org/ice/schedule-authority";
     private static final String REFERENCE_TYPE_ORGANIZATION = "Organization";
 
     public List<Extension> build(final List<RelatedClinicalStatement> relatedClinicalStatements)
     {
-        return streamObservationResults(relatedClinicalStatements)
-                .filter(this::isScheduleAuthorityFocusObservation)
+        return streamObservationResults(relatedClinicalStatements).filter(this::isScheduleAuthorityFocusObservation)
                 .map(ObservationResult::getInterpretation)
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)

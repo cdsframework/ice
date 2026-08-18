@@ -51,6 +51,7 @@ public class SupportedScheduleAuthorities implements SupportingData
     private final ICESupportingDataConfiguration iceSupportingDataConfiguration;
     private final Map<String, LocallyCodedScheduleAuthorityItem> cdsListItemNameToScheduleAuthorityItem;
     private final boolean isSupportingDataConsistent;
+
     /**
      * SupportedScheduleAuthorities constructor
      */
@@ -94,8 +95,7 @@ public class SupportedScheduleAuthorities implements SupportingData
     {
         final String _METHODNAME = "initializeFromCdsLists(): ";
 
-        final Collection<LocallyCodedCdsListItem> lCdsListItems = this.iceSupportingDataConfiguration
-                .getSupportedCdsLists()
+        final Collection<LocallyCodedCdsListItem> lCdsListItems = this.iceSupportingDataConfiguration.getSupportedCdsLists()
                 .getCdsListItemsAssociatedWithCdsListCode(ICEConceptType.SCHEDULE_AUTHORITY.getIceConceptTypeValue());
 
         if (lCdsListItems == null)
@@ -113,16 +113,13 @@ public class SupportedScheduleAuthorities implements SupportingData
                     .displayName(lCdsListItem.getCdsListItemValue())
                     .build();
 
-            final ScheduleAuthority lScheduleAuthority = ScheduleAuthority.builder()
-                    .code(lScheduleAuthorityCode)
-                    .displayName(lCdsConcept.getDisplayName())
-                    .build();
+            final ScheduleAuthority lScheduleAuthority =
+                    ScheduleAuthority.builder().code(lScheduleAuthorityCode).displayName(lCdsConcept.getDisplayName()).build();
 
             try
             {
                 this.cdsListItemNameToScheduleAuthorityItem.put(lScheduleAuthorityCode,
-                        new LocallyCodedScheduleAuthorityItem(lScheduleAuthorityCode, lCdsConcept,
-                                lScheduleAuthority));
+                        new LocallyCodedScheduleAuthorityItem(lScheduleAuthorityCode, lCdsConcept, lScheduleAuthority));
             }
             catch (final Exception e)
             {

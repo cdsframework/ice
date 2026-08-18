@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @UtilityClass
 public class ICELogicHelper
 {
-    public static <T> T log(T obj, String message)
+    public static <T> T log(final T obj, final String message)
     {
         log.info("{}: {}", message, obj);
         return obj;

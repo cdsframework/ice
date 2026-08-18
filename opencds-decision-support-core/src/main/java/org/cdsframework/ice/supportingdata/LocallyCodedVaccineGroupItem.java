@@ -46,9 +46,8 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
     private final String vaccineGroupRulesUrl;
 
     protected LocallyCodedVaccineGroupItem(final String pVaccineGroupCdsListItemName, final CdsConcept pVaccineGroupCdsConcept,
-            final Collection<String> pRelatedDiseasesCdsListItemNames,
-            final Collection<String> pScheduleAuthorityCdsListItemNames, final int pPriority, final boolean routine,
-            final String pVaccineGroupRulesUrl) throws IllegalArgumentException
+            final Collection<String> pRelatedDiseasesCdsListItemNames, final Collection<String> pScheduleAuthorityCdsListItemNames,
+            final int pPriority, final boolean routine, final String pVaccineGroupRulesUrl) throws IllegalArgumentException
     {
         super(pVaccineGroupCdsListItemName, pVaccineGroupCdsConcept);
 
@@ -63,9 +62,8 @@ public class LocallyCodedVaccineGroupItem extends LocallyCodedCdsItem
         }
 
         this.relatedDiseasesCdsListItemNames = pRelatedDiseasesCdsListItemNames;
-        this.scheduleAuthorityCdsListItemNames = pScheduleAuthorityCdsListItemNames != null
-                ? pScheduleAuthorityCdsListItemNames
-                : new ArrayList<>();
+        this.scheduleAuthorityCdsListItemNames =
+                pScheduleAuthorityCdsListItemNames != null ? pScheduleAuthorityCdsListItemNames : new ArrayList<>();
         this.priority = pPriority;
         this.routine = routine;
         this.vaccineGroupRulesUrl = pVaccineGroupRulesUrl;

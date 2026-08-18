@@ -34,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Supporting Data", description = "Read-only endpoints for ICE module plan definitions and supporting data.")
 public class SupportingDataController
 {
-    private static final String MODULE_CANONICAL_EXAMPLE = "http://cdsframework.org/PlanDefinition/ice-forecast";
+    private static final String MODULE_CANONICAL_EXAMPLE = "https://terminology.cdsframework.org/PlanDefinition/ice-forecast";
     private static final String MODULE_VERSION_EXAMPLE = "1.0.0";
     private static final String CODE_SYSTEM_NAME_EXAMPLE = "SUPPORTED_VACCINES";
 
@@ -51,10 +51,10 @@ public class SupportingDataController
     @GetMapping("/module-plan-definitions")
     public Collection<PlanDefinition> getModulePlanDefinitions()
     {
-        return cdsEngineProperties.getModuleCanonicalDefinitionMap()
+        return cdsEngineProperties.getKnowledgeBaseDefinitionMap()
                 .values()
                 .stream()
-                .map(CdsEngineProperties.ModuleCanonicalDefinition::modulePlanDefinition)
+                .map(CdsEngineProperties.KnowledgeBaseDefinition::knowledgeBasePlanDefinition)
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -163,7 +163,7 @@ public class SupportingDataController
             @Parameter(description = "PlanDefinition version.", example = MODULE_VERSION_EXAMPLE) @RequestParam @NotBlank
             final String moduleVersion)
     {
-        return supportingDataService.getKnowledgeModuleFromCanonicalUrlVersion(moduleCanonical, moduleVersion)
+        return supportingDataService.getKnowledgeBaseFromCanonicalUrlVersion(moduleCanonical, moduleVersion)
                 .planDefinitions()
                 .values();
     }

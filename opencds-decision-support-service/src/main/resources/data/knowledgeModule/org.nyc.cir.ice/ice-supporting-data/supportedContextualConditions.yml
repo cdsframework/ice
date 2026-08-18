@@ -1,0 +1,112 @@
+cds-engine:
+  knowledge-base-definition-map:
+    '[https://terminology.cdsframework.org/PlanDefinition/ice-forecast|1.0.0]':
+      code-systems:
+        SUPPORTED_CONTEXTUAL_CONDITION_CODES:
+          name: SUPPORTED_CONTEXTUAL_CONDITION_CODES
+          identifier:
+            - system: urn:ietf:rfc:3986
+              value: urn:oid:2.16.840.1.113883.3.795.12.100.52
+          description: Supported contextual condition codes for reportable diseases
+          url: http://ivci.org/CodeSystem/contextual-condition
+          title: Supported Contextual Condition Codes
+          version: 1.0.0
+          status: active
+          content: complete
+          property:
+            - code: observationFocus
+              type: Coding
+            - code: observationValue
+              type: Coding
+          concept:
+            - code: '018'
+              display: Laboratory Evidence of Immunity or confirmation of Hepatitis A disease
+              property:
+                - code: observationFocus
+                  valueCoding:
+                    code: '40468003'
+                    display: Viral hepatitis, type A
+                    system: http://snomed.info/sct
+                - code: observationValue
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Documented
+                    system: https://terminology.cdsframework.org/ice/disease-immunity-source
+            - code: '019'
+              display: Laboratory Evidence of Immunity or confirmation of Hepatitis B disease
+              property:
+                - code: observationFocus
+                  valueCoding:
+                    code: '66071002'
+                    display: Type B viral hepatitis
+                    system: http://snomed.info/sct
+                - code: observationValue
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Documented
+                    system: https://terminology.cdsframework.org/ice/disease-immunity-source
+            - code: '020'
+              display: Laboratory Evidence of Immunity for Measles
+              property:
+                - code: observationFocus
+                  valueCoding:
+                    code: '14189004'
+                    display: Measles
+                    system: http://snomed.info/sct
+                - code: observationValue
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Documented
+                    system: https://terminology.cdsframework.org/ice/disease-immunity-source
+            - code: '021'
+              display: Laboratory Evidence of Immunity for Mumps
+              property:
+                - code: observationFocus
+                  valueCoding:
+                    code: '36989005'
+                    display: Mumps
+                    system: http://snomed.info/sct
+                - code: observationValue
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Documented
+                    system: https://terminology.cdsframework.org/ice/disease-immunity-source
+            - code: '022'
+              display: Laboratory Evidence of Immunity for Rubella
+              property:
+                - code: observationFocus
+                  valueCoding:
+                    code: '36653000'
+                    display: Rubella
+                    system: http://snomed.info/sct
+                - code: observationValue
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Documented
+                    system: https://terminology.cdsframework.org/ice/disease-immunity-source
+            - code: '023'
+              display: Laboratory Evidence of Immunity or confirmation of Varicella disease
+              property:
+                - code: observationFocus
+                  valueCoding:
+                    code: '38907003'
+                    display: Varicella
+                    system: http://snomed.info/sct
+                - code: observationValue
+                  valueCoding:
+                    code: DISEASE_DOCUMENTED
+                    display: Disease Documented
+                    system: https://terminology.cdsframework.org/ice/disease-immunity-source
+            - code: '024'
+              display: Healthcare provider verified history of or diagnosis of Varicella
+              property:
+                - code: observationFocus
+                  valueCoding:
+                    code: '38907003'
+                    display: Varicella
+                    system: http://snomed.info/sct
+                - code: observationValue
+                  valueCoding:
+                    code: PROOF_OF_IMMUNITY
+                    display: Proof of Immunity
+                    system: https://terminology.cdsframework.org/ice/disease-immunity-source
