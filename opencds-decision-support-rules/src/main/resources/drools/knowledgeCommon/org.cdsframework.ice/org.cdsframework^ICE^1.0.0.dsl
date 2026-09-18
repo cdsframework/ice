@@ -44,6 +44,8 @@
 [condition][]- [Tt]he [Ss]hot does not belong to the [Ss]eries with [Nn]ame {sSeriesName}=associatedSeriesName != {sSeriesName}
 [condition][]- [Tt]he [Ss]hot belongs to the [Ss]eries {oTargetSeries}=associatedTargetSeries == {oTargetSeries}
 [condition][]- [Tt]he [Ss]hot does not belong to the [Ss]eries {oTargetSeries}=associatedTargetSeries != {oTargetSeries}
+[condition][]- [Tt]he [Ss]hot belongs to the same [Ss]eason as the [Ss]eries {oTargetSeries}=associatedTargetSeries != null, associatedTargetSeries.targetSeason == {oTargetSeries}.targetSeason
+[condition][]- [Tt]he [Ss]hot does not belong to the same [Ss]eason as the [Ss]eries {oTargetSeries}=associatedTargetSeries != null, associatedTargetSeries.targetSeason != {oTargetSeries}.targetSeason
 [condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem} and the [Ss]eries with [Nn]ame {sSeriesName}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}, associatedSeriesName == {sSeriesName}
 [condition][]- [Tt]he [Ss]hot belongs to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=associatedVaccineGroup == {dd_oVaccineGroupCdsListItem}
 [condition][]- [Tt]he [Ss]hot does not belong to the [Vv]accine [Gg]roup {dd_oVaccineGroupCdsListItem}=associatedVaccineGroup != {dd_oVaccineGroupCdsListItem}

@@ -81,7 +81,7 @@ end
  * Non-U.S. vaccine that does not count towards vaccination, administered on or after 9/12/2023
  * If the patient has a prior formulation COVID-19 shot that does not count towards U.S. vaccination (CVX 500, CVX 501, CVX 503, CVX
  * 504, CVX 505, CVX 506, CVX 507, CVX 508, CVX 509, CVX 513, CVX 514, CVX 515, CVX 516, CVX 517, CVX 518, CVX 521) administered on
- * or after 9/12/2023, the intervals to the next target dose are:
+ * or after 9/12/2023, then for the 2023-2024 and 2024-2025 seasons, intervals to the next target dose arethe intervals to the next target dose are:
  * + Absolute Minimum Interval = 8 weeks - 4 days
  * + Minimum Interval = 8 weeks
  * + Recommended Interval = 8 weeks
@@ -96,6 +96,9 @@ rule "COVID-19(9/12/2023+ Abstract): If a COVID-19 shot that does not count towa
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- make note of the date this shot was administered as $currentShotDate
 			- make note of the associated series as $associatedTargetSeries
+		There is a Series $targetSeries identified by $associatedTargetSeries
+			- the series belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
+			- the series belongs to the season with name a member of ("SUPPORTED_SEASON.COVID_19_SEP_2023_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2024_SEASON")
 		There is an administered shot $previousShot distinct from $currentShot
 			- the shot belongs to the Vaccine Group "VACCINE_GROUP_CONCEPT.COVID_19"
 			- that has already been evaluated
@@ -284,7 +287,7 @@ rule "COVID-19: Invoke separate agenda group for evaluation of shots in the COVI
 			- make note of the Associated Series as $associatedTargetSeries
 			- make note of the unique ID of the shot as $uniqueShotId
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the series belongs to the season with name "SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON"
+			- the series belongs to the season with name a member of ("SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2026_SEASON")
 		There does not exist an IceFact
 			- that has finding $uniqueShotId
 			- that has associated administered shot $currentShot
@@ -339,6 +342,10 @@ rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in
 		Set the Agenda Group Focus to "HistoryEvaluation^postEvaluationCheck^COVID_19_SEP_2023_SEASON"
 end
 
+/**
+  * Need to execute for 2023+ seasons so skip dose rules are applied when there are no doses in current season
+  * to evaluate.
+  */
 rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in the COVIDAug2025+ Season"
 	dialect "mvel"
 	ruleflow-group "HistoryEvaluation^postEvaluationCheck"
@@ -354,7 +361,7 @@ rule "COVID-19: Invoke separate agenda group for postEvaluationCheck of shots in
 			- that has already been evaluated
 			- the administered shot number is > $administeredShotNumberFocus
 		There is a Series $targetSeries identified by $associatedTargetSeries
-			- the series belongs to the season with name a member of ("SUPPORTED_SEASON.COVID_19_SEP_2023_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2024_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON")
+		    - the series does not belong to the season with name "SUPPORTED_SEASON.COVID_19_DEC_2020_SEASON"
 	then
 		Record that this dose rule was Processed for the TargetDose $currentShot
 		Log that this dose rule fired for the dose $currentShot in the Series $targetSeries

@@ -884,11 +884,11 @@ rule "SeriesSelection(RSV): Select the RSV Adult Series if the patient is >= 20 
 end
 
 // Start COVID Series Selection Rules Aug2025+ Season
-rule "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+rule "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025+ season, determine date at which patient turns 2 and 65 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	when
-		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName == "SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON")
+		$tss : TargetSeriesSelection(seriesSelectionVaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", seriesSelectionStatus == SeriesSelectionStatus.SERIES_SELECTION_IN_PROCESS, seriesSelectionSeason!.seasonName in ("SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2026_SEASON"))
 		not TargetSeries(seriesRules.vaccineGroup == "VACCINE_GROUP_CONCEPT.COVID_19", selectedSeries == true, targetSeason != null && targetSeason == $tss.seriesSelectionSeason)
 		$person : EvaluatedPerson($dateAt2yrs : TimePeriod.addTimePeriod(demographics.birthTime, "2y"), $dateAt65yrs : TimePeriod.addTimePeriod(demographics.birthTime, "65y"))
 	then
@@ -896,7 +896,7 @@ rule "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine 
 end
 
 rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Series (< 2 years) if patient is < 2 years of age as of evaluation date, or patient is >= 2 years and has a shot administered in current season at < 2 years of age"
-	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025+ season, determine date at which patient turns 2 and 65 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 100
@@ -921,7 +921,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Se
 end
 
 rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 1-dose COVID-19 Series (>= 2 - 64 years) if patient has no in-season shots and is >= 2 years and < 65 years as of evaluation date"
-	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025+ season, determine date at which patient turns 2 and 65 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50
@@ -939,7 +939,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 1-dose COVID-19 Se
 end
 
 rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Series (>= 65 years) if patient has no in-season shots and is >= 65 years as of evaluation date"
-	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025+ season, determine date at which patient turns 2 and 65 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50
@@ -957,7 +957,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Se
 end
 
 rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 1-dose COVID-19 Series (>= 2 - 64 years) if patient has in-season shots administered at >= 2 years and target dose 1 received at age < 65 years"
-	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025+ season, determine date at which patient turns 2 and 65 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50
@@ -976,7 +976,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 1-dose COVID-19 Se
 end
 
 rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Series (>= 65 years) if patient has in-season shots administered and target dose 1 received at age >= 65 years"
-	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025+ season, determine date at which patient turns 2 and 65 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50
@@ -993,7 +993,7 @@ rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Se
 end
 
 rule "SeriesSelection(COVID-19 Aug2025+): Select the Seasonal 2-dose COVID-19 Series (>= 65 years) if patient if dose 1 is administered to a patient that will turn 65 within 12 months of season start date"
-	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025 season, determine date at which patient turns 2 and 65 years of age"
+	extends "SeriesSelection(COVID-19 Aug2025+ Abstract): In Aug2025+ season, determine date at which patient turns 2 and 65 years of age"
 	dialect "mvel"
 	ruleflow-group "SeriesSelection^customSeriesSelectionRules"
 	salience 50

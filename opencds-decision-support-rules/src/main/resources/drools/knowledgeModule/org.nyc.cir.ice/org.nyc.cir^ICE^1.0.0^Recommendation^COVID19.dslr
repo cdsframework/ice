@@ -105,7 +105,7 @@ rule "COVID-19: Invoke separate agenda group for recommendations in the Aug2025+
 	when
 		There is a Series $targetSeries that needs forecasting
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the Series belongs to the Season with name "SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON"
+			- the Series belongs to the Season with name a member of ("SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2026_SEASON")
 			- make note of the Season name as $seasonNameForSeriesToBeForecasted
 		There is a Season $aug2025season
 			- the name of the Season is $seasonNameForSeriesToBeForecasted
@@ -156,7 +156,7 @@ rule "COVID-19: Invoke separate agenda group for post recommendation checks in t
 	when
 		There is a Series $targetSeries
 			- the Series belongs to the vaccine group "VACCINE_GROUP_CONCEPT.COVID_19"
-			- the Series belongs to the Season with name "SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON"
+			- the Series belongs to the Season with name a member of ("SUPPORTED_SEASON.COVID_19_AUG_2025_SEASON", "SUPPORTED_SEASON.COVID_19_AUG_2026_SEASON")
 			- a forecast for the Series has been made
 			- post processing on the Series forecast has not already been run
 	then
